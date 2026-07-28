@@ -12,6 +12,11 @@ OUTPUT_FILE = "pokemon_standard_cards.json"
 MAX_RETRIES = 8
 MAX_WAIT_SECONDS = 30
 
+# pokemontcg.io's legalities.standard flag is not kept in sync with rotation,
+# so filter by regulation mark instead. H/I/J are legal as of the March 2026
+# Standard rotation (G rotated out); update this set when the format rotates again.
+ACTIVE_REGULATION_MARKS = {"H", "I", "J"}
+
 
 def fetch_page(page):
     for attempt in range(1, MAX_RETRIES + 1):
@@ -48,10 +53,13 @@ def fetch_all_standard_cards():
 def main():
     cards = fetch_all_standard_cards()
 
-    with open(OUTPUT_FILE, "w") as f:
-        json.dump(cards, f, indent=4)
+    standard_cards = [c for c in cards if c.get("regulationMark") in ACTIVE_REGULATION_MARKS]
+    print(f"Fetched {len(cards)} cards, {len(standard_cards)} currently Standard-legal by regulation mark")
 
-    print(f"Saved {len(cards)} cards to {OUTPUT_FILE}")
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(standard_cards, f, indent=4)
+
+    print(f"Saved {len(standard_cards)} cards to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
