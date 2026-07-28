@@ -108,7 +108,7 @@ class Player:
         self.hand.remove((kind, name))
 
     def in_play_names(self):
-        names = [n for n, _ in self.bench]
+        names = [n for n, _, _ in self.bench]
         if self.active:
             names.append(self.active)
         return names
@@ -144,27 +144,30 @@ def play_basics(p, log):
     for kind, name in list(p.hand):
         if kind == "Pokemon" and p.defs[name]["stage"] == "Basic" and len(p.bench) < 5:
             p.remove_from_hand(kind, name)
-            p.bench.append([name, 0])
+            p.bench.append([name, 0, False])
             log.append(f"[{p.name}] Bench {name}")
 
 
 def try_evolve(p, log):
+    # Only one evolution per Pokemon per turn (without Rare Candy, which
+    # evolves Basic -> Stage 2 directly as a single action elsewhere).
     for kind, name in list(p.hand):
         if kind != "Pokemon":
             continue
         target = p.defs[name]["evolves_from"]
         if target is None:
             continue
-        if p.active == target:
+        if p.active == target and not p.active_evolved_this_turn:
             p.remove_from_hand(kind, name)
             p.active = name
             p.active_evolved_this_turn = True
             log.append(f"[{p.name}] Evolve {target} -> {name} (can't attack this turn)")
         else:
-            slot = next((s for s in p.bench if s[0] == target), None)
+            slot = next((s for s in p.bench if s[0] == target and not s[2]), None)
             if slot is not None:
                 p.remove_from_hand(kind, name)
                 slot[0] = name
+                slot[2] = True
                 log.append(f"[{p.name}] Evolve {target} -> {name} (on Bench)")
 
 
@@ -210,7 +213,7 @@ def play_generic_items(p, log):
         p.deck = remaining
         random.shuffle(p.deck)
         for name in found:
-            p.bench.append([name, 0])
+            p.bench.append([name, 0, False])
         log.append(f"[{p.name}] Buddy-Buddy Poffin -> bench {', '.join(found)}")
 
     while ("Item", "Ultra Ball") in p.hand:
@@ -249,21 +252,23 @@ def play_generic_items(p, log):
             if kind == "Pokemon" and p.defs[name]["stage"] == "Stage 2":
                 mid = p.defs[name]["evolves_from"]
                 basic = p.defs[mid]["evolves_from"] if mid in p.defs else None
-                if p.active == basic or any(s[0] == basic for s in p.bench):
-                    stage2 = (name, basic)
+                active_ok = p.active == basic and not p.active_evolved_this_turn
+                bench_slot = next((s for s in p.bench if s[0] == basic and not s[2]), None)
+                if active_ok or bench_slot is not None:
+                    stage2 = (name, basic, active_ok, bench_slot)
                     break
         if stage2 is None:
             break
-        name, basic = stage2
+        name, basic, active_ok, bench_slot = stage2
         p.remove_from_hand("Item", "Rare Candy")
         p.discard.append("Rare Candy")
         p.remove_from_hand("Pokemon", name)
-        if p.active == basic:
+        if active_ok:
             p.active = name
             p.active_evolved_this_turn = True
         else:
-            slot = next(s for s in p.bench if s[0] == basic)
-            slot[0] = name
+            bench_slot[0] = name
+            bench_slot[2] = True
         log.append(f"[{p.name}] Rare Candy: {basic} -> {name}")
 
 
@@ -322,7 +327,7 @@ def gust(attacker_name, defender, target_name, log):
     old_active, old_energy = defender.active, defender.active_energy
     defender.bench.remove(slot)
     if old_active is not None:
-        defender.bench.append([old_active, old_energy])
+        defender.bench.append([old_active, old_energy, defender.active_evolved_this_turn])
     defender.active, defender.active_energy = slot[0], slot[1]
     defender.active_evolved_this_turn = False
     log.append(f"[{attacker_name}] Boss's Orders forces {defender.name}'s "
@@ -400,8 +405,13 @@ def play_opp_supporter(opp, us, log):
         log.append(f"[{opp.name}] Play Crispin (fetch Energy)")
         return
     if ("Supporter", "Boss's Orders") in opp.hand and us.bench:
-        # Target our lowest-HP benched Pokemon -- easiest to threaten next turn.
-        target = min(us.bench, key=lambda s: OUR_POKEMON[s[0]]["hp"])[0]
+        # Target our lowest-HP benched Pokemon -- easiest to threaten next
+        # turn. Never force Jellicent ex active: its item lock is passive,
+        # so pulling it up would just turn our own lock on for us.
+        candidates = [s for s in us.bench if s[0] != "Jellicent ex"]
+        if not candidates:
+            return
+        target = min(candidates, key=lambda s: OUR_POKEMON[s[0]]["hp"])[0]
         opp.remove_from_hand("Supporter", "Boss's Orders")
         opp.discard.append("Boss's Orders")
         opp.supporter_played = True
@@ -414,6 +424,8 @@ def play_turn(p, other, log, turn_num, going_first, supporter_fn):
         log.append(f"[{p.name}] Draw 1 card")
     p.supporter_played = False
     p.active_evolved_this_turn = False
+    for slot in p.bench:
+        slot[2] = False
     play_basics(p, log)
     try_evolve(p, log)
     play_generic_items(p, log)
@@ -422,7 +434,7 @@ def play_turn(p, other, log, turn_num, going_first, supporter_fn):
     try_evolve(p, log)
     can_attack = turn_num > 1 or not going_first
     try_attack(p, log, can_attack)
-    bench_str = ", ".join(f"{n}({e})" for n, e in p.bench)
+    bench_str = ", ".join(f"{n}({e})" for n, e, _ in p.bench)
     log.append(f"[{p.name}] State: Active={p.active}({p.active_energy}), "
                f"Bench=[{bench_str}], Hand={len(p.hand)}")
 
