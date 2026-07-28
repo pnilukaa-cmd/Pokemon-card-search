@@ -121,14 +121,14 @@ class Player:
                 and any(o["evolves_from"] == n for o in self.defs.values())}
 
 
-def opening_hand(player, log_prefix):
+def opening_hand(player, log_prefix, verbose=False):
     while not player.has_basic_in_hand():
         if player.hand:
             player.deck.extend(player.hand)
             player.hand = []
             random.shuffle(player.deck)
         player.draw(7)
-        if not player.has_basic_in_hand():
+        if not player.has_basic_in_hand() and verbose:
             print(f"  {log_prefix}: mulligan (no Basic Pokemon)")
 
 
@@ -181,6 +181,8 @@ def choose_search_target(p, allow_rule_box):
         if name in in_play or name in in_hand:
             continue
         if pre_evo is not None and pre_evo not in in_play:
+            continue
+        if ("Pokemon", name) not in p.deck:
             continue
         return name
     return None
@@ -308,7 +310,7 @@ def attach_energy(p, log):
 
 def try_attack(p, log, can_attack):
     if not p.active or p.active_evolved_this_turn or not can_attack:
-        return
+        return 0
     best = None
     for atk_name, cost, dmg in p.defs[p.active]["attacks"]:
         if p.active_energy >= cost and (best is None or dmg > best[2]):
@@ -316,6 +318,8 @@ def try_attack(p, log, can_attack):
     if best:
         log.append(f"[{p.name}] Attack: {p.active} uses {best[0]} for {best[2]} "
                    f"({p.active_energy} energy, needed {best[1]})")
+        return best[2]
+    return 0
 
 
 def gust(attacker_name, defender, target_name, log):
@@ -433,37 +437,84 @@ def play_turn(p, other, log, turn_num, going_first, supporter_fn):
     attach_energy(p, log)
     try_evolve(p, log)
     can_attack = turn_num > 1 or not going_first
-    try_attack(p, log, can_attack)
+    damage = try_attack(p, log, can_attack)
     bench_str = ", ".join(f"{n}({e})" for n, e, _ in p.bench)
     log.append(f"[{p.name}] State: Active={p.active}({p.active_energy}), "
                f"Bench=[{bench_str}], Hand={len(p.hand)}")
+    return damage
 
 
-def main():
-    random.seed()
+NUM_ROUNDS = 3
+
+
+def run_match(verbose=False):
+    """Play one simulated match and return a stats dict. Set verbose=True
+    to also print the full turn-by-turn log (used by the single-sample mode)."""
     us = Player("US", OUR_POKEMON, OUR_DECKLIST, OUR_BUDDY_POFFIN_ELIGIBLE,
                 OUR_LOAD_PRIORITY, OUR_SEARCH_PRIORITY)
     opp = Player("OPPONENT", OPP_POKEMON, OPP_DECKLIST, OPP_BUDDY_POFFIN_ELIGIBLE,
                  OPP_LOAD_PRIORITY, OPP_SEARCH_PRIORITY)
 
     us.draw(7)
-    opening_hand(us, "US")
+    opening_hand(us, "US", verbose=verbose)
     opp.draw(7)
-    opening_hand(opp, "OPPONENT")
+    opening_hand(opp, "OPPONENT", verbose=verbose)
 
-    print("US opening hand:      ", sorted(n for _, n in us.hand))
-    print("OPPONENT opening hand:", sorted(n for _, n in opp.hand))
-    print()
+    if verbose:
+        print("US opening hand:      ", sorted(n for _, n in us.hand))
+        print("OPPONENT opening hand:", sorted(n for _, n in opp.hand))
+        print()
+
+    stats = {
+        "jellicent_ex_round": None,   # first round Jellicent ex is in play (either side of board)
+        "espeon_ex_round": None,
+        "either_ex_round": None,      # first round we have Jellicent ex OR Espeon ex in play
+        "dragapult_ex_round": None,   # opponent's payoff card
+        "us_first_attack_round": None,
+        "opp_first_attack_round": None,
+        "us_total_damage": 0,
+        "opp_total_damage": 0,
+        "us_final_hand": None,
+        "opp_final_hand": None,
+    }
 
     log = []
     for turn in (1, 2, 3):
         log.append(f"=== Round {turn} ===")
         log.append(f"--- {turn}: US turn (US goes first) ---")
-        play_turn(us, opp, log, turn, going_first=True, supporter_fn=play_our_supporter)
-        log.append(f"--- {turn}: OPPONENT turn ---")
-        play_turn(opp, us, log, turn, going_first=False, supporter_fn=play_opp_supporter)
+        dmg = play_turn(us, opp, log, turn, going_first=True, supporter_fn=play_our_supporter)
+        stats["us_total_damage"] += dmg
+        if dmg and stats["us_first_attack_round"] is None:
+            stats["us_first_attack_round"] = turn
 
-    print("\n".join(log))
+        in_play = us.in_play_names()
+        if stats["jellicent_ex_round"] is None and "Jellicent ex" in in_play:
+            stats["jellicent_ex_round"] = turn
+        if stats["espeon_ex_round"] is None and "Espeon ex" in in_play:
+            stats["espeon_ex_round"] = turn
+        if stats["either_ex_round"] is None and ("Jellicent ex" in in_play or "Espeon ex" in in_play):
+            stats["either_ex_round"] = turn
+
+        log.append(f"--- {turn}: OPPONENT turn ---")
+        dmg = play_turn(opp, us, log, turn, going_first=False, supporter_fn=play_opp_supporter)
+        stats["opp_total_damage"] += dmg
+        if dmg and stats["opp_first_attack_round"] is None:
+            stats["opp_first_attack_round"] = turn
+        if stats["dragapult_ex_round"] is None and "Dragapult ex" in opp.in_play_names():
+            stats["dragapult_ex_round"] = turn
+
+    stats["us_final_hand"] = len(us.hand)
+    stats["opp_final_hand"] = len(opp.hand)
+
+    if verbose:
+        print("\n".join(log))
+
+    return stats
+
+
+def main():
+    random.seed()
+    run_match(verbose=True)
 
 
 if __name__ == "__main__":
