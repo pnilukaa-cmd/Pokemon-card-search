@@ -33,6 +33,38 @@ def fetch_page(page):
         return response.json().get("data", [])
 
 
+def card_signature(card):
+    """Identity of a card's gameplay function, ignoring cosmetic printing details
+    like set, card number, artist, rarity, and images."""
+    return (
+        card.get("name"),
+        card.get("supertype"),
+        card.get("hp"),
+        tuple(card.get("types") or []),
+        tuple(card.get("subtypes") or []),
+        tuple(card.get("rules") or []),
+        tuple(
+            (a.get("name"), tuple(a.get("cost") or []), a.get("damage"), a.get("text"))
+            for a in (card.get("attacks") or [])
+        ),
+        tuple((a.get("name"), a.get("text")) for a in (card.get("abilities") or [])),
+        tuple((w.get("type"), w.get("value")) for w in (card.get("weaknesses") or [])),
+        tuple((r.get("type"), r.get("value")) for r in (card.get("resistances") or [])),
+        card.get("convertedRetreatCost"),
+    )
+
+
+def dedupe_by_signature(cards):
+    seen = set()
+    unique_cards = []
+    for card in cards:
+        sig = card_signature(card)
+        if sig not in seen:
+            seen.add(sig)
+            unique_cards.append(card)
+    return unique_cards
+
+
 def fetch_all_standard_cards():
     all_cards = []
     page = 1
@@ -56,10 +88,13 @@ def main():
     standard_cards = [c for c in cards if c.get("regulationMark") in ACTIVE_REGULATION_MARKS]
     print(f"Fetched {len(cards)} cards, {len(standard_cards)} currently Standard-legal by regulation mark")
 
-    with open(OUTPUT_FILE, "w") as f:
-        json.dump(standard_cards, f, indent=4)
+    unique_cards = dedupe_by_signature(standard_cards)
+    print(f"Deduped cosmetic reprints (alt art, rarity, etc.): {len(unique_cards)} unique cards")
 
-    print(f"Saved {len(standard_cards)} cards to {OUTPUT_FILE}")
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(unique_cards, f, indent=4)
+
+    print(f"Saved {len(unique_cards)} cards to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
