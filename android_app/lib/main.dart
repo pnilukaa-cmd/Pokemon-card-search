@@ -139,13 +139,15 @@ Total Cards: 60''';
     super.dispose();
   }
 
-  void _resetTargetControllers(Iterable<String> categories) {
+  void _resetTargetControllers(Iterable<String> categories, {Map<String, int>? prefill}) {
     for (final c in _targetControllers.values) {
       c.dispose();
     }
     _targetControllers.clear();
     for (final category in categories) {
-      _targetControllers[category] = TextEditingController();
+      final startValue = prefill?[category];
+      _targetControllers[category] =
+          TextEditingController(text: startValue != null && startValue > 0 ? '$startValue' : '');
     }
     _targetProbability = null;
     _targetError = null;
@@ -238,7 +240,9 @@ Total Cards: 60''';
         );
         setState(() {
           _categoryResult = result;
-          _resetTargetControllers(result.categoryCounts.keys);
+          final topComposition =
+              result.topCompositions.isNotEmpty ? result.topCompositions.first.composition : null;
+          _resetTargetControllers(result.categoryCounts.keys, prefill: topComposition);
           _calculating = false;
         });
       }
@@ -439,9 +443,9 @@ Total Cards: 60''';
         const Divider(),
         const Text('Set your optimal hand:', style: TextStyle(fontWeight: FontWeight.bold)),
         const Text(
-          'Enter how many of each category you\'d ideally want in your 7-card '
-          'opening hand (must add up to 7), then compare its exact odds '
-          'against the most likely shape above.',
+          'Pre-filled with the #1 most likely shape as a starting point -- '
+          'edit to set your own ideal 7-card opening hand (must add up to '
+          '7), then compare its exact odds against the most likely shape above.',
           style: TextStyle(fontSize: 11, color: Colors.grey),
         ),
         const SizedBox(height: 4),

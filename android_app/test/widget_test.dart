@@ -18,10 +18,10 @@ void main() {
 
   testWidgets('Loading the sample deck and calculating shows results',
       (WidgetTester tester) async {
-    // The results list is long (marginals + top-5 compositions). Widen the
-    // test surface so ListView doesn't cull off-screen items out of the
-    // element tree before we assert on them.
-    tester.view.physicalSize = const Size(800, 2400);
+    // The results list is long (marginals + top-5 compositions + the target
+    // comparison section). Widen the test surface so ListView doesn't cull
+    // off-screen items out of the element tree before we assert on them.
+    tester.view.physicalSize = const Size(800, 6000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -47,5 +47,54 @@ void main() {
 
     expect(find.text('At least 1 in opening hand:'), findsOneWidget);
     expect(find.text('Top 5 most likely hand shapes:'), findsOneWidget);
+  });
+
+  testWidgets(
+      'Type-split categories, confidence hints, and optimal-hand comparison work',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const DeckOddsApp());
+
+    await tester.tap(find.byType(DropdownButton<DeckSource>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Load Sample Deck').last);
+    await tester.pump();
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Calculate Odds'));
+      await Future<void>.delayed(const Duration(seconds: 2));
+    });
+    await tester.pump();
+
+    // The sample deck has 3 Pokemon types (Budew=Grass, Eevee=Colorless,
+    // the rest Psychic), so Pokemon should type-split; Energy is genuinely
+    // mono-Psychic so it should NOT split.
+    expect(find.text('Pokemon (Psychic)'), findsWidgets);
+    expect(find.text('Pokemon (Grass)'), findsWidgets);
+    expect(find.text('Pokemon (Colorless)'), findsWidgets);
+    expect(find.text('Energy'), findsWidgets);
+    expect(find.text('Pokemon'), findsNothing); // lumped bucket shouldn't exist once split
+
+    // Confidence calculator section is present with its dropdown.
+    expect(find.text('Target confidence: '), findsOneWidget);
+
+    // Optimal-hand section: pre-filled from the #1 most likely composition,
+    // then editable and computable.
+    expect(find.text('Set your optimal hand:'), findsOneWidget);
+    expect(find.text('Calculate My Target\'s Odds'), findsOneWidget);
+
+    await tester.tap(find.text('Calculate My Target\'s Odds'));
+    await tester.pump();
+
+    // Pre-filled values come straight from the #1 composition, so they
+    // should already sum to 7 and produce a result with no error.
+    expect(find.textContaining('Your target hand:'), findsOneWidget);
+    // "currently" only appears in the error message (e.g. "currently 5"),
+    // not the static instructional text, so this confirms no error fired.
+    expect(find.textContaining('currently'), findsNothing);
   });
 }
