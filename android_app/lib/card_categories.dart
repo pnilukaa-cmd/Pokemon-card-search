@@ -4,13 +4,23 @@
 /// Item, Tool, Stadium, Energy) and compute well-differentiated odds like
 /// "72% chance of at least 1 Supporter in your opening hand".
 ///
-/// Categorization uses a bundled name -> category lookup built from the
-/// real Standard-legal card pool (assets/card_categories.json). Any card
-/// name not found there (homebrew, proxies, future sets not yet in the
-/// lookup) falls back to the section it was pasted under (Pokemon/Trainer/
-/// Energy from deck_parser.dart), with Trainer defaulting to a generic
-/// "Trainer (unspecified)" bucket since the paste format alone can't tell
-/// Supporter from Item.
+/// When a deck has more than one Pokemon type (e.g. a Dark/Psychic deck) or
+/// more than one Energy type, those two categories are further split by
+/// type ("Pokemon (Darkness)", "Pokemon (Psychic)", etc.) instead of being
+/// lumped together, since "how many Psychic Pokemon will I open with" is a
+/// more useful question than "how many Pokemon" once type matters. A
+/// mono-type deck keeps the simple single "Pokemon"/"Energy" bucket.
+///
+/// Categorization uses a bundled name -> {category, types} lookup built
+/// from the real Standard-legal card pool (assets/card_categories.json).
+/// Any card name not found there (homebrew, proxies, future sets, or Basic
+/// Energy cards which aren't in the card database at all since they're
+/// evergreen and not tied to a set) falls back to: a "Basic X Energy" /
+/// "X Energy" name pattern match for typing energy, then the section it
+/// was pasted under (Pokemon/Trainer/Energy from deck_parser.dart) for
+/// anything else, with Trainer defaulting to a generic "Trainer
+/// (unspecified)" bucket since the paste format alone can't tell Supporter
+/// from Item.
 library card_categories;
 
 import 'dart:convert';
@@ -20,6 +30,17 @@ import 'hand_odds.dart';
 
 const unknownTrainerCategory = 'Trainer (unspecified)';
 const unknownCategory = 'Unrecognized';
+
+const List<String> pokemonTypes = [
+  'Grass', 'Fire', 'Water', 'Lightning', 'Psychic', 'Fighting',
+  'Darkness', 'Metal', 'Dragon', 'Colorless', 'Fairy',
+];
+
+class CardInfo {
+  final String category;
+  final List<String> types;
+  const CardInfo(this.category, this.types);
+}
 
 // Strips common Latin diacritics (é -> e, etc.) so a card name typed or
 // pasted without accents -- e.g. "Poke Pad" instead of "Poké Pad" -- can
@@ -43,53 +64,102 @@ String stripDiacritics(String input) {
   return buffer.toString();
 }
 
-/// Parses the bundled JSON asset (a flat {"CardName": "Category", ...} map)
-/// into a lookup table.
-Map<String, String> parseCategoryLookup(String jsonText) {
+/// Parses the bundled JSON asset: {"CardName": {"category": ..., "types":
+/// [...]}, ...} into a lookup table.
+Map<String, CardInfo> parseCategoryLookup(String jsonText) {
   final decoded = jsonDecode(jsonText) as Map<String, dynamic>;
-  return decoded.map((k, v) => MapEntry(k, v as String));
+  return decoded.map((name, value) {
+    final v = value as Map<String, dynamic>;
+    final types = (v['types'] as List<dynamic>).map((t) => t as String).toList();
+    return MapEntry(name, CardInfo(v['category'] as String, types));
+  });
 }
 
 /// Builds a secondary index keyed by diacritic-stripped name, for matching
 /// names typed/pasted without accents. If multiple real names collapse to
 /// the same stripped form, the first one wins (rare in practice).
-Map<String, String> buildNormalizedLookup(Map<String, String> lookup) {
-  final normalized = <String, String>{};
-  lookup.forEach((name, category) {
+Map<String, CardInfo> buildNormalizedLookup(Map<String, CardInfo> lookup) {
+  final normalized = <String, CardInfo>{};
+  lookup.forEach((name, info) {
     final key = stripDiacritics(name).toLowerCase();
-    normalized.putIfAbsent(key, () => category);
+    normalized.putIfAbsent(key, () => info);
   });
   return normalized;
 }
 
-/// Collapses a parsed deck's per-card-name counts into category counts,
-/// using [lookup] first (exact match, then diacritic-insensitive match),
-/// and falling back to the pasted section otherwise.
-Map<String, int> categorize(ParsedDeck deck, Map<String, String> lookup,
-    {Map<String, String>? normalizedLookup}) {
+// Matches energy card names not in the lookup, e.g. "Basic Psychic Energy"
+// (not in the card database at all -- Basic Energy is evergreen, not tied
+// to a set) or a homebrew/future "Shadowy Fire Energy" -- pulls out the
+// type keyword anywhere in the name.
+String? _typeFromEnergyName(String name) {
+  if (!name.toLowerCase().contains('energy')) return null;
+  for (final type in pokemonTypes) {
+    if (name.contains(type)) return type;
+  }
+  return null;
+}
+
+class ClassifiedCard {
+  final String category;
+  final String? type; // null when not Pokemon/Energy, or type unknown
+  ClassifiedCard(this.category, this.type);
+}
+
+ClassifiedCard _classify(
+    String name, ParsedDeck deck, Map<String, CardInfo> lookup, Map<String, CardInfo> normalized) {
+  final normalizedKey = stripDiacritics(name).toLowerCase();
+  CardInfo? info = lookup[name] ?? normalized[normalizedKey];
+
+  if (info != null) {
+    return ClassifiedCard(info.category, info.types.isNotEmpty ? info.types.first : null);
+  }
+
+  final energyType = _typeFromEnergyName(name);
+  if (energyType != null) {
+    return ClassifiedCard('Energy', energyType);
+  }
+
+  final section = deck.sectionOf[name];
+  if (section == 'Pokemon') return ClassifiedCard('Pokemon', null);
+  if (section == 'Energy') return ClassifiedCard('Energy', null);
+  if (section == 'Trainer') return ClassifiedCard(unknownTrainerCategory, null);
+  return ClassifiedCard(unknownCategory, null);
+}
+
+/// Collapses a parsed deck's per-card-name counts into category counts.
+/// Pokemon and Energy are split by type ("Pokemon (Darkness)") only when
+/// more than one distinct type is present in that category; otherwise they
+/// stay as a single "Pokemon"/"Energy" bucket.
+Map<String, int> categorize(ParsedDeck deck, Map<String, CardInfo> lookup,
+    {Map<String, CardInfo>? normalizedLookup}) {
   final normalized = normalizedLookup ?? buildNormalizedLookup(lookup);
-  final categoryCounts = <String, int>{};
+
+  // First pass: classify every card and bucket by (category, type).
+  final byCategoryAndType = <String, Map<String?, int>>{};
   deck.cardCounts.forEach((name, count) {
-    String category;
-    final normalizedKey = stripDiacritics(name).toLowerCase();
-    if (lookup.containsKey(name)) {
-      category = lookup[name]!;
-    } else if (normalized.containsKey(normalizedKey)) {
-      category = normalized[normalizedKey]!;
-    } else {
-      final section = deck.sectionOf[name];
-      if (section == 'Pokemon') {
-        category = 'Pokemon';
-      } else if (section == 'Energy') {
-        category = 'Energy';
-      } else if (section == 'Trainer') {
-        category = unknownTrainerCategory;
-      } else {
-        category = unknownCategory;
-      }
-    }
-    categoryCounts[category] = (categoryCounts[category] ?? 0) + count;
+    final classified = _classify(name, deck, lookup, normalized);
+    final byType = byCategoryAndType.putIfAbsent(classified.category, () => {});
+    byType[classified.type] = (byType[classified.type] ?? 0) + count;
   });
+
+  // Second pass: only split Pokemon/Energy by type if >1 distinct type is
+  // present (excluding the "unknown type" bucket from that count, since an
+  // unrecognized card doesn't tell us anything about type diversity).
+  final categoryCounts = <String, int>{};
+  byCategoryAndType.forEach((category, byType) {
+    final knownTypes = byType.keys.where((t) => t != null).toList();
+    final shouldSplit = (category == 'Pokemon' || category == 'Energy') && knownTypes.length > 1;
+    if (shouldSplit) {
+      byType.forEach((type, count) {
+        final label = type != null ? '$category ($type)' : '$category (Other)';
+        categoryCounts[label] = (categoryCounts[label] ?? 0) + count;
+      });
+    } else {
+      final total = byType.values.fold(0, (a, b) => a + b);
+      categoryCounts[category] = (categoryCounts[category] ?? 0) + total;
+    }
+  });
+
   return categoryCounts;
 }
 
@@ -122,6 +192,39 @@ double atLeastProbability(List<MarginalPoint> dist, int atLeast) {
       .fold(0.0, (sum, p) => sum + p.probability);
 }
 
+/// The smallest number of copies of a category (out of [deckSize] total
+/// cards) needed so that P(at least 1 in a [handSize]-card hand) reaches
+/// [targetProbability]. Returns null if even all [deckSize] cards being
+/// that category wouldn't be enough (impossible unless handSize > deckSize
+/// in some degenerate case) or if targetProbability is unreachable below
+/// deckSize copies of a single card (deck-building copy limits aside --
+/// this is pure math, the UI is responsible for flagging unrealistic counts
+/// like "you'd need 40 copies of a card, but only 4 are legal").
+int? minimumCountForConfidence(
+    int deckSize, int handSize, double targetProbability) {
+  for (var count = 1; count <= deckSize; count++) {
+    final dist = marginalDistribution(deckSize, count, handSize);
+    if (atLeastProbability(dist, 1) >= targetProbability) {
+      return count;
+    }
+  }
+  return null;
+}
+
+/// Exact probability of a specific hand composition (e.g. a user-entered
+/// "optimal" target), independent of enumerating every possible hand.
+double compositionProbability(
+    Map<String, int> deck, Map<String, int> composition, int handSize) {
+  final deckSize = deck.values.fold(0, (a, b) => a + b);
+  final totalWays = binomial(deckSize, handSize);
+  var ways = 1;
+  composition.forEach((category, count) {
+    final available = deck[category] ?? 0;
+    ways *= binomial(available, count);
+  });
+  return ways / totalWays;
+}
+
 class CategoryModeResult {
   final Map<String, int> categoryCounts;
   final List<HandResult> topCompositions;
@@ -131,7 +234,7 @@ class CategoryModeResult {
 }
 
 CategoryModeResult computeCategoryMode(
-    ParsedDeck deck, Map<String, String> lookup, int handSize, int topN) {
+    ParsedDeck deck, Map<String, CardInfo> lookup, int handSize, int topN) {
   final categoryCounts = categorize(deck, lookup);
   final deckSize = categoryCounts.values.fold(0, (a, b) => a + b);
 

@@ -70,7 +70,7 @@ CategoryModeResult _computeCategoryMode(_CategoryModeRequest req) {
 
 class _CategoryModeRequest {
   final ParsedDeck deck;
-  final Map<String, String> lookup;
+  final Map<String, CardInfo> lookup;
   final int handSize;
   final int n;
   _CategoryModeRequest(this.deck, this.lookup, this.handSize, this.n);
@@ -91,10 +91,21 @@ class _HomePageState extends State<HomePage> {
   ParsedDeck? _parsedDeck;
   List<HandResult>? _exactTopHands;
   CategoryModeResult? _categoryResult;
-  Map<String, String>? _categoryLookup;
+  Map<String, CardInfo>? _categoryLookup;
 
   bool _calculating = false;
   String? _error;
+
+  // Confidence calculator: "how many copies do I need for X% chance of at
+  // least 1 in my opening hand?"
+  double _confidenceTarget = 0.90;
+
+  // Optimal-hand comparison: user types a target count per category, we
+  // show the exact probability of that specific composition and compare it
+  // to the single most likely shape.
+  final Map<String, TextEditingController> _targetControllers = {};
+  double? _targetProbability;
+  String? _targetError;
 
   static const _sampleDeck = '''Pokémon: 15
 3 Budew PRE 148
@@ -119,7 +130,69 @@ Energy: 14
 
 Total Cards: 60''';
 
-  Future<Map<String, String>> _loadLookup() async {
+  @override
+  void dispose() {
+    _controller.dispose();
+    for (final c in _targetControllers.values) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  void _resetTargetControllers(Iterable<String> categories) {
+    for (final c in _targetControllers.values) {
+      c.dispose();
+    }
+    _targetControllers.clear();
+    for (final category in categories) {
+      _targetControllers[category] = TextEditingController();
+    }
+    _targetProbability = null;
+    _targetError = null;
+  }
+
+  void _calculateTargetOdds() {
+    final result = _categoryResult;
+    if (result == null) return;
+
+    final composition = <String, int>{};
+    var sum = 0;
+    var anyInvalid = false;
+    for (final entry in _targetControllers.entries) {
+      final text = entry.value.text.trim();
+      if (text.isEmpty) continue;
+      final value = int.tryParse(text);
+      if (value == null || value < 0) {
+        anyInvalid = true;
+        continue;
+      }
+      if (value > 0) composition[entry.key] = value;
+      sum += value;
+    }
+
+    if (anyInvalid) {
+      setState(() {
+        _targetError = 'Enter whole numbers only.';
+        _targetProbability = null;
+      });
+      return;
+    }
+    if (sum != 7) {
+      setState(() {
+        _targetError = 'Target counts must add up to 7 (currently $sum).';
+        _targetProbability = null;
+      });
+      return;
+    }
+
+    final prob = compositionProbability(result.categoryCounts, composition, 7);
+    setState(() {
+      _targetError = null;
+      _targetProbability = prob;
+    });
+  }
+
+  Future<Map<String, CardInfo>> _loadLookup() async {
     if (_categoryLookup != null) return _categoryLookup!;
     final jsonText = await rootBundle.loadString('assets/card_categories.json');
     _categoryLookup = parseCategoryLookup(jsonText);
@@ -165,6 +238,7 @@ Total Cards: 60''';
         );
         setState(() {
           _categoryResult = result;
+          _resetTargetControllers(result.categoryCounts.keys);
           _calculating = false;
         });
       }
@@ -300,15 +374,50 @@ Total Cards: 60''';
     if (result == null) {
       return const Center(child: Text('Results will appear here.'));
     }
+    final deckSize = result.categoryCounts.values.fold(0, (a, b) => a + b);
 
     return ListView(
       children: [
-        const Text('At least 1 in opening hand:', style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('At least 1 in opening hand:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Target confidence: ', style: TextStyle(fontSize: 12)),
+                DropdownButton<double>(
+                  value: _confidenceTarget,
+                  items: const [0.80, 0.90, 0.95, 0.99]
+                      .map((v) => DropdownMenuItem(
+                          value: v, child: Text('${(v * 100).round()}%')))
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _confidenceTarget = v);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
         ...result.marginals.entries.map((e) {
           final atLeast1 = atLeastProbability(e.value, 1);
+          final currentCount = result.categoryCounts[e.key] ?? 0;
+          final neededCount =
+              minimumCountForConfidence(deckSize, 7, _confidenceTarget);
+          final needMore = neededCount != null && neededCount > currentCount;
           return ListTile(
             dense: true,
             title: Text(e.key),
+            subtitle: needMore
+                ? Text(
+                    'Have $currentCount -- need ~$neededCount for '
+                    '${(_confidenceTarget * 100).round()}% confidence',
+                    style: const TextStyle(fontSize: 11, color: Colors.orange))
+                : Text('Have $currentCount -- already meets '
+                    '${(_confidenceTarget * 100).round()}% target',
+                    style: const TextStyle(fontSize: 11, color: Colors.green)),
             trailing: Text('${(atLeast1 * 100).toStringAsFixed(1)}%'),
           );
         }),
@@ -327,6 +436,56 @@ Total Cards: 60''';
             ),
           );
         }),
+        const Divider(),
+        const Text('Set your optimal hand:', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Enter how many of each category you\'d ideally want in your 7-card '
+          'opening hand (must add up to 7), then compare its exact odds '
+          'against the most likely shape above.',
+          style: TextStyle(fontSize: 11, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 12,
+          runSpacing: 4,
+          children: result.categoryCounts.keys.map((category) {
+            return SizedBox(
+              width: 140,
+              child: TextField(
+                controller: _targetControllers[category],
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: category, isDense: true),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          onPressed: _calculateTargetOdds,
+          child: const Text('Calculate My Target\'s Odds'),
+        ),
+        if (_targetError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(_targetError!, style: const TextStyle(color: Colors.red)),
+          ),
+        if (_targetProbability != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Builder(builder: (context) {
+              final best = result.topCompositions.isNotEmpty
+                  ? result.topCompositions.first.probability
+                  : null;
+              final pctText = (_targetProbability! * 100).toStringAsFixed(3);
+              final comparison = best != null
+                  ? ' (the single most likely shape is ${(best * 100).toStringAsFixed(2)}%)'
+                  : '';
+              return Text(
+                'Your target hand: $pctText% chance$comparison',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              );
+            }),
+          ),
       ],
     );
   }
