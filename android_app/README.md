@@ -23,6 +23,17 @@ Limitless TCG) and it shows odds two ways:
     for an ideal 7-card hand (pre-filled with the #1 most likely shape as a
     starting point), and see its exact probability compared against the
     single most likely shape.
+  - **Deck-building recommendations**: a rule-based check (grounded in
+    commonly-cited Standard deck-building ratios) that flags things like too
+    few/many Pokemon, Trainers, or Energy, too few Basic Pokemon, thin Stage
+    2 evolution lines, no Supporters at all, or an illegal >4-copy count
+    (>4 of a non-Basic-Energy card) -- each with a stated reason. Only shows
+    up when there's something worth flagging; a well-built list shows none.
+    Basic Pokemon and evolution-stage recommendations rely on a per-card
+    "stage" field bundled in `assets/card_categories.json`, so they only
+    cover cards in the current Standard-legal pool -- older/homebrew/rotated
+    Pokemon fall into an "unknown stage" bucket and are silently excluded
+    from those specific checks (but still counted normally everywhere else).
 - **Exact Hands**: the top 5 most probable exact card-for-card 7-card hands.
   With ~15-25 unique card names in a typical deck these cluster very close
   together (each around 0.02%) since there are tens of thousands of
@@ -74,12 +85,16 @@ The full Flutter SDK (3.44.8 stable) was installed and used to actually
 verify this project, not just read the code:
 
 - `flutter analyze`: **0 errors** across the whole project.
-- `flutter test`: **all tests pass** (4 widget tests), including an
+- `flutter test`: **all tests pass** (6 widget tests), including an
   end-to-end test that loads the sample deck, calculates, and checks
   type-split categories, the confidence calculator, and the optimal-hand
   comparison (including its pre-filled starting values) all render and
-  compute correctly, plus a dedicated test confirming the type-split toggle
-  actually keeps a single lumped bucket when turned off.
+  compute correctly, a dedicated test confirming the type-split toggle
+  actually keeps a single lumped bucket when turned off, and two tests for
+  the recommendations engine -- one pasting a deliberately bad decklist
+  (illegal copy count, no Supporters) and confirming the specific warnings
+  show up, one confirming a well-built decklist shows no recommendations
+  at all.
 - `flutter build web`: **builds successfully** to `build/web/`.
 - `lib/deck_parser.dart`, `lib/hand_odds.dart`, and `lib/card_categories.dart`
   were also independently run as plain Dart scripts
@@ -162,9 +177,12 @@ to be regenerated from `pokemon_standard_cards.json` in the repo root.
   name. Two different prints of the same-named card are treated
   identically, which is correct for hand-odds math but means the app has no
   card metadata (HP, attacks, images) beyond what's typed in.
-- Category mode can't distinguish Basic Pokemon from evolutions (that would
-  need the full card database bundled, not just a name->category map) --
-  "at least 1 Pokemon" isn't the same as "hand is legal to start with."
+- The opening-hand odds themselves still treat all Pokemon as one category
+  (Basic vs. evolution isn't split into separate hand-odds buckets) -- "at
+  least 1 Pokemon" isn't the same as "hand is legal to start with." The
+  deck-building recommendations feature does use per-card stage data (see
+  above) for its Basic-count and evolution-line checks, but that's a
+  separate, coarser check than the exact hand-odds math.
 - The category lookup only covers the current Standard-legal card pool.
   Older/Expanded-format cards fall back to a generic "Trainer
   (unspecified)"/"Unrecognized" bucket instead of being properly typed and

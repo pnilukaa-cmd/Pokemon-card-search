@@ -39,7 +39,10 @@ const List<String> pokemonTypes = [
 class CardInfo {
   final String category;
   final List<String> types;
-  const CardInfo(this.category, this.types);
+  // Basic / Stage 1 / Stage 2, Pokemon only -- null for Trainers/Energy and
+  // for any Pokemon whose stage wasn't resolvable in the source data.
+  final String? stage;
+  const CardInfo(this.category, this.types, [this.stage]);
 }
 
 // Strips common Latin diacritics (é -> e, etc.) so a card name typed or
@@ -71,7 +74,7 @@ Map<String, CardInfo> parseCategoryLookup(String jsonText) {
   return decoded.map((name, value) {
     final v = value as Map<String, dynamic>;
     final types = (v['types'] as List<dynamic>).map((t) => t as String).toList();
-    return MapEntry(name, CardInfo(v['category'] as String, types));
+    return MapEntry(name, CardInfo(v['category'] as String, types, v['stage'] as String?));
   });
 }
 
@@ -251,4 +254,154 @@ CategoryModeResult computeCategoryMode(
   });
 
   return CategoryModeResult(categoryCounts, topCompositions, marginals);
+}
+
+/// How many Basic/Stage 1/Stage 2 Pokemon are in the deck. [unknown] counts
+/// Pokemon-section cards whose stage couldn't be resolved (not in the
+/// bundled lookup -- e.g. homebrew, or a future/older card not yet in the
+/// Standard-legal pool this app ships with).
+class StageBreakdown {
+  final int basic;
+  final int stage1;
+  final int stage2;
+  final int unknown;
+  StageBreakdown(this.basic, this.stage1, this.stage2, this.unknown);
+}
+
+StageBreakdown pokemonStageBreakdown(
+    ParsedDeck deck, Map<String, CardInfo> lookup,
+    {Map<String, CardInfo>? normalizedLookup}) {
+  final normalized = normalizedLookup ?? buildNormalizedLookup(lookup);
+  var basic = 0, stage1 = 0, stage2 = 0, unknown = 0;
+
+  deck.cardCounts.forEach((name, count) {
+    final normalizedKey = stripDiacritics(name).toLowerCase();
+    final info = lookup[name] ?? normalized[normalizedKey];
+
+    if (info == null) {
+      if (deck.sectionOf[name] == 'Pokemon') unknown += count;
+      return;
+    }
+    if (info.category != 'Pokemon') return;
+
+    switch (info.stage) {
+      case 'Basic':
+        basic += count;
+        break;
+      case 'Stage 1':
+        stage1 += count;
+        break;
+      case 'Stage 2':
+        stage2 += count;
+        break;
+      default:
+        unknown += count;
+    }
+  });
+
+  return StageBreakdown(basic, stage1, stage2, unknown);
+}
+
+enum RecommendationLevel { error, warning, info }
+
+class Recommendation {
+  final RecommendationLevel level;
+  final String message;
+  Recommendation(this.level, this.message);
+}
+
+// Grounded in commonly-cited Standard deck-building guidance: ~60 cards
+// split roughly 12-20 Pokemon / 25-35 Trainer / 8-16 Energy, 6-8 Basic
+// Pokemon so you reliably have something to open with, at least a few
+// Supporter draw cards, max 4 copies of any one card except Basic Energy.
+// These are heuristics, not hard rules (except the legality checks, which
+// are marked as errors) -- a deck can reasonably break them for a specific
+// strategy.
+List<Recommendation> generateRecommendations(
+    ParsedDeck deck, Map<String, CardInfo> lookup,
+    {Map<String, CardInfo>? normalizedLookup}) {
+  final normalized = normalizedLookup ?? buildNormalizedLookup(lookup);
+  final lumped =
+      categorize(deck, lookup, normalizedLookup: normalized, splitByType: false);
+
+  final pokemonCount = lumped['Pokemon'] ?? 0;
+  final energyCount = lumped['Energy'] ?? 0;
+  final supporterCount = lumped['Supporter'] ?? 0;
+  final trainerCount = (lumped['Supporter'] ?? 0) +
+      (lumped['Item'] ?? 0) +
+      (lumped['Tool'] ?? 0) +
+      (lumped['Stadium'] ?? 0) +
+      (lumped[unknownTrainerCategory] ?? 0);
+  final deckSize = deck.totalCards;
+
+  final recs = <Recommendation>[];
+
+  if (deckSize != 60) {
+    recs.add(Recommendation(RecommendationLevel.error,
+        'Deck has $deckSize cards -- Standard decks must have exactly 60.'));
+  }
+
+  deck.cardCounts.forEach((name, count) {
+    final isBasicEnergy =
+        name.toLowerCase().startsWith('basic') && name.toLowerCase().contains('energy');
+    if (count > 4 && !isBasicEnergy) {
+      recs.add(Recommendation(RecommendationLevel.error,
+          '$count copies of "$name" -- the format limit is 4 copies of any card except Basic Energy.'));
+    }
+  });
+
+  final stages = pokemonStageBreakdown(deck, lookup, normalizedLookup: normalized);
+  if (stages.basic == 0) {
+    recs.add(Recommendation(RecommendationLevel.error,
+        'No confirmed Basic Pokemon -- you need at least one Basic Pokemon to legally start a game.'));
+  } else if (stages.basic < 6) {
+    recs.add(Recommendation(RecommendationLevel.warning,
+        'Only ${stages.basic} confirmed Basic Pokemon -- most decks run 6-8 so you reliably '
+        'have something to open with and can rebuild your board after a knockout.'));
+  }
+
+  if (pokemonCount < 12) {
+    recs.add(Recommendation(RecommendationLevel.warning,
+        'Only $pokemonCount Pokemon -- most Standard decks run at least 12-15 so you don\'t '
+        'get stranded without an attacker. Consider adding more.'));
+  } else if (pokemonCount > 20) {
+    recs.add(Recommendation(RecommendationLevel.info,
+        '$pokemonCount Pokemon is on the high side -- decks this heavy on Pokemon often '
+        'struggle to fit enough draw and search Trainers. Worth double-checking.'));
+  }
+
+  if (supporterCount == 0) {
+    recs.add(Recommendation(RecommendationLevel.warning,
+        'No Supporters recognized in this list -- competitive decks almost always run '
+        'several Supporter draw cards to consistently hit their key cards each turn.'));
+  }
+
+  if (trainerCount < 22) {
+    recs.add(Recommendation(RecommendationLevel.warning,
+        'Only $trainerCount Trainer cards -- competitive decks typically run 25-35 (often '
+        '30+) since draw and search power is usually what wins games. Consider adding more.'));
+  } else if (trainerCount > 38) {
+    recs.add(Recommendation(RecommendationLevel.info,
+        '$trainerCount Trainer cards is unusually high -- double-check you still have enough '
+        'Pokemon and Energy to actually attack.'));
+  }
+
+  if (energyCount < 6) {
+    recs.add(Recommendation(RecommendationLevel.warning,
+        'Only $energyCount Energy -- even decks with strong draw/search support usually want '
+        'at least 8-12. Consider adding more.'));
+  } else if (energyCount > 18) {
+    recs.add(Recommendation(RecommendationLevel.info,
+        '$energyCount Energy is on the high side -- most Standard decks run 8-16 and use the '
+        'extra slots for Trainers instead.'));
+  }
+
+  if (stages.stage2 > 0 && stages.stage1 < (stages.stage2 * 2 - 1)) {
+    recs.add(Recommendation(RecommendationLevel.info,
+        '${stages.stage2} Stage 2 Pokemon but only ${stages.stage1} Stage 1 Pokemon -- '
+        'thin evolution lines are a common source of inconsistency. Make sure each Stage 2 '
+        'line has enough Stage 1s (and Basics) backing it up.'));
+  }
+
+  return recs;
 }

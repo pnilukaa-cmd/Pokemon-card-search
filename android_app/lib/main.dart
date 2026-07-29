@@ -64,9 +64,17 @@ class _ExactHandsRequest {
   _ExactHandsRequest(this.deck, this.handSize, this.n);
 }
 
-CategoryModeResult _computeCategoryMode(_CategoryModeRequest req) {
-  return computeCategoryMode(req.deck, req.lookup, req.handSize, req.n,
+_CategoryModeResponse _computeCategoryMode(_CategoryModeRequest req) {
+  final result = computeCategoryMode(req.deck, req.lookup, req.handSize, req.n,
       splitByType: req.splitByType);
+  final recommendations = generateRecommendations(req.deck, req.lookup);
+  return _CategoryModeResponse(result, recommendations);
+}
+
+class _CategoryModeResponse {
+  final CategoryModeResult result;
+  final List<Recommendation> recommendations;
+  _CategoryModeResponse(this.result, this.recommendations);
 }
 
 class _CategoryModeRequest {
@@ -94,6 +102,7 @@ class _HomePageState extends State<HomePage> {
   ParsedDeck? _parsedDeck;
   List<HandResult>? _exactTopHands;
   CategoryModeResult? _categoryResult;
+  List<Recommendation>? _recommendations;
   Map<String, CardInfo>? _categoryLookup;
 
   bool _calculating = false;
@@ -210,6 +219,7 @@ Total Cards: 60''';
       _error = null;
       _exactTopHands = null;
       _categoryResult = null;
+      _recommendations = null;
     });
 
     final parsed = parseDecklist(_controller.text);
@@ -237,12 +247,14 @@ Total Cards: 60''';
         });
       } else {
         final lookup = await _loadLookup();
-        final result = await compute(
+        final response = await compute(
           _computeCategoryMode,
           _CategoryModeRequest(parsed, lookup, 7, 5, _splitByType),
         );
+        final result = response.result;
         setState(() {
           _categoryResult = result;
+          _recommendations = response.recommendations;
           final topComposition =
               result.topCompositions.isNotEmpty ? result.topCompositions.first.composition : null;
           _resetTargetControllers(result.categoryCounts.keys, prefill: topComposition);
@@ -367,6 +379,36 @@ Total Cards: 60''';
     );
   }
 
+  Widget _buildRecommendationTile(Recommendation r) {
+    final IconData icon;
+    final Color color;
+    switch (r.level) {
+      case RecommendationLevel.error:
+        icon = Icons.error;
+        color = Colors.red;
+        break;
+      case RecommendationLevel.warning:
+        icon = Icons.warning_amber;
+        color = Colors.orange;
+        break;
+      case RecommendationLevel.info:
+        icon = Icons.info_outline;
+        color = Colors.blueGrey;
+        break;
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 6),
+          Expanded(child: Text(r.message, style: TextStyle(fontSize: 12, color: color))),
+        ],
+      ),
+    );
+  }
+
   Widget _buildResults() {
     if (_mode == OddsMode.exactHands) {
       final hands = _exactTopHands;
@@ -398,6 +440,12 @@ Total Cards: 60''';
 
     return ListView(
       children: [
+        if (_recommendations != null && _recommendations!.isNotEmpty) ...[
+          const Text('Deck-building recommendations:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          ..._recommendations!.map((r) => _buildRecommendationTile(r)),
+          const Divider(),
+        ],
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
