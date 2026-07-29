@@ -13,7 +13,7 @@ void main() {
     expect(find.text('Deck Opening Hand Odds'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('Calculate Odds'), findsOneWidget);
-    expect(find.text('Load Sample'), findsOneWidget);
+    expect(find.byType(DropdownButton<DeckSource>), findsOneWidget);
   });
 
   testWidgets('Loading the sample deck and calculating shows results',
@@ -28,7 +28,11 @@ void main() {
 
     await tester.pumpWidget(const DeckOddsApp());
 
-    await tester.tap(find.text('Load Sample'));
+    // Open the format dropdown and select "Load Sample Deck" to fill the
+    // paste box with a real example.
+    await tester.tap(find.byType(DropdownButton<DeckSource>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Load Sample Deck').last);
     await tester.pump();
 
     // compute() spawns a real isolate; testWidgets runs in a fake-async

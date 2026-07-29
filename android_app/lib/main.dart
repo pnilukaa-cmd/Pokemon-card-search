@@ -23,6 +23,33 @@ class DeckOddsApp extends StatelessWidget {
 
 enum OddsMode { exactHands, byCategory }
 
+enum DeckSource {
+  ptcgLive('Pokémon TCG Live'),
+  pokemonCardIo('PokemonCard.io'),
+  limitless('Limitless TCG'),
+  loadSample('Load Sample Deck');
+
+  final String label;
+  const DeckSource(this.label);
+}
+
+// Short reference examples shown below the format dropdown so you know what
+// to paste. The parser itself tries every known suffix pattern regardless
+// of which source is selected, so this is just a helper, not a strict mode.
+const Map<DeckSource, String> _formatExamples = {
+  DeckSource.ptcgLive: 'Pokémon: 14\n2 Sandile BLK 57\n1 Krokorok BLK 58\n\n'
+      "Trainer: 34\n4 Boss's Orders MEG 114\n\nEnergy: 12\n12 Basic Darkness Energy",
+  DeckSource.pokemonCardIo: '// PokemonCard.io Deck List\n'
+      '1 Arven sv1-166\n5 Basic Darkness Energy sve-7',
+  // Limitless's "Share > Copy as Text" export uses the same space-separated
+  // "SETCODE NUMBER" shape as PTCG Live (confirmed from a public example:
+  // "2 Pikachu A1 94"), so it should already parse correctly -- this is
+  // lower-confidence than the other two since their docs page couldn't be
+  // fetched directly to fully confirm section headers. If a real Limitless
+  // export doesn't parse, paste it here and it can be fixed.
+  DeckSource.limitless: '2 Sandile BLK 57\n1 Krokorok BLK 58\n1 Krookodile BLK 59',
+};
+
 // --- Background-isolate work, kept as free functions + plain-data request
 // objects so compute() can run them off the UI thread. ---
 
@@ -59,6 +86,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
   OddsMode _mode = OddsMode.byCategory;
+  DeckSource _source = DeckSource.ptcgLive;
 
   ParsedDeck? _parsedDeck;
   List<HandResult>? _exactTopHands;
@@ -112,7 +140,9 @@ Total Cards: 60''';
     if (parsed.cardCounts.isEmpty) {
       setState(() {
         _calculating = false;
-        _error = 'No cards recognized. Paste a Pokemon TCG Live decklist export.';
+        _error = 'No cards recognized. Paste a decklist export from Pokémon TCG '
+            'Live, PokemonCard.io, or Limitless TCG (see the format examples '
+            'below the dropdown).';
       });
       return;
     }
@@ -156,7 +186,7 @@ Total Cards: 60''';
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Paste your Pokemon TCG Live decklist export below.',
+              'Paste a decklist export below (Pokémon TCG Live, PokemonCard.io, or Limitless TCG).',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
@@ -191,20 +221,39 @@ Total Cards: 60''';
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _calculating ? null : _calculate,
-                    child: Text(_calculating ? 'Calculating...' : 'Calculate Odds'),
-                  ),
-                ),
+                const Text('Format:'),
                 const SizedBox(width: 8),
-                OutlinedButton(
-                  onPressed: _calculating
+                DropdownButton<DeckSource>(
+                  value: _source,
+                  items: DeckSource.values
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s.label)))
+                      .toList(),
+                  onChanged: _calculating
                       ? null
-                      : () => setState(() => _controller.text = _sampleDeck),
-                  child: const Text('Load Sample'),
+                      : (s) {
+                          if (s == null) return;
+                          setState(() {
+                            _source = s;
+                            if (s == DeckSource.loadSample) {
+                              _controller.text = _sampleDeck;
+                            }
+                          });
+                        },
                 ),
               ],
+            ),
+            if (_source != DeckSource.loadSample)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Example:\n${_formatExamples[_source]}',
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _calculating ? null : _calculate,
+              child: Text(_calculating ? 'Calculating...' : 'Calculate Odds'),
             ),
             const SizedBox(height: 16),
             if (_error != null)

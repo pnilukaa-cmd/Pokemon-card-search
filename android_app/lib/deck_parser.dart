@@ -35,10 +35,18 @@ class ParsedDeck {
 }
 
 final RegExp _cardLine = RegExp(r'^(\d+)\s+(.+)$');
-// Matches a trailing "SETCODE NUMBER" suffix, e.g. " BLK 57" or " MEG 114".
-final RegExp _setSuffix = RegExp(r'\s+[A-Za-z0-9]{2,6}\s+\d+[a-zA-Z]?$');
+final RegExp _commentLine = RegExp(r'^//');
 final RegExp _sectionHeader =
     RegExp(r'^(Pok[eé]mon|Trainer(\s+Cards)?|Energy)\s*:', caseSensitive: false);
+
+// Trailing set-code/number suffixes to strip, tried in order. Different
+// sites format these differently:
+//   PTCG Live:      "Sandile BLK 57"      -> code and number space-separated
+//   PokemonCard.io: "Allister swsh4-146"  -> code-number as one hyphenated token
+final List<RegExp> _setSuffixPatterns = [
+  RegExp(r'\s+[A-Za-z0-9]{2,8}\s+\d+[a-zA-Z]?$'),
+  RegExp(r'\s+[A-Za-z0-9]+-[A-Za-z0-9]+$'),
+];
 
 String? _normalizeSection(String raw) {
   final lower = raw.toLowerCase();
@@ -56,7 +64,7 @@ ParsedDeck parseDecklist(String text) {
 
   for (final rawLine in text.split('\n')) {
     final line = rawLine.trim();
-    if (line.isEmpty) continue;
+    if (line.isEmpty || _commentLine.hasMatch(line)) continue;
 
     final headerMatch = _sectionHeader.firstMatch(line);
     if (headerMatch != null) {
@@ -70,10 +78,14 @@ ParsedDeck parseDecklist(String text) {
     final count = int.parse(match.group(1)!);
     var name = match.group(2)!.trim();
 
-    // Strip a trailing set code + number if present (e.g. "Sandile BLK 57" -> "Sandile").
-    final suffixMatch = _setSuffix.firstMatch(name);
-    if (suffixMatch != null) {
-      name = name.substring(0, suffixMatch.start).trim();
+    // Strip a trailing set code + number if present, e.g. "Sandile BLK 57"
+    // or "Allister swsh4-146" both become just the card name.
+    for (final pattern in _setSuffixPatterns) {
+      final suffixMatch = pattern.firstMatch(name);
+      if (suffixMatch != null) {
+        name = name.substring(0, suffixMatch.start).trim();
+        break;
+      }
     }
 
     if (name.isEmpty) {
