@@ -191,5 +191,61 @@ Energy: 14
       '(top composition: ${(monoResult.topCompositions.first.probability * 100).toStringAsFixed(3)}%)');
   print('Composition probability PASSED');
 
+  // --- Limitless TCG "archetype average" format test ---
+  // Real export has parenthetical section headers ("Pokémon (17.48)", not
+  // "Pokémon: 14") and fractional counts (statistical averages across many
+  // tournament decks, not one buildable deck). Confirm: headers parse
+  // without producing "Unrecognized"/no-section fallback noise, counts
+  // round to sensible integers, entries that round to 0 are dropped, and a
+  // clear warning fires flagging this as non-integer/likely-aggregate data.
+  const limitlessAverageText = '''
+Pokémon (5.48)
+4.00 N's Zorua JTG 97
+1.10 Pecharunt ex SFA 39
+0.29 Budew ASC 16
+0.01 Snorunt ASC 46
+0.09 Purrloin WHT 55
+
+Trainer (2.6)
+2.42 Ultra Ball MEG 131
+0.14 Judge POR 76
+0.04 Ruffian JTG 157
+
+Energy (7.87)
+7.86 Darkness Energy MEE 7
+0.01 Prism Energy ASC 216
+''';
+  final limitlessParsed = parseDecklist(limitlessAverageText);
+  print('\nLimitless average-format parse:');
+  print('  Total: ${limitlessParsed.totalCards}, entries: ${limitlessParsed.cardCounts}');
+  print('  Warnings: ${limitlessParsed.warnings}');
+
+  if (limitlessParsed.cardCounts["N's Zorua"] != 4) {
+    throw Exception("Expected N's Zorua to round to 4, got ${limitlessParsed.cardCounts["N's Zorua"]}");
+  }
+  if (limitlessParsed.cardCounts['Pecharunt ex'] != 1) {
+    throw Exception('Expected Pecharunt ex to round to 1, got ${limitlessParsed.cardCounts['Pecharunt ex']}');
+  }
+  if (limitlessParsed.cardCounts.containsKey('Snorunt')) {
+    throw Exception('Expected Snorunt (0.01, rounds to 0) to be dropped entirely');
+  }
+  if (limitlessParsed.cardCounts.containsKey('Budew')) {
+    throw Exception('Expected Budew (0.29, rounds to 0) to be dropped entirely');
+  }
+  if (!limitlessParsed.warnings.any((w) => w.contains('not whole numbers'))) {
+    throw Exception('Expected a warning about non-integer counts, got: ${limitlessParsed.warnings}');
+  }
+  // The section headers (with parens, not colons) must still be recognized
+  // -- confirmed indirectly since Pecharunt ex/Ultra Ball/Darkness Energy
+  // all round to nonzero and correctly land under their real sections,
+  // which categorize() would need for any unrecognized-name fallback.
+  if (limitlessParsed.sectionOf['Ultra Ball'] != 'Trainer') {
+    throw Exception('Parenthetical Trainer header not recognized: ${limitlessParsed.sectionOf}');
+  }
+  if (limitlessParsed.sectionOf["N's Zorua"] != 'Pokemon') {
+    throw Exception('Parenthetical Pokemon header not recognized: ${limitlessParsed.sectionOf}');
+  }
+  print('Limitless average-format handling PASSED');
+
   print('\nALL CHECKS PASSED');
 }

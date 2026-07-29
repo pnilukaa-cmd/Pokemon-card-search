@@ -65,7 +65,8 @@ class _ExactHandsRequest {
 }
 
 CategoryModeResult _computeCategoryMode(_CategoryModeRequest req) {
-  return computeCategoryMode(req.deck, req.lookup, req.handSize, req.n);
+  return computeCategoryMode(req.deck, req.lookup, req.handSize, req.n,
+      splitByType: req.splitByType);
 }
 
 class _CategoryModeRequest {
@@ -73,7 +74,8 @@ class _CategoryModeRequest {
   final Map<String, CardInfo> lookup;
   final int handSize;
   final int n;
-  _CategoryModeRequest(this.deck, this.lookup, this.handSize, this.n);
+  final bool splitByType;
+  _CategoryModeRequest(this.deck, this.lookup, this.handSize, this.n, this.splitByType);
 }
 
 class HomePage extends StatefulWidget {
@@ -87,6 +89,7 @@ class _HomePageState extends State<HomePage> {
   final _controller = TextEditingController();
   OddsMode _mode = OddsMode.byCategory;
   DeckSource _source = DeckSource.ptcgLive;
+  bool _splitByType = true;
 
   ParsedDeck? _parsedDeck;
   List<HandResult>? _exactTopHands;
@@ -236,7 +239,7 @@ Total Cards: 60''';
         final lookup = await _loadLookup();
         final result = await compute(
           _computeCategoryMode,
-          _CategoryModeRequest(parsed, lookup, 7, 5),
+          _CategoryModeRequest(parsed, lookup, 7, 5, _splitByType),
         );
         setState(() {
           _categoryResult = result;
@@ -296,6 +299,19 @@ Total Cards: 60''';
               selected: {_mode},
               onSelectionChanged: (s) => setState(() => _mode = s.first),
             ),
+            if (_mode == OddsMode.byCategory)
+              SwitchListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Split Pokemon/Energy by type',
+                    style: TextStyle(fontSize: 13)),
+                subtitle: const Text(
+                  'When off, "Pokemon" and "Energy" stay as single buckets even in a multi-type deck.',
+                  style: TextStyle(fontSize: 11),
+                ),
+                value: _splitByType,
+                onChanged: (v) => setState(() => _splitByType = v),
+              ),
             const SizedBox(height: 8),
             Row(
               children: [

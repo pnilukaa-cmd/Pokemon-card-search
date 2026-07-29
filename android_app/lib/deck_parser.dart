@@ -34,10 +34,14 @@ class ParsedDeck {
   int get totalCards => cardCounts.values.fold(0, (a, b) => a + b);
 }
 
-final RegExp _cardLine = RegExp(r'^(\d+)\s+(.+)$');
+// Count may be a decimal (e.g. Limitless TCG's "archetype average" export
+// shows fractional counts like "1.89" or "0.01" -- see the rounding/warning
+// handling below).
+final RegExp _cardLine = RegExp(r'^(\d+(?:\.\d+)?)\s+(.+)$');
 final RegExp _commentLine = RegExp(r'^//');
+// Matches "Pokémon: 14" (PTCG Live) and "Pokémon (17.48)" (Limitless TCG).
 final RegExp _sectionHeader =
-    RegExp(r'^(Pok[eé]mon|Trainer(\s+Cards)?|Energy)\s*:', caseSensitive: false);
+    RegExp(r'^(Pok[eé]mon|Trainer(\s+Cards)?|Energy)\s*[:(]', caseSensitive: false);
 
 // Trailing set-code/number suffixes to strip, tried in order. Different
 // sites format these differently:
@@ -61,6 +65,7 @@ ParsedDeck parseDecklist(String text) {
   final sectionOf = <String, String>{};
   final warnings = <String>[];
   String? currentSection;
+  var roundedCount = 0;
 
   for (final rawLine in text.split('\n')) {
     final line = rawLine.trim();
@@ -75,7 +80,10 @@ ParsedDeck parseDecklist(String text) {
     final match = _cardLine.firstMatch(line);
     if (match == null) continue; // unrecognized line (e.g. "Total Cards: 60"), skip
 
-    final count = int.parse(match.group(1)!);
+    final rawCount = double.parse(match.group(1)!);
+    final count = rawCount.round();
+    if (rawCount != count) roundedCount++;
+    if (count == 0) continue; // rounds to nothing, e.g. a 0.01 "average" entry
     var name = match.group(2)!.trim();
 
     // Strip a trailing set code + number if present, e.g. "Sandile BLK 57"
@@ -97,6 +105,14 @@ ParsedDeck parseDecklist(String text) {
     if (currentSection != null) {
       sectionOf[name] = currentSection;
     }
+  }
+
+  if (roundedCount > 0) {
+    warnings.add('$roundedCount card count(s) were not whole numbers and got '
+        'rounded -- this looks like a statistical/average decklist (e.g. a '
+        "Limitless \"archetype average\" view), not one player's actual "
+        'deck. Results below are only meaningful for a real single 60-card '
+        'decklist.');
   }
 
   final deck = ParsedDeck(counts, sectionOf, warnings);

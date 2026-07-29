@@ -128,10 +128,12 @@ ClassifiedCard _classify(
 
 /// Collapses a parsed deck's per-card-name counts into category counts.
 /// Pokemon and Energy are split by type ("Pokemon (Darkness)") only when
-/// more than one distinct type is present in that category; otherwise they
-/// stay as a single "Pokemon"/"Energy" bucket.
+/// [splitByType] is true (default) AND more than one distinct type is
+/// present in that category; otherwise they stay as a single
+/// "Pokemon"/"Energy" bucket. Pass splitByType: false to always keep the
+/// single lumped bucket regardless of type diversity.
 Map<String, int> categorize(ParsedDeck deck, Map<String, CardInfo> lookup,
-    {Map<String, CardInfo>? normalizedLookup}) {
+    {Map<String, CardInfo>? normalizedLookup, bool splitByType = true}) {
   final normalized = normalizedLookup ?? buildNormalizedLookup(lookup);
 
   // First pass: classify every card and bucket by (category, type).
@@ -142,13 +144,15 @@ Map<String, int> categorize(ParsedDeck deck, Map<String, CardInfo> lookup,
     byType[classified.type] = (byType[classified.type] ?? 0) + count;
   });
 
-  // Second pass: only split Pokemon/Energy by type if >1 distinct type is
-  // present (excluding the "unknown type" bucket from that count, since an
-  // unrecognized card doesn't tell us anything about type diversity).
+  // Second pass: only split Pokemon/Energy by type if the toggle is on and
+  // >1 distinct type is present (excluding the "unknown type" bucket from
+  // that count, since an unrecognized card doesn't tell us anything about
+  // type diversity).
   final categoryCounts = <String, int>{};
   byCategoryAndType.forEach((category, byType) {
     final knownTypes = byType.keys.where((t) => t != null).toList();
-    final shouldSplit = (category == 'Pokemon' || category == 'Energy') && knownTypes.length > 1;
+    final shouldSplit =
+        splitByType && (category == 'Pokemon' || category == 'Energy') && knownTypes.length > 1;
     if (shouldSplit) {
       byType.forEach((type, count) {
         final label = type != null ? '$category ($type)' : '$category (Other)';
@@ -234,8 +238,9 @@ class CategoryModeResult {
 }
 
 CategoryModeResult computeCategoryMode(
-    ParsedDeck deck, Map<String, CardInfo> lookup, int handSize, int topN) {
-  final categoryCounts = categorize(deck, lookup);
+    ParsedDeck deck, Map<String, CardInfo> lookup, int handSize, int topN,
+    {bool splitByType = true}) {
+  final categoryCounts = categorize(deck, lookup, splitByType: splitByType);
   final deckSize = categoryCounts.values.fold(0, (a, b) => a + b);
 
   final topCompositions = topHands(categoryCounts, handSize, topN);

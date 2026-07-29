@@ -10,7 +10,10 @@ Limitless TCG) and it shows odds two ways:
   Pokemon type (e.g. a Dark/Psychic deck) or more than one Energy type,
   those two categories further split by type ("Pokemon (Darkness)",
   "Pokemon (Psychic)") instead of lumping them together; a mono-type deck
-  keeps the simple single bucket. Also includes:
+  keeps the simple single bucket. **This is a toggle** ("Split Pokemon/
+  Energy by type", on by default) shown above the format dropdown -- turn
+  it off to always keep single lumped buckets regardless of type
+  diversity. Also includes:
   - **Top 5 most likely hand shapes** by category composition.
   - **Confidence calculator**: pick a target confidence (80/90/95/99%) and
     see how many copies of each category you'd need in the deck to hit
@@ -37,16 +40,33 @@ selection you make, so pasting works the same either way -- the dropdown
 expected:
 
 - **Pokemon TCG Live**: `Pokémon: 14` / `Trainer: 34` / `Energy: 12` section
-  headers, cards like `2 Sandile BLK 57` (space-separated set code + number).
+  headers (colon), cards like `2 Sandile BLK 57` (space-separated set code +
+  number).
 - **PokemonCard.io**: `// PokemonCard.io Deck List` comment header, no
   section headers, cards like `1 Allister swsh4-146` (hyphenated
   `setcode-number` as one token). Verified against a real export.
-- **Limitless TCG**: "Share > Copy as Text" export uses the same
-  space-separated shape as PTCG Live (confirmed from a public example: `2
-  Pikachu A1 94`), so it should already work -- lower confidence than the
-  other two since their docs site couldn't be fetched directly during
-  development to fully confirm section headers. If a real export doesn't
-  parse, that's a bug to report and fix.
+- **Limitless TCG**: `Pokémon (17.48)` / `Trainer (34.6)` / `Energy (7.87)`
+  section headers (parentheses, not colon), same space-separated
+  `SETCODE NUMBER` card shape as PTCG Live. Verified against a real export
+  -- though that particular export turned out to be an **"archetype
+  average"** view (fractional counts like `1.89` or `0.01`, statistically
+  averaged across many tournament decks, not one buildable 60-card deck).
+  The parser handles this gracefully: counts round to the nearest integer,
+  entries that round to 0 are dropped, and a clear warning fires explaining
+  this looks like an aggregate/average list rather than a real decklist. A
+  genuine single-player Limitless export (integer counts) should parse
+  cleanly with no such warning.
+
+### The "not whole numbers" warning
+
+If you see a warning about card counts not being whole numbers, you've
+likely pasted a statistical/meta-analysis view (an archetype's average
+build across many real decks) rather than one specific player's decklist.
+The app still parses it (rounding each count, dropping anything that rounds
+to 0) so you can see an approximate build, but the resulting percentages
+aren't meaningful for deck-building the way they are for a real decklist --
+look for an individual tournament player's submitted list instead if you
+want exact math.
 
 ## Status / what's been verified
 
@@ -54,11 +74,12 @@ The full Flutter SDK (3.44.8 stable) was installed and used to actually
 verify this project, not just read the code:
 
 - `flutter analyze`: **0 errors** across the whole project.
-- `flutter test`: **all tests pass** (3 widget tests), including an
+- `flutter test`: **all tests pass** (4 widget tests), including an
   end-to-end test that loads the sample deck, calculates, and checks
   type-split categories, the confidence calculator, and the optimal-hand
   comparison (including its pre-filled starting values) all render and
-  compute correctly.
+  compute correctly, plus a dedicated test confirming the type-split toggle
+  actually keeps a single lumped bucket when turned off.
 - `flutter build web`: **builds successfully** to `build/web/`.
 - `lib/deck_parser.dart`, `lib/hand_odds.dart`, and `lib/card_categories.dart`
   were also independently run as plain Dart scripts
@@ -151,5 +172,6 @@ to be regenerated from `pokemon_standard_cards.json` in the repo root.
   considered but deliberately deferred -- ask for it if Expanded support
   becomes a priority.
 - No manual card picker yet -- paste-only, per the initial scope.
-- Limitless TCG format is unverified against a real export (see Supported
-  decklist formats above).
+- Limitless TCG's per-player decklist export (integer counts, not the
+  "archetype average" view) hasn't been tested against a real single-deck
+  export yet -- only the average/aggregate format has been confirmed so far.

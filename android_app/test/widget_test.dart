@@ -97,4 +97,37 @@ void main() {
     // not the static instructional text, so this confirms no error fired.
     expect(find.textContaining('currently'), findsNothing);
   });
+
+  testWidgets('Type-split toggle off keeps a single lumped Pokemon/Energy bucket',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const DeckOddsApp());
+
+    await tester.tap(find.byType(DropdownButton<DeckSource>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Load Sample Deck').last);
+    await tester.pump();
+
+    // Turn the type-split toggle off before calculating.
+    expect(find.text('Split Pokemon/Energy by type'), findsOneWidget);
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Calculate Odds'));
+      await Future<void>.delayed(const Duration(seconds: 2));
+    });
+    await tester.pump();
+
+    // With the toggle off, Pokemon should stay a single bucket even though
+    // this deck genuinely has 3 Pokemon types.
+    expect(find.text('Pokemon'), findsWidgets);
+    expect(find.text('Pokemon (Psychic)'), findsNothing);
+    expect(find.text('Pokemon (Grass)'), findsNothing);
+    expect(find.text('Pokemon (Colorless)'), findsNothing);
+  });
 }
