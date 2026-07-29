@@ -247,5 +247,34 @@ Energy (7.87)
   }
   print('Limitless average-format handling PASSED');
 
+  // --- PTCG Live {X} type-letter shorthand test ---
+  // Some PTCG Live exports use "Basic {P} Energy" instead of "Basic
+  // Psychic Energy", and for Special Energy the letter code replaces the
+  // type word inside the real name itself ("Telepathic {P} Energy" whose
+  // real card is "Telepathic Psychic Energy"). Both must expand correctly.
+  const letterCodeText = '''
+Pokémon: 4
+4 Poltchageist PBL 5
+
+Trainer: 47
+47 Boss's Orders MEG 114
+
+Energy: 9
+8 Basic {P} Energy MEE 5
+1 Telepathic {P} Energy POR 88
+''';
+  final letterParsed = parseDecklist(letterCodeText);
+  print('\n{X} type-letter shorthand parse: ${letterParsed.cardCounts}');
+  if (letterParsed.cardCounts['Basic Psychic Energy'] != 8) {
+    throw Exception('Basic {P} Energy did not expand correctly: ${letterParsed.cardCounts}');
+  }
+  if (letterParsed.cardCounts['Telepathic Psychic Energy'] != 1) {
+    throw Exception('Telepathic {P} Energy did not expand correctly: ${letterParsed.cardCounts}');
+  }
+  if (!lookup.containsKey('Telepathic Psychic Energy')) {
+    throw Exception('Sanity check failed: real card "Telepathic Psychic Energy" not in lookup');
+  }
+  print('{X} type-letter shorthand PASSED');
+
   print('\nALL CHECKS PASSED');
 }

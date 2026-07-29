@@ -52,6 +52,24 @@ final List<RegExp> _setSuffixPatterns = [
   RegExp(r'\s+[A-Za-z0-9]+-[A-Za-z0-9]+$'),
 ];
 
+// PTCG Live sometimes exports energy names using its internal type-letter
+// shorthand instead of the spelled-out type, e.g. "Basic {P} Energy"
+// (Psychic) or "Telepathic {P} Energy" (whose real name is "Telepathic
+// Psychic Energy"). Expand these before lookup/type-matching.
+const Map<String, String> _typeLetterCodes = {
+  'G': 'Grass', 'R': 'Fire', 'W': 'Water', 'L': 'Lightning', 'P': 'Psychic',
+  'F': 'Fighting', 'D': 'Darkness', 'M': 'Metal', 'C': 'Colorless',
+  'N': 'Dragon', 'Y': 'Fairy',
+};
+final RegExp _typeLetterCode = RegExp(r'\{([A-Za-z])\}');
+
+String _expandTypeLetterCodes(String name) {
+  return name.replaceAllMapped(_typeLetterCode, (m) {
+    final letter = m.group(1)!.toUpperCase();
+    return _typeLetterCodes[letter] ?? m.group(0)!;
+  });
+}
+
 String? _normalizeSection(String raw) {
   final lower = raw.toLowerCase();
   if (lower.startsWith('pok')) return 'Pokemon';
@@ -84,7 +102,7 @@ ParsedDeck parseDecklist(String text) {
     final count = rawCount.round();
     if (rawCount != count) roundedCount++;
     if (count == 0) continue; // rounds to nothing, e.g. a 0.01 "average" entry
-    var name = match.group(2)!.trim();
+    var name = _expandTypeLetterCodes(match.group(2)!.trim());
 
     // Strip a trailing set code + number if present, e.g. "Sandile BLK 57"
     // or "Allister swsh4-146" both become just the card name.
