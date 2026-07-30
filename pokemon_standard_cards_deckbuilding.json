@@ -52657,6 +52657,7 @@
         "subtypes": [
             "Item"
         ],
+        "hp": 60,
         "abilities": [
             {
                 "name": "Plume Protection",

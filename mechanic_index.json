@@ -48,7 +48,7 @@
     {
       "tag": "counterattack_on_hit",
       "role": "consume",
-      "card_count": 16
+      "card_count": 17
     },
     {
       "tag": "damage_scales_with_counters_on_opponent",
@@ -523,12 +523,12 @@
     {
       "tag": "damage_reduction_team",
       "role": "consume",
-      "card_count": 9
+      "card_count": 10
     },
     {
       "tag": "attack_damage_reduced_next_turn_opponent",
       "role": "consume",
-      "card_count": 11
+      "card_count": 12
     },
     {
       "tag": "damage_increase_next_turn_opponent",
@@ -538,12 +538,12 @@
     {
       "tag": "damage_prevention_conditional",
       "role": "consume",
-      "card_count": 53
+      "card_count": 54
     },
     {
       "tag": "effect_prevention_conditional",
       "role": "consume",
-      "card_count": 13
+      "card_count": 15
     },
     {
       "tag": "ko_prevention",
@@ -633,7 +633,7 @@
     {
       "tag": "attack_cost_increase_opponent",
       "role": "produce",
-      "card_count": 2
+      "card_count": 3
     },
     {
       "tag": "attack_cost_reduction_flat_conditional",
@@ -15393,6 +15393,17 @@
       ]
     },
     {
+      "name": "Antique Cover Fossil",
+      "kind": "ability",
+      "effect": "Protective Cover",
+      "text": "Prevent all effects of attacks used by your opponent's Pokémon done to this Pokémon. (Damage is not an effect.)",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "effect_prevention_conditional"
+      ]
+    },
+    {
       "name": "Antique Root Fossil",
       "kind": "trainer",
       "effect": "Antique Root Fossil",
@@ -15401,6 +15412,17 @@
       "hp": null,
       "tags": [
         "fossil_pseudo_pokemon"
+      ]
+    },
+    {
+      "name": "Antique Root Fossil",
+      "kind": "ability",
+      "effect": "Primal Root",
+      "text": "As long as this Pokémon is in the Active Spot, attacks used by your opponent's Basic Pokémon cost Colorless more.",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "attack_cost_increase_opponent"
       ]
     },
     {
@@ -33572,6 +33594,17 @@
       ]
     },
     {
+      "name": "Antique Plume Fossil",
+      "kind": "ability",
+      "effect": "Plume Protection",
+      "text": "As long as this Pokémon is on your Bench, prevent all damage done to this Pokémon by attacks from your opponent's Pokémon.",
+      "types": [],
+      "hp": 60,
+      "tags": [
+        "damage_prevention_conditional"
+      ]
+    },
+    {
       "name": "Stoutland",
       "kind": "attack",
       "effect": "Odor Sleuth",
@@ -46733,6 +46766,17 @@
       ]
     },
     {
+      "name": "Antique Jaw Fossil",
+      "kind": "ability",
+      "effect": "Intimidating Jaw",
+      "text": "As long as this Pokémon is in the Active Spot, attacks used by your opponent's Active Pokémon do 30 less damage (before applying Weakness and Resistance).",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "attack_damage_reduced_next_turn_opponent"
+      ]
+    },
+    {
       "name": "Antique Sail Fossil",
       "kind": "trainer",
       "effect": "Antique Sail Fossil",
@@ -46741,6 +46785,17 @@
       "hp": null,
       "tags": [
         "fossil_pseudo_pokemon"
+      ]
+    },
+    {
+      "name": "Antique Sail Fossil",
+      "kind": "ability",
+      "effect": "Protective Sail",
+      "text": "Whenever your opponent plays a Supporter card from their hand, prevent all effects of that card done to this Pokémon.",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "effect_prevention_conditional"
       ]
     },
     {
@@ -50950,6 +51005,17 @@
       ]
     },
     {
+      "name": "Antique Armor Fossil",
+      "kind": "ability",
+      "effect": "Protective Armor",
+      "text": "As long as this Pokémon is in the Active Spot, all of your Pokémon take 10 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance).",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "damage_reduction_team"
+      ]
+    },
+    {
       "name": "Trumbeak",
       "kind": "attack",
       "effect": "Fly",
@@ -51078,6 +51144,17 @@
       "hp": null,
       "tags": [
         "fossil_pseudo_pokemon"
+      ]
+    },
+    {
+      "name": "Antique Skull Fossil",
+      "kind": "ability",
+      "effect": "Spiny Skull",
+      "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out), place 3 damage counters on the Attacking Pokémon.",
+      "types": [],
+      "hp": "60",
+      "tags": [
+        "counterattack_on_hit"
       ]
     },
     {

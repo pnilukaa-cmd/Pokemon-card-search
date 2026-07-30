@@ -69,19 +69,37 @@ def extract_entries():
         elif c["supertype"] == "Trainer":
             text = " ".join(c.get("rules") or [])
             key = (name, "trainer", name, text)
-            if key in seen:
-                continue
-            seen.add(key)
-            entries.append(
-                {
-                    "name": name,
-                    "kind": "trainer",
-                    "effect": name,
-                    "text": text,
-                    "types": [],
-                    "hp": None,
-                }
-            )
+            if key not in seen:
+                seen.add(key)
+                entries.append(
+                    {
+                        "name": name,
+                        "kind": "trainer",
+                        "effect": name,
+                        "text": text,
+                        "types": [],
+                        "hp": None,
+                    }
+                )
+            # A handful of Trainer cards (the "Antique ... Fossil" cards) are
+            # played as if they were a Pokemon and carry their own named
+            # Ability -- that Ability text is mechanically distinct from the
+            # card's fossil-pseudo-pokemon rules text and needs its own entry.
+            for a in c.get("abilities") or []:
+                key = (name, "ability", a["name"], a["text"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                entries.append(
+                    {
+                        "name": name,
+                        "kind": "ability",
+                        "effect": a["name"],
+                        "text": a["text"],
+                        "types": [],
+                        "hp": c.get("hp"),
+                    }
+                )
         elif c["supertype"] == "Energy":
             text = " ".join(c.get("rules") or [])
             if not text.strip():
@@ -410,7 +428,7 @@ FAMILIES = [
      r"attacks? .*cost [A-Za-z]+ less for each|costs? [A-Za-z]+ less for each"),
     ("attack_cost_reduction_flat", "consume", r"attack costs? \d+ Energy less"),
     ("attack_cost_increase_opponent", "produce",
-     r"attacks used by (the Defending Pok[eé]mon|your opponent'?s Active Pok[eé]mon|each [\w' ]*Pok[eé]mon in play)( \([^)]*\))? cost [A-Za-z]+ more"),
+     r"attacks used by (the Defending Pok[eé]mon|your opponent'?s (Active|Basic|Stage \d) Pok[eé]mon|each [\w' ]*Pok[eé]mon in play)( \([^)]*\))? cost [A-Za-z]+ more"),
     ("attack_cost_reduction_flat_conditional", "consume",
      r"attacks used by (the Pok[eé]mon this card is attached to|your [\w' ]+ Pok[eé]mon) cost [A-Za-z]+ less\b"),
     ("hp_scales_with_count", "consume", r"[+–-]\d+ HP for each"),
