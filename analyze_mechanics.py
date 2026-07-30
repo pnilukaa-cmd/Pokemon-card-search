@@ -313,7 +313,7 @@ FAMILIES = [
     ("draw_scales_with_count", "produce", r"[Dd]raw a card for each"),
     ("mutual_draw", "produce", r"each player draws?"),
     ("discard_own_hand_cost", "produce",
-     r"discard (a |an |\d+ |any number of |random )?cards? from your hand in order to use this Ability|discard \d+ (other )?cards? from your hand|discard any number of cards from your hand"),
+     r"discard (a |an |\d+ |any number of |random )?cards? from your hand in order to use this Ability|discard \d+ (other )?cards? from your hand|discard any number of cards from your hand|discard (a|another) card from your hand\b"),
     ("discard_pile_recursion_pokemon", "produce",
      r"Pok[eé]mon (card )?(from|s from) your discard pile into your hand"),
     ("discard_pile_recursion_supporter", "produce",

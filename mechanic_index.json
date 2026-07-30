@@ -358,7 +358,7 @@
     {
       "tag": "discard_own_hand_cost",
       "role": "produce",
-      "card_count": 6
+      "card_count": 12
     },
     {
       "tag": "discard_pile_recursion_pokemon",
@@ -5409,7 +5409,8 @@
       "hp": null,
       "tags": [
         "draw_power",
-        "draw_scales_with_count"
+        "draw_scales_with_count",
+        "discard_own_hand_cost"
       ]
     },
     {
@@ -19224,7 +19225,8 @@
       ],
       "hp": "70",
       "tags": [
-        "draw_power"
+        "draw_power",
+        "discard_own_hand_cost"
       ]
     },
     {
@@ -25607,7 +25609,8 @@
       ],
       "hp": "110",
       "tags": [
-        "draw_power"
+        "draw_power",
+        "discard_own_hand_cost"
       ]
     },
     {
@@ -26124,7 +26127,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "discard_own_hand_cost"
       ]
     },
     {
@@ -30481,7 +30485,8 @@
       ],
       "hp": "60",
       "tags": [
-        "hand_discard_opponent"
+        "hand_discard_opponent",
+        "discard_own_hand_cost"
       ]
     },
     {
@@ -44727,7 +44732,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon"
+        "deck_search_pokemon",
+        "discard_own_hand_cost"
       ]
     },
     {
