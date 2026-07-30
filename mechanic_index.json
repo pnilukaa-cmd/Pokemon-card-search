@@ -13,7 +13,7 @@
     {
       "tag": "direct_damage_no_attack",
       "role": "produce",
-      "card_count": 20
+      "card_count": 24
     },
     {
       "tag": "damage_both_sides_ability_havers",
@@ -23,12 +23,22 @@
     {
       "tag": "transfer_damage_to_opponent",
       "role": "produce",
-      "card_count": 1
+      "card_count": 5
     },
     {
       "tag": "transfer_damage_own",
       "role": "produce",
       "card_count": 1
+    },
+    {
+      "tag": "damage_move_opponent_side",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_both_sides_with_counters",
+      "role": "produce",
+      "card_count": 3
     },
     {
       "tag": "damage_counter_move_lock",
@@ -38,7 +48,7 @@
     {
       "tag": "counterattack_on_hit",
       "role": "consume",
-      "card_count": 13
+      "card_count": 16
     },
     {
       "tag": "damage_scales_with_counters_on_opponent",
@@ -68,7 +78,7 @@
     {
       "tag": "status_checkup_damage_amp",
       "role": "produce",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "mutual_ko",
@@ -83,7 +93,7 @@
     {
       "tag": "heal_team",
       "role": "produce",
-      "card_count": 9
+      "card_count": 10
     },
     {
       "tag": "heal_other_target",
@@ -128,7 +138,7 @@
     {
       "tag": "energy_discard_opponent",
       "role": "produce",
-      "card_count": 32
+      "card_count": 35
     },
     {
       "tag": "energy_search",
@@ -138,7 +148,7 @@
     {
       "tag": "energy_recursion",
       "role": "produce",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "energy_shuffle_from_discard",
@@ -148,7 +158,7 @@
     {
       "tag": "energy_attach_bonus",
       "role": "produce",
-      "card_count": 48
+      "card_count": 49
     },
     {
       "tag": "energy_attach_to_opponent",
@@ -158,22 +168,22 @@
     {
       "tag": "energy_move_between_own",
       "role": "produce",
-      "card_count": 22
+      "card_count": 24
     },
     {
       "tag": "energy_bounce_self_to_hand",
       "role": "produce",
-      "card_count": 4
+      "card_count": 6
     },
     {
       "tag": "energy_bounce_from_opponent",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "energy_move_opponent_side",
       "role": "produce",
-      "card_count": 3
+      "card_count": 4
     },
     {
       "tag": "energy_shuffle_self_into_deck",
@@ -183,12 +193,17 @@
     {
       "tag": "energy_provides_extra_type",
       "role": "consume",
+      "card_count": 18
+    },
+    {
+      "tag": "restricted_attachment_named_group",
+      "role": "produce",
       "card_count": 1
     },
     {
       "tag": "damage_scales_with_energy_attached",
       "role": "consume",
-      "card_count": 42
+      "card_count": 46
     },
     {
       "tag": "damage_scales_with_energy_in_discard",
@@ -218,7 +233,7 @@
     {
       "tag": "status_cure",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "status_immune",
@@ -273,7 +288,7 @@
     {
       "tag": "deck_search_pokemon",
       "role": "produce",
-      "card_count": 127
+      "card_count": 128
     },
     {
       "tag": "deck_search_trainer",
@@ -288,7 +303,7 @@
     {
       "tag": "search_to_bench_generic",
       "role": "produce",
-      "card_count": 41
+      "card_count": 42
     },
     {
       "tag": "recruit_species_to_bench",
@@ -298,7 +313,17 @@
     {
       "tag": "bench_recruit_from_discard",
       "role": "produce",
-      "card_count": 2
+      "card_count": 4
+    },
+    {
+      "tag": "deck_peek_opponent_top",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "hand_to_deck_top_self",
+      "role": "produce",
+      "card_count": 1
     },
     {
       "tag": "deck_peek_keep_any",
@@ -318,7 +343,7 @@
     {
       "tag": "draw_power",
       "role": "produce",
-      "card_count": 113
+      "card_count": 115
     },
     {
       "tag": "draw_scales_with_count",
@@ -353,7 +378,7 @@
     {
       "tag": "self_bounce_to_hand",
       "role": "produce",
-      "card_count": 4
+      "card_count": 6
     },
     {
       "tag": "self_shuffle_into_deck",
@@ -383,7 +408,7 @@
     {
       "tag": "self_switch_optional",
       "role": "produce",
-      "card_count": 31
+      "card_count": 32
     },
     {
       "tag": "on_play_switch_to_active",
@@ -393,17 +418,17 @@
     {
       "tag": "free_or_reduced_retreat_self",
       "role": "produce",
-      "card_count": 11
+      "card_count": 12
     },
     {
       "tag": "retreat_cost_increase_opponent",
       "role": "produce",
-      "card_count": 3
+      "card_count": 4
     },
     {
       "tag": "retreat_prevent_opponent",
       "role": "produce",
-      "card_count": 29
+      "card_count": 30
     },
     {
       "tag": "attack_lock_opponent",
@@ -443,7 +468,17 @@
     {
       "tag": "evolve_lock_opponent",
       "role": "produce",
-      "card_count": 0
+      "card_count": 1
+    },
+    {
+      "tag": "tool_effect_nullify",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "acespec_lock",
+      "role": "produce",
+      "card_count": 1
     },
     {
       "tag": "stadium_discard_effect",
@@ -453,7 +488,17 @@
     {
       "tag": "tool_discard_opponent",
       "role": "produce",
-      "card_count": 8
+      "card_count": 10
+    },
+    {
+      "tag": "tool_discard_either_side",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "extra_tool_slot_named_group",
+      "role": "produce",
+      "card_count": 1
     },
     {
       "tag": "attack_copy_opponent",
@@ -463,27 +508,37 @@
     {
       "tag": "damage_reduction_self",
       "role": "consume",
-      "card_count": 39
+      "card_count": 46
+    },
+    {
+      "tag": "self_damage_increase_next_turn",
+      "role": "consume",
+      "card_count": 1
     },
     {
       "tag": "damage_reduction_team",
       "role": "consume",
-      "card_count": 8
+      "card_count": 9
     },
     {
       "tag": "attack_damage_reduced_next_turn_opponent",
       "role": "consume",
-      "card_count": 10
+      "card_count": 11
+    },
+    {
+      "tag": "damage_increase_next_turn_opponent",
+      "role": "consume",
+      "card_count": 2
     },
     {
       "tag": "damage_prevention_conditional",
       "role": "consume",
-      "card_count": 52
+      "card_count": 53
     },
     {
       "tag": "effect_prevention_conditional",
       "role": "consume",
-      "card_count": 11
+      "card_count": 13
     },
     {
       "tag": "ko_prevention",
@@ -498,7 +553,7 @@
     {
       "tag": "damage_boost_conditional_generic",
       "role": "consume",
-      "card_count": 283
+      "card_count": 284
     },
     {
       "tag": "damage_scales_with_pokemon_count",
@@ -508,7 +563,7 @@
     {
       "tag": "damage_on_opponent_energy_attach",
       "role": "produce",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "damage_on_opponent_evolve",
@@ -588,7 +643,7 @@
     {
       "tag": "hp_modify_flat",
       "role": "produce",
-      "card_count": 11
+      "card_count": 12
     },
     {
       "tag": "evolve_bonus_effect",
@@ -608,17 +663,22 @@
     {
       "tag": "devolve_opponent",
       "role": "produce",
-      "card_count": 3
+      "card_count": 4
+    },
+    {
+      "tag": "self_devolve",
+      "role": "produce",
+      "card_count": 1
     },
     {
       "tag": "prize_bonus_self",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "prize_reduction_opponent",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "prize_peek",
@@ -648,7 +708,7 @@
     {
       "tag": "bench_snipe_opponent",
       "role": "produce",
-      "card_count": 58
+      "card_count": 69
     },
     {
       "tag": "bench_snipe_opponent_all",
@@ -684,6 +744,231 @@
       "tag": "type_specific_damage_reduction_consumable",
       "role": "consume",
       "card_count": 6
+    },
+    {
+      "tag": "damage_scales_with_named_attack_in_discard",
+      "role": "consume",
+      "card_count": 2
+    },
+    {
+      "tag": "attack_access_previous_evolution",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "emergency_evolve_low_hp",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "opponent_pokemon_shuffle_into_deck",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "opponent_pokemon_bounce_lock",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "first_turn_attack_unlock",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "attack_type_substitution_conditional",
+      "role": "consume",
+      "card_count": 2
+    },
+    {
+      "tag": "conditional_attack_type_unlock",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "opponent_turn_ends_conditional",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "special_play_condition_only",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "discard_pile_pokemon_swap_named",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "attack_base_damage_boost_next_turn",
+      "role": "consume",
+      "card_count": 2
+    },
+    {
+      "tag": "conditional_combo_unlock_by_named_card",
+      "role": "consume",
+      "card_count": 2
+    },
+    {
+      "tag": "named_group_evolve_timing_bonus",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "energy_attach_mutual",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "bench_swap_from_discard_basic",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "play_face_down_setup",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "attack_unlock_by_prior_attack",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "discard_energy_on_hit_ability",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "tool_swap_condition",
+      "role": "produce",
+      "card_count": 12
+    },
+    {
+      "tag": "coin_flip_reroll",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "recur_multiple_named_cards_paired",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "stack_bench_swap_basic_from_discard",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_on_bench_placement",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "status_persist_through_evolve",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_counter_doubler",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "energy_salvage_on_ko",
+      "role": "produce",
+      "card_count": 3
+    },
+    {
+      "tag": "damage_scales_with_revealed_subtype",
+      "role": "consume",
+      "card_count": 3
+    },
+    {
+      "tag": "damage_scales_with_revealed_count",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "grants_attack_via_tool",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "hand_deck_top_swap",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "ability_pokemon_play_lock",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "pokemon_shuffle_from_discard_into_deck",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "deck_peek_bottom",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "hand_count_shuffle_redraw_opponent",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "stage2_conditional_bench_play",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "attack_unlock_by_own_hp",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "prize_reshuffle",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "retreat_cost_gated_energy_move",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "first_turn_go_second_energy_bounce",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "energy_up_to_amount_attached_opponent",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_boost_if_damaged_last_turn",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_scales_with_card_type_in_discard",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "self_reset_via_bottom_discard",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "heal_and_cure_from",
+      "role": "produce",
+      "card_count": 1
     }
   ],
   "entries": [
@@ -816,7 +1101,9 @@
         "Grass"
       ],
       "hp": "150",
-      "tags": []
+      "tags": [
+        "opponent_pokemon_shuffle_into_deck"
+      ]
     },
     {
       "name": "Shiftry",
@@ -2188,7 +2475,9 @@
         "Lightning"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "damage_both_sides_with_counters"
+      ]
     },
     {
       "name": "Raichu",
@@ -2486,7 +2775,9 @@
         "Lightning"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "damage_scales_with_revealed_subtype"
+      ]
     },
     {
       "name": "Iron Thorns",
@@ -2694,7 +2985,9 @@
         "Psychic"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "evolve_lock_opponent"
+      ]
     },
     {
       "name": "Bronzong",
@@ -2849,7 +3142,9 @@
         "Psychic"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "prize_bonus_self"
+      ]
     },
     {
       "name": "Scream Tail",
@@ -3093,7 +3388,9 @@
         "Fighting"
       ],
       "hp": "100",
-      "tags": []
+      "tags": [
+        "attack_access_previous_evolution"
+      ]
     },
     {
       "name": "Relicanth",
@@ -3828,7 +4125,9 @@
         "Darkness"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "damage_move_opponent_side"
+      ]
     },
     {
       "name": "Farigiraf ex",
@@ -4660,7 +4959,10 @@
         "Colorless"
       ],
       "hp": "50",
-      "tags": []
+      "tags": [
+        "emergency_evolve_low_hp",
+        "attack_unlock_by_own_hp"
+      ]
     },
     {
       "name": "Pidove",
@@ -4845,7 +5147,9 @@
         "Colorless"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
     },
     {
       "name": "Iron Jugulis",
@@ -4977,7 +5281,9 @@
       "text": "Metal Pokémon (both yours and your opponent's) take 30 less damage from attacks from the opponent's Pokémon (after applying Weakness and Resistance). You may play only 1 Stadium card during your turn. Put it into the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "damage_reduction_team"
+      ]
     },
     {
       "name": "Future Booster Energy Capsule",
@@ -5009,7 +5315,10 @@
       "text": "If the Pokémon this card is attached to has a Retreat Cost of exactly 4, is in the Active Spot, and is Knocked Out by damage from an attack from your opponent's Pokémon, move up to 3 Basic Energy cards from that Pokémon to your Benched Pokémon in any way you like. You may attach any number of Pokémon Tools to your Pokémon during your turn. You may attach only 1 Pokémon Tool to each Pokémon, and it stays attached.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "energy_salvage_on_ko",
+        "retreat_cost_gated_energy_move"
+      ]
     },
     {
       "name": "Hero's Cape",
@@ -5063,7 +5372,9 @@
       "text": "During Pokémon Checkup, put 2 more damage counters on each Poisoned non-Darkness Pokémon (both yours and your opponent's). You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played. You may play only 1 Stadium card during your turn. Put it into the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "status_checkup_damage_amp"
+      ]
     },
     {
       "name": "Prime Catcher",
@@ -5109,6 +5420,29 @@
       "tags": [
         "deck_search_pokemon",
         "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Mist Energy",
+      "kind": "energy",
+      "effect": "Mist Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.    Prevent all effects of attacks used by your opponent's Pokémon done to the Pokémon this card is attached to. (Existing effects are not removed. Damage is not an effect.)",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "effect_prevention_conditional"
+      ]
+    },
+    {
+      "name": "Neo Upper Energy",
+      "kind": "energy",
+      "effect": "Neo Upper Energy",
+      "text": "You can't have more than 1 ACE SPEC card in your deck. As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to a Stage 2 Pokémon, this card provides every type of Energy but provides only 2 Energy at a time. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
       ]
     },
     {
@@ -5430,7 +5764,9 @@
         "Grass"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "opponent_pokemon_shuffle_into_deck"
+      ]
     },
     {
       "name": "Illumise",
@@ -6108,7 +6444,9 @@
         "Fire"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "energy_attach_bonus"
+      ]
     },
     {
       "name": "Infernape",
@@ -6658,7 +6996,9 @@
         "Water"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "opponent_pokemon_bounce_lock"
+      ]
     },
     {
       "name": "Milotic",
@@ -6825,7 +7165,9 @@
         "Water"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "direct_damage_no_attack"
+      ]
     },
     {
       "name": "Glaceon",
@@ -6873,7 +7215,9 @@
         "Water"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
     },
     {
       "name": "Cramorant",
@@ -6986,7 +7330,9 @@
         "Water"
       ],
       "hp": "340",
-      "tags": []
+      "tags": [
+        "special_play_condition_only"
+      ]
     },
     {
       "name": "Palafin ex",
@@ -8431,6 +8777,7 @@
       "hp": "140",
       "tags": [
         "stadium_discard_effect",
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -8820,7 +9167,9 @@
         "Metal"
       ],
       "hp": "180",
-      "tags": []
+      "tags": [
+        "damage_both_sides_with_counters"
+      ]
     },
     {
       "name": "Aggron",
@@ -9510,7 +9859,9 @@
       "text": "Once during each player's turn, if they played a Supporter card from their hand this turn, they may heal 10 damage from each of their Pokémon. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played. You may play only 1 Stadium card during your turn. Put it into the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "heal_team"
+      ]
     },
     {
       "name": "Cook",
@@ -9530,7 +9881,9 @@
       "text": "Discard a Special Energy from 1 of your opponent's Pokémon. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "energy_discard_opponent"
+      ]
     },
     {
       "name": "Festival Grounds",
@@ -9562,7 +9915,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "energy_move_between_own"
+        "energy_move_between_own",
+        "tool_swap_condition"
       ]
     },
     {
@@ -9583,7 +9937,9 @@
       "text": "Pokémon Tools attached to each Pokémon (both yours and your opponent's) have no effect. You may play only 1 Stadium card during your turn. Put it into the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_effect_nullify"
+      ]
     },
     {
       "name": "Kieran",
@@ -9639,7 +9995,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "tool_swap_condition"
       ]
     },
     {
@@ -9649,7 +10006,9 @@
       "text": "Choose a Pokémon ex in your discard pile that has \"Ogerpon\" in its name, and switch it with 1 of your Pokémon ex in play that has \"Ogerpon\" in its name. Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pokémon. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "discard_pile_pokemon_swap_named"
+      ]
     },
     {
       "name": "Perrin",
@@ -9680,7 +10039,9 @@
       "text": "You can't have more than 1 ACE SPEC card in your deck. Put 1 of your Pokémon and all attached cards into your hand. You may play any number of Item cards during your turn. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "self_bounce_to_hand"
+      ]
     },
     {
       "name": "Secret Box",
@@ -9704,7 +10065,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "ko_prevention"
+        "ko_prevention",
+        "tool_swap_condition"
       ]
     },
     {
@@ -9720,6 +10082,28 @@
       ]
     },
     {
+      "name": "Boomerang Energy",
+      "kind": "energy",
+      "effect": "Boomerang Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.    If this card is discarded by an effect of an attack used by the Pokémon this card is attached to, attach this card from your discard pile to that Pokémon after attacking.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
+      ]
+    },
+    {
+      "name": "Legacy Energy",
+      "kind": "energy",
+      "effect": "Legacy Energy",
+      "text": "You can't have more than 1 ACE SPEC card in your deck. As long as this card is attached to a Pokémon, it provides every type of Energy but provides only 1 Energy at a time.    If the Pokémon this card is attached to is Knocked Out by damage from an attack from your opponent's Pokémon, that player takes 1 fewer Prize card. This effect of your Legacy Energy can't be applied more than once per game. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "prize_reduction_opponent"
+      ]
+    },
+    {
       "name": "Rescue Board",
       "kind": "trainer",
       "effect": "Rescue Board",
@@ -9727,7 +10111,19 @@
       "types": [],
       "hp": null,
       "tags": [
-        "free_or_reduced_retreat_self"
+        "free_or_reduced_retreat_self",
+        "tool_swap_condition"
+      ]
+    },
+    {
+      "name": "Luminous Energy",
+      "kind": "energy",
+      "effect": "Luminous Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides every type of Energy but provides only 1 Energy at a time.  If the Pokémon this card is attached to has any other Special Energy attached, this card provides Colorless Energy instead.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
       ]
     },
     {
@@ -10093,7 +10489,9 @@
         "Grass"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "damage_scales_with_named_attack_in_discard"
+      ]
     },
     {
       "name": "Dartrix",
@@ -10507,7 +10905,9 @@
         "Psychic"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "opponent_turn_ends_conditional"
+      ]
     },
     {
       "name": "Duskull",
@@ -10522,7 +10922,9 @@
         "Psychic"
       ],
       "hp": "60",
-      "tags": []
+      "tags": [
+        "bench_recruit_from_discard"
+      ]
     },
     {
       "name": "Duskull",
@@ -11014,7 +11416,9 @@
         "Darkness"
       ],
       "hp": "60",
-      "tags": []
+      "tags": [
+        "deck_peek_opponent_top"
+      ]
     },
     {
       "name": "Inkay",
@@ -11246,7 +11650,9 @@
         "Metal"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "acespec_lock"
+      ]
     },
     {
       "name": "Genesect",
@@ -11472,7 +11878,9 @@
         "Dragon"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "conditional_attack_type_unlock"
+      ]
     },
     {
       "name": "Kyurem",
@@ -11660,7 +12068,9 @@
       "text": "Once during each player's turn, that player may put a card from their hand on top of their deck. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "hand_to_deck_top_self"
+      ]
     },
     {
       "name": "Binding Mochi",
@@ -11970,7 +12380,9 @@
         "Grass"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "tool_discard_opponent"
+      ]
     },
     {
       "name": "Gossifleur",
@@ -14193,7 +14605,9 @@
         "Metal"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "stage2_conditional_bench_play"
+      ]
     },
     {
       "name": "Klinklang",
@@ -15005,7 +15419,9 @@
       "text": "As long as the Pokémon this card is attached to is in the Active Spot, the Retreat Cost of both Active Pokémon is Colorless more. You may attach any number of Pokémon Tools to your Pokémon during your turn. You may attach only 1 Pokémon Tool to each Pokémon, and it stays attached.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "retreat_cost_increase_opponent"
+      ]
     },
     {
       "name": "Kofu",
@@ -15037,6 +15453,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "damage_reduction_self",
         "type_specific_damage_reduction_consumable"
       ]
     },
@@ -15048,6 +15465,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "damage_reduction_self",
         "type_specific_damage_reduction_consumable"
       ]
     },
@@ -15071,7 +15489,9 @@
         "Darkness"
       ],
       "hp": "80",
-      "tags": []
+      "tags": [
+        "direct_damage_no_attack"
+      ]
     },
     {
       "name": "Pecharunt",
@@ -16185,7 +16605,9 @@
         "Water"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "energy_bounce_from_opponent"
+      ]
     },
     {
       "name": "Paldean Tauros",
@@ -16799,7 +17221,9 @@
         "Lightning"
       ],
       "hp": "80",
-      "tags": []
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
     },
     {
       "name": "Blitzle",
@@ -17135,7 +17559,9 @@
         "Psychic"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "conditional_attack_type_unlock"
+      ]
     },
     {
       "name": "Azumarill",
@@ -17794,7 +18220,9 @@
         "Psychic"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "transfer_damage_to_opponent"
+      ]
     },
     {
       "name": "Flutter Mane",
@@ -18070,7 +18498,9 @@
         "Fighting"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "damage_increase_next_turn_opponent"
+      ]
     },
     {
       "name": "Vibrava",
@@ -18122,6 +18552,7 @@
       "hp": "310",
       "tags": [
         "damage_ignores_weakness_resistance_or_effects",
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -18324,7 +18755,9 @@
         "Fighting"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "attack_type_substitution_conditional"
+      ]
     },
     {
       "name": "Glimmet",
@@ -19768,7 +20201,8 @@
       "hp": null,
       "tags": [
         "deck_search_pokemon",
-        "deck_search_generic"
+        "deck_search_generic",
+        "tool_swap_condition"
       ]
     },
     {
@@ -19779,7 +20213,9 @@
       "types": [],
       "hp": null,
       "tags": [
-        "type_specific_damage_reduction_consumable"
+        "damage_reduction_self",
+        "type_specific_damage_reduction_consumable",
+        "tool_swap_condition"
       ]
     },
     {
@@ -19812,7 +20248,9 @@
       "text": "You can use this card only if you go second, and only during your first turn.  Put an Energy attached to 1 of your opponent's Pokémon into their hand. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "first_turn_go_second_energy_bounce"
+      ]
     },
     {
       "name": "Clemont's Quick Wit",
@@ -19833,7 +20271,9 @@
       "types": [],
       "hp": null,
       "tags": [
-        "type_specific_damage_reduction_consumable"
+        "damage_reduction_self",
+        "type_specific_damage_reduction_consumable",
+        "tool_swap_condition"
       ]
     },
     {
@@ -19844,7 +20284,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "attack_cost_reduction_flat_conditional"
+        "attack_cost_reduction_flat_conditional",
+        "tool_swap_condition"
       ]
     },
     {
@@ -19910,7 +20351,9 @@
       "text": "Look at the bottom 7 cards of your deck. You may reveal a Pokémon you find there and put it into your hand. Shuffle the other cards back into your deck. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "deck_peek_bottom"
+      ]
     },
     {
       "name": "Energy Search Pro",
@@ -19975,7 +20418,9 @@
       "text": "Your opponent counts the cards in their hand, shuffles those cards, and puts them on the bottom of their deck. If they do, they draw that many cards. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "hand_count_shuffle_redraw_opponent"
+      ]
     },
     {
       "name": "Megaton Blower",
@@ -20008,7 +20453,9 @@
       "types": [],
       "hp": null,
       "tags": [
-        "type_specific_damage_reduction_consumable"
+        "damage_reduction_self",
+        "type_specific_damage_reduction_consumable",
+        "tool_swap_condition"
       ]
     },
     {
@@ -20054,7 +20501,10 @@
       "text": "The Pokémon this card is attached to can use the attack on this card. (You still need the necessary Energy to use this attack.) If this card is attached to 1 of your Pokémon, discard it at the end of your turn. You may attach any number of Pokémon Tools to your Pokémon during your turn. You may attach only 1 Pokémon Tool to each Pokémon, and it stays attached. Attach a Pokémon Tool to 1 of your Pokémon that doesn't already have a Pokémon Tool attached.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_swap_condition",
+        "grants_attack_via_tool"
+      ]
     },
     {
       "name": "Tera Orb",
@@ -20075,6 +20525,18 @@
       "types": [],
       "hp": null,
       "tags": [
+        "draw_power"
+      ]
+    },
+    {
+      "name": "Enriching Energy",
+      "kind": "energy",
+      "effect": "Enriching Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  When you attach this card from your hand to a Pokémon, draw 4 cards. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
         "draw_power"
       ]
     },
@@ -20410,6 +20872,7 @@
       "hp": "280",
       "tags": [
         "damage_ignores_weakness_resistance_or_effects",
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -20760,7 +21223,9 @@
         "Psychic"
       ],
       "hp": "270",
-      "tags": []
+      "tags": [
+        "devolve_opponent"
+      ]
     },
     {
       "name": "Spritzee",
@@ -21322,7 +21787,9 @@
         "Colorless"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "attack_unlock_by_prior_attack"
+      ]
     },
     {
       "name": "Buneary",
@@ -21586,6 +22053,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "damage_reduction_self",
         "type_specific_damage_reduction_consumable"
       ]
     },
@@ -21663,7 +22131,9 @@
       "text": "You can't have more than 1 ACE SPEC card in your deck. Put 1 of your Pokémon and all attached cards into your hand. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "self_bounce_to_hand"
+      ]
     },
     {
       "name": "Treasure Tracker",
@@ -21835,7 +22305,9 @@
         "Grass"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "counterattack_on_hit"
+      ]
     },
     {
       "name": "Maractus",
@@ -22701,6 +23173,7 @@
       ],
       "hp": "120",
       "tags": [
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -23453,7 +23926,9 @@
         "Psychic"
       ],
       "hp": "190",
-      "tags": []
+      "tags": [
+        "direct_damage_no_attack"
+      ]
     },
     {
       "name": "Mimikyu ex",
@@ -23808,7 +24283,9 @@
         "Fighting"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "damage_reduction_self"
+      ]
     },
     {
       "name": "Regirock",
@@ -24783,6 +25260,7 @@
       ],
       "hp": "320",
       "tags": [
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -25585,7 +26063,9 @@
       "text": "Once during each player's turn, that player may put up to 2 Basic Lightning Energy cards from their discard pile into their hand. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "energy_recursion"
+      ]
     },
     {
       "name": "Lillie's Pearl",
@@ -25638,7 +26118,9 @@
       "text": "Count your Prize cards, shuffle them, and put them on the bottom of your deck. Then, take that many cards from the top of your deck and put them face down as your Prize cards. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "prize_reshuffle"
+      ]
     },
     {
       "name": "Ruffian",
@@ -25647,7 +26129,9 @@
       "text": "Discard a Pokémon Tool and a Special Energy from 1 of your opponent's Pokémon. You may play only 1 Supporter card during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_discard_opponent"
+      ]
     },
     {
       "name": "Super Potion",
@@ -25658,6 +26142,18 @@
       "hp": null,
       "tags": [
         "heal_other_target"
+      ]
+    },
+    {
+      "name": "Spiky Energy",
+      "kind": "energy",
+      "effect": "Spiky Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  If the Pokémon this card is attached to is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out), put 2 damage counters on the Attacking Pokémon.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "counterattack_on_hit",
+        "energy_provides_extra_type"
       ]
     },
     {
@@ -25757,7 +26253,9 @@
         "Grass"
       ],
       "hp": "280",
-      "tags": []
+      "tags": [
+        "energy_move_between_own"
+      ]
     },
     {
       "name": "Pineco",
@@ -26871,7 +27369,9 @@
         "Water"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "self_reset_via_bottom_discard"
+      ]
     },
     {
       "name": "Misty's Psyduck",
@@ -27112,7 +27612,9 @@
         "Water"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "energy_salvage_on_ko"
+      ]
     },
     {
       "name": "Huntail",
@@ -27944,7 +28446,9 @@
         "Psychic"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "transfer_damage_to_opponent"
+      ]
     },
     {
       "name": "Team Rocket's Wobbuffet",
@@ -28786,7 +29290,9 @@
         "Darkness"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "ability_pokemon_play_lock"
+      ]
     },
     {
       "name": "Team Rocket's Arbok",
@@ -28804,6 +29310,7 @@
       ],
       "hp": "130",
       "tags": [
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -29054,6 +29561,7 @@
       ],
       "hp": "310",
       "tags": [
+        "direct_damage_no_attack",
         "evolve_bonus_effect"
       ]
     },
@@ -29071,7 +29579,9 @@
         "Darkness"
       ],
       "hp": "310",
-      "tags": []
+      "tags": [
+        "self_bounce_to_hand"
+      ]
     },
     {
       "name": "Team Rocket's Grimer",
@@ -29919,7 +30429,9 @@
         "Colorless"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "conditional_combo_unlock_by_named_card"
+      ]
     },
     {
       "name": "Team Rocket's Porygon-Z",
@@ -29949,7 +30461,9 @@
         "Colorless"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "conditional_combo_unlock_by_named_card"
+      ]
     },
     {
       "name": "Taillow",
@@ -30135,7 +30649,9 @@
       "text": "Shuffle up to 5 Pokémon from your discard pile into your deck. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "pokemon_shuffle_from_discard_into_deck"
+      ]
     },
     {
       "name": "Spikemuth Gym",
@@ -30288,13 +30804,27 @@
       ]
     },
     {
+      "name": "Team Rocket's Energy",
+      "kind": "energy",
+      "effect": "Team Rocket's Energy",
+      "text": "This card can only be attached to a Team Rocket's Pokémon. If this card is attached to anything other than a Team Rocket's Pokémon, discard this card.  As long as this card is attached to a Pokémon, it provides 2 in any combination of Psychic Energy and Darkness Energy.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "restricted_attachment_named_group"
+      ]
+    },
+    {
       "name": "Jamming Tower",
       "kind": "trainer",
       "effect": "Jamming Tower",
       "text": "Pokémon Tools attached to each Pokémon (both yours and your opponent's) have no effect. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_effect_nullify"
+      ]
     },
     {
       "name": "Kyogre ex",
@@ -30805,7 +31335,8 @@
       ],
       "hp": "230",
       "tags": [
-        "hand_reveal_opponent"
+        "hand_reveal_opponent",
+        "damage_scales_with_revealed_subtype"
       ]
     },
     {
@@ -31803,7 +32334,9 @@
         "Psychic"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "transfer_damage_to_opponent"
+      ]
     },
     {
       "name": "Cofagrigus",
@@ -32359,7 +32892,9 @@
         "Colorless"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "attack_base_damage_boost_next_turn"
+      ]
     },
     {
       "name": "Watchog",
@@ -32925,7 +33460,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "tool_swap_condition"
       ]
     },
     {
@@ -32937,6 +33473,17 @@
       "hp": null,
       "tags": [
         "draw_power"
+      ]
+    },
+    {
+      "name": "Ignition Energy",
+      "kind": "energy",
+      "effect": "Ignition Energy",
+      "text": "If this card is attached to 1 of your Pokémon, discard it at the end of your turn.  As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to an Evolution Pokémon, it provides ColorlessColorlessColorless Energy instead.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
       ]
     },
     {
@@ -32957,7 +33504,9 @@
       "text": "Choose up to 2 Pokémon Tools attached to Pokémon (yours or your opponent's) and discard them. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_discard_either_side"
+      ]
     },
     {
       "name": "Antique Plume Fossil",
@@ -33543,7 +34092,9 @@
         "Water"
       ],
       "hp": "100",
-      "tags": []
+      "tags": [
+        "damage_scales_with_card_type_in_discard"
+      ]
     },
     {
       "name": "Tirtouga",
@@ -33791,7 +34342,9 @@
         "Water"
       ],
       "hp": "110",
-      "tags": []
+      "tags": [
+        "bench_recruit_from_discard"
+      ]
     },
     {
       "name": "Alomomola",
@@ -33875,6 +34428,7 @@
       ],
       "hp": "230",
       "tags": [
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -34197,7 +34751,9 @@
         "Psychic"
       ],
       "hp": "60",
-      "tags": []
+      "tags": [
+        "energy_move_opponent_side"
+      ]
     },
     {
       "name": "Elgyem",
@@ -34406,7 +34962,9 @@
         "Psychic"
       ],
       "hp": "200",
-      "tags": []
+      "tags": [
+        "first_turn_attack_unlock"
+      ]
     },
     {
       "name": "Meloetta ex",
@@ -35209,7 +35767,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "free_or_reduced_retreat_self"
+        "free_or_reduced_retreat_self",
+        "tool_swap_condition"
       ]
     },
     {
@@ -35283,6 +35842,17 @@
       ]
     },
     {
+      "name": "Prism Energy",
+      "kind": "energy",
+      "effect": "Prism Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to a Basic Pokémon, this card provides every type of Energy but provides only 1 Energy at a time.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
+      ]
+    },
+    {
       "name": "Bulbasaur",
       "kind": "attack",
       "effect": "Bind Down",
@@ -35324,7 +35894,9 @@
         "Grass"
       ],
       "hp": "380",
-      "tags": []
+      "tags": [
+        "energy_move_between_own"
+      ]
     },
     {
       "name": "Mega Venusaur ex",
@@ -35790,7 +36362,9 @@
         "Fire"
       ],
       "hp": "160",
-      "tags": []
+      "tags": [
+        "play_face_down_setup"
+      ]
     },
     {
       "name": "Cinderace",
@@ -36076,7 +36650,9 @@
         "Fire"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "energy_bounce_self_to_hand"
+      ]
     },
     {
       "name": "Centiskorch",
@@ -36423,6 +36999,7 @@
       "hp": "110",
       "tags": [
         "status_inflict",
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -36713,7 +37290,9 @@
         "Lightning"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "damage_on_opponent_energy_attach"
+      ]
     },
     {
       "name": "Abra",
@@ -37546,7 +38125,9 @@
         "Darkness"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "attack_type_substitution_conditional"
+      ]
     },
     {
       "name": "Mega Absol ex",
@@ -37802,7 +38383,9 @@
         "Metal"
       ],
       "hp": "270",
-      "tags": []
+      "tags": [
+        "attack_base_damage_boost_next_turn"
+      ]
     },
     {
       "name": "Dialga",
@@ -37898,7 +38481,9 @@
         "Metal"
       ],
       "hp": "160",
-      "tags": []
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
     },
     {
       "name": "Gholdengo",
@@ -38245,7 +38830,9 @@
         "Colorless"
       ],
       "hp": "100",
-      "tags": []
+      "tags": [
+        "hand_deck_top_swap"
+      ]
     },
     {
       "name": "Gumshoos",
@@ -38382,7 +38969,9 @@
       "text": "Each player's Grass Pokémon can evolve into Grass Pokémon during the turn they play those Pokémon, except during their first turn. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "named_group_evolve_timing_bonus"
+      ]
     },
     {
       "name": "Iron Defender",
@@ -38435,7 +39024,9 @@
       "text": "Once during each player's turn, that player may discard an Energy card from their hand in order to draw cards until they have as many cards in their hand as they have Psychic Pokémon in play. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "draw_power"
+      ]
     },
     {
       "name": "Pokémon Center Lady",
@@ -38489,7 +39080,9 @@
       "text": "Whenever any player puts a Basic non-Darkness Pokémon onto their Bench during their turn, place 2 damage counters on that Pokémon. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "damage_on_bench_placement"
+      ]
     },
     {
       "name": "Strange Timepiece",
@@ -38498,7 +39091,9 @@
       "text": "Devolve 1 of your evolved Psychic Pokémon by putting any number of Evolution cards on it into your hand. (That Pokémon can't evolve this turn.) You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "self_devolve"
+      ]
     },
     {
       "name": "Surfing Beach",
@@ -38507,7 +39102,9 @@
       "text": "Once during each player's turn, that player may switch their Active Water Pokémon with 1 of their Benched Water Pokémon. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "self_switch_optional"
+      ]
     },
     {
       "name": "Switch",
@@ -38635,7 +39232,9 @@
         "Grass"
       ],
       "hp": "280",
-      "tags": []
+      "tags": [
+        "damage_boost_if_damaged_last_turn"
+      ]
     },
     {
       "name": "Mega Heracross ex",
@@ -39290,7 +39889,9 @@
         "Lightning"
       ],
       "hp": "190",
-      "tags": []
+      "tags": [
+        "extra_tool_slot_named_group"
+      ]
     },
     {
       "name": "Rotom ex",
@@ -39757,7 +40358,9 @@
         "Fighting"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "damage_both_sides_with_counters"
+      ]
     },
     {
       "name": "Paldean Tauros",
@@ -40600,7 +41203,8 @@
       ],
       "hp": "110",
       "tags": [
-        "energy_discard_on_attack"
+        "energy_discard_on_attack",
+        "bench_snipe_opponent"
       ]
     },
     {
@@ -40792,7 +41396,9 @@
       "text": "Confused Pokémon (both yours and your opponent's) don't recover from that Special Condition when they evolve or devolve. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can't be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "status_persist_through_evolve"
+      ]
     },
     {
       "name": "Firebreather",
@@ -41188,7 +41794,8 @@
       ],
       "hp": "130",
       "tags": [
-        "hand_reveal_opponent"
+        "hand_reveal_opponent",
+        "damage_scales_with_revealed_subtype"
       ]
     },
     {
@@ -41721,7 +42328,9 @@
         "Water"
       ],
       "hp": "150",
-      "tags": []
+      "tags": [
+        "damage_counter_doubler"
+      ]
     },
     {
       "name": "N's Vanilluxe",
@@ -41739,6 +42348,7 @@
       ],
       "hp": "150",
       "tags": [
+        "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
     },
@@ -41926,7 +42536,9 @@
         "Lightning"
       ],
       "hp": "350",
-      "tags": []
+      "tags": [
+        "bench_snipe_opponent"
+      ]
     },
     {
       "name": "Mega Eelektross ex",
@@ -41962,7 +42574,8 @@
       ],
       "hp": "110",
       "tags": [
-        "retreat_prevent_opponent"
+        "retreat_prevent_opponent",
+        "damage_increase_next_turn_opponent"
       ]
     },
     {
@@ -44035,7 +44648,9 @@
       "text": "Each player's Grass Pokémon can evolve into Grass Pokémon during the turn they play those Pokémon, except during their first turn. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can’t be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "named_group_evolve_timing_bonus"
+      ]
     },
     {
       "name": "Light Ball",
@@ -44055,7 +44670,9 @@
       "text": "Once during each player's turn, that player may discard an Energy card from their hand in order to draw cards until they have as many cards in their hand as they have Psychic Pokémon in play. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can’t be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "draw_power"
+      ]
     },
     {
       "name": "Nighttime Mine",
@@ -44164,7 +44781,9 @@
       "text": "Pokémon Tools attached to each Pokémon (both yours and your opponent's) have no effect. You may play only 1 Stadium card during your turn. Put it next to the Active Spot, and discard it if another Stadium comes into play. A Stadium with the same name can’t be played.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_effect_nullify"
+      ]
     },
     {
       "name": "Spinarak",
@@ -44276,7 +44895,9 @@
         "Fire"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "discard_energy_on_hit_ability"
+      ]
     },
     {
       "name": "Turtonator",
@@ -44931,7 +45552,9 @@
         "Lightning"
       ],
       "hp": "70",
-      "tags": []
+      "tags": [
+        "energy_up_to_amount_attached_opponent"
+      ]
     },
     {
       "name": "Dedenne",
@@ -45596,7 +46219,9 @@
         "Metal"
       ],
       "hp": "100",
-      "tags": []
+      "tags": [
+        "damage_scales_with_revealed_count"
+      ]
     },
     {
       "name": "Gastly",
@@ -46057,7 +46682,9 @@
       "text": "The Mega Zygarde ex this card is attached to can use the attack on this card. (You still need the necessary Energy to use this attack.) You may attach any number of Pokémon Tools to your Pokémon during your turn. You may attach only 1 Pokémon Tool to each Pokémon, and it stays attached.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "grants_attack_via_tool"
+      ]
     },
     {
       "name": "Crushing Hammer",
@@ -46067,6 +46694,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "energy_discard_opponent",
         "coin_flip_effect"
       ]
     },
@@ -46135,7 +46763,8 @@
       "hp": null,
       "tags": [
         "deck_search_pokemon",
-        "search_to_bench_generic"
+        "search_to_bench_generic",
+        "opponent_turn_ends_conditional"
       ]
     },
     {
@@ -46157,7 +46786,9 @@
       "text": "Heal 20 damage and remove a Special Condition from your Active Pokémon. You may play any number of Item cards during your turn.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "heal_and_cure_from"
+      ]
     },
     {
       "name": "Poké Ball",
@@ -46214,6 +46845,43 @@
       "hp": null,
       "tags": [
         "energy_recursion"
+      ]
+    },
+    {
+      "name": "Growing Grass Energy",
+      "kind": "energy",
+      "effect": "Growing Grass Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Grass Energy. The Grass Pokémon this card is attached to gets +20 HP.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "hp_modify_flat"
+      ]
+    },
+    {
+      "name": "Rocky Fighting Energy",
+      "kind": "energy",
+      "effect": "Rocky Fighting Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Fighting Energy. Prevent all effects of attacks used by your opponent's Pokémon done to the Fighting Pokémon this card is attached to. (Existing effects are not removed. Damage is not an effect.)",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "effect_prevention_conditional"
+      ]
+    },
+    {
+      "name": "Telepathic Psychic Energy",
+      "kind": "energy",
+      "effect": "Telepathic Psychic Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Psychic Energy. When you attach this card from your hand to a Psychic Pokémon, search your deck for up to 2 Basic Psychic Pokémon and put them onto your Bench. Then, shuffle your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "deck_search_pokemon",
+        "search_to_bench_generic"
       ]
     },
     {
@@ -46378,7 +47046,9 @@
         "Fire"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "transfer_damage_to_opponent"
+      ]
     },
     {
       "name": "Ninetales",
@@ -46767,7 +47437,9 @@
         "Water"
       ],
       "hp": "90",
-      "tags": []
+      "tags": [
+        "energy_attach_mutual"
+      ]
     },
     {
       "name": "Delibird",
@@ -46881,6 +47553,7 @@
       ],
       "hp": "350",
       "tags": [
+        "energy_bounce_self_to_hand",
         "damage_boost_conditional_generic"
       ]
     },
@@ -47642,7 +48315,9 @@
         "Darkness"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "attack_damage_reduced_next_turn_opponent"
+      ]
     },
     {
       "name": "Garbodor",
@@ -48208,7 +48883,9 @@
       "text": "During your opponent's next turn, their Poisoned Pokémon can't retreat. (This includes newly Poisoned Pokémon.)",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "retreat_prevent_opponent"
+      ]
     },
     {
       "name": "Ange Floette",
@@ -48285,7 +48962,46 @@
       "text": "You must play 2 Transformation Tome cards at once. (This effect works one time for 2 cards.)\n \nChoose a Basic Pokémon in your discard pile and switch it with 1 of your Basic Pokémon in play. Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pokémon.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "bench_swap_from_discard_basic",
+        "recur_multiple_named_cards_paired",
+        "stack_bench_swap_basic_from_discard"
+      ]
+    },
+    {
+      "name": "Bubbly Water Energy",
+      "kind": "energy",
+      "effect": "Bubbly Water Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Water Energy.\n\nThe Water Pokémon this card is attached to recovers from all Special Conditions and can't be affected by any Special Conditions.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "status_cure"
+      ]
+    },
+    {
+      "name": "Nitro Fire Energy",
+      "kind": "energy",
+      "effect": "Nitro Fire Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Fire Energy.\n \nIf this card is discarded by an effect of an attack used by the Fire Pokémon this card is attached to, put this card into your hand after attack damage and effects.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type"
+      ]
+    },
+    {
+      "name": "Magnetic Metal Energy",
+      "kind": "energy",
+      "effect": "Magnetic Metal Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Metal Energy.\n\nThe Metal Pokémon this card is attached to has no Retreat Cost.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "free_or_reduced_retreat_self"
+      ]
     },
     {
       "name": "Energy Retrieval",
@@ -48316,7 +49032,9 @@
       "text": "Once during each player's turn, that player may switch their Active Water Pokémon with 1 of their Benched Water Pokémon.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "self_switch_optional"
+      ]
     },
     {
       "name": "Tool Scrapper",
@@ -48325,7 +49043,9 @@
       "text": "Choose up to 2 Pokémon Tools attached to Pokémon (yours or your opponent's) and discard them.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "tool_discard_either_side"
+      ]
     },
     {
       "name": "Tropius",
@@ -48559,7 +49279,9 @@
         "Fire"
       ],
       "hp": "80",
-      "tags": []
+      "tags": [
+        "damage_scales_with_named_attack_in_discard"
+      ]
     },
     {
       "name": "Mega Delphox ex",
@@ -49074,7 +49796,9 @@
         "Lightning"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "energy_salvage_on_ko"
+      ]
     },
     {
       "name": "Miraidon",
@@ -49219,7 +49943,9 @@
         "Psychic"
       ],
       "hp": "60",
-      "tags": []
+      "tags": [
+        "damage_counter_doubler"
+      ]
     },
     {
       "name": "Jynx",
@@ -49863,7 +50589,9 @@
         "Darkness"
       ],
       "hp": "140",
-      "tags": []
+      "tags": [
+        "self_damage_increase_next_turn"
+      ]
     },
     {
       "name": "Maschiff",
@@ -50296,7 +51024,9 @@
       "text": "Once during your turn, after you flip any coins for an attack of the Colorless Pokémon this card is attached to, you may ignore all results of those coin flips and begin flipping those coins again.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "coin_flip_reroll"
+      ]
     },
     {
       "name": "Dark Bell",
@@ -50351,7 +51081,9 @@
       "text": "You can use this card only if any of your Pokémon were Knocked Out during your opponent's last turn.\n\nDiscard an Energy from 1 of your opponent's Pokémon.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "energy_discard_opponent"
+      ]
     },
     {
       "name": "Tremendous Bomb",
@@ -50360,7 +51092,33 @@
       "text": "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, is in the Active Spot, and takes 240 or more damage from an attack from your opponent's Mega Evolution Pokémon ex (even if this Pokémon is Knocked Out), place 12 damage counters on the Attacking Pokémon. If you placed any damage counters in this way, discard this card.",
       "types": [],
       "hp": null,
-      "tags": []
+      "tags": [
+        "counterattack_on_hit"
+      ]
+    },
+    {
+      "name": "Voltaic Lightning Energy",
+      "kind": "energy",
+      "effect": "Voltaic Lightning Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Lightning Energy.\n \nAttacks used by the Lightning Pokémon this card is attached to do 20 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance).",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Shadowy Darkness Energy",
+      "kind": "energy",
+      "effect": "Shadowy Darkness Energy",
+      "text": "As long as this card is attached to a Pokémon, it provides Darkness Energy.\n \nAs long as the Darkness Pokémon this card is attached to is on your Bench, prevent all damage done to it by attacks from your opponent's Pokémon.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_provides_extra_type",
+        "damage_prevention_conditional"
+      ]
     },
     {
       "name": "Brave Bangle",
@@ -50381,6 +51139,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "energy_discard_opponent",
         "coin_flip_effect"
       ]
     },
