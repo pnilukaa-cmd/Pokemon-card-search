@@ -33,7 +33,7 @@
     {
       "tag": "damage_move_opponent_side",
       "role": "produce",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "damage_both_sides_with_counters",
@@ -98,7 +98,7 @@
     {
       "tag": "heal_other_target",
       "role": "produce",
-      "card_count": 14
+      "card_count": 19
     },
     {
       "tag": "heal_all_damage",
@@ -143,7 +143,7 @@
     {
       "tag": "energy_search",
       "role": "produce",
-      "card_count": 24
+      "card_count": 25
     },
     {
       "tag": "energy_recursion",
@@ -223,7 +223,7 @@
     {
       "tag": "status_inflict",
       "role": "produce",
-      "card_count": 164
+      "card_count": 166
     },
     {
       "tag": "double_attack_conditional",
@@ -493,7 +493,7 @@
     {
       "tag": "tool_discard_opponent",
       "role": "produce",
-      "card_count": 10
+      "card_count": 13
     },
     {
       "tag": "tool_discard_either_side",
@@ -598,7 +598,7 @@
     {
       "tag": "damage_scales_with_prizes_taken_opponent",
       "role": "consume",
-      "card_count": 4
+      "card_count": 7
     },
     {
       "tag": "damage_scales_with_prizes_taken_self",
@@ -678,7 +678,7 @@
     {
       "tag": "prize_bonus_self",
       "role": "produce",
-      "card_count": 5
+      "card_count": 6
     },
     {
       "tag": "prize_reduction_opponent",
@@ -973,6 +973,51 @@
     {
       "tag": "heal_and_cure_from",
       "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_boost_if_damage_counters_present",
+      "role": "consume",
+      "card_count": 31
+    },
+    {
+      "tag": "prize_count_threshold_conditional",
+      "role": "consume",
+      "card_count": 17
+    },
+    {
+      "tag": "tool_attached_conditional_trigger",
+      "role": "consume",
+      "card_count": 5
+    },
+    {
+      "tag": "damage_boost_if_stadium_in_play",
+      "role": "consume",
+      "card_count": 7
+    },
+    {
+      "tag": "status_checkup_damage_multiplier",
+      "role": "produce",
+      "card_count": 4
+    },
+    {
+      "tag": "tool_discard_self",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "retreat_negate_on_coin",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "mutual_deck_mill",
+      "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_on_self_energy_attach",
+      "role": "consume",
       "card_count": 1
     }
   ],
@@ -2479,7 +2524,8 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_both_sides_with_counters"
+        "damage_both_sides_with_counters",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -3782,7 +3828,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -4685,7 +4732,8 @@
       ],
       "hp": "220",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -5113,7 +5161,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -5424,7 +5473,9 @@
       "kind": "energy",
       "effect": "Mist Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.    Prevent all effects of attacks used by your opponent's Pokémon done to the Pokémon this card is attached to. (Existing effects are not removed. Damage is not an effect.)",
-      "types": [],
+      "types": [
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -5436,7 +5487,10 @@
       "kind": "energy",
       "effect": "Neo Upper Energy",
       "text": "You can't have more than 1 ACE SPEC card in your deck. As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to a Stage 2 Pokémon, this card provides every type of Energy but provides only 2 Energy at a time. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
-      "types": [],
+      "types": [
+        "Any",
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -6338,7 +6392,8 @@
       ],
       "hp": "270",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "mutual_deck_mill"
       ]
     },
     {
@@ -6664,7 +6719,8 @@
       "hp": "110",
       "tags": [
         "stadium_discard_effect",
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -7903,6 +7959,7 @@
       ],
       "hp": "140",
       "tags": [
+        "damage_move_opponent_side",
         "status_inflict"
       ]
     },
@@ -8477,7 +8534,8 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -8536,7 +8594,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "tool_attached_conditional_trigger"
       ]
     },
     {
@@ -8700,7 +8759,8 @@
       ],
       "hp": "70",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -8771,7 +8831,8 @@
       "tags": [
         "stadium_discard_effect",
         "bench_snipe_opponent",
-        "bench_snipe_opponent_all"
+        "bench_snipe_opponent_all",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -9161,7 +9222,8 @@
       ],
       "hp": "180",
       "tags": [
-        "damage_both_sides_with_counters"
+        "damage_both_sides_with_counters",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -10076,7 +10138,9 @@
       "kind": "energy",
       "effect": "Boomerang Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.    If this card is discarded by an effect of an attack used by the Pokémon this card is attached to, attach this card from your discard pile to that Pokémon after attacking.",
-      "types": [],
+      "types": [
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -10087,7 +10151,9 @@
       "kind": "energy",
       "effect": "Legacy Energy",
       "text": "You can't have more than 1 ACE SPEC card in your deck. As long as this card is attached to a Pokémon, it provides every type of Energy but provides only 1 Energy at a time.    If the Pokémon this card is attached to is Knocked Out by damage from an attack from your opponent's Pokémon, that player takes 1 fewer Prize card. This effect of your Legacy Energy can't be applied more than once per game. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
-      "types": [],
+      "types": [
+        "Any"
+      ],
       "hp": null,
       "tags": [
         "prize_reduction_opponent"
@@ -10110,7 +10176,10 @@
       "kind": "energy",
       "effect": "Luminous Energy",
       "text": "As long as this card is attached to a Pokémon, it provides every type of Energy but provides only 1 Energy at a time.  If the Pokémon this card is attached to has any other Special Energy attached, this card provides Colorless Energy instead.",
-      "types": [],
+      "types": [
+        "Any",
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -11303,7 +11372,8 @@
       ],
       "hp": "130",
       "tags": [
-        "status_inflict"
+        "status_inflict",
+        "status_checkup_damage_multiplier"
       ]
     },
     {
@@ -11473,7 +11543,8 @@
       ],
       "hp": "120",
       "tags": [
-        "direct_damage_no_attack"
+        "direct_damage_no_attack",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -11639,7 +11710,8 @@
       ],
       "hp": "110",
       "tags": [
-        "acespec_lock"
+        "acespec_lock",
+        "tool_attached_conditional_trigger"
       ]
     },
     {
@@ -12276,6 +12348,7 @@
       ],
       "hp": "150",
       "tags": [
+        "status_inflict",
         "coin_flip_effect"
       ]
     },
@@ -12460,6 +12533,7 @@
       ],
       "hp": "330",
       "tags": [
+        "heal_other_target",
         "energy_attach_bonus"
       ]
     },
@@ -13137,7 +13211,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -13274,7 +13349,8 @@
       ],
       "hp": "120",
       "tags": [
-        "status_inflict"
+        "status_inflict",
+        "status_checkup_damage_multiplier"
       ]
     },
     {
@@ -13438,7 +13514,8 @@
       ],
       "hp": "80",
       "tags": [
-        "status_inflict"
+        "status_inflict",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -13856,7 +13933,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -14709,7 +14787,8 @@
       ],
       "hp": "160",
       "tags": [
-        "conditional_no_effect_attack"
+        "conditional_no_effect_attack",
+        "tool_discard_self"
       ]
     },
     {
@@ -15343,7 +15422,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "prize_bonus_self"
+        "prize_bonus_self",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -15422,7 +15502,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -16567,7 +16648,8 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -17321,7 +17403,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -18732,7 +18815,8 @@
       ],
       "hp": "140",
       "tags": [
-        "attack_type_substitution_conditional"
+        "attack_type_substitution_conditional",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -20258,7 +20342,8 @@
       "hp": null,
       "tags": [
         "attack_cost_reduction_flat_conditional",
-        "tool_swap_condition"
+        "tool_swap_condition",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -20404,7 +20489,8 @@
       "hp": null,
       "tags": [
         "energy_discard_opponent",
-        "stadium_discard_effect"
+        "stadium_discard_effect",
+        "tool_discard_opponent"
       ]
     },
     {
@@ -20506,7 +20592,9 @@
       "kind": "energy",
       "effect": "Enriching Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  When you attach this card from your hand to a Pokémon, draw 4 cards. ACE SPEC: You can't have more than 1 ACE SPEC card in your deck.",
-      "types": [],
+      "types": [
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -21409,7 +21497,8 @@
       "hp": "280",
       "tags": [
         "energy_discard_self_all",
-        "energy_discard_on_attack"
+        "energy_discard_on_attack",
+        "prize_bonus_self"
       ]
     },
     {
@@ -24990,6 +25079,7 @@
       ],
       "hp": "90",
       "tags": [
+        "heal_other_target",
         "energy_attach_bonus"
       ]
     },
@@ -26108,7 +26198,9 @@
       "kind": "energy",
       "effect": "Spiky Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  If the Pokémon this card is attached to is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out), put 2 damage counters on the Attacking Pokémon.",
-      "types": [],
+      "types": [
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "counterattack_on_hit",
@@ -28666,7 +28758,8 @@
       ],
       "hp": "150",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -28856,7 +28949,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -29061,7 +29155,8 @@
       ],
       "hp": "160",
       "tags": [
-        "bench_damage_spread"
+        "bench_damage_spread",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -29416,7 +29511,8 @@
       ],
       "hp": "100",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -29435,7 +29531,8 @@
       ],
       "hp": "330",
       "tags": [
-        "status_inflict"
+        "status_inflict",
+        "status_checkup_damage_multiplier"
       ]
     },
     {
@@ -29961,7 +30058,8 @@
       ],
       "hp": "270",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -30534,7 +30632,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "heal_self"
+        "heal_self",
+        "heal_other_target"
       ]
     },
     {
@@ -30556,7 +30655,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -30758,7 +30858,10 @@
       "kind": "energy",
       "effect": "Team Rocket's Energy",
       "text": "This card can only be attached to a Team Rocket's Pokémon. If this card is attached to anything other than a Team Rocket's Pokémon, discard this card.  As long as this card is attached to a Pokémon, it provides 2 in any combination of Psychic Energy and Darkness Energy.",
-      "types": [],
+      "types": [
+        "Psychic",
+        "Darkness"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -31009,7 +31112,8 @@
       ],
       "hp": "230",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -31811,7 +31915,8 @@
       ],
       "hp": "90",
       "tags": [
-        "conditional_no_effect_attack"
+        "conditional_no_effect_attack",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -33425,7 +33530,9 @@
       "kind": "energy",
       "effect": "Ignition Energy",
       "text": "If this card is attached to 1 of your Pokémon, discard it at the end of your turn.  As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to an Evolution Pokémon, it provides ColorlessColorlessColorless Energy instead.",
-      "types": [],
+      "types": [
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -34373,6 +34480,7 @@
       ],
       "hp": "230",
       "tags": [
+        "damage_scales_with_prizes_taken_opponent",
         "bench_snipe_opponent",
         "bench_snipe_opponent_all"
       ]
@@ -34459,6 +34567,7 @@
       ],
       "hp": "70",
       "tags": [
+        "heal_other_target",
         "status_inflict"
       ]
     },
@@ -34842,7 +34951,8 @@
       ],
       "hp": "270",
       "tags": [
-        "bench_snipe_opponent"
+        "bench_snipe_opponent",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -35466,7 +35576,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -35592,7 +35703,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "tool_attached_conditional_trigger"
       ]
     },
     {
@@ -35788,7 +35900,10 @@
       "kind": "energy",
       "effect": "Prism Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Colorless Energy.  If this card is attached to a Basic Pokémon, this card provides every type of Energy but provides only 1 Energy at a time.",
-      "types": [],
+      "types": [
+        "Any",
+        "Colorless"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -36240,7 +36355,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -38064,7 +38180,8 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_type_substitution_conditional"
+        "attack_type_substitution_conditional",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -38249,6 +38366,7 @@
       ],
       "hp": "100",
       "tags": [
+        "status_inflict",
         "coin_flip_effect"
       ]
     },
@@ -38267,7 +38385,8 @@
       ],
       "hp": "200",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -38322,7 +38441,8 @@
       ],
       "hp": "270",
       "tags": [
-        "attack_base_damage_boost_next_turn"
+        "attack_base_damage_boost_next_turn",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -38863,7 +38983,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "damage_prevention_conditional"
+        "damage_prevention_conditional",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -38929,7 +39050,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -39708,7 +39830,8 @@
       "hp": "180",
       "tags": [
         "stadium_discard_effect",
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -40047,7 +40170,8 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -40230,7 +40354,8 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -40593,7 +40718,8 @@
       ],
       "hp": "330",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -40801,7 +40927,8 @@
       ],
       "hp": "140",
       "tags": [
-        "deck_search_generic"
+        "deck_search_generic",
+        "damage_on_self_energy_attach"
       ]
     },
     {
@@ -41309,7 +41436,8 @@
       "hp": null,
       "tags": [
         "energy_self_discard_cost",
-        "stadium_discard_effect"
+        "stadium_discard_effect",
+        "tool_discard_opponent"
       ]
     },
     {
@@ -42087,7 +42215,8 @@
       ],
       "hp": "370",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -43173,7 +43302,8 @@
       ],
       "hp": "210",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -43224,7 +43354,8 @@
       "hp": "250",
       "tags": [
         "stadium_discard_effect",
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -43256,7 +43387,8 @@
       ],
       "hp": "90",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -43414,7 +43546,9 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_scales_with_prizes_taken_opponent",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -43670,7 +43804,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -43855,7 +43990,8 @@
       ],
       "hp": "170",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_scales_with_prizes_taken_opponent"
       ]
     },
     {
@@ -44131,7 +44267,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "tool_attached_conditional_trigger"
       ]
     },
     {
@@ -44447,7 +44584,8 @@
       ],
       "hp": "70",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -44567,7 +44705,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "attack_cost_reduction_flat_conditional"
+        "attack_cost_reduction_flat_conditional",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -45333,7 +45472,8 @@
       ],
       "hp": "120",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
       ]
     },
     {
@@ -45999,7 +46139,8 @@
       ],
       "hp": "70",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -46442,6 +46583,7 @@
       ],
       "hp": "160",
       "tags": [
+        "energy_search",
         "coin_flip_effect"
       ]
     },
@@ -46759,7 +46901,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "energy_attach_bonus"
+        "energy_attach_bonus",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -46778,7 +46921,9 @@
       "kind": "energy",
       "effect": "Growing Grass Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Grass Energy. The Grass Pokémon this card is attached to gets +20 HP.",
-      "types": [],
+      "types": [
+        "Grass"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -46790,7 +46935,9 @@
       "kind": "energy",
       "effect": "Rocky Fighting Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Fighting Energy. Prevent all effects of attacks used by your opponent's Pokémon done to the Fighting Pokémon this card is attached to. (Existing effects are not removed. Damage is not an effect.)",
-      "types": [],
+      "types": [
+        "Fighting"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -46802,7 +46949,9 @@
       "kind": "energy",
       "effect": "Telepathic Psychic Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Psychic Energy. When you attach this card from your hand to a Psychic Pokémon, search your deck for up to 2 Basic Psychic Pokémon and put them onto your Bench. Then, shuffle your deck.",
-      "types": [],
+      "types": [
+        "Psychic"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -47942,7 +48091,8 @@
       "hp": "270",
       "tags": [
         "damage_boost_conditional_generic",
-        "damage_scales_with_pokemon_count"
+        "damage_scales_with_pokemon_count",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -48309,7 +48459,8 @@
       ],
       "hp": "320",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "tool_attached_conditional_trigger"
       ]
     },
     {
@@ -48345,7 +48496,8 @@
       ],
       "hp": "350",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -48407,7 +48559,8 @@
       "hp": "160",
       "tags": [
         "coin_flip_effect",
-        "attack_whiff_on_coin"
+        "attack_whiff_on_coin",
+        "retreat_negate_on_coin"
       ]
     },
     {
@@ -48629,7 +48782,8 @@
       ],
       "hp": "330",
       "tags": [
-        "energy_discard_opponent"
+        "energy_discard_opponent",
+        "tool_discard_opponent"
       ]
     },
     {
@@ -48647,7 +48801,8 @@
       ],
       "hp": "330",
       "tags": [
-        "status_inflict"
+        "status_inflict",
+        "status_checkup_damage_multiplier"
       ]
     },
     {
@@ -48764,7 +48919,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -48851,6 +49007,7 @@
       "types": [],
       "hp": null,
       "tags": [
+        "heal_other_target",
         "self_switch_optional"
       ]
     },
@@ -48894,7 +49051,9 @@
       "kind": "energy",
       "effect": "Bubbly Water Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Water Energy.\n\nThe Water Pokémon this card is attached to recovers from all Special Conditions and can't be affected by any Special Conditions.",
-      "types": [],
+      "types": [
+        "Water"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -48906,7 +49065,9 @@
       "kind": "energy",
       "effect": "Nitro Fire Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Fire Energy.\n \nIf this card is discarded by an effect of an attack used by the Fire Pokémon this card is attached to, put this card into your hand after attack damage and effects.",
-      "types": [],
+      "types": [
+        "Fire"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type"
@@ -48917,7 +49078,9 @@
       "kind": "energy",
       "effect": "Magnetic Metal Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Metal Energy.\n\nThe Metal Pokémon this card is attached to has no Retreat Cost.",
-      "types": [],
+      "types": [
+        "Metal"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -49601,7 +49764,8 @@
       ],
       "hp": "150",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
       ]
     },
     {
@@ -50252,7 +50416,8 @@
       ],
       "hp": "280",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -50581,7 +50746,8 @@
       "hp": "90",
       "tags": [
         "damage_boost_conditional_generic",
-        "damage_ignores_weakness_resistance_or_effects"
+        "damage_ignores_weakness_resistance_or_effects",
+        "damage_boost_if_damage_counters_present"
       ]
     },
     {
@@ -51021,7 +51187,9 @@
       "kind": "energy",
       "effect": "Voltaic Lightning Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Lightning Energy.\n \nAttacks used by the Lightning Pokémon this card is attached to do 20 more damage to your opponent's Active Pokémon (before applying Weakness and Resistance).",
-      "types": [],
+      "types": [
+        "Lightning"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",
@@ -51033,7 +51201,9 @@
       "kind": "energy",
       "effect": "Shadowy Darkness Energy",
       "text": "As long as this card is attached to a Pokémon, it provides Darkness Energy.\n \nAs long as the Darkness Pokémon this card is attached to is on your Bench, prevent all damage done to it by attacks from your opponent's Pokémon.",
-      "types": [],
+      "types": [
+        "Darkness"
+      ],
       "hp": null,
       "tags": [
         "energy_provides_extra_type",

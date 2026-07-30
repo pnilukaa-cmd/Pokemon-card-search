@@ -96,11 +96,45 @@ def extract_entries():
                     "kind": "energy",
                     "effect": name,
                     "text": text,
-                    "types": types,
+                    "types": types or infer_special_energy_types(text),
                     "hp": None,
                 }
             )
     return entries
+
+
+_REAL_TYPES = [
+    "Grass", "Fire", "Water", "Lightning", "Psychic", "Fighting",
+    "Darkness", "Metal", "Dragon", "Colorless", "Fairy",
+]
+
+
+def infer_special_energy_types(rules_text):
+    """The pokemontcg.io API leaves `types` empty for every Special Energy
+    card (confirmed against the raw data -- not a scraping gap), so the type
+    it actually provides has to be parsed out of its own rules text instead.
+    Several of these provide more than one type depending on a condition
+    (e.g. Colorless normally, every type if attached to a Basic) -- collect
+    every distinct provision mentioned rather than stopping at the first."""
+    found = []
+
+    def add(t):
+        if t not in found:
+            found.append(t)
+
+    if re.search(r"provides? every type of Energy", rules_text):
+        add("Any")
+    for t in _REAL_TYPES:
+        if re.search(rf"provides? {t} Energy\b", rules_text):
+            add(t)
+    combo = re.search(
+        r"provides? \d+ in any combination of ([A-Z][a-z]+) Energy and ([A-Z][a-z]+) Energy",
+        rules_text,
+    )
+    if combo:
+        add(combo.group(1))
+        add(combo.group(2))
+    return found
 
 
 # --- Mechanic taxonomy -------------------------------------------------
@@ -128,7 +162,8 @@ FAMILIES = [
     ("transfer_damage_own", "produce",
      r"move (up to )?\d* ?damage counters? from .*to (another of your|1 of your) Pok[eé]mon"),
     ("damage_move_opponent_side", "produce",
-     r"damage counters? from (your opponent'?s|1 of your opponent'?s) Benched Pok[eé]mon to (their|your opponent'?s) Active"),
+     r"damage counters? from (your opponent'?s|1 of your opponent'?s) Benched Pok[eé]mon to (their|your opponent'?s) Active|"
+     r"move any number of damage counters from your opponent'?s Pok[eé]mon to (their|your opponent'?s) other Pok[eé]mon"),
     ("damage_both_sides_with_counters", "produce",
      r"damage to each Pok[eé]mon that has any damage counters on it|"
      r"damage for each( of your| of your opponent'?s)? Pok[eé]mon.{0,40}that has any damage counters on it"),
@@ -156,7 +191,8 @@ FAMILIES = [
     ("heal_self", "produce",
      r"heal \d+ damage from (this Pok[eé]mon|itself|your Active [A-Za-z]* ?Pok[eé]mon)"),
     ("heal_team", "produce", r"heal \d+ damage from each of (your|their) [A-Za-z]* ?Pok[eé]mon"),
-    ("heal_other_target", "produce", r"heal \d+ damage from 1 of your"),
+    ("heal_other_target", "produce",
+     r"heal \d+ damage from (1 of your|that Pok[eé]mon|it\b)"),
     ("heal_all_damage", "produce", r"heal all damage from"),
     ("heal_equals_damage_dealt", "produce",
      r"heal from this Pok[eé]mon the same amount of damage"),
@@ -173,7 +209,8 @@ FAMILIES = [
      r"discard (an? |\d+ ?|all )?[A-Za-z]* ?Energy from (this Pok[eé]mon|your)"),
     ("energy_discard_opponent", "produce",
      r"discard (an? |\d+ ?|all )?[A-Za-z]* ?Energy (card )?from (1 of )?your opponent|discard all .*Energy from all of your opponent"),
-    ("energy_search", "produce", r"search your deck for (a |an |up to \d+ |any number of )?(Basic )?Energy"),
+    ("energy_search", "produce",
+     r"search your deck for (a |an |up to \d+ |any number of |an amount of )?(Basic )?Energy"),
     ("energy_recursion", "produce",
      r"Energy cards? (from (your|their) discard pile )?into (your|their) hand|Energy .*discard pile into (your|their) hand"),
     ("energy_shuffle_from_discard", "produce",
@@ -211,7 +248,8 @@ FAMILIES = [
     # --- Status conditions ---
     ("status_inflict", "produce",
      r"(is|are) now (Poisoned|Burned|Asleep|Paralyzed|Confused)|"
-     r"make your opponent'?s Active Pok[eé]mon (Asleep|Burned|Confused|Paralyzed|Poisoned)"),
+     r"make your opponent'?s Active Pok[eé]mon (Asleep|Burned|Confused|Paralyzed|Poisoned)|"
+     r"is now affected by that Special Condition"),
     ("double_attack_conditional", "consume", r"may use an attack it has twice"),
     ("status_cure", "produce", r"recovers? from (all )?Special Condition"),
     ("status_immune", "consume", r"can'?t be (Poisoned|Burned|Asleep|Paralyzed|Confused|Confused)|loses? any Ability that requires"),
@@ -316,7 +354,7 @@ FAMILIES = [
     ("acespec_lock", "produce", r"opponent can'?t play any ACE SPEC cards?"),
     ("stadium_discard_effect", "produce", r"[Dd]iscard (a|that) Stadium"),
     ("tool_discard_opponent", "produce",
-     r"discard (a |an |up to \d+ |all )?Pok[eé]mon Tools?( and (a |an )?[\w' ]+)? from (1 of )?your opponent|discard.*Pok[eé]mon Tools? from all of your opponent"),
+     r"discard (a |an |up to \d+ |all )?Pok[eé]mon Tools?( (and|or) (a |an )?[\w' ]+)? from (1 of |all of )?your opponent"),
     ("tool_discard_either_side", "produce",
      r"Pok[eé]mon Tools attached to Pok[eé]mon \(yours or your opponent'?s\) and discard them"),
     ("extra_tool_slot_named_group", "produce", r"may have up to \d+ Pok[eé]mon Tool cards attached"),
@@ -359,7 +397,7 @@ FAMILIES = [
     ("damage_scales_with_own_hand_size", "consume",
      r"damage.*for each card in your hand"),
     ("damage_scales_with_prizes_taken_opponent", "consume",
-     r"damage for each Prize card your opponent has taken"),
+     r"damage.{0,45}for each Prize card your opponent (has taken|took during their last turn)"),
     ("damage_scales_with_prizes_taken_self", "consume",
      r"damage for each Prize card you (have taken|'ve taken)"),
     ("damage_scales_with_tools_attached", "consume",
@@ -385,7 +423,7 @@ FAMILIES = [
     ("devolve_opponent", "produce",
      r"devolve (1 of |each of )?your opponent'?s|devolve it by (putting|shuffling)"),
     ("self_devolve", "produce", r"[Dd]evolve 1 of your evolved"),
-    ("prize_bonus_self", "produce", r"take \d+ more Prize cards?"),
+    ("prize_bonus_self", "produce", r"take \d+ more Prize cards?|,? and take a Prize card"),
     ("prize_reduction_opponent", "produce",
      r"takes? 1 fewer Prize card|can'?t take any Prize cards"),
     ("prize_peek", "produce", r"face-down Prize cards?|Prize cards? face up"),
@@ -489,6 +527,39 @@ FAMILIES = [
      r"discard the bottom card of your deck.*put this Pok[eé]mon on top of your deck"),
     ("heal_and_cure_from", "produce",
      r"[Hh]eal \d+ damage and remove a Special Condition from"),
+
+    # --- Boolean-conditional damage/effect triggers -- these previously only
+    # ever got the generic damage_boost_conditional_generic catch-all, found
+    # during a full-corpus audit cross-checking every card's text against an
+    # independent keyword sentinel rather than a sample. Each is a distinct,
+    # common enough pattern (10-25+ cards) to deserve its own family, mirroring
+    # how prize/energy/tool *scaling* already have dedicated families
+    # alongside the generic one -- this adds the *threshold/boolean* version.
+    ("damage_boost_if_damage_counters_present", "consume",
+     r"if (this Pok[eé]mon|your opponent'?s Active Pok[eé]mon|your Benched Pok[eé]mon|"
+     r"(any |all )?of your Benched [\w' ]*)"
+     r".{0,20}(has|have) (any |no |at least \d+ |\d+ or more )?damage counters? on (it|them)|"
+     r"(damage|attack).{0,40}Pok[eé]mon (that has|with) any damage counters on it"),
+    ("prize_count_threshold_conditional", "consume",
+     r"if you have (more|exactly \d+|\d+ or fewer) Prize cards? remaining|"
+     r"if your opponent (has|doesn'?t have) (\d+ or fewer|exactly \d+|more) Prize cards? remaining|"
+     r"for each Prize card your opponent took during their last turn"),
+    # Not just damage boosts -- Genesect's ACE Nullifier uses the same
+    # "has a Pokemon Tool attached" condition to gate an ACE SPEC lock
+    # instead, so this is named for the trigger, not one specific outcome.
+    ("tool_attached_conditional_trigger", "consume",
+     r"if (this Pok[eé]mon|your opponent'?s Active Pok[eé]mon) has a Pok[eé]mon Tool attached"),
+    ("damage_boost_if_stadium_in_play", "consume",
+     r"if (a Stadium is in play|you have a Stadium in play)"),
+    ("status_checkup_damage_multiplier", "produce",
+     r"(put|place) \d+ damage counters? instead of \d+ on (that Pok[eé]mon|1 of)|"
+     r"during Pok[eé]mon Checkup, (put|place) \d+ damage counters? on that Pok[eé]mon instead of 1"),
+    ("tool_discard_self", "produce", r"discard all Pok[eé]mon Tools from this Pok[eé]mon"),
+    ("retreat_negate_on_coin", "produce",
+     r"Energy for its Retreat Cost is not discarded, and they don'?t switch Pok[eé]mon"),
+    ("mutual_deck_mill", "produce", r"discard the top card of each player'?s deck"),
+    ("damage_on_self_energy_attach", "consume",
+     r"if you attached Energy to a Pok[eé]mon in this way, (place|put) \d+ damage counters"),
 ]
 
 _COMPILED = [(tag, role, re.compile(pattern, re.IGNORECASE)) for tag, role, pattern in FAMILIES]
