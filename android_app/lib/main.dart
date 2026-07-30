@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'card_categories.dart';
+import 'deck_builder.dart';
 import 'deck_parser.dart';
 import 'hand_odds.dart';
 
@@ -119,6 +120,14 @@ class _HomePageState extends State<HomePage> {
   double? _targetProbability;
   String? _targetError;
 
+  // "Build a deck around one Pokemon" section.
+  final _pokemonNameController = TextEditingController();
+  Map<String, PokemonCardInfo>? _cardPool;
+  bool _buildingDeck = false;
+  String? _deckBuilderError;
+  List<String>? _deckBuilderSuggestions;
+  List<String>? _deckBuilderNotes;
+
   static const _sampleDeck = '''Pokémon: 15
 3 Budew PRE 148
 3 Frillish WHF 32
@@ -145,10 +154,50 @@ Total Cards: 60''';
   @override
   void dispose() {
     _controller.dispose();
+    _pokemonNameController.dispose();
     for (final c in _targetControllers.values) {
       c.dispose();
     }
     super.dispose();
+  }
+
+  Future<Map<String, PokemonCardInfo>> _loadCardPool() async {
+    if (_cardPool != null) return _cardPool!;
+    final jsonText = await rootBundle.loadString('assets/card_pool.json');
+    _cardPool = parseCardPool(jsonText);
+    return _cardPool!;
+  }
+
+  Future<void> _buildDeckFromPokemon() async {
+    final query = _pokemonNameController.text.trim();
+    if (query.isEmpty) return;
+
+    setState(() {
+      _buildingDeck = true;
+      _deckBuilderError = null;
+      _deckBuilderSuggestions = null;
+      _deckBuilderNotes = null;
+    });
+
+    final pool = await _loadCardPool();
+    final generated = buildDeckForPokemon(query, pool);
+
+    if (generated == null) {
+      setState(() {
+        _buildingDeck = false;
+        _deckBuilderError = 'No Pokemon named "$query" found in the Standard-legal pool.';
+        _deckBuilderSuggestions = suggestNames(query, pool);
+      });
+      return;
+    }
+
+    setState(() {
+      _controller.text = generated.toDecklistText();
+      _deckBuilderNotes = generated.notes;
+      _buildingDeck = false;
+      _mode = OddsMode.byCategory;
+    });
+    await _calculate();
   }
 
   void _resetTargetControllers(Iterable<String> categories, {Map<String, int>? prefill}) {
@@ -278,6 +327,8 @@ Total Cards: 60''';
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _buildDeckGeneratorSection(),
+            const Divider(),
             const Text(
               'Paste a decklist export below (Pokémon TCG Live, PokemonCard.io, or Limitless TCG).',
               style: TextStyle(fontWeight: FontWeight.w600),
@@ -376,6 +427,64 @@ Total Cards: 60''';
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDeckGeneratorSection() {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      title: const Text('Build a deck around one Pokémon',
+          style: TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: const Text(
+        'Type a Pokémon name and generate a playable 60-card starting-point decklist.',
+        style: TextStyle(fontSize: 11, color: Colors.grey),
+      ),
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _pokemonNameController,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: OutlineInputBorder(),
+                  hintText: 'e.g. Feraligatr, Lurantis ex, Pikachu',
+                ),
+                onSubmitted: (_) => _buildingDeck ? null : _buildDeckFromPokemon(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _buildingDeck ? null : _buildDeckFromPokemon,
+              child: Text(_buildingDeck ? 'Building...' : 'Build Deck'),
+            ),
+          ],
+        ),
+        if (_deckBuilderError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(_deckBuilderError!, style: const TextStyle(color: Colors.red)),
+          ),
+        if (_deckBuilderSuggestions != null && _deckBuilderSuggestions!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text('Did you mean: ${_deckBuilderSuggestions!.join(', ')}?',
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          ),
+        if (_deckBuilderNotes != null) ...[
+          const SizedBox(height: 8),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text('Generated -- pasted below and calculated automatically:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          ),
+          ..._deckBuilderNotes!.map((n) => Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text('• $n', style: const TextStyle(fontSize: 11)),
+              )),
+        ],
+        const SizedBox(height: 8),
+      ],
     );
   }
 

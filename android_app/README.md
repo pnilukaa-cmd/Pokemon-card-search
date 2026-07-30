@@ -4,6 +4,47 @@ Flutter app that computes exact opening-hand odds for a 60-card Pokemon TCG
 deck. Paste a decklist export (Pokemon TCG Live, PokemonCard.io, or
 Limitless TCG) and it shows odds two ways:
 
+## Build a deck around one Pokemon
+
+An expandable section above the paste box: type a Pokemon name (e.g.
+"Feraligatr", "Lurantis ex", "Pikachu") and generate a playable, legal
+60-card starting-point decklist built around it, which then gets pasted
+into the main box and calculated automatically (By Category mode).
+
+How it works (`lib/deck_builder.dart`, driven by a bundled per-Pokemon data
+file, `assets/card_pool.json`, generated from the same Standard-legal card
+database as everything else in this repo):
+
+1. Looks up the named Pokemon (diacritic/case-insensitive), traces its full
+   evolution line backward to its Basic and forward to its final evolution,
+   and includes the whole line (4 copies of the Basic and final stage, 2 of
+   any middle "bridge" stage, plus 4x Rare Candy if there's a Stage 2).
+2. Picks that final stage's highest-damage attack as the "featured attack"
+   to determine the deck's Energy type(s) -- splitting Energy proportionally
+   if the attack costs more than one type.
+3. Pads the Pokemon count with generic, single-prize, Colorless-cost
+   support attackers (Tornadus, Bouffalant) when the line alone doesn't
+   reach a healthy count, since they slot into a deck of any type without
+   requiring a new Energy type.
+4. Fills out a Trainer package: always Ultra Ball, Boss's Orders, a draw
+   Supporter, Switch, and Night Stretcher; Buddy-Buddy Poffin if the Basic
+   is 70 HP or under; Rare Candy if there's a Stage 2; then rounds out the
+   remaining slots from a rotation of generic search/draw staples (Drayton,
+   Judge, Colress's Tenacity, Brock's Scouting, Energy Search, Cheren,
+   Perrin) until the deck hits exactly 60 cards.
+5. Immediately runs the result through the deck-building recommendation
+   engine (see below) so you can see right away how well-formed the
+   generated starting point actually is, and adjust from there.
+
+If the name doesn't match anything in the Standard-legal pool, it shows up
+to 5 substring suggestions instead of just failing silently.
+
+**Explicitly a starting point, not a tuned tournament list.** It doesn't
+know about real synergies between unrelated cards, matchup-specific techs,
+or curve considerations beyond the ratios the recommendation engine already
+checks -- see `test/verify_deck_builder.dart` for concrete examples of what
+it generates for Basic-only, 2-stage, 3-stage, and multi-energy-type seeds.
+
 - **By Category** (default): well-differentiated stats like "88% chance of
   at least 1 Pokemon in your opening hand", grouped into Pokemon /
   Supporter / Item / Tool / Stadium / Energy. When a deck has more than one
@@ -85,17 +126,26 @@ The full Flutter SDK (3.44.8 stable) was installed and used to actually
 verify this project, not just read the code:
 
 - `flutter analyze`: **0 errors** across the whole project.
-- `flutter test`: **all tests pass** (6 widget tests), including an
+- `flutter test`: **all tests pass** (8 widget tests), including an
   end-to-end test that loads the sample deck, calculates, and checks
   type-split categories, the confidence calculator, and the optimal-hand
   comparison (including its pre-filled starting values) all render and
   compute correctly, a dedicated test confirming the type-split toggle
-  actually keeps a single lumped bucket when turned off, and two tests for
-  the recommendations engine -- one pasting a deliberately bad decklist
-  (illegal copy count, no Supporters) and confirming the specific warnings
-  show up, one confirming a well-built decklist shows no recommendations
-  at all.
+  actually keeps a single lumped bucket when turned off, two tests for the
+  recommendations engine (a deliberately bad decklist flags the right
+  warnings; a well-built one shows none), and two tests for the deck
+  generator -- one builds a Feraligatr deck end-to-end and confirms the
+  paste box and results populate automatically, one confirms an unknown
+  name shows an error with suggestions instead of failing silently.
 - `flutter build web`: **builds successfully** to `build/web/`.
+- `lib/deck_builder.dart` was independently run as a plain Dart script
+  (`test/verify_deck_builder.dart`) against 6 representative seeds (a
+  Basic-only Pokemon, a 2-stage line, a 3-stage line, an ex, and Leafeon ex
+  specifically because its attack costs 3 distinct Energy types -- the edge
+  case that could break the energy-split rounding logic): every generated
+  deck is confirmed to total exactly 60 cards, respect the 4-copy limit,
+  round-trip cleanly back through the app's own parser with zero warnings,
+  and resolve every non-Energy card name against the category lookup.
 - `lib/deck_parser.dart`, `lib/hand_odds.dart`, and `lib/card_categories.dart`
   were also independently run as plain Dart scripts
   (`test/verify_hand_odds.dart`, `test/verify_categories.dart`):
@@ -151,21 +201,30 @@ lib/
                             supports PTCG Live / PokemonCard.io / Limitless
   hand_odds.dart         -- exact hand-probability math (hypergeometric)
   card_categories.dart   -- categorization, type-splitting, marginal odds,
-                            confidence calculator, composition probability
+                            confidence calculator, composition probability,
+                            deck-building recommendation engine
+  deck_builder.dart      -- generates a 60-card decklist around one Pokemon
   main.dart               -- Flutter UI (paste box, mode toggle, results,
-                            confidence calculator, optimal-hand comparison)
+                            confidence calculator, optimal-hand comparison,
+                            deck generator section)
 assets/
-  card_categories.json  -- name -> {category, types}, generated from
+  card_categories.json  -- name -> {category, types, stage}, generated from
                             pokemon_standard_cards.json
+  card_pool.json         -- name -> {types, hp, stage, evolvesFrom,
+                            evolvesTo, retreatCost, weaknesses, attacks},
+                            Pokemon only, generated from the same source --
+                            richer per-card data for the deck generator
 test/
   verify_hand_odds.dart   -- standalone verification script (see Status above)
   verify_categories.dart  -- standalone verification script (see Status above)
+  verify_deck_builder.dart -- standalone verification script (see Status above)
   widget_test.dart        -- Flutter widget tests (see Status above)
 ```
 
-To regenerate `assets/card_categories.json` after the card database
-updates, see the Python snippet in this file's git history, or ask for it
-to be regenerated from `pokemon_standard_cards.json` in the repo root.
+To regenerate `assets/card_categories.json` or `assets/card_pool.json`
+after the card database updates, see the Python snippets in this file's
+git history, or ask for them to be regenerated from
+`pokemon_standard_cards.json` in the repo root.
 
 ## Known limitations / next steps
 
@@ -193,3 +252,17 @@ to be regenerated from `pokemon_standard_cards.json` in the repo root.
 - Limitless TCG's per-player decklist export (integer counts, not the
   "archetype average" view) hasn't been tested against a real single-deck
   export yet -- only the average/aggregate format has been confirmed so far.
+- The deck generator only ever builds around the **single** evolution line
+  you type in, padded with generic support attackers -- it doesn't know
+  about real card-to-card synergies (e.g. it wouldn't discover the
+  Feraligatr/Munkidori damage-transfer combo or the Lurantis ex heal-punish
+  loop documented in this repo's `decks/` folder). It's a legal, playable,
+  60-card starting point to build from, not a substitute for hand-curated
+  synergy hunting.
+- `assets/card_pool.json` keeps only one printing per Pokemon name, even
+  when the real card pool has genuinely different variants sharing a name
+  (e.g. "Applin" exists as both a Grass-type and an unrelated Dragon-type
+  card). The generator deterministically picks the printing with a
+  recognized evolution stage and, among those, the higher HP -- if that's
+  not the variant you meant, the generated deck may feature different
+  attacks/HP than the specific print you had in mind.

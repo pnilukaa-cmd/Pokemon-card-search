@@ -8,9 +8,16 @@ import 'package:pokemon_deck_odds/main.dart';
 void main() {
   testWidgets('App launches and shows the paste box and calculate button',
       (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(const DeckOddsApp());
 
     expect(find.text('Deck Opening Hand Odds'), findsOneWidget);
+    // The deck-generator section's own TextField is collapsed by default,
+    // so only the main paste box should be present initially.
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('Calculate Odds'), findsOneWidget);
     expect(find.byType(DropdownButton<DeckSource>), findsOneWidget);
@@ -163,6 +170,60 @@ Energy: 15
     expect(find.text('Deck-building recommendations:'), findsNothing);
   });
 
+  testWidgets('Build a deck around one Pokemon end-to-end',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const DeckOddsApp());
+
+    // Open the "Build a deck around one Pokemon" section.
+    await tester.tap(find.text('Build a deck around one Pokémon'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'Feraligatr');
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Build Deck'));
+      await Future<void>.delayed(const Duration(seconds: 2));
+    });
+    await tester.pump();
+
+    // Generated deck's notes should mention the evolution line, and the
+    // paste box should now hold the generated decklist text.
+    expect(find.textContaining('Totodile -> Croconaw -> Feraligatr'), findsWidgets);
+    expect(_pasteBoxText(tester), contains('4 Feraligatr'));
+    expect(_pasteBoxText(tester), contains('Basic Water Energy'));
+
+    // The generated decklist is auto-calculated, so results should already
+    // be showing (category mode is the default).
+    expect(find.text('At least 1 in opening hand:'), findsOneWidget);
+  });
+
+  testWidgets('Build a deck shows suggestions for an unknown name',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const DeckOddsApp());
+
+    await tester.tap(find.text('Build a deck around one Pokémon'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'Zzyzxblorp');
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Build Deck'));
+      await Future<void>.delayed(const Duration(seconds: 1));
+    });
+    await tester.pump();
+
+    expect(find.textContaining('No Pokemon named "Zzyzxblorp" found'), findsOneWidget);
+  });
+
   testWidgets('Type-split toggle off keeps a single lumped Pokemon/Energy bucket',
       (WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 6000);
@@ -195,4 +256,18 @@ Energy: 15
     expect(find.text('Pokemon (Grass)'), findsNothing);
     expect(find.text('Pokemon (Colorless)'), findsNothing);
   });
+}
+
+// The main paste box is the one TextField configured to expand and fill
+// available space (maxLines: null, expands: true) -- the only field with
+// that shape, which distinguishes it from the Pokemon-name entry field in
+// the deck-generator section above it.
+String _pasteBoxText(WidgetTester tester) {
+  final fields = tester.widgetList<TextField>(find.byType(TextField));
+  for (final f in fields) {
+    if (f.maxLines == null && f.expands == true) {
+      return f.controller?.text ?? '';
+    }
+  }
+  return '';
 }
