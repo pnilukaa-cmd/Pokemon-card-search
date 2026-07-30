@@ -288,7 +288,7 @@
     {
       "tag": "deck_search_pokemon",
       "role": "produce",
-      "card_count": 128
+      "card_count": 87
     },
     {
       "tag": "deck_search_trainer",
@@ -433,7 +433,12 @@
     {
       "tag": "attack_lock_opponent",
       "role": "produce",
-      "card_count": 55
+      "card_count": 9
+    },
+    {
+      "tag": "attack_locked_by_condition_self",
+      "role": "produce",
+      "card_count": 2
     },
     {
       "tag": "attack_lock_specific_opponent",
@@ -443,7 +448,7 @@
     {
       "tag": "self_attack_lock_next_turn",
       "role": "produce",
-      "card_count": 66
+      "card_count": 67
     },
     {
       "tag": "ability_lock",
@@ -501,7 +506,7 @@
       "card_count": 1
     },
     {
-      "tag": "attack_copy_opponent",
+      "tag": "attack_copy_generic",
       "role": "produce",
       "card_count": 8
     },
@@ -1186,7 +1191,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -1725,7 +1729,6 @@
       ],
       "hp": "220",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -2683,7 +2686,6 @@
       ],
       "hp": "120",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -2899,7 +2901,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -4649,7 +4650,6 @@
       "hp": "110",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -5009,7 +5009,6 @@
       ],
       "hp": "80",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -5047,7 +5046,6 @@
       ],
       "hp": "150",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -5418,7 +5416,6 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -6966,7 +6963,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -7288,7 +7284,6 @@
       ],
       "hp": "70",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -7348,7 +7343,6 @@
       ],
       "hp": "340",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -7829,7 +7823,7 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -8523,7 +8517,6 @@
       "tags": [
         "coin_flip_effect",
         "attack_whiff_on_coin",
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -9532,7 +9525,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -9804,7 +9796,6 @@
       ],
       "hp": "260",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -10051,7 +10042,6 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon",
         "deck_search_trainer",
         "deck_search_generic",
         "discard_own_hand_cost"
@@ -11282,7 +11272,6 @@
       ],
       "hp": "80",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -11523,7 +11512,6 @@
       "hp": "250",
       "tags": [
         "status_inflict",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -11734,7 +11722,6 @@
       ],
       "hp": "200",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn",
         "damage_boost_conditional_generic"
       ]
@@ -12040,7 +12027,6 @@
       "hp": "130",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -12126,7 +12112,6 @@
       "hp": null,
       "tags": [
         "status_inflict",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -13253,7 +13238,7 @@
       ],
       "hp": "150",
       "tags": [
-        "attack_lock_opponent"
+        "self_attack_lock_next_turn"
       ]
     },
     {
@@ -13308,7 +13293,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -13326,7 +13310,6 @@
       ],
       "hp": "30",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -13524,7 +13507,7 @@
       "hp": "120",
       "tags": [
         "deck_discard_self_top",
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -14814,7 +14797,6 @@
       ],
       "hp": "180",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -15099,7 +15081,6 @@
       ],
       "hp": "100",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -15374,7 +15355,6 @@
       "hp": null,
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -16482,7 +16462,6 @@
       ],
       "hp": "140",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -17597,7 +17576,6 @@
       ],
       "hp": "30",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -17630,7 +17608,6 @@
       ],
       "hp": "210",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -18010,7 +17987,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -19351,7 +19327,6 @@
       "hp": "120",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -19749,7 +19724,7 @@
       ],
       "hp": "340",
       "tags": [
-        "attack_lock_opponent"
+        "attack_locked_by_condition_self"
       ]
     },
     {
@@ -20171,7 +20146,6 @@
       "hp": "120",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -20200,7 +20174,6 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic",
         "tool_swap_condition"
       ]
@@ -20832,7 +20805,6 @@
       "hp": "270",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -20852,7 +20824,6 @@
       ],
       "hp": "270",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -20892,7 +20863,6 @@
       ],
       "hp": "280",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -20993,7 +20963,6 @@
       ],
       "hp": "260",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -21166,7 +21135,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -21560,7 +21528,6 @@
       "hp": "120",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -21658,7 +21625,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -22684,7 +22650,6 @@
       ],
       "hp": "320",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -22903,7 +22868,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -23023,7 +22987,6 @@
       ],
       "hp": "90",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -23466,7 +23429,6 @@
       ],
       "hp": "280",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -24680,7 +24642,6 @@
       ],
       "hp": "280",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -24777,7 +24738,7 @@
       ],
       "hp": "280",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -24813,7 +24774,6 @@
       ],
       "hp": "140",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -24898,7 +24858,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -26233,7 +26192,6 @@
       ],
       "hp": "280",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -26803,7 +26761,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -27337,7 +27294,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -27718,7 +27674,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -28001,7 +27956,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -28409,7 +28363,7 @@
       ],
       "hp": "280",
       "tags": [
-        "attack_lock_opponent"
+        "attack_locked_by_condition_self"
       ]
     },
     {
@@ -28597,7 +28551,7 @@
       ],
       "hp": "60",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -28766,7 +28720,7 @@
       "hp": "110",
       "tags": [
         "coin_flip_effect",
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -29225,7 +29179,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -29920,7 +29873,6 @@
       ],
       "hp": "320",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic",
         "evolve_bonus_effect"
       ]
@@ -30167,7 +30119,6 @@
       ],
       "hp": "100",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -30181,7 +30132,6 @@
       ],
       "hp": "340",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -30307,7 +30257,7 @@
       ],
       "hp": "260",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -31007,7 +30957,6 @@
       ],
       "hp": "120",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -31077,7 +31026,6 @@
       ],
       "hp": "220",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -31133,7 +31081,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -31317,7 +31264,6 @@
       "hp": "230",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -31470,7 +31416,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -33233,7 +33178,7 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -34681,7 +34626,6 @@
       ],
       "hp": "120",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -35575,7 +35519,6 @@
       ],
       "hp": "100",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -35720,7 +35663,6 @@
       "tags": [
         "energy_search",
         "coin_flip_effect",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -35969,7 +35911,6 @@
       ],
       "hp": "60",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -36381,7 +36322,6 @@
       "hp": "160",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -37440,7 +37380,6 @@
       ],
       "hp": "360",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -38028,7 +37967,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -38958,7 +38896,6 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -40127,7 +40064,6 @@
       ],
       "hp": "120",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -40865,7 +40801,6 @@
       ],
       "hp": "140",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -40922,7 +40857,6 @@
       "tags": [
         "coin_flip_effect",
         "attack_whiff_on_coin",
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -41578,7 +41512,6 @@
       ],
       "hp": "90",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -42604,7 +42537,6 @@
       ],
       "hp": "120",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -43774,7 +43706,6 @@
       ],
       "hp": "120",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -44129,7 +44060,6 @@
       ],
       "hp": "130",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -44479,7 +44409,6 @@
       "tags": [
         "energy_search",
         "coin_flip_effect",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -45184,7 +45113,6 @@
       "hp": "70",
       "tags": [
         "energy_search",
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -46329,7 +46257,6 @@
       ],
       "hp": "150",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -46515,8 +46442,7 @@
       ],
       "hp": "160",
       "tags": [
-        "coin_flip_effect",
-        "deck_search_pokemon"
+        "coin_flip_effect"
       ]
     },
     {
@@ -46995,7 +46921,6 @@
       ],
       "hp": "100",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -47336,7 +47261,6 @@
       ],
       "hp": "140",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -47821,7 +47745,6 @@
       ],
       "hp": "110",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -47895,7 +47818,6 @@
       ],
       "hp": "250",
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },
@@ -48605,7 +48527,6 @@
       ],
       "hp": "210",
       "tags": [
-        "attack_lock_opponent",
         "self_attack_lock_next_turn"
       ]
     },
@@ -50538,7 +50459,7 @@
       ],
       "hp": "100",
       "tags": [
-        "attack_copy_opponent"
+        "attack_copy_generic"
       ]
     },
     {
@@ -51070,7 +50991,6 @@
       "types": [],
       "hp": null,
       "tags": [
-        "deck_search_pokemon",
         "deck_search_generic"
       ]
     },

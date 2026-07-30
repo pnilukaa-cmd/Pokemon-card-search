@@ -231,7 +231,11 @@ FAMILIES = [
      r"discard (the top|cards? from the top) .*of your opponent'?s deck"),
     ("deck_discard_self_top", "produce",
      r"discard the top( \d+)? cards? of your deck|look at the top card of your deck\. ?You may discard that card"),
-    ("deck_search_pokemon", "produce", r"search (your|their) deck for (a |an |up to \d+ )?[A-Za-z].*Pok[eé]mon"),
+    # Bounded gap (not `.*`) so "search...for Energy cards...attach them to your
+    # Benched Pokemon" doesn't false-positive as a Pokemon search just because
+    # "Pokemon" appears later as the attach target, not the search target.
+    ("deck_search_pokemon", "produce",
+     r"search (your|their) deck for (a |an |up to \d+ )?[A-Za-z][\w' ]{0,36}Pok[eé]mon"),
     ("deck_search_trainer", "produce", r"search (your|their) deck for (a |an |up to \d+ )?(Supporter|Item|Stadium|Trainer)"),
     ("deck_search_generic", "produce",
      r"search (your|their) deck for (a |an |up to \d+ |any number of )?[\w' ]{0,25}cards?\b"),
@@ -285,11 +289,21 @@ FAMILIES = [
      r"Retreat Cost.{0,50}is [A-Za-z]+ more"),
     ("retreat_prevent_opponent", "produce",
      r"(Defending Pok[eé]mon|Active Pok[eé]mon|their [\w']+ Pok[eé]mon) can'?t retreat"),
-    ("attack_lock_opponent", "produce", r"can'?t use attacks|this Pok[eé]mon takes? ?can'?t attack|Pok[eé]mon.*can'?t attack"),
+    # Deliberately narrow to genuine opponent-side locks (Defending Pokemon /
+    # a description of the opponent's board next turn) -- "this Pokemon can't
+    # attack" is a self-restriction and belongs to self_attack_lock_next_turn
+    # or attack_locked_by_condition_self instead, not this family.
+    ("attack_lock_opponent", "produce",
+     r"Defending Pok[eé]mon can'?t (attack|use attacks)|"
+     r"Defending Pok[eé]mon is a [\w' ]+, it can'?t attack|"
+     r"opponent'?s next turn,? Pok[eé]mon.*can'?t (attack|use attacks)"),
+    ("attack_locked_by_condition_self", "produce",
+     r"this Pok[eé]mon can'?t attack (unless|if)|"
+     r"^If [\w' ,]+, this Pok[eé]mon can'?t attack"),
     ("attack_lock_specific_opponent", "produce",
      r"that Pok[eé]mon can'?t use that attack|can'?t use [A-Za-z' ]+ during your opponent'?s next turn"),
     ("self_attack_lock_next_turn", "produce",
-     r"during your next turn, this Pok[eé]mon can'?t (use|attack)|this attack can'?t be used|can'?t use [A-Za-z' ]+ again"),
+     r"during your next turn, (this Pok[eé]mon|your Pok[eé]mon) can'?t (use|attack)|this attack can'?t be used|can'?t use [A-Za-z' ]+ again"),
     ("ability_lock", "produce",
      r"Pok[eé]mon.*(has|have) no Abilities|lose any Ability"),
     ("item_lock", "produce", r"opponent can'?t play any Item|they can'?t play any Item"),
@@ -306,7 +320,10 @@ FAMILIES = [
     ("tool_discard_either_side", "produce",
      r"Pok[eé]mon Tools attached to Pok[eé]mon \(yours or your opponent'?s\) and discard them"),
     ("extra_tool_slot_named_group", "produce", r"may have up to \d+ Pok[eé]mon Tool cards attached"),
-    ("attack_copy_opponent", "produce",
+    # Renamed from attack_copy_opponent: some members (e.g. N's Zoroark ex's
+    # Night Joker) copy an attack from the user's OWN Benched Pokemon, not
+    # the opponent's -- "opponent" in the old name overclaimed the source.
+    ("attack_copy_generic", "produce",
      r"use it as this attack|use that attack as this attack"),
 
     # --- Damage math ---
