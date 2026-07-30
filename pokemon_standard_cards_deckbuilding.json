@@ -610,6 +610,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -1234,6 +1236,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -3454,6 +3458,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -6029,6 +6035,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -6276,6 +6284,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -6326,6 +6336,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Temporal Forces"
     },
@@ -9998,6 +10010,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Twilight Masquerade"
     },
@@ -15797,6 +15811,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Shrouded Fable"
     },
@@ -17156,6 +17172,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Stellar Crown"
     },
@@ -18167,6 +18185,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "As long as this Pok\u00e9mon is on your Bench, prevent all damage done to this Pok\u00e9mon by attacks (both yours and your opponent's).",
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
@@ -22355,6 +22375,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Stellar Crown"
     },
@@ -23710,6 +23732,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Surging Sparks"
     },
@@ -25859,6 +25883,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
         ],
@@ -26159,6 +26185,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Surging Sparks"
     },
@@ -31127,6 +31155,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Prismatic Evolutions"
     },
@@ -31425,6 +31455,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "As long as this Pok\u00e9mon is on your Bench, prevent all damage done to this Pok\u00e9mon by attacks (both yours and your opponent's).",
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
@@ -32374,6 +32406,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Prismatic Evolutions"
     },
@@ -35891,6 +35925,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Journey Together"
     },
@@ -35999,6 +36035,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
         ],
@@ -36733,6 +36771,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Journey Together"
     },
@@ -36772,6 +36812,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Journey Together"
     },
@@ -39623,6 +39665,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Journey Together"
     },
@@ -43551,6 +43595,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Destined Rivals"
     },
@@ -44224,6 +44270,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Destined Rivals"
     },
@@ -44307,6 +44355,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Destined Rivals"
     },
@@ -45060,6 +45110,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
         ],
@@ -46551,6 +46603,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Destined Rivals"
     },
@@ -47487,6 +47541,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Destined Rivals"
     },
@@ -48717,6 +48773,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
         ],
@@ -53562,6 +53620,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Black Bolt"
     },
@@ -54001,6 +54061,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Black Bolt"
     },
@@ -55514,6 +55576,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Black Bolt"
     },
@@ -55606,6 +55670,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Black Bolt"
     },
@@ -56861,6 +56927,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Mega Evolution"
     },
@@ -57187,6 +57255,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Mega Evolution"
     },
@@ -58151,6 +58221,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Mega Evolution ex Rule: When your Mega Evolution Pok\u00e9mon ex is Knocked Out, your opponent takes 3 Prize cards."
         ],
@@ -58708,6 +58780,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Mega Evolution"
     },
@@ -59235,6 +59309,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Mega Evolution"
     },
@@ -59923,6 +59999,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Mega Evolution"
     },
@@ -63974,6 +64052,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Mega Evolution ex Rule: When your Mega Evolution Pok\u00e9mon ex is Knocked Out, your opponent takes 3 Prize cards."
         ],
@@ -65865,6 +65945,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "H",
         "set": "Ascended Heroes"
     },
@@ -66285,6 +66367,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "As long as this Pok\u00e9mon is on your Bench, prevent all damage done to this Pok\u00e9mon by attacks (both yours and your opponent\u2019s).",
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards."
@@ -69892,6 +69976,8 @@
                 "text": "If this Pok\u00e9mon has a Pok\u00e9mon Tool attached, this attack does 70 more damage."
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "I",
         "set": "Ascended Heroes"
     },
@@ -70021,6 +70107,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Ascended Heroes"
     },
@@ -71332,6 +71420,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Perfect Order"
     },
@@ -71592,6 +71682,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Perfect Order"
     },
@@ -72933,6 +73025,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Perfect Order"
     },
@@ -73126,6 +73220,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "rules": [
             "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards.",
             "Mega Evolution ex Rule: When your Mega Evolution Pok\u00e9mon ex is Knocked Out, your opponent takes 3 Prize cards."
@@ -75730,6 +75826,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Chaos Rising"
     },
@@ -76431,6 +76529,8 @@
                 "value": "-30"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Chaos Rising"
     },
@@ -77840,6 +77940,8 @@
                 "value": "\u00d72"
             }
         ],
+        "retreatCost": [],
+        "convertedRetreatCost": 0,
         "regulationMark": "J",
         "set": "Pitch Black"
     },
