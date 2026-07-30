@@ -11,7 +11,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Scizor"
+            "Scizor",
+            "Scizor ex"
         ],
         "attacks": [
             {
@@ -478,7 +479,8 @@
         "hp": "120",
         "evolvesFrom": "Turtwig",
         "evolvesTo": [
-            "Torterra"
+            "Torterra",
+            "Torterra ex"
         ],
         "attacks": [
             {
@@ -670,7 +672,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Whimsicott"
+            "Whimsicott",
+            "Whimsicott ex"
         ],
         "attacks": [
             {
@@ -850,6 +853,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Brambleghast"
+        ],
         "attacks": [
             {
                 "name": "Spike Sting",
@@ -1025,6 +1031,10 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Rabsca",
+            "Rabsca ex"
+        ],
         "attacks": [
             {
                 "name": "Slight Intrusion",
@@ -1253,7 +1263,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Magcargo"
+            "Magcargo",
+            "Magcargo ex"
         ],
         "attacks": [
             {
@@ -1470,7 +1481,8 @@
         "hp": "100",
         "evolvesFrom": "Litten",
         "evolvesTo": [
-            "Incineroar"
+            "Incineroar",
+            "Incineroar ex"
         ],
         "attacks": [
             {
@@ -1799,7 +1811,8 @@
         "hp": "90",
         "evolvesFrom": "Totodile",
         "evolvesTo": [
-            "Feraligatr"
+            "Feraligatr",
+            "Mega Feraligatr ex"
         ],
         "attacks": [
             {
@@ -1884,6 +1897,7 @@
         ],
         "hp": "50",
         "evolvesTo": [
+            "Mega Sharpedo ex",
             "Sharpedo"
         ],
         "attacks": [
@@ -2093,6 +2107,9 @@
             "Water"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Wugtrio ex"
+        ],
         "attacks": [
             {
                 "name": "Lucky Find",
@@ -2138,6 +2155,10 @@
             "Water"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Palafin",
+            "Palafin ex"
+        ],
         "attacks": [
             {
                 "name": "Rain Splash",
@@ -2369,7 +2390,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Electivire"
+            "Electivire",
+            "Electivire ex"
         ],
         "attacks": [
             {
@@ -2882,7 +2904,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Azumarill"
+            "Azumarill",
+            "Azumarill ex"
         ],
         "attacks": [
             {
@@ -2979,6 +3002,10 @@
             "Psychic"
         ],
         "hp": "90",
+        "evolvesTo": [
+            "Farigiraf",
+            "Farigiraf ex"
+        ],
         "attacks": [
             {
                 "name": "Psychic Assault",
@@ -3724,7 +3751,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Medicham"
+            "Medicham",
+            "Medicham ex"
         ],
         "attacks": [
             {
@@ -3862,7 +3890,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Excadrill"
+            "Excadrill",
+            "Excadrill ex",
+            "Mega Excadrill ex"
         ],
         "attacks": [
             {
@@ -4733,7 +4763,9 @@
         "hp": "90",
         "evolvesFrom": "Gastly",
         "evolvesTo": [
-            "Gengar"
+            "Gengar",
+            "Gengar ex",
+            "Mega Gengar ex"
         ],
         "attacks": [
             {
@@ -5278,7 +5310,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Melmetal"
+            "Melmetal",
+            "Melmetal ex"
         ],
         "attacks": [
             {
@@ -6008,6 +6041,10 @@
             "Colorless"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Dudunsparce",
+            "Dudunsparce ex"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -6353,7 +6390,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Cinccino"
+            "Cinccino",
+            "Cinccino ex"
         ],
         "attacks": [
             {
@@ -7573,6 +7611,10 @@
         ],
         "hp": "80",
         "evolvesFrom": "Applin",
+        "evolvesTo": [
+            "Hydrapple",
+            "Hydrapple ex"
+        ],
         "attacks": [
             {
                 "name": "Do the Wave",
@@ -7763,6 +7805,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
+            "Appletun",
+            "Dipplin",
             "Flapple"
         ],
         "attacks": [
@@ -7847,6 +7891,10 @@
             "Grass"
         ],
         "hp": "30",
+        "evolvesTo": [
+            "Sinistcha",
+            "Sinistcha ex"
+        ],
         "attacks": [
             {
                 "name": "Hook",
@@ -7889,6 +7937,10 @@
             "Grass"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Sinistcha",
+            "Sinistcha ex"
+        ],
         "attacks": [
             {
                 "name": "Tea Server",
@@ -8152,7 +8204,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Magcargo"
+            "Magcargo",
+            "Magcargo ex"
         ],
         "attacks": [
             {
@@ -8582,7 +8635,8 @@
         "hp": "80",
         "evolvesFrom": "Litwick",
         "evolvesTo": [
-            "Chandelure"
+            "Chandelure",
+            "Mega Chandelure ex"
         ],
         "attacks": [
             {
@@ -9149,7 +9203,8 @@
         ],
         "hp": "30",
         "evolvesTo": [
-            "Milotic"
+            "Milotic",
+            "Milotic ex"
         ],
         "attacks": [
             {
@@ -9232,8 +9287,9 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Froslass",
             "Glalie",
-            "Froslass"
+            "Mega Froslass ex"
         ],
         "attacks": [
             {
@@ -9415,7 +9471,9 @@
         "hp": "90",
         "evolvesFrom": "Froakie",
         "evolvesTo": [
-            "Greninja"
+            "Greninja",
+            "Greninja ex",
+            "Mega Greninja ex"
         ],
         "attacks": [
             {
@@ -9625,6 +9683,10 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Palafin",
+            "Palafin ex"
+        ],
         "attacks": [
             {
                 "name": "Aqua Slash",
@@ -9955,7 +10017,8 @@
         "hp": "90",
         "evolvesFrom": "Shinx",
         "evolvesTo": [
-            "Luxray"
+            "Luxray",
+            "Luxray ex"
         ],
         "attacks": [
             {
@@ -10202,6 +10265,9 @@
             "Lightning"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Bellibolt"
+        ],
         "attacks": [
             {
                 "name": "Tackle",
@@ -10297,6 +10363,10 @@
             "Lightning"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Kilowattrel",
+            "Kilowattrel ex"
+        ],
         "attacks": [
             {
                 "name": "Thunder Shock",
@@ -10443,7 +10513,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Clefable"
+            "Clefable",
+            "Mega Clefable ex"
         ],
         "attacks": [
             {
@@ -10677,6 +10748,10 @@
             "Psychic"
         ],
         "hp": "100",
+        "evolvesTo": [
+            "Farigiraf",
+            "Farigiraf ex"
+        ],
         "attacks": [
             {
                 "name": "Dual Headbutt",
@@ -11049,7 +11124,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Palossand"
+            "Palossand",
+            "Palossand ex"
         ],
         "attacks": [
             {
@@ -11407,7 +11483,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Arcanine"
+            "Arcanine",
+            "Hisuian Arcanine"
         ],
         "attacks": [
             {
@@ -11873,6 +11950,9 @@
             "Fighting"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Glimmora"
+        ],
         "attacks": [
             {
                 "name": "Rock Shot",
@@ -12658,6 +12738,10 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Revavroom",
+            "Revavroom ex"
+        ],
         "attacks": [
             {
                 "name": "Metal Coating",
@@ -12766,6 +12850,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
+            "Appletun",
+            "Dipplin",
             "Flapple"
         ],
         "attacks": [
@@ -12808,6 +12894,10 @@
         ],
         "hp": "80",
         "evolvesFrom": "Applin",
+        "evolvesTo": [
+            "Hydrapple",
+            "Hydrapple ex"
+        ],
         "attacks": [
             {
                 "name": "Syrup Catcher",
@@ -12883,7 +12973,8 @@
         "hp": "90",
         "evolvesFrom": "Dreepy",
         "evolvesTo": [
-            "Dragapult"
+            "Dragapult",
+            "Dragapult ex"
         ],
         "attacks": [
             {
@@ -13058,7 +13149,8 @@
         ],
         "hp": "120",
         "evolvesTo": [
-            "Blissey"
+            "Blissey",
+            "Blissey ex"
         ],
         "attacks": [
             {
@@ -13160,14 +13252,22 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Vaporeon",
-            "Jolteon",
-            "Flareon",
-            "Sylveon",
             "Espeon",
-            "Umbreon",
+            "Espeon ex",
+            "Flareon",
+            "Flareon ex",
+            "Glaceon",
+            "Glaceon ex",
+            "Jolteon",
+            "Jolteon ex",
             "Leafeon",
-            "Glaceon"
+            "Leafeon ex",
+            "Sylveon",
+            "Sylveon ex",
+            "Umbreon",
+            "Umbreon ex",
+            "Vaporeon",
+            "Vaporeon ex"
         ],
         "attacks": [
             {
@@ -14243,6 +14343,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Pawniard",
+        "evolvesTo": [
+            "Kingambit"
+        ],
         "attacks": [
             {
                 "name": "Cut",
@@ -14425,7 +14528,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
-            "Galvantula"
+            "Galvantula",
+            "Galvantula ex"
         ],
         "attacks": [
             {
@@ -14555,7 +14659,8 @@
         "hp": "90",
         "evolvesFrom": "Rowlet",
         "evolvesTo": [
-            "Decidueye"
+            "Decidueye",
+            "Decidueye ex"
         ],
         "attacks": [
             {
@@ -14885,7 +14990,8 @@
         "hp": "90",
         "evolvesFrom": "Horsea",
         "evolvesTo": [
-            "Kingdra"
+            "Kingdra",
+            "Kingdra ex"
         ],
         "attacks": [
             {
@@ -16464,6 +16570,10 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Revavroom",
+            "Revavroom ex"
+        ],
         "attacks": [
             {
                 "name": "Rigidify",
@@ -16770,14 +16880,22 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Vaporeon",
-            "Jolteon",
-            "Flareon",
-            "Sylveon",
             "Espeon",
-            "Umbreon",
+            "Espeon ex",
+            "Flareon",
+            "Flareon ex",
+            "Glaceon",
+            "Glaceon ex",
+            "Jolteon",
+            "Jolteon ex",
             "Leafeon",
-            "Glaceon"
+            "Leafeon ex",
+            "Sylveon",
+            "Sylveon ex",
+            "Umbreon",
+            "Umbreon ex",
+            "Vaporeon",
+            "Vaporeon ex"
         ],
         "attacks": [
             {
@@ -17523,6 +17641,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
+            "Appletun",
+            "Dipplin",
             "Flapple"
         ],
         "attacks": [
@@ -17561,6 +17681,10 @@
         ],
         "hp": "90",
         "evolvesFrom": "Applin",
+        "evolvesTo": [
+            "Hydrapple",
+            "Hydrapple ex"
+        ],
         "attacks": [
             {
                 "name": "Coated Attack",
@@ -17648,6 +17772,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Lokix"
+        ],
         "attacks": [
             {
                 "name": "Tackle",
@@ -17719,6 +17846,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Toedscruel"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -17976,7 +18106,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Salazzle"
+            "Salazzle",
+            "Salazzle ex"
         ],
         "attacks": [
             {
@@ -18104,7 +18235,8 @@
         "hp": "90",
         "evolvesFrom": "Scorbunny",
         "evolvesTo": [
-            "Cinderace"
+            "Cinderace",
+            "Cinderace ex"
         ],
         "attacks": [
             {
@@ -18252,6 +18384,12 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Armarouge",
+            "Armarouge ex",
+            "Ceruledge",
+            "Ceruledge ex"
+        ],
         "attacks": [
             {
                 "name": "Flare",
@@ -18342,7 +18480,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Azumarill"
+            "Azumarill",
+            "Azumarill ex"
         ],
         "attacks": [
             {
@@ -18630,7 +18769,9 @@
         "hp": "90",
         "evolvesFrom": "Froakie",
         "evolvesTo": [
-            "Greninja"
+            "Greninja",
+            "Greninja ex",
+            "Mega Greninja ex"
         ],
         "attacks": [
             {
@@ -18894,7 +19035,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Electivire"
+            "Electivire",
+            "Electivire ex"
         ],
         "attacks": [
             {
@@ -19080,7 +19222,8 @@
         ],
         "hp": "30",
         "evolvesTo": [
-            "Galvantula"
+            "Galvantula",
+            "Galvantula ex"
         ],
         "attacks": [
             {
@@ -19330,6 +19473,9 @@
             "Lightning"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Pawmo"
+        ],
         "attacks": [
             {
                 "name": "Targeted Spark",
@@ -19366,6 +19512,7 @@
         ],
         "hp": "80",
         "evolvesTo": [
+            "Mega Slowbro ex",
             "Slowbro",
             "Slowking"
         ],
@@ -19653,7 +19800,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Alcremie"
+            "Alcremie",
+            "Alcremie ex"
         ],
         "attacks": [
             {
@@ -19736,6 +19884,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Dachsbun ex"
+        ],
         "attacks": [
             {
                 "name": "Pleasant Aroma",
@@ -19830,6 +19981,9 @@
             "Psychic"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Espathra"
+        ],
         "attacks": [
             {
                 "name": "Peck",
@@ -19913,6 +20067,10 @@
             "Psychic"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Houndstone",
+            "Houndstone ex"
+        ],
         "attacks": [
             {
                 "name": "Paw Shake Punch",
@@ -20014,6 +20172,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Alolan Marowak",
             "Marowak"
         ],
         "attacks": [
@@ -20232,7 +20391,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Medicham"
+            "Medicham",
+            "Medicham ex"
         ],
         "attacks": [
             {
@@ -20270,7 +20430,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Medicham"
+            "Medicham",
+            "Medicham ex"
         ],
         "attacks": [
             {
@@ -20407,7 +20568,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Lucario"
+            "Lucario",
+            "Lucario ex",
+            "Mega Lucario ex"
         ],
         "attacks": [
             {
@@ -21342,7 +21505,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Melmetal"
+            "Melmetal",
+            "Melmetal ex"
         ],
         "attacks": [
             {
@@ -21397,7 +21561,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Melmetal"
+            "Melmetal",
+            "Melmetal ex"
         ],
         "attacks": [
             {
@@ -21557,6 +21722,10 @@
             "Metal"
         ],
         "hp": "130",
+        "evolvesTo": [
+            "Archaludon",
+            "Archaludon ex"
+        ],
         "attacks": [
             {
                 "name": "Hammer In",
@@ -21662,6 +21831,10 @@
             "Metal"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Revavroom",
+            "Revavroom ex"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -21891,14 +22064,22 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Vaporeon",
-            "Jolteon",
-            "Flareon",
-            "Sylveon",
             "Espeon",
-            "Umbreon",
+            "Espeon ex",
+            "Flareon",
+            "Flareon ex",
+            "Glaceon",
+            "Glaceon ex",
+            "Jolteon",
+            "Jolteon ex",
             "Leafeon",
-            "Glaceon"
+            "Leafeon ex",
+            "Sylveon",
+            "Sylveon ex",
+            "Umbreon",
+            "Umbreon ex",
+            "Vaporeon",
+            "Vaporeon ex"
         ],
         "attacks": [
             {
@@ -22475,6 +22656,9 @@
             "Colorless"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Oinkologne"
+        ],
         "attacks": [
             {
                 "name": "Rear Kick",
@@ -22885,6 +23069,7 @@
         ],
         "hp": "30",
         "evolvesTo": [
+            "Alolan Exeggutor ex",
             "Exeggutor"
         ],
         "attacks": [
@@ -22923,6 +23108,7 @@
         ],
         "hp": "50",
         "evolvesTo": [
+            "Alolan Exeggutor ex",
             "Exeggutor"
         ],
         "attacks": [
@@ -23356,6 +23542,9 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Scovillain ex"
+        ],
         "attacks": [
             {
                 "name": "Headbutt Bounce",
@@ -23392,6 +23581,10 @@
             "Grass"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Rabsca",
+            "Rabsca ex"
+        ],
         "attacks": [
             {
                 "name": "Collect",
@@ -24104,6 +24297,9 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Crocalor"
+        ],
         "attacks": [
             {
                 "name": "Heat Burn",
@@ -24142,6 +24338,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Fuecoco",
+        "evolvesTo": [
+            "Skeledirge"
+        ],
         "attacks": [
             {
                 "name": "Heat Breath",
@@ -24226,6 +24425,12 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Armarouge",
+            "Armarouge ex",
+            "Ceruledge",
+            "Ceruledge ex"
+        ],
         "attacks": [
             {
                 "name": "Will-O-Wisp",
@@ -24261,6 +24466,12 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Armarouge",
+            "Armarouge ex",
+            "Ceruledge",
+            "Ceruledge ex"
+        ],
         "attacks": [
             {
                 "name": "Light Punch",
@@ -24650,7 +24861,8 @@
         ],
         "hp": "30",
         "evolvesTo": [
-            "Milotic"
+            "Milotic",
+            "Milotic ex"
         ],
         "attacks": [
             {
@@ -25057,6 +25269,9 @@
             "Water"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Quaxwell"
+        ],
         "attacks": [
             {
                 "name": "Aerial Ace",
@@ -25093,6 +25308,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Quaxly",
+        "evolvesTo": [
+            "Quaquaval"
+        ],
         "attacks": [
             {
                 "name": "Aqua Edge",
@@ -25173,6 +25391,10 @@
             "Water"
         ],
         "hp": "100",
+        "evolvesTo": [
+            "Cetitan",
+            "Cetitan ex"
+        ],
         "attacks": [
             {
                 "name": "Draining Fin",
@@ -25753,6 +25975,10 @@
             "Lightning"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Kilowattrel",
+            "Kilowattrel ex"
+        ],
         "attacks": [
             {
                 "name": "Aerial Ace",
@@ -26075,7 +26301,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Azumarill"
+            "Azumarill",
+            "Azumarill ex"
         ],
         "attacks": [
             {
@@ -26910,7 +27137,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Palossand"
+            "Palossand",
+            "Palossand ex"
         ],
         "attacks": [
             {
@@ -27117,6 +27345,9 @@
             "Psychic"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Espathra"
+        ],
         "attacks": [
             {
                 "name": "Splashing Dodge",
@@ -27257,6 +27488,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Gholdengo"
+        ],
         "attacks": [
             {
                 "name": "Minor Errand-Running",
@@ -27349,6 +27583,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Mankey",
+        "evolvesTo": [
+            "Annihilape"
+        ],
         "attacks": [
             {
                 "name": "Sweep the Leg",
@@ -27629,7 +27866,8 @@
         "hp": "90",
         "evolvesFrom": "Trapinch",
         "evolvesTo": [
-            "Flygon"
+            "Flygon",
+            "Flygon ex"
         ],
         "attacks": [
             {
@@ -27777,7 +28015,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Excadrill"
+            "Excadrill",
+            "Excadrill ex",
+            "Mega Excadrill ex"
         ],
         "attacks": [
             {
@@ -28043,6 +28283,9 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Glimmora"
+        ],
         "attacks": [
             {
                 "name": "Rock Hurl",
@@ -28225,7 +28468,8 @@
         "hp": "100",
         "evolvesFrom": "Deino",
         "evolvesTo": [
-            "Hydreigon"
+            "Hydreigon",
+            "Hydreigon ex"
         ],
         "attacks": [
             {
@@ -28331,6 +28575,9 @@
             "Darkness"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Grafaiai"
+        ],
         "attacks": [
             {
                 "name": "Spray Fluid",
@@ -28413,6 +28660,7 @@
         ],
         "hp": "50",
         "evolvesTo": [
+            "Alolan Dugtrio",
             "Dugtrio"
         ],
         "attacks": [
@@ -28736,6 +28984,10 @@
             "Metal"
         ],
         "hp": "130",
+        "evolvesTo": [
+            "Archaludon",
+            "Archaludon ex"
+        ],
         "attacks": [
             {
                 "name": "Confront",
@@ -29160,6 +29412,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
+            "Appletun",
+            "Dipplin",
             "Flapple"
         ],
         "attacks": [
@@ -29373,14 +29627,22 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Vaporeon",
-            "Jolteon",
-            "Flareon",
-            "Sylveon",
             "Espeon",
-            "Umbreon",
+            "Espeon ex",
+            "Flareon",
+            "Flareon ex",
+            "Glaceon",
+            "Glaceon ex",
+            "Jolteon",
+            "Jolteon ex",
             "Leafeon",
-            "Glaceon"
+            "Leafeon ex",
+            "Sylveon",
+            "Sylveon ex",
+            "Umbreon",
+            "Umbreon ex",
+            "Vaporeon",
+            "Vaporeon ex"
         ],
         "attacks": [
             {
@@ -29514,7 +29776,8 @@
         "hp": "90",
         "evolvesFrom": "Slakoth",
         "evolvesTo": [
-            "Slaking"
+            "Slaking",
+            "Slaking ex"
         ],
         "attacks": [
             {
@@ -30017,6 +30280,9 @@
             "Colorless"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Maushold"
+        ],
         "attacks": [
             {
                 "name": "Play Rough",
@@ -31042,6 +31308,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Alolan Exeggutor ex",
             "Exeggutor"
         ],
         "attacks": [
@@ -31332,6 +31599,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Mega Pyroar ex",
             "Pyroar"
         ],
         "attacks": [
@@ -31476,7 +31744,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Slowbro"
+            "Mega Slowbro ex",
+            "Slowbro",
+            "Slowking"
         ],
         "attacks": [
             {
@@ -32112,7 +32382,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Lucario"
+            "Lucario",
+            "Lucario ex",
+            "Mega Lucario ex"
         ],
         "attacks": [
             {
@@ -32189,7 +32461,8 @@
         "hp": "90",
         "evolvesFrom": "Larvitar",
         "evolvesTo": [
-            "Tyranitar"
+            "Tyranitar",
+            "Tyranitar ex"
         ],
         "attacks": [
             {
@@ -33076,7 +33349,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Lopunny"
+            "Lopunny",
+            "Mega Lopunny ex"
         ],
         "attacks": [
             {
@@ -33367,7 +33641,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Noivern"
+            "Noivern",
+            "Noivern ex"
         ],
         "attacks": [
             {
@@ -34213,7 +34488,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Amoonguss"
+            "Amoonguss",
+            "Amoonguss ex"
         ],
         "attacks": [
             {
@@ -34462,6 +34738,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Floragato"
+        ],
         "attacks": [
             {
                 "name": "Tons of Treading",
@@ -34498,6 +34777,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Sprigatito",
+        "evolvesTo": [
+            "Meowscarada"
+        ],
         "attacks": [
             {
                 "name": "Magical Leaf",
@@ -34578,6 +34860,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Lokix"
+        ],
         "attacks": [
             {
                 "name": "Rear Kick",
@@ -34740,7 +35025,8 @@
         "hp": "90",
         "evolvesFrom": "Torchic",
         "evolvesTo": [
-            "Blaziken"
+            "Blaziken",
+            "Blaziken ex"
         ],
         "attacks": [
             {
@@ -34877,7 +35163,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Darmanitan"
+            "Darmanitan",
+            "N's Darmanitan"
         ],
         "attacks": [
             {
@@ -35525,7 +35812,8 @@
         ],
         "hp": "130",
         "evolvesTo": [
-            "Wailord"
+            "Wailord",
+            "Wailord ex"
         ],
         "attacks": [
             {
@@ -35708,6 +35996,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Alolan Graveler",
             "Graveler"
         ],
         "attacks": [
@@ -35758,6 +36047,7 @@
         "hp": "100",
         "evolvesFrom": "Alolan Geodude",
         "evolvesTo": [
+            "Alolan Golem",
             "Golem"
         ],
         "attacks": [
@@ -35857,7 +36147,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Electrode"
+            "Electrode",
+            "Iono's Electrode"
         ],
         "attacks": [
             {
@@ -36054,6 +36345,9 @@
             "Lightning"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Iono's Bellibolt ex"
+        ],
         "attacks": [
             {
                 "name": "Tiny Charge",
@@ -36142,6 +36436,9 @@
             "Lightning"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Iono's Kilowattrel"
+        ],
         "attacks": [
             {
                 "name": "Quick Attack",
@@ -36752,6 +37049,7 @@
         ],
         "hp": "30",
         "evolvesTo": [
+            "Lillie's Ribombee",
             "Ribombee"
         ],
         "attacks": [
@@ -37121,7 +37419,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Alcremie"
+            "Alcremie",
+            "Alcremie ex"
         ],
         "attacks": [
             {
@@ -37209,6 +37508,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Alolan Marowak",
             "Marowak"
         ],
         "attacks": [
@@ -37306,7 +37606,8 @@
         "hp": "100",
         "evolvesFrom": "Swinub",
         "evolvesTo": [
-            "Mamoswine"
+            "Mamoswine",
+            "Mamoswine ex"
         ],
         "attacks": [
             {
@@ -37447,7 +37748,8 @@
         "hp": "90",
         "evolvesFrom": "Larvitar",
         "evolvesTo": [
-            "Tyranitar"
+            "Tyranitar",
+            "Tyranitar ex"
         ],
         "attacks": [
             {
@@ -37675,6 +37977,7 @@
         ],
         "hp": "80",
         "evolvesTo": [
+            "Hop's Sandaconda",
             "Sandaconda"
         ],
         "attacks": [
@@ -37773,6 +38076,9 @@
             "Fighting"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Toedscruel"
+        ],
         "attacks": [
             {
                 "name": "Spray Fluid",
@@ -37999,6 +38305,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Paldean Clodsire ex",
             "Quagsire"
         ],
         "attacks": [
@@ -38176,6 +38483,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "N's Zoroark ex",
             "Zoroark"
         ],
         "attacks": [
@@ -38453,7 +38761,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Klang"
+            "Klang",
+            "N's Klang"
         ],
         "attacks": [
             {
@@ -38498,7 +38807,8 @@
         "hp": "90",
         "evolvesFrom": "N's Klink",
         "evolvesTo": [
-            "Klinklang"
+            "Klinklang",
+            "N's Klinklang"
         ],
         "attacks": [
             {
@@ -38974,7 +39284,8 @@
         "hp": "100",
         "evolvesFrom": "Bagon",
         "evolvesTo": [
-            "Salamence"
+            "Salamence",
+            "Salamence ex"
         ],
         "attacks": [
             {
@@ -39282,6 +39593,10 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Dudunsparce",
+            "Dudunsparce ex"
+        ],
         "attacks": [
             {
                 "name": "Trading Places",
@@ -39515,7 +39830,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Cinccino"
+            "Cinccino",
+            "Cinccino ex"
         ],
         "attacks": [
             {
@@ -39589,7 +39905,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Noivern"
+            "Noivern",
+            "Noivern ex"
         ],
         "attacks": [
             {
@@ -39850,7 +40167,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Corvisquire"
+            "Corvisquire",
+            "Hop's Corvisquire"
         ],
         "attacks": [
             {
@@ -39905,7 +40223,8 @@
         "hp": "90",
         "evolvesFrom": "Hop's Rookidee",
         "evolvesTo": [
-            "Corviknight"
+            "Corviknight",
+            "Hop's Corviknight"
         ],
         "attacks": [
             {
@@ -39960,7 +40279,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Dubwool"
+            "Dubwool",
+            "Hop's Dubwool"
         ],
         "attacks": [
             {
@@ -40128,6 +40448,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Oinkologne"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -40506,7 +40829,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Yanmega"
+            "Yanmega",
+            "Yanmega ex"
         ],
         "attacks": [
             {
@@ -40743,6 +41067,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Cynthia's Roserade",
             "Roserade"
         ],
         "attacks": [
@@ -41000,7 +41325,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Lurantis"
+            "Lurantis",
+            "Lurantis ex"
         ],
         "attacks": [
             {
@@ -41083,7 +41409,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Dottler"
+            "Dottler",
+            "Team Rocket's Dottler"
         ],
         "attacks": [
             {
@@ -41121,6 +41448,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
+            "Appletun",
+            "Dipplin",
             "Flapple"
         ],
         "attacks": [
@@ -41159,6 +41488,10 @@
         ],
         "hp": "90",
         "evolvesFrom": "Applin",
+        "evolvesTo": [
+            "Hydrapple",
+            "Hydrapple ex"
+        ],
         "attacks": [
             {
                 "name": "Energy Loop",
@@ -41245,6 +41578,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Team Rocket's Spidops"
+        ],
         "attacks": [
             {
                 "name": "Take Down",
@@ -41325,6 +41661,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Dolliv"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -41361,6 +41700,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Smoliv",
+        "evolvesTo": [
+            "Arboliva ex"
+        ],
         "attacks": [
             {
                 "name": "Nutrients",
@@ -41797,6 +42139,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Ethan's Quilava",
             "Quilava"
         ],
         "attacks": [
@@ -41836,6 +42179,7 @@
         "hp": "100",
         "evolvesFrom": "Ethan's Cyndaquil",
         "evolvesTo": [
+            "Ethan's Typhlosion",
             "Typhlosion"
         ],
         "attacks": [
@@ -41929,6 +42273,7 @@
         ],
         "hp": "80",
         "evolvesTo": [
+            "Ethan's Magcargo",
             "Magcargo"
         ],
         "attacks": [
@@ -42015,7 +42360,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Houndoom"
+            "Houndoom",
+            "Team Rocket's Houndoom"
         ],
         "attacks": [
             {
@@ -42198,7 +42544,8 @@
         "hp": "100",
         "evolvesFrom": "Torchic",
         "evolvesTo": [
-            "Blaziken"
+            "Blaziken",
+            "Blaziken ex"
         ],
         "attacks": [
             {
@@ -42433,6 +42780,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Misty's Starmie",
             "Starmie"
         ],
         "attacks": [
@@ -42507,7 +42855,8 @@
         ],
         "hp": "30",
         "evolvesTo": [
-            "Gyarados"
+            "Gyarados",
+            "Misty's Gyarados"
         ],
         "attacks": [
             {
@@ -42697,6 +43046,7 @@
         ],
         "hp": "30",
         "evolvesTo": [
+            "Cynthia's Milotic",
             "Milotic"
         ],
         "attacks": [
@@ -42991,7 +43341,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Abomasnow"
+            "Abomasnow",
+            "Mega Abomasnow ex"
         ],
         "attacks": [
             {
@@ -43225,6 +43576,10 @@
             "Water"
         ],
         "hp": "100",
+        "evolvesTo": [
+            "Cetitan",
+            "Cetitan ex"
+        ],
         "attacks": [
             {
                 "name": "Gentle Slap",
@@ -43430,7 +43785,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Electivire"
+            "Electivire",
+            "Electivire ex"
         ],
         "attacks": [
             {
@@ -43612,7 +43968,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Flaaffy"
+            "Flaaffy",
+            "Team Rocket's Flaaffy"
         ],
         "attacks": [
             {
@@ -43660,7 +44017,8 @@
         "hp": "90",
         "evolvesFrom": "Team Rocket's Mareep",
         "evolvesTo": [
-            "Ampharos"
+            "Ampharos",
+            "Team Rocket's Ampharos"
         ],
         "attacks": [
             {
@@ -43746,7 +44104,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Manectric"
+            "Manectric",
+            "Mega Manectric ex"
         ],
         "attacks": [
             {
@@ -43931,7 +44290,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Hypno"
+            "Hypno",
+            "Team Rocket's Hypno"
         ],
         "attacks": [
             {
@@ -44140,7 +44500,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Claydol"
+            "Claydol",
+            "Steven's Claydol"
         ],
         "attacks": [
             {
@@ -44373,7 +44734,8 @@
         "hp": "80",
         "evolvesFrom": "Team Rocket's Blipbug",
         "evolvesTo": [
-            "Orbeetle"
+            "Orbeetle",
+            "Team Rocket's Orbeetle"
         ],
         "attacks": [
             {
@@ -44518,6 +44880,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Mankey",
+        "evolvesTo": [
+            "Annihilape"
+        ],
         "attacks": [
             {
                 "name": "Drag Off",
@@ -44645,7 +45010,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Pupitar"
+            "Pupitar",
+            "Team Rocket's Pupitar"
         ],
         "attacks": [
             {
@@ -44684,6 +45050,7 @@
         "hp": "100",
         "evolvesFrom": "Team Rocket's Larvitar",
         "evolvesTo": [
+            "Team Rocket's Tyranitar",
             "Tyranitar"
         ],
         "attacks": [
@@ -44871,7 +45238,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Medicham"
+            "Medicham",
+            "Medicham ex"
         ],
         "attacks": [
             {
@@ -44998,6 +45366,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Cynthia's Gabite",
             "Gabite"
         ],
         "attacks": [
@@ -45037,6 +45406,7 @@
         "hp": "100",
         "evolvesFrom": "Cynthia's Gible",
         "evolvesTo": [
+            "Cynthia's Garchomp ex",
             "Garchomp"
         ],
         "attacks": [
@@ -45308,6 +45678,9 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Arven's Toedscruel"
+        ],
         "attacks": [
             {
                 "name": "Slight Intrusion",
@@ -45438,7 +45811,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Arbok"
+            "Arbok",
+            "Team Rocket's Arbok"
         ],
         "attacks": [
             {
@@ -45531,7 +45905,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Nidorina"
+            "Nidorina",
+            "Team Rocket's Nidorina"
         ],
         "attacks": [
             {
@@ -45570,7 +45945,8 @@
         "hp": "90",
         "evolvesFrom": "Team Rocket's Nidoran\u2640",
         "evolvesTo": [
-            "Nidoqueen"
+            "Nidoqueen",
+            "Team Rocket's Nidoqueen"
         ],
         "attacks": [
             {
@@ -45667,7 +46043,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Nidorino"
+            "Nidorino",
+            "Team Rocket's Nidorino"
         ],
         "attacks": [
             {
@@ -45716,7 +46093,8 @@
         "hp": "100",
         "evolvesFrom": "Team Rocket's Nidoran\u2642",
         "evolvesTo": [
-            "Nidoking"
+            "Nidoking",
+            "Team Rocket's Nidoking ex"
         ],
         "attacks": [
             {
@@ -45823,7 +46201,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Golbat"
+            "Golbat",
+            "Team Rocket's Golbat"
         ],
         "attacks": [
             {
@@ -45868,7 +46247,8 @@
         "hp": "80",
         "evolvesFrom": "Team Rocket's Zubat",
         "evolvesTo": [
-            "Crobat"
+            "Crobat",
+            "Team Rocket's Crobat ex"
         ],
         "attacks": [
             {
@@ -45973,7 +46353,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Muk"
+            "Muk",
+            "Team Rocket's Muk"
         ],
         "attacks": [
             {
@@ -46065,6 +46446,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Team Rocket's Weezing",
             "Weezing"
         ],
         "attacks": [
@@ -46149,7 +46531,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Honchkrow"
+            "Honchkrow",
+            "Team Rocket's Honchkrow"
         ],
         "attacks": [
             {
@@ -46286,7 +46669,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Liepard"
+            "Liepard",
+            "Marnie's Liepard"
         ],
         "attacks": [
             {
@@ -46361,6 +46745,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Marnie's Scrafty",
             "Scrafty"
         ],
         "attacks": [
@@ -46449,6 +46834,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Marnie's Morgrem",
             "Morgrem"
         ],
         "attacks": [
@@ -46497,7 +46883,8 @@
         "hp": "100",
         "evolvesFrom": "Marnie's Impidimp",
         "evolvesTo": [
-            "Grimmsnarl"
+            "Grimmsnarl",
+            "Marnie's Grimmsnarl ex"
         ],
         "attacks": [
             {
@@ -46619,6 +47006,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Arven's Mabosstiff ex"
+        ],
         "attacks": [
             {
                 "name": "Stampede",
@@ -46879,7 +47269,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Metang"
+            "Metang",
+            "Steven's Metang"
         ],
         "attacks": [
             {
@@ -46925,7 +47316,8 @@
         "hp": "100",
         "evolvesFrom": "Steven's Beldum",
         "evolvesTo": [
-            "Metagross"
+            "Metagross",
+            "Steven's Metagross ex"
         ],
         "attacks": [
             {
@@ -47072,7 +47464,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Raticate"
+            "Raticate",
+            "Team Rocket's Raticate"
         ],
         "attacks": [
             {
@@ -47146,7 +47539,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Persian"
+            "Persian",
+            "Team Rocket's Persian ex"
         ],
         "attacks": [
             {
@@ -47341,7 +47735,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Porygon2"
+            "Porygon2",
+            "Team Rocket's Porygon2"
         ],
         "attacks": [
             {
@@ -47380,7 +47775,8 @@
         "hp": "90",
         "evolvesFrom": "Team Rocket's Porygon",
         "evolvesTo": [
-            "Porygon-Z"
+            "Porygon-Z",
+            "Team Rocket's Porygon-Z"
         ],
         "attacks": [
             {
@@ -47558,6 +47954,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Arven's Greedent",
             "Greedent"
         ],
         "attacks": [
@@ -48153,7 +48550,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Yanmega"
+            "Yanmega",
+            "Yanmega ex"
         ],
         "attacks": [
             {
@@ -48198,6 +48596,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Mega Scrafty ex",
             "Scrafty"
         ],
         "attacks": [
@@ -48708,7 +49107,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Whimsicott"
+            "Whimsicott",
+            "Whimsicott ex"
         ],
         "attacks": [
             {
@@ -49059,7 +49459,8 @@
         "hp": "110",
         "evolvesFrom": "Tepig",
         "evolvesTo": [
-            "Emboar"
+            "Emboar",
+            "Mega Emboar ex"
         ],
         "attacks": [
             {
@@ -49283,7 +49684,8 @@
         "hp": "80",
         "evolvesFrom": "Litwick",
         "evolvesTo": [
-            "Chandelure"
+            "Chandelure",
+            "Mega Chandelure ex"
         ],
         "attacks": [
             {
@@ -50044,7 +50446,8 @@
         ],
         "hp": "40",
         "evolvesTo": [
-            "Galvantula"
+            "Galvantula",
+            "Galvantula ex"
         ],
         "attacks": [
             {
@@ -50563,7 +50966,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Jellicent"
+            "Jellicent",
+            "Jellicent ex"
         ],
         "attacks": [
             {
@@ -51026,6 +51430,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Mega Scrafty ex",
             "Scrafty"
         ],
         "attacks": [
@@ -51161,7 +51566,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Mandibuzz"
+            "Mandibuzz",
+            "Mandibuzz ex"
         ],
         "attacks": [
             {
@@ -51915,7 +52321,8 @@
         "hp": "110",
         "evolvesFrom": "Deino",
         "evolvesTo": [
-            "Hydreigon"
+            "Hydreigon",
+            "Hydreigon ex"
         ],
         "attacks": [
             {
@@ -52428,7 +52835,8 @@
         "hp": "100",
         "evolvesFrom": "Snivy",
         "evolvesTo": [
-            "Serperior"
+            "Serperior",
+            "Serperior ex"
         ],
         "attacks": [
             {
@@ -52797,7 +53205,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Amoonguss"
+            "Amoonguss",
+            "Amoonguss ex"
         ],
         "attacks": [
             {
@@ -53740,7 +54149,8 @@
         "hp": "90",
         "evolvesFrom": "Tynamo",
         "evolvesTo": [
-            "Eelektross"
+            "Eelektross",
+            "Mega Eelektross ex"
         ],
         "attacks": [
             {
@@ -54338,7 +54748,9 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Excadrill"
+            "Excadrill",
+            "Excadrill ex",
+            "Mega Excadrill ex"
         ],
         "attacks": [
             {
@@ -54949,7 +55361,8 @@
         "hp": "100",
         "evolvesFrom": "Sandile",
         "evolvesTo": [
-            "Krookodile"
+            "Krookodile",
+            "Krookodile ex"
         ],
         "attacks": [
             {
@@ -55497,6 +55910,9 @@
         ],
         "hp": "120",
         "evolvesFrom": "Pawniard",
+        "evolvesTo": [
+            "Kingambit"
+        ],
         "attacks": [
             {
                 "name": "Cut Up",
@@ -55836,7 +56252,8 @@
         ],
         "hp": "60",
         "evolvesTo": [
-            "Cinccino"
+            "Cinccino",
+            "Cinccino ex"
         ],
         "attacks": [
             {
@@ -56103,6 +56520,7 @@
         "hp": "110",
         "evolvesFrom": "Bulbasaur",
         "evolvesTo": [
+            "Mega Venusaur ex",
             "Venusaur"
         ],
         "attacks": [
@@ -56246,6 +56664,7 @@
         ],
         "hp": "60",
         "evolvesTo": [
+            "Alolan Exeggutor ex",
             "Exeggutor"
         ],
         "attacks": [
@@ -56425,6 +56844,7 @@
         "hp": "110",
         "evolvesFrom": "Chikorita",
         "evolvesTo": [
+            "Mega Meganium ex",
             "Meganium"
         ],
         "attacks": [
@@ -56744,7 +57164,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Ninjask"
+            "Ninjask",
+            "Shedinja"
         ],
         "attacks": [
             {
@@ -57042,7 +57463,8 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Camerupt"
+            "Camerupt",
+            "Mega Camerupt ex"
         ],
         "attacks": [
             {
@@ -57149,7 +57571,8 @@
         "hp": "100",
         "evolvesFrom": "Scorbunny",
         "evolvesTo": [
-            "Cinderace"
+            "Cinderace",
+            "Cinderace ex"
         ],
         "attacks": [
             {
@@ -57187,6 +57610,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Mega Pyroar ex",
             "Pyroar"
         ],
         "attacks": [
@@ -57593,7 +58017,8 @@
         ],
         "hp": "90",
         "evolvesTo": [
-            "Abomasnow"
+            "Abomasnow",
+            "Mega Abomasnow ex"
         ],
         "attacks": [
             {
@@ -58339,7 +58764,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Manectric"
+            "Manectric",
+            "Mega Manectric ex"
         ],
         "attacks": [
             {
@@ -58639,8 +59065,10 @@
         "hp": "100",
         "evolvesFrom": "Ralts",
         "evolvesTo": [
+            "Gallade",
             "Gardevoir",
-            "Gallade"
+            "Mega Gallade ex",
+            "Mega Gardevoir ex"
         ],
         "attacks": [
             {
@@ -58938,6 +59366,10 @@
             "Psychic"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Houndstone",
+            "Houndstone ex"
+        ],
         "attacks": [
             {
                 "name": "Stampede",
@@ -58991,6 +59423,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Gholdengo"
+        ],
         "attacks": [
             {
                 "name": "Slap",
@@ -59416,7 +59851,9 @@
         ],
         "hp": "80",
         "evolvesTo": [
-            "Lucario"
+            "Lucario",
+            "Lucario ex",
+            "Mega Lucario ex"
         ],
         "attacks": [
             {
@@ -59698,6 +60135,9 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Naclstack"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -59735,6 +60175,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Nacli",
+        "evolvesTo": [
+            "Garganacl"
+        ],
         "attacks": [
             {
                 "name": "Rock Hurl",
@@ -60099,6 +60542,9 @@
             "Darkness"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Grafaiai"
+        ],
         "attacks": [
             {
                 "name": "Poison Jab",
@@ -60342,6 +60788,9 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Tinkatuff"
+        ],
         "attacks": [
             {
                 "name": "Beat",
@@ -60384,6 +60833,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Tinkatink",
+        "evolvesTo": [
+            "Tinkaton"
+        ],
         "attacks": [
             {
                 "name": "Light Punch",
@@ -60850,7 +61302,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Lopunny"
+            "Lopunny",
+            "Mega Lopunny ex"
         ],
         "attacks": [
             {
@@ -61775,6 +62228,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Lokix"
+        ],
         "attacks": [
             {
                 "name": "Flail Around",
@@ -61905,7 +62361,9 @@
         "hp": "110",
         "evolvesFrom": "Charmander",
         "evolvesTo": [
-            "Charizard"
+            "Charizard",
+            "Mega Charizard X ex",
+            "Mega Charizard Y ex"
         ],
         "attacks": [
             {
@@ -62199,6 +62657,12 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Armarouge",
+            "Armarouge ex",
+            "Ceruledge",
+            "Ceruledge ex"
+        ],
         "attacks": [
             {
                 "name": "Gather Strength",
@@ -62417,7 +62881,8 @@
         "hp": "100",
         "evolvesFrom": "Swinub",
         "evolvesTo": [
-            "Mamoswine"
+            "Mamoswine",
+            "Mamoswine ex"
         ],
         "attacks": [
             {
@@ -62608,7 +63073,8 @@
         "hp": "100",
         "evolvesFrom": "Piplup",
         "evolvesTo": [
-            "Empoleon"
+            "Empoleon",
+            "Empoleon ex"
         ],
         "attacks": [
             {
@@ -62780,6 +63246,9 @@
             "Lightning"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Pawmo"
+        ],
         "attacks": [
             {
                 "name": "Growl",
@@ -62825,6 +63294,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Pawmi",
+        "evolvesTo": [
+            "Pawmot"
+        ],
         "attacks": [
             {
                 "name": "Electric Punch",
@@ -62899,7 +63371,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Mismagius"
+            "Mismagius",
+            "Mismagius ex"
         ],
         "attacks": [
             {
@@ -63280,7 +63753,8 @@
         ],
         "hp": "50",
         "evolvesTo": [
-            "Alcremie"
+            "Alcremie",
+            "Alcremie ex"
         ],
         "attacks": [
             {
@@ -63390,6 +63864,9 @@
             "Psychic"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Brambleghast"
+        ],
         "attacks": [
             {
                 "name": "Sneaky Placement",
@@ -63643,7 +64120,8 @@
         "hp": "90",
         "evolvesFrom": "Trapinch",
         "evolvesTo": [
-            "Flygon"
+            "Flygon",
+            "Flygon ex"
         ],
         "attacks": [
             {
@@ -63765,7 +64243,9 @@
         "hp": "100",
         "evolvesFrom": "Gastly",
         "evolvesTo": [
-            "Gengar"
+            "Gengar",
+            "Gengar ex",
+            "Mega Gengar ex"
         ],
         "attacks": [
             {
@@ -63985,6 +64465,7 @@
         ],
         "hp": "70",
         "evolvesTo": [
+            "Mega Sharpedo ex",
             "Sharpedo"
         ],
         "attacks": [
@@ -64211,7 +64692,8 @@
         "hp": "100",
         "evolvesFrom": "Sandile",
         "evolvesTo": [
-            "Krookodile"
+            "Krookodile",
+            "Krookodile ex"
         ],
         "attacks": [
             {
@@ -64669,6 +65151,10 @@
             "Metal"
         ],
         "hp": "130",
+        "evolvesTo": [
+            "Archaludon",
+            "Archaludon ex"
+        ],
         "attacks": [
             {
                 "name": "Hyper Beam",
@@ -65059,7 +65545,8 @@
         ],
         "hp": "70",
         "evolvesTo": [
-            "Lopunny"
+            "Lopunny",
+            "Mega Lopunny ex"
         ],
         "attacks": [
             {
@@ -65297,6 +65784,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Erika's Gloom"
+        ],
         "attacks": [
             {
                 "name": "Reckless Charge",
@@ -65333,6 +65823,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Erika's Oddish",
+        "evolvesTo": [
+            "Erika's Vileplume ex"
+        ],
         "attacks": [
             {
                 "name": "Poison Spray",
@@ -65419,6 +65912,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Erika's Weepinbell"
+        ],
         "attacks": [
             {
                 "name": "Vine Slap",
@@ -65455,6 +65951,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Erika's Bellsprout",
+        "evolvesTo": [
+            "Erika's Victreebel"
+        ],
         "attacks": [
             {
                 "name": "Melt",
@@ -65595,6 +66094,9 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Bayleef"
+        ],
         "attacks": [
             {
                 "name": "Growl",
@@ -65641,6 +66143,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Chikorita",
+        "evolvesTo": [
+            "Mega Meganium ex",
+            "Meganium"
+        ],
         "attacks": [
             {
                 "name": "Leaf Step",
@@ -65723,6 +66229,10 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Cascoon",
+            "Silcoon"
+        ],
         "attacks": [
             {
                 "name": "Bug Bite",
@@ -65759,6 +66269,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Wurmple",
+        "evolvesTo": [
+            "Beautifly"
+        ],
         "attacks": [
             {
                 "name": "Tackle",
@@ -65849,6 +66362,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Wurmple",
+        "evolvesTo": [
+            "Dustox"
+        ],
         "attacks": [
             {
                 "name": "Trading Places",
@@ -65961,6 +66477,9 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Charmeleon"
+        ],
         "attacks": [
             {
                 "name": "Fire Claws",
@@ -65998,6 +66517,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Charmander",
+        "evolvesTo": [
+            "Mega Charizard X ex",
+            "Mega Charizard Y ex"
+        ],
         "attacks": [
             {
                 "name": "Heat Blast",
@@ -66116,6 +66639,10 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Camerupt",
+            "Mega Camerupt ex"
+        ],
         "attacks": [
             {
                 "name": "Combustion",
@@ -66211,6 +66738,9 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Pignite"
+        ],
         "attacks": [
             {
                 "name": "Steady Firebreathing",
@@ -66248,6 +66778,10 @@
         ],
         "hp": "110",
         "evolvesFrom": "Tepig",
+        "evolvesTo": [
+            "Emboar",
+            "Mega Emboar ex"
+        ],
         "attacks": [
             {
                 "name": "Super Singe",
@@ -66387,6 +66921,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Golduck"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -66475,6 +67012,9 @@
             "Water"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Croconaw"
+        ],
         "attacks": [
             {
                 "name": "Slight Intrusion",
@@ -66512,6 +67052,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Totodile",
+        "evolvesTo": [
+            "Feraligatr",
+            "Mega Feraligatr ex"
+        ],
         "attacks": [
             {
                 "name": "Crunch",
@@ -66595,6 +67139,11 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Froslass",
+            "Glalie",
+            "Mega Froslass ex"
+        ],
         "attacks": [
             {
                 "name": "Chilly",
@@ -66736,6 +67285,9 @@
             "Water"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "N's Vanillish"
+        ],
         "attacks": [
             {
                 "name": "Call for Family",
@@ -66782,6 +67334,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "N's Vanillite",
+        "evolvesTo": [
+            "N's Vanilluxe"
+        ],
         "attacks": [
             {
                 "name": "Flop",
@@ -66877,6 +67432,9 @@
             "Water"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Frosmoth"
+        ],
         "attacks": [
             {
                 "name": "Icicle",
@@ -67004,6 +67562,9 @@
             "Lightning"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Raichu"
+        ],
         "attacks": [
             {
                 "name": "Tail Smack",
@@ -67278,6 +67839,9 @@
             "Lightning"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Heliolisk"
+        ],
         "attacks": [
             {
                 "name": "Zap Kick",
@@ -67506,6 +68070,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Team Rocket's Exeggutor"
+        ],
         "attacks": [
             {
                 "name": "Focused Wish",
@@ -67603,6 +68170,10 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Azumarill",
+            "Azumarill ex"
+        ],
         "attacks": [
             {
                 "name": "Hide",
@@ -67698,6 +68269,10 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Mismagius",
+            "Mismagius ex"
+        ],
         "attacks": [
             {
                 "name": "Ascension",
@@ -67891,6 +68466,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Slurpuff"
+        ],
         "attacks": [
             {
                 "name": "Ram",
@@ -67973,6 +68551,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Hop's Trevenant"
+        ],
         "attacks": [
             {
                 "name": "Splashing Dodge",
@@ -68121,6 +68702,9 @@
             "Fighting"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Team Rocket's Dugtrio"
+        ],
         "attacks": [
             {
                 "name": "Relentless Burrowing",
@@ -68245,6 +68829,10 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Medicham",
+            "Medicham ex"
+        ],
         "attacks": [
             {
                 "name": "Collect",
@@ -68480,6 +69068,9 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Pangoro"
+        ],
         "attacks": [
             {
                 "name": "Reckless Charge",
@@ -68610,6 +69201,9 @@
             "Fighting"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Carkol"
+        ],
         "attacks": [
             {
                 "name": "Mud-Slap",
@@ -68648,6 +69242,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Rolycoly",
+        "evolvesTo": [
+            "Coalossal"
+        ],
         "attacks": [
             {
                 "name": "Guard Press",
@@ -68954,6 +69551,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Galarian Linoone"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -68990,6 +69590,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Galarian Zigzagoon",
+        "evolvesTo": [
+            "Galarian Obstagoon"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -69085,6 +69688,10 @@
             "Darkness"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Mega Scrafty ex",
+            "Scrafty"
+        ],
         "attacks": [
             {
                 "name": "Knock Off",
@@ -69174,6 +69781,10 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mandibuzz",
+            "Mandibuzz ex"
+        ],
         "attacks": [
             {
                 "name": "Flap",
@@ -69523,6 +70134,9 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Bisharp"
+        ],
         "attacks": [
             {
                 "name": "Push Down",
@@ -69565,6 +70179,9 @@
         ],
         "hp": "120",
         "evolvesFrom": "Pawniard",
+        "evolvesTo": [
+            "Kingambit"
+        ],
         "attacks": [
             {
                 "name": "Rapid Draw",
@@ -69713,6 +70330,9 @@
             "Dragon"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Dragonair"
+        ],
         "attacks": [
             {
                 "name": "Headbutt",
@@ -69745,6 +70365,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Dratini",
+        "evolvesTo": [
+            "Mega Dragonite ex"
+        ],
         "attacks": [
             {
                 "name": "Tail Snap",
@@ -69914,6 +70537,10 @@
             "Dragon"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Noivern",
+            "Noivern ex"
+        ],
         "attacks": [
             {
                 "name": "Knickknack Carrying",
@@ -70090,6 +70717,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Larry's Dudunsparce ex"
+        ],
         "attacks": [
             {
                 "name": "Rising Lunge",
@@ -70167,6 +70797,9 @@
             "Colorless"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Delcatty"
+        ],
         "attacks": [
             {
                 "name": "Cat Kick",
@@ -70298,6 +70931,9 @@
             "Colorless"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Larry's Staravia"
+        ],
         "attacks": [
             {
                 "name": "Minor Errand-Running",
@@ -70349,6 +70985,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Larry's Starly",
+        "evolvesTo": [
+            "Larry's Staraptor"
+        ],
         "attacks": [
             {
                 "name": "Flap",
@@ -70505,6 +71144,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Larry's Braviary"
+        ],
         "attacks": [
             {
                 "name": "Peck the Wound",
@@ -71019,6 +71661,9 @@
             "Grass"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Ariados"
+        ],
         "attacks": [
             {
                 "name": "Gooey Thread",
@@ -71054,6 +71699,9 @@
             "Grass"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Spewpa"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -71090,6 +71738,9 @@
         ],
         "hp": "80",
         "evolvesFrom": "Scatterbug",
+        "evolvesTo": [
+            "Vivillon"
+        ],
         "attacks": [
             {
                 "name": "Hide",
@@ -71127,6 +71778,10 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Salazzle",
+            "Salazzle ex"
+        ],
         "attacks": [
             {
                 "name": "Fire Claws",
@@ -71257,6 +71912,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mega Starmie ex"
+        ],
         "attacks": [
             {
                 "name": "Water Gun",
@@ -71347,6 +72005,10 @@
         ],
         "hp": "90",
         "evolvesFrom": "Shinx",
+        "evolvesTo": [
+            "Luxray",
+            "Luxray ex"
+        ],
         "attacks": [
             {
                 "name": "Static Shock",
@@ -71473,6 +72135,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Meowstic"
+        ],
         "attacks": [
             {
                 "name": "Nap",
@@ -71618,6 +72283,9 @@
             "Fighting"
         ],
         "hp": "90",
+        "evolvesTo": [
+            "Probopass"
+        ],
         "attacks": [
             {
                 "name": "Rolling Rocks",
@@ -71699,6 +72367,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Snivy",
+        "evolvesTo": [
+            "Serperior",
+            "Serperior ex"
+        ],
         "attacks": [
             {
                 "name": "Solar Cutter",
@@ -71734,6 +72406,9 @@
             "Grass"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Dartrix"
+        ],
         "attacks": [
             {
                 "name": "Find a Friend",
@@ -71782,6 +72457,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Fletchling",
+        "evolvesTo": [
+            "Talonflame"
+        ],
         "attacks": [
             {
                 "name": "Flare",
@@ -71874,6 +72552,9 @@
             "Water"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Dewgong"
+        ],
         "attacks": [
             {
                 "name": "Rain Splash",
@@ -71920,6 +72601,9 @@
             "Lightning"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Luxio"
+        ],
         "attacks": [
             {
                 "name": "Double Scratch",
@@ -71955,6 +72639,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Aromatisse"
+        ],
         "attacks": [
             {
                 "name": "Sweet Scent",
@@ -72279,6 +72966,10 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Clefable",
+            "Mega Clefable ex"
+        ],
         "attacks": [
             {
                 "name": "Follow Me",
@@ -72360,6 +73051,9 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Servine"
+        ],
         "attacks": [
             {
                 "name": "Reckless Charge",
@@ -72444,6 +73138,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Rowlet",
+        "evolvesTo": [
+            "Decidueye",
+            "Decidueye ex"
+        ],
         "attacks": [
             {
                 "name": "Leafage",
@@ -72543,6 +73241,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Antique Sail Fossil",
+        "evolvesTo": [
+            "Aurorus"
+        ],
         "attacks": [
             {
                 "name": "Icy Wind",
@@ -72682,6 +73383,9 @@
             "Fighting"
         ],
         "hp": "100",
+        "evolvesTo": [
+            "Hippowdon"
+        ],
         "attacks": [
             {
                 "name": "Sand Attack",
@@ -72831,6 +73535,9 @@
             "Fighting"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Barbaracle"
+        ],
         "attacks": [
             {
                 "name": "Double Draw",
@@ -72924,6 +73631,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Antique Jaw Fossil",
+        "evolvesTo": [
+            "Tyrantrum"
+        ],
         "attacks": [
             {
                 "name": "Get Angry",
@@ -73098,6 +73808,9 @@
             "Darkness"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Drapion"
+        ],
         "attacks": [
             {
                 "name": "Poison Jab",
@@ -73240,6 +73953,9 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Doublade"
+        ],
         "attacks": [
             {
                 "name": "Cut",
@@ -73283,6 +73999,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Honedge",
+        "evolvesTo": [
+            "Aegislash"
+        ],
         "attacks": [
             {
                 "name": "Weaponized Swords",
@@ -73326,6 +74045,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Haunter"
+        ],
         "attacks": [
             {
                 "name": "Surprise Attack",
@@ -73362,6 +74084,11 @@
         ],
         "hp": "100",
         "evolvesFrom": "Gastly",
+        "evolvesTo": [
+            "Gengar",
+            "Gengar ex",
+            "Mega Gengar ex"
+        ],
         "attacks": [
             {
                 "name": "Haunt",
@@ -73635,6 +74362,9 @@
             "Colorless"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Raticate"
+        ],
         "attacks": [
             {
                 "name": "Take Down",
@@ -73813,6 +74543,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Diggersby"
+        ],
         "attacks": [
             {
                 "name": "Smash Kick",
@@ -73898,6 +74631,9 @@
             "Colorless"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Fletchinder"
+        ],
         "attacks": [
             {
                 "name": "Chirp",
@@ -74301,6 +75037,9 @@
         ],
         "hp": "80",
         "evolvesFrom": "Weedle",
+        "evolvesTo": [
+            "Beedrill ex"
+        ],
         "attacks": [
             {
                 "name": "Hang Down",
@@ -74385,6 +75124,9 @@
             "Grass"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Kakuna"
+        ],
         "attacks": [
             {
                 "name": "Surprise Attack",
@@ -74421,6 +75163,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Fennekin",
+        "evolvesTo": [
+            "Delphox",
+            "Mega Delphox ex"
+        ],
         "attacks": [
             {
                 "name": "Flamethrower",
@@ -74457,6 +75203,10 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mega Pyroar ex",
+            "Pyroar"
+        ],
         "attacks": [
             {
                 "name": "Tackle",
@@ -74493,6 +75243,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Chespin",
+        "evolvesTo": [
+            "Chesnaught"
+        ],
         "attacks": [
             {
                 "name": "Leafy Charge",
@@ -74541,6 +75294,9 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Ninetales"
+        ],
         "attacks": [
             {
                 "name": "Singe",
@@ -74622,6 +75378,9 @@
             "Fire"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Braixen"
+        ],
         "attacks": [
             {
                 "name": "Call for Family",
@@ -74711,6 +75470,9 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Quilladin"
+        ],
         "attacks": [
             {
                 "name": "Beat",
@@ -74944,6 +75706,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Octillery"
+        ],
         "attacks": [
             {
                 "name": "Sharp Fin",
@@ -75028,6 +75793,10 @@
         ],
         "hp": "100",
         "evolvesFrom": "Froakie",
+        "evolvesTo": [
+            "Greninja ex",
+            "Mega Greninja ex"
+        ],
         "attacks": [
             {
                 "name": "Summoning Jutsu",
@@ -75073,6 +75842,9 @@
             "Lightning"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Flaaffy"
+        ],
         "attacks": [
             {
                 "name": "Thunder Wave",
@@ -75110,6 +75882,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Frogadier"
+        ],
         "attacks": [
             {
                 "name": "Collect",
@@ -75244,6 +76019,9 @@
             "Water"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Avalugg"
+        ],
         "attacks": [
             {
                 "name": "Chilly",
@@ -75438,6 +76216,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Golisopod"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -75661,6 +76442,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Meowstic"
+        ],
         "attacks": [
             {
                 "name": "Buddy Attack",
@@ -75702,6 +76486,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Trevenant"
+        ],
         "attacks": [
             {
                 "name": "Mumble",
@@ -75894,6 +76681,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Mareep",
+        "evolvesTo": [
+            "Ampharos"
+        ],
         "attacks": [
             {
                 "name": "Disconnect",
@@ -76029,6 +76819,9 @@
             "Fighting"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Donphan"
+        ],
         "attacks": [
             {
                 "name": "Mud-Slap",
@@ -76227,6 +77020,9 @@
             "Psychic"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Gourgeist ex"
+        ],
         "attacks": [
             {
                 "name": "Stampede",
@@ -76392,6 +77188,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Skuntank"
+        ],
         "attacks": [
             {
                 "name": "Scratch",
@@ -76428,6 +77227,9 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Claydol"
+        ],
         "attacks": [
             {
                 "name": "Continuous Spin",
@@ -76506,6 +77308,9 @@
             "Darkness"
         ],
         "hp": "40",
+        "evolvesTo": [
+            "Golbat"
+        ],
         "attacks": [
             {
                 "name": "Supersonic",
@@ -76642,6 +77447,9 @@
         ],
         "hp": "80",
         "evolvesFrom": "Zubat",
+        "evolvesTo": [
+            "Crobat"
+        ],
         "attacks": [
             {
                 "name": "Covert Flight",
@@ -76737,6 +77545,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Garbodor"
+        ],
         "attacks": [
             {
                 "name": "Acid Spray",
@@ -76918,6 +77729,9 @@
             "Dragon"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Sliggoo"
+        ],
         "attacks": [
             {
                 "name": "Absorb",
@@ -76987,6 +77801,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Beldum",
+        "evolvesTo": [
+            "Metagross"
+        ],
         "attacks": [
             {
                 "name": "Metal Claw",
@@ -77095,6 +77912,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mega Dragalge ex"
+        ],
         "attacks": [
             {
                 "name": "Hook",
@@ -77130,6 +77950,9 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Metang"
+        ],
         "attacks": [
             {
                 "name": "Headbutt",
@@ -77181,6 +78004,9 @@
             "Metal"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Ferrothorn"
+        ],
         "attacks": [
             {
                 "name": "Rolling Tackle",
@@ -77328,6 +78154,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Goomy",
+        "evolvesTo": [
+            "Goodra"
+        ],
         "attacks": [
             {
                 "name": "Gentle Slap",
@@ -77360,6 +78189,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Watchog"
+        ],
         "attacks": [
             {
                 "name": "Bite",
@@ -77447,6 +78279,10 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Cinccino",
+            "Cinccino ex"
+        ],
         "attacks": [
             {
                 "name": "Take Down",
@@ -77795,6 +78631,9 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Charjabug"
+        ],
         "attacks": [
             {
                 "name": "String Shot",
@@ -77831,6 +78670,10 @@
             "Grass"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Lurantis",
+            "Lurantis ex"
+        ],
         "attacks": [
             {
                 "name": "Reckless Charge",
@@ -77916,6 +78759,10 @@
             "Grass"
         ],
         "hp": "30",
+        "evolvesTo": [
+            "Sinistcha",
+            "Sinistcha ex"
+        ],
         "attacks": [
             {
                 "name": "Furtive Drop",
@@ -78048,6 +78895,9 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Centiskorch"
+        ],
         "attacks": [
             {
                 "name": "Controlled Burn",
@@ -78198,6 +79048,12 @@
             "Fire"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Armarouge",
+            "Armarouge ex",
+            "Ceruledge",
+            "Ceruledge ex"
+        ],
         "attacks": [
             {
                 "name": "Best Punch",
@@ -78234,6 +79090,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Seaking"
+        ],
         "attacks": [
             {
                 "name": "Pierce",
@@ -78438,6 +79297,10 @@
             "Water"
         ],
         "hp": "130",
+        "evolvesTo": [
+            "Wailord",
+            "Wailord ex"
+        ],
         "attacks": [
             {
                 "name": "Water Gun",
@@ -78488,6 +79351,9 @@
             "Water"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Brionne"
+        ],
         "attacks": [
             {
                 "name": "Pound",
@@ -78524,6 +79390,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Popplio",
+        "evolvesTo": [
+            "Primarina"
+        ],
         "attacks": [
             {
                 "name": "Hyper Voice",
@@ -78652,6 +79521,10 @@
             "Lightning"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Manectric",
+            "Mega Manectric ex"
+        ],
         "attacks": [
             {
                 "name": "Collect",
@@ -78697,6 +79570,10 @@
             "Water"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Palafin",
+            "Palafin ex"
+        ],
         "attacks": [
             {
                 "name": "Draining Fin",
@@ -78821,6 +79698,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Grubbin",
+        "evolvesTo": [
+            "Vikavolt"
+        ],
         "attacks": [
             {
                 "name": "Vise Grip",
@@ -78961,6 +79841,11 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mega Slowbro ex",
+            "Slowbro",
+            "Slowking"
+        ],
         "attacks": [
             {
                 "name": "All-You-Can-Yeet",
@@ -79068,6 +79953,9 @@
             "Psychic"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Lampent"
+        ],
         "attacks": [
             {
                 "name": "Will-O-Wisp",
@@ -79251,6 +80139,10 @@
         ],
         "hp": "90",
         "evolvesFrom": "Litwick",
+        "evolvesTo": [
+            "Chandelure",
+            "Mega Chandelure ex"
+        ],
         "attacks": [
             {
                 "name": "Spreading Light",
@@ -79343,6 +80235,9 @@
             "Psychic"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Banette"
+        ],
         "attacks": [
             {
                 "name": "Hang Down",
@@ -79538,6 +80433,9 @@
             "Fighting"
         ],
         "hp": "50",
+        "evolvesTo": [
+            "Primeape"
+        ],
         "attacks": [
             {
                 "name": "Low Kick",
@@ -79615,6 +80513,9 @@
         ],
         "hp": "110",
         "evolvesFrom": "Mankey",
+        "evolvesTo": [
+            "Annihilape"
+        ],
         "attacks": [
             {
                 "name": "Corkscrew Punch",
@@ -79702,6 +80603,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Antique Skull Fossil",
+        "evolvesTo": [
+            "Rampardos ex"
+        ],
         "attacks": [
             {
                 "name": "Push Down",
@@ -79786,6 +80690,11 @@
             "Fighting"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Excadrill",
+            "Excadrill ex",
+            "Mega Excadrill ex"
+        ],
         "attacks": [
             {
                 "name": "Call for Family",
@@ -79833,6 +80742,10 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mandibuzz",
+            "Mandibuzz ex"
+        ],
         "attacks": [
             {
                 "name": "Flap",
@@ -80086,6 +80999,9 @@
             "Darkness"
         ],
         "hp": "60",
+        "evolvesTo": [
+            "Malamar"
+        ],
         "attacks": [
             {
                 "name": "Procurement",
@@ -80131,6 +81047,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Thievul"
+        ],
         "attacks": [
             {
                 "name": "Gnaw",
@@ -80274,6 +81193,9 @@
             "Darkness"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Mabosstiff"
+        ],
         "attacks": [
             {
                 "name": "Bite",
@@ -80489,6 +81411,9 @@
         ],
         "hp": "100",
         "evolvesFrom": "Antique Armor Fossil",
+        "evolvesTo": [
+            "Bastiodon"
+        ],
         "attacks": [
             {
                 "name": "Smithereen Smash",
@@ -80533,6 +81458,9 @@
             "Metal"
         ],
         "hp": "80",
+        "evolvesTo": [
+            "Bronzong"
+        ],
         "attacks": [
             {
                 "name": "Mirror Attack",
@@ -80693,6 +81621,9 @@
             "Colorless"
         ],
         "hp": "70",
+        "evolvesTo": [
+            "Trumbeak"
+        ],
         "attacks": [
             {
                 "name": "Double Stab",
@@ -80734,6 +81665,9 @@
             "Colorless"
         ],
         "hp": "110",
+        "evolvesTo": [
+            "Silvally"
+        ],
         "attacks": [
             {
                 "name": "Power Edge",
@@ -80793,6 +81727,9 @@
         ],
         "hp": "90",
         "evolvesFrom": "Pikipek",
+        "evolvesTo": [
+            "Toucannon"
+        ],
         "attacks": [
             {
                 "name": "Fly",

@@ -318,6 +318,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Alolan Dugtrio",
       "Dugtrio"
     ],
     "hp": 50,
@@ -413,6 +414,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Alolan Graveler",
       "Graveler"
     ],
     "hp": 60,
@@ -481,6 +483,7 @@
     ],
     "evolvesFrom": "Alolan Geodude",
     "evolvesTo": [
+      "Alolan Golem",
       "Golem"
     ],
     "hp": 100,
@@ -600,7 +603,9 @@
       }
     ],
     "evolvesFrom": "Antique Sail Fossil",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Aurorus"
+    ],
     "hp": 100,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -804,6 +809,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "hp": 40,
@@ -1314,7 +1321,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Arven's Mabosstiff ex"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -1340,6 +1349,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Arven's Greedent",
       "Greedent"
     ],
     "hp": 60,
@@ -1366,7 +1376,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Arven's Toedscruel"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -1675,7 +1687,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Claydol"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -1854,6 +1868,7 @@
     ],
     "evolvesFrom": "Chikorita",
     "evolvesTo": [
+      "Mega Meganium ex",
       "Meganium"
     ],
     "hp": 110,
@@ -2078,7 +2093,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Avalugg"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -2145,7 +2162,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Barbaracle"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -2178,7 +2197,9 @@
       }
     ],
     "evolvesFrom": "Pawniard",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Kingambit"
+    ],
     "hp": 120,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -2584,7 +2605,10 @@
       }
     ],
     "evolvesFrom": "Fennekin",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Delphox",
+      "Mega Delphox ex"
+    ],
     "hp": 100,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -2637,7 +2661,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Brambleghast"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -2730,7 +2756,9 @@
       }
     ],
     "evolvesFrom": "Popplio",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Primarina"
+    ],
     "hp": 90,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -2975,7 +3003,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Lopunny"
+      "Lopunny",
+      "Mega Lopunny ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -3001,7 +3030,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Diggersby"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -3087,7 +3118,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Scovillain ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -3238,6 +3271,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Mega Sharpedo ex",
       "Sharpedo"
     ],
     "hp": 70,
@@ -3264,7 +3298,9 @@
       }
     ],
     "evolvesFrom": "Wurmple",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dustox"
+    ],
     "hp": 90,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -3542,7 +3578,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Cetitan",
+      "Cetitan ex"
+    ],
     "hp": 100,
     "retreatCost": 3,
     "stage": "Basic",
@@ -3610,7 +3649,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Blissey"
+      "Blissey",
+      "Blissey ex"
     ],
     "hp": 120,
     "retreatCost": 2,
@@ -3645,7 +3685,12 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -3726,7 +3771,9 @@
     ],
     "evolvesFrom": "Charmander",
     "evolvesTo": [
-      "Charizard"
+      "Charizard",
+      "Mega Charizard X ex",
+      "Mega Charizard Y ex"
     ],
     "hp": 110,
     "retreatCost": 2,
@@ -3819,7 +3866,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Quilladin"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -4322,7 +4371,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Clefable",
+      "Mega Clefable ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -4514,7 +4566,8 @@
     ],
     "evolvesFrom": "Torchic",
     "evolvesTo": [
-      "Blaziken"
+      "Blaziken",
+      "Blaziken ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -4728,7 +4781,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Whimsicott"
+      "Whimsicott",
+      "Whimsicott ex"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -4880,7 +4934,9 @@
       }
     ],
     "evolvesFrom": "Antique Skull Fossil",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Rampardos ex"
+    ],
     "hp": 100,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -5036,7 +5092,9 @@
       }
     ],
     "evolvesFrom": "Fuecoco",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Skeledirge"
+    ],
     "hp": 110,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -5062,7 +5120,10 @@
       }
     ],
     "evolvesFrom": "Totodile",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Feraligatr",
+      "Mega Feraligatr ex"
+    ],
     "hp": 100,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -5174,6 +5235,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Alolan Marowak",
       "Marowak"
     ],
     "hp": 70,
@@ -5336,6 +5398,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Cynthia's Milotic",
       "Milotic"
     ],
     "hp": 30,
@@ -5363,6 +5426,7 @@
     ],
     "evolvesFrom": "Cynthia's Gible",
     "evolvesTo": [
+      "Cynthia's Garchomp ex",
       "Garchomp"
     ],
     "hp": 100,
@@ -5424,6 +5488,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Cynthia's Gabite",
       "Gabite"
     ],
     "hp": 70,
@@ -5477,6 +5542,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Cynthia's Roserade",
       "Roserade"
     ],
     "hp": 70,
@@ -5655,7 +5721,10 @@
       }
     ],
     "evolvesFrom": "Rowlet",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Decidueye",
+      "Decidueye ex"
+    ],
     "hp": 100,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -6215,7 +6284,10 @@
       }
     ],
     "evolvesFrom": "Applin",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Hydrapple",
+      "Hydrapple ex"
+    ],
     "hp": 90,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -6248,7 +6320,9 @@
       }
     ],
     "evolvesFrom": "Smoliv",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Arboliva ex"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -6345,7 +6419,9 @@
       }
     ],
     "evolvesFrom": "Honedge",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Aegislash"
+    ],
     "hp": 100,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -6404,7 +6480,9 @@
       }
     ],
     "evolvesFrom": "Dratini",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Mega Dragonite ex"
+    ],
     "hp": 100,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -6429,7 +6507,8 @@
     ],
     "evolvesFrom": "Dreepy",
     "evolvesTo": [
-      "Dragapult"
+      "Dragapult",
+      "Dragapult ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -6524,7 +6603,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dragonair"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -6661,7 +6742,9 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Excadrill"
+      "Excadrill",
+      "Excadrill ex",
+      "Mega Excadrill ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -6904,7 +6987,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dudunsparce",
+      "Dudunsparce ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -6965,7 +7051,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Archaludon",
+      "Archaludon ex"
+    ],
     "hp": 130,
     "retreatCost": 2,
     "stage": "Basic",
@@ -7197,7 +7286,8 @@
     ],
     "evolvesFrom": "Tynamo",
     "evolvesTo": [
-      "Eelektross"
+      "Eelektross",
+      "Mega Eelektross ex"
     ],
     "hp": 90,
     "retreatCost": 2,
@@ -7267,14 +7357,22 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Vaporeon",
-      "Jolteon",
-      "Flareon",
-      "Sylveon",
       "Espeon",
-      "Umbreon",
+      "Espeon ex",
+      "Flareon",
+      "Flareon ex",
+      "Glaceon",
+      "Glaceon ex",
+      "Jolteon",
+      "Jolteon ex",
       "Leafeon",
-      "Glaceon"
+      "Leafeon ex",
+      "Sylveon",
+      "Sylveon ex",
+      "Umbreon",
+      "Umbreon ex",
+      "Vaporeon",
+      "Vaporeon ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -7449,7 +7547,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Electivire"
+      "Electivire",
+      "Electivire ex"
     ],
     "hp": 90,
     "retreatCost": 2,
@@ -7545,7 +7644,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Manectric"
+      "Manectric",
+      "Mega Manectric ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -7746,7 +7846,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Erika's Weepinbell"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -7772,7 +7874,9 @@
       }
     ],
     "evolvesFrom": "Erika's Oddish",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Erika's Vileplume ex"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -7797,7 +7901,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Erika's Gloom"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -7919,7 +8025,9 @@
       }
     ],
     "evolvesFrom": "Erika's Bellsprout",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Erika's Victreebel"
+    ],
     "hp": 90,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -8100,6 +8208,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Ethan's Quilava",
       "Quilava"
     ],
     "hp": 70,
@@ -8242,6 +8351,7 @@
     ],
     "evolvesFrom": "Ethan's Cyndaquil",
     "evolvesTo": [
+      "Ethan's Typhlosion",
       "Typhlosion"
     ],
     "hp": 100,
@@ -8269,6 +8379,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Ethan's Magcargo",
       "Magcargo"
     ],
     "hp": 80,
@@ -8434,6 +8545,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Alolan Exeggutor ex",
       "Exeggutor"
     ],
     "hp": 60,
@@ -8670,7 +8782,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Milotic"
+      "Milotic",
+      "Milotic ex"
     ],
     "hp": 30,
     "retreatCost": 1,
@@ -8703,7 +8816,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Braixen"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -8885,7 +9000,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dachsbun ex"
+    ],
     "hp": 60,
     "retreatCost": 2,
     "stage": "Basic",
@@ -8919,7 +9036,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Palafin",
+      "Palafin ex"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -9200,7 +9320,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Espathra"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -9296,7 +9418,9 @@
       }
     ],
     "evolvesFrom": "Sprigatito",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Meowscarada"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -9437,7 +9561,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Lurantis",
+      "Lurantis ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -9463,7 +9590,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Amoonguss"
+      "Amoonguss",
+      "Amoonguss ex"
     ],
     "hp": 50,
     "retreatCost": 1,
@@ -9550,7 +9678,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Jellicent"
+      "Jellicent",
+      "Jellicent ex"
     ],
     "hp": 80,
     "retreatCost": 3,
@@ -9583,7 +9712,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Frogadier"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -9616,7 +9747,10 @@
       }
     ],
     "evolvesFrom": "Froakie",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Greninja ex",
+      "Mega Greninja ex"
+    ],
     "hp": 100,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -9694,7 +9828,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Crocalor"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -9785,7 +9921,9 @@
       }
     ],
     "evolvesFrom": "Galarian Zigzagoon",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Galarian Obstagoon"
+    ],
     "hp": 90,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -9880,7 +10018,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Galarian Linoone"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -10274,7 +10414,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Gholdengo"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -10299,7 +10441,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Farigiraf",
+      "Farigiraf ex"
+    ],
     "hp": 100,
     "retreatCost": 1,
     "stage": "Basic",
@@ -10518,7 +10663,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Glimmora"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -10664,7 +10811,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Seaking"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -10846,7 +10995,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Sliggoo"
+    ],
     "hp": 60,
     "retreatCost": 2,
     "stage": "Basic",
@@ -11263,7 +11414,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Houndstone",
+      "Houndstone ex"
+    ],
     "hp": 80,
     "retreatCost": 3,
     "stage": "Basic",
@@ -11430,7 +11584,8 @@
     ],
     "evolvesFrom": "Turtwig",
     "evolvesTo": [
-      "Torterra"
+      "Torterra",
+      "Torterra ex"
     ],
     "hp": 120,
     "retreatCost": 4,
@@ -11716,7 +11871,9 @@
     ],
     "evolvesFrom": "Gastly",
     "evolvesTo": [
-      "Gengar"
+      "Gengar",
+      "Gengar ex",
+      "Mega Gengar ex"
     ],
     "hp": 100,
     "retreatCost": 1,
@@ -12114,7 +12271,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Hippowdon"
+    ],
     "hp": 100,
     "retreatCost": 4,
     "stage": "Basic",
@@ -12217,7 +12376,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Arcanine"
+      "Arcanine",
+      "Hisuian Arcanine"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -12345,7 +12505,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Doublade"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -12476,7 +12638,8 @@
     ],
     "evolvesFrom": "Hop's Rookidee",
     "evolvesTo": [
-      "Corviknight"
+      "Corviknight",
+      "Hop's Corviknight"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -12554,7 +12717,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Hop's Trevenant"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -12616,7 +12781,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Corvisquire"
+      "Corvisquire",
+      "Hop's Corvisquire"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -12686,6 +12852,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Hop's Sandaconda",
       "Sandaconda"
     ],
     "hp": 80,
@@ -12776,7 +12943,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Dubwool"
+      "Dubwool",
+      "Hop's Dubwool"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -13469,7 +13637,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Iono's Bellibolt ex"
+    ],
     "hp": 60,
     "retreatCost": 2,
     "stage": "Basic",
@@ -13496,7 +13666,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Electrode"
+      "Electrode",
+      "Iono's Electrode"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -13522,7 +13693,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Iono's Kilowattrel"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -13998,6 +14171,7 @@
     ],
     "evolvesFrom": "Bulbasaur",
     "evolvesTo": [
+      "Mega Venusaur ex",
       "Venusaur"
     ],
     "hp": 110,
@@ -14149,7 +14323,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Galvantula"
+      "Galvantula",
+      "Galvantula ex"
     ],
     "hp": 40,
     "retreatCost": 1,
@@ -14228,7 +14403,9 @@
       }
     ],
     "evolvesFrom": "Weedle",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Beedrill ex"
+    ],
     "hp": 80,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -14553,8 +14730,10 @@
     ],
     "evolvesFrom": "Ralts",
     "evolvesTo": [
+      "Gallade",
       "Gardevoir",
-      "Gallade"
+      "Mega Gallade ex",
+      "Mega Gardevoir ex"
     ],
     "hp": 100,
     "retreatCost": 1,
@@ -14868,7 +15047,8 @@
     ],
     "evolvesFrom": "Sandile",
     "evolvesTo": [
-      "Krookodile"
+      "Krookodile",
+      "Krookodile ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -15136,7 +15316,10 @@
       }
     ],
     "evolvesFrom": "Litwick",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Chandelure",
+      "Mega Chandelure ex"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -15364,7 +15547,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Larry's Dudunsparce ex"
+    ],
     "hp": 70,
     "retreatCost": 0,
     "stage": "Basic",
@@ -15415,7 +15600,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Larry's Braviary"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -15482,7 +15669,9 @@
       }
     ],
     "evolvesFrom": "Larry's Starly",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Larry's Staraptor"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -15514,7 +15703,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Larry's Staravia"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -15782,7 +15973,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Oinkologne"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -16047,6 +16240,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Lillie's Ribombee",
       "Ribombee"
     ],
     "hp": 30,
@@ -16187,6 +16381,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Mega Pyroar ex",
       "Pyroar"
     ],
     "hp": 70,
@@ -16240,7 +16435,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Lampent"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -16594,7 +16791,8 @@
     ],
     "evolvesFrom": "Shinx",
     "evolvesTo": [
-      "Luxray"
+      "Luxray",
+      "Luxray ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -17308,7 +17506,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Flaaffy"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -17343,7 +17543,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Azumarill"
+      "Azumarill",
+      "Azumarill ex"
     ],
     "hp": 70,
     "retreatCost": 2,
@@ -17404,6 +17605,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Marnie's Morgrem",
       "Morgrem"
     ],
     "hp": 70,
@@ -17458,7 +17660,8 @@
     ],
     "evolvesFrom": "Marnie's Impidimp",
     "evolvesTo": [
-      "Grimmsnarl"
+      "Grimmsnarl",
+      "Marnie's Grimmsnarl ex"
     ],
     "hp": 100,
     "retreatCost": 1,
@@ -17512,7 +17715,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Liepard"
+      "Liepard",
+      "Marnie's Liepard"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -17575,6 +17779,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Marnie's Scrafty",
       "Scrafty"
     ],
     "hp": 70,
@@ -17661,7 +17866,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Mabosstiff"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -17823,7 +18030,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Medicham"
+      "Medicham",
+      "Medicham ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -19360,7 +19568,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Melmetal"
+      "Melmetal",
+      "Melmetal ex"
     ],
     "hp": 80,
     "retreatCost": 3,
@@ -19747,7 +19956,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Alcremie"
+      "Alcremie",
+      "Alcremie ex"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -19938,7 +20148,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Cinccino"
+      "Cinccino",
+      "Cinccino ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -20033,7 +20244,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Mismagius"
+      "Mismagius",
+      "Mismagius ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -20180,7 +20392,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Gyarados"
+      "Gyarados",
+      "Misty's Gyarados"
     ],
     "hp": 30,
     "retreatCost": 1,
@@ -20259,6 +20472,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Misty's Starmie",
       "Starmie"
     ],
     "hp": 70,
@@ -20782,7 +20996,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Darmanitan"
+      "Darmanitan",
+      "N's Darmanitan"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -20845,7 +21060,8 @@
     ],
     "evolvesFrom": "N's Klink",
     "evolvesTo": [
-      "Klinklang"
+      "Klinklang",
+      "N's Klinklang"
     ],
     "hp": 90,
     "retreatCost": 3,
@@ -20872,7 +21088,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Klang"
+      "Klang",
+      "N's Klang"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -21037,7 +21254,9 @@
       }
     ],
     "evolvesFrom": "N's Vanillite",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "N's Vanilluxe"
+    ],
     "hp": 100,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -21070,7 +21289,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "N's Vanillish"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -21193,6 +21414,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "N's Zoroark ex",
       "Zoroark"
     ],
     "hp": 70,
@@ -21219,7 +21441,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Naclstack"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -21245,7 +21469,9 @@
       }
     ],
     "evolvesFrom": "Nacli",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Garganacl"
+    ],
     "hp": 110,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -21298,7 +21524,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Ninjask"
+      "Ninjask",
+      "Shedinja"
     ],
     "hp": 50,
     "retreatCost": 1,
@@ -21412,7 +21639,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Noivern",
+      "Noivern ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -21503,7 +21733,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Probopass"
+    ],
     "hp": 90,
     "retreatCost": 3,
     "stage": "Basic",
@@ -21538,7 +21770,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Camerupt"
+      "Camerupt",
+      "Mega Camerupt ex"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -21599,7 +21832,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Lokix"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -22149,6 +22384,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Paldean Clodsire ex",
       "Quagsire"
     ],
     "hp": 60,
@@ -22571,7 +22807,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Watchog"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -22603,7 +22841,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Pawmo"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -22629,7 +22869,9 @@
       }
     ],
     "evolvesFrom": "Pawmi",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Pawmot"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -22993,7 +23235,8 @@
     ],
     "evolvesFrom": "Tepig",
     "evolvesTo": [
-      "Emboar"
+      "Emboar",
+      "Mega Emboar ex"
     ],
     "hp": 110,
     "retreatCost": 3,
@@ -23076,7 +23319,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Trumbeak"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -23110,7 +23355,8 @@
     ],
     "evolvesFrom": "Swinub",
     "evolvesTo": [
-      "Mamoswine"
+      "Mamoswine",
+      "Mamoswine ex"
     ],
     "hp": 100,
     "retreatCost": 3,
@@ -23337,7 +23583,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Sinistcha",
+      "Sinistcha ex"
+    ],
     "hp": 40,
     "retreatCost": 1,
     "stage": "Basic",
@@ -23425,7 +23674,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Brionne"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -23484,7 +23735,9 @@
       }
     ],
     "evolvesFrom": "Mankey",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Annihilape"
+    ],
     "hp": 110,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -23519,7 +23772,8 @@
     ],
     "evolvesFrom": "Piplup",
     "evolvesTo": [
-      "Empoleon"
+      "Empoleon",
+      "Empoleon ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -23583,7 +23837,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Golduck"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -23608,7 +23864,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Gourgeist ex"
+    ],
     "hp": 60,
     "retreatCost": 2,
     "stage": "Basic",
@@ -23643,7 +23901,8 @@
     ],
     "evolvesFrom": "Larvitar",
     "evolvesTo": [
-      "Tyranitar"
+      "Tyranitar",
+      "Tyranitar ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -23809,7 +24068,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Quaxwell"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -23834,7 +24095,9 @@
       }
     ],
     "evolvesFrom": "Quaxly",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Quaquaval"
+    ],
     "hp": 100,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -23868,7 +24131,9 @@
       }
     ],
     "evolvesFrom": "Chespin",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Chesnaught"
+    ],
     "hp": 100,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -23919,7 +24184,8 @@
     ],
     "evolvesFrom": "Scorbunny",
     "evolvesTo": [
-      "Cinderace"
+      "Cinderace",
+      "Cinderace ex"
     ],
     "hp": 100,
     "retreatCost": 1,
@@ -24252,7 +24518,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Raticate"
+    ],
     "hp": 40,
     "retreatCost": 1,
     "stage": "Basic",
@@ -24560,7 +24828,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Rabsca",
+      "Rabsca ex"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -24585,7 +24856,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Octillery"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -24911,7 +25184,9 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Lucario"
+      "Lucario",
+      "Lucario ex",
+      "Mega Lucario ex"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -25192,7 +25467,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dartrix"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -25307,7 +25584,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Salazzle"
+      "Salazzle",
+      "Salazzle ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -25566,7 +25844,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Palossand"
+      "Palossand",
+      "Palossand ex"
     ],
     "hp": 90,
     "retreatCost": 3,
@@ -25844,7 +26123,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Mega Scrafty ex",
+      "Scrafty"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -25948,7 +26230,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Scizor"
+      "Scizor",
+      "Scizor ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -25983,7 +26266,8 @@
     ],
     "evolvesFrom": "Horsea",
     "evolvesTo": [
-      "Kingdra"
+      "Kingdra",
+      "Kingdra ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -26269,7 +26553,8 @@
     ],
     "evolvesFrom": "Snivy",
     "evolvesTo": [
-      "Serperior"
+      "Serperior",
+      "Serperior ex"
     ],
     "hp": 100,
     "retreatCost": 1,
@@ -26446,7 +26731,8 @@
     ],
     "evolvesFrom": "Bagon",
     "evolvesTo": [
-      "Salamence"
+      "Salamence",
+      "Salamence ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -26527,7 +26813,9 @@
       }
     ],
     "evolvesFrom": "Antique Armor Fossil",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Bastiodon"
+    ],
     "hp": 100,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -26611,7 +26899,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Luxio"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -26636,7 +26926,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Grafaiai"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -26783,7 +27075,9 @@
       }
     ],
     "evolvesFrom": "Wurmple",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Beautifly"
+    ],
     "hp": 90,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -27102,7 +27396,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Drapion"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -27127,7 +27423,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Mega Dragalge ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -27276,7 +27574,9 @@
       }
     ],
     "evolvesFrom": "Goomy",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Goodra"
+    ],
     "hp": 90,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -27405,6 +27705,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Mega Slowbro ex",
       "Slowbro",
       "Slowking"
     ],
@@ -27433,7 +27734,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Magcargo"
+      "Magcargo",
+      "Magcargo ex"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -27518,7 +27820,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Dolliv"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -27741,7 +28045,11 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Froslass",
+      "Glalie",
+      "Mega Froslass ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -27777,7 +28085,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Abomasnow"
+      "Abomasnow",
+      "Mega Abomasnow ex"
     ],
     "hp": 90,
     "retreatCost": 3,
@@ -28111,7 +28420,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Floragato"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -28178,7 +28489,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Aromatisse"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -28236,7 +28549,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Mega Starmie ex"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -28305,7 +28620,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Claydol"
+      "Claydol",
+      "Steven's Claydol"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -28333,7 +28649,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Metang"
+      "Metang",
+      "Steven's Metang"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -28450,7 +28767,8 @@
     ],
     "evolvesFrom": "Steven's Beldum",
     "evolvesTo": [
-      "Metagross"
+      "Metagross",
+      "Steven's Metagross ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -28669,7 +28987,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Skuntank"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -29002,7 +29322,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Slurpuff"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -29140,7 +29462,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Bellibolt"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -29218,7 +29542,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Maushold"
+    ],
     "hp": 40,
     "retreatCost": 1,
     "stage": "Basic",
@@ -29665,7 +29991,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Dottler"
+      "Dottler",
+      "Team Rocket's Dottler"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -29743,7 +30070,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Team Rocket's Dugtrio"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -29777,7 +30106,8 @@
     ],
     "evolvesFrom": "Team Rocket's Blipbug",
     "evolvesTo": [
-      "Orbeetle"
+      "Orbeetle",
+      "Team Rocket's Orbeetle"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -29804,7 +30134,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Hypno"
+      "Hypno",
+      "Team Rocket's Hypno"
     ],
     "hp": 80,
     "retreatCost": 2,
@@ -29864,7 +30195,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Arbok"
+      "Arbok",
+      "Team Rocket's Arbok"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -29890,7 +30222,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Team Rocket's Exeggutor"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -29952,7 +30286,8 @@
     ],
     "evolvesFrom": "Team Rocket's Mareep",
     "evolvesTo": [
-      "Ampharos"
+      "Ampharos",
+      "Team Rocket's Ampharos"
     ],
     "hp": 90,
     "retreatCost": 2,
@@ -29979,7 +30314,8 @@
     ],
     "evolvesFrom": "Team Rocket's Zubat",
     "evolvesTo": [
-      "Crobat"
+      "Crobat",
+      "Team Rocket's Crobat ex"
     ],
     "hp": 80,
     "retreatCost": 1,
@@ -30007,7 +30343,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Muk"
+      "Muk",
+      "Team Rocket's Muk"
     ],
     "hp": 80,
     "retreatCost": 3,
@@ -30102,7 +30439,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Houndoom"
+      "Houndoom",
+      "Team Rocket's Houndoom"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -30200,6 +30538,7 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
+      "Team Rocket's Weezing",
       "Weezing"
     ],
     "hp": 70,
@@ -30227,7 +30566,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Pupitar"
+      "Pupitar",
+      "Team Rocket's Pupitar"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -30261,7 +30601,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Flaaffy"
+      "Flaaffy",
+      "Team Rocket's Flaaffy"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -30296,7 +30637,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Persian"
+      "Persian",
+      "Team Rocket's Persian ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -30458,7 +30800,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Honchkrow"
+      "Honchkrow",
+      "Team Rocket's Honchkrow"
     ],
     "hp": 80,
     "retreatCost": 1,
@@ -30556,7 +30899,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Nidorina"
+      "Nidorina",
+      "Team Rocket's Nidorina"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -30591,7 +30935,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Nidorino"
+      "Nidorino",
+      "Team Rocket's Nidorino"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -30626,7 +30971,8 @@
     ],
     "evolvesFrom": "Team Rocket's Nidoran♀",
     "evolvesTo": [
-      "Nidoqueen"
+      "Nidoqueen",
+      "Team Rocket's Nidoqueen"
     ],
     "hp": 90,
     "retreatCost": 2,
@@ -30663,7 +31009,8 @@
     ],
     "evolvesFrom": "Team Rocket's Nidoran♂",
     "evolvesTo": [
-      "Nidoking"
+      "Nidoking",
+      "Team Rocket's Nidoking ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -30753,7 +31100,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Porygon2"
+      "Porygon2",
+      "Team Rocket's Porygon2"
     ],
     "hp": 60,
     "retreatCost": 1,
@@ -30808,7 +31156,8 @@
     ],
     "evolvesFrom": "Team Rocket's Porygon",
     "evolvesTo": [
-      "Porygon-Z"
+      "Porygon-Z",
+      "Team Rocket's Porygon-Z"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -30835,6 +31184,7 @@
     ],
     "evolvesFrom": "Team Rocket's Larvitar",
     "evolvesTo": [
+      "Team Rocket's Tyranitar",
       "Tyranitar"
     ],
     "hp": 100,
@@ -30887,7 +31237,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Raticate"
+      "Raticate",
+      "Team Rocket's Raticate"
     ],
     "hp": 50,
     "retreatCost": 1,
@@ -30974,7 +31325,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Team Rocket's Spidops"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -31124,7 +31477,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Golbat"
+      "Golbat",
+      "Team Rocket's Golbat"
     ],
     "hp": 50,
     "retreatCost": 1,
@@ -31150,7 +31504,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Pignite"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -31463,7 +31819,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Tinkatuff"
+    ],
     "hp": 70,
     "retreatCost": 1,
     "stage": "Basic",
@@ -31513,7 +31871,9 @@
       }
     ],
     "evolvesFrom": "Tinkatink",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Tinkaton"
+    ],
     "hp": 90,
     "retreatCost": 2,
     "stage": "Stage 1",
@@ -31574,7 +31934,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Toedscruel"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -31889,7 +32251,8 @@
     ],
     "evolvesFrom": "Litten",
     "evolvesTo": [
-      "Incineroar"
+      "Incineroar",
+      "Incineroar ex"
     ],
     "hp": 100,
     "retreatCost": 2,
@@ -31951,7 +32314,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Croconaw"
+    ],
     "hp": 80,
     "retreatCost": 1,
     "stage": "Basic",
@@ -32261,7 +32626,9 @@
       }
     ],
     "evolvesFrom": "Pikipek",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Toucannon"
+    ],
     "hp": 90,
     "retreatCost": 1,
     "stage": "Stage 1",
@@ -32408,7 +32775,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Silvally"
+    ],
     "hp": 110,
     "retreatCost": 2,
     "stage": "Basic",
@@ -32550,7 +32919,9 @@
       }
     ],
     "evolvesFrom": "Antique Jaw Fossil",
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Tyrantrum"
+    ],
     "hp": 100,
     "retreatCost": 3,
     "stage": "Stage 1",
@@ -32818,7 +33189,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Revavroom",
+      "Revavroom ex"
+    ],
     "hp": 80,
     "retreatCost": 2,
     "stage": "Basic",
@@ -32951,7 +33325,8 @@
     ],
     "evolvesFrom": "Trapinch",
     "evolvesTo": [
-      "Flygon"
+      "Flygon",
+      "Flygon ex"
     ],
     "hp": 90,
     "retreatCost": 1,
@@ -33011,7 +33386,8 @@
     ],
     "evolvesFrom": "Slakoth",
     "evolvesTo": [
-      "Slaking"
+      "Slaking",
+      "Slaking ex"
     ],
     "hp": 90,
     "retreatCost": 2,
@@ -33327,7 +33703,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Mandibuzz"
+      "Mandibuzz",
+      "Mandibuzz ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -33384,7 +33761,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Wailord"
+      "Wailord",
+      "Wailord ex"
     ],
     "hp": 130,
     "retreatCost": 3,
@@ -33639,7 +34017,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Kilowattrel",
+      "Kilowattrel ex"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -33697,7 +34078,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Kakuna"
+    ],
     "hp": 50,
     "retreatCost": 1,
     "stage": "Basic",
@@ -33962,7 +34345,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Wugtrio ex"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -33995,7 +34380,9 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Golisopod"
+    ],
     "hp": 70,
     "retreatCost": 2,
     "stage": "Basic",
@@ -34206,7 +34593,10 @@
       }
     ],
     "evolvesFrom": null,
-    "evolvesTo": [],
+    "evolvesTo": [
+      "Cascoon",
+      "Silcoon"
+    ],
     "hp": 60,
     "retreatCost": 1,
     "stage": "Basic",
@@ -34373,7 +34763,8 @@
     ],
     "evolvesFrom": null,
     "evolvesTo": [
-      "Yanmega"
+      "Yanmega",
+      "Yanmega ex"
     ],
     "hp": 70,
     "retreatCost": 1,
@@ -35024,7 +35415,8 @@
     ],
     "evolvesFrom": "Deino",
     "evolvesTo": [
-      "Hydreigon"
+      "Hydreigon",
+      "Hydreigon ex"
     ],
     "hp": 110,
     "retreatCost": 3,

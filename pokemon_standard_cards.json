@@ -11,7 +11,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Scizor"
+      "Scizor",
+      "Scizor ex"
     ],
     "attacks": [
       {
@@ -1228,7 +1229,8 @@
     ],
     "evolvesFrom": "Turtwig",
     "evolvesTo": [
-      "Torterra"
+      "Torterra",
+      "Torterra ex"
     ],
     "attacks": [
       {
@@ -1712,7 +1714,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Whimsicott"
+      "Whimsicott",
+      "Whimsicott ex"
     ],
     "attacks": [
       {
@@ -2290,7 +2293,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Brambleghast"
+    ]
   },
   {
     "id": "sv5-21",
@@ -2764,7 +2770,11 @@
         "reverseHoloAvg7": 0.16,
         "reverseHoloAvg30": 0.16
       }
-    }
+    },
+    "evolvesTo": [
+      "Rabsca",
+      "Rabsca ex"
+    ]
   },
   {
     "id": "sv5-22",
@@ -3254,7 +3264,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Magcargo"
+      "Magcargo",
+      "Magcargo ex"
     ],
     "attacks": [
       {
@@ -3846,7 +3857,8 @@
     ],
     "evolvesFrom": "Litten",
     "evolvesTo": [
-      "Incineroar"
+      "Incineroar",
+      "Incineroar ex"
     ],
     "attacks": [
       {
@@ -4681,7 +4693,8 @@
     ],
     "evolvesFrom": "Totodile",
     "evolvesTo": [
-      "Feraligatr"
+      "Feraligatr",
+      "Mega Feraligatr ex"
     ],
     "attacks": [
       {
@@ -4916,6 +4929,7 @@
       "Water"
     ],
     "evolvesTo": [
+      "Mega Sharpedo ex",
       "Sharpedo"
     ],
     "attacks": [
@@ -5607,7 +5621,10 @@
         "reverseHoloAvg7": 0.12,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Wugtrio ex"
+    ]
   },
   {
     "id": "sv5-48",
@@ -5729,7 +5746,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Palafin",
+      "Palafin ex"
+    ]
   },
   {
     "id": "sv5-49",
@@ -6218,7 +6239,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Electivire"
+      "Electivire",
+      "Electivire ex"
     ],
     "attacks": [
       {
@@ -7548,7 +7570,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Azumarill"
+      "Azumarill",
+      "Azumarill ex"
     ],
     "attacks": [
       {
@@ -7899,7 +7922,11 @@
         "reverseHoloAvg7": 0.1,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Farigiraf",
+      "Farigiraf ex"
+    ]
   },
   {
     "id": "sv5-67",
@@ -9729,7 +9756,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Medicham"
+      "Medicham",
+      "Medicham ex"
     ],
     "attacks": [
       {
@@ -10092,7 +10120,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Excadrill"
+      "Excadrill",
+      "Excadrill ex",
+      "Mega Excadrill ex"
     ],
     "abilities": [
       {
@@ -12302,7 +12332,9 @@
     ],
     "evolvesFrom": "Gastly",
     "evolvesTo": [
-      "Gengar"
+      "Gengar",
+      "Gengar ex",
+      "Mega Gengar ex"
     ],
     "attacks": [
       {
@@ -13648,7 +13680,8 @@
       "Metal"
     ],
     "evolvesTo": [
-      "Melmetal"
+      "Melmetal",
+      "Melmetal ex"
     ],
     "attacks": [
       {
@@ -15581,7 +15614,11 @@
       }
     },
     "retreatCost": [],
-    "convertedRetreatCost": 0
+    "convertedRetreatCost": 0,
+    "evolvesTo": [
+      "Dudunsparce",
+      "Dudunsparce ex"
+    ]
   },
   {
     "id": "sv5-130",
@@ -16346,7 +16383,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Cinccino"
+      "Cinccino",
+      "Cinccino ex"
     ],
     "attacks": [
       {
@@ -20667,7 +20705,11 @@
         "reverseHoloAvg7": 0.22,
         "reverseHoloAvg30": 0.18
       }
-    }
+    },
+    "evolvesTo": [
+      "Hydrapple",
+      "Hydrapple ex"
+    ]
   },
   {
     "id": "sv6-23",
@@ -21041,6 +21083,8 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "attacks": [
@@ -21376,7 +21420,11 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Sinistcha",
+      "Sinistcha ex"
+    ]
   },
   {
     "id": "sv6-21",
@@ -21492,7 +21540,11 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Sinistcha",
+      "Sinistcha ex"
+    ]
   },
   {
     "id": "sv6-22",
@@ -22082,7 +22134,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Magcargo"
+      "Magcargo",
+      "Magcargo ex"
     ],
     "attacks": [
       {
@@ -23179,7 +23232,8 @@
     ],
     "evolvesFrom": "Litwick",
     "evolvesTo": [
-      "Chandelure"
+      "Chandelure",
+      "Mega Chandelure ex"
     ],
     "attacks": [
       {
@@ -24635,7 +24689,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Milotic"
+      "Milotic",
+      "Milotic ex"
     ],
     "attacks": [
       {
@@ -24868,8 +24923,9 @@
       "Water"
     ],
     "evolvesTo": [
+      "Froslass",
       "Glalie",
-      "Froslass"
+      "Mega Froslass ex"
     ],
     "attacks": [
       {
@@ -25351,7 +25407,9 @@
     ],
     "evolvesFrom": "Froakie",
     "evolvesTo": [
-      "Greninja"
+      "Greninja",
+      "Greninja ex",
+      "Mega Greninja ex"
     ],
     "attacks": [
       {
@@ -26033,7 +26091,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Palafin",
+      "Palafin ex"
+    ]
   },
   {
     "id": "sv6-60",
@@ -26772,7 +26834,8 @@
     ],
     "evolvesFrom": "Shinx",
     "evolvesTo": [
-      "Luxray"
+      "Luxray",
+      "Luxray ex"
     ],
     "attacks": [
       {
@@ -27568,7 +27631,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Bellibolt"
+    ]
   },
   {
     "id": "sv6-74",
@@ -27809,7 +27875,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Kilowattrel",
+      "Kilowattrel ex"
+    ]
   },
   {
     "id": "sv6-76",
@@ -28069,7 +28139,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Clefable"
+      "Clefable",
+      "Mega Clefable ex"
     ],
     "attacks": [
       {
@@ -28781,7 +28852,11 @@
         "reverseHoloAvg7": 0.11,
         "reverseHoloAvg30": 0.14
       }
-    }
+    },
+    "evolvesTo": [
+      "Farigiraf",
+      "Farigiraf ex"
+    ]
   },
   {
     "id": "sv6-84",
@@ -29650,7 +29725,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Palossand"
+      "Palossand",
+      "Palossand ex"
     ],
     "attacks": [
       {
@@ -30519,7 +30595,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Arcanine"
+      "Arcanine",
+      "Hisuian Arcanine"
     ],
     "attacks": [
       {
@@ -31824,7 +31901,10 @@
         "reverseHoloAvg7": 0.06,
         "reverseHoloAvg30": 0.07
       }
-    }
+    },
+    "evolvesTo": [
+      "Glimmora"
+    ]
   },
   {
     "id": "sv6-109",
@@ -33813,7 +33893,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Revavroom",
+      "Revavroom ex"
+    ]
   },
   {
     "id": "sv6-125",
@@ -33956,6 +34040,8 @@
       "Dragon"
     ],
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "attacks": [
@@ -34163,7 +34249,11 @@
         "reverseHoloAvg7": 0.11,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Hydrapple",
+      "Hydrapple ex"
+    ]
   },
   {
     "id": "sv6-128",
@@ -34295,7 +34385,8 @@
     ],
     "evolvesFrom": "Dreepy",
     "evolvesTo": [
-      "Dragapult"
+      "Dragapult",
+      "Dragapult ex"
     ],
     "abilities": [
       {
@@ -34762,7 +34853,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Blissey"
+      "Blissey",
+      "Blissey ex"
     ],
     "attacks": [
       {
@@ -35006,14 +35098,22 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Vaporeon",
-      "Jolteon",
-      "Flareon",
-      "Sylveon",
       "Espeon",
-      "Umbreon",
+      "Espeon ex",
+      "Flareon",
+      "Flareon ex",
+      "Glaceon",
+      "Glaceon ex",
+      "Jolteon",
+      "Jolteon ex",
       "Leafeon",
-      "Glaceon"
+      "Leafeon ex",
+      "Sylveon",
+      "Sylveon ex",
+      "Umbreon",
+      "Umbreon ex",
+      "Vaporeon",
+      "Vaporeon ex"
     ],
     "attacks": [
       {
@@ -38989,7 +39089,10 @@
         "reverseHoloAvg7": 0.0,
         "reverseHoloAvg30": 0.0
       }
-    }
+    },
+    "evolvesTo": [
+      "Kingambit"
+    ]
   },
   {
     "id": "svp-113",
@@ -39402,7 +39505,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Galvantula"
+      "Galvantula",
+      "Galvantula ex"
     ],
     "attacks": [
       {
@@ -39751,7 +39855,8 @@
     ],
     "evolvesFrom": "Rowlet",
     "evolvesTo": [
-      "Decidueye"
+      "Decidueye",
+      "Decidueye ex"
     ],
     "attacks": [
       {
@@ -40586,7 +40691,8 @@
     ],
     "evolvesFrom": "Horsea",
     "evolvesTo": [
-      "Kingdra"
+      "Kingdra",
+      "Kingdra ex"
     ],
     "attacks": [
       {
@@ -44555,7 +44661,11 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.07
       }
-    }
+    },
+    "evolvesTo": [
+      "Revavroom",
+      "Revavroom ex"
+    ]
   },
   {
     "id": "sv6pt5-44",
@@ -45261,14 +45371,22 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Vaporeon",
-      "Jolteon",
-      "Flareon",
-      "Sylveon",
       "Espeon",
-      "Umbreon",
+      "Espeon ex",
+      "Flareon",
+      "Flareon ex",
+      "Glaceon",
+      "Glaceon ex",
+      "Jolteon",
+      "Jolteon ex",
       "Leafeon",
-      "Glaceon"
+      "Leafeon ex",
+      "Sylveon",
+      "Sylveon ex",
+      "Umbreon",
+      "Umbreon ex",
+      "Vaporeon",
+      "Vaporeon ex"
     ],
     "attacks": [
       {
@@ -47785,6 +47903,8 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "attacks": [
@@ -47990,7 +48110,11 @@
         "reverseHoloAvg7": 0.15,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Hydrapple",
+      "Hydrapple ex"
+    ]
   },
   {
     "id": "sv7-14",
@@ -48211,7 +48335,10 @@
         "reverseHoloAvg7": 0.1,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Lokix"
+    ]
   },
   {
     "id": "sv7-16",
@@ -48438,7 +48565,10 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.12
       }
-    }
+    },
+    "evolvesTo": [
+      "Toedscruel"
+    ]
   },
   {
     "id": "sv7-18",
@@ -49028,7 +49158,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Salazzle"
+      "Salazzle",
+      "Salazzle ex"
     ],
     "attacks": [
       {
@@ -49375,7 +49506,8 @@
     ],
     "evolvesFrom": "Scorbunny",
     "evolvesTo": [
-      "Cinderace"
+      "Cinderace",
+      "Cinderace ex"
     ],
     "attacks": [
       {
@@ -49831,7 +49963,13 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.12
       }
-    }
+    },
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ]
   },
   {
     "id": "sv7-32",
@@ -49964,7 +50102,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Azumarill"
+      "Azumarill",
+      "Azumarill ex"
     ],
     "attacks": [
       {
@@ -50763,7 +50902,9 @@
     ],
     "evolvesFrom": "Froakie",
     "evolvesTo": [
-      "Greninja"
+      "Greninja",
+      "Greninja ex",
+      "Mega Greninja ex"
     ],
     "attacks": [
       {
@@ -51458,7 +51599,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Electivire"
+      "Electivire",
+      "Electivire ex"
     ],
     "attacks": [
       {
@@ -51936,7 +52078,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Galvantula"
+      "Galvantula",
+      "Galvantula ex"
     ],
     "attacks": [
       {
@@ -52712,7 +52855,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Pawmo"
+    ]
   },
   {
     "id": "sv7-57",
@@ -52726,6 +52872,7 @@
       "Psychic"
     ],
     "evolvesTo": [
+      "Mega Slowbro ex",
       "Slowbro",
       "Slowking"
     ],
@@ -53451,7 +53598,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Alcremie"
+      "Alcremie",
+      "Alcremie ex"
     ],
     "attacks": [
       {
@@ -53785,7 +53933,10 @@
         "reverseHoloAvg7": 0.12,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Dachsbun ex"
+    ]
   },
   {
     "id": "sv7-67",
@@ -54014,7 +54165,10 @@
         "reverseHoloAvg7": 0.11,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Espathra"
+    ]
   },
   {
     "id": "sv7-69",
@@ -54257,7 +54411,11 @@
         "reverseHoloAvg7": 0.1,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Houndstone",
+      "Houndstone ex"
+    ]
   },
   {
     "id": "sv7-71",
@@ -54386,6 +54544,7 @@
       "Fighting"
     ],
     "evolvesTo": [
+      "Alolan Marowak",
       "Marowak"
     ],
     "attacks": [
@@ -54969,7 +55128,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Medicham"
+      "Medicham",
+      "Medicham ex"
     ],
     "attacks": [
       {
@@ -55080,7 +55240,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Medicham"
+      "Medicham",
+      "Medicham ex"
     ],
     "attacks": [
       {
@@ -55429,7 +55590,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Lucario"
+      "Lucario",
+      "Lucario ex",
+      "Mega Lucario ex"
     ],
     "attacks": [
       {
@@ -57817,7 +57980,8 @@
       "Metal"
     ],
     "evolvesTo": [
-      "Melmetal"
+      "Melmetal",
+      "Melmetal ex"
     ],
     "attacks": [
       {
@@ -57945,7 +58109,8 @@
       "Metal"
     ],
     "evolvesTo": [
-      "Melmetal"
+      "Melmetal",
+      "Melmetal ex"
     ],
     "attacks": [
       {
@@ -58430,7 +58595,11 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Archaludon",
+      "Archaludon ex"
+    ]
   },
   {
     "id": "sv7-107",
@@ -58668,7 +58837,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Revavroom",
+      "Revavroom ex"
+    ]
   },
   {
     "id": "sv7-109",
@@ -59149,14 +59322,22 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Vaporeon",
-      "Jolteon",
-      "Flareon",
-      "Sylveon",
       "Espeon",
-      "Umbreon",
+      "Espeon ex",
+      "Flareon",
+      "Flareon ex",
+      "Glaceon",
+      "Glaceon ex",
+      "Jolteon",
+      "Jolteon ex",
       "Leafeon",
-      "Glaceon"
+      "Leafeon ex",
+      "Sylveon",
+      "Sylveon ex",
+      "Umbreon",
+      "Umbreon ex",
+      "Vaporeon",
+      "Vaporeon ex"
     ],
     "attacks": [
       {
@@ -60777,7 +60958,10 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.12
       }
-    }
+    },
+    "evolvesTo": [
+      "Oinkologne"
+    ]
   },
   {
     "id": "sv7-127",
@@ -62392,6 +62576,7 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Alolan Exeggutor ex",
       "Exeggutor"
     ],
     "attacks": [
@@ -62503,6 +62688,7 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Alolan Exeggutor ex",
       "Exeggutor"
     ],
     "attacks": [
@@ -63755,7 +63941,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Scovillain ex"
+    ]
   },
   {
     "id": "sv8-13",
@@ -63872,7 +64061,11 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Rabsca",
+      "Rabsca ex"
+    ]
   },
   {
     "id": "sv8-14",
@@ -65745,7 +65938,10 @@
         "reverseHoloAvg7": 1.71,
         "reverseHoloAvg30": 1.71
       }
-    }
+    },
+    "evolvesTo": [
+      "Crocalor"
+    ]
   },
   {
     "id": "sv8-30",
@@ -65857,7 +66053,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Skeledirge"
+    ]
   },
   {
     "id": "sv8-31",
@@ -66084,7 +66283,13 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ]
   },
   {
     "id": "sv8-33",
@@ -66204,7 +66409,13 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ]
   },
   {
     "id": "sv8-34",
@@ -67056,7 +67267,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Milotic"
+      "Milotic",
+      "Milotic ex"
     ],
     "attacks": [
       {
@@ -68201,7 +68413,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Quaxwell"
+    ]
   },
   {
     "id": "sv8-51",
@@ -68310,7 +68525,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Quaquaval"
+    ]
   },
   {
     "id": "sv8-52",
@@ -68539,7 +68757,11 @@
         "reverseHoloAvg7": 0.06,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Cetitan",
+      "Cetitan ex"
+    ]
   },
   {
     "id": "sv8-54",
@@ -70064,7 +70286,11 @@
         "reverseHoloAvg7": 0.1,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Kilowattrel",
+      "Kilowattrel ex"
+    ]
   },
   {
     "id": "sv8-67",
@@ -70789,7 +71015,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Azumarill"
+      "Azumarill",
+      "Azumarill ex"
     ],
     "attacks": [
       {
@@ -72851,7 +73078,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Palossand"
+      "Palossand",
+      "Palossand ex"
     ],
     "attacks": [
       {
@@ -73444,7 +73672,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Espathra"
+    ]
   },
   {
     "id": "sv8-95",
@@ -73815,7 +74046,10 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.17
       }
-    }
+    },
+    "evolvesTo": [
+      "Gholdengo"
+    ]
   },
   {
     "id": "sv8-98",
@@ -74046,7 +74280,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Annihilape"
+    ]
   },
   {
     "id": "sv8-100",
@@ -74658,7 +74895,8 @@
     ],
     "evolvesFrom": "Trapinch",
     "evolvesTo": [
-      "Flygon"
+      "Flygon",
+      "Flygon ex"
     ],
     "attacks": [
       {
@@ -75018,7 +75256,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Excadrill"
+      "Excadrill",
+      "Excadrill ex",
+      "Mega Excadrill ex"
     ],
     "attacks": [
       {
@@ -75818,7 +76058,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.07
       }
-    }
+    },
+    "evolvesTo": [
+      "Glimmora"
+    ]
   },
   {
     "id": "sv8-115",
@@ -76196,7 +76439,8 @@
     ],
     "evolvesFrom": "Deino",
     "evolvesTo": [
-      "Hydreigon"
+      "Hydreigon",
+      "Hydreigon ex"
     ],
     "attacks": [
       {
@@ -76536,7 +76780,10 @@
         "reverseHoloAvg7": 0.05,
         "reverseHoloAvg30": 0.06
       }
-    }
+    },
+    "evolvesTo": [
+      "Grafaiai"
+    ]
   },
   {
     "id": "sv8-121",
@@ -76669,6 +76916,7 @@
       "Metal"
     ],
     "evolvesTo": [
+      "Alolan Dugtrio",
       "Dugtrio"
     ],
     "attacks": [
@@ -77617,7 +77865,11 @@
         "reverseHoloAvg7": 0.06,
         "reverseHoloAvg30": 0.07
       }
-    }
+    },
+    "evolvesTo": [
+      "Archaludon",
+      "Archaludon ex"
+    ]
   },
   {
     "id": "sv8-130",
@@ -78570,6 +78822,8 @@
       "Dragon"
     ],
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "attacks": [
@@ -79141,14 +79395,22 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Vaporeon",
-      "Jolteon",
-      "Flareon",
-      "Sylveon",
       "Espeon",
-      "Umbreon",
+      "Espeon ex",
+      "Flareon",
+      "Flareon ex",
+      "Glaceon",
+      "Glaceon ex",
+      "Jolteon",
+      "Jolteon ex",
       "Leafeon",
-      "Glaceon"
+      "Leafeon ex",
+      "Sylveon",
+      "Sylveon ex",
+      "Umbreon",
+      "Umbreon ex",
+      "Vaporeon",
+      "Vaporeon ex"
     ],
     "abilities": [
       {
@@ -79501,7 +79763,8 @@
     ],
     "evolvesFrom": "Slakoth",
     "evolvesTo": [
-      "Slaking"
+      "Slaking",
+      "Slaking ex"
     ],
     "attacks": [
       {
@@ -80895,7 +81158,10 @@
         "reverseHoloAvg7": 0.1,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Maushold"
+    ]
   },
   {
     "id": "sv8-158",
@@ -84654,6 +84920,7 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Alolan Exeggutor ex",
       "Exeggutor"
     ],
     "attacks": [
@@ -85228,6 +85495,7 @@
       "Fire"
     ],
     "evolvesTo": [
+      "Mega Pyroar ex",
       "Pyroar"
     ],
     "attacks": [
@@ -85521,7 +85789,9 @@
       "Water"
     ],
     "evolvesTo": [
-      "Slowbro"
+      "Mega Slowbro ex",
+      "Slowbro",
+      "Slowking"
     ],
     "attacks": [
       {
@@ -86791,7 +87061,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Lucario"
+      "Lucario",
+      "Lucario ex",
+      "Mega Lucario ex"
     ],
     "attacks": [
       {
@@ -86972,7 +87244,8 @@
     ],
     "evolvesFrom": "Larvitar",
     "evolvesTo": [
-      "Tyranitar"
+      "Tyranitar",
+      "Tyranitar ex"
     ],
     "attacks": [
       {
@@ -88746,7 +89019,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Lopunny"
+      "Lopunny",
+      "Mega Lopunny ex"
     ],
     "attacks": [
       {
@@ -89394,7 +89668,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Noivern"
+      "Noivern",
+      "Noivern ex"
     ],
     "attacks": [
       {
@@ -91847,7 +92122,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Amoonguss"
+      "Amoonguss",
+      "Amoonguss ex"
     ],
     "attacks": [
       {
@@ -92635,7 +92911,10 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Floragato"
+    ]
   },
   {
     "id": "sv9-17",
@@ -92747,7 +93026,10 @@
         "reverseHoloAvg7": 0.12,
         "reverseHoloAvg30": 0.12
       }
-    }
+    },
+    "evolvesTo": [
+      "Meowscarada"
+    ]
   },
   {
     "id": "sv9-18",
@@ -92976,7 +93258,10 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Lokix"
+    ]
   },
   {
     "id": "sv9-20",
@@ -93341,7 +93626,8 @@
     ],
     "evolvesFrom": "Torchic",
     "evolvesTo": [
-      "Blaziken"
+      "Blaziken",
+      "Blaziken ex"
     ],
     "attacks": [
       {
@@ -93695,7 +93981,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Darmanitan"
+      "Darmanitan",
+      "N's Darmanitan"
     ],
     "attacks": [
       {
@@ -95377,7 +95664,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Wailord"
+      "Wailord",
+      "Wailord ex"
     ],
     "attacks": [
       {
@@ -95852,6 +96140,7 @@
       "Lightning"
     ],
     "evolvesTo": [
+      "Alolan Graveler",
       "Graveler"
     ],
     "attacks": [
@@ -95977,6 +96266,7 @@
     ],
     "evolvesFrom": "Alolan Geodude",
     "evolvesTo": [
+      "Alolan Golem",
       "Golem"
     ],
     "attacks": [
@@ -96226,7 +96516,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Electrode"
+      "Electrode",
+      "Iono's Electrode"
     ],
     "attacks": [
       {
@@ -96889,7 +97180,10 @@
         "reverseHoloAvg7": 0.12,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Iono's Bellibolt ex"
+    ]
   },
   {
     "id": "sv9-53",
@@ -97123,7 +97417,10 @@
         "reverseHoloAvg7": 0.12,
         "reverseHoloAvg30": 0.12
       }
-    }
+    },
+    "evolvesTo": [
+      "Iono's Kilowattrel"
+    ]
   },
   {
     "id": "sv9-55",
@@ -98522,6 +98819,7 @@
       "Psychic"
     ],
     "evolvesTo": [
+      "Lillie's Ribombee",
       "Ribombee"
     ],
     "attacks": [
@@ -99483,7 +99781,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Alcremie"
+      "Alcremie",
+      "Alcremie ex"
     ],
     "attacks": [
       {
@@ -99713,6 +100012,7 @@
       "Fighting"
     ],
     "evolvesTo": [
+      "Alolan Marowak",
       "Marowak"
     ],
     "attacks": [
@@ -99960,7 +100260,8 @@
     ],
     "evolvesFrom": "Swinub",
     "evolvesTo": [
-      "Mamoswine"
+      "Mamoswine",
+      "Mamoswine ex"
     ],
     "attacks": [
       {
@@ -100318,7 +100619,8 @@
     ],
     "evolvesFrom": "Larvitar",
     "evolvesTo": [
-      "Tyranitar"
+      "Tyranitar",
+      "Tyranitar ex"
     ],
     "attacks": [
       {
@@ -100921,6 +101223,7 @@
       "Fighting"
     ],
     "evolvesTo": [
+      "Hop's Sandaconda",
       "Sandaconda"
     ],
     "attacks": [
@@ -101266,7 +101569,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Toedscruel"
+    ]
   },
   {
     "id": "sv9-89",
@@ -101770,6 +102076,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Paldean Clodsire ex",
       "Quagsire"
     ],
     "attacks": [
@@ -102239,6 +102546,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "N's Zoroark ex",
       "Zoroark"
     ],
     "attacks": [
@@ -102958,7 +103266,8 @@
       "Metal"
     ],
     "evolvesTo": [
-      "Klang"
+      "Klang",
+      "N's Klang"
     ],
     "attacks": [
       {
@@ -103078,7 +103387,8 @@
     ],
     "evolvesFrom": "N's Klink",
     "evolvesTo": [
-      "Klinklang"
+      "Klinklang",
+      "N's Klinklang"
     ],
     "attacks": [
       {
@@ -104221,7 +104531,8 @@
     ],
     "evolvesFrom": "Bagon",
     "evolvesTo": [
-      "Salamence"
+      "Salamence",
+      "Salamence ex"
     ],
     "attacks": [
       {
@@ -105153,7 +105464,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Dudunsparce",
+      "Dudunsparce ex"
+    ]
   },
   {
     "id": "sv9-121",
@@ -105646,7 +105961,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Cinccino"
+      "Cinccino",
+      "Cinccino ex"
     ],
     "attacks": [
       {
@@ -105870,7 +106186,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Noivern"
+      "Noivern",
+      "Noivern ex"
     ],
     "attacks": [
       {
@@ -106581,7 +106898,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Corvisquire"
+      "Corvisquire",
+      "Hop's Corvisquire"
     ],
     "attacks": [
       {
@@ -106711,7 +107029,8 @@
     ],
     "evolvesFrom": "Hop's Rookidee",
     "evolvesTo": [
-      "Corviknight"
+      "Corviknight",
+      "Hop's Corviknight"
     ],
     "attacks": [
       {
@@ -106841,7 +107160,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Dubwool"
+      "Dubwool",
+      "Hop's Dubwool"
     ],
     "attacks": [
       {
@@ -107406,7 +107726,10 @@
         "reverseHoloAvg7": 0.13,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Oinkologne"
+    ]
   },
   {
     "id": "sv9-140",
@@ -108980,7 +109303,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Yanmega"
+      "Yanmega",
+      "Yanmega ex"
     ],
     "attacks": [
       {
@@ -109584,6 +109908,7 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Cynthia's Roserade",
       "Roserade"
     ],
     "attacks": [
@@ -110291,7 +110616,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Lurantis"
+      "Lurantis",
+      "Lurantis ex"
     ],
     "attacks": [
       {
@@ -110524,7 +110850,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Dottler"
+      "Dottler",
+      "Team Rocket's Dottler"
     ],
     "attacks": [
       {
@@ -110637,6 +110964,8 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Appletun",
+      "Dipplin",
       "Flapple"
     ],
     "attacks": [
@@ -110849,7 +111178,11 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.1
       }
-    }
+    },
+    "evolvesTo": [
+      "Hydrapple",
+      "Hydrapple ex"
+    ]
   },
   {
     "id": "sv10-18",
@@ -111083,7 +111416,10 @@
         "reverseHoloAvg7": 0.14,
         "reverseHoloAvg30": 0.15
       }
-    }
+    },
+    "evolvesTo": [
+      "Team Rocket's Spidops"
+    ]
   },
   {
     "id": "sv10-20",
@@ -111313,7 +111649,10 @@
         "reverseHoloAvg7": 0.15,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Dolliv"
+    ]
   },
   {
     "id": "sv10-22",
@@ -111434,7 +111773,10 @@
         "reverseHoloAvg7": 0.17,
         "reverseHoloAvg30": 0.13
       }
-    }
+    },
+    "evolvesTo": [
+      "Arboliva ex"
+    ]
   },
   {
     "id": "sv10-23",
@@ -112414,6 +112756,7 @@
       "Fire"
     ],
     "evolvesTo": [
+      "Ethan's Quilava",
       "Quilava"
     ],
     "attacks": [
@@ -112528,6 +112871,7 @@
     ],
     "evolvesFrom": "Ethan's Cyndaquil",
     "evolvesTo": [
+      "Ethan's Typhlosion",
       "Typhlosion"
     ],
     "abilities": [
@@ -112771,6 +113115,7 @@
       "Fire"
     ],
     "evolvesTo": [
+      "Ethan's Magcargo",
       "Magcargo"
     ],
     "attacks": [
@@ -113007,7 +113352,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Houndoom"
+      "Houndoom",
+      "Team Rocket's Houndoom"
     ],
     "attacks": [
       {
@@ -113482,7 +113828,8 @@
     ],
     "evolvesFrom": "Torchic",
     "evolvesTo": [
-      "Blaziken"
+      "Blaziken",
+      "Blaziken ex"
     ],
     "attacks": [
       {
@@ -114092,6 +114439,7 @@
       "Water"
     ],
     "evolvesTo": [
+      "Misty's Starmie",
       "Starmie"
     ],
     "attacks": [
@@ -114316,7 +114664,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Gyarados"
+      "Gyarados",
+      "Misty's Gyarados"
     ],
     "abilities": [
       {
@@ -114806,6 +115155,7 @@
       "Water"
     ],
     "evolvesTo": [
+      "Cynthia's Milotic",
       "Milotic"
     ],
     "attacks": [
@@ -115625,7 +115975,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Abomasnow"
+      "Abomasnow",
+      "Mega Abomasnow ex"
     ],
     "attacks": [
       {
@@ -116346,7 +116697,11 @@
         "reverseHoloAvg7": 0.09,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Cetitan",
+      "Cetitan ex"
+    ]
   },
   {
     "id": "sv10-65",
@@ -116723,7 +117078,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Electivire"
+      "Electivire",
+      "Electivire ex"
     ],
     "attacks": [
       {
@@ -117197,7 +117553,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Flaaffy"
+      "Flaaffy",
+      "Team Rocket's Flaaffy"
     ],
     "attacks": [
       {
@@ -117320,7 +117677,8 @@
     ],
     "evolvesFrom": "Team Rocket's Mareep",
     "evolvesTo": [
-      "Ampharos"
+      "Ampharos",
+      "Team Rocket's Ampharos"
     ],
     "attacks": [
       {
@@ -117556,7 +117914,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Manectric"
+      "Manectric",
+      "Mega Manectric ex"
     ],
     "attacks": [
       {
@@ -118041,7 +118400,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Hypno"
+      "Hypno",
+      "Team Rocket's Hypno"
     ],
     "attacks": [
       {
@@ -118542,7 +118902,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Claydol"
+      "Claydol",
+      "Steven's Claydol"
     ],
     "attacks": [
       {
@@ -119150,7 +119511,8 @@
     ],
     "evolvesFrom": "Team Rocket's Blipbug",
     "evolvesTo": [
-      "Orbeetle"
+      "Orbeetle",
+      "Team Rocket's Orbeetle"
     ],
     "attacks": [
       {
@@ -119618,7 +119980,10 @@
         "reverseHoloAvg7": 0.11,
         "reverseHoloAvg30": 0.11
       }
-    }
+    },
+    "evolvesTo": [
+      "Annihilape"
+    ]
   },
   {
     "id": "sv10-92",
@@ -119872,7 +120237,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Pupitar"
+      "Pupitar",
+      "Team Rocket's Pupitar"
     ],
     "attacks": [
       {
@@ -119986,6 +120352,7 @@
     ],
     "evolvesFrom": "Team Rocket's Larvitar",
     "evolvesTo": [
+      "Team Rocket's Tyranitar",
       "Tyranitar"
     ],
     "attacks": [
@@ -120473,7 +120840,8 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Medicham"
+      "Medicham",
+      "Medicham ex"
     ],
     "attacks": [
       {
@@ -120817,6 +121185,7 @@
       "Fighting"
     ],
     "evolvesTo": [
+      "Cynthia's Gabite",
       "Gabite"
     ],
     "attacks": [
@@ -120931,6 +121300,7 @@
     ],
     "evolvesFrom": "Cynthia's Gible",
     "evolvesTo": [
+      "Cynthia's Garchomp ex",
       "Garchomp"
     ],
     "abilities": [
@@ -121741,7 +122111,10 @@
         "reverseHoloAvg7": 0.07,
         "reverseHoloAvg30": 0.08
       }
-    }
+    },
+    "evolvesTo": [
+      "Arven's Toedscruel"
+    ]
   },
   {
     "id": "sv10-110",
@@ -121999,7 +122372,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Arbok"
+      "Arbok",
+      "Team Rocket's Arbok"
     ],
     "attacks": [
       {
@@ -122242,7 +122616,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Nidorina"
+      "Nidorina",
+      "Team Rocket's Nidorina"
     ],
     "attacks": [
       {
@@ -122356,7 +122731,8 @@
     ],
     "evolvesFrom": "Team Rocket's Nidoran♀",
     "evolvesTo": [
-      "Nidoqueen"
+      "Nidoqueen",
+      "Team Rocket's Nidoqueen"
     ],
     "attacks": [
       {
@@ -122603,7 +122979,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Nidorino"
+      "Nidorino",
+      "Team Rocket's Nidorino"
     ],
     "attacks": [
       {
@@ -122727,7 +123104,8 @@
     ],
     "evolvesFrom": "Team Rocket's Nidoran♂",
     "evolvesTo": [
-      "Nidoking"
+      "Nidoking",
+      "Team Rocket's Nidoking ex"
     ],
     "attacks": [
       {
@@ -122976,7 +123354,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Golbat"
+      "Golbat",
+      "Team Rocket's Golbat"
     ],
     "attacks": [
       {
@@ -123096,7 +123475,8 @@
     ],
     "evolvesFrom": "Team Rocket's Zubat",
     "evolvesTo": [
-      "Crobat"
+      "Crobat",
+      "Team Rocket's Crobat ex"
     ],
     "abilities": [
       {
@@ -123343,7 +123723,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Muk"
+      "Muk",
+      "Team Rocket's Muk"
     ],
     "attacks": [
       {
@@ -123585,6 +123966,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Team Rocket's Weezing",
       "Weezing"
     ],
     "abilities": [
@@ -123819,7 +124201,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Honchkrow"
+      "Honchkrow",
+      "Team Rocket's Honchkrow"
     ],
     "attacks": [
       {
@@ -124181,7 +124564,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Liepard"
+      "Liepard",
+      "Marnie's Liepard"
     ],
     "attacks": [
       {
@@ -124406,6 +124790,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Marnie's Scrafty",
       "Scrafty"
     ],
     "attacks": [
@@ -124644,6 +125029,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Marnie's Morgrem",
       "Morgrem"
     ],
     "attacks": [
@@ -124767,7 +125153,8 @@
     ],
     "evolvesFrom": "Marnie's Impidimp",
     "evolvesTo": [
-      "Grimmsnarl"
+      "Grimmsnarl",
+      "Marnie's Grimmsnarl ex"
     ],
     "attacks": [
       {
@@ -125215,7 +125602,10 @@
         "reverseHoloAvg7": 0.08,
         "reverseHoloAvg30": 0.09
       }
-    }
+    },
+    "evolvesTo": [
+      "Arven's Mabosstiff ex"
+    ]
   },
   {
     "id": "sv10-139",
@@ -125733,7 +126123,8 @@
       "Metal"
     ],
     "evolvesTo": [
-      "Metang"
+      "Metang",
+      "Steven's Metang"
     ],
     "attacks": [
       {
@@ -125854,7 +126245,8 @@
     ],
     "evolvesFrom": "Steven's Beldum",
     "evolvesTo": [
-      "Metagross"
+      "Metagross",
+      "Steven's Metagross ex"
     ],
     "attacks": [
       {
@@ -126218,7 +126610,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Raticate"
+      "Raticate",
+      "Team Rocket's Raticate"
     ],
     "attacks": [
       {
@@ -126442,7 +126835,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Persian"
+      "Persian",
+      "Team Rocket's Persian ex"
     ],
     "attacks": [
       {
@@ -126929,7 +127323,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Porygon2"
+      "Porygon2",
+      "Team Rocket's Porygon2"
     ],
     "attacks": [
       {
@@ -127043,7 +127438,8 @@
     ],
     "evolvesFrom": "Team Rocket's Porygon",
     "evolvesTo": [
-      "Porygon-Z"
+      "Porygon-Z",
+      "Team Rocket's Porygon-Z"
     ],
     "attacks": [
       {
@@ -127521,6 +127917,7 @@
       "Colorless"
     ],
     "evolvesTo": [
+      "Arven's Greedent",
       "Greedent"
     ],
     "attacks": [
@@ -130093,7 +130490,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Yanmega"
+      "Yanmega",
+      "Yanmega ex"
     ],
     "attacks": [
       {
@@ -130205,6 +130603,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Mega Scrafty ex",
       "Scrafty"
     ],
     "attacks": [
@@ -131435,7 +131834,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Whimsicott"
+      "Whimsicott",
+      "Whimsicott ex"
     ],
     "attacks": [
       {
@@ -132385,7 +132785,8 @@
     ],
     "evolvesFrom": "Tepig",
     "evolvesTo": [
-      "Emboar"
+      "Emboar",
+      "Mega Emboar ex"
     ],
     "attacks": [
       {
@@ -132984,7 +133385,8 @@
     ],
     "evolvesFrom": "Litwick",
     "evolvesTo": [
-      "Chandelure"
+      "Chandelure",
+      "Mega Chandelure ex"
     ],
     "attacks": [
       {
@@ -134936,7 +135338,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Galvantula"
+      "Galvantula",
+      "Galvantula ex"
     ],
     "attacks": [
       {
@@ -136280,7 +136683,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Jellicent"
+      "Jellicent",
+      "Jellicent ex"
     ],
     "attacks": [
       {
@@ -137485,6 +137889,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Mega Scrafty ex",
       "Scrafty"
     ],
     "attacks": [
@@ -137845,7 +138250,8 @@
       "Darkness"
     ],
     "evolvesTo": [
-      "Mandibuzz"
+      "Mandibuzz",
+      "Mandibuzz ex"
     ],
     "attacks": [
       {
@@ -139791,7 +140197,8 @@
     ],
     "evolvesFrom": "Deino",
     "evolvesTo": [
-      "Hydreigon"
+      "Hydreigon",
+      "Hydreigon ex"
     ],
     "attacks": [
       {
@@ -141462,7 +141869,8 @@
     ],
     "evolvesFrom": "Snivy",
     "evolvesTo": [
-      "Serperior"
+      "Serperior",
+      "Serperior ex"
     ],
     "attacks": [
       {
@@ -142423,7 +142831,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Amoonguss"
+      "Amoonguss",
+      "Amoonguss ex"
     ],
     "attacks": [
       {
@@ -144933,7 +145342,8 @@
     ],
     "evolvesFrom": "Tynamo",
     "evolvesTo": [
-      "Eelektross"
+      "Eelektross",
+      "Mega Eelektross ex"
     ],
     "abilities": [
       {
@@ -146431,7 +146841,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Excadrill"
+      "Excadrill",
+      "Excadrill ex",
+      "Mega Excadrill ex"
     ],
     "attacks": [
       {
@@ -148001,7 +148413,8 @@
     ],
     "evolvesFrom": "Sandile",
     "evolvesTo": [
-      "Krookodile"
+      "Krookodile",
+      "Krookodile ex"
     ],
     "attacks": [
       {
@@ -149555,7 +149968,10 @@
         "reverseHoloAvg7": 0.21,
         "reverseHoloAvg30": 0.15
       }
-    }
+    },
+    "evolvesTo": [
+      "Kingambit"
+    ]
   },
   {
     "id": "zsv10pt5-72",
@@ -150443,7 +150859,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Cinccino"
+      "Cinccino",
+      "Cinccino ex"
     ],
     "attacks": [
       {
@@ -151346,6 +151763,7 @@
     ],
     "evolvesFrom": "Bulbasaur",
     "evolvesTo": [
+      "Mega Venusaur ex",
       "Venusaur"
     ],
     "attacks": [
@@ -151638,6 +152056,7 @@
       "Grass"
     ],
     "evolvesTo": [
+      "Alolan Exeggutor ex",
       "Exeggutor"
     ],
     "attacks": [
@@ -152025,6 +152444,7 @@
     ],
     "evolvesFrom": "Chikorita",
     "evolvesTo": [
+      "Mega Meganium ex",
       "Meganium"
     ],
     "attacks": [
@@ -152708,7 +153128,8 @@
       "Grass"
     ],
     "evolvesTo": [
-      "Ninjask"
+      "Ninjask",
+      "Shedinja"
     ],
     "attacks": [
       {
@@ -153370,7 +153791,8 @@
       "Fire"
     ],
     "evolvesTo": [
-      "Camerupt"
+      "Camerupt",
+      "Mega Camerupt ex"
     ],
     "attacks": [
       {
@@ -153574,7 +153996,8 @@
     ],
     "evolvesFrom": "Scorbunny",
     "evolvesTo": [
-      "Cinderace"
+      "Cinderace",
+      "Cinderace ex"
     ],
     "attacks": [
       {
@@ -153664,6 +154087,7 @@
       "Fire"
     ],
     "evolvesTo": [
+      "Mega Pyroar ex",
       "Pyroar"
     ],
     "attacks": [
@@ -154538,7 +154962,8 @@
       "Water"
     ],
     "evolvesTo": [
-      "Abomasnow"
+      "Abomasnow",
+      "Mega Abomasnow ex"
     ],
     "attacks": [
       {
@@ -156154,7 +156579,8 @@
       "Lightning"
     ],
     "evolvesTo": [
-      "Manectric"
+      "Manectric",
+      "Mega Manectric ex"
     ],
     "attacks": [
       {
@@ -156818,8 +157244,10 @@
     ],
     "evolvesFrom": "Ralts",
     "evolvesTo": [
+      "Gallade",
       "Gardevoir",
-      "Gallade"
+      "Mega Gallade ex",
+      "Mega Gardevoir ex"
     ],
     "attacks": [
       {
@@ -157514,7 +157942,11 @@
           "directLow": 0.1
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Houndstone",
+      "Houndstone ex"
+    ]
   },
   {
     "id": "me1-67",
@@ -157608,7 +158040,10 @@
           "directLow": 0.1
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Gholdengo"
+    ]
   },
   {
     "id": "me1-66",
@@ -158420,7 +158855,9 @@
       "Fighting"
     ],
     "evolvesTo": [
-      "Lucario"
+      "Lucario",
+      "Lucario ex",
+      "Mega Lucario ex"
     ],
     "attacks": [
       {
@@ -159134,7 +159571,10 @@
           "directLow": 0.09
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Naclstack"
+    ]
   },
   {
     "id": "me1-83",
@@ -159225,7 +159665,10 @@
           "directLow": 0.01
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Garganacl"
+    ]
   },
   {
     "id": "me1-84",
@@ -159996,7 +160439,10 @@
           "directLow": 0.01
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Grafaiai"
+    ]
   },
   {
     "id": "me1-92",
@@ -160497,7 +160943,10 @@
           "directLow": 0.02
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Tinkatuff"
+    ]
   },
   {
     "id": "me1-97",
@@ -160599,7 +161048,10 @@
           "directLow": 0.04
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Tinkaton"
+    ]
   },
   {
     "id": "me1-98",
@@ -161483,7 +161935,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Lopunny"
+      "Lopunny",
+      "Mega Lopunny ex"
     ],
     "attacks": [
       {
@@ -164242,7 +164695,10 @@
           "directLow": 0.12
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Lokix"
+    ]
   },
   {
     "id": "me2-10",
@@ -164458,7 +164914,9 @@
     ],
     "evolvesFrom": "Charmander",
     "evolvesTo": [
-      "Charizard"
+      "Charizard",
+      "Mega Charizard X ex",
+      "Mega Charizard Y ex"
     ],
     "attacks": [
       {
@@ -165200,7 +165658,13 @@
           "directLow": 0.01
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ]
   },
   {
     "id": "me2-20",
@@ -165602,7 +166066,8 @@
     ],
     "evolvesFrom": "Swinub",
     "evolvesTo": [
-      "Mamoswine"
+      "Mamoswine",
+      "Mamoswine ex"
     ],
     "attacks": [
       {
@@ -166009,7 +166474,8 @@
     ],
     "evolvesFrom": "Piplup",
     "evolvesTo": [
-      "Empoleon"
+      "Empoleon",
+      "Empoleon ex"
     ],
     "attacks": [
       {
@@ -166474,7 +166940,10 @@
           "directLow": 0.1
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Pawmo"
+    ]
   },
   {
     "id": "me2-33",
@@ -166565,7 +167034,10 @@
           "directLow": 0.01
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Pawmot"
+    ]
   },
   {
     "id": "me2-34",
@@ -166670,7 +167142,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Mismagius"
+      "Mismagius",
+      "Mismagius ex"
     ],
     "attacks": [
       {
@@ -167467,7 +167940,8 @@
       "Psychic"
     ],
     "evolvesTo": [
-      "Alcremie"
+      "Alcremie",
+      "Alcremie ex"
     ],
     "attacks": [
       {
@@ -167821,7 +168295,10 @@
           "directLow": 0.1
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Brambleghast"
+    ]
   },
   {
     "id": "me2-47",
@@ -168316,7 +168793,8 @@
     ],
     "evolvesFrom": "Trapinch",
     "evolvesTo": [
-      "Flygon"
+      "Flygon",
+      "Flygon ex"
     ],
     "attacks": [
       {
@@ -168600,7 +169078,9 @@
     ],
     "evolvesFrom": "Gastly",
     "evolvesTo": [
-      "Gengar"
+      "Gengar",
+      "Gengar ex",
+      "Mega Gengar ex"
     ],
     "attacks": [
       {
@@ -169082,6 +169562,7 @@
       "Darkness"
     ],
     "evolvesTo": [
+      "Mega Sharpedo ex",
       "Sharpedo"
     ],
     "attacks": [
@@ -169570,7 +170051,8 @@
     ],
     "evolvesFrom": "Sandile",
     "evolvesTo": [
-      "Krookodile"
+      "Krookodile",
+      "Krookodile ex"
     ],
     "attacks": [
       {
@@ -170591,7 +171073,11 @@
           "directLow": 0.05
         }
       }
-    }
+    },
+    "evolvesTo": [
+      "Archaludon",
+      "Archaludon ex"
+    ]
   },
   {
     "id": "me2-75",
@@ -171382,7 +171868,8 @@
       "Colorless"
     ],
     "evolvesTo": [
-      "Lopunny"
+      "Lopunny",
+      "Mega Lopunny ex"
     ],
     "attacks": [
       {
@@ -172279,7 +172766,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-1"
-    }
+    },
+    "evolvesTo": [
+      "Erika's Gloom"
+    ]
   },
   {
     "id": "me2pt5-2",
@@ -172353,7 +172843,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-2"
-    }
+    },
+    "evolvesTo": [
+      "Erika's Vileplume ex"
+    ]
   },
   {
     "id": "me2pt5-3",
@@ -172511,7 +173004,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-4"
-    }
+    },
+    "evolvesTo": [
+      "Erika's Weepinbell"
+    ]
   },
   {
     "id": "me2pt5-5",
@@ -172595,7 +173091,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-5"
-    }
+    },
+    "evolvesTo": [
+      "Erika's Victreebel"
+    ]
   },
   {
     "id": "me2pt5-6",
@@ -172844,7 +173343,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-8"
-    }
+    },
+    "evolvesTo": [
+      "Bayleef"
+    ]
   },
   {
     "id": "me2pt5-9",
@@ -172918,7 +173420,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-9"
-    }
+    },
+    "evolvesTo": [
+      "Mega Meganium ex",
+      "Meganium"
+    ]
   },
   {
     "id": "me2pt5-10",
@@ -173071,7 +173577,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-11"
-    }
+    },
+    "evolvesTo": [
+      "Cascoon",
+      "Silcoon"
+    ]
   },
   {
     "id": "me2pt5-12",
@@ -173153,7 +173663,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-12"
-    }
+    },
+    "evolvesTo": [
+      "Beautifly"
+    ]
   },
   {
     "id": "me2pt5-13",
@@ -173310,7 +173823,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-14"
-    }
+    },
+    "evolvesTo": [
+      "Dustox"
+    ]
   },
   {
     "id": "me2pt5-15",
@@ -173532,7 +174048,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-20"
-    }
+    },
+    "evolvesTo": [
+      "Charmeleon"
+    ]
   },
   {
     "id": "me2pt5-21",
@@ -173606,7 +174125,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-21"
-    }
+    },
+    "evolvesTo": [
+      "Mega Charizard X ex",
+      "Mega Charizard Y ex"
+    ]
   },
   {
     "id": "me2pt5-22",
@@ -173843,7 +174366,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-27"
-    }
+    },
+    "evolvesTo": [
+      "Camerupt",
+      "Mega Camerupt ex"
+    ]
   },
   {
     "id": "me2pt5-28",
@@ -174003,7 +174530,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-29"
-    }
+    },
+    "evolvesTo": [
+      "Pignite"
+    ]
   },
   {
     "id": "me2pt5-30",
@@ -174080,7 +174610,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-30"
-    }
+    },
+    "evolvesTo": [
+      "Emboar",
+      "Mega Emboar ex"
+    ]
   },
   {
     "id": "me2pt5-31",
@@ -174332,7 +174866,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-39"
-    }
+    },
+    "evolvesTo": [
+      "Golduck"
+    ]
   },
   {
     "id": "me2pt5-40",
@@ -174487,7 +175024,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-41"
-    }
+    },
+    "evolvesTo": [
+      "Croconaw"
+    ]
   },
   {
     "id": "me2pt5-42",
@@ -174562,7 +175102,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-42"
-    }
+    },
+    "evolvesTo": [
+      "Feraligatr",
+      "Mega Feraligatr ex"
+    ]
   },
   {
     "id": "me2pt5-43",
@@ -174716,7 +175260,12 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-46"
-    }
+    },
+    "evolvesTo": [
+      "Froslass",
+      "Glalie",
+      "Mega Froslass ex"
+    ]
   },
   {
     "id": "me2pt5-47",
@@ -174976,7 +175525,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-49"
-    }
+    },
+    "evolvesTo": [
+      "N's Vanillish"
+    ]
   },
   {
     "id": "me2pt5-50",
@@ -175060,7 +175612,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-50"
-    }
+    },
+    "evolvesTo": [
+      "N's Vanilluxe"
+    ]
   },
   {
     "id": "me2pt5-51",
@@ -175217,7 +175772,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-52"
-    }
+    },
+    "evolvesTo": [
+      "Frosmoth"
+    ]
   },
   {
     "id": "me2pt5-53",
@@ -175464,7 +176022,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-55"
-    }
+    },
+    "evolvesTo": [
+      "Raichu"
+    ]
   },
   {
     "id": "me2pt5-56",
@@ -175948,7 +176509,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-63"
-    }
+    },
+    "evolvesTo": [
+      "Heliolisk"
+    ]
   },
   {
     "id": "me2pt5-64",
@@ -176364,7 +176928,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-77"
-    }
+    },
+    "evolvesTo": [
+      "Team Rocket's Exeggutor"
+    ]
   },
   {
     "id": "me2pt5-78",
@@ -176539,7 +177106,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-83"
-    }
+    },
+    "evolvesTo": [
+      "Azumarill",
+      "Azumarill ex"
+    ]
   },
   {
     "id": "me2pt5-84",
@@ -176703,7 +177274,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-85"
-    }
+    },
+    "evolvesTo": [
+      "Mismagius",
+      "Mismagius ex"
+    ]
   },
   {
     "id": "me2pt5-86",
@@ -177036,7 +177611,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-93"
-    }
+    },
+    "evolvesTo": [
+      "Slurpuff"
+    ]
   },
   {
     "id": "me2pt5-94",
@@ -177199,7 +177777,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-95"
-    }
+    },
+    "evolvesTo": [
+      "Hop's Trevenant"
+    ]
   },
   {
     "id": "me2pt5-96",
@@ -177451,7 +178032,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-100"
-    }
+    },
+    "evolvesTo": [
+      "Team Rocket's Dugtrio"
+    ]
   },
   {
     "id": "me2pt5-101",
@@ -177694,7 +178278,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-103"
-    }
+    },
+    "evolvesTo": [
+      "Medicham",
+      "Medicham ex"
+    ]
   },
   {
     "id": "me2pt5-104",
@@ -178103,7 +178691,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-115"
-    }
+    },
+    "evolvesTo": [
+      "Pangoro"
+    ]
   },
   {
     "id": "me2pt5-116",
@@ -178343,7 +178934,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-118"
-    }
+    },
+    "evolvesTo": [
+      "Carkol"
+    ]
   },
   {
     "id": "me2pt5-119",
@@ -178429,7 +179023,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-119"
-    }
+    },
+    "evolvesTo": [
+      "Coalossal"
+    ]
   },
   {
     "id": "me2pt5-120",
@@ -178936,7 +179533,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-130"
-    }
+    },
+    "evolvesTo": [
+      "Galarian Linoone"
+    ]
   },
   {
     "id": "me2pt5-131",
@@ -179020,7 +179620,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-131"
-    }
+    },
+    "evolvesTo": [
+      "Galarian Obstagoon"
+    ]
   },
   {
     "id": "me2pt5-132",
@@ -179180,7 +179783,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-134"
-    }
+    },
+    "evolvesTo": [
+      "Mega Scrafty ex",
+      "Scrafty"
+    ]
   },
   {
     "id": "me2pt5-135",
@@ -179347,7 +179954,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-138"
-    }
+    },
+    "evolvesTo": [
+      "Mandibuzz",
+      "Mandibuzz ex"
+    ]
   },
   {
     "id": "me2pt5-139",
@@ -179951,7 +180562,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-146"
-    }
+    },
+    "evolvesTo": [
+      "Bisharp"
+    ]
   },
   {
     "id": "me2pt5-147",
@@ -180027,7 +180641,10 @@
     "images": {
       "small": "https://images.scrydex.com/pokemon/me2pt5-147/small",
       "large": "https://images.scrydex.com/pokemon/me2pt5-147/large"
-    }
+    },
+    "evolvesTo": [
+      "Kingambit"
+    ]
   },
   {
     "id": "me2pt5-148",
@@ -180275,7 +180892,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-150"
-    }
+    },
+    "evolvesTo": [
+      "Dragonair"
+    ]
   },
   {
     "id": "me2pt5-151",
@@ -180351,7 +180971,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-151"
-    }
+    },
+    "evolvesTo": [
+      "Mega Dragonite ex"
+    ]
   },
   {
     "id": "me2pt5-152",
@@ -180668,7 +181291,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-156"
-    }
+    },
+    "evolvesTo": [
+      "Noivern",
+      "Noivern ex"
+    ]
   },
   {
     "id": "me2pt5-157",
@@ -180981,7 +181608,10 @@
       "large": "https://images.scrydex.com/pokemon/me2pt5-163/large"
     },
     "retreatCost": [],
-    "convertedRetreatCost": 0
+    "convertedRetreatCost": 0,
+    "evolvesTo": [
+      "Larry's Dudunsparce ex"
+    ]
   },
   {
     "id": "me2pt5-164",
@@ -181133,7 +181763,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-165"
-    }
+    },
+    "evolvesTo": [
+      "Delcatty"
+    ]
   },
   {
     "id": "me2pt5-166",
@@ -181386,7 +182019,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-168"
-    }
+    },
+    "evolvesTo": [
+      "Larry's Staravia"
+    ]
   },
   {
     "id": "me2pt5-169",
@@ -181475,7 +182111,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-169"
-    }
+    },
+    "evolvesTo": [
+      "Larry's Staraptor"
+    ]
   },
   {
     "id": "me2pt5-170",
@@ -181732,7 +182371,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me2pt5-173"
-    }
+    },
+    "evolvesTo": [
+      "Larry's Braviary"
+    ]
   },
   {
     "id": "me2pt5-174",
@@ -182982,7 +183624,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-1"
-    }
+    },
+    "evolvesTo": [
+      "Ariados"
+    ]
   },
   {
     "id": "me3-7",
@@ -183052,7 +183697,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-7"
-    }
+    },
+    "evolvesTo": [
+      "Spewpa"
+    ]
   },
   {
     "id": "me3-8",
@@ -183125,7 +183773,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-8"
-    }
+    },
+    "evolvesTo": [
+      "Vivillon"
+    ]
   },
   {
     "id": "me3-15",
@@ -183195,7 +183846,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-15"
-    }
+    },
+    "evolvesTo": [
+      "Salazzle",
+      "Salazzle ex"
+    ]
   },
   {
     "id": "me3-16",
@@ -183430,7 +184085,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-20"
-    }
+    },
+    "evolvesTo": [
+      "Mega Starmie ex"
+    ]
   },
   {
     "id": "me3-21",
@@ -183598,7 +184256,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-27"
-    }
+    },
+    "evolvesTo": [
+      "Luxray",
+      "Luxray ex"
+    ]
   },
   {
     "id": "me3-28",
@@ -183836,7 +184498,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-33"
-    }
+    },
+    "evolvesTo": [
+      "Meowstic"
+    ]
   },
   {
     "id": "me3-34",
@@ -184074,7 +184739,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-37"
-    }
+    },
+    "evolvesTo": [
+      "Probopass"
+    ]
   },
   {
     "id": "me3-3",
@@ -184222,7 +184890,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-5"
-    }
+    },
+    "evolvesTo": [
+      "Serperior",
+      "Serperior ex"
+    ]
   },
   {
     "id": "me3-10",
@@ -184304,7 +184976,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-10"
-    }
+    },
+    "evolvesTo": [
+      "Dartrix"
+    ]
   },
   {
     "id": "me3-13",
@@ -184382,7 +185057,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-13"
-    }
+    },
+    "evolvesTo": [
+      "Talonflame"
+    ]
   },
   {
     "id": "me3-14",
@@ -184548,7 +185226,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-18"
-    }
+    },
+    "evolvesTo": [
+      "Dewgong"
+    ]
   },
   {
     "id": "me3-26",
@@ -184618,7 +185299,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-26"
-    }
+    },
+    "evolvesTo": [
+      "Luxio"
+    ]
   },
   {
     "id": "me3-35",
@@ -184697,7 +185381,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-35"
-    }
+    },
+    "evolvesTo": [
+      "Aromatisse"
+    ]
   },
   {
     "id": "me3-9",
@@ -185267,7 +185954,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-30"
-    }
+    },
+    "evolvesTo": [
+      "Clefable",
+      "Mega Clefable ex"
+    ]
   },
   {
     "id": "me3-2",
@@ -185408,7 +186099,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-4"
-    }
+    },
+    "evolvesTo": [
+      "Servine"
+    ]
   },
   {
     "id": "me3-6",
@@ -185574,7 +186268,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-11"
-    }
+    },
+    "evolvesTo": [
+      "Decidueye",
+      "Decidueye ex"
+    ]
   },
   {
     "id": "me3-12",
@@ -185734,7 +186432,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-23"
-    }
+    },
+    "evolvesTo": [
+      "Aurorus"
+    ]
   },
   {
     "id": "me3-31",
@@ -185989,7 +186690,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-39"
-    }
+    },
+    "evolvesTo": [
+      "Hippowdon"
+    ]
   },
   {
     "id": "me3-40",
@@ -186240,7 +186944,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-42"
-    }
+    },
+    "evolvesTo": [
+      "Barbaracle"
+    ]
   },
   {
     "id": "me3-43",
@@ -186395,7 +187102,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-44"
-    }
+    },
+    "evolvesTo": [
+      "Tyrantrum"
+    ]
   },
   {
     "id": "me3-45",
@@ -186708,7 +187418,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-51"
-    }
+    },
+    "evolvesTo": [
+      "Drapion"
+    ]
   },
   {
     "id": "me3-53",
@@ -186960,7 +187673,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-56"
-    }
+    },
+    "evolvesTo": [
+      "Doublade"
+    ]
   },
   {
     "id": "me3-57",
@@ -187039,7 +187755,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-57"
-    }
+    },
+    "evolvesTo": [
+      "Aegislash"
+    ]
   },
   {
     "id": "me3-48",
@@ -187109,7 +187828,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-48"
-    }
+    },
+    "evolvesTo": [
+      "Haunter"
+    ]
   },
   {
     "id": "me3-49",
@@ -187180,7 +187902,12 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-49"
-    }
+    },
+    "evolvesTo": [
+      "Gengar",
+      "Gengar ex",
+      "Mega Gengar ex"
+    ]
   },
   {
     "id": "me3-52",
@@ -187663,7 +188390,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-60"
-    }
+    },
+    "evolvesTo": [
+      "Raticate"
+    ]
   },
   {
     "id": "me3-62",
@@ -187981,7 +188711,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-64"
-    }
+    },
+    "evolvesTo": [
+      "Diggersby"
+    ]
   },
   {
     "id": "me3-65",
@@ -188152,7 +188885,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me3-66"
-    }
+    },
+    "evolvesTo": [
+      "Fletchinder"
+    ]
   },
   {
     "id": "me3-67",
@@ -189260,7 +189996,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-2"
-    }
+    },
+    "evolvesTo": [
+      "Beedrill ex"
+    ]
   },
   {
     "id": "me4-3",
@@ -189408,7 +190147,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-1"
-    }
+    },
+    "evolvesTo": [
+      "Kakuna"
+    ]
   },
   {
     "id": "me4-12",
@@ -189482,7 +190224,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-12"
-    }
+    },
+    "evolvesTo": [
+      "Delphox",
+      "Mega Delphox ex"
+    ]
   },
   {
     "id": "me4-14",
@@ -189554,7 +190300,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-14"
-    }
+    },
+    "evolvesTo": [
+      "Mega Pyroar ex",
+      "Pyroar"
+    ]
   },
   {
     "id": "me4-6",
@@ -189640,7 +190390,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-6"
-    }
+    },
+    "evolvesTo": [
+      "Chesnaught"
+    ]
   },
   {
     "id": "me4-8",
@@ -189712,7 +190465,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-8"
-    }
+    },
+    "evolvesTo": [
+      "Ninetales"
+    ]
   },
   {
     "id": "me4-9",
@@ -189876,7 +190632,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-11"
-    }
+    },
+    "evolvesTo": [
+      "Braixen"
+    ]
   },
   {
     "id": "me4-13",
@@ -190041,7 +190800,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-5"
-    }
+    },
+    "evolvesTo": [
+      "Quilladin"
+    ]
   },
   {
     "id": "me4-4",
@@ -190447,7 +191209,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-16"
-    }
+    },
+    "evolvesTo": [
+      "Octillery"
+    ]
   },
   {
     "id": "me4-26",
@@ -190615,7 +191380,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-21"
-    }
+    },
+    "evolvesTo": [
+      "Greninja ex",
+      "Mega Greninja ex"
+    ]
   },
   {
     "id": "me4-27",
@@ -190689,7 +191458,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-27"
-    }
+    },
+    "evolvesTo": [
+      "Flaaffy"
+    ]
   },
   {
     "id": "me4-20",
@@ -190770,7 +191542,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-20"
-    }
+    },
+    "evolvesTo": [
+      "Frogadier"
+    ]
   },
   {
     "id": "me4-18",
@@ -191018,7 +191793,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-23"
-    }
+    },
+    "evolvesTo": [
+      "Avalugg"
+    ]
   },
   {
     "id": "me4-22",
@@ -191358,7 +192136,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-25"
-    }
+    },
+    "evolvesTo": [
+      "Golisopod"
+    ]
   },
   {
     "id": "me4-29",
@@ -191761,7 +192542,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-36"
-    }
+    },
+    "evolvesTo": [
+      "Meowstic"
+    ]
   },
   {
     "id": "me4-38",
@@ -191847,7 +192631,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-38"
-    }
+    },
+    "evolvesTo": [
+      "Trevenant"
+    ]
   },
   {
     "id": "me4-31",
@@ -192174,7 +192961,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-28"
-    }
+    },
+    "evolvesTo": [
+      "Ampharos"
+    ]
   },
   {
     "id": "me4-32",
@@ -192430,7 +193220,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-44"
-    }
+    },
+    "evolvesTo": [
+      "Donphan"
+    ]
   },
   {
     "id": "me4-41",
@@ -192770,7 +193563,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-40"
-    }
+    },
+    "evolvesTo": [
+      "Gourgeist ex"
+    ]
   },
   {
     "id": "me4-42",
@@ -193077,7 +193873,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-53"
-    }
+    },
+    "evolvesTo": [
+      "Skuntank"
+    ]
   },
   {
     "id": "me4-46",
@@ -193150,7 +193949,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-46"
-    }
+    },
+    "evolvesTo": [
+      "Claydol"
+    ]
   },
   {
     "id": "me4-52",
@@ -193305,7 +194107,10 @@
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-49"
     },
     "retreatCost": [],
-    "convertedRetreatCost": 0
+    "convertedRetreatCost": 0,
+    "evolvesTo": [
+      "Golbat"
+    ]
   },
   {
     "id": "me4-51",
@@ -193554,7 +194359,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-50"
-    }
+    },
+    "evolvesTo": [
+      "Crobat"
+    ]
   },
   {
     "id": "me4-55",
@@ -193717,7 +194525,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-56"
-    }
+    },
+    "evolvesTo": [
+      "Garbodor"
+    ]
   },
   {
     "id": "me4-48",
@@ -194040,7 +194851,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-66"
-    }
+    },
+    "evolvesTo": [
+      "Sliggoo"
+    ]
   },
   {
     "id": "me4-69",
@@ -194205,7 +195019,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-60"
-    }
+    },
+    "evolvesTo": [
+      "Metagross"
+    ]
   },
   {
     "id": "me4-64",
@@ -194368,7 +195185,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-58"
-    }
+    },
+    "evolvesTo": [
+      "Mega Dragalge ex"
+    ]
   },
   {
     "id": "me4-59",
@@ -194456,7 +195276,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-59"
-    }
+    },
+    "evolvesTo": [
+      "Metang"
+    ]
   },
   {
     "id": "me4-62",
@@ -194536,7 +195359,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-62"
-    }
+    },
+    "evolvesTo": [
+      "Ferrothorn"
+    ]
   },
   {
     "id": "me4-61",
@@ -194782,7 +195608,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-67"
-    }
+    },
+    "evolvesTo": [
+      "Goodra"
+    ]
   },
   {
     "id": "me4-70",
@@ -194861,7 +195690,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-70"
-    }
+    },
+    "evolvesTo": [
+      "Watchog"
+    ]
   },
   {
     "id": "me4-71",
@@ -195015,7 +195847,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me4-72"
-    }
+    },
+    "evolvesTo": [
+      "Cinccino",
+      "Cinccino ex"
+    ]
   },
   {
     "id": "me4-74",
@@ -196032,7 +196868,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-2"
-    }
+    },
+    "evolvesTo": [
+      "Charjabug"
+    ]
   },
   {
     "id": "me5-3",
@@ -196104,7 +196943,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-3"
-    }
+    },
+    "evolvesTo": [
+      "Lurantis",
+      "Lurantis ex"
+    ]
   },
   {
     "id": "me5-4",
@@ -196267,7 +197110,11 @@
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-5"
     },
     "retreatCost": [],
-    "convertedRetreatCost": 0
+    "convertedRetreatCost": 0,
+    "evolvesTo": [
+      "Sinistcha",
+      "Sinistcha ex"
+    ]
   },
   {
     "id": "me5-6",
@@ -196517,7 +197364,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-9"
-    }
+    },
+    "evolvesTo": [
+      "Centiskorch"
+    ]
   },
   {
     "id": "me5-8",
@@ -196766,7 +197616,13 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-11"
-    }
+    },
+    "evolvesTo": [
+      "Armarouge",
+      "Armarouge ex",
+      "Ceruledge",
+      "Ceruledge ex"
+    ]
   },
   {
     "id": "me5-13",
@@ -196839,7 +197695,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-13"
-    }
+    },
+    "evolvesTo": [
+      "Seaking"
+    ]
   },
   {
     "id": "me5-12",
@@ -197241,7 +198100,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-15"
-    }
+    },
+    "evolvesTo": [
+      "Wailord",
+      "Wailord ex"
+    ]
   },
   {
     "id": "me5-18",
@@ -197313,7 +198176,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-18"
-    }
+    },
+    "evolvesTo": [
+      "Brionne"
+    ]
   },
   {
     "id": "me5-19",
@@ -197387,7 +198253,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-19"
-    }
+    },
+    "evolvesTo": [
+      "Primarina"
+    ]
   },
   {
     "id": "me5-20",
@@ -197635,7 +198504,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-23"
-    }
+    },
+    "evolvesTo": [
+      "Manectric",
+      "Mega Manectric ex"
+    ]
   },
   {
     "id": "me5-21",
@@ -197709,7 +198582,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-21"
-    }
+    },
+    "evolvesTo": [
+      "Palafin",
+      "Palafin ex"
+    ]
   },
   {
     "id": "me5-22",
@@ -197953,7 +198830,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-25"
-    }
+    },
+    "evolvesTo": [
+      "Vikavolt"
+    ]
   },
   {
     "id": "me5-27",
@@ -198209,7 +199089,12 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-29"
-    }
+    },
+    "evolvesTo": [
+      "Mega Slowbro ex",
+      "Slowbro",
+      "Slowking"
+    ]
   },
   {
     "id": "me5-30",
@@ -198379,7 +199264,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-36"
-    }
+    },
+    "evolvesTo": [
+      "Lampent"
+    ]
   },
   {
     "id": "me5-34",
@@ -198710,7 +199598,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-37"
-    }
+    },
+    "evolvesTo": [
+      "Chandelure",
+      "Mega Chandelure ex"
+    ]
   },
   {
     "id": "me5-31",
@@ -198882,7 +199774,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-33"
-    }
+    },
+    "evolvesTo": [
+      "Banette"
+    ]
   },
   {
     "id": "me5-39",
@@ -199209,7 +200104,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-42"
-    }
+    },
+    "evolvesTo": [
+      "Primeape"
+    ]
   },
   {
     "id": "me5-40",
@@ -199362,7 +200260,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-43"
-    }
+    },
+    "evolvesTo": [
+      "Annihilape"
+    ]
   },
   {
     "id": "me5-45",
@@ -199522,7 +200423,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-44"
-    }
+    },
+    "evolvesTo": [
+      "Rampardos ex"
+    ]
   },
   {
     "id": "me5-47",
@@ -199686,7 +200590,12 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-46"
-    }
+    },
+    "evolvesTo": [
+      "Excadrill",
+      "Excadrill ex",
+      "Mega Excadrill ex"
+    ]
   },
   {
     "id": "me5-49",
@@ -199774,7 +200683,11 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-49"
-    }
+    },
+    "evolvesTo": [
+      "Mandibuzz",
+      "Mandibuzz ex"
+    ]
   },
   {
     "id": "me5-48",
@@ -200204,7 +201117,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-51"
-    }
+    },
+    "evolvesTo": [
+      "Malamar"
+    ]
   },
   {
     "id": "me5-53",
@@ -200286,7 +201202,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-53"
-    }
+    },
+    "evolvesTo": [
+      "Thievul"
+    ]
   },
   {
     "id": "me5-54",
@@ -200532,7 +201451,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-57"
-    }
+    },
+    "evolvesTo": [
+      "Mabosstiff"
+    ]
   },
   {
     "id": "me5-56",
@@ -200939,7 +201861,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-61"
-    }
+    },
+    "evolvesTo": [
+      "Bastiodon"
+    ]
   },
   {
     "id": "me5-63",
@@ -201019,7 +201944,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-63"
-    }
+    },
+    "evolvesTo": [
+      "Bronzong"
+    ]
   },
   {
     "id": "me5-64",
@@ -201287,7 +202215,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-66"
-    }
+    },
+    "evolvesTo": [
+      "Trumbeak"
+    ]
   },
   {
     "id": "me5-69",
@@ -201361,7 +202292,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-69"
-    }
+    },
+    "evolvesTo": [
+      "Silvally"
+    ]
   },
   {
     "id": "me5-72",
@@ -201492,7 +202426,10 @@
     },
     "tcgplayer": {
       "url": "https://prices.pokemontcg.io/tcgplayer/me5-67"
-    }
+    },
+    "evolvesTo": [
+      "Toucannon"
+    ]
   },
   {
     "id": "me5-71",
