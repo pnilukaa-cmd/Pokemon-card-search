@@ -1,2 +1,10 @@
 __pycache__/
 *.pyc
+
+# Claude Code Agent tool isolation:"worktree" scratch state -- internal git
+# plumbing for background agent runs, not repo content.
+.claude/worktrees/
+
+# skill-creator eval-run scratch output (with_skill/without_skill outputs,
+# grading.json, benchmark.json, etc.) -- transient test artifacts, not source.
+.claude/skills/*-workspace/

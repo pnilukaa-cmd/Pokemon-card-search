@@ -1,0 +1,76 @@
+{
+  "skill_name": "tcg-theorycraft",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I noticed Poltchageist has this ability called Storehouse Hideaway that prevents damage while benched. Can you find every card that either has that exact ability, or that references it somewhere in their own text for a bonus (like some cards do with other named abilities)?",
+      "expected_output": "A search covering both which cards HAVE the named ability by name, and which cards reference it elsewhere as a scaling/payoff condition, using --sweep-phrase against both the effect name field and body text.",
+      "files": [],
+      "expectations": [
+        "searched_by_ability_name: checks cards that literally have 'Storehouse Hideaway' as an ability",
+        "searched_body_text_references: also checks other cards' body text for references to the ability by name, not just ownership",
+        "distinguished_owners_vs_referencers: clearly separates 'cards that have it' from 'cards that reference it as a payoff condition' rather than blending them",
+        "no_invented_cards: every card name/stat cited is verifiable against pokemon_standard_cards.json"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "can you dig up everything in the standard card pool related to Weakness - both cards that mess with weakness (add it, remove it, change it) and cards whose attacks or abilities get stronger because of weakness",
+      "expected_output": "Tag-based search of mechanic_index.json covering both produce (weakness manipulation) and consume (payoffs conditioned on weakness) roles, not just one side.",
+      "files": [],
+      "expectations": [
+        "checked_mechanic_index_tags: consults mechanic_index.json/analyze_mechanics.py's existing tag families rather than only free-associating card names",
+        "covered_produce_role: reports cards that manipulate/add/remove Weakness",
+        "covered_consume_role: reports cards whose effect scales with or is conditioned on Weakness, reported separately from the produce list",
+        "no_invented_cards: every card name/stat cited is verifiable against pokemon_standard_cards.json"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "ok this is a weird one but I want to build a deck that leans into all those quirky Special Energy cards - Boomerang Energy, Prism Energy, stuff like that. find what's out there and put together a full decklist",
+      "expected_output": "A search of the Special Energy card pool, a decklist built from real card stats pulled from pokemon_standard_cards.json, with a Basic-count/mulligan-odds check before finalizing.",
+      "files": [],
+      "expectations": [
+        "queried_real_special_energy_cards: cites actual Special Energy cards and their real rules text from the dataset",
+        "decklist_totals_60: the final decklist's Pokemon+Trainer+Energy counts sum to exactly 60",
+        "computed_mulligan_odds: explicitly computes or references the Basic-count/mulligan probability before finalizing the list",
+        "real_pokemon_stats_cited: Pokemon HP/retreat cost/attack costs in the decklist match real printings, not invented values"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "hey can you sanity check this deck idea before I commit to it - 4x Mega Meganium ex, 4x Bayleef, 2x Chikorita, then a pile of trainers and 12 grass energy. does the basic count work out ok?",
+      "expected_output": "Should flag that only 2 Chikorita as the sole Basic gives a dangerously high mulligan rate, using the hypergeometric mulligan-table calculation, not just a vague 'seems low' comment.",
+      "files": [],
+      "expectations": [
+        "flags_thin_basic_count: explicitly identifies that 2 total Basics is a real consistency problem, not just a minor note",
+        "computes_actual_mulligan_probability: gives an actual computed percentage (hypergeometric math), not just a qualitative 'that seems low'",
+        "verifies_evolution_chain: confirms the Chikorita->Bayleef->Mega Meganium ex line against real card data rather than assuming it from the names",
+        "gives_actionable_recommendation: suggests a concrete fix (e.g. how many more Basics to add) rather than just flagging the problem"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "is there anything in the pool that cares about how many Prize cards YOU'VE taken (not the opponent) - like an attack that gets stronger the more prizes I've already grabbed?",
+      "expected_output": "Should check mechanic_index.json tags first (e.g. damage_scales_with_prizes_taken_self or similar), cross-check with a raw sweep, and clearly distinguish self-prizes-taken from opponent-prizes-taken (an easy mix-up).",
+      "files": [],
+      "expectations": [
+        "distinguishes_self_vs_opponent_prizes: correctly separates 'prizes you've taken' from 'prizes your opponent has taken' and doesn't conflate them",
+        "checked_tags_and_raw_sweep: uses both the mechanic_index.json tag search and a raw text sweep as a cross-check",
+        "no_false_positive_mechanic: doesn't claim a card fits the self-prizes-taken mechanic if it's actually about the opponent's prizes taken"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I want to build a deck where I poison the opponent and then finish with an attack that does more damage based on damage counters already on them - walk me through how that'd actually play out turn by turn, does it actually work timing-wise?",
+      "expected_output": "Should narrate an actual turn-by-turn sequence and explicitly check whether the opponent can escape (e.g. by retreating, which cures Poison) in the turn between setup and the finishing attack, per skill step 5.",
+      "files": [],
+      "expectations": [
+        "narrates_turn_by_turn: lays out an explicit turn-by-turn sequence (turn N, opponent's turn, turn N+1...) rather than just describing the combo abstractly",
+        "checks_opponent_escape_window: explicitly considers whether the opponent can retreat (or otherwise cure Poison) in the turn between setup and the finishing attack",
+        "uses_real_cards: cards cited for the poison-setup and damage-counter-scaling attack are real, with real costs/damage from the dataset",
+        "honest_about_reliability: communicates clearly whether the combo is a hard lock or has an exploitable window, rather than overclaiming reliability"
+      ]
+    }
+  ]
+}
