@@ -155,6 +155,82 @@ usually still worth playing; the point is to know it's there rather than
 build the whole game plan on an assumption that doesn't survive the
 opponent taking a turn.
 
+### 6. When a card has a self-inflicted drawback, search *every* category of fix, not just the first one
+
+A card that hurts itself to do something big (self-damage, self-status,
+a brutal retreat cost) usually has more than one real answer in the pool,
+and they're mechanically different from each other — finding one doesn't
+mean the search is done. This showed up concretely with Wailord ex: its
+Falling Down attack does 270 damage but puts *itself* to Sleep, and it
+has a 4-cost retreat on top of that. The instinct was to search for
+"retreat cost reduction" and stop there. The real decklist for that
+Pokémon stacked *three* different answers to the same problem:
+
+- **Immunity effects** — Bubbly Water Energy grants the holder immunity to
+  Special Conditions, which can stop the self-inflicted Sleep from landing
+  at all if it's already attached. This is the most elegant fix and the
+  easiest one to miss, because it doesn't read like a "retreat" card at
+  all — check Special Energy and Tool text for "immune to Special
+  Conditions" / "can't be [Poisoned/Confused/Asleep/etc.]" whenever a
+  self-status drawback is in play.
+- **Switch-not-retreat effects** — Surfing Beach (Stadium) lets a Water
+  Pokémon swap Active/Bench for free, once per turn each side. It cures
+  Sleep the same way retreating does (leaving Active clears Special
+  Conditions), but it isn't a retreat, so a "no retreat cost" or "retreat
+  cost reduction" keyword search never finds it. Search for "switch...
+  Active...Benched" phrasing separately when the goal is "get this
+  Pokémon out of the Active Spot," not just "reduce its retreat cost."
+- **Flat retreat-cost tools** — the obvious category (Air Balloon, Rescue
+  Board, etc.), and worth double-checking with more than one regex pass:
+  an ad hoc search for `retreat cost.{0,20}(is|are|becomes).{0,10}(0|Colorless)`
+  missed Air Balloon's own text ("Retreat Cost of the Pokémon this card
+  **is attached to is** Colorless less") because the intervening clause
+  pushed the second "is" outside the character window. If a search for a
+  very common, expected card type (retreat tools are a real, well-known
+  category) comes back thin or empty, that's a signal to check the search
+  itself before concluding the category doesn't exist in the pool.
+
+The general version of this: when hunting for "how do I solve problem X,"
+enumerate the different mechanical *shapes* an answer could take (prevent
+it, cure it, bypass it via a different game action, reduce its cost) and
+search each shape separately, rather than stopping at the first phrasing
+that comes to mind.
+
+### 7. Self-validate against real published decklists when possible
+
+The clearest signal that a generated decklist has blind spots doesn't come
+from re-reading the same search results harder — it comes from comparing
+against a real, currently-played decklist for the same key card(s). When
+`WebSearch`/`WebFetch` are available, use them proactively for this rather
+than waiting to be handed a decklist to compare against:
+
+1. After building a decklist around specific key Pokémon, search the web
+   for real decklists featuring the same cards — Limitless TCG
+   (limitlesstcg.com/decks) is the best target, since it indexes real
+   tournament and meta decklists with full card lists. A query like
+   `site:limitlesstcg.com <Pokémon name> deck` or searching the deck
+   archetype name directly usually works.
+2. Compare card-by-card against the generated list. Don't just note *that*
+   something differs — work out *why* the search missed it: was it a
+   category of fix not considered (see step 6), a regex that didn't reach
+   far enough, a card whose role wasn't obvious from its text alone (e.g.
+   Misty's Vitality's "search 4 Energy and attach them" reads as a generic
+   Supporter until you connect it to a specific attack's steep energy
+   cost), or a card search that was never run at all (searching only
+   within the key Pokémon's own kit instead of also looking for standalone
+   tech answers, like Moltres's anti-ex attack, that don't reference the
+   deck's theme in their own text)?
+3. Treat a real, systematic gap (not a one-off stylistic difference — real
+   decks vary and there's rarely one "correct" 60) as material to fold
+   back into this file or into `analyze_mechanics.py`, the same way a
+   taxonomy gap found via the raw-sweep diff in step 2 gets fixed rather
+   than just noted once and forgotten.
+4. Be honest about the limits of this check: web search results can be
+   outdated, Expanded/other-format lists, or just one valid build among
+   several — the point is to catch a systematic blind spot in the search
+   process (a whole category of card being missed), not to treat someone
+   else's exact 60 as ground truth to copy.
+
 ## Script reference
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
