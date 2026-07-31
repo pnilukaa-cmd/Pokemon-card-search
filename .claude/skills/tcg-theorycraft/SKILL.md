@@ -116,6 +116,45 @@ is roughly a 60% mulligan rate — a real, easy-to-miss problem, not
 theoretical. Aim for roughly 8-12 total Basics unless the user has a reason
 to want fewer.
 
+### 5. Walk the actual turn sequence before calling a combo reliable
+
+Listing synergistic cards is not the same as verifying they combo the way
+they look like they should. A combo that spans more than one turn gives the
+opponent a turn in between to react, and several ordinary game rules quietly
+break "setup this turn, cash in next turn" plans if they aren't accounted
+for:
+
+- **Retreating cures every Special Condition** on the Pokémon that retreats.
+  If a combo relies on Poisoned/Confused/Burned/etc. still being present on
+  the *following* turn, and nothing prevents the opponent from retreating in
+  between, the setup is undone for the cost of their retreat. This is exactly
+  what happened when a "Arbok applies 3 conditions, then Muk cashes in next
+  turn" plan was first proposed for a Team Rocket deck — it looked clean but
+  had a free escape hatch until the sequence was corrected to route through
+  Muk's own Gooped Up (which both re-applies a condition *and* locks the
+  opponent's retreat for their next turn) before the payoff attack, closing
+  most of the window.
+- **Evolving also cures Special Conditions** (unless something explicitly
+  overrides it, e.g. a card like Dizzying Valley).
+- **Only the Active Pokémon attacks, once per turn** — a combo that needs
+  Pokémon A to set up and Pokémon B to cash in takes at least two of your
+  turns minimum, with an opponent turn in between each. Count the turns
+  explicitly rather than describing the combo as if it happens all at once.
+- Some conditions self-resolve on their own timeline regardless of anything
+  else (Paralyzed clears automatically at the end of the affected player's
+  next turn; Asleep requires a coin-flip check each Checkup) — factor this in
+  if a combo's timing is tight.
+
+Before presenting a multi-turn combo as the deck's game plan, narrate it as
+actual turns ("your turn N: X. opponent's turn: can they escape here? your
+turn N+1: Y.") and explicitly ask, at each opponent turn in between, "what
+can they do right now to get out of this." If there's a real window, say so
+plainly rather than presenting the combo as more reliable than it is — a
+strong combo with a known, disclosed soft spot is a fine, honest answer, and
+usually still worth playing; the point is to know it's there rather than
+build the whole game plan on an assumption that doesn't survive the
+opponent taking a turn.
+
 ## Script reference
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
