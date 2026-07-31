@@ -210,6 +210,18 @@ than waiting to be handed a decklist to compare against:
    tournament and meta decklists with full card lists. A query like
    `site:limitlesstcg.com <Pokémon name> deck` or searching the deck
    archetype name directly usually works.
+   **Caveat learned the hard way**: `WebFetch`/direct `curl` to
+   limitlesstcg.com (and every other general web domain tested) returned a
+   403 policy denial from this session's egress proxy, not a fetchable
+   page — check `$HTTPS_PROXY/__agentproxy/status` for
+   `recentRelayFailures` before assuming a fetch failure is fixable, and
+   don't retry a host that's actually blocked by policy. `WebSearch` still
+   works when direct fetch doesn't, but its summaries can contain real
+   errors (a decklist summary once had a Pokémon-count header that didn't
+   match its own listed contents) — **verify every card name it returns
+   against `pokemon_standard_cards.json` individually before trusting
+   any of it**, and don't trust card *counts* from a search summary to the
+   same standard as card *names*, since names are far easier to verify.
 2. Compare card-by-card against the generated list. Don't just note *that*
    something differs — work out *why* the search missed it: was it a
    category of fix not considered (see step 6), a regex that didn't reach
@@ -230,6 +242,23 @@ than waiting to be handed a decklist to compare against:
    several — the point is to catch a systematic blind spot in the search
    process (a whole category of card being missed), not to treat someone
    else's exact 60 as ground truth to copy.
+
+### 8. Check `references/current_meta_staples.md` before assuming a support card doesn't exist
+
+This file catalogs real, individually-verified staple cards and mechanics
+found by cross-checking actual July 2026 tournament results against the
+dataset (see the file for exactly how and its limits). It's a snapshot, not
+a live feed — re-verify anything time-sensitive rather than trusting it
+blindly as it ages, and treat it as a set of leads to check against the
+data, not as ground truth on its own. Notable standing lessons already in
+there: some decks legitimately run more than 5 Pokémon on the Bench (Area
+Zero Underdepths + a Tera Pokémon raises the cap to 8 — worth checking
+before assuming 5 is a hard ceiling), a key Pokémon's own evolution line
+sometimes already has draw/selection built in (check before assuming a
+bolted-on draw engine is needed), and several real decks run *fewer* total
+Energy cards than a first-pass build would suggest because they lean on
+search-and-attach Supporters/Items for their steep-cost attacks rather than
+raw draw-and-attach over several turns.
 
 ## Script reference
 
