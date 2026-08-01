@@ -57,6 +57,37 @@ ages. See the note at the bottom on how this was gathered and its limits.
   **also corrected**: it's real and Standard-legal, see the note on the
   Risky Ruins entry above and the methodology section below for the actual
   root cause (a data-fetch gap, not a rotation issue).
+- **Mega Zeraora ex "energy burst" build, no Iono's-Bellibolt bridge**
+  (user-provided, verified card-by-card) — a second, independent real deck
+  reaching for the same Thunderous Fist payoff as the entry above (60
+  damage per Lightning Energy attached, for a 1-Energy attack cost), but
+  fueling it a completely different way — no Iono's Bellibolt ex, no
+  Scramble Switch, just direct energy-dumping. `Magneton`'s Overvolt
+  Discharge attaches up to 3 Basic Energy from the discard pile to any
+  Lightning Pokémon in one shot, at the cost of KO'ing Magneton itself —
+  the deck runs 3 copies specifically to get multiple activations, backed
+  by `Explorer's Guidance` and `Canari` (whose own discard costs help seed
+  the discard pile with Basic Energy for Magneton to later grab). Cinderace's
+  Turbo Flare is a second, independent burst-loader (search 3 Basic Energy,
+  attach to a Benched Pokémon) that doesn't need discard-pile setup at all.
+  Worth generalizing: when a "per-Energy-attached" scaling attack shows up,
+  check for *multiple different* burst-loading pieces rather than assuming
+  one Supporter/Ability is the whole plan — this deck stacks at least three
+  independent loaders (Magneton, Cinderace, `Powerglass`'s slow 1-per-turn
+  trickle). `Voltaic Lightning Energy` is worth flagging as a real
+  "double-dip" Special Energy: it counts as a Lightning Energy for
+  Thunderous Fist's per-Energy multiplier *and* separately adds a flat +20
+  to whatever attacks off it — when checking a scaling attack's Energy
+  count, verify whether any attached Special Energy is also stacking a flat
+  bonus on top, not just contributing to the count. `Hero's Cape` (ACE
+  SPEC, +100 HP) protects the single big investment (Zeraora ex, 270→370
+  HP) from being sniped down before it unloads. `Cinderace`'s Explosiveness
+  Ability is a distinct setup-time mechanic worth remembering exists: its
+  text allows putting it face-down in the Active Spot during setup while
+  still in hand, bypassing the normal Basic-Pokémon-only opening-Active
+  rule — quote the exact wording rather than assuming how it resolves if
+  this comes up again, since it's an unusual enough interaction to double
+  check against current rulings before relying on it.
 - **Mega Slowbro ex / Dudunsparce bulky-Psychic control deck**
   (user-provided, verified card-by-card) — a wall/attrition build, not a
   combo deck: two big beefy attackers (Mega Slowbro ex, 330 HP; Latias ex,
