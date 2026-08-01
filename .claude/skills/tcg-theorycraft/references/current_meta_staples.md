@@ -74,7 +74,11 @@ ages. See the note at the bottom on how this was gathered and its limits.
   counter-producer in `combo_patterns.md` Pattern 1 (those trigger from the
   player's own actions; this triggers from the *opponent* choosing to
   attack), not yet tagged in the taxonomy — worth adding a
-  `retaliate_after_ko`-style tag if this shape recurs. Latias ex's Skyliner
+  `retaliate_after_ko`-style tag now that it's recurred (see `Spiky Energy`
+  below, a Special Energy that grants the identical "even if Knocked Out"
+  retaliation property to *any* Pokémon it's attached to — confirming this
+  is a real, portable mechanic shape and not a one-card curiosity).
+  Latias ex's Skyliner
   Ability (all of your Basic Pokémon have no Retreat Cost) is a
   quality-of-life enabler for the whole low-HP-Basic support package
   (Smoochum, Slowpoke, Dunsparce) to reposition freely. Smoochum's
@@ -124,6 +128,44 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Genesect's Ability trigger, a two-birds-one-Tool efficiency worth
   checking for whenever a deck runs both a Tool-gated Ability and a
   generically-useful Tool for unrelated reasons.
+- **Mega Kangaskhan ex / Cornerstone Ogerpon ex "ex-immunity wall"**
+  (user-provided, verified card-by-card) — the defensive mirror of the
+  Festival Grounds Goldeen ex-hate toolbox above: instead of dealing bonus
+  damage *to* ex/V Pokémon, this deck stacks several separate, narrowly-
+  conditioned damage-**prevention** effects to wall out the ex/Mega-ex/
+  Ability-heavy current meta entirely. `Cornerstone Mask Ogerpon ex`
+  prevents all damage from opponent's Pokémon *that have an Ability* while
+  Active, and all damage period while on the Bench. `Crustle`'s Mysterious
+  Rock Inn prevents all damage specifically from opponent's Pokémon **ex**.
+  Between those two conditions (Ability-havers, and separately all ex's),
+  most of the archetypes already logged in this file are walled out
+  entirely — everything catalogued above is either ex, Mega ex, or built
+  around a named Ability. `Mist Energy` layers on top, blocking attack
+  *effects* (not damage — "damage is not an effect" is explicit in its
+  text) from landing on whatever it's attached to, covering the residual
+  small non-ex non-Ability attackers the two Abilities above don't stop.
+  `Spiky Energy` adds the retaliation property described in the Mega
+  Slowbro ex entry above to any Pokémon wearing it. `Psyduck`'s Damp
+  Ability is a direct, specific counter to the exact "suicide for a
+  free-damage-counter burst" shape `Dusknoir`'s Cursed Blast uses (logged
+  under the Dragapult ex/Dusknoir entry below) — "Pokémon in play lose any
+  Ability that requires the Pokémon using it to Knock Out itself," which
+  reads like a narrow rider until you notice it's aimed at a real, currently
+  meta-relevant Ability shape. `Dwebble`'s Ascension attack (free-cost,
+  search a card this Pokémon evolves from... into, and evolve immediately)
+  is a Rare-Candy-shaped effect built into a Basic's own attack line rather
+  than a separate Item — a distinct way to skip a turn of waiting on a slow
+  evolution line, worth remembering as its own category next to Rare Candy.
+  `Mega Kangaskhan ex` is the actual win condition once the wall is up:
+  Run Errand draws 2 every turn it's Active, and Rapid-Fire Combo
+  (200+ damage, flip until tails, +50 per heads) is an escalating,
+  high-variance burst finisher. **Flagging a real arithmetic problem, not
+  just a stylistic note**: this decklist as pasted sums to Pokémon 12 +
+  Trainer 33 + Energy 13 = **58 cards, not 60** (verified by adding the
+  literal copy counts on every line, which do match the section headers
+  exactly here — so the headers aren't lying, the list itself is 2 cards
+  short of legal). Worth double-checking with the source for what's
+  missing before treating this as a complete, playable 60.
 - **Team Rocket's Honchkrow / Porygon2 Supporter-discard deck**
   (user-provided, verified card-by-card) — the whole Pokémon lineup is
   "Team Rocket's ___"-named (all non-Rule-Box), which feeds two different
