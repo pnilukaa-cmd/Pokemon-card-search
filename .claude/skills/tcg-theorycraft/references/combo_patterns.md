@@ -414,3 +414,51 @@ opponent's Pokémon (not just their Active) with a flat, unscaled amount:
   one turn and double it the next, at the cost of needing 3 Energy (Water +
   Colorless ×2) for the seed turn before switching to the 2-Colorless
   double turn
+
+## Pattern 7: a board-wide status-immunity Stadium is a 4th real fix for self-inflicted Special Conditions — and a direct anti-synergy against Pattern 5
+
+SKILL.md step 6 lists three real answers to a self-inflicted Special
+Condition drawback (immunity Energy/Tools, switch-not-retreat Stadiums,
+flat retreat-cost reduction), using Wailord ex's Falling Down (270 damage,
+"This Pokémon is now Asleep") as the running example fixed there by
+`Bubbly Water Energy`. Checked directly against the taxonomy for this pass:
+`status_cure`'s `Festival Grounds` (Stadium) is a fourth real fix, more
+general than any of the three already logged, and it wasn't cross-checked
+against Wailord ex before now.
+
+**Festival Grounds**' actual text: "Each Pokémon that has any Energy
+attached (both yours and your opponent's) recovers from all Special
+Conditions and can't be affected by any Special Conditions." Wailord ex's
+own Falling Down costs 5 Water Energy, so by the time it's used, Wailord ex
+already trivially satisfies "has any Energy attached" — once Festival
+Grounds is in play, Wailord ex simply **never becomes Asleep from its own
+attack at all**, and is also immune to anything the opponent tries to
+inflict on it. Unlike Bubbly Water Energy, this doesn't cost an Energy-line
+slot (every attached card can be a plain Basic Water Energy) and doesn't
+only cover Sleep — it blanket-covers every Special Condition, from any
+source, for the whole game once it's in play.
+
+**The real tradeoff, checked rather than assumed**: the immunity is
+explicitly "both yours and your opponent's" — symmetric. Any deck running
+Festival Grounds for this reason gives up its own ability to inflict
+Special Conditions on the opponent for as long as the Stadium stays in
+play, since the opponent's own energied attacker becomes equally immune.
+This is a **direct, concrete anti-synergy with Pattern 5 above** (the
+Arbok/Muk/Cradily Special-Condition-stacking combo) — a deck can't
+meaningfully run both game plans at once, since Festival Grounds would
+neutralize its own Panic Poison/Gooped Up/Selective Slime the moment any of
+them tries to land on an opponent's Pokémon holding any Energy at all
+(true of essentially every attacker by the time it's attacking). Worth
+checking for this specific clash whenever a decklist pairs a self-status
+attacker (wanting the immunity) with a status-inflicting subplan (wanting
+the opposite) — the two want opposite things from the same Stadium slot,
+and only one can be in play at a time under the normal 1-Stadium rule.
+
+Also worth noting as a practical fragility, not just for this card but for
+any Stadium-based fix: Stadiums are directly contestable — a single
+opposing Stadium played later discards Festival Grounds outright (both
+players' Stadium slots are shared, "discard it if another Stadium comes
+into play" applies regardless of who played either one), so a plan that
+depends on Festival Grounds staying in play indefinitely has a real,
+opponent-controlled failure mode that Bubbly Water Energy (attached
+directly to the Pokémon, not contestable) doesn't share.
