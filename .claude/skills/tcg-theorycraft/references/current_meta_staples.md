@@ -86,6 +86,44 @@ ages. See the note at the bottom on how this was gathered and its limits.
   pure meta call — this deck runs no Tera Pokémon of its own, so it's a
   one-sided tax specifically aimed at Tera-line decks, which includes the
   Dragapult ex archetype logged below (`['Stage 2', 'Tera', 'ex']`).
+- **Festival Grounds Goldeen "ex-hate toolbox"** (user-provided, verified
+  card-by-card) — a distinct third archetype *shape* worth naming alongside
+  the combo decks (Wailord ex, Risky Ruins, Mega Zeraora ex) and the
+  wall/control decks (Mega Slowbro ex) already logged here: an all-cheap,
+  all-non-Rule-Box roster (every Pokémon in the 60 lacks a Rule Box — no
+  ex/V/Mega at all) that stacks *multiple, separate* small bonus-damage-vs-
+  opponent's-ex/V effects onto those cheap attackers, specifically to punch
+  above their weight against the current ex/Mega-ex-saturated meta (every
+  other archetype logged in this file is ex or Mega ex). The stack: `Kieran`
+  (+30 to opponent's Active ex/V, or a free switch), `Brave Bangle`
+  (Pokémon Tool, +30 to opponent's Active ex, non-Rule-Box holder only),
+  `Gladion's Final Battle` (+80 to opponent's Active, but only when it's the
+  *last card in your hand* — a hand-emptying finisher, non-Rule-Box
+  attacker only), and `Shaymin`'s Pinpoint Dive (60 flat snipe damage
+  directly to a Benched ex or V, bypassing the Active-only restriction the
+  other three share). None of these alone is a real threat to an ex's HP
+  total; stacked together on one attack they add up fast. Two other pieces
+  worth naming as their own mechanic shapes: **`Festival Grounds` (Stadium)
+  + `Goldeen`'s Festival Lead Ability** ("if Festival Grounds is in play,
+  this Pokémon may use an attack it has twice; if the first KOs, attack
+  again after the opponent's forced switch-in") is an attack-doubling
+  combo gated behind a specific Stadium being in play — check for this
+  shape (`X may use an attack twice if [Stadium] is in play`) whenever a
+  Stadium and a Pokémon's Ability are both in the same decklist rather than
+  assuming they're unrelated pieces; and **`Thwackey`'s Boom Boom Groove**
+  ("once per turn, if your Active Pokémon has the Festival Lead Ability,
+  search your deck for any card") is gated by *Ability name*, not card name
+  or type — the same restriction shape as Pattern 2 in `combo_patterns.md`
+  (named-family Abilities), just keyed to an Ability's name instead of a
+  Pokémon's; worth checking `--suggest-tags` for other Abilities that key
+  off a *named Ability* being present rather than a named Pokémon. Also:
+  `Genesect`'s ACE Nullifier Ability ("if this Pokémon has a Pokémon Tool
+  attached, opponent can't play ACE SPECs") is turned on for free here by
+  `Air Balloon` — the deck was already attaching Air Balloon to reduce
+  retreat cost, and that single attachment happens to also satisfy
+  Genesect's Ability trigger, a two-birds-one-Tool efficiency worth
+  checking for whenever a deck runs both a Tool-gated Ability and a
+  generically-useful Tool for unrelated reasons.
 - **N's Zoroark ex** (August 2026, TCGplayer "Best Decks Right Now" — see
   methodology note below on how this batch was gathered) — a draw-engine
   deck built around N's Zoroark ex's Trade Ability (discard 1 card, draw 2,
