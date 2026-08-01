@@ -57,6 +57,35 @@ ages. See the note at the bottom on how this was gathered and its limits.
   **also corrected**: it's real and Standard-legal, see the note on the
   Risky Ruins entry above and the methodology section below for the actual
   root cause (a data-fetch gap, not a rotation issue).
+- **Mega Slowbro ex / Dudunsparce bulky-Psychic control deck**
+  (user-provided, verified card-by-card) — a wall/attrition build, not a
+  combo deck: two big beefy attackers (Mega Slowbro ex, 330 HP; Latias ex,
+  210 HP) backed by an unusually heavy stack of three separate healing
+  effects (AZ's Tranquility, Jacinthe, Jumbo Ice Cream) and a
+  self-sustaining draw engine (Dudunsparce's Run Away Draw — draw 3, then
+  shuffle itself back into the deck, so it never gets stranded as a dead
+  card and just keeps getting re-evolved into again). Mega Slowbro ex's
+  Shellnado Spin is a genuinely new mechanic shape worth naming — a
+  **retaliation/vengeance effect**: "during your opponent's next turn, if
+  this Pokémon is damaged by an attack (**even if this Pokémon is Knocked
+  Out**), place 12 damage counters on the attacker" — so trading into Mega
+  Slowbro ex, even for a clean KO, still costs the opponent 120 damage on
+  whatever attacked it next. This is a distinct shape from every damage-
+  counter-producer in `combo_patterns.md` Pattern 1 (those trigger from the
+  player's own actions; this triggers from the *opponent* choosing to
+  attack), not yet tagged in the taxonomy — worth adding a
+  `retaliate_after_ko`-style tag if this shape recurs. Latias ex's Skyliner
+  Ability (all of your Basic Pokémon have no Retreat Cost) is a
+  quality-of-life enabler for the whole low-HP-Basic support package
+  (Smoochum, Slowpoke, Dunsparce) to reposition freely. Smoochum's
+  Delightful Kiss (Free-cost attack, search 2 Basic Psychic Energy and
+  attach both to a Benched Pokémon) is another real instance of the
+  "energy-search-and-attach as the primary energy plan" pattern already
+  logged in the mechanics section below. `Nighttime Mine` (Stadium: "attacks
+  used by each Tera Pokémon in play cost Colorless more," both players) is a
+  pure meta call — this deck runs no Tera Pokémon of its own, so it's a
+  one-sided tax specifically aimed at Tera-line decks, which includes the
+  Dragapult ex archetype logged below (`['Stage 2', 'Tera', 'ex']`).
 - **N's Zoroark ex** (August 2026, TCGplayer "Best Decks Right Now" — see
   methodology note below on how this batch was gathered) — a draw-engine
   deck built around N's Zoroark ex's Trade Ability (discard 1 card, draw 2,
