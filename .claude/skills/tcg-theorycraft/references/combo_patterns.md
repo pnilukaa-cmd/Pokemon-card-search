@@ -340,3 +340,77 @@ gated behind Cradily's 50% coin flip rather than a guaranteed effect. It
 also mixes Darkness (Muk) with Grass (Cradily) in one deck, same as the
 Arbok line mixing Darkness (Arbok, Muk) with a Supporter slot instead of a
 second color — worth weighing which tradeoff a real 60 would rather make.
+
+## Pattern 6: seed flat damage across the *whole* opposing board, then double it — no retreat escape hatch to design around at all
+
+`damage_counter_doubler` (produce role) has two members; the generally
+usable one is **`N's Vanilluxe`**'s Snow Coating (Colorless+Colorless, 0
+base damage): "Double the number of damage counters on each of your
+opponent's Pokémon." Unlike Pattern 5's Special-Condition stack, this
+pairs with a category of card that's structurally safer to combo with: an
+attack that spreads a small, *flat* amount of damage across **every** one
+of the opponent's Pokémon — Active and Bench simultaneously — rather than
+a single target. `bench_snipe_opponent_all` and `direct_damage_no_attack`
+both contain several: `Uxie`'s Painful Memories (Psychic ×1, 0 base
+damage): "Put 2 damage counters on each of your opponent's Pokémon";
+`Frosmoth`'s Chilling Wings (me1 print, Water ×1, 20 damage): "This attack
+does 20 damage to each of your opponent's Pokémon... Your opponent's Active
+Pokémon is now Asleep"; `Team Rocket's Arbok`'s Spinning Tail (Darkness
+×3, 30 damage): "This attack does 30 damage to each of your opponent's
+Pokémon."
+
+### Why this is more reliable than Pattern 5, checked against the actual rules
+
+Special Conditions are cured by retreating or evolving — that's the whole
+reason Pattern 5 needs a dedicated retreat-lock piece to make the 2-turn
+setup-then-cash-in sequence hold up. **Damage counters have no such
+escape.** Retreating moves a Pokémon to the Bench with every damage counter
+it already had still on it; evolving does the same. The only ways to remove
+a damage counter are a healing effect or the Pokémon being Knocked Out.
+That means a "seed now, double next turn" plan built on this family needs
+**no** protective piece at all — the opponent can freely retreat, evolve,
+or reposition their whole board in between and the counters (and the
+doubler's payoff) are completely unaffected either way.
+
+### Worked example, numbers checked
+
+1. **Turn N**: `Frosmoth` (me1 print) attacks with Chilling Wings for 1
+   Water Energy — every one of the opponent's Pokémon in play (Active and
+   however many are Benched) takes 20 damage (2 counters), and their Active
+   is Asleep as a bonus.
+2. **Opponent's turn**: free to retreat, evolve, attack, whatever they want
+   — none of it removes the damage counters just placed, regardless of
+   which of their Pokémon ends up in which position by the time your next
+   turn starts.
+3. **Turn N+1**: switch `N's Vanilluxe` into the Active Spot and attack with
+   Snow Coating for 2 Colorless Energy — every opponent Pokémon that still
+   has those counters (all of them, unless healed) now has them **doubled**:
+   20 → 40 damage, again spread across their entire board, for a total
+   outlay of 3 Energy across two turns.
+
+40 flat, unavoidable damage to literally everything the opponent has in
+play is a serious chunk of HP against the many 60-90 HP support Basics that
+show up throughout `current_meta_staples.md` (Smoochum, Slowpoke, Dunsparce,
+Voltorb, Tadbulb, etc.) and sets up an easy follow-up KO from any ordinary
+attack or snipe effect the turn after — check the specific target's real HP
+before calling it a guaranteed KO on its own, since 40 alone won't finish a
+150+ HP attacker, but as a board-wide softening pass it's strictly better
+than a single-target snipe of the same total Energy cost.
+
+### Toolkit: other flat, no-condition, whole-board seeders worth swapping in
+
+Any of these work as the "seed" half in place of Frosmoth, chosen for
+whichever Energy type fits the rest of the deck — all hit every one of the
+opponent's Pokémon (not just their Active) with a flat, unscaled amount:
+
+- **Uxie** — Painful Memories, Psychic ×1, 20 damage everywhere, no
+  attached-Pokémon requirement at all (works from turn one)
+- **Team Rocket's Arbok** — Spinning Tail, Darkness ×3, 30 damage everywhere
+- **Regice** — Blizzard, Water+Colorless×2, 90 to the Active plus 10 to each
+  Benched Pokémon (asymmetric — Bench-only portion is what feeds the doubler
+  evenly; the Active already took its big hit directly)
+- **N's Vanilluxe**'s own other attack, Blizzard (same text as Regice's) —
+  meaning a single copy of N's Vanilluxe can seed its own Bench-wide damage
+  one turn and double it the next, at the cost of needing 3 Energy (Water +
+  Colorless ×2) for the seed turn before switching to the 2-Colorless
+  double turn
