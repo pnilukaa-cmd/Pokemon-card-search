@@ -148,6 +148,20 @@ needing its own dedicated Energy line per attacker. When auditing energy
 type-payability, check whether the attack cost is Colorless-only before
 concluding a color mismatch is a real problem.
 
+Also check every Pokémon's **Ability line**, not just its attack text, for
+a condition that gates whether it can attack *at all* — this is a separate
+check from energy-payability and easy to skip once the attack cost itself
+looks clean. Real example: a from-scratch build included `Team Rocket's
+Mewtwo ex` on the strength of its attack (Erasure Ball, a clean 160+ with
+no restriction in the attack text itself) without noticing its Ability,
+Power Saver: "This Pokémon can't attack unless you have 4 or more Team
+Rocket's Pokémon in play." None of the deck's other four Pokémon were
+Team Rocket's-named, so the card could never attack at all — caught only
+when asked directly to double-check it, not by the original build process.
+Read the full card (abilities *and* attacks together) before concluding a
+Pokémon is a working attacker, the same discipline already applied to
+energy costs above.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way
