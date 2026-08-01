@@ -74,6 +74,30 @@ deck runs any card that damages its own side as a cost or side effect,
 checking for Munkidori (or another `transfer_damage_to_opponent` member) is
 worth doing by default, not just when a decklist happens to already include it.
 
+### Third real-world confirmation, and the cleanest one yet: Risky Ruins + Mega Darkrai ex
+
+One of five Mega Darkrai ex build variants a user shared (Version 5, and
+notably only that version) already ran `Risky Ruins` alongside `Mega
+Darkrai ex` — and the connection is exact and essentially free.
+`Mega Darkrai ex`'s Dusk Raid (Darkness+Darkness, 110+): "If your Benched
+Pokémon have any damage counters on them, this attack does 110 more
+damage" — 220 total for 2 Energy, but only if *something* on the bench has
+taken damage. Risky Ruins produces exactly that, automatically, every time
+a non-Darkness Basic is benched (2 damage counters, no attack needed) —
+and every other Basic in this deck's roster (Latias ex, Fezandipiti ex,
+Meowth ex, Mega Kangaskhan ex, Moltres, Chi-Yu, Munkidori, Yveltal is not
+Basic-restricted-out since it's Darkness... check each roster's own types)
+is non-Darkness, while Mega Darkrai ex itself is Darkness-typed and so
+exempt from its own Stadium's damage. This is the cleanest instance of
+Pattern 1 found yet: no dedicated combo piece needed beyond a Stadium the
+deck plausibly wants for other reasons too, and the "drawback" damages the
+support cast, never the payoff attacker. **Caution worth carrying
+forward**: if this deck also runs `Chi-Yu`'s Ground Melter ("+60 damage if
+a Stadium is in play, then discard that Stadium"), firing it while Risky
+Ruins is your own active Stadium destroys your own Dusk Raid enabler —
+check for this kind of self-inflicted Stadium removal whenever a deck
+pairs a Stadium-dependent engine with a Stadium-discarding attack.
+
 ## Pattern 2: a generic transfer effect routes around a name/type-restricted ability
 
 Many of the strongest resource-generation Abilities are restricted to a
@@ -578,3 +602,19 @@ the three needs its passive on right now — Okidogi before it attacks,
 Fezandipiti before the opponent's turn (its bonus only matters when it's
 about to take a hit), Munkidori before using Adrena-Brain — rather than
 needing one dedicated Darkness Energy per Pokémon.
+
+### Independent confirmation: a Mega Darkrai ex deck runs straight into the same gap
+
+A different user-provided deck (several Mega Darkrai ex build variants,
+none related to the Okidogi research above) ran both `Munkidori` and
+`Janine's Secret Art` — and would have hit exactly this wall: Janine's
+Secret Art only attaches Basic Darkness Energy to "your Darkness
+Pokémon," and Munkidori is Psychic-typed, so it can never be a legal
+target for it. The deck already happened to run `Energy Switch` (2-3
+copies across its variants) for unrelated-looking generic utility — which
+is, unnoticed by the builder or not, the only thing in the list actually
+capable of getting a Darkness Energy onto Munkidori to turn on
+Adrena-Brain. Worth calling out plainly when this shows up again: a deck
+can already contain its own fix for a gap like this without the fix being
+labeled as one — check every generic mover already in a decklist against
+every type-restricted trigger before assuming a gap needs a new card added.
