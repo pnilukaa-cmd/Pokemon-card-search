@@ -37,6 +37,19 @@ ages. See the note at the bottom on how this was gathered and its limits.
   sniped. Two cards in the list as pasted (`Poké Pad`, `Rosa's
   Encouragement`) are flagged `standard: Not Legal` in the dataset — worth
   a legality check before playing this as-is in a sanctioned event.
+- **Mega Zeraora ex / Iono's Bellibolt ex burst deck** (user-provided,
+  verified card-by-card) — see `references/combo_patterns.md` Pattern 2 for
+  the full writeup. Short version: Bellibolt ex's Electric Streamer dumps
+  unlimited Lightning Energy per turn onto "Iono's" Pokémon, which Mega
+  Zeraora ex's name doesn't qualify for — the deck routes around that with
+  Scramble Switch (a generic, unrestricted energy-transfer ACE SPEC),
+  moving the whole stockpile onto Zeraora for a single huge Thunderous
+  Fist. Real weakness: the combo is gated behind that one ACE SPEC copy,
+  and the whole core (Zeraora, Bellibolt ex, Voltorb, Tadbulb) shares a
+  Fighting ×2 weakness. `Poké Pad` showed up flagged `Not Legal` here too —
+  the second of two different user-provided decklists to include it,
+  suggesting whatever list-building source these come from hasn't
+  accounted for the current rotation boundary.
 - **Team Rocket's Mewtwo ex** — also made Top Cut at NAIC 2026, with at
   least one build adding a single copy of Lillie's Clefairy ex as a tech
   inclusion — a reminder that "counter-tech splashes" (running 1-2 copies

@@ -6,7 +6,7 @@ shapes of combo worth actively searching for even without a real decklist
 prompting it, because the taxonomy already has the pieces tagged
 individually and the only missing step is cross-referencing them.
 
-## The pattern: a "drawback" is often an enabler for something else
+## Pattern 1: a "drawback" is often an enabler for something else
 
 A card whose own text reads as a downside — self-damage, a self-inflicted
 Special Condition, a resource cost, a Bench-size or HP restriction — is
@@ -55,12 +55,72 @@ rather than treating the one seen as the only option — they're
 interchangeable enablers for the same combo shape, and a different one
 might fit a different deck's type/energy base better.
 
-## How to run this search proactively (not just when handed a decklist)
+## Pattern 2: a generic transfer effect routes around a name/type-restricted ability
+
+Many of the strongest resource-generation Abilities are restricted to a
+named family — "your Iono's Pokémon," "your Team Rocket's Pokémon," "your
+Cynthia's Pokémon," and so on. That restriction looks like it walls off any
+payoff card that doesn't share the family name, and it's tempting to
+conclude the combo just doesn't work. Check for a **generic transfer
+effect** before concluding that — one with no name/type restriction can
+move the resource the restricted ability generated onto the excluded
+payoff card anyway.
+
+### Worked example: Mega Zeraora ex + Iono's Bellibolt ex
+
+`Iono's Bellibolt ex`'s Electric Streamer Ability attaches unlimited Basic
+Lightning Energy per turn, but only to "your Iono's Pokémon" — and
+`Mega Zeraora ex` (whose Thunderous Fist does 60 damage per Lightning
+Energy attached to it) isn't Iono's-prefixed at all, so Electric Streamer
+can't target it directly. The bridge is `Scramble Switch` (ACE SPEC):
+"Switch your Active with a Benched Pokémon. If you do, move any amount of
+Energy from the Pokémon you moved to the Bench to the new Active
+Pokémon" — completely generic, no name restriction. Stack a large energy
+pool onto Bellibolt ex (fully legal target for Electric Streamer), then
+Scramble Switch moves all of it onto Mega Zeraora ex in one shot for a
+massive Thunderous Fist off a 1-energy attack cost. Verify this kind of
+bridge is real by checking the *exact* wording of the transfer effect for
+any restriction of its own — Scramble Switch has none, which is what makes
+it work; a differently-worded transfer effect might still carry a
+restriction that blocks the same trick.
+
+**Caveat worth flagging when this pattern shows up**: if the bridge card is
+a single-copy ACE SPEC (as it is here), the combo is a precious, largely
+one-per-game event, not a repeatable engine — say so plainly rather than
+presenting it as reliably available turn after turn.
+
+### The toolkit: generic energy-movement cards (no name/type restriction)
+
+Tagged `energy_move_between_own` in the taxonomy (25 cards total; the ones
+below have no Basic-type or name restriction, making them the most
+flexible bridges — several other family members are restricted to a
+specific Energy type, e.g. Metal- or Water-only, and are situational
+bridges only for that color):
+
+- **Scramble Switch** (Item, ACE SPEC) — switch-gated, moves any amount
+- **Energy Switch** (Item) — no switch required, moves 1 Basic Energy,
+  unlimited copies allowed (not ACE SPEC) — the most accessible generic
+  bridge in the pool since it isn't gated behind the 1-ACE-SPEC rule
+- **Delcatty** (attack, Energy Blender) — "any amount... in any way you
+  like," fully generic
+- **Blissey ex** (ability, Happy Switch) — repeatable every turn, moves 1
+  Basic Energy between any two of your Pokémon
+- **Azumarill ex** (ability, Bubble Gathering) — repeatable, pulls energy
+  from any other Pokémon onto itself specifically
+- **N's Plan** (Supporter) — moves up to 2 Energy from Bench to Active
+
+## How to run these searches proactively (not just when handed a decklist)
 
 1. When any card's own text is a downside on its face (self-damage,
    self-status, discards a resource, restricts something about the user's
-   own board), treat that as a signal to check it against consume-role
-   families, not just skip past it as "why would anyone run this."
+   own board) — Pattern 1 — treat that as a signal to check it against
+   consume-role families, not just skip past it as "why would anyone run
+   this." When a powerful resource-generation Ability is restricted to a
+   named family and a payoff card falls outside that family — Pattern 2 —
+   check for a generic transfer effect (search `--suggest-tags` for
+   `move`, `transfer`, `switch`) before concluding the combo doesn't work,
+   and check the transfer effect's own wording carefully for whether it
+   carries a restriction of its own.
 2. Use `--suggest-tags` with keywords describing the *shape* of the
    drawback (`damage_counter`, `bench_placement`, `hp_threshold`,
    `transfer`, `self_damage`, etc.) to find candidate produce/consume tag
