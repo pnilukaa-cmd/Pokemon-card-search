@@ -23,6 +23,20 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Latias ex, Wellspring Mask Ogerpon ex, Fezandipiti ex, and a small
   tech package (Moltres, Chien-Pao, Koraidon ex). Notably uses **Area Zero
   Underdepths** (see below) to run past the normal 5-card Bench limit.
+- **Drakloak/Unfezant "Risky Ruins" resilience deck** (user-provided,
+  verified card-by-card, not sourced from tournament coverage) — no big
+  attacker or ex at all; wins through attrition instead. Full mechanic
+  writeup and the general search recipe for finding combos shaped like
+  this one are in `references/combo_patterns.md`; the short version: Risky
+  Ruins' self-damage-on-bench "drawback" is repurposed twice, once by
+  Pidove's Emergency Evolution (auto-evolves once the self-damage brings
+  it to exactly 30 HP) and once by Munkidori's Adrena-Brain (launders the
+  self-damage onto the opponent instead). Backed by Unfezant's Add On
+  (draw 4 for 1 Colorless) as the card-advantage engine and Shaymin's
+  Flower Curtain protecting the whole fragile-low-HP-Basic plan from being
+  sniped. Two cards in the list as pasted (`Poké Pad`, `Rosa's
+  Encouragement`) are flagged `standard: Not Legal` in the dataset — worth
+  a legality check before playing this as-is in a sanctioned event.
 - **Team Rocket's Mewtwo ex** — also made Top Cut at NAIC 2026, with at
   least one build adding a single copy of Lillie's Clefairy ex as a tech
   inclusion — a reminder that "counter-tech splashes" (running 1-2 copies

@@ -260,7 +260,35 @@ Energy cards than a first-pass build would suggest because they lean on
 search-and-attach Supporters/Items for their steep-cost attacks rather than
 raw draw-and-attach over several turns.
 
-## Script reference
+### 9. Actively hunt for "drawback as enabler" combos, not just when handed a decklist
+
+A card whose own text reads as a downside — self-damage, a self-inflicted
+Special Condition, a Bench/HP restriction, a resource cost — is worth
+checking against every *other* card whose trigger condition that exact
+downside could satisfy, proactively, not just when a real decklist
+happens to demonstrate the combo. This is a distinct skill from steps 1-2
+(finding cards *for* a named mechanic): it's finding a mechanic's hidden
+*consumer* by starting from something that looks like it has none.
+
+This showed up concretely with `Risky Ruins` (a Stadium that deals 20 free
+self-damage to your own newly-benched Basic Pokémon, no attack required) —
+it reads as pure downside until cross-referenced against `emergency_evolve_low_hp`
+(Pidove's HP hits exactly 30 after the damage, triggering a free instant
+evolution) and `transfer_damage_to_opponent` (Munkidori's Adrena-Brain
+launders the "wasted" self-damage onto the opponent instead). Both
+individual tags already existed correctly in the taxonomy — the missing
+step was treating a drawback-looking card as worth the cross-reference at
+all, and then actually running `--tags` with the produce tag alongside
+candidate consume tags in one call to see them side by side.
+
+Full worked example, the general search recipe (keyword-to-tag-shape
+mapping, the "verify the actual numbers, don't assume a tag match is a
+confirmed combo" caveat, and checking for sibling members of a small
+consume family before treating the first match as the only answer) live in
+`references/combo_patterns.md` — read that before starting this kind of
+search rather than re-deriving the recipe each time.
+
+### 10. Check `references/current_meta_staples.md` before assuming a support card doesn't exist
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
 examples (`--suggest-tags`, `--tags`, `--sweep`, `--sweep-phrase`, `--diff`,
