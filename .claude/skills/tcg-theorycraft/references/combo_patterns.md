@@ -495,3 +495,69 @@ assuming from a family's dominant pattern (4 of 5 members say "your," the
 5th doesn't) — general lesson: when several members of the same taxonomy
 family look interchangeable, check each one's exact text before treating
 the majority phrasing as universal.
+
+## Pattern 9: a shared unusual trigger across several cards doesn't mean any of them natively satisfy it — check the *holder's* type separately from the *condition's* type
+
+Several different cards can share an oddly-specific trigger condition
+("if this Pokémon has any [X] attached/attribute") as a deliberate family
+identity, without any of them actually being built to satisfy that
+condition on their own. Don't assume a shared trigger implies a
+type-restricted searcher for that trigger will work on all of them —
+check the *searcher's* restriction against each *holder's own type*
+separately, since those are two independent facts that can easily conflict.
+
+### Worked example: Okidogi's "Adrena-" family and why type-restricted Darkness search doesn't feed it
+
+Studying `Okidogi` surfaces three real cards, all worth separating clearly
+by printing since two share the name:
+
+- **`Okidogi` (sv6-111, Fighting-type)**: Adrena-Power — "If this Pokémon
+  has any Darkness Energy attached, it gets +100 HP, and the attacks it
+  uses do 100 more damage to your opponent's Active Pokémon." A huge
+  passive, but Okidogi's own attack (Good Punch, Fighting+Fighting) has
+  nothing to do with Darkness — the Darkness Energy is purely there to
+  flip the condition, not to pay a cost.
+- **`Okidogi` (me2pt5-122, Fighting-type)**: a different card entirely —
+  Settle the Score does 80+ damage, "+60 more damage for each Prize card
+  your opponent took during their last turn." A revenge attacker: it wants
+  the opponent to have just KO'd one of your Pokémon (2 Prizes from an ex
+  KO = +120, for 200 total off a 3-Energy attack). Same disposable-Basics
+  philosophy as `Hop's Trevenant`/`Hassel`'s shared "a Hop's Pokémon was
+  KO'd last turn" trigger (`current_meta_staples.md`) — not something you
+  can force, but a real payoff for a deck willing to trade a big Pokémon on
+  purpose rather than only trying to protect its board.
+- **`Okidogi ex` (sv6pt5-36, Darkness-type)**: a self-contained 2-turn
+  combo with itself — Poisonous Musculature searches up to 2 Basic
+  Darkness Energy and attaches them to itself, *and* self-inflicts
+  Poison as a side effect of doing so; Chain-Crazed does 130+130=260 if
+  Poisoned. No external card needed — it's Pattern 1's shape (a drawback
+  enabling a payoff) except both halves are printed on the same card, one
+  turn apart. **Anti-synergy worth flagging explicitly**: `Festival
+  Grounds` (Stadium — "Each Pokémon that has any Energy attached recovers
+  from all Special Conditions and can't be affected by any Special
+  Conditions," both players) directly erases this combo the instant
+  Poisonous Musculature attaches Energy, the same way Pattern 7 already
+  flagged it against Wailord ex's self-Sleep. Don't run both in the same
+  deck without noticing.
+
+The interesting cross-card finding: `Munkidori`'s Adrena-Brain and
+`Fezandipiti`'s Adrena-Pheromone share Adrena-Power's exact "any Darkness
+Energy attached" trigger — clearly a deliberate shared family identity
+(these three are the Loyal Three legendary trio) — but **checking their
+actual types**, Munkidori and Fezandipiti (non-ex) are both **Psychic**,
+and the base Okidogi above is **Fighting**. None of the three
+Adrena-ability holders is Darkness-typed. That matters because the
+obvious-looking feeders are type-restricted and can't reach them:
+`Toxtricity`'s Sinister Surge only attaches to "your Benched **Darkness**
+Pokémon," and `Janine's Secret Art` only targets "your **Darkness**
+Pokémon" — both walled off from all three Adrena- holders. The real
+bridge has to be a **generic, type-unrestricted** Energy mover — exactly
+the `energy_move_between_own` toolkit from Pattern 2 (`Energy Switch`,
+`Delcatty`, `Blissey ex`, `N's Plan`, etc.). `Energy Switch` in particular
+is the cleanest fit here: not gated behind the 1-ACE-SPEC rule, and since
+none of the three Adrena- Pokémon's own attacks need Darkness Energy for
+cost, a single Darkness Energy card can be shuffled between whichever of
+the three needs its passive on right now — Okidogi before it attacks,
+Fezandipiti before the opponent's turn (its bonus only matters when it's
+about to take a hit), Munkidori before using Adrena-Brain — rather than
+needing one dedicated Darkness Energy per Pokémon.
