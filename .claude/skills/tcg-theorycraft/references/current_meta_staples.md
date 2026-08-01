@@ -73,11 +73,19 @@ ages. See the note at the bottom on how this was gathered and its limits.
   whatever attacked it next. This is a distinct shape from every damage-
   counter-producer in `combo_patterns.md` Pattern 1 (those trigger from the
   player's own actions; this triggers from the *opponent* choosing to
-  attack), not yet tagged in the taxonomy — worth adding a
-  `retaliate_after_ko`-style tag now that it's recurred (see `Spiky Energy`
-  below, a Special Energy that grants the identical "even if Knocked Out"
-  retaliation property to *any* Pokémon it's attached to — confirming this
-  is a real, portable mechanic shape and not a one-card curiosity).
+  attack). **Correction**: this file originally said this shape wasn't
+  tagged in the taxonomy and floated adding a new tag for it — checked
+  `analyze_mechanics.py` directly and it already exists as
+  `counterattack_on_hit` (consume role), with 17 members already matched,
+  including `Spiky Energy` (a Special Energy granting the identical "even
+  if Knocked Out" property to any Pokémon it's attached to) and
+  `Bouffalant`'s (Surging Sparks print) Ready to Ram attack, both of which
+  showed up in later user-provided decks — so this is a real, recurring
+  design shape in the current pool, already correctly covered, not a gap.
+  Lesson: check the taxonomy directly (`--suggest-tags` or grep
+  `analyze_mechanics.py`'s `FAMILIES`) before asserting something isn't
+  tagged, rather than assuming novelty from not having seen the tag name
+  before.
   Latias ex's Skyliner
   Ability (all of your Basic Pokémon have no Retreat Cost) is a
   quality-of-life enabler for the whole low-HP-Basic support package
@@ -166,6 +174,35 @@ ages. See the note at the bottom on how this was gathered and its limits.
   exactly here — so the headers aren't lying, the list itself is 2 cards
   short of legal). Worth double-checking with the source for what's
   missing before treating this as a complete, playable 60.
+- **Mega Kangaskhan ex Colorless-tank squad** (user-provided, verified
+  card-by-card) — a bulky-Colorless variant of the wall archetype: three
+  big Colorless-*type* ex/Mega attackers (`Mega Kangaskhan ex`, 300 HP;
+  `Bloodmoon Ursaluna ex`, 260 HP; `Meowth ex`, 170 HP) protected by two
+  stacking layers of passive defense — `Bouffalant` (Stellar Crown print)'s
+  Curly Wall Ability (-60 damage to all of your Basic *Colorless* Pokémon,
+  once 2+ Bouffalant are in play — the whole attacker trio qualifies) and
+  `Lively Stadium` (+30 HP to every Basic Pokémon, both sides, which is
+  most of this roster). A genuinely useful, generalizable insight on the
+  Energy side: this deck's actual Energy investment is entirely
+  **Water** (`Misty's Vitality` search-and-dump-4, `Dewgong`'s Wash Out
+  Ability moving Water Energy from Bench to Active "as often as you like"
+  each turn) even though its three main attackers' costs are pure
+  Colorless — not a mismatch, because Colorless cost accepts *any* Energy
+  type. Paired with a repeatable, unrestricted mover like Wash Out, this
+  means a single big Water-Energy dump (loaded once via a Supporter) can
+  keep re-fueling whichever Colorless attacker rotates into the Active
+  Spot next, rather than needing a dedicated Energy line per attacker —
+  see the new note added to SKILL.md step 4 on checking this deliberately
+  (it's the positive counterpart to the Team Rocket's Articuno gap logged
+  below). `Wally's Compassion` fully heals a Mega Evolution Pokémon ex but
+  returns all its attached Energy to hand as the cost of doing so — cheap
+  to pay off here specifically because Wash Out makes re-fueling trivial.
+  `Precious Trolley` (ACE SPEC) dumps any number of Basic Pokémon onto the
+  Bench in one shot — a fast way to get the whole Water-line-plus-Bouffalat
+  package into play at once. `Special Red Card` is a late-game safety
+  valve, usable only once the opponent is down to 3 or fewer Prizes:
+  shuffles their hand away and forces a fresh draw-3, denying a built-up
+  hand right as they're about to close out a win.
 - **Team Rocket's Honchkrow / Porygon2 Supporter-discard deck**
   (user-provided, verified card-by-card) — the whole Pokémon lineup is
   "Team Rocket's ___"-named (all non-Rule-Box), which feeds two different

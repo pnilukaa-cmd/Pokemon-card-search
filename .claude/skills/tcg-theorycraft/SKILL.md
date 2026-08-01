@@ -131,6 +131,23 @@ Special Energy text carefully — many restrict which type(s) they produce,
 or which Pokémon they can attach to) before assuming a Pokémon is a
 functional attacker rather than an Ability-only or dead include.
 
+The flip side of this check is also real and worth recognizing when it
+works rather than only flagging when it doesn't: an attacker whose cost is
+entirely **Colorless** accepts *any* Energy type, so a deck's Energy plan
+doesn't have to nominally "match" its attackers' type at all. A
+user-provided deck ran a Water-Energy-heavy support package (`Misty's
+Vitality`, `Dewgong`'s repeatable Wash Out Ability moving Water Energy from
+Bench to Active) feeding a trio of Colorless-type ex/Mega attackers (`Mega
+Kangaskhan ex`, `Bloodmoon Ursaluna ex`, `Meowth ex`) whose attack costs are
+pure Colorless — a real, working plan, not a mismatch, precisely because
+Colorless cost doesn't care what type pays it. Combined with a repeatable,
+unrestricted Energy-mover like Wash Out, this means a single big Energy
+investment (loaded via one Supporter) can keep re-fueling whichever
+Colorless-cost attacker rotates into the Active Spot next, rather than
+needing its own dedicated Energy line per attacker. When auditing energy
+type-payability, check whether the attack cost is Colorless-only before
+concluding a color mismatch is a real problem.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way
