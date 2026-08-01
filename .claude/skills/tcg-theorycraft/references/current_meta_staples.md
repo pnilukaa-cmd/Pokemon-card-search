@@ -34,9 +34,16 @@ ages. See the note at the bottom on how this was gathered and its limits.
   self-damage onto the opponent instead). Backed by Unfezant's Add On
   (draw 4 for 1 Colorless) as the card-advantage engine and Shaymin's
   Flower Curtain protecting the whole fragile-low-HP-Basic plan from being
-  sniped. Two cards in the list as pasted (`Poké Pad`, `Rosa's
-  Encouragement`) are flagged `standard: Not Legal` in the dataset — worth
-  a legality check before playing this as-is in a sanctioned event.
+  sniped. **Correction (see methodology note below):** this entry
+  previously flagged `Poké Pad` and `Rosa's Encouragement` as
+  `standard: Not Legal`. That was wrong for Poké Pad specifically — it's a
+  real, currently Standard-legal card (Regulation Mark J); the flag was a
+  data gap in `fetch_pokemon_cards.py` (it filtered the initial fetch by
+  the API's own unreliable `legalities.standard` field before the
+  regulation-mark safeguard could apply, silently excluding this and
+  ~1,140 other currently-legal cards across nearly every set — root-caused
+  and fixed). `Rosa's Encouragement` was not re-checked as part of this fix
+  and should be verified directly before trusting either claim about it.
 - **Mega Zeraora ex / Iono's Bellibolt ex burst deck** (user-provided,
   verified card-by-card) — see `references/combo_patterns.md` Pattern 2 for
   the full writeup. Short version: Bellibolt ex's Electric Streamer dumps
@@ -47,9 +54,77 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Fist. Real weakness: the combo is gated behind that one ACE SPEC copy,
   and the whole core (Zeraora, Bellibolt ex, Voltorb, Tadbulb) shares a
   Fighting ×2 weakness. `Poké Pad` showed up flagged `Not Legal` here too —
-  the second of two different user-provided decklists to include it,
-  suggesting whatever list-building source these come from hasn't
-  accounted for the current rotation boundary.
+  **also corrected**: it's real and Standard-legal, see the note on the
+  Risky Ruins entry above and the methodology section below for the actual
+  root cause (a data-fetch gap, not a rotation issue).
+- **N's Zoroark ex** (August 2026, TCGplayer "Best Decks Right Now" — see
+  methodology note below on how this batch was gathered) — a draw-engine
+  deck built around N's Zoroark ex's Trade Ability (discard 1 card, draw 2,
+  repeatable every turn) for raw consistency, then attacking with Night
+  Joker, which borrows an attack from any Benched "N's" Pokémon rather than
+  using a kit of its own — see `combo_patterns.md` Pattern 4 for the full
+  writeup on why the real payoff is N's Reshiram's damage-counter-scaling
+  Powerful Rage or N's Darmanitan's opponent-discard-scaling Back Draft, not
+  anything printed on Zoroark ex itself. Supported by Boss's Orders, Cyrano,
+  and Lillie's Determination for setup/utility.
+- **Slowking** (August 2026, same source) — an unusually low-attack-count
+  deck: Slowking's own attack, Seek Inspiration, discards the top deck card
+  and borrows its attack if it's a non-Rule-Box Pokémon (`combo_patterns.md`
+  Patterns 3 and 4 — the "randomness" can be engineered away with Academy at
+  Night). A common tech package pairs Kyurem (Trifrost — discard all its
+  Energy for 110 to 3 of the opponent's Pokémon, a mini board wipe) and
+  Metagross (Meteor Mash — windup attack, next turn's copy of the same
+  attack hits 60 harder) with Drapion and Cofagrigus, both of which deal
+  damage to *your own* side as part of their attack/ability (Hazardous Tail,
+  Law of the Underworld) — laundered through Munkidori's Adrena-Brain into
+  damage on the opponent instead, a second independent real-decklist
+  confirmation of the Pattern 1 shape (full writeup in `combo_patterns.md`).
+  Crispin fetches the deck's Basic Energy split.
+- **Dragapult ex / Dusknoir** (August 2026, same source — an established
+  archetype, "hasn't really changed in two years" per the source material) —
+  Budew's Itchy Pollen (Free-cost attack, 10 damage, locks the opponent out
+  of playing Item cards next turn) opens the game by denying the
+  Item-search-heavy setup most current decks rely on (Ultra Ball, Buddy-
+  Buddy Poffin, etc.). Dusknoir's Cursed Blast Ability is a suicide-for-
+  value effect — it knocks out Dusknoir itself but puts 13 damage counters
+  directly on an opponent's Pokémon, bypassing Weakness/Resistance entirely
+  since it's counters, not attack damage. Dragapult ex's Phantom Dive (200
+  damage to the Active, plus 6 damage counters spread across the opponent's
+  Bench in any distribution) turns one attack into a partial board wipe.
+  Drakloak's Recon Directive Ability (look at top 2, keep 1) gives this
+  evolution line its own card selection before it even reaches Dragapult ex
+  — see the "draw/selection built into a mid-evolution stage" mechanics
+  note below, which this deck is the original source of.
+- **Mega Excadrill ex** (August 2026, same source, described as the newest
+  deck on the list) — a Metal toolbox: Genesect ex's Metallic Signal
+  Ability searches up to 2 Evolution Metal Pokémon per turn (a targeted,
+  type-restricted search staple worth knowing as its own category, distinct
+  from Ultra Ball/Buddy-Buddy Poffin's generic/Basic-only search), setting
+  up Mega Excadrill ex's Maximum Drilling (200+, "+130 more damage if this
+  Pokémon has at least 2 extra Energy attached beyond the attack's cost" —
+  an energy-overkill-payoff attack, worth checking for an
+  energy-acceleration engine when a deck runs one of these). Metagross
+  offsets the deck's own Prize-trade math on a KO (a Stage-2, high-HP body
+  worth more Prizes if traded on curve). Mega Skarmory ex's Sonic Ripper
+  ("shuffle all Energy attached to this Pokémon into your deck" + 220
+  damage) is a build-it-then-detonate attack, similar in shape to Kyurem's
+  Trifrost in the Slowking deck above — a repeatable pattern worth naming:
+  **an attack that discards/shuffles away all its own attached Energy as
+  part of dealing very high damage is a one-shot burst, not a repeatable
+  attacker**, and needs a re-energizing plan (or a second attacker to pivot
+  to) for the turns after it fires. Fezandipiti ex's Flip the Script
+  (draw 3 once per turn, but only if one of your own Pokémon was KO'd last
+  opponent turn) is a comeback-mechanic Ability worth remembering as its
+  own named category — a payoff specifically for *being behind*, distinct
+  from every other draw-support card catalogued so far in this file, all of
+  which are unconditional. **Tech note, not a full archetype of its own**:
+  the source material also mentions `Blaziken ex` (Seething Spirit Ability —
+  once per turn, reattach a Basic Energy from the discard pile to any of
+  your Pokémon, verified real) as a partner/answer piece alongside
+  Dragapult ex, since it's Fire-type and super-effective against both
+  Hydrapple ex and Mega Excadrill ex — a reminder that a deck's *matchup
+  answers* are sometimes covered by a completely different deck's tech
+  slot rather than needing to be solved from within the archetype itself.
 - **Team Rocket's Mewtwo ex** — also made Top Cut at NAIC 2026, with at
   least one build adding a single copy of Lillie's Clefairy ex as a tech
   inclusion — a reminder that "counter-tech splashes" (running 1-2 copies
@@ -143,3 +218,22 @@ confirmed-real mechanics are recorded.
 If full-page web access becomes available in a future session, the next
 useful expansion here is literal top-5-per-tournament decklists with exact
 counts, which this pass could not get to reliably.
+
+### Update: the N's Zoroark ex / Slowking / Dragapult ex-Dusknoir batch above
+
+Gathered the same way, with the same limits, plus one addition: `tcgplayer.com`
+is also blocked at the proxy level for `WebFetch` (confirmed with a direct
+403 on the specific source article URL the user provided), joining the
+domain list above. That means the source article's exact text — including
+any real decklists with counts it contains — was never actually read; only
+`WebSearch`'s synthesized summaries of it were available, plus this
+project's own `pokemon_standard_cards.json` for verifying every card name
+and pulling exact ability/attack text. The three archetype names, and every
+individual card name attributed to each, were confirmed in the dataset
+before being written above; no card *counts* for these three decks were
+sourced or recorded, for the same reliability reason as the July 2026 batch.
+The specific combo mechanics described (Munkidori laundering Drapion/
+Cofagrigus self-damage; the Academy at Night + Seek Inspiration
+determinism trick) were derived directly from the verified card texts, not
+from the search summaries — the summaries only supplied which named cards
+and archetypes to go look up.

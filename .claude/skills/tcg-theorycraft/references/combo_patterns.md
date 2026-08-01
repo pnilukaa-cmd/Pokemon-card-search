@@ -55,6 +55,25 @@ rather than treating the one seen as the only option — they're
 interchangeable enablers for the same combo shape, and a different one
 might fit a different deck's type/energy base better.
 
+### Second real-world confirmation: Slowking's Drapion/Cofagrigus tech (August 2026)
+
+The same `damage-counter producer + Munkidori's Adrena-Brain` shape showed up
+again, independently, in a real August 2026 Standard Slowking build (source:
+TCGplayer's "Best Decks Right Now" column, cross-checked card-by-card against
+`pokemon_standard_cards.json`) — this time the producers are attacks, not a
+Stadium: `Drapion`'s Hazardous Tail (100 damage, "this Pokémon also does 70
+damage to itself") and `Cofagrigus`'s Law of the Underworld ("Put 6 damage
+counters on each Pokémon that has an Ability — both yours and your
+opponent's" — a free board-wide effect that also hits your own Ability-users,
+e.g. Munkidori itself). Munkidori's Adrena-Brain launders that self-damage
+onto the opponent exactly as it did in the Risky Ruins deck. Two independent
+real decklists reaching for the same enabler for two different producer
+shapes (a Stadium's passive trigger vs. two Pokémon's own attack costs) is
+good evidence this is a genuine known staple package, not a one-off — when a
+deck runs any card that damages its own side as a cost or side effect,
+checking for Munkidori (or another `transfer_damage_to_opponent` member) is
+worth doing by default, not just when a decklist happens to already include it.
+
 ## Pattern 2: a generic transfer effect routes around a name/type-restricted ability
 
 Many of the strongest resource-generation Abilities are restricted to a
@@ -109,6 +128,49 @@ bridges only for that color):
   from any other Pokémon onto itself specifically
 - **N's Plan** (Supporter) — moves up to 2 Energy from Bench to Active
 
+## Pattern 3: a "random" resolution can be made deterministic by controlling what it looks at
+
+Some effects read as pure gambling — "discard the top card of your deck and
+use its attack if applicable" (Slowking's Seek Inspiration), "flip a coin,"
+"reveal the top card." Before writing an effect like this off as unreliable
+filler, check whether anything else in the pool can *set or know* the exact
+card the random effect will act on. If so, the "randomness" is cosmetic —
+the deck can engineer the outcome every time.
+
+### Worked example: Slowking + Academy at Night
+
+`Slowking`'s Seek Inspiration attack discards the top card of the deck and,
+if it's a non-Rule-Box Pokémon, borrows one of its attacks. Taken alone this
+is a coin flip on deck order. `Academy at Night` (Stadium) lets *each*
+player, once per their own turn, "put a card from their hand on top of their
+deck" — completely generic, no restriction on which card. Play Academy at
+Night, then on a later turn place a spare copy of whatever powerful
+non-Rule-Box attacker's attack you want (e.g., a big Trainer-Stage Pokémon
+with a strong attack) face-up from hand onto the top of the deck, then
+immediately attack with Seek Inspiration — the "randomly discarded" card is
+the exact one you just placed, so the "random" attack-copy is fully
+deterministic that turn. This is inference from the two cards' literal text
+verified against the dataset, not sourced from any deck guide — worth
+double-checking turn-order legality (both effects need to resolve within the
+same turn, stadium ability before the attack) before relying on it, but the
+game-text math checks out.
+
+### The general shape to search for
+
+Whenever a card's effect depends on "the top card of the deck," "a random
+card," or a coin flip, check the pool for:
+1. **Top-of-deck setters** — anything that lets a player choose a card and
+   place it on top (Academy at Night above; `Ciphermaniac's Codebreaking`
+   also stacks 2 chosen cards on top, already catalogued in
+   `current_meta_staples.md` as deck-stacking, not draw).
+2. **Rerolls / look-and-choose variants of the same effect family** — a
+   different card that does a similar thing but lets you choose instead of
+   relying on chance, which might replace the "random" card entirely rather
+   than feed it.
+Either one turns a nominally-random payoff into a reliable one, which
+meaningfully changes how strong the effect actually is compared to reading
+its text in isolation.
+
 ## How to run these searches proactively (not just when handed a decklist)
 
 1. When any card's own text is a downside on its face (self-damage,
@@ -144,3 +206,32 @@ for that specific case); resource-discard costs (Ultra Ball-style) paired
 against discard-pile recursion or discard-count payoffs; retreat-cost
 increases on the *opponent* paired against anything that benefits from the
 opponent being stuck Active.
+
+## Pattern 4: an attack-copying attacker is only as good as what it can copy — check the source's best attack, not the copier's own kit
+
+Tagged `attack_copy_generic` in the taxonomy (Clefable's Metronome, Slowking's
+Seek Inspiration, N's Zoroark ex's Night Joker, Team Rocket's Mimikyu's
+Gemstone Mimicry, Ethan's Sudowoodo's Try to Imitate, Team Rocket's Persian
+ex's Haughty Order, Zoroark's Foul Play, Thievul's Skill Thief) — a card
+whose own attack is "use one of [some other Pokémon]'s attacks instead."
+These attackers are frequently cheap-to-activate (Night Joker costs just 2
+Darkness regardless of what it copies) and deliberately weak or blank on
+their own, so their real ceiling is whichever attack they can reach, not
+anything printed on their own attack line. When one shows up:
+
+1. Identify what it's allowed to copy (own Bench only, opponent's Active
+   only, own discard pile, etc. — the restriction varies by card and matters
+   a lot for how reliably it's usable).
+2. Look up the actual best-in-slot attack among the eligible sources and
+   check whether the deck can set up that attack's own trigger condition —
+   e.g. N's Zoroark ex's Night Joker can borrow N's Reshiram's Powerful Rage
+   ("20 damage for each damage counter on this Pokémon," scales with however
+   much damage N's Reshiram has already taken) or N's Darmanitan's Back
+   Draft ("30 damage for each Basic Energy in your opponent's discard pile,"
+   scales with the deck's own Energy-discard/disruption count, e.g. Crushing
+   Hammer). The attack-copier's real damage ceiling depends on which of
+   those setup conditions the rest of the decklist is actually feeding.
+3. Cross-check against Pattern 3 above — if the copy source is
+   randomly-determined (Seek Inspiration's top-of-deck discard) rather than
+   a chosen Bench Pokémon (Night Joker), check for a way to make that
+   randomness deterministic before assuming the attack is unreliable.

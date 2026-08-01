@@ -12,8 +12,28 @@ MAX_RETRIES = 8
 MAX_WAIT_SECONDS = 30
 
 # pokemontcg.io's legalities.standard flag is not kept in sync with rotation,
-# so filter by regulation mark instead. H/I/J are legal as of the March 2026
-# Standard rotation (G rotated out); update this set when the format rotates again.
+# so filter by regulation mark instead. H/I/J are legal per the real 2026
+# Standard rotation (in-person Play! Pokemon cutover April 10 2026, PTCG Live
+# March 26 2026 -- confirmed via pokemon.com's own rotation announcement and
+# corroborated by TCGplayer's rotation guide): G was explicitly called out as
+# rotating OUT, with E and F having already rotated out earlier (F was
+# removed April 11 2025). Update this set when the format actually rotates
+# again.
+#
+# DO NOT re-derive this by checking what fraction of each mark's cards the
+# API's own legalities.standard field claims are Legal, even in aggregate --
+# tried exactly that and it's actively misleading, not just noisy: it showed
+# ~100% "Legal" across E, F, and G alike (1201/1202, 1180/1180, 1639/1639)
+# indistinguishable from the genuinely-current H/I/J marks (1302/1302,
+# 1226/1226, 419/419), and would have reintroduced ~4,000 cards that
+# actually rotated out a year-plus ago, based purely on a stale bulk flag
+# the API apparently never updated after the real rotation. Only D showed
+# the expected mostly-Not-Legal pattern (35/1261, ~3%). The field's
+# staleness isn't limited to a few just-released stragglers (the original
+# me3-113 Poke Pad case) -- it can be wrong for an entire regulation mark's
+# worth of cards at once. Regulation-mark legality has to be established
+# from an authoritative rotation announcement (or a working, non-blocked
+# legality tracker), never from this field, no matter how it's aggregated.
 #
 # IMPORTANT: query by regulationMark directly (one query per mark, see
 # fetch_all_standard_cards below), not via `legalities.standard:legal` -- that
@@ -29,6 +49,14 @@ MAX_WAIT_SECONDS = 30
 # (`regulationMark:H OR regulationMark:I`, `regulationMark:(H OR I)`,
 # `regulationMark:H,I`) all return 500/400 errors as of this writing --
 # querying each mark separately and merging is what actually works.
+#
+# Also pass orderBy=id on every page request (see fetch_page below): without
+# an explicit sort, the API's default ordering isn't stable across separate
+# paginated requests, so paging through a query can silently skip or
+# duplicate cards even though totalCount is correct. Confirmed this directly:
+# me3-113 matched a `regulationMark:J` query on its own, but was missing from
+# a full unordered pagination of that same query; adding orderBy=id fixed it
+# with no duplicates.
 ACTIVE_REGULATION_MARKS = {"H", "I", "J"}
 
 
@@ -36,7 +64,15 @@ def fetch_page(query, page):
     for attempt in range(1, MAX_RETRIES + 1):
         response = requests.get(
             API_URL,
-            params={"q": query, "page": page, "pageSize": PAGE_SIZE},
+            # orderBy=id makes pagination deterministic. Without it, the API's
+            # default (relevance-ish) ordering isn't stable across separate
+            # page requests, so paging through a query can silently skip or
+            # duplicate cards even though the totalCount is correct -- caught
+            # this because me3-113 (Poke Pad) matched `regulationMark:J` on
+            # its own but was missing from a full paginated fetch of that
+            # same query; adding orderBy=id made it show up with no
+            # duplicates across pages.
+            params={"q": query, "page": page, "pageSize": PAGE_SIZE, "orderBy": "id"},
         )
         if response.status_code >= 500 and attempt < MAX_RETRIES:
             wait = min(2 ** attempt, MAX_WAIT_SECONDS)
