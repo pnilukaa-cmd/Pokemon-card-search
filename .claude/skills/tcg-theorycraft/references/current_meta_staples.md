@@ -88,6 +88,47 @@ ages. See the note at the bottom on how this was gathered and its limits.
   rule — quote the exact wording rather than assuming how it resolves if
   this comes up again, since it's an unusual enough interaction to double
   check against current rulings before relying on it.
+- **Fossil "mass-evolve" toolbox** (user-provided, verified card-by-card
+  — one real discrepancy found: `Reuniclus PR-SV 212` doesn't match any of
+  the 11 real Reuniclus printings checked live against the API, none of
+  which are from a `svp`/PR-SV promo set at all; the deck's other cards
+  (`Duosion`, `Solosis`) specify the `BLK` set code, and the `zsv10pt5-39`
+  Reuniclus printing — the one already in the local dataset — fits the
+  deck's whole theme exactly (see below), so that's almost certainly what
+  was meant; worth a direct correction with the source rather than
+  guessing silently) — the headline mechanic here hasn't come up before
+  in this file: **attacks that evolve multiple Pokémon at once**, not just
+  one. `Duosion` (BLK print)'s Cellular Evolution evolves one target;
+  `Reuniclus` (BLK print, `zsv10pt5-39`)'s Cellular Ascension goes further
+  — "for each of your Benched Pokémon, search your deck for a card that
+  evolves from that Pokémon and put it onto that Pokémon to evolve it" —
+  potentially completing 4+ separate evolution lines in a single attack,
+  a Rare-Candy-for-the-whole-bench effect gated behind one Pokémon's turn
+  rather than one Item card per target. `Rare Candy` is still run
+  alongside it, most likely to fast-track Reuniclus itself online first,
+  with Cellular Ascension mass-completing everything else afterward.
+  Feeding that engine: `Antique Root Fossil` and `Antique Armor Fossil`
+  (Item cards played as if 60-HP Basic Colorless Pokémon — no retreat, no
+  Special Conditions, discardable any time) that `Lileep` and `Shieldon`
+  literally evolve *from*, letting the deck open a Basic-count-free board
+  position via Trainer search instead of needing real Basics in the
+  opening hand, then evolve the Fossil directly into a real attacker.
+  `Fossil Quarry` (Stadium) searches up to 2 "Antique"-named Fossils to
+  bench per player per turn, symmetric but functionally this deck's own
+  Fossil-flooding engine. Real payoff pieces once evolved: `Cradily`'s
+  Miasma Wind is the exact scaler documented in `combo_patterns.md`
+  Pattern 5 (100 damage per distinct Special Condition on the opponent's
+  Active) — this deck reaches it via `Magmar`/`Magmortar`'s own coin-flip
+  Burn plus Cradily's own coin-flip Ability rather than the Pattern 5
+  worked example's Arbok/Muk line, a real independent confirmation this
+  scaler shows up across more than one build (now logged in that Pattern's
+  entry too). `Bastiodon`'s Ancient Bulwark (while Benched, not Active —
+  easy to misread) zeroes damage from any opponent attacker with 2 or
+  fewer Energy attached, a slow-start-denial wall while this evolution
+  engine sets up. `Togekiss`'s Wonder Kiss is a coin-flip bonus-Prize
+  effect on KO-ing the opponent's Active, worth naming as its own small
+  category distinct from the direct-damage-scaling payoffs elsewhere in
+  this file.
 - **Mega Slowbro ex / Dudunsparce bulky-Psychic control deck**
   (user-provided, verified card-by-card) — a wall/attrition build, not a
   combo deck: two big beefy attackers (Mega Slowbro ex, 330 HP; Latias ex,

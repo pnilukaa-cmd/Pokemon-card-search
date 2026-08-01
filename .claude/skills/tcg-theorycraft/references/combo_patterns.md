@@ -341,6 +341,23 @@ also mixes Darkness (Muk) with Grass (Cradily) in one deck, same as the
 Arbok line mixing Darkness (Arbok, Muk) with a Supporter slot instead of a
 second color — worth weighing which tradeoff a real 60 would rather make.
 
+### Real-world confirmation with a third Burn source: Magmar/Magmortar
+
+A user-provided decklist independently ran `Cradily` paired with the
+`Magmar`/`Magmortar` line instead of Team Rocket's Muk — a third distinct
+way to reach the same 2-condition Miasma Wind payoff, worth recording since
+it changes which conditions are actually reliable. Magmortar's own Searing
+Flame (Fire+Fire+Colorless, 90 damage) inflicts Burn on a coin flip, not
+guaranteed — so this variant leans on Cradily's own coin-flip Ability for
+the *second* condition too, meaning both halves of the 2-condition stack
+are independently ~50% here, a real step down in reliability from the
+Muk/Gooped-Up route (which locks Confused for free, no flip). Magmortar's
+Magma Surge Ability ("during Pokémon Checkup, put 3 more damage counters on
+your opponent's Burned Pokémon") is worth noting as a separate, independent
+reason to want Burn active on the target regardless of whether Miasma Wind
+ever fires — it's pulling double duty as both a condition-count contributor
+and its own damage-over-time source.
+
 ## Pattern 6: seed flat damage across the *whole* opposing board, then double it — no retreat escape hatch to design around at all
 
 `damage_counter_doubler` (produce role) has two members; the generally
