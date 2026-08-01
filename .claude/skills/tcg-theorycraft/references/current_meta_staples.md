@@ -174,6 +174,44 @@ ages. See the note at the bottom on how this was gathered and its limits.
   exactly here — so the headers aren't lying, the list itself is 2 cards
   short of legal). Worth double-checking with the source for what's
   missing before treating this as a complete, playable 60.
+- **Hop's-named-family stacked-buff deck** (user-provided, verified
+  card-by-card against literal card IDs, not just names — a `pokemoncard.io`
+  export lists exact IDs like `me2pt5-96`, and a couple of those didn't
+  match the printing that survived dedup locally; confirmed live via the
+  API that they're identical reprints, e.g. `sv9-56` and the local
+  `Lillie's Clefairy ex` entry match exactly on HP/Ability/attack text) —
+  every named "Hop's ___" attacker looks weak alone (`Hop's Wooloo`: 50
+  damage for 3 Colorless), but three *independent* sources stack the same
+  bonus onto them at once: `Hop's Snorlax`'s Extra Helpings Ability (+30,
+  doesn't stack with itself but only needs one Snorlax in play),
+  `Postwick` (Stadium, +30, both players' Hop's Pokémon), and `Hop's
+  Choice Band` (Tool, +30 and −1 Colorless cost). All three online turns
+  Wooloo into 110 damage for 2 Colorless. This is the positive-buff mirror
+  of the ex-hate toolbox's damage-tax stack logged above — same "several
+  independently-sourced conditional bonuses for one named family, stacked"
+  shape, just aimed at your own side instead of the opponent's.
+  **A genuine two-card lock combo, not a coincidence**: `Hop's Dubwool`'s
+  Defiant Horn forces one of the opponent's Benched Pokémon into the
+  Active Spot the instant you evolve into Dubwool, and `Hop's Trevenant`'s
+  Corner attack stops the Defending Pokémon from retreating next turn —
+  gust a squishy bench target up, lock it in place, then swing with
+  whichever buffed Hop's attacker is ready. The deck also actively *wants*
+  its own cheap Basics to die: Trevenant's own attack jumps from 30 to 130
+  base if a Hop's Pokémon was KO'd by an attack during the opponent's last
+  turn, and `Hassel` (look at top 8, take up to 3) shares that exact same
+  trigger condition — a disposable-Basics-as-fuel philosophy, not a
+  wall/attrition plan like the earlier logged decks. The one non-Hop's
+  card, `Lillie's Clefairy ex`, is real tech, not filler: Fairy Zone turns
+  opposing Dragon Pokémon's Weakness to Psychic — direct tech against the
+  Dragapult ex archetype (Tera/Dragon, logged above) — and Full Moon Rondo
+  scales off *total* Benched Pokémon on both sides, which this
+  bench-heavy deck (`Hop's Bag` fetches 2 Basic Hop's Pokémon at once)
+  naturally inflates on its own. `Telepathic Psychic Energy` (attach to a
+  Psychic Pokémon, search 2 Basic Psychic Pokémon to bench) doubles as a
+  second Hop's-Basic tutor here specifically because `Hop's Phantump` is
+  Psychic-typed — worth checking a Special Energy's search clause against
+  a deck's actual type lineup rather than assuming it only fuels, since it
+  can moonlight as extra search.
 - **Mega Kangaskhan ex Colorless-tank squad** (user-provided, verified
   card-by-card) — a bulky-Colorless variant of the wall archetype: three
   big Colorless-*type* ex/Mega attackers (`Mega Kangaskhan ex`, 300 HP;
