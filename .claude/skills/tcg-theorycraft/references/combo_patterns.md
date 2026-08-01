@@ -235,3 +235,108 @@ anything printed on their own attack line. When one shows up:
    randomly-determined (Seek Inspiration's top-of-deck discard) rather than
    a chosen Bench Pokémon (Night Joker), check for a way to make that
    randomness deterministic before assuming the attack is unreliable.
+
+## Pattern 5: stack multiple *distinct* Special Conditions on one target, close the retreat escape hatch, then cash in with a per-condition-count scaler
+
+SKILL.md step 5 already flags the general danger here in passing (an
+"Arbok applies 3 conditions, then Muk cashes in next turn" plan that looked
+clean but had a free retreat escape hatch) but never worked the combo all
+the way through with real numbers, and — checked directly against the
+dataset for this pass — the "Muk" in that anecdote is `Team Rocket's Muk`,
+whose own Gooped Up attack (the fix SKILL.md's anecdote actually used) only
+adds *one* condition (Confused) and can't be the attack that also cashes in,
+since a Pokémon only gets one attack per turn. Below is the sequence
+actually checked card-by-card, with the real fix identified (a Supporter,
+not Gooped Up) and the real ceiling checked against real Special-Condition
+rules rather than assumed.
+
+### The scaler: a two-member family that pays per *distinct* condition, not per counter
+
+`damage_scales_with_special_condition` (consume role) has exactly two
+members, and both count the number of *different* Special Conditions
+currently affecting the opponent's Active Pokémon, not damage counters:
+
+- **Team Rocket's Muk**'s Hazardous Venom (Darkness+Darkness+Colorless, 3
+  Energy): "This attack does 100 damage for each Special Condition
+  affecting your opponent's Active Pokémon."
+- **Cradily**'s Miasma Wind (Grass, 1 Energy): identical wording, "100
+  damage for each Special Condition affecting your opponent's Active
+  Pokémon."
+
+One Confused Pokémon is only worth 100 — a fine rate but nothing special.
+The real payoff is stacking 2-3 *different* conditions (Confused, Poisoned,
+Burned all count separately) onto the same target before this attack fires.
+
+### The setup: Arbok's Panic Poison applies all three at once for 1 Energy
+
+`Arbok` (Darkness, Stage 1, retreat cost 2 Colorless) has Panic Poison
+(Darkness ×1, 0 damage): "Your opponent's Active Pokémon is now Burned,
+Confused, and Poisoned." — all three Special Conditions, in one attack, for
+the cheapest possible cost. This is the cheapest way to load the scaler's
+counter in the whole pool (no other card in `status_inflict` applies more
+than one condition per use, let alone three for one Energy).
+
+### Closing the actual escape hatch: `Roxie's Performance`, not Gooped Up
+
+The obvious next step — attack with Panic Poison this turn, attack with
+Hazardous Venom/Miasma Wind next turn — is exactly the plan SKILL.md warns
+about: retreating cures every Special Condition, and nothing in Panic
+Poison's own text stops the opponent from just retreating away on their
+turn in between, undoing all three conditions for the cost of one retreat.
+`Roxie's Performance` (Supporter) is the actual fix, checked directly: "During
+your opponent's next turn, their Poisoned Pokémon can't retreat. (This
+includes newly Poisoned Pokémon.)" Play it the same turn as Panic Poison —
+the parenthetical confirms it applies even though the Poison itself lands
+from the same turn's attack, so there's no ordering trap. (Team Rocket's
+Muk's own Gooped Up also locks retreat, but only adds Confused, and using it
+this turn instead of Panic Poison would mean giving up the 3-condition stack
+for a 1-condition one — it's the wrong tool for this specific line, useful
+only as a same-Pokémon 2-condition backup, see below.)
+
+### Full turn-by-turn (numbers and timing checked, not assumed)
+
+1. **Your turn N** (Arbok Active, Team Rocket's Muk on the Bench with
+   Hazardous Venom's 3 Energy already attached from prior turns): play
+   Roxie's Performance, then attack with Panic Poison. Opponent's Active is
+   now Burned + Confused + Poisoned, and can't retreat next turn.
+2. **Opponent's turn N**: locked out of retreating. Checkup happens once at
+   the end of this turn: Poison chips its usual amount with no self-cure;
+   Confused only matters if they try to attack (coin flip risk, doesn't
+   expire either way); **Burn gets its own coin flip at Checkup to clear
+   itself, in addition to dealing damage** — this is the one condition of
+   the three that isn't guaranteed to survive.
+3. **Your turn N+1**: retreat Arbok (2 Colorless, legal same turn as an
+   attack), Team Rocket's Muk is promoted, attack with Hazardous Venom.
+
+### The honest ceiling: 200 guaranteed, 300 only if Burn survives two coin flips
+
+Poisoned and Confused have no self-cure mechanic at all in the rules — once
+applied and not retreated/evolved away, they're still there next turn, full
+stop. Burned gets an independent coin-flip cure check at **every** Checkup,
+and two Checkups happen between Panic Poison landing and Hazardous Venom
+resolving (end of your turn N, end of the opponent's turn N) — each an
+independent ~50% chance to clear it, so Burn survives to the payoff turn
+only ~25% of the time. **The reliable number to plan around is 200 damage
+(Confused + Poisoned, both guaranteed once applied and retreat-locked), not
+300** — 300 is a real but minority-chance bonus, not the deck's expected
+output. Report it that way rather than quoting the theoretical 3-condition
+maximum as if it were the normal case.
+
+### Simpler 2-condition fallback that doesn't need Arbok or a Supporter slot
+
+Team Rocket's Muk can generate its own second condition without any other
+piece: Gooped Up (Darkness+Colorless, 40 damage) confuses and locks retreat
+in the same attack, no Supporter needed. Pair it with `Cradily` sitting on
+the Bench (Grass, no Active-Spot restriction on its own ability): "Once
+during your turn, you may flip a coin. If heads, choose Burned, Confused,
+or Poisoned. Your opponent's Active Pokémon is now affected by that Special
+Condition" — choose Poisoned. Turn N: Muk attacks with Gooped Up
+(Confused + retreat lock). Turn N+1: before attacking, activate Cradily's
+ability choosing Poisoned; on heads, Muk's own Hazardous Venom now hits for
+200 (2 conditions); on tails, it's a 100 floor. This route needs one fewer
+card, doesn't cost a Supporter for the turn, and never risks Burn's
+self-cure — but its own upside is capped at 200 (no route to 300) and is
+gated behind Cradily's 50% coin flip rather than a guaranteed effect. It
+also mixes Darkness (Muk) with Grass (Cradily) in one deck, same as the
+Arbok line mixing Darkness (Arbok, Muk) with a Supporter slot instead of a
+second color — worth weighing which tradeoff a real 60 would rather make.
