@@ -462,3 +462,36 @@ into play" applies regardless of who played either one), so a plan that
 depends on Festival Grounds staying in play indefinitely has a real,
 opponent-controlled failure mode that Bubbly Water Energy (attached
 directly to the Pokémon, not contestable) doesn't share.
+
+## Pattern 8: check whether a "Tool count" scaler is scoped to your side only — the wording isn't always identical between near-duplicate attacks
+
+`damage_scales_with_tools_attached` has 5 members, 4 of which are the
+Rotom line's Gadget Show — "This attack does 30 damage for each Pokémon
+Tool attached to all of **your** Pokémon" — explicitly your-side-only. The
+5th, `Bronzong` (me2 print)'s Tool Drop, reads differently, checked against
+the literal dataset text rather than assumed identical: "This attack does
+40 damage for each Pokémon Tool attached to **all** Pokémon" — no "your."
+As printed, that counts Tools on both sides of the board, not just the
+caster's own — a real, verified textual difference from its closest
+taxonomy sibling, not a transcription artifact (cross-checked, no other
+printing of "Tool Drop" exists in the dataset to compare against, but the
+wording is internally consistent with itself and clearly distinct from
+Gadget Show's explicit "your Pokémon" phrasing).
+
+Practically: Bronzong (me2-72; Colorless×1 Triple Draw for a 3-card hand
+refill, Colorless×3 for Tool Drop) doesn't need its own deck to be
+Tool-heavy to hit a real number — Pokémon Tools like `Air Balloon` are
+common enough across the current pool (`current_meta_staples.md` logs it as
+a default retreat-cost fixer in more than one archetype) that an opponent's
+own unrelated Tool choices can passively feed this attack's damage without
+Bronzong's pilot doing anything to cause it. **Don't take this as a
+guaranteed source of damage** — it depends entirely on what both players
+happen to have attached at the moment Tool Drop is used, and a Tool-light
+matchup gives it nothing — but when auditing a Tool Drop deck's real
+output, count Tools on both sides of the table, not just the caster's own,
+since that's what the actual printed text says to do. This is exactly the
+kind of near-identical-wording gap worth checking literally rather than
+assuming from a family's dominant pattern (4 of 5 members say "your," the
+5th doesn't) — general lesson: when several members of the same taxonomy
+family look interchangeable, check each one's exact text before treating
+the majority phrasing as universal.
