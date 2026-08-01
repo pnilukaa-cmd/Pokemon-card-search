@@ -88,6 +88,45 @@ ages. See the note at the bottom on how this was gathered and its limits.
   rule — quote the exact wording rather than assuming how it resolves if
   this comes up again, since it's an unusual enough interaction to double
   check against current rulings before relying on it.
+- **Six-deck batch (Wailord ex, Relicanth, Rampardos ex, Vikavolt, Slowbro,
+  Lurantis ex)** — all user-provided, all verified card-by-card, all
+  clean at 60/60 with no illegal counts. A few standout, exact-number
+  findings worth remembering as reusable checks:
+  - `Heavy Baton` requires the holder to have a Retreat Cost of *exactly*
+    4, be Active, and get Knocked Out by an opponent's attack, to salvage
+    3 Basic Energy onto the bench. `Wailord ex`'s retreat cost is exactly
+    4 — checked, not assumed — so this is a real, precisely-tuned
+    insurance policy for a deck that invests 3-5 Water Energy per swing.
+  - `Antique Skull Fossil`'s Spiny Skull Ability is a **fourth** independent
+    real-decklist instance of the `counterattack_on_hit`/"retaliate even
+    through a KO" family (after Mega Slowbro ex's Shellnado Spin,
+    Bouffalant's Ready to Ram, and Spiky Energy) — this shape is
+    thoroughly confirmed as a real, recurring design pattern in the
+    current pool, not a rarity.
+  - `Vikavolt` (PBL print, `me5-26`)'s Giga Railgun (260 damage, 2
+    Lightning) is a hard on/off gate, not a scaling bonus: "If this
+    Pokémon has no Voltaic Lightning Energy attached, this attack does
+    nothing" — worth distinguishing from scaling attacks when auditing an
+    energy line, since the deck needs *at least one* specific Special
+    Energy, not just "more energy is better."
+  - `Slowbro`'s All Out (50+, "+160 more damage if you have no cards in
+    hand") is a third independent instance of "empty hand as a resource
+    state, not just a risk" — alongside `Gladion's Final Battle` (usable
+    only as your last card) and `Cassiopeia` (usable only as your last
+    card) already logged elsewhere in this project. Already correctly
+    tagged in the taxonomy (`damage_scales_with_own_hand_size`), no gap —
+    worth actively checking for a hand-dumping Trainer suite (multiple
+    Ultra Ball/Poké Pad/Buddy-Buddy Poffin copies) as a *deliberate* setup
+    for this kind of attack rather than assuming a thin hand is accidental.
+  - `Lurantis ex`'s Lively Cutter (60+, "+200 more damage if this Pokémon
+    was healed this turn") pairs with `Community Center` (Stadium: heal 10
+    from every one of your Pokémon once per turn, if you played a
+    Supporter that turn) in the same decklist — a real combo shape, but
+    flagged as worth double-checking against actual rulings rather than
+    assumed: it's not fully certain from text alone whether a 0-effect
+    heal (Lurantis ex already at full HP) still counts as "was healed"
+    for Lively Cutter's trigger, the same category of edge case as
+    Cinderace's Explosiveness Ability logged earlier in this file.
 - **Fossil "mass-evolve" toolbox** (user-provided, verified card-by-card
   — one real discrepancy found: `Reuniclus PR-SV 212` doesn't match any of
   the 11 real Reuniclus printings checked live against the API, none of
