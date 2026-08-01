@@ -124,6 +124,39 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Genesect's Ability trigger, a two-birds-one-Tool efficiency worth
   checking for whenever a deck runs both a Tool-gated Ability and a
   generically-useful Tool for unrelated reasons.
+- **Team Rocket's Honchkrow / Porygon2 Supporter-discard deck**
+  (user-provided, verified card-by-card) — the whole Pokémon lineup is
+  "Team Rocket's ___"-named (all non-Rule-Box), which feeds two different
+  scaling attacks off the same resource: `Team Rocket's Honchkrow`'s Rocket
+  Feathers discards any number of "Team Rocket"-named Supporters *from
+  hand* for 60 damage each (a burst that wants a full hand of them),
+  while `Team Rocket's Porygon2`'s R Command does 20 damage per
+  "Team Rocket" Supporter already sitting *in the discard pile* (grows
+  passively over the game, no hand cost). The deck runs six different named
+  "Team Rocket" Supporters (Ariana, Giovanni, Proton, Petrel, Archer) plus
+  `Team Rocket's Transceiver` (an Item, so it doesn't compete for the
+  1-per-turn Supporter slot) to fetch more of them — and because the whole
+  board really is all Team Rocket's Pokémon, `Team Rocket's Ariana`'s "draw
+  to 5, or to 8 if your whole board is Team Rocket's Pokémon" clause is
+  effectively always the draw-to-8 mode. `Team Rocket's Factory` (Stadium)
+  refunds a card draw every time either player plays a "Team Rocket"
+  Supporter that turn, and `Roto-Stick` is worth noting as a distinct
+  search-Item shape — most "look at top N, take 1" Items cap at a single
+  card, but Roto-Stick lets you take *any number* of the Supporters found
+  in the top 4. `Miracle Headset` (ACE SPEC) returns up to 2 Supporters from
+  the discard pile, which doubles as recursion for whatever Honchkrow just
+  dumped. **Real gap found by checking energy-type payability, not just
+  count (see SKILL.md step 4)**: `Team Rocket's Articuno`'s Dark Frost
+  attack costs Water + Colorless + Colorless, but the deck's only two
+  Energy cards are `Team Rocket's Energy` (Psychic/Darkness only, and only
+  attaches to Team Rocket's Pokémon) and `Ignition Energy` (Colorless
+  only) — there is no Water source anywhere in the 60 cards, so Dark Frost
+  can never actually be paid for as built. Articuno's Repelling Veil
+  Ability (blocks attack *effects*, not damage, against your Basic Team
+  Rocket's Pokémon) still has standalone defensive value against
+  status-heavy matchups, so the card isn't dead, but it's an Ability-only
+  include here, not a real attacker — worth stating plainly rather than
+  assuming every attack line printed on an included card is actually usable.
 - **N's Zoroark ex** (August 2026, TCGplayer "Best Decks Right Now" — see
   methodology note below on how this batch was gathered) — a draw-engine
   deck built around N's Zoroark ex's Trade Ability (discard 1 card, draw 2,

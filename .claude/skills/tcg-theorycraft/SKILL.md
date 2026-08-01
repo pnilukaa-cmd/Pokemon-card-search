@@ -116,6 +116,21 @@ is roughly a 60% mulligan rate — a real, easy-to-miss problem, not
 theoretical. Aim for roughly 8-12 total Basics unless the user has a reason
 to want fewer.
 
+Also check that every attacker's energy *type* cost, not just the total
+count, is actually payable by what the Energy line provides. Counting total
+Energy cards isn't enough — a deck can have "8 Energy" and still be unable
+to pay a specific attack if none of them are the right type. Real example:
+a user-provided Team Rocket's deck ran `Team Rocket's Articuno`, whose Dark
+Frost attack costs Water + Colorless + Colorless, but the deck's only two
+Energy cards were `Team Rocket's Energy` (provides Psychic/Darkness only,
+and only attaches to Team Rocket's Pokémon) and `Ignition Energy` (provides
+Colorless only) — zero Water anywhere in the 60 cards, so that attack is
+literally uncastable as built. Read every attacker's attack cost against
+the *specific types* the deck's Energy cards actually provide (checking
+Special Energy text carefully — many restrict which type(s) they produce,
+or which Pokémon they can attach to) before assuming a Pokémon is a
+functional attacker rather than an Ability-only or dead include.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way
