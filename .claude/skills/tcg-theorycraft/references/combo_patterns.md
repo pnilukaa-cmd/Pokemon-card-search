@@ -633,3 +633,45 @@ not a repeatable plan. Three independent decks hitting this exact wall is
 strong confirmation this is a common, easy-to-miss deckbuilding trap
 whenever Munkidori is paired with *any* named-family-restricted Darkness
 search, not just Janine's Secret Art specifically.
+
+## Pattern 10: a card can count a shared *Ability name* across multiple different cards in the discard pile as its trigger threshold
+
+Distinct from Pattern 4 (attack-copying) and Pattern 9 (a shared trigger
+condition across a family): here the payoff card's own trigger is a raw
+*count* of how many cards sharing one specific Ability name are sitting in
+the discard pile, regardless of which different Pokémon they are. This
+means the "engine" isn't one card searching for copies of itself — it's
+several *different* Basic/Stage-1 Pokémon that all happen to carry the
+identical named Ability, functioning as interchangeable fuel for the same
+counter.
+
+### Worked example: Sinistcha's Matcha Spin and the "Hide 'n' Sneak" quartet
+
+A user-provided deck (literally named "Hide N Sneak" by its builder) runs
+`Shuppet`, `Banette`, `Poltchageist`, and `Sinistcha` — four *different*
+Pokémon (checked directly: `me5-33`, `me5-34`, `me5-5`, `me5-6`) that all
+carry the exact same Ability, word-for-word: "Hide 'n' Sneak — Prevent all
+effects of your opponent's Pokémon's attacks and Abilities done to this
+Pokémon. (Damage is not an effect.)" `Sinistcha`'s Matcha Spin attack
+(Colorless, 0 base cost): "If you have 6 or more Pokémon that have the
+Hide 'n' Sneak Ability in your discard pile, place 4 damage counters on
+each of your opponent's Pokémon" — a free, full-board 4-damage sweep, Active
+and Bench simultaneously, once the threshold is hit. With 16 total copies
+of Hide-'n'-Sneak-ability holders in the 60 (4 copies each of all four
+names), reaching 6 in the discard pile is a realistic mid-game state
+through normal attrition alone, not a rare setup.
+
+### The accelerant: `Gwynn` turns "discarding your own Pokémon" from a cost into double value
+
+`Gwynn` (Supporter): "Discard up to 2 Pokémon that don't have a Rule Box
+from your hand, and draw 3 cards for each card you discarded in this way"
+— up to 6 cards for discarding 2. In a normal deck this is a pure
+card-advantage engine with a real cost (losing board presence). In this
+exact deck, discarding a Shuppet/Poltchageist/Banette/Sinistcha from hand
+via Gwynn is **not a cost at all** — it draws the normal huge card boost
+*and* directly advances Matcha Spin's discard-pile threshold, without
+needing to actually play and lose that copy in battle first. Whenever a
+deck runs both a discard-pile-count threshold payoff and a hand-discard
+draw Supporter, check whether the discarded card type overlaps with what
+the payoff is counting — if it does, the "cost" of the draw Supporter is
+partially or fully an illusion.
