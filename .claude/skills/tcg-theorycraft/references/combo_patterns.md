@@ -618,3 +618,18 @@ Adrena-Brain. Worth calling out plainly when this shows up again: a deck
 can already contain its own fix for a gap like this without the fix being
 labeled as one — check every generic mover already in a decklist against
 every type-restricted trigger before assuming a gap needs a new card added.
+
+### Third independent confirmation, and the most fragile version yet: a Marnie's Grimmsnarl ex deck
+
+A third, unrelated user-provided deck (a Marnie's Grimmsnarl ex evolution
+line plus `Munkidori` and `Yveltal`) ran straight into the identical gap —
+its only Darkness Energy source that could reach a non-Darkness Pokémon
+is `Marnie's Grimmsnarl ex`'s Punk Up Ability, which is itself restricted
+to "your **Marnie's** Pokémon," so it can't feed Munkidori either.
+This deck's only generic bridge is a single copy of `Energy Switch` — even
+more precious than the 2-3 copies the Mega Darkrai ex deck ran, so
+Adrena-Brain coming online at all is a real one-shot-per-game event here,
+not a repeatable plan. Three independent decks hitting this exact wall is
+strong confirmation this is a common, easy-to-miss deckbuilding trap
+whenever Munkidori is paired with *any* named-family-restricted Darkness
+search, not just Janine's Secret Art specifically.

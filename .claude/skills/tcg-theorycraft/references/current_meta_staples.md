@@ -330,6 +330,34 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Psychic-typed — worth checking a Special Energy's search clause against
   a deck's actual type lineup rather than assuming it only fuels, since it
   can moonlight as extra search.
+- **Marnie's Grimmsnarl ex line** (user-provided — flagging a real
+  arithmetic problem: this decklist as pasted sums to 12+15... no, checked
+  precisely by adding every line: Pokémon 18 + Trainer 32 + Energy 9 =
+  **59, not 60** — short one card, worth checking with the source before
+  treating this as a complete legal 60) — verified card-by-card otherwise,
+  all real (two printings, `Froslass TWM 53` and `Snorunt ASC 46`, weren't
+  the exact copy that survived local dedup; confirmed live via the API
+  both are identical reprints of what's already in the dataset). Third
+  independent confirmation of the Pattern 9 gap in `combo_patterns.md` —
+  see that entry for the full writeup; this deck's version is the most
+  fragile yet, since its only generic Energy-mover is a single copy of
+  `Energy Switch`. A real, distinct combo worth naming on its own:
+  `Froslass`'s Freezing Shroud Ability passively puts 1 damage counter on
+  every Ability-haver on **both** sides, every single Checkup, no attack
+  needed — including your own `Munkidori` and `Marnie's Grimmsnarl ex`.
+  `Yveltal` (the `sv6pt5-35` print)'s Corrosive Winds then sweeps the
+  board: "+2 damage counters on each of your opponent's Pokémon that has
+  any damage counters on it," for 1 Energy. This is a flat-additive
+  conditional sweep, not the doubler shape in `combo_patterns.md` Pattern
+  6 — worth being precise about the difference — but the same underlying
+  idea: seed small damage everywhere passively, then cash in with a cheap
+  board-wide finisher. `Marnie's Grimmsnarl ex`'s Punk Up (search up to 5
+  Basic Darkness Energy onto your Marnie's Pokémon, on evolving into it)
+  is a huge one-time dump, but restricted to the Marnie's-named trio
+  (Impidimp/Morgrem/Grimmsnarl ex) — the same named-family-restriction
+  shape as `combo_patterns.md` Pattern 2, and the single `Energy Switch`
+  copy above is the only thing capable of routing any of that stockpile
+  onto Yveltal or Munkidori instead.
 - **Mega Kangaskhan ex / Crustle, stripped-down and refined (user reports
   this build "making some noise" competitively)** — verified card-by-card,
   same core two cards as the ex-immunity wall entry above but with
