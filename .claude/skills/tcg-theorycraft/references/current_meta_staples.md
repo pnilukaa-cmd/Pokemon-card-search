@@ -252,14 +252,21 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Festival Grounds Goldeen ex-hate toolbox above: instead of dealing bonus
   damage *to* ex/V Pokémon, this deck stacks several separate, narrowly-
   conditioned damage-**prevention** effects to wall out the ex/Mega-ex/
-  Ability-heavy current meta entirely. `Cornerstone Mask Ogerpon ex`
-  prevents all damage from opponent's Pokémon *that have an Ability* while
-  Active, and all damage period while on the Bench. `Crustle`'s Mysterious
-  Rock Inn prevents all damage specifically from opponent's Pokémon **ex**.
-  Between those two conditions (Ability-havers, and separately all ex's),
-  most of the archetypes already logged in this file are walled out
-  entirely — everything catalogued above is either ex, Mega ex, or built
-  around a named Ability. `Mist Energy` layers on top, blocking attack
+  Ability-heavy current meta entirely. **Precision worth being exact
+  about**: both of these are self-protection, not team-wide shields —
+  `Cornerstone Mask Ogerpon ex`'s Ability reads "prevent all damage done
+  to **this Pokémon**," and `Crustle`'s Mysterious Rock Inn reads
+  "prevent all damage done to **this Pokémon** by attacks from your
+  opponent's Pokémon ex" (checked literally, not paraphrased from memory)
+  — each protects only the single card holding the Ability, while it's
+  the one being attacked. The wall works because whichever of these two
+  is sitting Active becomes unkillable by the matching attacker type, not
+  because the whole board is immune; anything else on the field is still
+  as vulnerable as normal. Between those two self-protections (Ability-
+  havers, and separately all ex's) most of the archetypes already
+  catalogued in this file still can't touch whichever wall-piece is
+  Active — everything logged above is either ex, Mega ex, or built around
+  a named Ability. `Mist Energy` layers on top, blocking attack
   *effects* (not damage — "damage is not an effect" is explicit in its
   text) from landing on whatever it's attached to, covering the residual
   small non-ex non-Ability attackers the two Abilities above don't stop.
@@ -323,6 +330,45 @@ ages. See the note at the bottom on how this was gathered and its limits.
   Psychic-typed — worth checking a Special Energy's search clause against
   a deck's actual type lineup rather than assuming it only fuels, since it
   can moonlight as extra search.
+- **Mega Kangaskhan ex / Crustle, stripped-down and refined (user reports
+  this build "making some noise" competitively)** — verified card-by-card,
+  same core two cards as the ex-immunity wall entry above but with
+  `Cornerstone Mask Ogerpon ex` and `Psyduck` cut entirely, replaced by a
+  much heavier disruption and healing suite. The real strategic read,
+  given the self-protection correction above: `Crustle` isn't walling the
+  *team*, it's turning whichever single Active slot it holds into
+  something the entire ex-saturated current meta (see this whole file)
+  functionally cannot touch — an opposing ex attacker can never damage
+  Crustle specifically, full stop, for the rest of the game, no matter
+  how much HP or damage it has. `Mega Kangaskhan ex` behind it is the
+  actual engine: Run Errand drawing 2 cards *every* turn it's Active is
+  enormous sustained card advantage over a long grind, and Rapid-Fire
+  Combo's escalating coin-flip damage is the eventual finisher once the
+  opponent's board has been worn down. The disruption package attacks the
+  opponent's ability to ever find an answer, not their board directly:
+  `Eri` strips 2 Items from a revealed hand, `Xerosic's Machinations`
+  caps their hand at 3, `Hand Trimmer` caps *both* hands at 5 but the
+  opponent discards first (so it's asymmetric in the pilot's favor if
+  played after already committing their own hand down). `Handheld Fan`
+  is worth noting as the deck's answer to Crustle's one real gap: since
+  Mysterious Rock Inn only blocks *ex* attackers, a non-ex attacker can
+  still damage Crustle — Handheld Fan (redirect Energy from whatever hits
+  the holder onto the *opponent's own* Bench) specifically punishes that
+  exact edge case rather than being a generic inclusion. Three separate
+  heal effects (`Jumbo Ice Cream`, `Pokémon Center Lady`, `Bianca's
+  Devotion`) plus `Hero's Cape` (+100 HP on Kangaskhan ex, 300→400) keep
+  the non-immune half of the team alive through the long game this build
+  is built to win. Running both `Community Center` and `Festival Grounds`
+  (only one Stadium can ever be in play at once) is a real, deliberate
+  toolbox choice, not redundancy — pick whichever passive effect actually
+  matters for the matchup in front of you. **Honest weak points, not
+  glossed over**: this is a grindy, reactive plan with no fast kill, so a
+  genuinely explosive aggressive deck can beat it to the punch before the
+  disruption/heal engine gets rolling; and any deck built entirely around
+  non-ex attackers (several toolbox decks already logged in this file —
+  the Team Rocket Supporter-discard deck, the Fossil mass-evolve deck —
+  sidestep Crustle's protection completely, since it's ex-specific, not
+  universal.
 - **Mega Kangaskhan ex Colorless-tank squad** (user-provided, verified
   card-by-card) — a bulky-Colorless variant of the wall archetype: three
   big Colorless-*type* ex/Mega attackers (`Mega Kangaskhan ex`, 300 HP;
