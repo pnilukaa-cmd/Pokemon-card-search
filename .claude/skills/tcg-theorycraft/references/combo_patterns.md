@@ -752,3 +752,36 @@ Worth checking for whenever a deck runs a discard-for-damage attacker:
 search `--suggest-tags` for `energy` + `discard pile` + `attach` to find
 the matching family's recycler before assuming a discard-heavy attack is
 a one-time cost.
+
+## Pattern 12: a card that returns to hand instead of the discard pile on KO is only as fast as its own re-evolution route
+
+Distinct from every "reduce the Prize cost of a KO" card in the pool
+(Lillie's Pearl, Shedinja's Fragile Husk, Mega Gengar ex's Shadowy
+Concealment — all Prize-math mitigation) is a card that changes *where
+the KO'd Pokémon physically goes*: `Gengar` (the `me3` print)'s Infinite
+Shadow Ability — "If this Pokémon is Knocked Out by damage from an attack
+from your opponent's Pokémon, put it into your hand instead of the
+discard pile" — skips the discard pile entirely.
+
+**Don't read this as "free redeploy" without checking the Pokémon's own
+stage** — this specific Gengar is a Stage 2. Returning to hand doesn't let
+it re-enter play the way a Basic would; a Stage 2 can only enter play by
+evolving from an in-play Stage 1, so without help this is a full
+Gastly→Haunter→Gengar re-climb, far too slow to be a real loop. The
+combo only works because `Rare Candy` exists: skip straight from a fresh
+Basic to the Stage 2, so the actual cycle is "Gengar gets KO'd → hand
+instead of discard → next turn, play a new Gastly and Rare Candy straight
+back to Gengar." The KO costs a turn and a Rare Candy, not the
+investment itself — which flips the usual risk calculus for an attacker
+this valuable: it doesn't need protecting from trades the way a normal
+Stage 2 would, since even a "bad" trade barely costs anything. A deck
+built around this wants Gastly and Rare Candy treated as consumable fuel
+for the loop, not one-time setup costs.
+
+General lesson: whenever a card changes *where* a KO'd or discarded
+Pokémon ends up rather than *how much it costs* to lose it, check the
+Pokémon's own Stage before assuming the effect enables a fast loop —
+a Basic makes this kind of Ability immediately repeatable on its own; an
+evolved Pokémon needs an explicit re-evolution accelerant (Rare Candy, or
+a stage2_conditional_bench_play-style effect like Klinklang's Emergency
+Rotation) before the loop is actually fast enough to matter.
