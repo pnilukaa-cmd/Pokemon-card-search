@@ -675,3 +675,41 @@ deck runs both a discard-pile-count threshold payoff and a hand-discard
 draw Supporter, check whether the discarded card type overlaps with what
 the payoff is counting — if it does, the "cost" of the draw Supporter is
 partially or fully an illusion.
+
+## Pattern 11: a repeatable "reattach Energy from discard" Ability can recycle an entire *family* of "discard Energy for a big attack" cards, not just one
+
+Several strong Lightning attacks pay for their own damage by discarding
+their attached Energy as part of the attack ("discard 2 Lightning Energy
+and Paralyze," "discard all Lightning Energy, 50 damage per card
+discarded") — read in isolation these look like one-shot bursts that
+strand the Pokémon empty afterward. Check for a repeatable Ability that
+retrieves *Basic Energy from the discard pile* before concluding that: it
+turns every member of the discard-for-damage family into a sustainable
+engine, not a burst you only get once.
+
+### Worked example: Eelektrik's Dynamotor feeding the whole line
+
+`Eelektrik`'s Dynamotor Ability: "Once during your turn, you may attach a
+Basic Lightning Energy card from your discard pile to 1 of your Benched
+Pokémon" — no once-per-game limit, no restriction on which Benched
+Pokémon receives it. This directly refuels **multiple different**
+discard-for-damage attackers in the same evolution family and beyond:
+`Mega Eelektross ex`'s Disaster Shock (Lightning ×3, 190 damage — "You may
+discard 2 Lightning Energy from this Pokémon and make your opponent's
+Active Pokémon Paralyzed," a guaranteed, non-coin-flip Paralysis with no
+extra cost beyond Energy already spent) and `Galvantula` (the `rsv10pt5`
+print)'s Discharge ("Discard all Lightning Energy from this Pokémon. This
+attack does 50 damage for each card you discarded"). Each of these looks
+like it strands the attacker Energy-less after one big swing; with
+Eelektrik on the Bench, one Basic Lightning Energy comes back from the
+discard pile every turn, partially refunding the investment turn over
+turn rather than requiring a full manual re-attach cycle from hand.
+**Verify the exact Energy type match before assuming the recycling
+applies** — Dynamotor only retrieves *Basic* Lightning Energy, so it
+won't recover a discarded Special Energy (e.g. Voltaic Lightning Energy)
+from the same attack.
+
+Worth checking for whenever a deck runs a discard-for-damage attacker:
+search `--suggest-tags` for `energy` + `discard pile` + `attach` to find
+the matching family's recycler before assuming a discard-heavy attack is
+a one-time cost.
