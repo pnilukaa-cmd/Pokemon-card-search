@@ -382,6 +382,45 @@ reason to want Burn active on the target regardless of whether Miasma Wind
 ever fires — it's pulling double duty as both a condition-count contributor
 and its own damage-over-time source.
 
+### The real distinction that decides which conditions to stack: persistent vs. action-denial
+
+All five Special Conditions got treated as interchangeable "count toward
+the scaler" fuel above, but they aren't mechanically equal, and which kind
+you're using changes what the combo actually looks like:
+
+- **Persistent** (Poisoned, Burned, Confused) — none of these block
+  attacking or retreating on their own, and none but Burned has any
+  self-cure chance. This is exactly why they need an *external* retreat
+  lock (Roxie's Performance, Team Rocket's Muk's own Gooped Up) to survive
+  to a delayed payoff turn — nothing about the condition itself protects
+  the setup.
+- **Action-denial** (Asleep, Paralyzed) — both block attacking *and*
+  retreating while active, no external lock needed. But Asleep rolls a
+  coin at every Checkup to clear, and Paralyzed clears automatically and
+  deterministically after the affected player's own next turn. Neither
+  survives to be counted by a scaler on *your* following turn — by the
+  time you're back to attack, Paralyzed is already gone and Asleep is a
+  coin flip whether it's gone.
+
+That means action-denial conditions are the wrong tool for Pattern 5's
+"stack conditions, wait a turn, cash in" shape — they're a same-turn
+tempo tool instead (guarantee the opponent can't attack back or flee
+*this* turn), not scaler fuel. Confirmed against real card text:
+`Drapion`'s Hazardous Tail (Darkness×3, 100 damage, 70 self-damage as a
+cost) applies Paralyzed + Poisoned in one guaranteed attack, no coin
+flip — genuinely the single most reliable dual-condition attack in the
+pool, but its Paralysis half won't still be there for a delayed
+Muk/Cradily cash-in, only its Poisoned half will (100, not 200). Use it
+as an immediate lockdown-and-bleed attacker, not as Pattern 5's opener.
+
+For the actual Pattern 5 opener, the persistent pair (Poisoned + Confused)
+is the reliable one, and it doesn't require Arbok specifically: `Ekans`'s
+Poison Blend and `Crobat`'s (`me4` print) Poison Sound Wave both land
+Confused + Poisoned in a single attack (Poison Blend is coin-gated;
+Poison Sound Wave is guaranteed) — either paired with Roxie's Performance
+reaches the same 200-guaranteed floor as the Arbok line from a cheaper,
+lower-setup card.
+
 ## Pattern 6: seed flat damage across the *whole* opposing board, then double it — no retreat escape hatch to design around at all
 
 `damage_counter_doubler` (produce role) has two members; the generally
