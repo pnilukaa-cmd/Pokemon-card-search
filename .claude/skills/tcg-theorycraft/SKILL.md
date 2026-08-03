@@ -31,6 +31,53 @@ with `python3 analyze_mechanics.py` first.
 
 ## The process
 
+**Every full deck-build request runs every step below, in order, explicitly
+— not just the ones that feel relevant to a fast answer.** Standing user
+instruction: when asked for a deck, check every one of these rules, even if
+it takes longer. Speed is not the priority on a full build; a clean result
+on only some of the checks is not the same as a clean result. Concretely,
+before presenting a finished decklist, confirm out loud (briefly, one line
+each is fine) that each of the following actually happened for this build,
+not just that it usually happens:
+
+1. Searched via tags or sweep-phrase (step 1), checking **both** produce and
+   consume roles, not just one.
+2. Ran the raw-sweep `--diff` (step 2) and manually triaged every hit —
+   fixed `analyze_mechanics.py` if a real gap turned up, and re-confirmed
+   both `python3 analyze_mechanics.py` and `python3 audit_mechanics.py`
+   report 0 before moving on.
+3. Reported producers and consumers separately and checked for
+   anti-synergies (step 3).
+4. Pulled every included card's real stats from the JSON, never memory,
+   checked the Basic count against the mulligan math, checked every
+   attacker's energy-*type* payability (not just total count) with
+   `check_energy_support.py`, checked every Ability line for an
+   attack-gating clause, and put an exact `SET NUM` on every card line,
+   Trainers and Energy included (step 4).
+5. Walked the actual turn sequence for the deck's core combo/game plan
+   (step 5) — retreat/evolve clearing Special Conditions, one attack per
+   turn, Rare Candy's same-turn restriction, and named the opponent's real
+   out at each turn boundary rather than presenting the plan as more
+   reliable than it is. This applies to any strategy writeup for the deck,
+   not only the initial build.
+6. For any card with a self-inflicted drawback, searched every mechanical
+   *shape* of fix (immunity, switch-not-retreat, flat cost reduction, etc.),
+   not just the first one found (step 6).
+7. Cross-checked against a real published decklist via web search when
+   available, and verified every card name it returned against the JSON
+   before trusting it (step 7).
+8. Checked `references/current_meta_staples.md` for a known real support
+   card or precedent before assuming one doesn't exist (step 8).
+9. Actively checked whether any included drawback card has a hidden
+   "drawback as enabler" combo partner in the pool, not only when handed a
+   decklist that already demonstrates one (step 9).
+
+Skipping a step because the deck's theme seems simple or narrow is exactly
+the situation this list exists to catch — a narrow-seeming theme is often
+where a single missed card (an energy-payability gap, an Ability gate, a
+Rare Candy timing error) does the most damage, precisely because there's
+less redundancy to fall back on.
+
 ### 1. Classify the ask: named mechanic, or general concept?
 
 - **A specific named Ability/attack** (e.g. "Hide 'n' Sneak", "Tighten Up"):
@@ -389,7 +436,7 @@ consume family before treating the first match as the only answer) live in
 `references/combo_patterns.md` — read that before starting this kind of
 search rather than re-deriving the recipe each time.
 
-### 10. Check `references/current_meta_staples.md` before assuming a support card doesn't exist
+### 10. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
 examples (`--suggest-tags`, `--tags`, `--sweep`, `--sweep-phrase`, `--diff`,
