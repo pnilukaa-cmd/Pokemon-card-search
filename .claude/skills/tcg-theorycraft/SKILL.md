@@ -178,6 +178,21 @@ printing's attacks together), so a clean result means "no red flag found
 among known printings," not an ironclad guarantee — still worth a manual
 skim on anything it flags as borderline.
 
+When outputting a decklist in Pokémon TCG Live's plain-text import format,
+**every card line needs an exact `SET NUM` pair, not just the Pokémon
+section.** Real failure: a from-scratch build listed Trainer and Energy
+cards by bare name only (`4 Ultra Ball`, `14 Darkness Energy`) while the
+Pokémon section correctly had set codes — the user reported the import
+partially failed, Pokémon matched but nothing else did. PTCGL's importer
+apparently can't resolve a Trainer/Supporter/Item card (many of which have
+multiple reprints) from name alone the way this project's own
+`check_energy_support.py` can. Basic Energy is the one exception — write it
+as `14 Basic Darkness Energy` with no set code, matching every previously
+working decklist in `decks/`. Look up each Trainer's real `(ptcgoCode,
+number)` from `pokemon_standard_cards.json` before finalizing any decklist
+meant to be pasted into the actual client, the same discipline already
+applied to Pokémon.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way

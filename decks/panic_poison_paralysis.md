@@ -45,21 +45,21 @@ Pokémon: 12
 3 Team Rocket's Muk DRI 124
 
 Trainer: 34
-4 Lillie's Determination
-4 Ultra Ball
-4 Buddy-Buddy Poffin
-3 Poké Pad
-3 Boss's Orders
-3 Roxie's Performance
-2 Night Stretcher
-2 Switch
-2 Air Balloon
-4 Crushing Hammer
-2 Special Red Card
-1 Hero's Cape
+4 Lillie's Determination MEG 119
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+3 Poké Pad ASC 198
+3 Boss's Orders MEG 114
+3 Roxie's Performance CRI 112
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+2 Air Balloon MEG 166
+4 Crushing Hammer POR 71
+2 Special Red Card CRI 113
+1 Hero's Cape TEF 152
 
 Energy: 14
-14 Darkness Energy
+14 Basic Darkness Energy
 
 Total Cards: 60
 ```

@@ -44,19 +44,19 @@ Pokémon: 16
 2 Numel ASC 223
 
 Trainer: 33
-4 Ultra Ball
-4 Buddy-Buddy Poffin
-4 Boss's Orders
-4 Cheren
-3 Judge
-3 Switch
-3 Night Stretcher
-3 Air Balloon
-3 Rescue Board
-2 Firebreather
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Boss's Orders MEG 114
+4 Cheren ASC 258
+3 Judge POR 76
+3 Switch MEG 130
+3 Night Stretcher MEG 173
+3 Air Balloon MEG 166
+3 Rescue Board TEF 159
+2 Firebreather PFL 119
 
 Energy: 11
-11 Fire Energy
+11 Basic Fire Energy
 
 Total Cards: 60
 ```

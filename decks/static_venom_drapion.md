@@ -41,20 +41,20 @@ Pokémon: 8
 4 Drapion POR 52
 
 Trainer: 41
-4 Ultra Ball
-4 Poké Ball
-4 Boss's Orders
-4 Cheren
-4 Judge
-4 Switch
-4 Night Stretcher
-4 Cook
-4 Air Balloon
-4 Rescue Board
-1 Prime Catcher
+4 Ultra Ball MEG 131
+4 Poké Ball POR 80
+4 Boss's Orders MEG 114
+4 Cheren ASC 258
+4 Judge POR 76
+4 Switch MEG 130
+4 Night Stretcher MEG 173
+4 Cook TWM 147
+4 Air Balloon MEG 166
+4 Rescue Board TEF 159
+1 Prime Catcher TEF 157
 
 Energy: 11
-11 Darkness Energy
+11 Basic Darkness Energy
 
 Total Cards: 60
 ```

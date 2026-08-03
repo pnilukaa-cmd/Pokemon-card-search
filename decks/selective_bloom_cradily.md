@@ -47,20 +47,20 @@ Pokémon: 8
 
 Trainer: 42
 4 Antique Root Fossil SCR 130
-4 Rare Candy
-4 Ultra Ball
-4 Poké Ball
-3 Dawn
-3 Cheren
-3 Boss's Orders
-3 Night Stretcher
-3 Judge
-3 Switch
-4 Air Balloon
-4 Rescue Board
+4 Rare Candy MEG 125
+4 Ultra Ball MEG 131
+4 Poké Ball POR 80
+3 Dawn PFL 118
+3 Cheren ASC 258
+3 Boss's Orders MEG 114
+3 Night Stretcher MEG 173
+3 Judge POR 76
+3 Switch MEG 130
+4 Air Balloon MEG 166
+4 Rescue Board TEF 159
 
 Energy: 10
-10 Grass Energy
+10 Basic Grass Energy
 
 Total Cards: 60
 ```

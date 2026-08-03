@@ -38,20 +38,20 @@ Pokémon: 11
 3 Erika's Vileplume ex ASC 3
 
 Trainer: 37
-4 Buddy-Buddy Poffin
-4 Rare Candy
-4 Ultra Ball
-3 Dawn
-3 Cheren
-3 Boss's Orders
-2 Judge
-3 Night Stretcher
-3 Switch
-4 Air Balloon
-4 Rescue Board
+4 Buddy-Buddy Poffin MEG 167
+4 Rare Candy MEG 125
+4 Ultra Ball MEG 131
+3 Dawn PFL 118
+3 Cheren ASC 258
+3 Boss's Orders MEG 114
+2 Judge POR 76
+3 Night Stretcher MEG 173
+3 Switch MEG 130
+4 Air Balloon MEG 166
+4 Rescue Board TEF 159
 
 Energy: 12
-12 Grass Energy
+12 Basic Grass Energy
 
 Total Cards: 60
 ```
