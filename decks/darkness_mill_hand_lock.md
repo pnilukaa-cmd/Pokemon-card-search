@@ -30,6 +30,11 @@ A control deck built around unconditional hand disruption (Sandile/Krokorok/Kroo
 - Max Rod (ACE SPEC) was chosen over Prime Catcher because this deck's win condition is a
   long grindy mill/disruption game — recursion (up to 5 Pokémon/Energy back from discard)
   matters more here than an extra tempo/gust effect.
+- Checked with `check_energy_support.py`: this exact printing of Hydreigon ex (`sv8-119`) also
+  has a second attack, `Obsidian` (Psychic/Darkness/Metal/Colorless, 130 damage), which this
+  mono-Darkness deck can never pay for. That's fine — the deck was never built around it,
+  `Crashing Headbutt` (Darkness/Colorless) is the intended attack — but it's worth stating
+  plainly rather than leaving `Obsidian` as a silent dead line on the card.
 
 ## Pokémon TCG Live Import
 

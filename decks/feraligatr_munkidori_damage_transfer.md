@@ -99,6 +99,11 @@ even two-type search for "good cards."
   here: 4x Rare Candy is meant to skip Croconaw entirely most games, so the 2 copies are
   backup insurance for when Candy isn't drawn, not the primary path. Verified this decklist
   parses to exactly 60 cards with the real app, cross-checked against `pokemon_standard_cards.json`.
+- Checked with `check_energy_support.py`: Munkidori's only attack, `Mind Bend`
+  (Psychic/Colorless), can never be paid — this deck runs Water and Darkness Energy only.
+  That's expected, not a bug: Munkidori's whole role here is `Adrena-Brain`, which is an
+  Ability (a "Darkness Energy attached" check, not an Energy cost) — it was never meant to
+  attack.
 
 ## Pokémon TCG Live Import
 

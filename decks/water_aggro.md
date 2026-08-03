@@ -50,3 +50,40 @@ Chien-Pao and Barraskewda apply cheap, single-prize pressure from turn 1-2. Once
 | 12 | Basic Water Energy |
 
 Mono-Water energy works throughout since every attack in the deck costs Water + Colorless, and Colorless is payable by any basic energy.
+
+## Pokémon TCG Live Import
+
+```
+Pokémon: 15
+3 Chien-Pao SSP 56
+2 Arrokuda
+2 Barraskewda
+3 Finizen
+3 Palafin
+2 Palafin ex
+
+Trainer: 33
+4 Boss's Orders
+4 Crispin
+4 Lacey
+4 Ultra Ball
+4 Buddy-Buddy Poffin
+3 Switch
+3 Night Stretcher
+2 Great Haul Net
+2 Rescue Board
+2 Air Balloon
+1 Prime Catcher
+
+Energy: 12
+12 Basic Water Energy
+
+Total Cards: 60
+```
+
+Note on `check_energy_support.py`: the pool also contains a second, unrelated `Chien-Pao`
+printing (`me3-54`, Phantasmal Flames) with Darkness-costed attacks. The checker matches by
+card name only and pools every printing sharing that name together (a documented limitation of
+the tool, not of this deck), so it flags those Darkness attacks as unpayable here. This deck
+specifically runs the Surging Sparks printing (`sv8-56`), whose only attack is `Icicle Loop`
+(Water/Water/Colorless) — fully covered by the 12 Water Energy above.
