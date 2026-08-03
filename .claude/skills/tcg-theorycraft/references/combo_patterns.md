@@ -769,14 +769,18 @@ it re-enter play the way a Basic would; a Stage 2 can only enter play by
 evolving from an in-play Stage 1, so without help this is a full
 Gastly→Haunter→Gengar re-climb, far too slow to be a real loop. The
 combo only works because `Rare Candy` exists: skip straight from a fresh
-Basic to the Stage 2, so the actual cycle is "Gengar gets KO'd → hand
-instead of discard → next turn, play a new Gastly and Rare Candy straight
-back to Gengar." The KO costs a turn and a Rare Candy, not the
-investment itself — which flips the usual risk calculus for an attacker
-this valuable: it doesn't need protecting from trades the way a normal
-Stage 2 would, since even a "bad" trade barely costs anything. A deck
-built around this wants Gastly and Rare Candy treated as consumable fuel
-for the loop, not one-time setup costs.
+Basic to the Stage 2 — but **check Rare Candy's own timing restriction
+before assuming the loop is one turn**: its text explicitly reads "You
+can't use this card... on a Basic Pokémon that was put into play this
+turn" (verified directly against the card, not assumed from general
+memory — an earlier draft of this entry got this wrong). The real cycle
+is two turns minimum: Gengar gets KO'd on turn N (hand instead of
+discard), a fresh Gastly goes down on turn N+1 (can't Candy it yet), and
+Rare Candy fires on turn N+2 once that Gastly has survived to the start
+of a turn. The KO still only costs a turn-and-a-half of tempo and a Rare
+Candy, not the investment itself, which still flips the usual risk
+calculus for an attacker this valuable — just budget two turns for the
+redeploy, not one, when sequencing a real game plan around it.
 
 General lesson: whenever a card changes *where* a KO'd or discarded
 Pokémon ends up rather than *how much it costs* to lose it, check the

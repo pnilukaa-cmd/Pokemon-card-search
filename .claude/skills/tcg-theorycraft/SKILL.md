@@ -206,6 +206,17 @@ for:
   else (Paralyzed clears automatically at the end of the affected player's
   next turn; Asleep requires a coin-flip check each Checkup) — factor this in
   if a combo's timing is tight.
+- **Rare Candy can't be used on a Basic Pokémon that was put into play that
+  same turn**, and can't be used during your first turn at all — checked
+  directly against the card's own text, not assumed. A "play a Basic and
+  Rare Candy it straight to Stage 2 the same turn" plan is illegal; the
+  Basic has to have already survived to the start of a turn before Rare
+  Candy can target it, meaning a from-scratch Rare Candy rush is two turns
+  minimum (play the Basic on turn N, Rare Candy it on turn N+1), not one.
+  This exact mistake made it into an earlier version of a real combo
+  writeup in this skill (a Basic-to-Stage-2 "redeploy" loop) before being
+  caught and corrected — worth narrating out loud as its own turn-count
+  check whenever a plan leans on Rare Candy for speed.
 
 Before presenting a multi-turn combo as the deck's game plan, narrate it as
 actual turns ("your turn N: X. opponent's turn: can they escape here? your
