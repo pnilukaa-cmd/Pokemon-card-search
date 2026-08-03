@@ -162,6 +162,22 @@ Read the full card (abilities *and* attacks together) before concluding a
 Pokémon is a working attacker, the same discipline already applied to
 energy costs above.
 
+**Both of the checks above are now automated** — run
+`scripts/check_energy_support.py <decklist file>` (or `-` to read from
+stdin) against any finished or user-provided decklist before writing the
+review up. It parses the same plain-text decklist format used throughout
+this project, cross-references every attacker's attack cost against the
+deck's actual Energy-by-type supply (flagging `IMPOSSIBLE` when a type's
+total supply is below what a single attack needs simultaneously attached,
+and `TIGHT` when supply exactly equals the requirement with no spare
+copies), and separately scans every included Pokémon's Ability text for
+"can't attack unless..."-style gating language. It caught the Team
+Rocket's Articuno, Bastiodon, and Team Rocket's Mewtwo ex cases above
+correctly in testing. It matches cards by name only (pooling every
+printing's attacks together), so a clean result means "no red flag found
+among known printings," not an ironclad guarantee — still worth a manual
+skim on anything it flags as borderline.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way
