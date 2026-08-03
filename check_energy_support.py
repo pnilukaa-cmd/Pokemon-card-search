@@ -187,6 +187,41 @@ def scan_attack_gating_abilities(deck_lines, cards_by_name):
     return hits
 
 
+def check_deck_construction_legality(deck_lines, cards_by_name):
+    """Returns (total_cards, over_limit, ace_spec_violation).
+
+    over_limit: list of (name, count) for any non-Basic-Energy card name
+    exceeding the game's 4-copy-per-name limit. Basic Energy has no limit.
+    ace_spec_violation: list of (name, count) for ACE SPEC cards where the
+    combined count across the whole decklist exceeds 1 (the real limit is
+    per-deck, not per-card-name -- two different ACE SPEC cards still only
+    get 1 total between them)."""
+    total_cards = sum(count for count, _ in deck_lines)
+    counts = defaultdict(int)
+    for count, name in deck_lines:
+        counts[name] += count
+    over_limit = []
+    for name, count in counts.items():
+        if BASIC_ENERGY_RE.match(name):
+            continue
+        if count > 4:
+            over_limit.append((name, count))
+
+    ace_spec_total = 0
+    ace_spec_names = []
+    for name in counts:
+        matches = cards_by_name.get(name)
+        if not matches:
+            continue
+        rules_text = " ".join(matches[0].get("rules") or [])
+        if "ACE SPEC" in rules_text:
+            ace_spec_total += counts[name]
+            ace_spec_names.append(name)
+    ace_spec_violation = ace_spec_names if ace_spec_total > 1 else []
+
+    return total_cards, over_limit, ace_spec_violation
+
+
 def main():
     if len(sys.argv) != 2:
         print(__doc__)
@@ -207,6 +242,20 @@ def main():
     supply = energy_type_supply(deck_lines, cards_by_name)
     reqs = attack_requirements(deck_lines, cards_by_name)
     gating = scan_attack_gating_abilities(deck_lines, cards_by_name)
+    total_cards, over_limit, ace_spec_violation = check_deck_construction_legality(deck_lines, cards_by_name)
+
+    print("===== Deck construction legality =====")
+    size_flag = "" if total_cards == 60 else "  <-- NOT 60"
+    print(f"Total cards: {total_cards}{size_flag}")
+    if over_limit:
+        print(f"OVER THE 4-COPY LIMIT ({len(over_limit)}):")
+        for name, count in over_limit:
+            print(f"  {count}x {name} -- max 4 copies of any non-Basic-Energy card")
+    if ace_spec_violation:
+        print(f"ACE SPEC LIMIT EXCEEDED (max 1 total across the whole deck): {', '.join(ace_spec_violation)}")
+    if not over_limit and not ace_spec_violation and total_cards == 60:
+        print("No construction-legality issues found (60 cards, no card over 4 copies, ACE SPEC within limit).")
+    print()
 
     print("===== Energy-type support check =====")
     print(f"Deck's total Energy-by-type supply: {dict(supply) if supply else '(no Energy cards recognized)'}\n")

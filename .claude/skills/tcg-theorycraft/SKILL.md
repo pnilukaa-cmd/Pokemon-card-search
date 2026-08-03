@@ -225,6 +225,18 @@ printing's attacks together), so a clean result means "no red flag found
 among known printings," not an ironclad guarantee — still worth a manual
 skim on anything it flags as borderline.
 
+**It also checks basic deck-construction legality**: total card count is
+60, no non-Basic-Energy card exceeds the real 4-copies-per-name limit, and
+combined ACE SPEC count across the whole deck is at most 1. Real failure
+that motivated adding this: a from-scratch build ran 5 copies of Rhyhorn —
+caught only because the user asked "how can there be 5 Rhyhorn," not by the
+build process itself, even though every other check (energy payability,
+Ability gating, mulligan math) had already run cleanly. The 4-copy limit is
+more fundamental than any of those checks and was never being verified at
+all before this. Run this check on every finished decklist same as the
+others — it's cheap and fully deterministic, there's no reason for this
+exact mistake to happen twice.
+
 When outputting a decklist in Pokémon TCG Live's plain-text import format,
 **every card line needs an exact `SET NUM` pair, not just the Pokémon
 section.** Real failure: a from-scratch build listed Trainer and Energy
