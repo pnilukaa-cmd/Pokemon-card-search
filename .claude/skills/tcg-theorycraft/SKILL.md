@@ -199,7 +199,20 @@ Listing synergistic cards is not the same as verifying they combo the way
 they look like they should. A combo that spans more than one turn gives the
 opponent a turn in between to react, and several ordinary game rules quietly
 break "setup this turn, cash in next turn" plans if they aren't accounted
-for:
+for.
+
+**This checklist applies every time a combo or play sequence gets described,
+not only while a decklist is first being built.** A real failure: this exact
+checklist already correctly listed "retreating cures every Special
+Condition" and "only the Active Pokémon attacks, once per turn," but a later
+message writing up *how to play* an already-finished deck (not building one)
+re-derived a rules claim from memory instead of re-checking this list first,
+and stated the opposite — that Burn/Poison survive a retreat to the bench.
+The gap wasn't missing knowledge; it was treating "explain the strategy" as
+a lighter task than "build the decklist" and skipping the checklist because
+of that framing. Re-run this same list before writing any turn-by-turn
+strategy explanation, matchup note, or "here's how to pilot this" writeup,
+exactly as rigorously as when the decklist itself was assembled.
 
 - **Retreating cures every Special Condition** on the Pokémon that retreats.
   If a combo relies on Poisoned/Confused/Burned/etc. still being present on
