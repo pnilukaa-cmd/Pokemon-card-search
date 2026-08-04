@@ -41,7 +41,25 @@ each is fine) that each of the following actually happened for this build,
 not just that it usually happens:
 
 1. Searched via tags or sweep-phrase (step 1), checking **both** produce and
-   consume roles, not just one.
+   consume roles, not just one. **The results already include every
+   supertype — Pokémon, Trainer, and Energy together, not a separate
+   pass per card type** — but that only helps if the full result list gets
+   re-checked against the *final* build, not just skimmed once at the start.
+   Real miss: a `counterattack_on_hit` search surfaced `Deluxe Bomb` (a
+   universal, no-type-restriction ACE SPEC Tool doing more damage per hit
+   than anything else in the family) in the very first query of a session,
+   it got used in one deck built from that search, and then silently
+   dropped from a *second*, later deck built from the same mechanic —
+   caught only when asked directly whether the Trainer/Item/Stadium/Energy
+   side gets the same scrutiny as the Pokémon side. It doesn't, by default:
+   the generic support shell (Ultra Ball, Boss's Orders, Switch, Air
+   Balloon, Night Stretcher, Lillie's Determination, Judge, Rescue Board)
+   gets pulled from a rotation of previously-used staples out of habit, not
+   from re-running the mechanic search against this specific build. Before
+   finalizing any deck, re-scan the *original* tag-search output
+   specifically for Trainer/Energy entries and check each one against the
+   list actually being built, even if that search happened earlier in the
+   same conversation for a different deck.
 2. Ran the raw-sweep `--diff` (step 2) and manually triaged every hit —
    fixed `analyze_mechanics.py` if a real gap turned up, and re-confirmed
    both `python3 analyze_mechanics.py` and `python3 audit_mechanics.py`
