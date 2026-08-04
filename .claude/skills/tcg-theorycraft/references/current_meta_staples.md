@@ -639,3 +639,23 @@ Cofagrigus self-damage; the Academy at Night + Seek Inspiration
 determinism trick) were derived directly from the verified card texts, not
 from the search summaries — the summaries only supplied which named cards
 and archetypes to go look up.
+
+### Beldum/Metang/Metagross + Cinccino ex + Genesect ex (user-provided)
+
+Verified card-by-card, including 8 of 17 named printings that didn't match
+this project's own deduped `pokemon_standard_cards.json` entries for the
+same card names — all 8 confirmed real, Standard-legal (regulation marks
+H/I/J) printings via the live API, just different specific reprints than
+the one this project's dedup-by-gameplay-signature process happened to
+keep (e.g. `Team Rocket's Petrel` DRI 176 vs. this project's ASC 207 —
+same card, different set). See Pattern 13 in `combo_patterns.md` for the
+real mechanic: `Metang`'s (`TEF` print) Metal Maker Ability attaches Metal
+Energy to *any* of your Pokémon, feeding `Cinccino ex`'s Colorless-type,
+total-Energy-count scaler (`Energized Slap`, 40 damage per Energy attached
+for a single Colorless cost) despite the type mismatch. `Genesect ex`
+rounds out consistency (`Metallic Signal` tutors Evolution Metal Pokémon)
+and serves as a second real attacker. `Team Rocket's Transceiver` in this
+specific 60 can only ever find `Team Rocket's Petrel` — the only
+"Team Rocket"-named Supporter in the list — still a real 2-card loop
+(Transceiver → Petrel → any Trainer, including another Transceiver), just
+narrower than the six-Supporter Team Rocket's package logged above.

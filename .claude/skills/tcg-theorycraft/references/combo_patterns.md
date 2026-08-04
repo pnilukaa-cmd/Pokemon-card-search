@@ -789,3 +789,37 @@ a Basic makes this kind of Ability immediately repeatable on its own; an
 evolved Pokémon needs an explicit re-evolution accelerant (Rare Candy, or
 a stage2_conditional_bench_play-style effect like Klinklang's Emergency
 Rotation) before the loop is actually fast enough to matter.
+
+## Pattern 13: an untyped "attach Energy to any of your Pokémon" Ability can feed a *different Pokémon's own type* entirely, including a total-Energy-count scaler
+
+Found in a user-provided decklist (Beldum/Metang line + Cinccino ex,
+verified card-by-card against the live API). `Metang`'s (`TEF` print)
+`Metal Maker` Ability — "look at the top 4 cards of your deck and attach
+any number of Basic Metal Energy cards you find there to your Pokémon in
+any way you like" — has no restriction on *which* of your Pokémon receives
+the Energy, only on the Energy's own type (must be Basic Metal). That
+means it can dump Metal Energy onto a **Colorless**-type Pokémon just as
+easily as onto itself.
+
+The payoff in this deck: `Cinccino ex`'s `Energized Slap` costs a single
+Colorless and does "40 damage for each Energy attached to this Pokémon" —
+the scaler counts *all* attached Energy regardless of type, not just
+Colorless. Metal Maker doesn't need to match Cinccino ex's own type at
+all; it just needs to be a legal Basic Energy, full stop. Stack several
+Metal Energy onto Cinccino ex over a couple of turns via repeated Metal
+Maker activations (each copy of Metang in play gets its own "once during
+your turn" use) and Energized Slap scales to real damage off a
+one-Energy attack cost.
+
+General lesson: when auditing an "attach Energy to your Pokémon"-shaped
+Ability, check two things separately — what type of Energy it moves, and
+*which Pokémon* it's allowed to move it onto. A same-Pokémon-only
+restriction (common) caps this at self-acceleration; a same-type-only
+restriction (also common, e.g. "attach to 1 of your Water Pokémon") caps
+which attackers can receive it; but when *neither* restriction is present,
+the Ability can bridge completely unrelated types — feeding any
+total-Energy-count or total-Energy-type-agnostic scaler in the deck, not
+just the obvious same-type attacker. Worth actively cross-referencing
+against `damage_scales_with_energy_attached` whenever a free-target Energy
+attacher shows up, the same way Pattern 9 already established for
+Special-Condition triggers.
