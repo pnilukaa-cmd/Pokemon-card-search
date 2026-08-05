@@ -823,3 +823,35 @@ just the obvious same-type attacker. Worth actively cross-referencing
 against `damage_scales_with_energy_attached` whenever a free-target Energy
 attacher shows up, the same way Pattern 9 already established for
 Special-Condition triggers.
+
+## Pattern 14: a bonus keyed to *this Pokémon's own action last turn*, not to a board-state condition, has no retreat-escape window at all
+
+`Weezing` (`JTG` print, Darkness, Stage 1): `Pervasive Gas` (1 Darkness, 30
+damage) inflicts Confused on the opponent's Active — ordinary Pattern-5-
+style condition infliction, coin-flip-free. Its other attack, `Crazy
+Blast` (Darkness + Colorless, 50+): *"If this Pokémon used Pervasive Gas
+during your last turn, this attack does 120 more damage"* (170 total) —
+but read the trigger carefully: it checks **Weezing's own action history**,
+not whether the opponent's Active is still Confused, and not even whether
+it's the *same* opponent's Pokémon that got Confused. The opponent
+retreating their Confused Pokémon away between turns — the standard
+Pattern-5 counter, since retreating cures every Special Condition — does
+**nothing** to stop this bonus, because the bonus was never reading the
+Confused status at all.
+
+This is a meaningfully different combo shape from every prior Special-
+Condition pattern in this file: Patterns 5 and 9-13 all key a scaler off
+board state (a condition, an Energy count, a discard pile) that the
+opponent can potentially disrupt by acting on their own turn. A
+self-history trigger like Crazy Blast's has exactly one real counter — KO
+the triggering Pokémon before its follow-up turn — not "play around the
+condition." Confirmed no real published decklist exists for this specific
+card yet (checked directly), so this is fresh, unexploited territory in
+the pool as of this writing.
+
+General lesson: when a card's bonus-damage clause references "if this
+Pokémon used/did X last turn" rather than "if the opponent's Active is
+currently Y," don't apply the retreat-escape-hatch caveat from Pattern 5 —
+check the exact wording before assuming a board-state counter exists,
+since these two trigger shapes look superficially similar but have
+completely different failure modes for the opponent to exploit.
