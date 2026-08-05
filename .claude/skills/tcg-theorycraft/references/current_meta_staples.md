@@ -44,6 +44,12 @@ ages. See the note at the bottom on how this was gathered and its limits.
   ~1,140 other currently-legal cards across nearly every set — root-caused
   and fixed). `Rosa's Encouragement` was not re-checked as part of this fix
   and should be verified directly before trusting either claim about it.
+  **Resolved**: it's present in the current, properly-filtered
+  `pokemon_standard_cards.json` (`me3-114`, Perfect Order) — since that
+  file is only ever populated by `fetch_pokemon_cards.py`'s H/I/J
+  regulation-mark query (not the unreliable `legalities.standard` field),
+  its presence there confirms it's genuinely Standard-legal, closing the
+  open question above.
 - **Mega Zeraora ex / Iono's Bellibolt ex burst deck** (user-provided,
   verified card-by-card) — see `references/combo_patterns.md` Pattern 2 for
   the full writeup. Short version: Bellibolt ex's Electric Streamer dumps
