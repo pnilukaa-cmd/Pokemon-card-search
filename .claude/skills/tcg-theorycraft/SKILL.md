@@ -89,6 +89,10 @@ not just that it usually happens:
 9. Actively checked whether any included drawback card has a hidden
    "drawback as enabler" combo partner in the pool, not only when handed a
    decklist that already demonstrates one (step 9).
+10. Ran a 1000-trial baseline development-timing simulation with
+    `scripts/simulate_baseline.py` and reported the results (step 10) —
+    every time a finished decklist is delivered, not only when explicitly
+    asked to "test" it.
 
 Skipping a step because the deck's theme seems simple or narrow is exactly
 the situation this list exists to catch — a narrow-seeming theme is often
@@ -466,7 +470,45 @@ consume family before treating the first match as the only answer) live in
 `references/combo_patterns.md` — read that before starting this kind of
 search rather than re-deriving the recipe each time.
 
-### 10. Use `search_mechanic.py --help` instead of guessing a flag's behavior
+### 10. Run a 1000-trial baseline simulation on every finished decklist
+
+`scripts/simulate_baseline.py <decklist file> [trial count] [--verbose]`
+runs a deck-agnostic development-timing simulation — it builds its
+Pokemon model (stage, evolvesFrom, HP, retreat, types, attacks) straight
+from `pokemon_standard_cards.json` for whatever decklist it's handed, so
+it works on any build without hand-coding each deck's Pokemon data. It
+reports, per Pokémon: what fraction of 1000 opening hands have it in play
+by turn 6 and the average turn that happens, plus first-attack timing and
+average final hand size at turn 6.
+
+Run this **every time a finished decklist is delivered**, the same
+standing requirement as `check_energy_support.py` in step 4 — not only
+when the user explicitly asks to "test" or "simulate" the deck. It
+answers a different question than the energy/construction checks: not
+"can this deck legally do what it claims," but "how fast does it actually
+assemble in practice." A deck can pass every legality and payability
+check and still turn out to come online too slowly to be worth playing —
+this is the check that catches that, quantitatively rather than by feel.
+
+Two stated limitations, matching `simulate_match.py`'s own disclosed
+simplifications: no retreating is modeled (so only whatever ends up
+Active on turn 1, or what it evolves into, ever attacks in a given
+playthrough) and no opponent is modeled (so it measures development
+speed, not win rate). Energy type-correctness isn't re-checked here
+either — that's `check_energy_support.py`'s job, already covered by step
+4. Trainer/Item/Supporter effects are modeled through a hand-authored
+registry covering this project's actual staples (Lillie's Determination,
+Ultra Ball, Buddy-Buddy Poffin, Poké Pad, Night Stretcher, Energy Search,
+Rare Candy, Team Rocket's Petrel, Janine's Secret Art, plus opponent-only
+cards like Boss's Orders correctly left un-simulated since they don't
+affect any reported metric); a card outside that registry is simply held
+in hand rather than misplayed, and the script's own report lists every
+such name it hit so a real coverage gap is visible, not silent — extend
+the registry in the script when a new staple shows up often enough to be
+worth modeling properly, the same way `analyze_mechanics.py` gets
+extended when a raw-sweep diff turns up a real taxonomy gap.
+
+### 11. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
 examples (`--suggest-tags`, `--tags`, `--sweep`, `--sweep-phrase`, `--diff`,
