@@ -19,6 +19,19 @@ staying alive.
    a fully-evolved Krookodile ex can reach back down and use Krokorok's
    `Tighten Up` again once both pieces are in play, without giving up
    Krookodile ex's HP or its own attacks.
+3. **Team Rocket's Koffing -> Team Rocket's Weezing** (DRI 125 / DRI 126)
+   — added after real playtesting surfaced "getting knocked out early with
+   an empty bench" as the deck's actual weak point (Purrloin/Liepard
+   didn't fix that and were cut). Koffing's Ability, Smog Signals: *"If
+   this Pokémon is in the Active Spot and is damaged by an attack (even if
+   Knocked Out), search your deck for up to 2 Pokémon that have 'Koffing'
+   in their name and put them onto your Bench."* Every hit it takes,
+   lethal or not, refills the bench for free instead of leaving it empty.
+   Weezing's `Explode Together Now` (Darkness + Colorless) does 40 damage
+   for each Koffing/Weezing in play on *either* side, so it directly
+   scales off Smog Signals' own refills — a real payoff, not just a
+   defensive stopgap. Both run on the same mono-Darkness Energy base as
+   the rest of the deck.
 
 ## Design notes
 
@@ -31,49 +44,65 @@ staying alive.
   `Tighten Up`. This deck's whole plan depends on evolving normally, so
   Rare Candy is excluded on purpose, not by oversight.
 - **Bench-slot ceiling respected.** Only 6 Pokémon total can ever be in
-  play (1 Active + 5 Bench). This deck runs 4 lines wanting board
-  presence (Krookodile ex line, Relicanth, Purrloin/Liepard,
-  Dunsparce/Dudunsparce) — an earlier draft also ran Toxtricity as a
-  fifth, and was cut once the bench math made clear a 5th permanent line
-  couldn't consistently find room alongside the other four.
-- **Purrloin/Liepard and Dunsparce/Dudunsparce** are secondary Darkness
-  support and a draw engine, respectively — not additional disruption
-  pieces, but they round out the curve and keep the hand moving while the
-  Krookodile ex line assembles.
+  play (1 Active + 5 Bench). This deck runs 4 lines wanting board presence
+  (Krookodile ex line, Relicanth, Dunsparce/Dudunsparce, Koffing/Weezing)
+  — an earlier draft ran 5 (Toxtricity, then later Purrloin/Liepard on top
+  of these four), and both extra lines were cut once it became clear a 5th
+  permanent line couldn't consistently find room.
+- **Purrloin/Liepard cut entirely** (previously ran 3/2) after real
+  playtesting showed the deck getting knocked out early with nothing on
+  the bench — Liepard's `Knock Off` wasn't essential, and Purrloin's
+  search wasn't fixing the actual problem. Team Rocket's Koffing/Weezing
+  replaced them specifically because Smog Signals answers that exact
+  complaint (empty bench on a KO) instead of a generic consistency boost
+  that didn't touch it. Buddy-Buddy Poffin was already at its legal
+  4-copy max, so the fix was adding more Poffin-*eligible* targets
+  (Koffing is a 70 HP Basic, well within Poffin's 70-HP-or-less limit)
+  rather than more Poffin copies.
+- **Dunsparce/Dudunsparce** is the draw-engine line, separate from the
+  disruption plan — keeps the hand moving while the other three lines
+  assemble. Its own consistency (~35-40% online by turn 6) is a known,
+  distinct weak point not touched by the Koffing swap — worth a dedicated
+  look if it's still not showing up in games.
 - Verified with `check_energy_support.py`: mono-Darkness supply (13 Basic
   Darkness Energy + Enriching Energy) covers every attack in the deck.
   The one flag it raises is expected and intentional: Relicanth's
   `Razor Fin` needs Fighting Energy, which this deck runs none of —
   Relicanth is an Ability-only include and was never meant to attack with
   its own kit.
-- Mulligan math: 12 effective Basics (Sandile, Relicanth, Purrloin,
-  Dunsparce) -> 19.1% mulligan rate.
+- Mulligan math: 12 effective Basics (Sandile, Relicanth, Dunsparce, Team
+  Rocket's Koffing) -> 19.1% mulligan rate, unchanged from the
+  Purrloin/Liepard build — dropping Purrloin to zero (rather than trimming
+  it) traded away the small mulligan improvement a partial trim would have
+  given, in exchange for the extra Koffing/Weezing slots. Worth knowing
+  this is a real tradeoff, not a free upgrade.
 - 60 cards, no card over 4 copies, no ACE SPEC in the deck.
 
 ## Baseline simulation (1000 trials, `simulate_baseline.py`)
 
 Development-timing only — no retreating or opponent modeled, so this
-measures how fast the pieces assemble, not win rate:
+measures how fast the pieces assemble, not win rate. It also can't show
+Smog Signals actually *paying off* (it only refills the bench once
+something damages Koffing) — it can only confirm Koffing shows up early
+and reliably; whether it saves games is a real-match question this tool
+doesn't answer:
 
 | Pokémon | In play by turn 6 | Avg turn |
 |---|---|---|
-| Sandile | 95.5% | 1.60 |
-| Krokorok | 63.0% | 3.18 |
-| Krookodile ex | 34.9% | 3.77 |
-| Relicanth | 68.0% | 2.23 |
-| Purrloin | 86.3% | 1.92 |
-| Liepard | 43.2% | 3.55 |
-| Dunsparce | 83.1% | 1.77 |
-| Dudunsparce | 38.6% | 3.46 |
+| Sandile | 95.6% | 1.62 |
+| Krokorok | 64.6% | 3.11 |
+| Krookodile ex | 37.3% | 3.71 |
+| Relicanth | 68.1% | 2.21 |
+| Dunsparce | 84.2% | 1.90 |
+| Dudunsparce | 39.6% | 3.40 |
+| Team Rocket's Koffing | 82.4% | 1.82 |
+| Team Rocket's Weezing | 39.6% | 3.34 |
 
-First attack landed by turn 6 in 95.5% of trials (avg turn 2.58, almost
-always Sandile's or Dunsparce's own Basic-level attack going first while
-the real engine is still assembling). Average final hand size at turn 6:
-4.68 cards. Full Krookodile ex line online only ~35% of the time by turn
-6 — consistent with running two independent lines (the evolution line and
-Relicanth) with no dedicated acceleration piece connecting them; this is
-the same "hard to get ramped up" read the deck already carried into this
-build, now with a number attached to it.
+First attack landed by turn 6 in 94.1% of trials (avg turn 2.66). Average
+final hand size at turn 6: 4.64 cards. Krookodile ex and Dudunsparce
+numbers are essentially unchanged from the Purrloin/Liepard build
+(~35-39% either way) — this swap targeted the empty-bench problem
+specifically, not the Krookodile ex line's own ramp speed.
 
 ## Pokémon TCG Live Import
 
@@ -83,10 +112,10 @@ Pokémon: 22
 3 Krokorok BLK 136
 3 Krookodile ex CRI 55
 2 Relicanth TEF 173
-3 Purrloin WHT 136
-2 Liepard WHT 137
 3 Dunsparce TEF 128
 2 Dudunsparce TEF 129
+3 Team Rocket's Koffing DRI 125
+2 Team Rocket's Weezing DRI 126
 
 Trainer: 24
 4 Lillie's Determination MEG 119
