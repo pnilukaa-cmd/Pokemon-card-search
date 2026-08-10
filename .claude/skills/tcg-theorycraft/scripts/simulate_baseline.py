@@ -424,7 +424,40 @@ def buddy_poffin_eligible(POKEMON):
     return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and info["hp"] <= 70]
 
 
+# Cards shaped like "search up to N Basic <Family> Pokemon and put them onto
+# your Bench" (Hop's Bag, and the same pattern used by other named-family
+# Trainers in this format) -- keyed by exact card name -> the substring its
+# own text restricts to and how many it fetches.
+FAMILY_BENCH_SEARCH_ITEMS = {
+    "Hop's Bag": ("Hop's", 2),
+}
+
+
+def family_bench_eligible(POKEMON, family_substring):
+    return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and family_substring in n]
+
+
 def play_items(state, POKEMON, priority, turn, log):
+    for item_name, (family, max_count) in FAMILY_BENCH_SEARCH_ITEMS.items():
+        eligible = family_bench_eligible(POKEMON, family)
+        while ("Item", item_name) in state.hand and len(state.bench) < 5:
+            found, remaining = [], []
+            for card in state.deck:
+                if len(found) < max_count and card[0] == "Pokemon" and card[1] in eligible:
+                    found.append(card[1])
+                else:
+                    remaining.append(card)
+            if not found:
+                break
+            state.remove_from_hand("Item", item_name)
+            state.discard.append(item_name)
+            state.deck = remaining
+            random.shuffle(state.deck)
+            for name in found[: max(0, 5 - len(state.bench))]:
+                state.bench.append({"name": name, "energy": 0, "entered_turn": turn})
+                state.note_online(name, turn)
+            log.append(f"Play {item_name} -> bench {', '.join(found)}")
+
     while ("Item", "Rare Candy") in state.hand:
         if not effect_rare_candy(state, POKEMON, turn, log):
             break
@@ -585,7 +618,13 @@ def play_supporter(state, POKEMON, log):
                 return
 
 
-KNOWN_ITEM_NAMES = {"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher", "Energy Search"}
+KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher", "Energy Search"}
+                     | set(FAMILY_BENCH_SEARCH_ITEMS))
+# Repositions Active/Bench with no other effect -- since retreating isn't
+# modeled at all (stated simplification, matching simulate_match.py), this
+# genuinely has zero effect on any metric this simulator reports, not a
+# gap in coverage.
+NO_SELF_EFFECT_ITEMS = {"Switch"}
 
 
 def collect_unmodeled(DECKLIST):
@@ -593,7 +632,7 @@ def collect_unmodeled(DECKLIST):
     for kind, name in DECKLIST:
         if kind == "Supporter" and name not in SUPPORTER_EFFECTS and name not in NO_SELF_EFFECT_SUPPORTERS:
             unmodeled.add(name)
-        elif kind == "Item" and name not in KNOWN_ITEM_NAMES:
+        elif kind == "Item" and name not in KNOWN_ITEM_NAMES and name not in NO_SELF_EFFECT_ITEMS:
             unmodeled.add(name)
     return unmodeled
 
