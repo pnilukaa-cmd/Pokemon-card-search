@@ -427,9 +427,13 @@ def buddy_poffin_eligible(POKEMON):
 # Cards shaped like "search up to N Basic <Family> Pokemon and put them onto
 # your Bench" (Hop's Bag, and the same pattern used by other named-family
 # Trainers in this format) -- keyed by exact card name -> the substring its
-# own text restricts to and how many it fetches.
+# own text restricts to and how many it fetches. An empty substring matches
+# every Basic, which covers unrestricted versions like Precious Trolley
+# ("search for any number of Basic Pokemon") -- 99 stands in for "any
+# number," since the bench-space check already caps the real limit.
 FAMILY_BENCH_SEARCH_ITEMS = {
     "Hop's Bag": ("Hop's", 2),
+    "Precious Trolley": ("", 99),
 }
 
 
