@@ -608,7 +608,7 @@ SUPPORTER_EFFECTS = {
 # Prize-count condition we don't track) -- correctly left unplayed rather
 # than misrepresented as "unmodeled gap," since they have zero effect on
 # any metric this simulator reports.
-NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement", "Special Red Card"}
+NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement"}
 
 
 def play_supporter(state, POKEMON, log):
@@ -624,19 +624,15 @@ def play_supporter(state, POKEMON, log):
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher", "Energy Search"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
-# Repositions Active/Bench with no other effect -- since retreating isn't
-# modeled at all (stated simplification, matching simulate_match.py), this
-# genuinely has zero effect on any metric this simulator reports, not a
-# gap in coverage.
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).
-# "Dangerous Laser" and "Dark Bell" apply Special Conditions to the
-# opponent's Active -- real, strong effects in an actual game, but this
-# simulator has no opponent board to apply them to, so they correctly
-# score as having zero effect on any metric reported here. That's a real
-# limit on what this tool can tell you about those two cards specifically,
-# not evidence they're weak.
-NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell"}
+# "Dangerous Laser" and "Dark Bell" apply Special Conditions, and
+# "Special Red Card" resets the opponent's hand -- all real, strong
+# effects in an actual game, but this simulator has no opponent board to
+# apply them to, so they correctly score as having zero effect on any
+# metric reported here. That's a real limit on what this tool can tell
+# you about those cards specifically, not evidence they're weak.
+NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card"}
 
 
 def collect_unmodeled(DECKLIST):
