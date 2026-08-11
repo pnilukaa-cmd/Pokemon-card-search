@@ -628,7 +628,15 @@ KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pa
 # modeled at all (stated simplification, matching simulate_match.py), this
 # genuinely has zero effect on any metric this simulator reports, not a
 # gap in coverage.
-NO_SELF_EFFECT_ITEMS = {"Switch"}
+# "Switch" repositions Active/Bench with no other effect (retreating isn't
+# modeled at all, so this can't move any tracked metric either way).
+# "Dangerous Laser" and "Dark Bell" apply Special Conditions to the
+# opponent's Active -- real, strong effects in an actual game, but this
+# simulator has no opponent board to apply them to, so they correctly
+# score as having zero effect on any metric reported here. That's a real
+# limit on what this tool can tell you about those two cards specifically,
+# not evidence they're weak.
+NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell"}
 
 
 def collect_unmodeled(DECKLIST):
