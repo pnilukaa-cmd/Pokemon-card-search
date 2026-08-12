@@ -110,6 +110,23 @@ less redundancy to fall back on.
   on its own for a named mechanic — the phrase is specific enough that noise
   is rare.
 
+- **A named *family* of Pokémon** (e.g. "is there other support for the
+  Hop's/Steven's/Ethan's cards?"): searching Trainer cards for the family's
+  own name prefix is **not enough** — a support card that boosts or
+  protects a named family very often doesn't carry that family's name
+  itself. `Postwick` (Stadium, +30 damage to Hop's Pokémon) and
+  `Granite Cave` (Stadium, -30 damage taken by Steven's Pokémon) both prove
+  this: neither has "Hop's" or "Steven's" anywhere in its own name, only in
+  its effect text. A real miss happened here — a Steven's-family deck was
+  built and confidently described as having "no equivalent to Postwick,"
+  when Granite Cave existed in the pool the whole time and was found only
+  because the user pushed back and asked to search for the *effect*
+  (similar damage-reduction text) rather than trust the name-prefix search
+  that had already run. Search by **effect text mentioning the family name**
+  (`--sweep-phrase "Steven's Pokémon"`, `--sweep-phrase "Hop's Pokémon"`,
+  etc.) in addition to a name-prefix search before concluding a themed
+  family has no supporting cast.
+
 - **A general concept** (e.g. "card draw", "hand discard", "Confusion",
   "healing", "Stage 2 Pokémon with ability X"): don't invent a regex from
   scratch. First run `scripts/search_mechanic.py --suggest-tags <keyword>`
