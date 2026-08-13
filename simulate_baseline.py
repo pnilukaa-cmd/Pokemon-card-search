@@ -203,6 +203,7 @@ class GameState:
         self.supporter_played = False
         self.online_turn = {}       # Pokemon name -> first turn it entered play
         self.first_attack_turn = None
+        self.stadium_in_play = None
 
     def draw(self, n=1):
         for _ in range(n):
@@ -316,6 +317,74 @@ def effect_rare_candy(state, POKEMON, turn, log):
         loc["name"] = s2name
     state.note_online(s2name, turn)
     log.append(f"Play Rare Candy -> {basic_name} skips Stage 1, becomes {s2name}")
+    return True
+
+
+def play_stadium(state, log):
+    for kind, name in list(state.hand):
+        if kind == "Stadium":
+            state.remove_from_hand(kind, name)
+            if state.stadium_in_play:
+                state.discard.append(state.stadium_in_play)
+            state.stadium_in_play = name
+            log.append(f"Play Stadium: {name}")
+            return
+
+
+def grand_tree_targets(state, POKEMON, turn):
+    if turn <= 1:
+        return []
+    candidates = []
+    if state.active and turn > state.active_entered_turn:
+        candidates.append(("active", state.active))
+    for slot in state.bench:
+        if turn > slot["entered_turn"]:
+            candidates.append((slot, slot["name"]))
+    results = []
+    for loc, name in candidates:
+        info = POKEMON.get(name)
+        if not info or info["stage"] != "Basic":
+            continue
+        for s1name, s1info in POKEMON.items():
+            if s1info.get("evolves_from") == name and s1info["stage"] == "Stage 1":
+                if any(c == ("Pokemon", s1name) for c in state.deck):
+                    results.append((loc, name, s1name))
+    return results
+
+
+def effect_grand_tree(state, POKEMON, turn, log):
+    """Grand Tree (ACE SPEC Stadium): once per player's turn, evolve a
+    Basic already in play straight from the deck (Basic -> Stage 1, then
+    chaining to Stage 2 if that's also in the deck) -- no need to have
+    drawn the evolution card at all. Real card text also lets the
+    opponent use it on their turn, not modeled here since this simulator
+    has no opponent."""
+    if state.stadium_in_play != "Grand Tree":
+        return False
+    targets = grand_tree_targets(state, POKEMON, turn)
+    if not targets:
+        return False
+    loc, basic_name, s1name = targets[0]
+    state.deck.remove(("Pokemon", s1name))
+    if loc == "active":
+        state.active = s1name
+        state.active_evolved_this_turn = True
+    else:
+        loc["name"] = s1name
+    state.note_online(s1name, turn)
+    log.append(f"Grand Tree -> {basic_name} evolves into {s1name} (searched from deck)")
+    for s2name, s2info in POKEMON.items():
+        if s2info.get("evolves_from") == s1name and s2info["stage"] == "Stage 2":
+            if any(c == ("Pokemon", s2name) for c in state.deck):
+                state.deck.remove(("Pokemon", s2name))
+                if loc == "active":
+                    state.active = s2name
+                else:
+                    loc["name"] = s2name
+                state.note_online(s2name, turn)
+                log.append(f"Grand Tree chains -> {s1name} evolves into {s2name}")
+            break
+    random.shuffle(state.deck)
     return True
 
 
@@ -654,6 +723,8 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
     state.active_evolved_this_turn = False
     play_basics(state, POKEMON, turn_num, log)
     try_evolve(state, POKEMON, turn_num, log)
+    play_stadium(state, log)
+    effect_grand_tree(state, POKEMON, turn_num, log)
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
     attach_energy(state, POKEMON, pre_evolutions, log)
