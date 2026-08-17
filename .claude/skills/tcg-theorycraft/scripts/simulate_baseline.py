@@ -606,6 +606,22 @@ def play_items(state, POKEMON, priority, turn, log):
             state.hand.append(basic_e)
             log.append(f"Play Energy Search -> get {basic_e[1]}")
 
+    # Team Rocket's Transceiver: search the deck for a Supporter whose name
+    # contains "Team Rocket" and put it into hand. Only fetches Supporters
+    # the registry can actually play, so the simulated value stays honest.
+    while ("Item", "Team Rocket's Transceiver") in state.hand:
+        fetch = next((c for c in state.deck
+                      if c[0] == "Supporter" and "Team Rocket" in c[1]
+                      and c[1] in SUPPORTER_EFFECTS), None)
+        if fetch is None:
+            break
+        state.remove_from_hand("Item", "Team Rocket's Transceiver")
+        state.discard.append("Team Rocket's Transceiver")
+        state.deck.remove(fetch)
+        random.shuffle(state.deck)
+        state.hand.append(fetch)
+        log.append(f"Play Team Rocket's Transceiver -> search {fetch[1]}")
+
 
 def effect_lillies_determination(state, POKEMON, log):
     if len(state.hand) >= 5:
@@ -667,17 +683,69 @@ def effect_petrel(state, POKEMON, log):
     return True
 
 
-SUPPORTER_PRIORITY = ["Lillie's Determination", "Janine's Secret Art", "Team Rocket's Petrel"]
+def effect_proton(state, POKEMON, log):
+    """Team Rocket's Proton: search up to 3 Basic Team Rocket's Pokemon
+    and put them into your hand. (The real card is also legal on your own
+    first turn going first, unlike most Supporters -- that exception
+    isn't modeled here because this simulator lets any Supporter be played
+    from turn 1 anyway, so modeling it would overstate nothing.)"""
+    found = []
+    remaining = []
+    for card in state.deck:
+        if (len(found) < 3 and card[0] == "Pokemon"
+                and POKEMON.get(card[1], {}).get("stage") == "Basic"
+                and card[1].startswith("Team Rocket's")):
+            found.append(card)
+        else:
+            remaining.append(card)
+    if not found:
+        return False
+    state.remove_from_hand("Supporter", "Team Rocket's Proton")
+    state.discard.append("Team Rocket's Proton")
+    state.deck = remaining
+    random.shuffle(state.deck)
+    state.hand.extend(found)
+    log.append(f"Play Team Rocket's Proton -> search {', '.join(c[1] for c in found)}")
+    return True
+
+
+def effect_ariana(state, POKEMON, log):
+    """Team Rocket's Ariana: draw until you have 5 cards in hand -- or 8
+    instead if EVERY Pokemon you have in play is a Team Rocket's Pokemon.
+    The all-Team-Rocket's check is the real deckbuilding constraint here:
+    a single non-Team-Rocket's Pokemon on the board silently downgrades
+    this to the 5-card mode."""
+    in_play = state.in_play_names()
+    all_tr = bool(in_play) and all(n.startswith("Team Rocket's") for n in in_play)
+    target = 8 if all_tr else 5
+    if len(state.hand) >= target:
+        return False
+    state.remove_from_hand("Supporter", "Team Rocket's Ariana")
+    state.discard.append("Team Rocket's Ariana")
+    drew = 0
+    while len(state.hand) < target and state.deck:
+        state.draw(1)
+        drew += 1
+    mode = "all Team Rocket's in play" if all_tr else "mixed board"
+    log.append(f"Play Team Rocket's Ariana -> draw to {target} ({mode}), drew {drew}")
+    return True
+
+
+SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana",
+                      "Lillie's Determination", "Janine's Secret Art", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Janine's Secret Art": effect_janines_secret_art,
     "Team Rocket's Petrel": effect_petrel,
+    "Team Rocket's Proton": effect_proton,
+    "Team Rocket's Ariana": effect_ariana,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
 # than misrepresented as "unmodeled gap," since they have zero effect on
 # any metric this simulator reports.
-NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement"}
+NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement",
+                             "Team Rocket's Giovanni"}
 
 
 def play_supporter(state, POKEMON, log):
@@ -691,7 +759,8 @@ def play_supporter(state, POKEMON, log):
                 return
 
 
-KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher", "Energy Search"}
+KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
+                      "Energy Search", "Team Rocket's Transceiver"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).
