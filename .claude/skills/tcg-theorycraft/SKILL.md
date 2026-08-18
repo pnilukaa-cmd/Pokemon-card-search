@@ -93,6 +93,9 @@ not just that it usually happens:
     `scripts/simulate_baseline.py` and reported the results (step 10) —
     every time a finished decklist is delivered, not only when explicitly
     asked to "test" it.
+11. Where a real opponent decklist is available, played it head-to-head
+    with `scripts/simulate_versus.py` and reported the win rate along
+    with that tool's own list of unmodeled cards (step 11).
 
 Skipping a step because the deck's theme seems simple or narrow is exactly
 the situation this list exists to catch — a narrow-seeming theme is often
@@ -525,7 +528,35 @@ the registry in the script when a new staple shows up often enough to be
 worth modeling properly, the same way `analyze_mechanics.py` gets
 extended when a raw-sweep diff turns up a real taxonomy gap.
 
-### 11. Use `search_mechanic.py --help` instead of guessing a flag's behavior
+### 11. Test against a real opponent deck with `simulate_versus.py`
+
+`scripts/simulate_versus.py <deckA> <deckB> [games] [--verbose]` plays full
+games between **any two decklists** and reports a win rate. Unlike the
+baseline sim it models knockouts, Prize cards (2 for an ex, 3 for a Mega
+Evolution ex, read from the card's own rules text), Weakness, type-correct
+Energy payment, retreating, and win conditions. Use it whenever the user
+supplies a real meta decklist, or asks "how does this do against X" --
+step 10's baseline sim answers "how fast does it assemble," this answers
+"does it actually beat that deck."
+
+Both sims share `scripts/tcg_model.py`, which owns decklist parsing, card
+resolution by exact SET NUM, and the **Ability parser**. That parser was
+built by enumerating every draw Ability in the pool (18 of them) and
+asserting the parsed output for each -- run `python3 tcg_model.py` to
+re-run those assertions after any change to it. Modeling Abilities matters
+more than it sounds: before they were modeled at all, a user's
+Alakazam deck (whose attack does 20 damage per card in hand) simulated at
+an average hand of 4.95, versus 13.5 once Abilities and the relevant
+search Supporters were wired in -- the difference between reading that
+deck as a ~99-damage attacker and a ~270-damage one.
+
+Both tools report their own gaps rather than hiding them: Trainers with no
+modeled effect, attacks whose text could not be turned into a damage
+number, and cards matched by name only. **Read those lines before
+trusting a number** -- a deck that leans on an unmodeled card is being
+undervalued, and saying so is part of reporting the result.
+
+### 12. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and
 examples (`--suggest-tags`, `--tags`, `--sweep`, `--sweep-phrase`, `--diff`,

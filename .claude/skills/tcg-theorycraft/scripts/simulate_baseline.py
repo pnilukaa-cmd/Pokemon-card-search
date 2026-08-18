@@ -1,35 +1,42 @@
 #!/usr/bin/env python3
-"""Generic baseline development-timing simulator + Monte Carlo runner.
+"""Generic single-deck development-timing simulator.
 
-Unlike simulate_deck.py / simulate_krookodile_deck.py (both hand-coded for
-one specific decklist each), this reads ANY decklist in this project's
-plain-text PTCGL format and builds its Pokemon model directly from
-pokemon_standard_cards.json -- stage, evolvesFrom, HP, retreat cost, types,
-and attacks are all pulled from the real card data, matched by exact
-SET NUM when the decklist provides it (falling back to name-only pooling,
-same fallback check_energy_support.py uses, if it doesn't).
+Reads ANY decklist in this project's plain-text PTCGL format and builds its
+Pokemon model from pokemon_standard_cards.json via tcg_model -- stage,
+evolvesFrom, HP, retreat, types, attacks, and Abilities all come from the
+real card data, matched by exact SET NUM where the decklist provides it.
 
-Trainer/Item/Supporter effects are modeled through a hand-authored
-registry (see EFFECT registries below) covering the staples this project
-has actually used across decks/ so far. A card with no registered handler
-is simply held in hand -- it's never misplayed, and every such name is
-reported once at the end of a run so a gap is visible rather than silent.
-Pokemon Tools and Stadiums are deliberately out of scope entirely (never
-attached/played) since they don't change board-development timing
-questions, the same simplification simulate_krookodile_deck.py already
-disclosed.
+For head-to-head testing against a real opponent deck (knockouts, Prize
+cards, an actual win rate) use simulate_versus.py instead. This tool
+answers the narrower question: how fast does one deck assemble, and how
+big does its hand get.
 
-Same stated simplifications as simulate_deck.py/simulate_match.py: no
-retreating (so only whatever ends up Active on turn 1 -- or what it
-evolves into -- ever attacks in a run) and no opponent modeled. Energy
-type-correctness is NOT re-checked here (that's check_energy_support.py's
-job); this only counts total attached Energy against total attack-cost
-length. This answers "how fast does the engine come online, and how does
-the hand hold up," not "who wins."
+What is modeled
+  * Board development: playing Basics, evolving (respecting "not the turn
+    it entered play"), Rare Candy, and Grand Tree.
+  * DRAW ABILITIES -- Toucannon, Dudunsparce, Kadabra/Alakazam,
+    N's Zoroark ex, Mega Kangaskhan ex, Fezandipiti ex and the rest of the
+    family, including on-evolve triggers, draw-to-N, Active-only and
+    after-a-KO conditions, and hand-discard costs. Before this existed the
+    simulator read no Abilities at all, which badly understated any
+    Ability-driven deck's hand size -- and therefore any attacker that
+    scales off hand size.
+  * A registry of common Trainer effects. Anything outside it is simply
+    never played, and every such name is listed in the report so a gap is
+    visible rather than silent.
+
+Stated simplifications
+  * No opponent and no retreating. Only whatever ends up Active -- or what
+    it evolves into -- ever attacks.
+  * Energy is counted, not type-checked (that is check_energy_support.py's
+    job), so an Ability whose cost is "discard a Basic <Type> Energy from
+    this Pokemon" is skipped rather than guessed at.
+  * Pokemon Tools are never attached; Stadiums other than Grand Tree do
+    nothing.
 
 Usage:
   python3 simulate_baseline.py decklist.txt          # 1000-trial baseline
-  python3 simulate_baseline.py decklist.txt 500       # custom trial count
+  python3 simulate_baseline.py decklist.txt 500      # custom trial count
   python3 simulate_baseline.py decklist.txt --verbose # + one full sample log
 """
 import random
@@ -41,149 +48,14 @@ from collections import defaultdict
 sys.path.insert(0, ".")
 from check_energy_support import load_cards, BASIC_ENERGY_RE, SYMBOL_TO_TYPE
 
-LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s*$")
+# Card model, decklist parsing, and Ability parsing all live in tcg_model
+# so this simulator and simulate_versus.py build Pokemon from exactly the
+# same code against the same data.
+import tcg_model as M
 
-
-def parse_decklist_entries(text):
-    """Like check_energy_support.parse_decklist, but keeps the SET/NUM
-    tokens (when present) instead of discarding them, so cards can be
-    resolved to their exact printing."""
-    out = []
-    for raw in text.splitlines():
-        m = LINE_RE.match(raw)
-        if not m:
-            continue
-        count, rest = int(m.group(1)), m.group(2)
-        tokens = rest.split()
-        set_code = number = None
-        if tokens and tokens[-1].isdigit():
-            number = tokens[-1]
-            tokens = tokens[:-1]
-            if tokens and re.fullmatch(r"[A-Za-z0-9]{2,6}", tokens[-1]) and tokens[-1].isupper():
-                set_code = tokens[-1]
-                tokens = tokens[:-1]
-        name = " ".join(tokens).strip()
-        if not name:
-            continue
-
-        def expand(mm):
-            return SYMBOL_TO_TYPE.get(mm.group(1).upper(), mm.group(0))
-        name = re.sub(r"\{(\w)\}", expand, name)
-        name = re.sub(r"^Basic (\w+) Energy$", r"\1 Energy", name)
-        out.append({"count": count, "name": name, "set": set_code, "number": number})
-    return out
-
-
-def build_card_index(cards):
-    by_name = defaultdict(list)
-    by_setnum = {}
-    for c in cards:
-        by_name[c["name"]].append(c)
-        code = (c.get("set") or {}).get("ptcgoCode")
-        num = c.get("number")
-        if code and num:
-            by_setnum[(c["name"], code, num)] = c
-    return by_name, by_setnum
-
-
-def resolve_card(entry, by_name, by_setnum):
-    """Returns (card_or_None, matched_exact_printing: bool)."""
-    if entry["set"] and entry["number"]:
-        c = by_setnum.get((entry["name"], entry["set"], entry["number"]))
-        if c:
-            return c, True
-    matches = by_name.get(entry["name"])
-    if matches:
-        return matches[0], False
-    return None, False
-
-
-def stage_of(card):
-    subtypes = card.get("subtypes") or []
-    if "Basic" in subtypes:
-        return "Basic"
-    if "Stage 1" in subtypes:
-        return "Stage 1"
-    if "Stage 2" in subtypes:
-        return "Stage 2"
-    return "Basic" if not card.get("evolvesFrom") else "Stage 1"
-
-
-def is_rule_box(card):
-    subtypes = set(card.get("subtypes") or [])
-    return bool(subtypes - {"Basic", "Stage 1", "Stage 2", "Restored"})
-
-
-DAMAGE_RE = re.compile(r"^\D*(\d+)")
-
-
-def parse_damage(dmg):
-    if not dmg:
-        return 0
-    m = DAMAGE_RE.match(dmg)
-    return int(m.group(1)) if m else 0
-
-
-def build_pokemon_info(card):
-    attacks = []
-    for atk in card.get("attacks") or []:
-        cost = atk.get("cost") or []
-        attacks.append((atk["name"], cost, parse_damage(atk.get("damage"))))
-    retreat = card.get("convertedRetreatCost")
-    if retreat is None:
-        retreat = len(card.get("retreatCost") or [])
-    return {
-        "stage": stage_of(card),
-        "evolves_from": card.get("evolvesFrom"),
-        "hp": int(card.get("hp") or 0),
-        "retreat": retreat,
-        "rule_box": is_rule_box(card),
-        "types": card.get("types") or [],
-        "attacks": attacks,
-    }
-
-
-def build_deck_model(text):
-    """Returns (POKEMON dict, DECKLIST list-of-(kind,name), fallback_pooled
-    set of names matched by name only, unresolved list of names not found
-    at all)."""
-    entries = parse_decklist_entries(text)
-    cards = load_cards()
-    by_name, by_setnum = build_card_index(cards)
-    POKEMON = {}
-    DECKLIST = []
-    fallback_pooled = set()
-    unresolved = []
-    for entry in entries:
-        name, count = entry["name"], entry["count"]
-        if BASIC_ENERGY_RE.match(name):
-            DECKLIST += [("Energy", name)] * count
-            continue
-        card, exact = resolve_card(entry, by_name, by_setnum)
-        if card is None:
-            unresolved.append(name)
-            continue
-        if not exact:
-            fallback_pooled.add(name)
-        supertype = card.get("supertype")
-        if supertype == "Pokémon":
-            if name not in POKEMON:
-                POKEMON[name] = build_pokemon_info(card)
-            DECKLIST += [("Pokemon", name)] * count
-        elif supertype == "Energy":
-            DECKLIST += [("Energy", name)] * count
-        else:  # Trainer
-            subtypes = set(card.get("subtypes") or [])
-            if "Supporter" in subtypes:
-                kind = "Supporter"
-            elif "Pokémon Tool" in subtypes:
-                kind = "Tool"
-            elif "Stadium" in subtypes:
-                kind = "Stadium"
-            else:
-                kind = "Item"
-            DECKLIST += [(kind, name)] * count
-    return POKEMON, DECKLIST, fallback_pooled, unresolved
+BASIC_ENERGY_RE = M.BASIC_ENERGY_RE
+build_deck_model = M.build_deck_model
+build_card_index = M.build_card_index
 
 
 # ---------------------------------------------------------------------------
@@ -204,6 +76,9 @@ class GameState:
         self.online_turn = {}       # Pokemon name -> first turn it entered play
         self.first_attack_turn = None
         self.stadium_in_play = None
+        self.abilities_used = set()   # (slot_key, ability name) used this turn
+        self.lost_pokemon_last_turn = False
+        self.played_supporters_this_turn = set()
 
     def draw(self, n=1):
         for _ in range(n):
@@ -273,6 +148,7 @@ def try_evolve(state, POKEMON, turn, log):
             state.active_evolved_this_turn = True
             state.note_online(name, turn)
             log.append(f"Evolve {target} -> {name} (Active, can't attack this turn)")
+            use_draw_abilities(state, POKEMON, log, evolved_name=name)
             continue
         slot = next((s for s in state.bench if s["name"] == target and turn > s["entered_turn"]), None)
         if slot is not None:
@@ -280,6 +156,7 @@ def try_evolve(state, POKEMON, turn, log):
             slot["name"] = name
             state.note_online(name, turn)
             log.append(f"Evolve {target} -> {name} (Bench)")
+            use_draw_abilities(state, POKEMON, log, evolved_name=name)
 
 
 def rare_candy_targets(state, POKEMON, turn):
@@ -392,7 +269,7 @@ def energy_need(POKEMON, name, energy_attached):
     attacks = POKEMON.get(name, {}).get("attacks") or []
     if not attacks:
         return 0
-    needed = len(attacks[0][1])
+    needed = len(attacks[0]["cost"])
     return max(0, needed - energy_attached)
 
 
@@ -441,13 +318,105 @@ def try_attack(state, POKEMON, turn, log):
     attacks = POKEMON.get(state.active, {}).get("attacks") or []
     if not attacks:
         return
-    name, cost, dmg = attacks[0]
+    atk = attacks[0]
+    name, cost, dmg = atk["name"], atk["cost"], atk["damage"]
     needed = len(cost)
     if state.active_energy >= needed:
         if state.first_attack_turn is None:
             state.first_attack_turn = turn
         log.append(f"Attack: {state.active} uses {name} for {dmg} "
                    f"({state.active_energy} energy, needed {needed})")
+
+
+def _slots(state):
+    """(key, name) for every Pokemon in play. The Active is keyed 'active';
+    Bench slots are keyed by identity so two copies of the same Pokemon each
+    get their own once-per-turn Ability use."""
+    out = []
+    if state.active:
+        out.append(("active", state.active))
+    for slot in state.bench:
+        out.append((id(slot), slot["name"]))
+    return out
+
+
+def use_draw_abilities(state, POKEMON, log, evolved_name=None):
+    """Fire every legal draw Ability once per turn.
+
+    Abilities are the draw engine for a large share of real decks (Toucannon,
+    Dudunsparce, Kadabra/Alakazam, N's Zoroark ex, Mega Kangaskhan ex ...).
+    Before this existed the simulator read none of them, which made any
+    Ability-driven deck's hand size -- and therefore any hand-size-scaling
+    attacker -- read far lower than it really is."""
+    for key, name in _slots(state):
+        for ab in POKEMON.get(name, {}).get("abilities", []):
+            if ab["kind"] != "draw":
+                continue
+            if ab["trigger"] == "on_evolve" and name != evolved_name:
+                continue
+            if ab["trigger"] != "on_evolve" and evolved_name is not None:
+                continue
+            ukey = (key, ab["name"])
+            if ukey in state.abilities_used:
+                continue
+            if ab.get("requires_active") and key != "active":
+                continue
+            if ab.get("requires_ko_last_turn") and not state.lost_pokemon_last_turn:
+                continue
+            need = ab.get("requires_in_play")
+            if need and need not in state.in_play_names():
+                continue
+            need_played = ab.get("requires_played_this_turn")
+            if need_played and need_played not in state.played_supporters_this_turn:
+                continue
+
+            cost_hand = ab.get("cost_discard_hand") or 0
+            if cost_hand and len(state.hand) < cost_hand:
+                continue
+            etype = ab.get("cost_discard_energy_hand")
+            eidx = None
+            if etype:
+                eidx = next((i for i, (k, n) in enumerate(state.hand)
+                             if k == "Energy" and n.startswith(etype)), None)
+                if eidx is None:
+                    continue
+            if ab.get("cost_discard_energy_self"):
+                # Needs a specific Energy attached to this Pokemon; the
+                # baseline sim tracks Energy as a bare count, not by type,
+                # so this cost cannot be checked honestly here.
+                continue
+
+            target = ab.get("draw_to")
+            if target is not None and len(state.hand) >= target:
+                continue
+
+            if eidx is not None:
+                k, n = state.hand.pop(eidx)
+                state.discard.append(n)
+            for _ in range(cost_hand):
+                if state.hand:
+                    k, n = state.hand.pop(0)
+                    state.discard.append(n)
+
+            before = len(state.hand)
+            if target is not None:
+                while len(state.hand) < target and state.deck:
+                    state.draw(1)
+            else:
+                state.draw(ab.get("amount") or 0)
+            drew = len(state.hand) - before
+            state.abilities_used.add(ukey)
+            log.append(f"Ability: {name} uses {ab['name']} -> drew {drew}")
+
+            if ab.get("cost_shuffle_self") and drew > 0:
+                state.deck.append(("Pokemon", name))
+                if key == "active":
+                    state.active = state.bench.pop(0)["name"] if state.bench else None
+                else:
+                    state.bench = [sl for sl in state.bench if id(sl) != key]
+                random.shuffle(state.deck)
+                log.append(f"  {name} shuffles itself back into the deck")
+                return
 
 
 # --- Trainer/Item/Supporter effect registry -------------------------------
@@ -731,7 +700,54 @@ def effect_ariana(state, POKEMON, log):
     return True
 
 
-SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana",
+def _search_pokemon_to_hand(state, POKEMON, pred):
+    for i, (k, n) in enumerate(state.deck):
+        if k == "Pokemon" and pred(n):
+            state.deck.pop(i)
+            random.shuffle(state.deck)
+            state.hand.append(("Pokemon", n))
+            return n
+    return None
+
+
+def effect_dawn(state, POKEMON, log):
+    """Dawn: search for a Basic, a Stage 1, and a Stage 2 -- three cards
+    straight into hand."""
+    got = []
+    for stage in ("Basic", "Stage 1", "Stage 2"):
+        n = _search_pokemon_to_hand(state, POKEMON,
+                                    lambda x, st=stage: POKEMON[x]["stage"] == st)
+        if n:
+            got.append(n)
+    if not got:
+        return False
+    state.remove_from_hand("Supporter", "Dawn")
+    state.discard.append("Dawn")
+    log.append(f"Play Dawn -> search {', '.join(got)}")
+    return True
+
+
+def effect_hilda(state, POKEMON, log):
+    """Hilda: search an Evolution Pokemon and an Energy card into hand."""
+    got = []
+    n = _search_pokemon_to_hand(state, POKEMON, lambda x: POKEMON[x]["stage"] != "Basic")
+    if n:
+        got.append(n)
+    i = next((i for i, (k, _) in enumerate(state.deck) if k == "Energy"), None)
+    if i is not None:
+        card = state.deck.pop(i)
+        random.shuffle(state.deck)
+        state.hand.append(card)
+        got.append(card[1])
+    if not got:
+        return False
+    state.remove_from_hand("Supporter", "Hilda")
+    state.discard.append("Hilda")
+    log.append(f"Play Hilda -> search {', '.join(got)}")
+    return True
+
+
+SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Dawn", "Hilda",
                       "Lillie's Determination", "Janine's Secret Art", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
@@ -739,6 +755,8 @@ SUPPORTER_EFFECTS = {
     "Team Rocket's Petrel": effect_petrel,
     "Team Rocket's Proton": effect_proton,
     "Team Rocket's Ariana": effect_ariana,
+    "Dawn": effect_dawn,
+    "Hilda": effect_hilda,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -790,12 +808,15 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
         log.append("Draw 1 for turn")
     state.supporter_played = False
     state.active_evolved_this_turn = False
+    state.abilities_used = set()
+    state.played_supporters_this_turn = set()
     play_basics(state, POKEMON, turn_num, log)
     try_evolve(state, POKEMON, turn_num, log)
     play_stadium(state, log)
     effect_grand_tree(state, POKEMON, turn_num, log)
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
+    use_draw_abilities(state, POKEMON, log)
     attach_energy(state, POKEMON, pre_evolutions, log)
     try_evolve(state, POKEMON, turn_num, log)
     if turn_num > 1 or not going_first:
