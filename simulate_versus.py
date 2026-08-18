@@ -17,9 +17,20 @@ What is modeled
     Prize cards taken -- including 2 for a rule-box ex and 3 for a Mega
     Evolution ex, read from each card's own rules text.
   * Retreating, paid by discarding Energy equal to the retreat cost.
-  * Draw Abilities, via tcg_model.parse_ability -- amounts, draw-to-N,
-    on-evolve triggers, Active-only conditions, after-a-KO conditions,
-    named-card-in-play conditions, and hand/Energy discard costs.
+  * Abilities, in three families (tcg_model classifies them):
+      - DRAW: amounts, draw-to-N, on-evolve triggers, Active-only and
+        after-a-KO conditions, hand/Energy discard costs.
+      - RETALIATION: "damaged by an attack -> put N counters on the
+        Attacking Pokemon", including the team-wide form (Spiritomb
+        protecting your Active Darkness Pokemon), Energy-scaling forms
+        (Orthworm ex), and the same shape printed on Tools and Special
+        Energy (Punk Helmet, Spiky Energy, Deluxe Bomb). Retaliation
+        resolves even when the hit was lethal, and can knock out the
+        attacker.
+      - DAMAGE REDUCTION: flat "takes N less damage", self or team-wide
+        (Bronzong, Steven's Carbink). Reductions whose condition the
+        parser cannot evaluate are skipped rather than guessed at.
+    Tools are attached only when their effect is one the engine models.
   * Win by Prizes, by the opponent having no Pokemon in play, or by the
     opponent being unable to draw at the start of their turn.
 
@@ -44,8 +55,15 @@ Stated simplifications (read these before trusting a win rate)
     reported at the end of a run rather than hidden.
   * Special Energy provides its listed types where the dataset states
     them, otherwise it is treated as providing any one type.
-  * No Special Conditions, no Abilities other than the draw family, no
-    Stadium effects besides Grand Tree.
+  * 282 Abilities exist in the pool; the three families above cover about
+    40 of them. Energy acceleration, search, gusting, healing, and lock
+    Abilities are NOT modeled -- a deck leaning on those is undervalued.
+  * CHOICE Abilities are resolved by a fixed heuristic, not by good play.
+    Munkidori-style counter movement always dumps onto the opponent's
+    Active off your most-damaged Pokemon; a human would sometimes aim at
+    a Benched target to set up a later knockout. Treat those results as a
+    floor, not a measurement.
+  * No Special Conditions and no Stadium effects besides Grand Tree.
 
 Usage
   python3 simulate_versus.py deckA.txt deckB.txt            # 500 games
@@ -70,12 +88,14 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 # --------------------------------------------------------------------------
 
 class InPlay:
-    __slots__ = ("name", "damage", "energy", "entered_turn", "evolved_this_turn", "tool")
+    __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
+                 "evolved_this_turn", "tool")
 
     def __init__(self, name, turn):
         self.name = name
         self.damage = 0
         self.energy = []          # list of type-lists, one per attached Energy card
+        self.energy_names = []    # parallel list of the Energy cards' names
         self.entered_turn = turn
         self.evolved_this_turn = False
         self.tool = None
@@ -130,6 +150,20 @@ class Player:
 # --------------------------------------------------------------------------
 # Energy handling
 # --------------------------------------------------------------------------
+
+RETALIATE_CARDS = {}   # card name -> retaliation dict (Tools and Special Energy)
+
+
+def build_retaliate_index(cards):
+    idx = {}
+    for c in cards:
+        if c.get("supertype") == "Pokémon":
+            continue
+        r = M.parse_tool_or_energy_retaliation(c)
+        if r:
+            idx[c["name"]] = r
+    return idx
+
 
 def energy_types_for(card_name, cards_by_name):
     """What types a single Energy card provides."""
@@ -267,11 +301,22 @@ def basics_in_hand(pl):
     return [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Basic"]
 
 
+def _lead_score(pl, name):
+    """Rank a Basic as an opening Active. Prefer something that evolves into
+    a real threat, then something that can actually attack -- picking purely
+    by HP led with support pieces like Munkidori (110 HP, Ability-only) over
+    the deck's actual attacker."""
+    info = pl.POKEMON[name]
+    evolves_into = any(o["evolves_from"] == name for o in pl.POKEMON.values())
+    has_attack = any(a["damage"] > 0 for a in info["attacks"])
+    return (2 if evolves_into else 0) + (1 if has_attack else 0), info["hp"]
+
+
 def play_basics(pl, turn, log):
     if pl.active is None:
         bs = basics_in_hand(pl)
         if bs:
-            best = max(bs, key=lambda n: pl.POKEMON[n]["hp"])
+            best = max(bs, key=lambda n: _lead_score(pl, n))
             pl.remove_from_hand("Pokemon", best)
             pl.active = InPlay(best, turn)
             log.append(f"  {pl.name}: {best} to Active")
@@ -690,6 +735,69 @@ def attack_damage(pl, opp, spot, atk, record=True):
     return base
 
 
+def damage_reduction_for(pl, spot):
+    """Flat "takes N less damage" from the defender's own Ability and from
+    team-wide sources (Bronzong, Steven's Carbink). Conditional reductions
+    the parser flagged as unevaluable are skipped, not guessed at."""
+    total = 0
+    types = pl.POKEMON[spot.name]["types"]
+    for other in pl.in_play():
+        for ab in pl.POKEMON[other.name]["abilities"]:
+            if ab.get("kind") != "reduce" or ab.get("unmodeled"):
+                continue
+            if ab.get("protects_team"):
+                tt = ab.get("team_type")
+                if tt and tt not in types:
+                    continue
+                if ab.get("requires_bench") and other is pl.active:
+                    continue
+                total += ab["amount"]
+            elif other is spot:
+                total += ab["amount"]
+    return total
+
+
+def retaliation_from(defender, attacker_spot):
+    """Damage counters the DEFENDER puts back on the attacking Pokemon."""
+    if not defender.active:
+        return 0
+    total = 0
+    act = defender.active
+    act_types = defender.POKEMON[act.name]["types"]
+    for other in defender.in_play():
+        for ab in defender.POKEMON[other.name]["abilities"]:
+            if ab.get("kind") != "retaliate":
+                continue
+            if ab.get("protects_team"):
+                tt = ab.get("team_type")
+                if tt and tt not in act_types:
+                    continue
+            else:
+                if other is not act:
+                    continue
+                if ab.get("requires_active") and other is not act:
+                    continue
+            counters = ab["counters"]
+            per = ab.get("per_energy_type")
+            if per:
+                counters *= sum(1 for e in other.energy if per in e)
+            total += counters * 10
+    # Tools and Special Energy carrying the same shape (Punk Helmet, Spiky
+    # Energy, Deluxe Bomb).
+    sources = []
+    if act.tool:
+        sources.append(act.tool)
+    sources += [n for n in getattr(act, "energy_names", [])]
+    for cname in sources:
+        r = RETALIATE_CARDS.get(cname)
+        if not r:
+            continue
+        if r.get("requires_type") and r["requires_type"] not in act_types:
+            continue
+        total += r["counters"] * 10
+    return total
+
+
 def best_attack(pl, spot, only_payable=True, opp=None):
     info = pl.POKEMON[spot.name]
     best, best_dmg = None, -1
@@ -727,12 +835,65 @@ def attach_energy(pl, cards_by_name, log):
         return
     kind, name = pl.hand.pop(idx)
     target.energy.append(energy_types_for(name, cards_by_name))
+    target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
 
 
 def _ready_damage(pl, opp, spot):
     atk = best_attack(pl, spot, opp=opp)
     return attack_damage(pl, opp, spot, atk) if atk else 0
+
+
+def attach_tools(pl, log):
+    """Attach a Pokemon Tool to whoever will be holding the Active Spot.
+    Only Tools carrying a modeled effect (retaliation) are attached -- any
+    other Tool would be decoration the engine cannot honor."""
+    for kind, name in list(pl.hand):
+        if kind != "Tool" or name not in RETALIATE_CARDS:
+            continue
+        if not pl.active or pl.active.tool:
+            continue
+        r = RETALIATE_CARDS[name]
+        if r.get("requires_type") and r["requires_type"] not in pl.POKEMON[pl.active.name]["types"]:
+            continue
+        pl.remove_from_hand(kind, name)
+        pl.active.tool = name
+        log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+
+
+def use_counter_movers(pl, opp, log):
+    """Munkidori-style "move up to N damage counters from 1 of your Pokemon
+    to 1 of your opponent's".
+
+    This is a CHOICE Ability, so the engine has to pick for you, and the
+    heuristic is an assumption rather than a fact: move as many counters as
+    allowed off your most-damaged Pokemon and onto the opponent's Active.
+    A human would sometimes aim at a Benched target instead to set up a
+    later knockout, which this never does -- so treat the resulting numbers
+    as a floor for what a mover is worth, not a measurement of it.
+    """
+    if not opp.active:
+        return
+    for p in pl.in_play():
+        for ab in pl.POKEMON[p.name]["abilities"]:
+            if ab.get("kind") != "move_counters":
+                continue
+            key = ability_key(p, ab)
+            if key in pl.abilities_used:
+                continue
+            need = ab.get("requires_energy_type")
+            if need and not any(need in e for e in p.energy):
+                continue
+            donors = [q for q in pl.in_play() if q.damage >= 10]
+            if not donors:
+                continue
+            donor = max(donors, key=lambda q: q.damage)
+            amount = min(ab["amount"] * 10, donor.damage)
+            donor.damage -= amount
+            opp.active.damage += amount
+            pl.abilities_used.add(key)
+            log.append(f"  {pl.name}: {p.name} moves {amount} damage from "
+                       f"{donor.name} onto {opp.active.name}")
 
 
 def try_retreat(pl, opp, log):
@@ -782,9 +943,34 @@ def do_attack(pl, opp, log):
     weak = opp.POKEMON[opp.active.name]["weakness"]
     if weak and weak in atk_types:
         dmg *= 2
+    reduction = damage_reduction_for(opp, opp.active)
+    if reduction:
+        dmg = max(0, dmg - reduction)
     opp.active.damage += dmg
     log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} for {dmg}"
+               f"{f' (-{reduction} reduced)' if reduction else ''}"
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
+
+    # Retaliation resolves even if the defender is Knocked Out by this hit.
+    back = retaliation_from(opp, pl.active) if dmg > 0 else 0
+    if back:
+        pl.active.damage += back
+        log.append(f"  {opp.name}: retaliation puts {back} back on {pl.active.name}")
+    if pl.active and pl.active.damage >= pl.POKEMON[pl.active.name]["hp"]:
+        taken = pl.POKEMON[pl.active.name]["prize_value"]
+        log.append(f"  {pl.name}: {pl.active.name} KO'd by retaliation (+{taken} to {opp.name})")
+        pl.discard.append(pl.active.name)
+        pl.active = None
+        pl.lost_pokemon_last_turn = True
+        opp.prizes -= taken
+        if opp.prizes <= 0:
+            return True
+        if pl.bench:
+            pl.bench.sort(key=lambda p: pl.POKEMON[p.name]["hp"] - p.damage, reverse=True)
+            pl.active = pl.bench.pop(0)
+        else:
+            return True
+
     if opp.active.damage >= opp.POKEMON[opp.active.name]["hp"]:
         taken = opp.POKEMON[opp.active.name]["prize_value"]
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
@@ -843,6 +1029,8 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     play_supporter(pl, opp, turn, log)
     try_use_draw_abilities(pl, log)
     attach_energy(pl, cards_by_name, log)
+    attach_tools(pl, log)
+    use_counter_movers(pl, opp, log)
     try_evolve(pl, turn, log, first_turn)
     try_retreat(pl, opp, log)
 
@@ -854,7 +1042,11 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
 
 def run_game(modelA, modelB, verbose=False):
     (nameA, POKA, DECKA), (nameB, POKB, DECKB) = modelA, modelB
-    cards_by_name, _ = M.build_card_index(M.load_cards())
+    _cards = M.load_cards()
+    cards_by_name, _ = M.build_card_index(_cards)
+    global RETALIATE_CARDS
+    if not RETALIATE_CARDS:
+        RETALIATE_CARDS = build_retaliate_index(_cards)
 
     a = Player(nameA, POKA, DECKA)
     b = Player(nameB, POKB, DECKB)

@@ -181,7 +181,7 @@ def build_pokemon_info(card):
         "types": card.get("types") or [],
         "weakness": weak,
         "attacks": attacks,
-        "abilities": [parse_ability(ab) for ab in (card.get("abilities") or [])],
+        "abilities": [classify_ability(ab) for ab in (card.get("abilities") or [])],
     }
 
 
@@ -291,6 +291,112 @@ def parse_ability(ab):
         info["kind"] = "other"
         info["unmodeled"] = "draw is conditional on an Energy attachment (acceleration Ability)"
     return info
+
+
+# --------------------------------------------------------------------------
+# Ability parsing: retaliation / damage reduction / counter movement
+# --------------------------------------------------------------------------
+# These three families are small and fully enumerable (8 retaliation
+# Abilities, 18 reduction, a handful of movers), and between them they carry
+# the whole game plan of several real decks -- a retaliation deck's entire
+# defense is invisible without them.
+
+_DAMAGED_BY_ATTACK_RE = re.compile(r"is damaged by an attack", re.I)
+_RETAL_AMOUNT_RE = re.compile(
+    r"(?:place|put) (\d+) damage counters? on the attacking pok[eé]mon", re.I)
+_RETAL_PER_RE = re.compile(
+    r"for each (\w+) energy attached to this pok[eé]mon", re.I)
+_REDUCE_RE = re.compile(r"takes? (\d+) less damage from attacks", re.I)
+_REDUCE_TEAM_RE = re.compile(r"all of your ([\w ]*?)pok[eé]mon take", re.I)
+_MOVE_COUNTERS_RE = re.compile(
+    r"move (?:up to )?(\d+) damage counters? from", re.I)
+
+
+def parse_defensive_ability(ab):
+    """Classify retaliation / damage-reduction Abilities.
+
+    Returns None when the text is not one of these families, so callers can
+    fall through to parse_ability.
+    """
+    name = ab.get("name") or ""
+    text = ab.get("text") or ""
+
+    if _DAMAGED_BY_ATTACK_RE.search(text):
+        m = _RETAL_AMOUNT_RE.search(text)
+        if m:
+            per = _RETAL_PER_RE.search(text)
+            # Spiritomb-style: triggers off your Active, not off itself.
+            team = bool(re.search(r"if your active ([\w ]*?)pok[eé]mon is damaged", text, re.I))
+            tmatch = re.search(r"if your active (\w+) pok[eé]mon is damaged", text, re.I)
+            return {
+                "name": name, "text": text, "kind": "retaliate",
+                "counters": int(m.group(1)),
+                "per_energy_type": per.group(1).capitalize() if per else None,
+                "requires_active": "in the active spot" in text.lower(),
+                "protects_team": team,
+                "team_type": tmatch.group(1).capitalize() if tmatch else None,
+                "unmodeled": None,
+            }
+
+    m = _REDUCE_RE.search(text)
+    if m:
+        team = _REDUCE_TEAM_RE.search(text)
+        team_type = None
+        cond = None
+        if team:
+            team_type = (team.group(1) or "").strip().capitalize() or None
+        # Conditional reductions (by attacker type, by a second copy in play)
+        if re.search(r"from your opponent's \w+ or \w+ pok[eé]mon|as long as you have", text, re.I):
+            cond = "conditional (attacker type or board state) -- not evaluated"
+        return {
+            "name": name, "text": text, "kind": "reduce",
+            "amount": int(m.group(1)),
+            "protects_team": bool(team),
+            "team_type": team_type,
+            "requires_bench": "on your bench" in text.lower(),
+            "unmodeled": cond,
+        }
+
+    m = _MOVE_COUNTERS_RE.search(text)
+    if m and "your opponent" in text.lower():
+        etype = re.search(r"if this pok[eé]mon has any (\w+) energy attached", text, re.I)
+        return {
+            "name": name, "text": text, "kind": "move_counters",
+            "amount": int(m.group(1)),
+            "requires_energy_type": etype.group(1).capitalize() if etype else None,
+            "unmodeled": None,
+        }
+    return None
+
+
+def classify_ability(ab):
+    """parse_defensive_ability first, then the draw-family parser."""
+    d = parse_defensive_ability(ab)
+    if d is not None:
+        return d
+    return parse_ability(ab)
+
+
+TOOL_RETALIATE_RE = re.compile(
+    r"(?:place|put) (\d+) damage counters? on the attacking pok[eé]mon", re.I)
+
+
+def parse_tool_or_energy_retaliation(card):
+    """Punk Helmet / Spiky Energy / Deluxe Bomb: same retaliation shape, but
+    printed on a Tool or Special Energy rather than a Pokemon."""
+    rules = " ".join(card.get("rules") or [])
+    if not _DAMAGED_BY_ATTACK_RE.search(rules):
+        return None
+    m = TOOL_RETALIATE_RE.search(rules)
+    if not m:
+        return None
+    tmatch = re.search(r"if the (\w+) pok[eé]mon this card is attached to", rules, re.I)
+    return {
+        "counters": int(m.group(1)),
+        "requires_type": tmatch.group(1).capitalize() if tmatch else None,
+        "requires_active": "in the active spot" in rules.lower(),
+        "discard_after": "discard this card" in rules.lower(),
+    }
 
 
 def build_deck_model(text, cards=None):
