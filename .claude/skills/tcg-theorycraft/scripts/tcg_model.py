@@ -399,6 +399,26 @@ def parse_tool_or_energy_retaliation(card):
     }
 
 
+def resolve_deck_cards(text, cards=None):
+    """name -> the exact raw card dict the decklist's SET/NUM resolves to.
+
+    Needed because a Pokemon's Abilities are printing-specific: Alakazam
+    MEG 56 has Psychic Draw and Alakazam TWM 82 has none, so compiling
+    Abilities from "the first card with this name" silently drops them.
+    """
+    entries = parse_decklist_entries(text)
+    cards = cards if cards is not None else load_cards()
+    by_name, by_setnum = build_card_index(cards)
+    out = {}
+    for entry in entries:
+        if BASIC_ENERGY_RE.match(entry["name"]):
+            continue
+        card, _ = resolve_card(entry, by_name, by_setnum)
+        if card is not None and card.get("supertype") == "Pokémon":
+            out.setdefault(entry["name"], card)
+    return out
+
+
 def build_deck_model(text, cards=None):
     """Returns (POKEMON, DECKLIST, fallback_pooled, unresolved).
 

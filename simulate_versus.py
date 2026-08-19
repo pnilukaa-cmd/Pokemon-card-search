@@ -17,20 +17,19 @@ What is modeled
     Prize cards taken -- including 2 for a rule-box ex and 3 for a Mega
     Evolution ex, read from each card's own rules text.
   * Retreating, paid by discarding Energy equal to the retreat cost.
-  * Abilities, in three families (tcg_model classifies them):
-      - DRAW: amounts, draw-to-N, on-evolve triggers, Active-only and
-        after-a-KO conditions, hand/Energy discard costs.
-      - RETALIATION: "damaged by an attack -> put N counters on the
-        Attacking Pokemon", including the team-wide form (Spiritomb
-        protecting your Active Darkness Pokemon), Energy-scaling forms
-        (Orthworm ex), and the same shape printed on Tools and Special
-        Energy (Punk Helmet, Spiky Energy, Deluxe Bomb). Retaliation
-        resolves even when the hit was lethal, and can knock out the
-        attacker.
-      - DAMAGE REDUCTION: flat "takes N less damage", self or team-wide
-        (Bronzong, Steven's Carbink). Reductions whose condition the
-        parser cannot evaluate are skipped rather than guessed at.
-    Tools are attached only when their effect is one the engine models.
+  * ABILITIES, via the ability_ir compiler + ability_engine runtime.
+    Card text compiles into a structured IR (trigger / conditions / costs /
+    actions) and the runtime executes it, so draw, search, Energy
+    acceleration, healing, counter movement, retaliation, damage reduction
+    and damage buffs all run through ONE code path instead of a bespoke
+    handler per family. 236 of the pool's 282 Abilities compile.
+    Abilities are read from each Pokemon's EXACT printing, because they
+    are printing-specific (Alakazam MEG 56 has Psychic Draw; TWM 82 has
+    none). Every run prints which Abilities are executing per deck and
+    which are not, so a deck leaning on an uncompiled Ability is visibly
+    undervalued rather than quietly so.
+    Tools/Special Energy carrying retaliation (Punk Helmet, Spiky Energy,
+    Deluxe Bomb) keep a small dedicated index, since they are not Pokemon.
   * Win by Prizes, by the opponent having no Pokemon in play, or by the
     opponent being unable to draw at the start of their turn.
 
@@ -55,9 +54,11 @@ Stated simplifications (read these before trusting a win rate)
     reported at the end of a run rather than hidden.
   * Special Energy provides its listed types where the dataset states
     them, otherwise it is treated as providing any one type.
-  * 282 Abilities exist in the pool; the three families above cover about
-    40 of them. Energy acceleration, search, gusting, healing, and lock
-    Abilities are NOT modeled -- a deck leaning on those is undervalued.
+  * 46 of 282 Abilities do not compile (26 genuine one-offs, plus coin
+    flips inside the effect, attack-repeats, type changes and replacement
+    effects). Those are listed per deck in the run's own output.
+  * Some ops compile but have no runtime handler yet (LOCK, SET_WEAKNESS,
+    MODIFY_PRIZE and friends are parsed but inert). Compiled != executed.
   * CHOICE Abilities are resolved by a fixed heuristic, not by good play.
     Munkidori-style counter movement always dumps onto the opponent's
     Active off your most-damaged Pokemon; a human would sometimes aim at
@@ -77,6 +78,8 @@ from collections import defaultdict
 
 sys.path.insert(0, ".")
 import tcg_model as M
+import ability_ir as IR
+import ability_engine as AE
 
 MAX_BENCH = 5
 STARTING_PRIZES = 6
@@ -105,9 +108,13 @@ class InPlay:
 
 
 class Player:
-    def __init__(self, name, POKEMON, decklist):
+    def __init__(self, name, POKEMON, decklist, EFFECTS=None):
         self.name = name
         self.POKEMON = POKEMON
+        # Pokemon name -> [compiled ability_ir.Effect]. MUST be populated:
+        # an earlier integration left this empty and every Ability silently
+        # no-opped, which is exactly what test_ability_engine.py now guards.
+        self.EFFECTS = EFFECTS if EFFECTS is not None else {}
         self.deck = list(decklist)
         self.hand = []
         self.active = None
@@ -208,89 +215,34 @@ def ability_key(p, ab):
     return (id(p), ab["name"])
 
 
-def try_use_draw_abilities(pl, log, on_evolve_only=False, just_evolved=None):
-    """Fire every legal draw Ability once per turn."""
-    for p in pl.in_play():
-        for ab in pl.info(p)["abilities"]:
-            if ab["kind"] != "draw":
+ACTIVATED = (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN)
+
+
+def use_abilities(pl, opp, turn, log, just_evolved=None):
+    """Fire every activated Ability whose conditions and costs are met.
+
+    One code path for the whole compiled IR -- draw, search, Energy
+    acceleration, healing, counter movement and the rest -- instead of a
+    bespoke handler per family.
+    """
+    def make_inplay(name):
+        return InPlay(name, turn)
+
+    for p in list(pl.in_play()):
+        for eff in pl.EFFECTS.get(p.name, []):
+            if eff.unsupported:
                 continue
-            if ab["trigger"] == "on_evolve":
-                # only fires the moment it evolves, handled by caller
-                if just_evolved is not p:
+            if just_evolved is not None:
+                if eff.trigger != IR.Trigger.ON_EVOLVE or p is not just_evolved:
                     continue
-            elif on_evolve_only:
+            elif eff.trigger not in ACTIVATED:
                 continue
-            key = ability_key(p, ab)
-            if key in pl.abilities_used:
+            key = (id(p), eff.name)
+            if key in pl.abilities_used and eff.trigger != IR.Trigger.ANY_TIMES_PER_TURN:
                 continue
-            if ab.get("requires_active") and p is not pl.active:
-                continue
-            if ab.get("requires_ko_last_turn") and not pl.lost_pokemon_last_turn:
-                continue
-            need = ab.get("requires_in_play")
-            if need and need not in pl.in_play_names():
-                continue
-            need_played = ab.get("requires_played_this_turn")
-            if need_played and need_played not in pl.played_supporters_this_turn:
-                continue
-
-            # costs
-            cost_hand = ab.get("cost_discard_hand") or 0
-            if cost_hand:
-                if len(pl.hand) < cost_hand:
-                    continue
-            etype = ab.get("cost_discard_energy_hand")
-            energy_idx = None
-            if etype:
-                energy_idx = next(
-                    (i for i, (k, n) in enumerate(pl.hand)
-                     if k == "Energy" and n.startswith(etype)), None)
-                if energy_idx is None:
-                    continue
-            self_etype = ab.get("cost_discard_energy_self")
-            if self_etype:
-                hit = next((i for i, prov in enumerate(p.energy) if self_etype in prov), None)
-                if hit is None:
-                    continue
-
-            target = ab.get("draw_to")
-            amount = ab.get("amount")
-            if target is not None and len(pl.hand) >= target:
-                continue
-
-            # pay
-            if etype:
-                k, n = pl.hand.pop(energy_idx)
-                pl.discard.append(n)
-            if self_etype:
-                p.energy.pop(hit)
-                pl.discard.append(f"{self_etype} Energy")
-            for _ in range(cost_hand):
-                if pl.hand:
-                    k, n = pl.hand.pop(0)
-                    pl.discard.append(n)
-
-            before = len(pl.hand)
-            if target is not None:
-                while len(pl.hand) < target and pl.deck:
-                    pl.draw(1)
-            else:
-                pl.draw(amount or 0)
-            drew = len(pl.hand) - before
-            pl.abilities_used.add(key)
-            log.append(f"  {pl.name}: {p.name} uses {ab['name']} -> drew {drew}")
-
-            if ab.get("cost_shuffle_self") and drew > 0:
-                pl.deck.append(("Pokemon", p.name))
-                if p is pl.active:
-                    # Real rule: the Active Spot cannot be left empty while
-                    # you still have Benched Pokemon -- promote one.
-                    pl.active = pl.bench.pop(0) if pl.bench else None
-                elif p in pl.bench:
-                    pl.bench.remove(p)
-                random.shuffle(pl.deck)
-                log.append(f"  {pl.name}: {p.name} shuffles itself back into the deck")
-                return  # board changed; stop iterating this pass
+            if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
+                pl.abilities_used.add(key)
+                log.append(f"  {pl.name}: {p.name} uses {eff.name}")
 
 
 # --------------------------------------------------------------------------
@@ -327,7 +279,7 @@ def play_basics(pl, turn, log):
             log.append(f"  {pl.name}: benches {name}")
 
 
-def try_evolve(pl, turn, log, first_turn):
+def try_evolve(pl, opp, turn, log, first_turn):
     if first_turn:
         return
     for kind, name in list(pl.hand):
@@ -342,11 +294,11 @@ def try_evolve(pl, turn, log, first_turn):
                 spot.name = name
                 spot.evolved_this_turn = True
                 log.append(f"  {pl.name}: {pre} -> {name}")
-                try_use_draw_abilities(pl, log, on_evolve_only=True, just_evolved=spot)
+                use_abilities(pl, opp, turn, log, just_evolved=spot)
                 break
 
 
-def effect_rare_candy(pl, turn, log, first_turn):
+def effect_rare_candy(pl, opp, turn, log, first_turn):
     if first_turn:
         return False
     s2 = [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Stage 2"]
@@ -363,7 +315,7 @@ def effect_rare_candy(pl, turn, log, first_turn):
                 spot.name = name
                 spot.evolved_this_turn = True
                 log.append(f"  {pl.name}: Rare Candy -> {name}")
-                try_use_draw_abilities(pl, log, on_evolve_only=True, just_evolved=spot)
+                use_abilities(pl, opp, turn, log, just_evolved=spot)
                 return True
     return False
 
@@ -385,9 +337,9 @@ def want_pokemon(pl, name):
     return info["evolves_from"] in pl.in_play_names()
 
 
-def play_items(pl, turn, log, first_turn):
+def play_items(pl, opp, turn, log, first_turn):
     while ("Item", "Rare Candy") in pl.hand:
-        if not effect_rare_candy(pl, turn, log, first_turn):
+        if not effect_rare_candy(pl, opp, turn, log, first_turn):
             break
 
     while ("Item", "Buddy-Buddy Poffin") in pl.hand and len(pl.bench) < MAX_BENCH:
@@ -735,60 +687,25 @@ def attack_damage(pl, opp, spot, atk, record=True):
     return base
 
 
-def damage_reduction_for(pl, spot):
-    """Flat "takes N less damage" from the defender's own Ability and from
-    team-wide sources (Bronzong, Steven's Carbink). Conditional reductions
-    the parser flagged as unevaluable are skipped, not guessed at."""
-    total = 0
-    types = pl.POKEMON[spot.name]["types"]
-    for other in pl.in_play():
-        for ab in pl.POKEMON[other.name]["abilities"]:
-            if ab.get("kind") != "reduce" or ab.get("unmodeled"):
-                continue
-            if ab.get("protects_team"):
-                tt = ab.get("team_type")
-                if tt and tt not in types:
-                    continue
-                if ab.get("requires_bench") and other is pl.active:
-                    continue
-                total += ab["amount"]
-            elif other is spot:
-                total += ab["amount"]
-    return total
+def damage_reduction_for(pl, spot, opp=None):
+    """Every "takes N less damage" Ability now flows through one query."""
+    return AE.query_damage_reduction(pl, spot, opp)
 
 
-def retaliation_from(defender, attacker_spot):
-    """Damage counters the DEFENDER puts back on the attacking Pokemon."""
+def retaliation_from(defender, attacker_spot, attacker_player=None):
+    """Counters the DEFENDER puts back on the attacking Pokemon.
+
+    Pokemon Abilities resolve through the IR runtime (which honours the
+    type gate on team-wide retaliators like Spiritomb). Tools and Special
+    Energy carry the same shape on Trainer/Energy cards, so they keep the
+    small dedicated index.
+    """
     if not defender.active:
         return 0
-    total = 0
+    total = AE.query_retaliation(defender, attacker_spot, attacker_player)
     act = defender.active
     act_types = defender.POKEMON[act.name]["types"]
-    for other in defender.in_play():
-        for ab in defender.POKEMON[other.name]["abilities"]:
-            if ab.get("kind") != "retaliate":
-                continue
-            if ab.get("protects_team"):
-                tt = ab.get("team_type")
-                if tt and tt not in act_types:
-                    continue
-            else:
-                if other is not act:
-                    continue
-                if ab.get("requires_active") and other is not act:
-                    continue
-            counters = ab["counters"]
-            per = ab.get("per_energy_type")
-            if per:
-                counters *= sum(1 for e in other.energy if per in e)
-            total += counters * 10
-    # Tools and Special Energy carrying the same shape (Punk Helmet, Spiky
-    # Energy, Deluxe Bomb).
-    sources = []
-    if act.tool:
-        sources.append(act.tool)
-    sources += [n for n in getattr(act, "energy_names", [])]
-    for cname in sources:
+    for cname in ([act.tool] if act.tool else []) + list(getattr(act, "energy_names", [])):
         r = RETALIATE_CARDS.get(cname)
         if not r:
             continue
@@ -943,7 +860,8 @@ def do_attack(pl, opp, log):
     weak = opp.POKEMON[opp.active.name]["weakness"]
     if weak and weak in atk_types:
         dmg *= 2
-    reduction = damage_reduction_for(opp, opp.active)
+    dmg += AE.query_damage_buff(pl, pl.active, opp)
+    reduction = damage_reduction_for(opp, opp.active, pl)
     if reduction:
         dmg = max(0, dmg - reduction)
     opp.active.damage += dmg
@@ -952,7 +870,7 @@ def do_attack(pl, opp, log):
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
 
     # Retaliation resolves even if the defender is Knocked Out by this hit.
-    back = retaliation_from(opp, pl.active) if dmg > 0 else 0
+    back = retaliation_from(opp, pl.active, pl) if dmg > 0 else 0
     if back:
         pl.active.damage += back
         log.append(f"  {opp.name}: retaliation puts {back} back on {pl.active.name}")
@@ -1024,14 +942,13 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     play_basics(pl, turn, log)
     if pl.active is None:
         return "no_pokemon"
-    try_evolve(pl, turn, log, first_turn)
-    play_items(pl, turn, log, first_turn)
+    try_evolve(pl, opp, turn, log, first_turn)
+    play_items(pl, opp, turn, log, first_turn)
     play_supporter(pl, opp, turn, log)
-    try_use_draw_abilities(pl, log)
+    use_abilities(pl, opp, turn, log)
     attach_energy(pl, cards_by_name, log)
     attach_tools(pl, log)
-    use_counter_movers(pl, opp, log)
-    try_evolve(pl, turn, log, first_turn)
+    try_evolve(pl, opp, turn, log, first_turn)
     try_retreat(pl, opp, log)
 
     if not first_turn:
@@ -1041,15 +958,18 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
 
 
 def run_game(modelA, modelB, verbose=False):
-    (nameA, POKA, DECKA), (nameB, POKB, DECKB) = modelA, modelB
+    nameA, POKA, DECKA = modelA[0], modelA[1], modelA[2]
+    nameB, POKB, DECKB = modelB[0], modelB[1], modelB[2]
     _cards = M.load_cards()
     cards_by_name, _ = M.build_card_index(_cards)
     global RETALIATE_CARDS
     if not RETALIATE_CARDS:
         RETALIATE_CARDS = build_retaliate_index(_cards)
 
-    a = Player(nameA, POKA, DECKA)
-    b = Player(nameB, POKB, DECKB)
+    effA = compile_effects_for(POKA, modelA[3])
+    effB = compile_effects_for(POKB, modelB[3])
+    a = Player(nameA, POKA, DECKA, effA)
+    b = Player(nameB, POKB, DECKB, effB)
     mullA = opening_hand(a)
     mullB = opening_hand(b)
     log = []
@@ -1096,12 +1016,32 @@ def run_game(modelA, modelB, verbose=False):
     }
 
 
+def compile_effects_for(POKEMON, resolved_cards):
+    """Compile every in-deck Pokemon's Abilities into IR, once per run.
+
+    `resolved_cards` must come from tcg_model.resolve_deck_cards so each
+    Pokemon's EXACT printing is used -- Abilities are printing-specific
+    (Alakazam MEG 56 has Psychic Draw, Alakazam TWM 82 has none).
+    """
+    out = {}
+    for name in POKEMON:
+        card = resolved_cards.get(name)
+        out[name] = IR.compile_card_abilities(card) if card else []
+    return out
+
+
 def load_model(path, label):
     text = open(path).read()
     POKEMON, DECKLIST, pooled, unresolved = M.build_deck_model(text)
     unmodeled = sorted({n for k, n in DECKLIST
                         if k in ("Item", "Supporter") and n not in KNOWN_TRAINERS})
-    return (label, POKEMON, DECKLIST), {
+    eff_map = compile_effects_for(POKEMON, M.resolve_deck_cards(text))
+    live = sorted(f"{n}/{e.name}" for n, es in eff_map.items()
+                  for e in es if not e.unsupported)
+    dead = sorted(f"{n}/{e.name} ({e.unsupported})" for n, es in eff_map.items()
+                  for e in es if e.unsupported)
+    return (label, POKEMON, DECKLIST, M.resolve_deck_cards(text)), {
+        "abilities_live": live, "abilities_dead": dead,
         "size": len(DECKLIST), "pooled": sorted(pooled),
         "unresolved": sorted(unresolved), "unmodeled": unmodeled,
         "pokemon": POKEMON,
@@ -1121,8 +1061,8 @@ def main():
     modelB, metaB = load_model(pathB, "B")
     labelA = pathA.split("/")[-1].replace(".txt", "")
     labelB = pathB.split("/")[-1].replace(".txt", "")
-    modelA = (labelA, modelA[1], modelA[2])
-    modelB = (labelB, modelB[1], modelB[2])
+    modelA = (labelA, modelA[1], modelA[2], modelA[3])
+    modelB = (labelB, modelB[1], modelB[2], modelB[3])
 
     for label, meta in ((labelA, metaA), (labelB, metaB)):
         print(f"=== {label} ===")
@@ -1133,10 +1073,14 @@ def main():
             print(f"  matched by name only: {', '.join(meta['pooled'])}")
         if meta["unmodeled"]:
             print(f"  Trainers with no modeled effect (never played): {', '.join(meta['unmodeled'])}")
-        draw_abs = [(n, ab["name"]) for n, i in meta["pokemon"].items()
-                    for ab in i["abilities"] if ab["kind"] == "draw"]
-        if draw_abs:
-            print(f"  draw Abilities modeled: {', '.join(f'{a}/{b}' for a, b in draw_abs)}")
+        if meta.get("abilities_live"):
+            print(f"  Abilities executing ({len(meta['abilities_live'])}): "
+                  f"{', '.join(meta['abilities_live'])}")
+        if meta.get("abilities_dead"):
+            print(f"  Abilities NOT modeled ({len(meta['abilities_dead'])}) -- this deck is"
+                  f" undervalued by however much these matter:")
+            for d in meta["abilities_dead"]:
+                print(f"      {d}")
     print()
 
     if verbose:
