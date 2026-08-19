@@ -1,19 +1,6 @@
 #!/usr/bin/env python3
 """Executes compiled ability IR against a running game.
 
-STATUS: WRITTEN AND IMPORTABLE, BUT NOT YET WIRED INTO simulate_versus.py.
-A first integration attempt was reverted: routing every Ability through
-this runtime dropped the Alakazam deck's turn-6 hand from ~13.6 cards
-(what simulate_baseline.py measures) to ~2, which collapsed Powerful
-Hand from ~270 damage to 40. The draw Abilities stopped firing somewhere
-in the activation path. Rather than ship a simulator that silently
-reports wrong win rates, simulate_versus.py was restored to its previous
-hand-written ability handling, which is tested and correct. Wiring this
-in is the remaining work, and it needs a per-ability firing test (assert
-each Ability actually fires and changes state) before it replaces the
-existing path -- coverage of the IR is proven, execution is not.
-
-
 ability_ir.py turns card text into Effect/Action objects. This module is
 the other half: it takes those objects and actually changes game state.
 Keeping the two apart is the point of the design -- supporting a new card
@@ -352,13 +339,129 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         random.shuffle(pl.deck)
         return True
 
+    if op == O.DISCARD_ENERGY_FROM_OPPONENT:
+        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        n = 0
+        for h in hits[:1]:
+            for _ in range(act.amount or 1):
+                if h.energy:
+                    h.energy.pop()
+                    if getattr(h, "energy_names", None):
+                        opp.discard.append(h.energy_names.pop())
+                    n += 1
+        if n:
+            log.append(f"    discard {n} Energy from opponent")
+        return n > 0
+
+    if op == O.DISCARD_FROM_OPPONENT:
+        n = min(act.amount or 1, len(opp.hand))
+        for _ in range(n):
+            kind, name = opp.hand.pop(random.randrange(len(opp.hand)))
+            # "shuffles them into their deck" vs discard -- the IR records
+            # which, because returning a card to the deck is weaker.
+            if act.filter.get("to") == "deck":
+                opp.deck.append((kind, name))
+            else:
+                opp.discard.append(name)
+        if n and act.filter.get("to") == "deck":
+            random.shuffle(opp.deck)
+        if n:
+            log.append(f"    strip {n} card(s) from opponent's hand")
+        return n > 0
+
+    if op == O.LOOK_AT_DECK:
+        # Deck manipulation with no board effect; the closest honest
+        # approximation is that it improves the next draw, which this engine
+        # does not track. Counted as a no-op but NOT as an unhandled op.
+        return False
+
+    if op == O.SEARCH_TO_DISCARD:
+        n = 0
+        for _ in range(act.amount or 1):
+            card = _find_in_deck(pl, lambda k, nm: k == "Energy")
+            if not card:
+                break
+            pl.discard.append(card[1])
+            n += 1
+        if n:
+            log.append(f"    search {n} Energy to discard")
+        return n > 0
+
+    if op == O.REVEAL_OPPONENT_HAND:
+        return False        # information only; no state change to model
+
+    if op == O.DEVOLVE:
+        evolved = [q for q in opp.in_play()
+                   if opp.POKEMON.get(q.name, {}).get("evolves_from")]
+        if not evolved:
+            return False
+        tgt = max(evolved, key=lambda q: opp.POKEMON[q.name]["hp"])
+        pre = opp.POKEMON[tgt.name]["evolves_from"]
+        opp.hand.append(("Pokemon", tgt.name))
+        tgt.name = pre
+        log.append(f"    devolve -> {pre}")
+        return True
+
+    if op == O.DISCARD_STADIUM:
+        if getattr(pl, "stadium", None) or getattr(opp, "stadium", None):
+            pl.stadium = None
+            opp.stadium = None
+            return True
+        return False
+
+    if op == O.SWAP_HAND_WITH_DECK:
+        if not pl.hand or not pl.deck:
+            return False
+        i = random.randrange(len(pl.hand))
+        pl.hand[i], pl.deck[-1] = pl.deck[-1], pl.hand[i]
+        return True
+
+    if op == O.FORCE_BENCH_OPPONENT:
+        placed = 0
+        for kind, name in list(opp.hand):
+            if len(opp.bench) >= 5:
+                break
+            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic":
+                opp.hand.remove((kind, name))
+                if make_inplay:
+                    opp.bench.append(make_inplay(name))
+                    placed += 1
+        if placed:
+            log.append(f"    force {placed} Basic(s) onto opponent's Bench")
+        return placed > 0
+
+    if op == O.APPLY_CONDITION:
+        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        if not hits:
+            return False
+        conds = act.filter.get("conditions") or []
+        if act.filter.get("choose_one") and conds:
+            conds = [conds[0]]
+        for h in hits[:1]:
+            existing = getattr(h, "conditions", None)
+            if existing is None:
+                return False          # board object has no condition slot
+            # Asleep/Confused/Paralyzed are mutually exclusive; Burned and
+            # Poisoned stack alongside one of them.
+            EXCLUSIVE = {"asleep", "confused", "paralyzed"}
+            for c in conds:
+                if c in EXCLUSIVE:
+                    h.conditions -= EXCLUSIVE
+                h.conditions.add(c)
+        log.append(f"    apply {', '.join(conds)}")
+        return True
+
     # Passive / static ops are queried elsewhere, never "executed".
     if op in (IR.Op.REDUCE_DAMAGE, IR.Op.BUFF_DAMAGE, IR.Op.PREVENT_DAMAGE,
               IR.Op.MODIFY_RETREAT, IR.Op.LOCK, IR.Op.MODIFY_HP,
               IR.Op.MODIFY_ATTACK_COST, IR.Op.GRANT_ATTACK_ACCESS,
               IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,
               IR.Op.ATTACK_FIRST_TURN, IR.Op.MODIFY_PRIZE, IR.Op.ENDURE,
-              IR.Op.BUFF_CONDITION_DAMAGE):
+              IR.Op.BUFF_CONDITION_DAMAGE, IR.Op.SET_TYPE,
+              IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,
+              IR.Op.EXTRA_TOOLS, IR.Op.ATTACK_TWICE,
+              IR.Op.RETURN_TO_HAND_ON_KO, IR.Op.LOCK_COUNTER_MOVEMENT,
+              IR.Op.ATTACH_TOOL):
         return False
 
     UNEXECUTED_OPS[op] += 1
@@ -371,6 +474,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
 def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
     if not conditions_met(effect, pl, opp, source):
+        return False
+    # Coin flips are real randomness in the game, so roll them rather than
+    # treating a flip-gated Ability as always-on or always-off.
+    if getattr(effect, "chance", 1.0) < 1.0 and random.random() >= effect.chance:
         return False
     snapshot_hand = list(pl.hand)
     if not pay_costs(effect, pl, source, log):
@@ -477,6 +584,20 @@ def query_retreat_modifier(pl, spot, opp=None):
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
         if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        total += act.amount or 0
+    return total
+
+
+def query_condition_damage_bonus(pl, condition):
+    """Extra damage counters a player's Abilities add to a Special Condition
+    at Pokemon Checkup (Pecharunt's Toxic Subjugation, Magmortar's Magma
+    Surge). Returns a COUNT OF COUNTERS, not damage."""
+    total = 0
+    for holder, eff, act in _passive_actions(pl, IR.Op.BUFF_CONDITION_DAMAGE):
+        if not conditions_met(eff, pl, pl, holder):
+            continue
+        if (act.filter.get("condition") or "").lower() != condition:
             continue
         total += act.amount or 0
     return total

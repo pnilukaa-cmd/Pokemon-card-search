@@ -104,6 +104,17 @@ class Op:
     SET_WEAKNESS = "set_weakness"
     REVEAL_OPPONENT_HAND = "reveal_opponent_hand"
     ATTACH_TOOL = "attach_tool"
+    SET_TYPE = "set_type"
+    SEARCH_TO_DISCARD = "search_to_discard"
+    ENERGY_PROVIDES_EXTRA = "energy_provides_extra"
+    FORCE_BENCH_OPPONENT = "force_bench_opponent"
+    ATTACK_TWICE = "attack_twice"
+    RETURN_TO_HAND_ON_KO = "return_to_hand_on_ko"
+    IGNORE_OPPONENT_EFFECTS = "ignore_opponent_effects"
+    DISCARD_ENERGY_FROM_OPPONENT = "discard_energy_from_opponent"
+    SWAP_HAND_WITH_DECK = "swap_hand_with_deck"
+    EXTRA_TOOLS = "extra_tools"
+    LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -150,7 +161,7 @@ class Action:
 
 class Effect:
     __slots__ = ("source", "name", "text", "trigger", "conditions", "costs",
-                 "actions", "unsupported", "rules_hit")
+                 "actions", "unsupported", "rules_hit", "chance")
 
     def __init__(self, source, name, text):
         self.source = source
@@ -162,6 +173,11 @@ class Effect:
         self.actions = []
         self.unsupported = None
         self.rules_hit = []
+        # Probability the effect resolves. Coin flips are real randomness in
+        # the game, so they are modeled as such rather than treated as
+        # unsupported: "flip a coin, if heads..." is chance=0.5, and
+        # "flip 2 coins" style multi-flips set it accordingly.
+        self.chance = 1.0
 
     @property
     def supported(self):
@@ -179,6 +195,7 @@ class Effect:
             "conditions": self.conditions, "costs": self.costs,
             "actions": [a.to_dict() for a in self.actions],
             "unsupported": self.unsupported, "rules_hit": self.rules_hit,
+            "chance": self.chance,
         }
 
 
@@ -258,6 +275,27 @@ def parse_conditions(text):
     if m:
         out.append({"kind": "opponent_has_in_play", "what": m.group(1).strip()})
     return out
+
+
+def parse_chance(text):
+    """Probability the effect resolves, from any coin-flip clause.
+
+    A single "flip a coin. If heads..." is 0.5. "Flip N coins. If all of
+    them are heads" is 0.5**N. Flip-until-tails scaling attacks are damage
+    calculations, not ability gates, so they are left at 1.0 here.
+    """
+    t = text.lower()
+    m = re.search(r"flip (\d+) coins?[^.]{0,40}if all of them are heads", t)
+    if m:
+        return 0.5 ** int(m.group(1))
+    if re.search(r"flip a coin[^.]{0,30}if heads", t):
+        return 0.5
+    if re.search(r"flip a coin[^.]{0,30}if tails", t):
+        return 0.5
+    m = re.search(r"flip (\d+) coins", t)
+    if m and "for each heads" not in t:
+        return 1 - 0.5 ** int(m.group(1))     # at least one heads
+    return 1.0
 
 
 def parse_costs(text):
@@ -580,7 +618,7 @@ def _r(m, text):
     return [Action(Op.SHUFFLE_SELF_INTO_DECK, 1, Target.SELF)]
 
 
-@rule("endure_ko", r"it is not knocked out")
+@rule("endure_ko", r"(?:it|this pok[eé]mon) is not knocked out")
 def _r(m, text):
     return [Action(Op.ENDURE, None, Target.SELF)]
 
@@ -747,6 +785,176 @@ def _r(m, text):
     return [Action(Op.ATTACH_TOOL, 1, Target.YOUR_ANY, {"from": "deck"})]
 
 
+@rule("prevent_that_damage", r"prevent that damage")
+def _r(m, text):
+    return [Action(Op.PREVENT_DAMAGE, None, Target.SELF)]
+
+
+@rule("apply_chosen_condition",
+      r"choose (?:burned|confused|poisoned)[\s\S]{0,80}affected by that special condition")
+def _r(m, text):
+    return [Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE,
+                   {"conditions": ["burned", "confused", "poisoned"], "choose_one": True})]
+
+
+@rule("checkup_bonus_any_order",
+      r"during pok[eé]mon checkup, put (\d+) more damage counters on your opponent'?s (\w+)")
+def _r(m, text):
+    return [Action(Op.BUFF_CONDITION_DAMAGE, int(m.group(1)), Target.OPP_ALL,
+                   {"condition": m.group(2).lower()})]
+
+
+@rule("discard_opponent_energy",
+      r"(?:put|discard) an energy (?:attached to|from) (your opponent'?s active|the attacking)")
+def _r(m, text):
+    tgt = (Target.ATTACKING_POKEMON if "attacking" in m.group(1).lower()
+           else Target.OPP_ACTIVE)
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, tgt)]
+
+
+@rule("extra_prize", r"take 1 more prize card")
+def _r(m, text):
+    return [Action(Op.MODIFY_PRIZE, 1, Target.SELF)]
+
+
+@rule("set_type", r"it is (" + TYPES + r") and (" + TYPES + r") type")
+def _r(m, text):
+    return [Action(Op.SET_TYPE, None, Target.SELF,
+                   {"types": [m.group(1).capitalize(), m.group(2).capitalize()]})]
+
+
+@rule("attack_twice", r"may use an attack it has twice")
+def _r(m, text):
+    return [Action(Op.ATTACK_TWICE, None, Target.SELF)]
+
+
+@rule("return_to_hand_on_ko", r"put it into your hand instead of")
+def _r(m, text):
+    return [Action(Op.RETURN_TO_HAND_ON_KO, None, Target.SELF)]
+
+
+@rule("ignore_opponent_effects",
+      r"isn'?t affected by any effects on your opponent'?s active")
+def _r(m, text):
+    return [Action(Op.IGNORE_OPPONENT_EFFECTS, None, Target.SELF)]
+
+
+@rule("swap_hand_with_deck", r"switch a card from your hand with the top card of your deck")
+def _r(m, text):
+    return [Action(Op.SWAP_HAND_WITH_DECK, 1, Target.SELF)]
+
+
+@rule("extra_tools", r"may have up to (\d+) pok[eé]mon tool cards attached")
+def _r(m, text):
+    return [Action(Op.EXTRA_TOOLS, int(m.group(1)), Target.YOUR_ALL)]
+
+
+@rule("lock_counter_movement", r"damage counters[^.]{0,60}can'?t be moved")
+def _r(m, text):
+    return [Action(Op.LOCK_COUNTER_MOVEMENT, None, Target.BOTH_ALL)]
+
+
+@rule("search_named_evolution",
+      r"search your deck for an? ([A-Z][\w'’ -]+?) or ([A-Z][\w'’ -]+?) and put it")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF,
+                   {"kind": "pokemon", "one_of": [m.group(1).strip(), m.group(2).strip()]})]
+
+
+@rule("attach_named_energy_from_discard",
+      r"attach up to (\d+) ([A-Z][\w'’ ]*?energy) cards? from your discard pile")
+def _r(m, text):
+    return [Action(Op.ATTACH_ENERGY, int(m.group(1)), Target.SELF,
+                   {"from": "discard", "card_name": m.group(2).strip()})]
+
+
+@rule("move_energy_on_ko", r"move up to (\d+) basic ([\w]+) energy")
+def _r(m, text):
+    return [Action(Op.MOVE_ENERGY, int(m.group(1)), Target.YOUR_ANY,
+                   {"type": m.group(2).capitalize(), "from": Target.SELF})]
+
+
+@rule("conditional_attack_access", r"this pok[eé]mon can use the ([\w'’ -]+?) attack")
+def _r(m, text):
+    return [Action(Op.GRANT_ATTACK_ACCESS, None, Target.SELF,
+                   {"attack": m.group(1).strip()})]
+
+
+@rule("search_named_to_bench",
+      r"search your deck for an? ([A-Z][\w'’ -]+?) and put it onto your bench")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_BENCH, 1, Target.YOUR_BENCHED,
+                   {"name_contains": m.group(1).strip()})]
+
+
+@rule("search_energy_and_discard",
+      r"search your deck for up to (\d+) basic (" + TYPES + r") energy cards? and discard them")
+def _r(m, text):
+    # Thins the deck and stocks the discard pile; the Energy never lands
+    # in play, so this is deck manipulation, not acceleration.
+    return [Action(Op.SEARCH_TO_DISCARD, int(m.group(1)), Target.SELF,
+                   {"kind": "energy", "type": m.group(2).capitalize()})]
+
+
+@rule("shuffle_opponent_hand_cards",
+      r"choose a random card from your opponent'?s hand[\s\S]{0,80}shuffles? them into their deck")
+def _r(m, text):
+    n = 2 if re.search(r"flip 2 coins", text, re.I) else 1
+    return [Action(Op.DISCARD_FROM_OPPONENT, n, Target.OPPONENT,
+                   {"to": "deck", "per_heads": bool(re.search(r"for each heads", text, re.I))})]
+
+
+@rule("switch_self_with_active", r"switch this pok[eé]mon with your active pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False, "promote_self": True})]
+
+
+@rule("energy_provides_more",
+      r"each basic (" + TYPES + r") energy attached to all of your pok[eé]mon provides")
+def _r(m, text):
+    return [Action(Op.ENERGY_PROVIDES_EXTRA, 1, Target.YOUR_ALL,
+                   {"type": m.group(1).capitalize()})]
+
+
+@rule("self_to_top_of_deck",
+      r"put this pok[eé]mon on top of your deck")
+def _r(m, text):
+    return [Action(Op.SHUFFLE_SELF_INTO_DECK, 1, Target.SELF, {"to_top": True})]
+
+
+@rule("bench_opponent_basics",
+      r"put any number of basic pok[eé]mon you find there onto their bench")
+def _r(m, text):
+    return [Action(Op.FORCE_BENCH_OPPONENT, None, Target.OPPONENT)]
+
+
+@rule("attack_cost_scales_by_prizes",
+      r"costs (" + TYPES + r") less for each prize card your opponent has taken")
+def _r(m, text):
+    return [Action(Op.MODIFY_ATTACK_COST, -1, Target.SELF,
+                   {"type": m.group(1).capitalize(), "per_opponent_prize_taken": True})]
+
+
+@rule("retreat_may_fail",
+      r"if tails, energy for its retreat cost is not discarded, and they don'?t switch")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.OPPONENT,
+                   {"what": "retreat", "chance_to_block": 0.5})]
+
+
+@rule("put_self_onto_bench_from_hand",
+      r"you may put this pok[eé]mon onto your bench")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_BENCH, 1, Target.YOUR_BENCHED, {"from": "hand", "self": True})]
+
+
+@rule("move_energy_on_own_ko",
+      r"put all basic (" + TYPES + r") energy attached to that pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.MOVE_ENERGY, None, Target.YOUR_ANY,
+                   {"type": m.group(1).capitalize(), "any_amount": True, "on_ko": True})]
+
+
 # ---- meta ----------------------------------------------------------------
 
 @rule("grant_attack_access", r"can use any attack from its previous evolutions")
@@ -761,7 +969,16 @@ def _r(m, text):
 # Phrases that mark an effect as genuinely outside the verb set. Recorded as
 # a reason rather than silently producing an empty Effect.
 _KNOWN_UNSUPPORTED = [
-    (r"flip a coin", "outcome depends on a coin flip inside the effect"),
+    # These are structural rules about how a card enters play or what it may
+    # evolve into -- not effects that happen during a turn. There is nothing
+    # for the runtime to execute, so they are named precisely rather than
+    # left as a vague "no rule matched".
+    (r"put this pok[eé]mon into play only with", "deckbuilding/put-into-play rule, not a turn action"),
+    (r"when you are setting up to play", "setup-phase rule, before the game starts"),
+    (r"can evolve into any pok[eé]mon ex that evolves from",
+     "evolution-legality rule, not a turn action"),
+    (r"moves from the active spot to the bench[\s\S]{0,120}switch it with this pok",
+     "in-place transform (Palafin <-> Palafin ex) keeping all attached state"),
     (r"instead of", "replacement effect"),
     (r"put this pok[eé]mon into play only with", "special put-into-play rule"),
     (r"choose an attack|use it as this attack", "copies another attack"),
@@ -780,6 +997,7 @@ def compile_effect(source, name, text):
     eff.trigger = parse_trigger(text)
     eff.conditions = parse_conditions(text)
     eff.costs = parse_costs(text)
+    eff.chance = parse_chance(text)
 
     for rname, rx, builder in RULES:
         m = rx.search(text)

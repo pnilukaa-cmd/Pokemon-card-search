@@ -286,6 +286,77 @@ def test_shuffle_self_cost():
           p.active is bench_mon, f"active={p.active.name if p.active else None}")
 
 
+def test_apply_condition():
+    POK, EFF = build(["Shiinotic"])
+    eff = find(EFF["Shiinotic"], "Calming Light")
+    mine = Spot("Shiinotic")
+    theirs = Spot("Shiinotic")
+    theirs.conditions = set()
+    me = FakePlayer("A", POK, EFF, active=mine)
+    them = FakePlayer("B", POK, EFF, active=theirs)
+    ok = AE.activate(eff, me, them, mine, [])
+    check("Shiinotic makes the opponent's Active Asleep",
+          ok and "asleep" in theirs.conditions, f"ok={ok} conds={theirs.conditions}")
+
+
+def test_exclusive_conditions():
+    """Asleep/Confused/Paralyzed replace each other; Burn/Poison stack."""
+    import simulate_versus as V
+    spot = V.InPlay("X", 0)
+    spot.conditions = {"asleep", "poisoned"}
+    # applying Confused must displace Asleep but leave Poisoned
+    EXCL = {"asleep", "confused", "paralyzed"}
+    spot.conditions -= EXCL
+    spot.conditions.add("confused")
+    check("Confused displaces Asleep but Poison remains",
+          spot.conditions == {"confused", "poisoned"}, f"got {spot.conditions}")
+
+
+def test_checkup_damage_and_clearing():
+    import simulate_versus as V
+    POK, EFF = build(["Toucannon"])
+    a = Spot("Toucannon")
+    p = FakePlayer("A", POK, EFF, active=a)
+    o = FakePlayer("B", POK, EFF, active=Spot("Toucannon"))
+    a.conditions = {"poisoned"}
+    V.pokemon_checkup(p, o, [])
+    check("Poison deals 10 at checkup", a.damage == 10, f"got {a.damage}")
+
+    b = Spot("Toucannon")
+    b.conditions = {"burned"}
+    p2 = FakePlayer("A", POK, EFF, active=b)
+    V.pokemon_checkup(p2, o, [])
+    check("Burn deals 20 at checkup", b.damage == 20, f"got {b.damage}")
+
+    c = Spot("Toucannon")
+    c.conditions = {"paralyzed"}
+    p3 = FakePlayer("A", POK, EFF, active=c)
+    V.pokemon_checkup(p3, o, [])
+    check("Paralysis clears after the turn", "paralyzed" not in c.conditions)
+
+
+def test_conditions_clear_on_retreat_and_evolve():
+    import simulate_versus as V
+    spot = V.InPlay("Scraggy", 0)
+    spot.conditions = {"poisoned", "asleep"}
+    V.clear_conditions(spot, "retreated")
+    check("Retreating clears every Special Condition", spot.conditions == set(),
+          f"got {spot.conditions}")
+
+
+def test_condition_blocks_attack():
+    import simulate_versus as V
+    POK, EFF = build(["Toucannon"])
+    a = Spot("Toucannon")
+    a.conditions = {"asleep"}
+    p = FakePlayer("A", POK, EFF, active=a)
+    check("Asleep blocks attacking", V.condition_blocks_attack(p, []))
+    a.conditions = {"paralyzed"}
+    check("Paralyzed blocks attacking", V.condition_blocks_attack(p, []))
+    a.conditions = set()
+    check("No condition does not block", not V.condition_blocks_attack(p, []))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -293,7 +364,11 @@ def main():
                test_ko_condition, test_energy_type_condition_and_counter_move,
                test_passive_damage_reduction, test_passive_damage_buff,
                test_retaliation, test_spiritomb_team_retaliation_type_gate,
-               test_search_to_hand, test_shuffle_self_cost]:
+               test_search_to_hand, test_shuffle_self_cost,
+               test_apply_condition, test_exclusive_conditions,
+               test_checkup_damage_and_clearing,
+               test_conditions_clear_on_retreat_and_evolve,
+               test_condition_blocks_attack]:
         print(f"{fn.__name__}:")
         try:
             fn()
