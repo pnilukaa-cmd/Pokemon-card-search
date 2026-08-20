@@ -357,6 +357,51 @@ def test_condition_blocks_attack():
     check("No condition does not block", not V.condition_blocks_attack(p, []))
 
 
+def test_opponent_hand_reset():
+    """Vivillon's Grand Wing must SET the opponent's hand to exactly 4 --
+    not draw 4 for both players, which is what it compiled to before."""
+    POK, EFF = build(["Vivillon"], {"Vivillon": ("POR", "9")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Vivillon"),
+                    hand=[("Item", "Ultra Ball")] * 3)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Vivillon"),
+                     hand=[("Item", "Ultra Ball")] * 7,
+                     deck=[("Item", "Rare Candy")] * 20)
+    eff = find(EFF["Vivillon"], "Grand Wing")
+    log = []
+    fired = AE.activate(eff, me, opp, me.active, log)
+    check("Grand Wing fires", fired)
+    check("opponent's hand is set to exactly 4", len(opp.hand) == 4,
+          f"got {len(opp.hand)}")
+    check("own hand is untouched", len(me.hand) == 3, f"got {len(me.hand)}")
+    check("the discarded hand went to the bottom of the deck",
+          len(opp.deck) == 20 + 7 - 4, f"got {len(opp.deck)}")
+
+    # An opponent already hellbent has nothing to put down, so nothing
+    # happens -- Grand Wing cannot turn a 0-card hand into a 4-card one.
+    opp2 = FakePlayer("C", POK, EFF, active=Spot("Vivillon"), hand=[],
+                      deck=[("Item", "Rare Candy")] * 20)
+    check("empty opposing hand is left alone",
+          not AE.activate(eff, me, opp2, me.active, []) and not opp2.hand)
+
+
+def test_sniper_eye_cost_reduction_is_conditional():
+    """Sniper's Eye may only discount the cost while the opponent holds
+    exactly 4 cards. Compiled without its condition it read as a permanent
+    discount, which silently overrated every deck built on it."""
+    POK, EFF = build(["Decidueye ex"], {"Decidueye ex": ("POR", "100")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Decidueye ex", energy=[["Grass"]]))
+    opp = FakePlayer("B", POK, EFF, active=Spot("Decidueye ex"))
+
+    opp.hand = [("Item", "Ultra Ball")] * 4
+    on = AE.query_ignored_cost_types(me, me.active, opp)
+    check("Colorless is ignored at exactly 4 cards", on == {"Colorless"}, str(on))
+
+    for n in (3, 5, 0):
+        opp.hand = [("Item", "Ultra Ball")] * n
+        off = AE.query_ignored_cost_types(me, me.active, opp)
+        check(f"no discount at {n} cards", off == set(), str(off))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -368,7 +413,9 @@ def main():
                test_apply_condition, test_exclusive_conditions,
                test_checkup_damage_and_clearing,
                test_conditions_clear_on_retreat_and_evolve,
-               test_condition_blocks_attack]:
+               test_condition_blocks_attack,
+               test_opponent_hand_reset,
+               test_sniper_eye_cost_reduction_is_conditional]:
         print(f"{fn.__name__}:")
         try:
             fn()

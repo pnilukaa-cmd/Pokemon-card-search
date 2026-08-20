@@ -137,6 +137,9 @@ class Player:
         self.discard = []
         self.prizes = STARTING_PRIZES
         self.supporter_played = False
+        # Set by turn-scoped damage Supporters (Black Belt's Training),
+        # cleared at the start of every turn.
+        self.turn_buff_vs_ex = 0
         self.stadium = None
         self.lost_pokemon_last_turn = False
         self.abilities_used = set()
@@ -198,6 +201,20 @@ def energy_types_for(card_name, cards_by_name):
         if listed:
             return list(listed)
     return list(M.REAL_TYPES)  # unknown Special Energy: treat as any
+
+
+def effective_cost(pl, spot, cost, opp=None):
+    """The attack cost as it stands right now, after any Ability that
+    ignores part of it. Decidueye ex's Sniper's Eye turns Crushing Arrow
+    from GrassColorlessColorlessColorless into a single Grass -- but only
+    while the opponent holds exactly 4 cards, so this is re-derived on
+    every pricing rather than baked into the card."""
+    ignored = AE.query_ignored_cost_types(pl, spot, opp)
+    if not ignored:
+        return cost
+    if "ALL" in ignored:
+        return []
+    return [c for c in cost if c not in ignored]
 
 
 def can_pay(cost, attached):
@@ -376,6 +393,20 @@ def play_items(pl, opp, turn, log, first_turn):
             pl.bench.append(InPlay(n, turn))
         log.append(f"  {pl.name}: Buddy-Buddy Poffin -> {', '.join(got)}")
 
+    # Pokegear 3.0: top 7, take a Supporter this engine can actually play,
+    # so the fetch is worth what the sim scores it at and no more.
+    while ("Item", "Pokégear 3.0") in pl.hand:
+        pick = next((c for c in reversed(pl.deck[-7:])
+                     if c[0] == "Supporter" and c[1] in KNOWN_TRAINERS), None)
+        if pick is None:
+            break
+        pl.remove_from_hand("Item", "Pokégear 3.0")
+        pl.discard.append("Pokégear 3.0")
+        pl.deck.remove(pick)
+        random.shuffle(pl.deck)
+        pl.hand.append(pick)
+        log.append(f"  {pl.name}: Pokégear 3.0 -> {pick[1]}")
+
     while ("Item", "Ultra Ball") in pl.hand:
         others = [c for c in pl.hand if c != ("Item", "Ultra Ball")]
         if len(others) < 2:
@@ -436,6 +467,26 @@ def supporter_draw_to(pl, target, log, label):
     log.append(f"  {pl.name}: {label} -> drew {len(pl.hand) - before}")
 
 
+def judge_unlocks_attack(pl, opp):
+    """Would putting the opponent on exactly 4 cards make this turn's
+    attack payable when it isn't right now?
+
+    This is the whole reason a Decidueye ex deck plays Judge from a hand it
+    would rather keep: Crushing Arrow costs four Energy at a hand size of 3
+    or 5, and one Grass at exactly 4.
+    """
+    if pl.active is None or opp is None:
+        return False
+    if best_attack(pl, pl.active, only_payable=True, opp=opp) is not None:
+        return False
+    saved = opp.hand
+    opp.hand = [("Item", "?")] * 4
+    try:
+        return best_attack(pl, pl.active, only_payable=True, opp=opp) is not None
+    finally:
+        opp.hand = saved
+
+
 def play_supporter(pl, opp, turn, log):
     if pl.supporter_played:
         return
@@ -447,8 +498,46 @@ def play_supporter(pl, opp, turn, log):
         pl.supporter_played = True
         pl.played_supporters_this_turn.add(name)
 
+    # Judge is played for the OPPONENT's half first and the draw second.
+    # Setting them to exactly 4 is what switches on a conditional
+    # cost-reduction Ability (Decidueye ex's Sniper's Eye); a deck built on
+    # that will spend the Supporter slot on it even from a full hand.
+    if "Judge" in hand_names and (len(pl.hand) - 1 <= 4 or judge_unlocks_attack(pl, opp)):
+        use("Judge")
+        opp.deck[:0] = opp.hand
+        opp.hand = []
+        for _ in range(4):
+            if opp.deck:
+                opp.hand.append(opp.deck.pop())
+        pl.deck.extend(pl.hand)
+        pl.hand = []
+        random.shuffle(pl.deck)
+        pl.draw(4)
+        log.append(f"  {pl.name}: Judge (both hands to 4)")
+        return
+
+    # Turn-scoped damage boost, only worth the Supporter slot on a turn the
+    # Active can actually attack an ex with it.
+    if "Black Belt's Training" in hand_names and pl.active and opp.active:
+        atk = best_attack(pl, pl.active, opp=opp)
+        # prize_value >= 2 is exactly "is a Pokemon ex" in this pool
+        # (2 for ex, 3 for Mega Evolution ex), which is what the card reads.
+        if atk and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
+            use("Black Belt's Training")
+            pl.turn_buff_vs_ex = 40
+            log.append(f"  {pl.name}: Black Belt's Training (+40 vs ex this turn)")
+            return
+
     # Draw/refresh Supporters, weakest hand first
     if len(pl.hand) <= 4:
+        if "Carmine" in hand_names and len(pl.hand) - 1 < 5:
+            use("Carmine")
+            for c in list(pl.hand):
+                pl.remove_from_hand(*c)
+                pl.discard.append(c[1])
+            pl.draw(5)
+            log.append(f"  {pl.name}: Carmine")
+            return
         for name, amount in (("Lillie's Determination", 6), ("Professor's Research", 7)):
             if name in hand_names:
                 use(name)
@@ -542,7 +631,8 @@ KNOWN_TRAINERS = {
     "Energy Search", "Night Stretcher", "Lillie's Determination",
     "Professor's Research", "Iono", "Team Rocket's Ariana", "Team Rocket's Proton",
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
-    "Team Rocket's Giovanni",
+    "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
+    "Pokégear 3.0",
 }
 
 
@@ -783,7 +873,8 @@ def best_attack(pl, spot, only_payable=True, opp=None):
     info = pl.POKEMON[spot.name]
     best, best_val = None, -1
     for atk in info["attacks"]:
-        if only_payable and not can_pay(atk["cost"], spot.energy):
+        if only_payable and not can_pay(effective_cost(pl, spot, atk["cost"], opp),
+                                        spot.energy):
             continue
         val = attack_value(pl, opp, spot, atk)
         if val > best_val:
@@ -796,6 +887,9 @@ def energy_shortfall(pl, spot):
     info = pl.POKEMON[spot.name]
     if not info["attacks"]:
         return 0
+    # Deliberately the UNREDUCED cost: a conditional discount (Sniper's
+    # Eye) can be off next turn, so keep loading Energy toward the real
+    # printed cost rather than stopping at the discounted one.
     need = max(len(a["cost"]) for a in info["attacks"])
     return max(0, need - spot.energy_count())
 
@@ -932,6 +1026,8 @@ def do_attack(pl, opp, log):
     if weak and weak in atk_types:
         dmg *= 2
     dmg += AE.query_damage_buff(pl, pl.active, opp)
+    if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
+        dmg += pl.turn_buff_vs_ex
     reduction = damage_reduction_for(opp, opp.active, pl)
     if reduction:
         dmg = max(0, dmg - reduction)
@@ -1100,6 +1196,7 @@ def opening_hand(pl):
 
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl.supporter_played = False
+    pl.turn_buff_vs_ex = 0
     pl.abilities_used = set()
     pl.played_supporters_this_turn = set()
     for spot in pl.in_play():

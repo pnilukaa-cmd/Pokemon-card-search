@@ -552,6 +552,24 @@ def play_items(state, POKEMON, priority, turn, log):
         state.hand.append(("Pokemon", target))
         log.append(f"Play Poké Pad -> search {target}")
 
+    # Pokegear 3.0: look at the top 7 cards of the deck and take a
+    # Supporter from among them. Like Team Rocket's Transceiver above, it
+    # only takes a Supporter the registry can actually resolve, so the
+    # measured value stays honest rather than counting a fetch that would
+    # then sit inert in hand.
+    while ("Item", "Pokégear 3.0") in state.hand:
+        top7 = state.deck[-7:]
+        pick = next((c for c in reversed(top7)
+                     if c[0] == "Supporter" and c[1] in SUPPORTER_EFFECTS), None)
+        if pick is None:
+            break
+        state.remove_from_hand("Item", "Pokégear 3.0")
+        state.discard.append("Pokégear 3.0")
+        state.deck.remove(pick)
+        random.shuffle(state.deck)
+        state.hand.append(pick)
+        log.append(f"Play Pokégear 3.0 -> reveal {pick[1]}")
+
     while ("Item", "Night Stretcher") in state.hand:
         pkmn_in_discard = next((n for n in state.discard if n in POKEMON), None)
         basic_energy_in_discard = next((n for n in state.discard if BASIC_ENERGY_RE.match(n)), None)
@@ -747,8 +765,47 @@ def effect_hilda(state, POKEMON, log):
     return True
 
 
+def effect_judge(state, POKEMON, log):
+    """Judge: each player shuffles their hand into their deck and draws 4.
+
+    Only the player's own half is modeled -- there is no opponent board
+    here, so the half that actually matters to a Decidueye ex deck
+    (setting the OPPONENT to exactly 4 cards, which is what switches
+    Sniper's Eye on) cannot be scored by this simulator at all. Read a
+    Judge deck's numbers here as development speed only, never as a
+    measure of how often the combo is live.
+    """
+    rest = [c for c in state.hand if c != ("Supporter", "Judge")]
+    if len(rest) >= 4:
+        return False
+    state.remove_from_hand("Supporter", "Judge")
+    state.discard.append("Judge")
+    state.deck.extend(rest)
+    state.hand = []
+    random.shuffle(state.deck)
+    state.draw(4)
+    log.append(f"Play Judge (shuffle {len(rest)} back, draw 4; opponent side not modeled)")
+    return True
+
+
+def effect_carmine(state, POKEMON, log):
+    """Carmine: discard your hand and draw 5."""
+    rest = [c for c in state.hand if c != ("Supporter", "Carmine")]
+    if len(rest) >= 5:
+        return False
+    state.remove_from_hand("Supporter", "Carmine")
+    state.discard.append("Carmine")
+    for kind, name in rest:
+        state.discard.append(name)
+    state.hand = []
+    state.draw(5)
+    log.append(f"Play Carmine (discard {len(rest)}, draw 5)")
+    return True
+
+
 SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Dawn", "Hilda",
-                      "Lillie's Determination", "Janine's Secret Art", "Team Rocket's Petrel"]
+                      "Lillie's Determination", "Carmine", "Judge",
+                      "Janine's Secret Art", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Janine's Secret Art": effect_janines_secret_art,
@@ -757,13 +814,15 @@ SUPPORTER_EFFECTS = {
     "Team Rocket's Ariana": effect_ariana,
     "Dawn": effect_dawn,
     "Hilda": effect_hilda,
+    "Judge": effect_judge,
+    "Carmine": effect_carmine,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
 # than misrepresented as "unmodeled gap," since they have zero effect on
 # any metric this simulator reports.
 NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement",
-                             "Team Rocket's Giovanni"}
+                             "Team Rocket's Giovanni", "Black Belt's Training"}
 
 
 def play_supporter(state, POKEMON, log):
@@ -778,7 +837,7 @@ def play_supporter(state, POKEMON, log):
 
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
-                      "Energy Search", "Team Rocket's Transceiver"}
+                      "Energy Search", "Team Rocket's Transceiver", "Pokégear 3.0"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).

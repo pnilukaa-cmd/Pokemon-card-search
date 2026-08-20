@@ -113,6 +113,7 @@ class Op:
     IGNORE_OPPONENT_EFFECTS = "ignore_opponent_effects"
     DISCARD_ENERGY_FROM_OPPONENT = "discard_energy_from_opponent"
     SWAP_HAND_WITH_DECK = "swap_hand_with_deck"
+    SET_OPPONENT_HAND = "set_opponent_hand"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     # meta
@@ -274,6 +275,16 @@ def parse_conditions(text):
     m = re.search(r"if your opponent has any ([\w' ]+?) in play", t, re.I)
     if m:
         out.append({"kind": "opponent_has_in_play", "what": m.group(1).strip()})
+    # Decidueye ex's Sniper's Eye gates its whole effect on the opponent
+    # holding an exact number of cards. Without this the cost reduction
+    # compiles as unconditional and the card reads as far stronger than it
+    # is -- the entire deck around it exists to satisfy this clause.
+    m = re.search(r"if your opponent has (?:exactly )?(\d+) (?:or (more|fewer) )?cards?"
+                  r" in (?:their|your opponent'?s) hand", t, re.I)
+    if m:
+        cmp_op = {"more": ">=", "fewer": "<="}.get(m.group(2) or "", "==")
+        out.append({"kind": "opponent_hand_size", "op": cmp_op,
+                    "count": int(m.group(1))})
     return out
 
 
@@ -376,9 +387,33 @@ def _r(m, text):
 def _r(m, text):
     if re.search(r"draw cards until you have", text, re.I):
         return []
+    # "opponent empties their hand, then draws N" is a hand-SIZE set, not a
+    # draw -- opponent_hand_reset below owns it. Left here it compiled as
+    # "both players draw N", which both handed the user free cards and lost
+    # the only thing that matters about the effect: the resulting count.
+    if re.search(r"(?:have your opponent shuffle|your opponent shuffles) their hand",
+                 text, re.I):
+        return []
     if re.search(r"each player draw|your opponent .{0,20}draw|they draw", text, re.I):
         return [Action(Op.DRAW, int(m.group(1)), Target.BOTH_ALL)]
     return [Action(Op.DRAW, int(m.group(1)), Target.SELF)]
+
+
+@rule("opponent_hand_reset",
+      r"(?:have your opponent shuffle|your opponent shuffles) their hand"
+      r"[^.]*?(?:into their deck|on the bottom of their deck)")
+def _r(m, text):
+    """Vivillon's Grand Wing / Gothitelle's Distorted Future.
+
+    The opponent's hand goes away and is replaced by exactly N fresh cards.
+    The number, not the drawing, is the effect: it is the only repeatable
+    way in the format to put an opponent on an exact hand count, which is
+    what Decidueye ex's Sniper's Eye reads.
+    """
+    n = re.search(r"(?:they |and )draw (\d+) cards?", text[m.start():], re.I)
+    if not n:
+        return []
+    return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT)]
 
 
 @rule("draw_one", r"\bdraw a card")

@@ -113,6 +113,16 @@ def conditions_met(effect, pl, opp, source):
         if k == "opponent_has_in_play":
             if not any(c["what"].lower() in n.lower() for n in opp.in_play_names()):
                 return False
+        if k == "opponent_hand_size":
+            if opp is pl:
+                return False      # no opponent in view: fail closed, never guess
+            n, want = len(opp.hand), c["count"]
+            if c["op"] == "==" and n != want:
+                return False
+            if c["op"] == ">=" and n < want:
+                return False
+            if c["op"] == "<=" and n > want:
+                return False
     return True
 
 
@@ -409,6 +419,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return True
         return False
 
+    if op == O.SET_OPPONENT_HAND:
+        # Their whole hand goes to the bottom of the deck, then they draw a
+        # fixed number back. Vivillon's wording only redraws if they had
+        # cards to put down, so an empty hand stays empty.
+        if not opp.hand:
+            return False
+        opp.deck[:0] = opp.hand          # bottom of deck (deck draws off the end)
+        opp.hand = []
+        for _ in range(act.amount or 0):
+            if opp.deck:
+                opp.hand.append(opp.deck.pop())
+        log.append(f"    opponent's hand reset to {len(opp.hand)}")
+        return True
+
     if op == O.SWAP_HAND_WITH_DECK:
         if not pl.hand or not pl.deck:
             return False
@@ -587,6 +611,25 @@ def query_retreat_modifier(pl, spot, opp=None):
             continue
         total += act.amount or 0
     return total
+
+
+def query_ignored_cost_types(pl, spot, opp=None):
+    """Energy types this Pokemon's attack costs ignore right now.
+
+    Decidueye ex's Sniper's Eye ("ignore all Colorless Energy in the costs
+    of attacks used by this Pokemon") is conditional on the opponent's hand
+    size, so this has to be re-evaluated every time an attack is priced --
+    it is on or off turn by turn, not a property of the card.
+    """
+    out = set()
+    for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_ATTACK_COST):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        if (act.amount or 0) <= -99:
+            out.add(act.filter.get("type") or "ALL")
+    return out
 
 
 def query_condition_damage_bonus(pl, condition):
