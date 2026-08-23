@@ -294,6 +294,46 @@ number)` from `pokemon_standard_cards.json` before finalizing any decklist
 meant to be pasted into the actual client, the same discipline already
 applied to Pokémon.
 
+### 4b. A missing SET NUM in this repo's index is NOT proof the user is wrong
+
+`pokemon_standard_cards.json` is a Standard-legal **snapshot carrying one
+printing per card**, not a complete set list. Every set in it has real
+gaps: SFA holds 59 of 66 numbers, TWM 164 of 226, ASC 209 of 289. So when
+a user-supplied `SET NUM` does not resolve, there are two possible causes
+and they look identical from the index:
+
+1. the user's number is genuinely wrong, or
+2. the number is right and this pool just carries a different printing.
+
+Near-miss that motivated writing this down: a user-provided Luxray deck
+was checked against the index and **eight** of its lines came back
+"mismatch" — `Fezandipiti ex SFA 38`, `Luxray ex TWM 68`, `Battle Cage
+PFL 85`, `Night Stretcher ASC 196`, `Buddy-Buddy Poffin ASC 184`, `Boss's
+Orders ASC 183`, `Air Balloon ASC 181`, `Rare Candy PAF 89`. Reporting
+that list would have been seven false accusations. **Exactly one was
+real.**
+
+Before calling any `SET NUM` wrong, run these two checks:
+
+- **Neighbour check.** Print the pool's cards at the surrounding numbers
+  in that set. Pokémon are numbered by evolution line and Trainers
+  alphabetically, so the gap's identity is usually inferable. `TWM 66
+  Shinx / 67 Luxio / [68 gap] / 69 Emolga` puts Luxray ex at exactly 68 —
+  the user was right. `ASC 182 Anthea & Concordia / [183, 184 gaps] / 185
+  Canari` is precisely where "Boss's Orders" and "Buddy-Buddy Poffin"
+  sort — both right. `SFA 36 Okidogi ex / 37 Munkidori ex / [38 gap] / 39
+  Pecharunt ex` is the loyal-three block, so Fezandipiti ex 38 is right.
+- **Set-legality check.** Is the set code in the pool's set list at all?
+  Every card in this pool is regulation mark **H, I or J**. `PAF`
+  (Paldean Fates) appears nowhere, so `Rare Candy PAF 89` is the one
+  genuine problem in that list — not a typo, a **rotated card**. That is
+  the failure worth reporting, and it is a different and more serious one
+  than a wrong number.
+
+Report a number as wrong only when both checks fail. When the pool simply
+lacks a printing, say so plainly ("this pool carries MEG 173; your ASC 196
+is a reprint it doesn't list") instead of correcting the user.
+
 ### 5. Walk the actual turn sequence before calling a combo reliable
 
 Listing synergistic cards is not the same as verifying they combo the way

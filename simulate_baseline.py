@@ -130,7 +130,7 @@ def play_basics(state, POKEMON, turn, log):
     for kind, name in list(state.hand):
         if kind == "Pokemon" and POKEMON[name]["stage"] == "Basic" and len(state.bench) < 5:
             state.remove_from_hand(kind, name)
-            state.bench.append({"name": name, "energy": 0, "entered_turn": turn})
+            state.bench.append({"name": name, "energy": 0, "entered_turn": turn, "evolved_this_turn": False})
             state.note_online(name, turn)
             log.append(f"Bench {name}")
 
@@ -142,7 +142,8 @@ def try_evolve(state, POKEMON, turn, log):
         target = POKEMON[name]["evolves_from"]
         if target is None:
             continue
-        if state.active == target and turn > state.active_entered_turn:
+        if (state.active == target and turn > state.active_entered_turn
+                and not state.active_evolved_this_turn):
             state.remove_from_hand(kind, name)
             state.active = name
             state.active_evolved_this_turn = True
@@ -150,10 +151,13 @@ def try_evolve(state, POKEMON, turn, log):
             log.append(f"Evolve {target} -> {name} (Active, can't attack this turn)")
             use_draw_abilities(state, POKEMON, log, evolved_name=name)
             continue
-        slot = next((s for s in state.bench if s["name"] == target and turn > s["entered_turn"]), None)
+        slot = next((s for s in state.bench
+                     if s["name"] == target and turn > s["entered_turn"]
+                     and not s.get("evolved_this_turn")), None)
         if slot is not None:
             state.remove_from_hand(kind, name)
             slot["name"] = name
+            slot["evolved_this_turn"] = True
             state.note_online(name, turn)
             log.append(f"Evolve {target} -> {name} (Bench)")
             use_draw_abilities(state, POKEMON, log, evolved_name=name)
@@ -496,7 +500,7 @@ def play_items(state, POKEMON, priority, turn, log):
             state.deck = remaining
             random.shuffle(state.deck)
             for name in found[: max(0, 5 - len(state.bench))]:
-                state.bench.append({"name": name, "energy": 0, "entered_turn": turn})
+                state.bench.append({"name": name, "energy": 0, "entered_turn": turn, "evolved_this_turn": False})
                 state.note_online(name, turn)
             log.append(f"Play {item_name} -> bench {', '.join(found)}")
 
@@ -519,7 +523,7 @@ def play_items(state, POKEMON, priority, turn, log):
         state.deck = remaining
         random.shuffle(state.deck)
         for name in found[: max(0, 5 - len(state.bench))]:
-            state.bench.append({"name": name, "energy": 0, "entered_turn": turn})
+            state.bench.append({"name": name, "energy": 0, "entered_turn": turn, "evolved_this_turn": False})
             state.note_online(name, turn)
         log.append(f"Play Buddy-Buddy Poffin -> bench {', '.join(found)}")
 
@@ -867,6 +871,8 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
         log.append("Draw 1 for turn")
     state.supporter_played = False
     state.active_evolved_this_turn = False
+    for _slot in state.bench:
+        _slot["evolved_this_turn"] = False
     state.abilities_used = set()
     state.played_supporters_this_turn = set()
     play_basics(state, POKEMON, turn_num, log)

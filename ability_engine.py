@@ -113,6 +113,11 @@ def conditions_met(effect, pl, opp, source):
         if k == "opponent_has_in_play":
             if not any(c["what"].lower() in n.lower() for n in opp.in_play_names()):
                 return False
+        if k == "opponent_active_is_ex":
+            if opp is pl or not opp.active:
+                return False
+            if opp.POKEMON[opp.active.name]["prize_value"] < 2:
+                return False
         if k == "opponent_hand_size":
             if opp is pl:
                 return False      # no opponent in view: fail closed, never guess
@@ -479,7 +484,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op in (IR.Op.REDUCE_DAMAGE, IR.Op.BUFF_DAMAGE, IR.Op.PREVENT_DAMAGE,
               IR.Op.MODIFY_RETREAT, IR.Op.LOCK, IR.Op.MODIFY_HP,
               IR.Op.MODIFY_ATTACK_COST, IR.Op.GRANT_ATTACK_ACCESS,
-              IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,
+              IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,   # EVOLVE_EARLY: query_evolves_early
               IR.Op.ATTACK_FIRST_TURN, IR.Op.MODIFY_PRIZE, IR.Op.ENDURE,
               IR.Op.BUFF_CONDITION_DAMAGE, IR.Op.SET_TYPE,
               IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,
@@ -580,6 +585,8 @@ def query_prevented(pl, spot, opp=None):
             continue
         if act.target == IR.Target.YOUR_BENCHED and spot not in pl.bench:
             continue
+        if act.filter.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
+            continue
         return True
     return False
 
@@ -630,6 +637,23 @@ def query_ignored_cost_types(pl, spot, opp=None):
         if (act.amount or 0) <= -99:
             out.add(act.filter.get("type") or "ALL")
     return out
+
+
+def query_evolves_early(pl, spot, opp=None):
+    """Can this Pokemon be evolved on the turn it was played (or turn 1)?
+
+    Luxio's Fighting Roar is the reason this exists: against an ex Active
+    it collapses Shinx -> Luxio -> Luxray ex from three turns to two, which
+    is the whole clock of a Luxray deck. Gated on the opponent's Active, so
+    it has to be asked fresh each turn rather than baked into the card.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.EVOLVE_EARLY):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        return True
+    return False
 
 
 def query_condition_damage_bonus(pl, condition):

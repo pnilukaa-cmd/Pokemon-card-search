@@ -155,40 +155,45 @@ Mulligan rate with 10 Basics: **25.9%** (`comb(50,7)/comb(60,7)`).
 
 | | % | avg turn |
 | --- | --- | --- |
-| Rowlet | 96.2% | 1.56 |
-| Scatterbug | 96.3% | 1.54 |
-| Dartrix | 81.4% | 3.07 |
-| Budew | 81.3% | 1.96 |
-| **Decidueye ex** | **69.7%** | 3.38 |
-| **Vivillon** | **63.4%** | 3.37 |
-| Spewpa | 62.0% | 3.34 |
+| Rowlet | 95.9% | 1.51 |
+| Scatterbug | 95.7% | 1.59 |
+| Budew | 82.4% | 1.95 |
+| Dartrix | 80.1% | 2.96 |
+| **Decidueye ex** | **68.3%** | 3.65 |
+| Spewpa | 62.8% | 3.29 |
+| **Vivillon** | **59.6%** | 3.63 |
 
-First attack landed by turn 6: 80.8% (avg turn 2.69).
+First attack landed by turn 6: 78.6% (avg turn 2.67).
 
 Builds tested along the way, by Decidueye ex / Vivillon on turn 6:
 
 | Build | Decidueye ex | Vivillon |
 | --- | --- | --- |
-| Maximum Belt ACE SPEC | 58.4% | 39.4% |
-| Grand Tree ACE SPEC | 66.6% | 51.1% |
-| + 2 Dawn (−1 Pokégear) | 74.6% | 57.4% |
-| + 3rd Vivillon (−1 Switch) | 70.8% | 65.2% |
-| **final (−1 Night Stretcher, +2nd Black Belt's)** | **69.7%** | **63.4%** |
+| Maximum Belt ACE SPEC | 52.5% | 39.6% |
+| Grand Tree ACE SPEC | 66.3% | 53.4% |
+| + 2 Dawn (−1 Pokégear) | 69.5% | 53.0% |
+| + 3rd Vivillon (−1 Switch) | 67.5% | 64.0% |
+| **final (−1 Night Stretcher, +2nd Black Belt's)** | **68.0%** | **59.9%** |
 
 A no-Vivillon variant (Dunsparce/Dudunsparce as the draw engine, Judge as
 the only hand-setter) was built and tested too: it reached Decidueye ex
-64.2% by turn 6, no better than the two-line build, and had no way to set
+62.0% by turn 6, no better than the two-line build, and had no way to set
 the opponent's hand without spending the Supporter slot. Dropped.
 
 `simulate_versus.py`, 300 games each:
 
 | Opponent | Win rate |
 | --- | --- |
-| Mega Scrafty ex darkness tank | 68.3% |
-| Eerie Inferno Ninetales burn | 60.7% |
-| Hop's Snorlax stacked buff | 50.7% |
-| Steven's Carbink damage wall | 35.3% |
-| Team Rocket's Persian ex attack theft | 30.0% |
+| Mega Scrafty ex darkness tank | 62.0% |
+| Eerie Inferno Ninetales burn | 52.7% |
+| Hop's Snorlax stacked buff | 44.0% |
+| Steven's Carbink damage wall | 36.3% |
+| Team Rocket's Persian ex attack theft | 35.3% |
+
+*(Every number on this page was re-measured after a later fix to evolution
+timing — the simulators had been letting one Pokémon evolve twice in a
+single turn, which flattered every Stage 2 deck by about a turn. The
+figures above are the post-fix ones.)*
 
 ## Turn sequence — what actually has to happen
 
@@ -260,4 +265,4 @@ Two genuine engine bugs surfaced while testing this list, both fixed in
 Also modeled, since they were being scored as blanks: `Judge`, `Carmine`,
 `Pokégear 3.0` and `Black Belt's Training` in both simulators. Before
 those landed the versus sim had this deck at 34.0% against Mega Scrafty;
-with them it is 68.3%.
+with them it is 62.0%.

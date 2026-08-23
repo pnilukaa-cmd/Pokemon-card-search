@@ -402,6 +402,38 @@ def test_sniper_eye_cost_reduction_is_conditional():
         check(f"no discount at {n} cards", off == set(), str(off))
 
 
+def test_fighting_roar_needs_an_ex_active():
+    """Luxio may evolve the turn it is played only while the opponent's
+    Active is a Pokemon ex. Compiled without that gate it read as a free
+    turn of evolution speed in every matchup."""
+    POK, EFF = build(["Luxio", "Luxray ex", "Shinx"],
+                     {"Luxio": ("POR", "27")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Luxio"))
+    opp = FakePlayer("B", POK, EFF, active=Spot("Luxray ex"))   # 310 HP ex
+    check("Fighting Roar is on against an ex Active",
+          AE.query_evolves_early(me, me.active, opp))
+    opp.active = Spot("Shinx")                                   # 70 HP Basic
+    check("Fighting Roar is off against a non-ex Active",
+          not AE.query_evolves_early(me, me.active, opp))
+    check("no opponent in view means off, not on",
+          not AE.query_evolves_early(me, me.active, me))
+
+
+def test_flower_curtain_skips_rule_box_pokemon():
+    """Shaymin protects benched Pokemon that DON'T have a Rule Box. The
+    clause was being dropped, so it shielded the benched ex too."""
+    POK, EFF = build(["Shaymin", "Fezandipiti ex", "Shinx"],
+                     {"Shaymin": ("DRI", "10")})
+    plain, boxed = Spot("Shinx"), Spot("Fezandipiti ex")
+    me = FakePlayer("A", POK, EFF, active=Spot("Shaymin"),
+                    bench=[plain, boxed])
+    opp = FakePlayer("B", POK, EFF, active=Spot("Shinx"))
+    check("benched non-Rule-Box Pokemon is protected",
+          AE.query_prevented(me, plain, opp))
+    check("benched Pokemon ex is NOT protected",
+          not AE.query_prevented(me, boxed, opp))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -415,7 +447,9 @@ def main():
                test_conditions_clear_on_retreat_and_evolve,
                test_condition_blocks_attack,
                test_opponent_hand_reset,
-               test_sniper_eye_cost_reduction_is_conditional]:
+               test_sniper_eye_cost_reduction_is_conditional,
+               test_fighting_roar_needs_an_ex_active,
+               test_flower_curtain_skips_rule_box_pokemon]:
         print(f"{fn.__name__}:")
         try:
             fn()

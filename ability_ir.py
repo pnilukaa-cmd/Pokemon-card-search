@@ -279,6 +279,11 @@ def parse_conditions(text):
     # holding an exact number of cards. Without this the cost reduction
     # compiles as unconditional and the card reads as far stronger than it
     # is -- the entire deck around it exists to satisfy this clause.
+    # Luxio's Fighting Roar only turns on against an ex Active. Without
+    # this the "can evolve the turn you play it" clause reads as
+    # unconditional, which is a materially different card.
+    if re.search(r"if your opponent'?s active pok[eé]mon is a pok[eé]mon ex", t, re.I):
+        out.append({"kind": "opponent_active_is_ex"})
     m = re.search(r"if your opponent has (?:exactly )?(\d+) (?:or (more|fewer) )?cards?"
                   r" in (?:their|your opponent'?s) hand", t, re.I)
     if m:
@@ -509,6 +514,11 @@ def _r(m, text):
     mm = re.search(r"from your opponent's ([\w' ]+?) pok", seg, re.I)
     if mm:
         filt["attacker_is"] = mm.group(1).strip()
+    # Shaymin's Flower Curtain shields only the Pokemon WITHOUT a Rule Box.
+    # Dropping this clause made it protect the benched ex it is played
+    # alongside, which is the exact opposite of how the card plays.
+    if re.search(r"don'?t have a rule box", seg, re.I):
+        filt["no_rule_box"] = True
     return [Action(Op.PREVENT_DAMAGE, None, tgt, filt)]
 
 

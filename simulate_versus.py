@@ -312,8 +312,6 @@ def play_basics(pl, turn, log):
 
 
 def try_evolve(pl, opp, turn, log, first_turn):
-    if first_turn:
-        return
     for kind, name in list(pl.hand):
         if kind != "Pokemon":
             continue
@@ -321,7 +319,17 @@ def try_evolve(pl, opp, turn, log, first_turn):
         if not pre:
             continue
         for spot in pl.in_play():
-            if spot.name == pre and turn > spot.entered_turn:
+            if spot.name != pre:
+                continue
+            # Normal timing: the Pokemon must have been in play since a
+            # previous turn, and one Pokemon evolves at most once per turn.
+            # (The second half was missing, so any Basic could run all the
+            # way to Stage 2 in a single turn and every Stage 2 line
+            # simulated a full turn faster than it really is.)
+            normal = (not first_turn and turn > spot.entered_turn
+                      and not spot.evolved_this_turn)
+            # Luxio's Fighting Roar is the printed exception to both halves.
+            if normal or AE.query_evolves_early(pl, spot, opp):
                 pl.remove_from_hand(kind, name)
                 spot.name = name
                 spot.evolved_this_turn = True
