@@ -57,16 +57,21 @@ there isn't one:
 - **Boss's Orders (4)** — drag up a Pokémon with **no Energy attached**.
   This is a damage-free play; the point is *which* Pokémon is Active, not
   hurting it.
-- **Gravity Gemstone (2)** — +1 Retreat Cost to both Actives. A gusted
-  0-Energy Pokémon with retreat 2 now needs two turns of attachments just
-  to leave, and they can only attach one Energy per turn.
+- **Jamming Tower (2)** — kills their `Air Balloon` and `Rescue Board`, so
+  a gusted 0-Energy Pokémon has to pay its printed Retreat Cost in real
+  Energy, one attachment per turn. See the Stadium section below.
+- **Crushing Hammer (3)** — an Item, so it strips the Energy they do
+  attach without costing you the turn's mill.
 - **Xerosic's Machinations (2)** — strips them to 3 cards, taking their
   `Switch` and `Air Balloon` with it. It also forces them to spend draw
   Supporters to refill, which burns their deck *again*. It earns its slot
   twice over in this plan.
 - **Team Rocket's Chingling (3)** — free-cost `Chiming Commotion` discards
-  a random card from their hand. Mostly a Poffin-able opener; use it only
-  on turns Centiskorch isn't ready, since Controlled Burn is worth more.
+  a random card from their hand, for **no Energy at all**. Best used the
+  turn after `Xerosic's Machinations`: they are already down to 3 cards, so
+  a random discard off a 3-card hand is a third of everything they hold,
+  and it costs you nothing but the attack on a turn Centiskorch isn't
+  online yet. Once Centiskorch is up, Controlled Burn is worth more.
 
 **Do not Knock Out the trapped Pokémon.** Every attack in this deck's plan
 deals 0 damage on purpose — a KO just lets them promote something better.
@@ -83,23 +88,23 @@ Pokémon: 21
 3 Centiskorch PBL 10
 3 Team Rocket's Chingling DRI 85
 
-Trainer: 29
+Trainer: 30
 4 Buddy-Buddy Poffin MEG 167
 4 Ultra Ball MEG 131
 4 Rare Candy MEG 125
 4 Boss's Orders MEG 114
 3 Lillie's Determination MEG 119
+3 Crushing Hammer POR 71
+2 Poké Pad ASC 198
 2 Xerosic's Machinations SFA 64
-2 Gravity Gemstone SCR 137
-2 Sacred Ash POR 115
-2 Night Stretcher MEG 173
-1 Poké Pad ASC 198
+2 Jamming Tower ASC 261
+1 Sacred Ash POR 115
 1 Grand Tree SCR 136
 
-Energy: 10
+Energy: 9
 2 Telepathic Psychic Energy POR 88
 4 Basic Psychic Energy
-4 Basic Fire Energy
+3 Basic Fire Energy
 
 Total Cards: 60
 ```
@@ -149,11 +154,17 @@ Mulligan with 10 Basics: **25.9%**.
 
 | | original | this build |
 | --- | --- | --- |
-| Litwick | 86.3% | 96.5% |
+| Litwick | 86.3% | 96.9% |
 | Lampent | 50.1% | 76.3% |
-| **Chandelure** (mill engine) | **25.4%** | **60.2%** |
-| Sizzlipede | 44.9% | 77.9% |
-| **Centiskorch** (the win condition) | **20.8%** | **51.1%** |
+| **Chandelure** (mill engine) | **25.4%** | **61.7%** |
+| Sizzlipede | 44.9% | 82.6% |
+| **Centiskorch** (the win condition) | **20.8%** | **57.9%** |
+| Team Rocket's Chingling | 29.2% | 88.6% |
+
+Mulligan 25.9% (11 Basics). Every utility Basic added on top of these
+costs engine consistency directly — a version carrying 3 Chingling **and**
+2 Elgyem dropped Chandelure to 50.3% and Centiskorch to 41.7%. Three
+Chingling is the most the engine will carry.
 
 **A caveat that matters more than the win rates below.** The simulator's
 AI cannot play this deck's actual plan: its `Boss's Orders` drags up the
@@ -246,6 +257,47 @@ Keep the Fire line. If you want a Poffin-eligible early miller without a
 third colour, **`Drilbur` SSP 108** is the one: `Burrow` costs a single
 **Colorless**, so the Psychic Energy already in the deck pays for it.
 
+## The Stadium slot
+
+The lock lives and dies on Retreat Cost, and **the cards that break it are
+Tools**: `Air Balloon` (−2), `Rescue Board` (−1), `Future Booster Energy
+Capsule` (no Retreat Cost at all). That points at one Stadium.
+
+**Jamming Tower ASC 261** — *"Pokémon Tools attached to each Pokémon (both
+yours and your opponent's) have no effect."* It answers every retreat Tool
+in the format at once, and at **2 copies** you always have a Stadium to
+push theirs out with.
+
+It does turn off your own `Gravity Gemstone`, so it is Jamming Tower **or**
+Gemstone, not both. On a gusted Pokémon with printed Retreat Cost 2:
+
+| | their retreat |
+| --- | --- |
+| Gemstone, they attach Air Balloon | 2 + 1 − 2 = **1** |
+| Gemstone, no Balloon | 2 + 1 = **3** |
+| **Jamming Tower** (Balloon dead) | **2** |
+
+Gemstone has the higher ceiling and folds completely to a single Air
+Balloon. Jamming Tower has the lower ceiling and no answer. For a deck
+whose survival *is* the lock, take the floor.
+
+The other Stadiums worth knowing about:
+
+| Stadium | Verdict |
+| --- | --- |
+| **Team Rocket's Watchtower** ASC 210 | *Colorless Pokémon have no Abilities.* **Costs this deck literally nothing** — nothing in it is Colorless — and switches off `Dudunsparce`, `Mega Kangaskhan ex`, `Fan Rotom`, `Noctowl`. The free-roll bump if you would rather keep Gravity Gemstone. Mild anti-synergy: killing their draw also slows their own deck burn |
+| **Neutralization Zone** SFA 60 | ACE SPEC. Nothing here has a Rule Box, so an ex deck **cannot damage you at all**. The strongest single lock card available — but it costs you Grand Tree, and it is 1 copy, so it cannot be replayed after a bump |
+| **Academy at Night** SFA 54 | Puts a card from hand back on **top of your deck** each turn, which extends your own clock. Symmetric, so it helps whoever is closer to decking out — that is *them*. Skip |
+| **Gravity Mountain** SSP 177 | −30 HP to every Stage 2. Your Chandelure is 130. No |
+| **Risky Ruins** MEG 127 | 2 damage counters on every Basic non-Darkness Pokémon benched. You bench 10+ Basics. No |
+| **Lumiose City** POR 111 | Searching with it **ends your turn**. No |
+
+Note that **Grand Tree is itself a Stadium**, so running it alongside two
+Jamming Tower means sequencing them: Grand Tree early while you are still
+assembling, Jamming Tower once the lock is what matters. Playing your own
+Jamming Tower discards your own Grand Tree — that is the intended line,
+not a mistake.
+
 ## The energy-denial half of the lock
 
 Raising Retreat Cost only works while they cannot pay it, and they attach
@@ -266,29 +318,31 @@ Basic. It undoes a turn of their retreat progress for free. Once
 Centiskorch is up, hand the job to `Crushing Hammer`, which does the same
 work at Item speed without costing you the 2-card mill.
 
-**Lock-heavy configuration** (swap into the list above):
+`Crushing Hammer` is maindecked at 3 above. **`Elgyem` is a 1-of swap**
+(over the third `Lillie's Determination`) if you want the guaranteed,
+no-flip version for turns 1–3; every utility Basic past the third
+Chingling measurably costs engine consistency, so it is a real trade
+rather than a free include.
 
-```
--2 Team Rocket's Chingling   -1 Sacred Ash
--1 Lillie's Determination    -1 Basic Fire Energy
-+2 Elgyem BLK 40             +3 Crushing Hammer POR 71
-```
-
-Cost, measured: Chandelure by turn 6 60.2% → 56.8%, Centiskorch
-51.1% → 46.7%. **The benefit is not measurable here** — `Crushing Hammer`
-has no modeled effect in the simulator, and the AI has no concept of
-denying a retreat, so its win rates score the cost of this swap and none
-of the payoff. Take it on the arithmetic, not on the sim: a trapped
-Pokémon on Retreat Cost 2–3 that loses one Energy a turn never leaves.
+**A limitation to read the win rates against.** `Crushing Hammer` has no
+modeled effect in the simulator, and **no Stadium does anything at all in
+`simulate_versus.py`** (`Player.stadium` is assigned and never read), so
+Jamming Tower is invisible there too. The AI also has no concept of
+denying a retreat. Those three together mean the versus numbers score
+this build's *costs* and none of its payoff — while the earlier
+Gravity Gemstone version did get its +1 counted, because Tools feed the
+retreat query. Judge the lock on the arithmetic: a trapped Pokémon on
+Retreat Cost 2 whose Air Balloon is dead and who loses an Energy a turn
+never leaves.
 
 ## What was cut, and why
 
 | Cut | Why |
 | --- | --- |
-| 2 Mega Chandelure ex | competes with Chandelure for the same Lampent, and **3 Prizes** is half the opponent's clock for one KO. `Gravity Gemstone` supplies the retreat tax for one card instead of a Stage 2 line |
+| 2 Mega Chandelure ex | competes with Chandelure for the same Lampent, and **3 Prizes** is half the opponent's clock for one KO. `Jamming Tower` protects the retreat lock for one card instead of a Stage 2 line |
 | 1 Latias ex | 2 Prizes, and `Skyliner` frees your *Basics* — irrelevant to a Stage 1 attacker that never wants to move |
 | 1 Comfey | `Flower Shower` draws **each** player 3 — symmetric, so it buys no edge, and it costs you 3 off your own cushion in one shot |
-| 1 Maractus | `Corner` stops retreat for one turn but is an *attack*, so it costs you the 2-card Controlled Burn that turn. The lock is cheaper via Gravity Gemstone + hand denial |
+| 1 Maractus | `Corner` stops retreat for one turn but is an *attack*, so it costs you the 2-card Controlled Burn that turn. The lock is cheaper via Jamming Tower + Crushing Hammer + hand denial |
 | 1 Eevee / 1 Sylveon | `Safeguard` walls one Pokémon; `Neutralization Zone` walls the whole board for one card if you want that effect |
 | 1 Elgyem, 1 Dedenne, 1 Team Rocket's Watchtower, 1 Lana's Aid, 2 Air Balloon | singleton utility with no line to it; the deck cannot afford cards that don't advance the clock or the lock |
 
