@@ -1,5 +1,14 @@
 # Mega Chandelure ex — retreat tax
 
+> **Superseded for the deck it was derived from.** This file read the
+> retreat tax as a *damage* scaler. The user's actual plan was to use it
+> as a **lock** — trap a harmless Pokémon Active and win by decking the
+> opponent out — which makes the mill package the win condition rather
+> than the chaff this file treats it as. See
+> `chandelure_centiskorch_deck_out.md` for that build. The damage numbers
+> and the Path A/B comparison below are still correct on their own terms,
+> and this remains a real deck if you want to win on Prizes.
+
 Refocus of a user-supplied Chandelure list that was running three
 different win conditions out of one evolution line. This file keeps the
 retreat-tax half and documents why the other two were cut.

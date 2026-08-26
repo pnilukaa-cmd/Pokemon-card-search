@@ -888,9 +888,21 @@ def attack_rider_value(pl, opp, atk):
         elif act.op == IR.Op.DISCARD_ENERGY_FROM_OPPONENT:
             value += 25 if opp.active.energy else 0
         elif act.op == IR.Op.MILL_OPPONENT:
-            value += 5 * (act.amount or 1)
+            # Decking someone out is a whole win, worth six Prizes. Milling
+            # N of the D cards they have left is N/D of the way there, so
+            # price it against what a Prize is worth in damage (~250, one
+            # KO). Flat-rating it at 5/card meant a 0-damage mill attack
+            # never beat any attack that dealt damage, so the AI would not
+            # play the deck-out plan at all -- the same shape of bug that
+            # made Special-Condition decks unplayable before RIDER_VALUE.
+            left = max(len(opp.deck), 1)
+            value += (act.amount or 1) / left * 6 * 250
         elif act.op == IR.Op.DISCARD_FROM_OPPONENT:
             value += 10 * (act.amount or 1)
+        elif act.op == IR.Op.SEARCH_TO_BENCH:
+            # Worth something only while there is Bench room to fill.
+            room = max(0, 5 - len(pl.bench))
+            value += 35 * min(act.amount or 1, room)
     return int(value * getattr(eff, "chance", 1.0))
 
 
@@ -1124,6 +1136,10 @@ ATTACK_RIDER_OPS = {
     IR.Op.MILL_OPPONENT,
     IR.Op.HEAL,
     IR.Op.DISCARD_FROM_OPPONENT,
+    # Lampent's Spreading Light fills the Bench with its own Stage 1 --
+    # a 0-damage setup attack that is the entire early game of a deck
+    # built on the Stage 2 above it.
+    IR.Op.SEARCH_TO_BENCH,
 }
 
 
@@ -1234,9 +1250,13 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
 
     first_turn = (turn == 1 and going_first)
     if not first_turn:
-        pl.draw(1)
-        if pl.deck_out and not pl.hand:
+        # You lose the moment you must draw and cannot. Hand size has
+        # nothing to do with it -- the old check also required an empty
+        # hand, which meant a decked-out player kept taking turns forever
+        # and no mill deck could ever be scored as winning.
+        if not pl.deck:
             return "deck_out"
+        pl.draw(1)
 
     play_basics(pl, turn, log)
     if pl.active is None:

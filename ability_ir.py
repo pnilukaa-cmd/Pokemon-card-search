@@ -423,8 +423,12 @@ def _r(m, text):
 
 @rule("draw_one", r"\bdraw a card")
 def _r(m, text):
+    # "each player draws a card" belongs to each_player_draws below. Both
+    # rules used to fire on Chandelure's Alluring Light, emitting the draw
+    # twice -- which doubled the rate of the one engine a deck-out deck
+    # actually wins with.
     if re.search(r"each player", text, re.I):
-        return [Action(Op.DRAW, 1, Target.BOTH_ALL)]
+        return []
     return [Action(Op.DRAW, 1, Target.SELF)]
 
 
@@ -433,6 +437,27 @@ def _r(m, text):
 def _r(m, text):
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
                    {"name_contains": m.group(2).strip() or None})]
+
+
+@rule("recruit_species_to_bench",
+      r"search your deck for (?:up to )?(\d+|a|an) ([\w'’ .-]+?) and put (?:it|them) onto your bench")
+def _r(m, text):
+    """Species-named Bench search: "search your deck for up to 3 Lampent".
+
+    search_to_bench above only matches text containing the word "Pokemon",
+    so a card that names the species instead compiled to nothing at all.
+    Lampent's Spreading Light is a whole deck's setup engine -- one attack
+    fills the Bench with the Stage 1 that becomes the mill engine.
+
+    The species is the capitalised token, checked against the ORIGINAL text
+    rather than the case-folded match, so "3 Basic Energy cards" and other
+    lowercase nouns don't get mistaken for a species name.
+    """
+    species = m.group(2).strip()
+    if not species[:1].isupper():
+        return []
+    return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
+                   {"name_contains": species})]
 
 
 @rule("search_to_hand",

@@ -479,6 +479,25 @@ def test_skyliner_frees_only_basics():
           str(AE.effective_retreat(me, stage2, opp)))
 
 
+def test_alluring_light_draws_one_each():
+    """Chandelure's Alluring Light draws each player exactly ONE card.
+    Two overlapping compiler rules were both firing, doubling the rate of
+    the engine a deck-out deck wins with."""
+    POK, EFF = build(["Chandelure"], {"Chandelure": ("TWM", "38")})
+    eff = find(EFF["Chandelure"], "Alluring Light")
+    check("exactly one draw action compiles", len(eff.actions) == 1,
+          str(eff.actions))
+    me = FakePlayer("A", POK, EFF, active=Spot("Chandelure"),
+                    deck=[("Item", "Ultra Ball")] * 20)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Chandelure"),
+                     deck=[("Item", "Ultra Ball")] * 20)
+    AE.activate(eff, me, opp, me.active, [])
+    check("each player drew 1, not 2",
+          len(me.hand) == 1 and len(opp.hand) == 1,
+          f"me={len(me.hand)} opp={len(opp.hand)}")
+    check("one card left each deck", len(me.deck) == 19 and len(opp.deck) == 19)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -496,7 +515,8 @@ def main():
                test_fighting_roar_needs_an_ex_active,
                test_flower_curtain_skips_rule_box_pokemon,
                test_retreat_tax_reaches_across_the_table,
-               test_skyliner_frees_only_basics]:
+               test_skyliner_frees_only_basics,
+               test_alluring_light_draws_one_each]:
         print(f"{fn.__name__}:")
         try:
             fn()
