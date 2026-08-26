@@ -169,6 +169,118 @@ setup table above as the real evidence, and the win rates as a floor:
 | Hop's Snorlax stacked buff | 33.6% | 40.8% |
 | Decidueye ex / Judge | 45.2% | 48.0% |
 
+## Every mill effect in Standard
+
+A full sweep of the pool turns up **25** effects that discard cards off
+the opponent's deck. **None of them is a Trainer** — there is no mill Item
+or Supporter in the format at all — and none is a repeatable Ability.
+That is why 2-per-turn is the ceiling.
+
+### Repeatable, 0 damage (these keep the lock intact)
+
+| Card | Cost | Mill | Notes |
+| --- | --- | --- | --- |
+| **Centiskorch** PBL 10 | `F` | **2** | Stage 1, 140 HP, retreat 3. The build's pick |
+| **Zweilous** SSP 118 | `D` | **2** | Stage 1, 100 HP, retreat 2 — off a **70 HP Poffin-eligible** Deino |
+| **Great Tusk** TEF 97 | `CC` | 1, or **4** | Basic, 140 HP, retreat 3. The 4 needs an Ancient Supporter that turn |
+| **Drilbur** SSP 108 | `C` | 1 | 70 HP Basic, **Colorless cost** — runs off any Energy, Poffin-eligible |
+| **Deino** SSP 117 | `D` | 1 | 70 HP Basic, retreat 1 |
+| **Sizzlipede** PBL 9 | `F` | 1 | 80 HP — **too big for Buddy-Buddy Poffin** |
+| **T.R. Diglett** ASC 100 | `F` | flip until tails | 60 HP Basic. Averages 1, spikes to 3–4 |
+
+### Repeatable but deals damage (breaks the lock)
+
+`Hydreigon ex` (200 dmg + mill 3), `Tyranitar` JTG 95 (150 + 2),
+`Coalossal` TEF 95 (150 + 2), `Mega Excadrill ex` PBL 103 (90 + 2),
+`Mega Heracross ex` PFL 108 (170 + 2), `Tyrantrum` POR 45 (160 + flips),
+`Mega Scrafty ex` and `Scovillain ex` (mill 1 + a hand discard).
+
+These are all better cards; none of them belongs in a trap deck, because
+Knocking the trapped Pokémon out just lets the opponent promote a real
+attacker. They belong in a Prize-race deck that mills as a bonus.
+
+### One-shot bursts
+
+| Card | Burst | Trigger |
+| --- | --- | --- |
+| **Ferrothorn** CRI 63 | **8** | *Only* if the opponent discards it **from your deck**. The largest single mill in the format, and near-dead outside the mill mirror — but it triggers from the deck, so it costs no Bench slot |
+| **Great Tusk + Explorer's Guidance** | 4 in one turn | `Land Collapse` goes 1 → 4 if you played an Ancient Supporter. `Explorer's Guidance` TEF 147 is the only one |
+| **Flygon** PFL 101 | 2 | On evolving into it, **and again** if it is KO'd in the Active Spot |
+| **Durant ex** SSP 215 | 1 | When played from hand to the Bench. 2 Prizes, so not here |
+
+**On the late one-time mill specifically.** `Great Tusk` + `Explorer's
+Guidance` is the only real burst available, and it is a *finisher only*,
+never an engine — Explorer's Guidance is *"look at the top 6 of your deck,
+put 2 into your hand, discard the other cards,"* which costs **you 6 cards
+to mill them 4**. Running it as the plan loses the race outright:
+
+| | per turn |
+| --- | --- |
+| them | 1 + N + 4 = N+5 |
+| you | 1 + N + 6 = **N+7** |
+
+At N=2 you deck yourself on turn 7 with 13 of their cards still to go. As
+a single pair of cards held for the turn they sit at 4 or fewer, it
+converts "two more turns" into "I win now" — worth it only if you can
+afford Great Tusk's **retreat 3** in the Active Spot. Tested as a maindeck
+package it cost more than it gave: Chandelure by turn 6 dropped
+60.2% → 54.2% and Centiskorch 51.1% → 46.5%.
+
+### The Deino line: better on paper, worse in practice
+
+`Deino` SSP 117 is 70 HP where `Sizzlipede` is 80 — the difference between
+Buddy-Buddy Poffin fetching your win condition and not. Swapping the whole
+line in did exactly what the maths predicted: **Zweilous by turn 6
+51.1% → 60.0%**, Deino 77.9% → 90.8%.
+
+It then lost the head-to-head against the Fire version **32% to 68%**, and
+every gauntlet matchup fell (34.0% → 20.0%, 40.8% → 17.2%, 48.0% → 16.4%).
+The reason is not the mill at all: dropping Fire Energy makes
+**`Mind Ruler` uncastable**, and Mind Ruler is the deck's only source of
+damage anywhere. Zweilous is also 100 HP against Centiskorch's 140. A deck
+whose every attack deals 0 damage needs one card that can actually kill
+something when the lock breaks — the Fire Energy is in the list for
+Chandelure, not for Centiskorch.
+
+Keep the Fire line. If you want a Poffin-eligible early miller without a
+third colour, **`Drilbur` SSP 108** is the one: `Burrow` costs a single
+**Colorless**, so the Psychic Energy already in the deck pays for it.
+
+## The energy-denial half of the lock
+
+Raising Retreat Cost only works while they cannot pay it, and they attach
+one Energy a turn. Denial is the other half:
+
+| Card | Speed | Effect |
+| --- | --- | --- |
+| **Crushing Hammer** POR 71 | **Item** | Flip; heads discards an Energy from **any** of their Pokémon. Costs no attack and no Supporter, and you can throw several a turn |
+| **Elgyem** BLK 40 | attack, `P`, **0 dmg** | `Slight Shift` — move an Energy from one of their Pokémon to another. Guaranteed, no flip |
+| **Enhanced Hammer** TWM 148 | Item | No flip, but **Special Energy only** |
+| **Dustox** ASC 15 | **Ability** | `Boisterous Wind` — flip, bounce an Energy off their Active to hand. Repeatable and free, but a third Stage 2 line |
+
+`Elgyem` is the right card for turns 1–3 specifically. Centiskorch is not
+online until turn ~3.3, so those attacks are doing nothing anyway, and
+`Slight Shift` costs one **Psychic** — a colour already in the deck — deals
+**0 damage** so it never breaks the trap, and is a 60 HP Poffin-eligible
+Basic. It undoes a turn of their retreat progress for free. Once
+Centiskorch is up, hand the job to `Crushing Hammer`, which does the same
+work at Item speed without costing you the 2-card mill.
+
+**Lock-heavy configuration** (swap into the list above):
+
+```
+-2 Team Rocket's Chingling   -1 Sacred Ash
+-1 Lillie's Determination    -1 Basic Fire Energy
++2 Elgyem BLK 40             +3 Crushing Hammer POR 71
+```
+
+Cost, measured: Chandelure by turn 6 60.2% → 56.8%, Centiskorch
+51.1% → 46.7%. **The benefit is not measurable here** — `Crushing Hammer`
+has no modeled effect in the simulator, and the AI has no concept of
+denying a retreat, so its win rates score the cost of this swap and none
+of the payoff. Take it on the arithmetic, not on the sim: a trapped
+Pokémon on Retreat Cost 2–3 that loses one Energy a turn never leaves.
+
 ## What was cut, and why
 
 | Cut | Why |
