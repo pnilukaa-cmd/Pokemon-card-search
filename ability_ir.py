@@ -636,13 +636,23 @@ def _r(m, text):
 def _r(m, text):
     sign = 1 if m.group(2).lower() == "more" else -1
     tgt = Target.OPP_ACTIVE if "your opponent" in text.lower() else Target.SELF
-    return [Action(Op.MODIFY_RETREAT, sign, tgt)]
+    filt = {}
+    # Ariados's Big Net taxes only an "Active Evolution Pokemon" -- it does
+    # nothing against the Basic attackers a lot of the format runs, so the
+    # restriction has to survive compilation.
+    if re.search(r"active evolution pok[eé]mon", text, re.I):
+        filt["stage_not"] = "Basic"
+    return [Action(Op.MODIFY_RETREAT, sign, tgt, filt)]
 
 
 @rule("no_retreat_cost", r"(?:has|have) no retreat cost")
 def _r(m, text):
     tgt = Target.YOUR_ALL if re.search(r"all of your|your basic", text, re.I) else Target.SELF
-    return [Action(Op.MODIFY_RETREAT, -99, tgt)]
+    filt = {}
+    # Latias ex's Skyliner frees your BASIC Pokemon only.
+    if re.search(r"your basic pok[eé]mon", text, re.I):
+        filt["stage"] = "Basic"
+    return [Action(Op.MODIFY_RETREAT, -99, tgt, filt)]
 
 
 @rule("opponent_attack_cost", r"attacks used by your opponent's ([\w' ]*?)pok[eé]mon cost (" + TYPES + r") more")

@@ -434,6 +434,51 @@ def test_flower_curtain_skips_rule_box_pokemon():
           not AE.query_prevented(me, boxed, opp))
 
 
+def test_retreat_tax_reaches_across_the_table():
+    """Mega Chandelure ex's Binding Flame taxes the OPPONENT's Active. The
+    retreat query only ever read the owner's own passives, so the tax --
+    and every attack that prices itself off the resulting number -- scored
+    as zero."""
+    POK, EFF = build(["Mega Chandelure ex", "Litwick", "Ariados", "Latias ex"],
+                     {"Mega Chandelure ex": ("PBL", "38"), "Ariados": ("TWM", "5")})
+    defender_active = Spot("Litwick")                 # Basic, printed retreat 1
+    me = FakePlayer("A", POK, EFF, active=defender_active)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Mega Chandelure ex"))
+    check("one Binding Flame adds 1",
+          AE.effective_retreat(me, defender_active, opp) == 2,
+          str(AE.effective_retreat(me, defender_active, opp)))
+
+    opp.bench = [Spot("Mega Chandelure ex")]          # Binding Flame stacks
+    check("a benched second copy stacks to 2",
+          AE.effective_retreat(me, defender_active, opp) == 3,
+          str(AE.effective_retreat(me, defender_active, opp)))
+
+    # Big Net taxes only an Active EVOLUTION Pokemon, so it misses a Basic.
+    opp.bench.append(Spot("Ariados"))
+    check("Big Net does not tax a Basic Active",
+          AE.effective_retreat(me, defender_active, opp) == 3,
+          str(AE.effective_retreat(me, defender_active, opp)))
+    me.active = Spot("Ariados")                        # Stage 1 Active
+    check("Big Net does tax an Evolution Active",
+          AE.effective_retreat(me, me.active, opp) == 1 + 2 + 1,
+          str(AE.effective_retreat(me, me.active, opp)))
+
+
+def test_skyliner_frees_only_basics():
+    """Latias ex's Skyliner reads 'your BASIC Pokemon'. The Basic clause was
+    being dropped, which zeroed the Retreat Cost of Stage 2s too."""
+    POK, EFF = build(["Latias ex", "Litwick", "Mega Chandelure ex"],
+                     {"Mega Chandelure ex": ("PBL", "38")})
+    basic, stage2 = Spot("Litwick"), Spot("Mega Chandelure ex")
+    me = FakePlayer("A", POK, EFF, active=Spot("Latias ex"), bench=[basic, stage2])
+    opp = FakePlayer("B", POK, EFF, active=Spot("Litwick"))
+    check("a Basic retreats for free", AE.effective_retreat(me, basic, opp) == 0,
+          str(AE.effective_retreat(me, basic, opp)))
+    check("a Stage 2 keeps its printed cost",
+          AE.effective_retreat(me, stage2, opp) == 2,
+          str(AE.effective_retreat(me, stage2, opp)))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -449,7 +494,9 @@ def main():
                test_opponent_hand_reset,
                test_sniper_eye_cost_reduction_is_conditional,
                test_fighting_roar_needs_an_ex_active,
-               test_flower_curtain_skips_rule_box_pokemon]:
+               test_flower_curtain_skips_rule_box_pokemon,
+               test_retreat_tax_reaches_across_the_table,
+               test_skyliner_frees_only_basics]:
         print(f"{fn.__name__}:")
         try:
             fn()

@@ -76,6 +76,10 @@ def matches_filter(pl, spot, filt):
     typ = filt.get("type")
     if typ and typ not in (info.get("types") or []):
         return False
+    if filt.get("stage") and info.get("stage") != filt["stage"]:
+        return False
+    if filt.get("stage_not") and info.get("stage") == filt["stage_not"]:
+        return False
     return True
 
 
@@ -610,14 +614,51 @@ def query_retaliation(defender, attacker_spot, attacker_player=None):
 
 
 def query_retreat_modifier(pl, spot, opp=None):
+    """Net Retreat-Cost modifier on `spot`, counting BOTH sides.
+
+    Retreat is the one stat an opponent routinely modifies: Mega
+    Chandelure ex's Binding Flame and Ariados's Big Net tax YOUR Active
+    from across the table. Reading only the owner's own passives missed
+    every one of them, which also silently zeroed out any attack that
+    scales off the number (Phantom Maze, String Bind, Shadowy Knot).
+
+    -99 is the "no Retreat Cost" sentinel and wins outright.
+    """
     total = 0
     for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_RETREAT):
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
+        if act.target == IR.Target.OPP_ACTIVE:
+            continue          # aimed across the table, not at our own side
         if act.target == IR.Target.SELF and holder is not spot:
             continue
+        if act.target in (IR.Target.YOUR_ALL, IR.Target.YOUR_ANY):
+            if not matches_filter(pl, spot, act.filter):
+                continue
+        if (act.amount or 0) <= -99:
+            return -99
         total += act.amount or 0
+
+    # The other player's retreat taxes, which only reach our Active.
+    if opp is not None and opp is not pl and spot is pl.active:
+        for holder, eff, act in _passive_actions(opp, IR.Op.MODIFY_RETREAT):
+            if act.target != IR.Target.OPP_ACTIVE:
+                continue
+            if not conditions_met(eff, opp, pl, holder):
+                continue
+            if not matches_filter(pl, spot, act.filter):
+                continue
+            total += act.amount or 0
     return total
+
+
+def effective_retreat(pl, spot, opp=None, tool_mod=0):
+    """Printed Retreat Cost after every modifier, floored at 0."""
+    base = pl.POKEMON[spot.name]["retreat"]
+    mod = query_retreat_modifier(pl, spot, opp)
+    if mod <= -99:
+        return 0
+    return max(0, base + mod + tool_mod)
 
 
 def query_ignored_cost_types(pl, spot, opp=None):

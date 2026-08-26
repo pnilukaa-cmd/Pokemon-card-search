@@ -665,9 +665,31 @@ _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 
 
+# Tools whose whole job is Retreat Cost. Gravity Gemstone taxes BOTH
+# Actives, which is why it sits on an attacker that never wants to retreat.
+RETREAT_TOOLS = {"Air Balloon": -2, "Rescue Board": -1, "Gravity Gemstone": 1}
+
+
+def retreat_of(pl, spot, opp=None):
+    """Retreat Cost of `spot` right now: printed, plus Abilities from both
+    sides, plus its own Tool, plus a Gravity Gemstone on either Active."""
+    tool_mod = RETREAT_TOOLS.get(getattr(spot, "tool", None), 0)
+    if spot is pl.active and opp is not None and opp is not pl and opp.active:
+        if getattr(opp.active, "tool", None) == "Gravity Gemstone":
+            tool_mod += 1
+    return AE.effective_retreat(pl, spot, opp, tool_mod)
+
+
 def _clause_count(clause, pl, opp, spot):
     """How many times a 'for each ...' clause applies right now, or None."""
     c = clause.lower()
+    # Phantom Maze / String Bind / Shadowy Knot all price themselves off the
+    # defender's Retreat Cost, which is exactly the number this deck's own
+    # Abilities are inflating.
+    if "in your opponent's active pok" in c and "retreat cost" in c:
+        return retreat_of(opp, opp.active, pl) if opp and opp.active else 0
+    if "in this pok" in c and "retreat cost" in c:
+        return retreat_of(pl, spot, opp)
     if "card in your hand" in c:
         return len(pl.hand)
     if "card in your opponent's hand" in c:
@@ -990,7 +1012,7 @@ def try_retreat(pl, opp, log):
     """
     if not pl.active or not pl.bench:
         return
-    cost = pl.POKEMON[pl.active.name]["retreat"]
+    cost = retreat_of(pl, pl.active, opp)
     if pl.active.energy_count() < cost:
         return
     here = _ready_damage(pl, opp, pl.active)
