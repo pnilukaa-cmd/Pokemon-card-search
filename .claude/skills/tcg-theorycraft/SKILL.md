@@ -93,9 +93,10 @@ not just that it usually happens:
     `scripts/simulate_baseline.py` and reported the results (step 10) —
     every time a finished decklist is delivered, not only when explicitly
     asked to "test" it.
-11. Where a real opponent decklist is available, played it head-to-head
-    with `scripts/simulate_versus.py` and reported the win rate along
-    with that tool's own list of unmodeled cards (step 11).
+11. Played the finished deck against **every** other deck in `decks/`
+    with `scripts/gauntlet.py`, not a hand-picked three or four, and
+    reported the spread along with that tool's own list of unmodeled
+    cards (step 11).
 
 Skipping a step because the deck's theme seems simple or narrow is exactly
 the situation this list exists to catch — a narrow-seeming theme is often
@@ -595,6 +596,36 @@ modeled effect, attacks whose text could not be turned into a damage
 number, and cards matched by name only. **Read those lines before
 trusting a number** -- a deck that leans on an unmodeled card is being
 undervalued, and saying so is part of reporting the result.
+
+### 11b. Run the WHOLE gauntlet, not a sample you picked
+
+`scripts/gauntlet.py <my-deck.txt> <folder-of-decklists> [games]` plays a
+decklist against every other deck in a folder and prints the spread, a
+mean/median, and a winning-matchup count.
+
+Use it instead of running `simulate_versus.py` against three or four
+opponents chosen by hand. Two reasons, both observed:
+
+- **Hand-picking hides the tails.** A four-opponent sample of the bench
+  snipe deck gave 53-66%. The full 26 gave the same middle (mean 58.2%,
+  median 54.5%) but also a 87.5% and a 36.5% — and the bad end was the
+  informative half, because the two worst matchups were both *healing*
+  decks, which is precisely the predicted counter to a deck that needs an
+  exact damage-counter total. The sample said "good deck"; the full run
+  said "good deck, and here is the card type that beats it."
+- **Two decks' numbers are only comparable if they faced the same field.**
+  Choosing opponents per build makes every figure in `decks/` a different
+  measurement.
+
+It also **screens the opponents**, which matters more than it sounds. A
+deck the engine cannot pilot inflates everyone's win rate against it:
+`selective_bloom_cradily` runs **zero Basic Pokémon** (its Lileep arrives
+via `Antique Root Fossil`, an Item the engine does not model as a Basic),
+so it mulligans out and loses on turn 2 — a clean 100% "matchup" that
+means nothing. `gauntlet.py` detects zero-Basic decks, lists them
+separately, and leaves them out of the summary. Any result it flags as
+`<- check, near-total result` (>=95% or <=5%) deserves the same suspicion
+before being reported.
 
 ### 12. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 

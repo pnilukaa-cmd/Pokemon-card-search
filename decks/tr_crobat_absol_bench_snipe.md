@@ -137,14 +137,39 @@ brief: counters start landing turn 3 in the large majority of games, and
 Mega Absol ex is already there because it is a Basic. Crobat ex at 44.8%
 is the Stage 2 bonus, not the plan.
 
-`simulate_versus.py`, 200 games each:
+`simulate_versus.py` against **every one of the 26 other saved decks**,
+200 games each — mean **58.2%**, median **54.5%**, **19/26** winning
+matchups:
 
-| Opponent | Win rate |
-| --- | --- |
-| Hop's Snorlax stacked buff | **66.5%** |
-| Mega Chandelure ex retreat tax | **60.0%** |
-| N's Zoroark ex Night Joker | **58.5%** |
-| Mega Scrafty ex darkness tank | **53.0%** |
+| Win rate | Opponent | | Win rate | Opponent |
+| --- | --- | --- | --- | --- |
+| **87.5%** | T.R. Wobbuffet / Orbeetle | | 54.0% | Arbok / T.R. Muk |
+| **81.5%** | Feraligatr / Munkidori | | 53.0% | Krookodile ex / Relicanth |
+| **78.0%** | Static Venom Drapion | | 51.0% | T.R. Koffing / Weezing |
+| **78.0%** | Eerie Inferno Ninetales | | 50.0% | Orthworm ex metal |
+| **71.5%** | Chandelure / Centiskorch mill | | 49.5% | Arbok / Muk (Trolley) |
+| **66.0%** | Darkness mill hand lock | | 49.0% | Steven's Carbink wall |
+| **65.5%** | Salazzle ex / T.R. Muk | | 45.0% | Toxic Slumber Vileplume ex |
+| **65.0%** | Hop's Snorlax | | 42.0% | T.R. Persian ex |
+| **61.5%** | T.R. Spidops swarm | | 39.5% | Panic Poison Paralysis |
+| **60.0%** | N's Zoroark ex Night Joker | | 36.5% | Lurantis heal punish |
+| 57.5% | Water aggro | | | |
+| 56.5% | Mega Chandelure ex retreat tax | | | |
+| 55.0% | Arbok / Muk (Laser) | | | |
+| 54.0% | Mega Scrafty ex darkness tank | | | |
+| 54.0% | Decidueye ex / Judge | | | |
+
+The bad matchups share a shape: `lurantis_heal_punish` (36.5%) and
+`toxic_slumber_vileplume_ex` (45.0%) both **heal**, which is exactly the
+predicted weakness — healing takes a marked target off *exactly* 6
+counters and blanks `Terminal Period`. `panic_poison_paralysis` (39.5%)
+wins the race before the counters accumulate.
+
+One deck, `selective_bloom_cradily`, is **excluded**: it runs zero Basic
+Pokémon (its Lileep arrives via `Antique Root Fossil`, an Item the engine
+does not model as a Basic), so it mulligans out and loses on turn 2 every
+game. It showed as a 100% matchup in a first pass, which is an artifact of
+the harness, not a result.
 
 **Read those with one caveat.** `Terminal Period` fired **zero** times
 across those games: the AI has no line for "aim counters at one target,
