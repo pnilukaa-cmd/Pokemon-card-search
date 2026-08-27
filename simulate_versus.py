@@ -106,7 +106,7 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
-                 "evolved_this_turn", "tool", "conditions")
+                 "evolved_this_turn", "tool", "conditions", "attack_locked")
 
     def __init__(self, name, turn):
         self.name = name
@@ -115,6 +115,11 @@ class InPlay:
         self.energy_names = []    # parallel list of the Energy cards' names
         self.entered_turn = turn
         self.evolved_this_turn = False
+        # Set by attacks that lock their own user out of attacking next
+        # turn (N's Zekrom's Rampaging Thunder, Iono's Bellibolt ex's
+        # Thunderous Bolt). Without it the AI re-used a 250-damage
+        # once-every-other-turn attack every single turn.
+        self.attack_locked = False
         self.tool = None
         self.conditions = set()   # asleep / burned / confused / paralyzed / poisoned
 
@@ -145,6 +150,10 @@ class Player:
         self.abilities_used = set()
         self.played_supporters_this_turn = set()
         self.deck_out = False
+        # Energy types this deck can actually put on a Pokemon. Attacks
+        # needing a type outside this set can never be cast, so they must
+        # not drive Energy attachment -- see energy_shortfall.
+        self.energy_types = set()
 
     # -- basic zone helpers ------------------------------------------------
     def draw(self, n=1):
@@ -188,6 +197,11 @@ def build_retaliate_index(cards):
         if r:
             idx[c["name"]] = r
     return idx
+
+
+# Populated in main(); lets helpers that don't take cards_by_name resolve
+# an Energy card's types (N's PP Up pulls one out of the discard pile).
+_CARDS_BY_NAME = {}
 
 
 def energy_types_for(card_name, cards_by_name):
@@ -415,6 +429,34 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.hand.append(pick)
         log.append(f"  {pl.name}: Pokégear 3.0 -> {pick[1]}")
 
+    # N's PP Up: recycle a Basic Energy out of the discard onto a Benched
+    # N's Pokemon -- the deck's way back after an attacker is Knocked Out.
+    # Stadiums: only those with a modeled effect get played, and playing
+    # one replaces whatever is already out (on either side).
+    for kind, name in list(pl.hand):
+        if kind != "Stadium" or name not in RETREAT_STADIUMS:
+            continue
+        if pl.stadium == name:
+            continue
+        pl.remove_from_hand(kind, name)
+        pl.discard.append(name)
+        pl.stadium = name
+        opp.stadium = None
+        log.append(f"  {pl.name}: plays Stadium {name}")
+        break
+
+    while ("Item", "N's PP Up") in pl.hand:
+        target = next((p for p in pl.bench if "N's" in p.name), None)
+        e = next((n for n in pl.discard if n.endswith("Energy")), None)
+        if target is None or e is None:
+            break
+        pl.remove_from_hand("Item", "N's PP Up")
+        pl.discard.append("N's PP Up")
+        pl.discard.remove(e)
+        target.energy.append(energy_types_for(e, _CARDS_BY_NAME))
+        target.energy_names.append(e)
+        log.append(f"  {pl.name}: N's PP Up -> {e} onto {target.name}")
+
     while ("Item", "Ultra Ball") in pl.hand:
         others = [c for c in pl.hand if c != ("Item", "Ultra Ball")]
         if len(others) < 2:
@@ -622,6 +664,31 @@ def play_supporter(pl, opp, turn, log):
                 log.append(f"  {pl.name}: {name} -> {', '.join(p[1] for p in picks)}")
                 return
 
+    # Janine's Secret Art: search out and attach up to 2 Basic Darkness
+    # Energy to Darkness Pokemon. Prefers the Bench, because attaching to
+    # the Active Poisons it -- which is also why N's Castle (free retreat
+    # for N's Pokemon) is what turns this into a clean load-and-swap.
+    if "Janine's Secret Art" in hand_names:
+        targets = [p for p in pl.bench + ([pl.active] if pl.active else [])
+                   if "Darkness" in pl.POKEMON[p.name]["types"]][:2]
+        pool = [c for c in pl.deck if c[0] == "Energy" and "Darkness" in c[1]]
+        if targets and pool:
+            use("Janine's Secret Art")
+            attached = []
+            for t in targets:
+                e = next((c for c in pl.deck if c[0] == "Energy" and "Darkness" in c[1]), None)
+                if e is None:
+                    break
+                pl.deck.remove(e)
+                t.energy.append(["Darkness"])
+                t.energy_names.append(e[1])
+                attached.append(t.name)
+                if t is pl.active:
+                    t.conditions.add("poisoned")
+            random.shuffle(pl.deck)
+            log.append(f"  {pl.name}: Janine's Secret Art -> {', '.join(attached)}")
+            return
+
     # Gust effects: drag up their weakest benched Pokemon
     for name in ("Boss's Orders", "Team Rocket's Giovanni"):
         if name in hand_names and opp.bench and opp.active is not None:
@@ -640,7 +707,7 @@ KNOWN_TRAINERS = {
     "Professor's Research", "Iono", "Team Rocket's Ariana", "Team Rocket's Proton",
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
-    "Pokégear 3.0",
+    "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
 }
 
 
@@ -669,11 +736,28 @@ _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 # Actives, which is why it sits on an attacker that never wants to retreat.
 RETREAT_TOOLS = {"Air Balloon": -2, "Rescue Board": -1, "Gravity Gemstone": 1}
 
+# Stadiums are otherwise unmodeled here. These are the ones whose whole
+# effect is Retreat Cost, which the lock/pivot decks live or die on, so
+# they get honoured rather than sitting inert. Value is the modifier;
+# "family" restricts it to Pokemon whose name contains that string.
+RETREAT_STADIUMS = {
+    "N's Castle": {"amount": -99, "family": "N's"},
+    "Paradise Resort": {"amount": -1, "family": "Psyduck"},
+}
+
 
 def retreat_of(pl, spot, opp=None):
     """Retreat Cost of `spot` right now: printed, plus Abilities from both
-    sides, plus its own Tool, plus a Gravity Gemstone on either Active."""
+    sides, plus its own Tool, plus a Gravity Gemstone on either Active,
+    plus a retreat-affecting Stadium."""
+    st = RETREAT_STADIUMS.get(pl.stadium or (opp.stadium if opp else None))
+    if st and (not st["family"] or st["family"].lower() in spot.name.lower()):
+        if st["amount"] <= -99:
+            return 0
     tool_mod = RETREAT_TOOLS.get(getattr(spot, "tool", None), 0)
+    if st and st["amount"] > -99:
+        if not st["family"] or st["family"].lower() in spot.name.lower():
+            tool_mod += st["amount"]
     if spot is pl.active and opp is not None and opp is not pl and opp.active:
         if getattr(opp.active, "tool", None) == "Gravity Gemstone":
             tool_mod += 1
@@ -726,6 +810,42 @@ _REVEAL_TOP_RE = _re.compile(
 _USE_AS_THIS_RE = _re.compile(r"use it as this attack", _re.I)
 _COPY_DEFENDING_RE = _re.compile(
     r"choose 1 of your opponent's active pok[eé]mon's attacks and use it as this attack", _re.I)
+# N's Zoroark ex's Night Joker: "Choose 1 of your Benched N's Pokemon's
+# attacks and use it as this attack." The whole deck is one attacker
+# borrowing a Bench full of Basics, so scoring this as 0 would write the
+# archetype off entirely. The captured group is the family prefix
+# ("N's"), empty when the card has no family restriction.
+_COPY_OWN_BENCH_RE = _re.compile(
+    r"choose 1 of your benched ([\w'’ -]*?)\s*pok[eé]mon's attacks and use it as this attack", _re.I)
+
+
+def _best_borrowed(pl, opp, spot, text):
+    """Which Benched attack Night Joker should borrow this turn.
+
+    Ranked on damage PER TURN, not damage: an attack that locks its user
+    out of attacking next turn only lands every other turn, so N's Zekrom's
+    Rampaging Thunder (250, self-locking) is worth 125/turn against N's
+    Reshiram's Virtuous Flame (170, no drawback). Ranking on raw damage
+    alone had the AI pick the 250 every time and attack half as often.
+    """
+    m = _COPY_OWN_BENCH_RE.search(text)
+    if not m:
+        return None
+    fam = (m.group(1) or "").strip().lower()
+    best, best_score = None, -1.0
+    for p in pl.bench:
+        if fam and fam not in p.name.lower():
+            continue
+        for a in pl.POKEMON[p.name]["attacks"]:
+            if _USE_AS_THIS_RE.search(a.get("text") or ""):
+                continue              # no borrowing a borrow
+            score = float(attack_damage(pl, opp, spot, a, record=False))
+            score += attack_rider_value(pl, opp, a)
+            if _SELF_ATTACK_LOCK_RE.search(a.get("text") or ""):
+                score /= 2.0
+            if score > best_score:
+                best, best_score = a, score
+    return best
 
 
 def _copied_attack_damage(pl, opp, spot, text):
@@ -738,6 +858,11 @@ def _copied_attack_damage(pl, opp, spot, text):
     The copied attack's own cost is irrelevant: the real card says to use
     it as this attack, which you already paid for.
     """
+    m = _COPY_OWN_BENCH_RE.search(text)
+    if m:
+        chosen = _best_borrowed(pl, opp, spot, text)
+        return attack_damage(pl, opp, spot, chosen, record=False) if chosen else 0
+
     if _COPY_DEFENDING_RE.search(text):
         if not opp.active:
             return 0
@@ -866,16 +991,21 @@ RIDER_VALUE = {
 }
 
 
+def _attack_ir(atk):
+    key = (atk["name"], atk.get("text") or "")
+    eff = _ATTACK_IR_CACHE.get(key)
+    if eff is None:
+        eff = IR.compile_effect("attack", atk["name"], atk.get("text") or "")
+        _ATTACK_IR_CACHE[key] = eff
+    return eff
+
+
 def attack_rider_value(pl, opp, atk):
     """Damage-equivalent worth of an attack's side effects, right now."""
     text = atk.get("text") or ""
     if not text or opp is None or not opp.active:
         return 0
-    key = (atk["name"], text)
-    eff = _ATTACK_IR_CACHE.get(key)
-    if eff is None:
-        eff = IR.compile_effect("attack", atk["name"], text)
-        _ATTACK_IR_CACHE[key] = eff
+    eff = _attack_ir(atk)
     if eff.unsupported:
         return 0
     value = 0
@@ -906,7 +1036,60 @@ def attack_rider_value(pl, opp, atk):
     return int(value * getattr(eff, "chance", 1.0))
 
 
+_SELF_ATTACK_LOCK_RE = _re.compile(
+    r"during your next turn, this pok[eé]mon can'?t (?:attack|use attacks)", _re.I)
+
+
+def _borrowed_text(pl, opp, spot, atk):
+    """An attack's text plus the text of whatever it borrows.
+
+    Night Joker copying Rampaging Thunder inherits its "can't attack next
+    turn" clause, so the drawback has to follow the copy.
+    """
+    text = atk.get("text") or ""
+    if not _COPY_OWN_BENCH_RE.search(text):
+        return text
+    chosen = _best_borrowed(pl, opp, spot, text)
+    return (chosen.get("text") or "") if chosen else text
+
+
+def attack_wins_game(pl, opp, spot, atk):
+    """Does using this attack, right now, win the game outright?
+
+    Checks the attack itself and -- because N's Zoroark ex's Night Joker
+    borrows a Benched Pokemon's attack -- everything it could borrow. This
+    is the only way the alternate win condition can be reached in practice:
+    Victory Symbol costs Psychic and the deck built around it runs
+    Darkness, so it is always cast through the copy.
+    """
+    def _wins(a):
+        text = a.get("text") or ""
+        if "win this game" not in text.lower():
+            return False
+        eff = _attack_ir(a)
+        if eff.unsupported:
+            return False
+        if not any(act.op == IR.Op.WIN_GAME for act in eff.actions):
+            return False
+        return AE.conditions_met(eff, pl, opp, spot)
+
+    if _wins(atk):
+        return True
+    m = _COPY_OWN_BENCH_RE.search(atk.get("text") or "")
+    if not m:
+        return False
+    fam = (m.group(1) or "").strip().lower()
+    for p in pl.bench:
+        if fam and fam not in p.name.lower():
+            continue
+        if any(_wins(a) for a in pl.POKEMON[p.name]["attacks"]):
+            return True
+    return False
+
+
 def attack_value(pl, opp, spot, atk):
+    if opp is not None and attack_wins_game(pl, opp, spot, atk):
+        return 10 ** 6            # nothing outranks winning on the spot
     dmg = attack_damage(pl, opp, spot, atk) if opp is not None else atk["damage"]
     return dmg + attack_rider_value(pl, opp, atk)
 
@@ -929,10 +1112,20 @@ def energy_shortfall(pl, spot):
     info = pl.POKEMON[spot.name]
     if not info["attacks"]:
         return 0
+    # Only attacks this deck could ever pay for. N's Reshiram's Virtuous
+    # Flame costs Fire/Fire/Lightning/Colorless and lives in a mono-Darkness
+    # deck: it is never cast, only borrowed by N's Zoroark ex's Night Joker.
+    # Counting it here sent every Energy to the Bench toolbox and starved
+    # the one Pokemon that actually attacks.
+    castable = [a for a in info["attacks"]
+                if all(c == "Colorless" or c in pl.energy_types
+                       for c in a["cost"])]
+    if not castable:
+        return 0
     # Deliberately the UNREDUCED cost: a conditional discount (Sniper's
     # Eye) can be off next turn, so keep loading Energy toward the real
     # printed cost rather than stopping at the discounted one.
-    need = max(len(a["cost"]) for a in info["attacks"])
+    need = max(len(a["cost"]) for a in castable)
     return max(0, need - spot.energy_count())
 
 
@@ -944,10 +1137,12 @@ def attach_energy(pl, cards_by_name, log):
     if pl.active and energy_shortfall(pl, pl.active) > 0:
         target = pl.active
     else:
-        for spot in pl.bench:
-            if energy_shortfall(pl, spot) > 0:
-                target = spot
-                break
+        # Among Benched Pokemon that still need Energy, feed the one that
+        # would hit hardest if promoted -- otherwise Energy trickles onto
+        # whichever toolbox Basic happens to be first in the list.
+        needy = [p for p in pl.bench if energy_shortfall(pl, p) > 0]
+        if needy:
+            target = max(needy, key=lambda p: _potential_damage(pl, p))
     if target is None:
         return
     kind, name = pl.hand.pop(idx)
@@ -959,6 +1154,37 @@ def attach_energy(pl, cards_by_name, log):
 def _ready_damage(pl, opp, spot):
     atk = best_attack(pl, spot, opp=opp)
     return attack_damage(pl, opp, spot, atk) if atk else 0
+
+
+def _potential_damage(pl, spot):
+    """What this Pokemon would hit for once it IS paid up -- used to decide
+    who deserves the Energy, where "what can it do right now" is always 0."""
+    # Printed base damage only: a full evaluation needs an opponent board
+    # and this is just a ranking, not a damage prediction.
+    info = pl.POKEMON[spot.name]
+    castable = [a for a in info["attacks"]
+                if all(c == "Colorless" or c in pl.energy_types for c in a["cost"])]
+    if not castable:
+        return 0
+
+    def printed(a):
+        # A copy attack (Night Joker) has no damage number of its own; it
+        # is worth whatever it can borrow. Ranking it at 0 sent every
+        # Energy to the Bench toolbox and starved the actual attacker.
+        m = _COPY_OWN_BENCH_RE.search(a.get("text") or "")
+        if not m:
+            return a["damage"] or 0
+        fam = (m.group(1) or "").strip().lower()
+        best = 0
+        for p in pl.in_play():
+            if p is spot or (fam and fam not in p.name.lower()):
+                continue
+            for b in pl.POKEMON[p.name]["attacks"]:
+                if not _USE_AS_THIS_RE.search(b.get("text") or ""):
+                    best = max(best, b["damage"] or 0)
+        return best
+
+    return max(printed(a) for a in castable)
 
 
 def attach_tools(pl, log):
@@ -1053,9 +1279,18 @@ def do_attack(pl, opp, log):
         pass  # evolving does not prevent attacking in the real game
     if condition_blocks_attack(pl, log):
         return False
+    if pl.active.attack_locked:
+        pl.active.attack_locked = False
+        log.append(f"  {pl.name}: {pl.active.name} can't attack this turn")
+        return False
     atk = best_attack(pl, pl.active, opp=opp)
     if not atk:
         return False
+    # The alternate win condition resolves before damage and ends the game.
+    if attack_wins_game(pl, opp, pl.active, atk):
+        pl.prizes = 0
+        log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- WINS THE GAME OUTRIGHT")
+        return True
     dmg = attack_damage(pl, opp, pl.active, atk)
     # A 0-damage attack is still worth using when it carries a rider --
     # Arbok's Panic Poison applies three Special Conditions and deals
@@ -1077,6 +1312,9 @@ def do_attack(pl, opp, log):
     log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} for {dmg}"
                f"{f' (-{reduction} reduced)' if reduction else ''}"
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
+
+    if _SELF_ATTACK_LOCK_RE.search(_borrowed_text(pl, opp, pl.active, atk)):
+        pl.active.attack_locked = True
 
     attack_side_effects(pl, opp, atk, log)
 
@@ -1111,7 +1349,13 @@ def do_attack(pl, opp, log):
         if pl.prizes <= 0:
             return True
         if opp.bench:
-            opp.bench.sort(key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage, reverse=True)
+            # Promote whoever can actually fight, falling back to the
+            # biggest body. Sorting on remaining HP alone put a Bench
+            # toolbox piece -- one whose attacks the deck cannot even pay
+            # for -- into the Active Spot ahead of the real attacker.
+            opp.bench.sort(key=lambda p: (_ready_damage(opp, pl, p),
+                                          opp.POKEMON[p.name]["hp"] - p.damage),
+                           reverse=True)
             opp.active = opp.bench.pop(0)
             log.append(f"  {opp.name}: promotes {opp.active.name}")
         else:
@@ -1296,6 +1540,7 @@ def run_game(modelA, modelB, verbose=False):
     nameB, POKB, DECKB = modelB[0], modelB[1], modelB[2]
     _cards = M.load_cards()
     cards_by_name, _ = M.build_card_index(_cards)
+    _CARDS_BY_NAME.update(cards_by_name)
     global RETALIATE_CARDS
     if not RETALIATE_CARDS:
         RETALIATE_CARDS = build_retaliate_index(_cards)
@@ -1304,6 +1549,10 @@ def run_game(modelA, modelB, verbose=False):
     effB = compile_effects_for(POKB, modelB[3])
     a = Player(nameA, POKA, DECKA, effA)
     b = Player(nameB, POKB, DECKB, effB)
+    for pl in (a, b):
+        for kind, name in pl.deck:
+            if kind == "Energy":
+                pl.energy_types.update(energy_types_for(name, cards_by_name))
     mullA = opening_hand(a)
     mullB = opening_hand(b)
     log = []

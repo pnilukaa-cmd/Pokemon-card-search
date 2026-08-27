@@ -117,6 +117,8 @@ def conditions_met(effect, pl, opp, source):
         if k == "opponent_has_in_play":
             if not any(c["what"].lower() in n.lower() for n in opp.in_play_names()):
                 return False
+        if k == "own_prizes_equal" and getattr(pl, "prizes", None) != c["count"]:
+            return False
         if k == "opponent_active_is_ex":
             if opp is pl or not opp.active:
                 return False
@@ -494,7 +496,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
               IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,
               IR.Op.EXTRA_TOOLS, IR.Op.ATTACK_TWICE,
               IR.Op.RETURN_TO_HAND_ON_KO, IR.Op.LOCK_COUNTER_MOVEMENT,
-              IR.Op.ATTACH_TOOL):
+              IR.Op.ATTACH_TOOL,
+              # WIN_GAME ends the game rather than changing board state, so
+              # the match loop owns it (see attack_wins_game).
+              IR.Op.WIN_GAME):
         return False
 
     UNEXECUTED_OPS[op] += 1

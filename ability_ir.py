@@ -116,6 +116,7 @@ class Op:
     SET_OPPONENT_HAND = "set_opponent_hand"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
+    WIN_GAME = "win_game"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -284,6 +285,11 @@ def parse_conditions(text):
     # unconditional, which is a materially different card.
     if re.search(r"if your opponent'?s active pok[eé]mon is a pok[eé]mon ex", t, re.I):
         out.append({"kind": "opponent_active_is_ex"})
+    # N's Sigilyph's Victory Symbol is the only outright "you win this
+    # game" card in the format, and it is gated on an exact Prize count.
+    m = re.search(r"when you have exactly (\d+) prize cards? remaining", t, re.I)
+    if m:
+        out.append({"kind": "own_prizes_equal", "count": int(m.group(1))})
     m = re.search(r"if your opponent has (?:exactly )?(\d+) (?:or (more|fewer) )?cards?"
                   r" in (?:their|your opponent'?s) hand", t, re.I)
     if m:
@@ -419,6 +425,14 @@ def _r(m, text):
     if not n:
         return []
     return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT)]
+
+
+@rule("win_game", r"you win this game")
+def _r(m, text):
+    """The alternate win condition itself. Its Prize-count gate is parsed
+    as a condition, so the action here is unconditional and the engine
+    decides whether it is live."""
+    return [Action(Op.WIN_GAME, None, Target.SELF)]
 
 
 @rule("draw_one", r"\bdraw a card")

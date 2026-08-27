@@ -498,6 +498,24 @@ def test_alluring_light_draws_one_each():
     check("one card left each deck", len(me.deck) == 19 and len(opp.deck) == 19)
 
 
+def test_victory_symbol_is_prize_gated():
+    """N's Sigilyph's Victory Symbol is the format's only outright win
+    condition, and it is live at exactly 1 Prize remaining -- not 2, and
+    not 0."""
+    POK, EFF = build(["N's Sigilyph"], {"N's Sigilyph": ("JTG", "64")})
+    card = card_for("N's Sigilyph", ("JTG", "64"))
+    atk = next(a for a in card["attacks"] if a["name"] == "Victory Symbol")
+    eff = IR.compile_effect("N's Sigilyph", atk["name"], atk["text"])
+    check("Victory Symbol compiles to a win", 
+          any(a.op == IR.Op.WIN_GAME for a in eff.actions), str(eff.actions))
+    me = FakePlayer("A", POK, EFF, active=Spot("N's Sigilyph"))
+    opp = FakePlayer("B", POK, EFF, active=Spot("N's Sigilyph"))
+    for prizes, want in ((1, True), (2, False), (0, False), (6, False)):
+        me.prizes = prizes
+        got = AE.conditions_met(eff, me, opp, me.active)
+        check(f"live at {prizes} Prize(s): {want}", got == want)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -516,7 +534,8 @@ def main():
                test_flower_curtain_skips_rule_box_pokemon,
                test_retreat_tax_reaches_across_the_table,
                test_skyliner_frees_only_basics,
-               test_alluring_light_draws_one_each]:
+               test_alluring_light_draws_one_each,
+               test_victory_symbol_is_prize_gated]:
         print(f"{fn.__name__}:")
         try:
             fn()
