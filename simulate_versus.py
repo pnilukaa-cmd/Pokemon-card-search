@@ -1029,6 +1029,16 @@ def attack_rider_value(pl, opp, atk):
             value += (act.amount or 1) / left * 6 * 250
         elif act.op == IR.Op.DISCARD_FROM_OPPONENT:
             value += 10 * (act.amount or 1)
+        elif act.op == IR.Op.CONDITIONAL_KO:
+            victim = conditional_ko_target(pl, opp, atk)
+            if victim is not None:
+                # Worth the whole Pokemon: it dies regardless of HP.
+                value += pl.POKEMON.get(victim.name, {}).get("hp", 200)
+        elif act.op == IR.Op.PLACE_COUNTERS and act.target in (
+                IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):
+            value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
+        elif act.op == IR.Op.MOVE_COUNTERS:
+            value += 20
         elif act.op == IR.Op.SEARCH_TO_BENCH:
             # Worth something only while there is Bench room to fill.
             room = max(0, 5 - len(pl.bench))
@@ -1051,6 +1061,29 @@ def _borrowed_text(pl, opp, spot, atk):
         return text
     chosen = _best_borrowed(pl, opp, spot, text)
     return (chosen.get("text") or "") if chosen else text
+
+
+def conditional_ko_target(pl, opp, atk):
+    """Which opposing Pokemon this attack Knocks Out outright, if any.
+
+    Mega Absol ex's Terminal Period Knocks Out an Active sitting on
+    exactly 6 damage counters no matter its HP -- the payoff for a deck
+    that places counters two at a time. Scored on damage it reads as a
+    0-damage attack and never gets used.
+    """
+    eff = _attack_ir(atk)
+    if eff.unsupported:
+        return None
+    for act in eff.actions:
+        if act.op != IR.Op.CONDITIONAL_KO:
+            continue
+        want = (act.filter.get("exact_counters") or 0) * 10
+        pool = ([opp.active] if act.target == IR.Target.OPP_ACTIVE
+                else opp.in_play())
+        for p in pool:
+            if p is not None and p.damage == want:
+                return p
+    return None
 
 
 def attack_wins_game(pl, opp, spot, atk):
@@ -1291,6 +1324,12 @@ def do_attack(pl, opp, log):
         pl.prizes = 0
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- WINS THE GAME OUTRIGHT")
         return True
+    victim = conditional_ko_target(pl, opp, atk)
+    if victim is not None:
+        victim.damage = 10 ** 6      # forced Knock Out, HP is irrelevant
+        log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
+                   f"{victim.name} Knocked Out outright (exact counters)")
+
     dmg = attack_damage(pl, opp, pl.active, atk)
     # A 0-damage attack is still worth using when it carries a rider --
     # Arbok's Panic Poison applies three Special Conditions and deals
@@ -1384,6 +1423,8 @@ ATTACK_RIDER_OPS = {
     # a 0-damage setup attack that is the entire early game of a deck
     # built on the Stage 2 above it.
     IR.Op.SEARCH_TO_BENCH,
+    IR.Op.PLACE_COUNTERS,
+    IR.Op.MOVE_COUNTERS,
 }
 
 

@@ -182,6 +182,11 @@ def _find_in_deck(pl, pred):
     return None
 
 
+# The counter total the format's "exactly N counters" Knock Out effects
+# key off (Mega Absol ex's Terminal Period, Glaceon ex's Euclase).
+KO_THRESHOLD = 60
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
@@ -201,20 +206,52 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
-        for h in hits[:1] if act.target != IR.Target.OPP_ALL else hits:
+        if act.target == IR.Target.OPP_ALL:
+            chosen = hits
+        else:
+            # "choose N of your opponent's Pokemon and put X on each"
+            n = act.filter.get("targets", 1)
+            # Focus fire toward a cash-in total rather than sprinkling.
+            # A counter-placement deck is building one target up to an
+            # exact threshold (Mega Absol ex's Terminal Period wants
+            # exactly 60), so top up whoever is closest to it from below
+            # and only spread once nobody is a candidate.
+            step = (act.amount or 0) * 10
+            def _priority(h):
+                room = KO_THRESHOLD - h.damage
+                if 0 < room and room >= step:
+                    return (0, room)          # can still climb toward it
+                return (1, -(pl.POKEMON.get(h.name, {}).get("hp", 0) - h.damage))
+            chosen = sorted(hits, key=_priority)[:n]
+        for h in chosen:
             h.damage += (act.amount or 0) * 10
-        if hits:
-            log.append(f"    place {(act.amount or 0)*10} damage")
+        if chosen:
+            log.append(f"    place {(act.amount or 0)*10} damage on "
+                       f"{len(chosen)} Pokemon")
         return True
 
+    if op == O.CONDITIONAL_KO:
+        # Terminal Period / Euclase: a Knock Out keyed off an exact counter
+        # total, ignoring HP entirely. Resolution lives in the match loop
+        # (it takes Prizes); this only reports whether it is live.
+        return False
+
     if op == O.MOVE_COUNTERS:
-        donors = [q for q in pl.in_play() if q.damage >= 10]
+        src = act.filter.get("from")
+        if src in (IR.Target.OPP_BENCHED, IR.Target.OPP_ANY, IR.Target.OPP_ALL):
+            pool = opp.bench if src == IR.Target.OPP_BENCHED else opp.in_play()
+        else:
+            pool = pl.in_play()
+        donors = [q for q in pool if q.damage >= 10]
         hits = resolve_targets(act.target, pl, opp, source, attacker) or \
             ([opp.active] if opp.active else [])
         if not donors or not hits:
             return False
         donor = max(donors, key=lambda q: q.damage)
-        amount = min((act.amount or 0) * 10, donor.damage)
+        if act.filter.get("any_number"):
+            amount = donor.damage        # "any number" -- take it all
+        else:
+            amount = min((act.amount or 0) * 10, donor.damage)
         donor.damage -= amount
         hits[0].damage += amount
         log.append(f"    move {amount} damage {donor.name} -> {hits[0].name}")

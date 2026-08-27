@@ -117,6 +117,7 @@ class Op:
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
+    CONDITIONAL_KO = "conditional_ko"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -348,7 +349,11 @@ def parse_target(phrase, default=Target.SELF):
         return Target.ATTACKING_POKEMON
     if "both yours and your opponent" in p or "each player" in p:
         return Target.BOTH_ALL
-    if "your opponent" in p or "opponent's" in p:
+    # "...to THEIR Active Pokemon" -- the possessive refers back to the
+    # opponent named earlier in the sentence, so the tail clause on its own
+    # has no "opponent" in it. Sableye's Damage Collection moved counters
+    # onto the wrong side of the board without this.
+    if "your opponent" in p or "opponent's" in p or re.match(r"\s*their\b", p):
         if "active" in p:
             return Target.OPP_ACTIVE
         if "bench" in p:
@@ -425,6 +430,20 @@ def _r(m, text):
     if not n:
         return []
     return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT)]
+
+
+@rule("conditional_ko_on_counters",
+      r"(?:if your opponent'?s active pok[eé]mon has exactly (\d+) damage counters"
+      r" on it, that pok[eé]mon is knocked out"
+      r"|knock out 1 of your opponent'?s pok[eé]mon that has exactly (\d+)"
+      r" damage counters on it)")
+def _r(m, text):
+    """Mega Absol ex's Terminal Period and Glaceon ex's Euclase: a Knock
+    Out that ignores HP entirely and keys off an exact counter total.
+    Scoring these on damage alone read them as 0-damage attacks."""
+    n = int(m.group(1) or m.group(2))
+    tgt = Target.OPP_ACTIVE if m.group(1) else Target.OPP_ANY
+    return [Action(Op.CONDITIONAL_KO, n, tgt, {"exact_counters": n})]
 
 
 @rule("win_game", r"you win this game")
@@ -527,6 +546,15 @@ def _r(m, text):
 
 @rule("place_counters", r"(?:place|put) (\d+) damage counters? on ([^.]{0,60})")
 def _r(m, text):
+    # "Choose 2 of your opponent's Pokemon and put 2 damage counters on
+    # EACH of them" -- the target lives in the *earlier* clause, so
+    # parsing only the "on ..." tail read "each of them" as this Pokemon
+    # and pointed Crobat ex's Biting Spree at its own side of the board.
+    mm = re.search(r"choose (\d+) of your opponent'?s pok[eé]mon[^.]{0,40}?"
+                   r"(?:place|put) (\d+) damage counters? on each", text, re.I)
+    if mm:
+        return [Action(Op.PLACE_COUNTERS, int(mm.group(2)), Target.OPP_ANY,
+                       {"targets": int(mm.group(1))})]
     return [Action(Op.PLACE_COUNTERS, int(m.group(1)), parse_target(m.group(2)))]
 
 
@@ -534,6 +562,16 @@ def _r(m, text):
 def _r(m, text):
     return [Action(Op.MOVE_COUNTERS, int(m.group(1)), parse_target(m.group(3)),
                    {"from": parse_target(m.group(2))})]
+
+
+@rule("move_counters_any",
+      r"move any number of damage counters from ([^.]{0,45}?) to ([^.]{0,45})")
+def _r(m, text):
+    """Sableye's Damage Collection. "Any number" is what makes an exact
+    counter total reachable on demand, so the amount is left open (None)
+    rather than pinned to a number the card never states."""
+    return [Action(Op.MOVE_COUNTERS, None, parse_target(m.group(2)),
+                   {"from": parse_target(m.group(1)), "any_number": True})]
 
 
 @rule("heal", r"heal (\d+) damage from ([^.]{0,50})")

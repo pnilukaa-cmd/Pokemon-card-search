@@ -516,6 +516,45 @@ def test_victory_symbol_is_prize_gated():
         check(f"live at {prizes} Prize(s): {want}", got == want)
 
 
+def test_biting_spree_hits_the_opponent():
+    """Team Rocket's Crobat ex names its targets in an earlier clause
+    ("choose 2 of your opponent's Pokemon ... put 2 counters on each"),
+    so parsing only the "on ..." tail pointed it at its own board."""
+    POK, EFF = build(["Team Rocket's Crobat ex", "Team Rocket's Zubat"],
+                     {"Team Rocket's Crobat ex": ("DRI", "122")})
+    eff = find(EFF["Team Rocket's Crobat ex"], "Biting Spree")
+    act = eff.actions[0]
+    check("aimed at the opponent", act.target == IR.Target.OPP_ANY, act.target)
+    check("hits two targets", act.filter.get("targets") == 2, str(act.filter))
+
+    mine = Spot("Team Rocket's Zubat")
+    a, b, c = (Spot("Team Rocket's Zubat"), Spot("Team Rocket's Zubat"),
+               Spot("Team Rocket's Zubat"))
+    me = FakePlayer("A", POK, EFF, active=Spot("Team Rocket's Crobat ex"),
+                    bench=[mine])
+    opp = FakePlayer("B", POK, EFF, active=a, bench=[b, c])
+    AE.activate(eff, me, opp, me.active, [])
+    check("20 damage landed on exactly two of theirs",
+          sorted(p.damage for p in (a, b, c)) == [0, 20, 20],
+          str([p.damage for p in (a, b, c)]))
+    check("none of mine took damage", mine.damage == 0 and me.active.damage == 0)
+
+
+def test_terminal_period_needs_exactly_six_counters():
+    """Mega Absol ex Knocks Out an Active on exactly 6 counters whatever
+    its HP -- and does nothing at 5 or 7."""
+    import simulate_versus as SV
+    POK, EFF = build(["Mega Absol ex"], {"Mega Absol ex": ("MEG", "161")})
+    card = card_for("Mega Absol ex", ("MEG", "161"))
+    atk = next(a for a in card["attacks"] if a["name"] == "Terminal Period")
+    me = FakePlayer("A", POK, EFF, active=Spot("Mega Absol ex"))
+    opp = FakePlayer("B", POK, EFF, active=Spot("Mega Absol ex"))
+    for dmg, want in ((60, True), (50, False), (70, False), (0, False)):
+        opp.active.damage = dmg
+        got = SV.conditional_ko_target(me, opp, atk) is not None
+        check(f"{dmg} damage -> KO {want}", got == want)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -535,7 +574,9 @@ def main():
                test_retreat_tax_reaches_across_the_table,
                test_skyliner_frees_only_basics,
                test_alluring_light_draws_one_each,
-               test_victory_symbol_is_prize_gated]:
+               test_victory_symbol_is_prize_gated,
+               test_biting_spree_hits_the_opponent,
+               test_terminal_period_needs_exactly_six_counters]:
         print(f"{fn.__name__}:")
         try:
             fn()
