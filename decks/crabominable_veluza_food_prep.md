@@ -47,9 +47,9 @@ but PTCGL will reject those counts on import.
 
 ## What is actually wrong
 
-**1. Four Buddy-Buddy Poffin can only fetch Dunsparce.** Poffin takes
-Basics with **70 HP or less**, and the only Basic in the deck that
-qualifies is Dunsparce:
+**1. ~~Four Buddy-Buddy Poffin can only fetch Dunsparce.~~ — WRONG, see
+"Correction" below.** Poffin takes Basics with **70 HP or less**, and the
+only Basic in the deck that qualifies is Dunsparce:
 
 | | HP | |
 | --- | --- | --- |
@@ -60,9 +60,10 @@ qualifies is Dunsparce:
 | Meowth ex | 170 | too big |
 | Fezandipiti ex | 210 | too big |
 
-Four Items that only ever fetch the draw engine, never an attacker — and
-`Poké Pad` (also 4 copies) already fetches every non-ex Pokémon in the
-deck including both attackers. The Poffins are redundant *and* narrower.
+I read that as four redundant Items, since `Poké Pad` also fetches every
+non-ex Pokémon in the deck including both attackers. **That conclusion was
+wrong** — see the correction below. Fetching only Dunsparce is not a
+weakness here, because Dunsparce is where the whole chain starts.
 
 **2. Crabominable is the wrong main attacker.** It is a Stage 1 needing
 Crabrawler first, and it arrives by turn 6 in only 63.6% of games (avg
@@ -79,25 +80,54 @@ reach the discard, Sonic Edge costs 4 and Haymaker costs 5, against six
 Energy in the deck. Turns 1–3 are spent playing Kofu, and there is no
 backup plan for the games where they do not show up.
 
+## Correction: keep the Poffin
+
+The original write-up recommended cutting all four `Buddy-Buddy Poffin`
+and credited the resulting build's improvement to that change plus the
+Veluza change together. **That was a bundled test, and the attribution was
+wrong.** Run separately:
+
+| Build | Dunsparce by T6 | Dudunsparce | mean | median | winning |
+| --- | --- | --- | --- | --- | --- |
+| as sent (3 Veluza, Poffin kept) | 97.3% @ 1.62 | 59.2% | 54.4% | 52.5% | 15/27 |
+| 3 Veluza, **Poffin cut** | — | — | 56.2% | 52.5% | 17/27 |
+| 4 Veluza, **Poffin cut** | 85.6% @ 2.30 | 41.1% | 57.9% | 55.0% | 22/27 |
+| **4 Veluza, Poffin kept** | **95.8% @ 1.67** | **54.8%** | **59.9%** | **58.0%** | 20/27 |
+
+**The Veluza change was carrying the entire improvement.** Cutting Poffin
+was a cost being paid alongside it, not a gain: it drops Dunsparce by 10
+points and half a turn, and **Dudunsparce by 14 points** — and Dudunsparce
+is the draw engine that digs to Petrel, which finds Brilliant Blender,
+which loads the discard. Poffin sits at the very start of that chain and
+puts **two** Dunsparce on the Bench for one card with no hand cost, which
+Poké Pad (one card, to hand) does not replicate.
+
+The winning-matchup counts (20 vs 22) are inside the noise band at 200
+games; mean and median both favour keeping the Poffin.
+
+**`Redeemable Ticket` also deserved more credit than it got.** With four
+Kofu and a one-of Brilliant Blender in 60 cards, **35.1%** of games prize
+at least one Kofu and **10.0%** prize the Blender — **42.1%** of games
+prize something the engine needs. Ticket rerolls the whole Prize pile and
+puts them back in the deck. That is not a filler slot; it is the answer to
+a two-in-five failure mode.
+
 ## Suggested changes
 
+One change, not six:
+
 ```
--4 Buddy-Buddy Poffin ASC 184     +1 Veluza SCR 45  (to 4)
--1 Crabrawler SCR 87   (to 2)     +2 Basic Water Energy (to 7)
--1 Crabominable SCR 42 (to 2)     +2 Switch MEG 130 (to 4)
+-1 Crabrawler SCR 87   (to 2)     +1 Veluza SCR 45      (to 4)
+-1 Crabominable SCR 42 (to 2)     +1 Basic Water Energy (to 6)
 ```
+
+Keep all four Poffin, both Switch, and the Ticket.
 
 Tested across all 27 saved decks, 200 games each:
 
-| Build | first attack by T6 | mean | median | winning matchups |
-| --- | --- | --- | --- | --- |
-| as sent | 53.1% | 54.4% | 52.5% | 15/27 |
-| −4 Poffin, +2 Switch, +2 Energy | 58.2% | 56.2% | 52.5% | 17/27 |
-| **+ Veluza-focused (4 Veluza, 2-2 Crab)** | **57.6%** | **57.9%** | **55.0%** | **22/27** |
-
-Veluza goes from 78.0% by turn 2.19 to **95.8% by turn 1.89**. The
-winning-matchup count is the number that moves most: **15 → 22**. Mulligan
-is unchanged at 19.1% (12 Basics both ways).
+Veluza goes from 78.0% by turn 2.19 to **98.0% by turn 1.77**, and the
+deck's mean win rate from **54.4% to 59.9%** with the median moving
+52.5% → 58.0%. Mulligan is unchanged at 19.1% (12 Basics either way).
 
 Keep 2 Crabominable. Haymaker for one Water Energy is still the best
 single attack in the deck when the Stage 1 does land; it just should not
@@ -116,26 +146,26 @@ Pokémon: 17
 1 Meowth ex POR 62
 1 Shaymin DRI 10
 
-Trainer: 35
+Trainer: 36
 4 Kofu SCR 138
 4 Team Rocket's Petrel ASC 207
 4 Poké Pad ASC 198
 4 Ultra Ball MEG 131
-4 Switch MEG 130
+4 Buddy-Buddy Poffin ASC 184
 3 Team Rocket's Factory ASC 203
 2 Lillie's Determination MEG 119
 2 Boss's Orders MEG 114
+2 Switch MEG 130
 1 Brilliant Blender SSP 164
 1 Special Red Card CRI 82
 1 Night Stretcher ASC 196
 1 Sacred Ash DRI 168
 1 Black Belt's Training PRE 96
-1 Brave Bangle WHT 80
 1 Redeemable Ticket JTG 156
-1 Nighttime Mine ASC 197
+1 Brave Bangle WHT 80
 
-Energy: 8
-7 Basic Water Energy
+Energy: 7
+6 Basic Water Energy
 1 Bubbly Water Energy CRI 84
 
 Total Cards: 60
@@ -143,11 +173,8 @@ Total Cards: 60
 
 ## Numbers
 
-Full field, 200 games each — mean **57.9%**, median **55.0%**, **22/27**
-winning. Best: Feraligatr/Munkidori 87.0%, T.R. Wobbuffet 80.0%, Eerie
-Inferno 77.5%, Salazzle ex 74.5%, Chandelure mill 74.0%. Worst: Panic
-Poison Paralysis 37.0%, Lurantis heal punish 39.5%, Mega Chandelure ex
-42.5%, Steven's Carbink 43.0%.
+Full field, 200 games each — mean **59.9%**, median **58.0%**, **20/27**
+winning, against 54.4% / 52.5% / 15-27 for the list as sent.
 
 The losses are all speed or attrition — decks that punish a turn-3 start.
 `panic_poison_paralysis` and `lurantis_heal_punish` both win the race
