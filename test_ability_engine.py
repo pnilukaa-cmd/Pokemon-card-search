@@ -555,6 +555,40 @@ def test_terminal_period_needs_exactly_six_counters():
         check(f"{dmg} damage -> KO {want}", got == want)
 
 
+def test_food_prep_scales_with_kofu_in_discard():
+    """Crabominable's Food Prep discounts one Colorless PER Kofu in the
+    discard. Compiled as a flat -1 it was wrong in both directions: a
+    discount with no Kofu played, and a quarter of the real one with four."""
+    import simulate_versus as SV
+    POK, EFF = build(["Crabominable", "Veluza"],
+                     {"Crabominable": ("SCR", "149"), "Veluza": ("SCR", "45")})
+    crab = Spot("Crabominable")
+    me = FakePlayer("A", POK, EFF, active=crab)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Veluza"))
+    haymaker = next(a for a in POK["Crabominable"]["attacks"]
+                    if a["name"] == "Haymaker")
+    sonic = next(a for a in POK["Veluza"]["attacks"] if a["name"] == "Sonic Edge")
+
+    for kofu, want in ((0, 5), (1, 4), (2, 3), (4, 1)):
+        me.discard = ["Kofu"] * kofu
+        got = len(SV.effective_cost(me, crab, haymaker["cost"], opp))
+        check(f"Haymaker costs {want} with {kofu} Kofu in discard",
+              got == want, f"got {got}")
+    me.discard = ["Kofu"] * 4
+    check("the surviving Energy is the Water, not a Colorless",
+          SV.effective_cost(me, crab, haymaker["cost"], opp) == ["Water"],
+          str(SV.effective_cost(me, crab, haymaker["cost"], opp)))
+
+    vel = Spot("Veluza")
+    me2 = FakePlayer("C", POK, EFF, active=vel, discard=["Kofu"] * 4)
+    check("Sonic Edge is free at 4 Kofu",
+          SV.effective_cost(me2, vel, sonic["cost"], opp) == [],
+          str(SV.effective_cost(me2, vel, sonic["cost"], opp)))
+    me2.discard = []
+    check("Sonic Edge costs its printed 4 at 0 Kofu",
+          len(SV.effective_cost(me2, vel, sonic["cost"], opp)) == 4)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -576,7 +610,8 @@ def main():
                test_alluring_light_draws_one_each,
                test_victory_symbol_is_prize_gated,
                test_biting_spree_hits_the_opponent,
-               test_terminal_period_needs_exactly_six_counters]:
+               test_terminal_period_needs_exactly_six_counters,
+               test_food_prep_scales_with_kofu_in_discard]:
         print(f"{fn.__name__}:")
         try:
             fn()

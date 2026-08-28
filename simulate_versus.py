@@ -224,11 +224,22 @@ def effective_cost(pl, spot, cost, opp=None):
     while the opponent holds exactly 4 cards, so this is re-derived on
     every pricing rather than baked into the card."""
     ignored = AE.query_ignored_cost_types(pl, spot, opp)
-    if not ignored:
-        return cost
     if "ALL" in ignored:
         return []
-    return [c for c in cost if c not in ignored]
+    cost = [c for c in cost if c not in ignored] if ignored else list(cost)
+
+    # Counted reductions (Food Prep: "cost Colorless less for each Kofu
+    # card in your discard pile"). Colorless symbols come off first --
+    # a typed requirement can only be removed by a reduction naming that
+    # type, which is why Haymaker still needs its one Water.
+    reduce = AE.query_cost_reduction(pl, spot, opp)
+    for typ, n in reduce.items():
+        for _ in range(n):
+            if typ in cost:
+                cost.remove(typ)
+            elif typ == "Colorless":
+                break
+    return cost
 
 
 def can_pay(cost, attached):
@@ -415,6 +426,22 @@ def play_items(pl, opp, turn, log, first_turn):
             pl.bench.append(InPlay(n, turn))
         log.append(f"  {pl.name}: Buddy-Buddy Poffin -> {', '.join(got)}")
 
+    # Brilliant Blender: search out up to 5 cards and discard them. Its
+    # whole purpose is loading the discard on demand -- here, four Kofu at
+    # once, which turns Food Prep on in a single Item.
+    while ("Item", "Brilliant Blender") in pl.hand:
+        wanted = [c for c in pl.deck if c[1] == "Kofu"][:5]
+        if not wanted:
+            break
+        pl.remove_from_hand("Item", "Brilliant Blender")
+        pl.discard.append("Brilliant Blender")
+        for card in wanted:
+            pl.deck.remove(card)
+            pl.discard.append(card[1])
+        random.shuffle(pl.deck)
+        log.append(f"  {pl.name}: Brilliant Blender -> discards "
+                   f"{len(wanted)} Kofu")
+
     # Pokegear 3.0: top 7, take a Supporter this engine can actually play,
     # so the fetch is worth what the sim scores it at and no more.
     while ("Item", "Pokégear 3.0") in pl.hand:
@@ -566,6 +593,19 @@ def play_supporter(pl, opp, turn, log):
         log.append(f"  {pl.name}: Judge (both hands to 4)")
         return
 
+    # Kofu: put 2 cards on the bottom of your deck, draw 4. In a Food Prep
+    # deck it is also the discount itself -- every copy played is one more
+    # Colorless off Haymaker and Sonic Edge -- so it stays worth playing
+    # even from a hand that does not need the cards.
+    if "Kofu" in hand_names and len(pl.hand) >= 3:
+        use("Kofu")
+        for _ in range(2):
+            if pl.hand:
+                pl.deck.insert(0, pl.hand.pop(0))
+        pl.draw(4)
+        log.append(f"  {pl.name}: Kofu (bottom 2, draw 4)")
+        return
+
     # Turn-scoped damage boost, only worth the Supporter slot on a turn the
     # Active can actually attack an ex with it.
     if "Black Belt's Training" in hand_names and pl.active and opp.active:
@@ -708,6 +748,7 @@ KNOWN_TRAINERS = {
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
     "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
+    "Kofu", "Brilliant Blender",
 }
 
 

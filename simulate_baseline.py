@@ -52,6 +52,7 @@ from check_energy_support import load_cards, BASIC_ENERGY_RE, SYMBOL_TO_TYPE
 # so this simulator and simulate_versus.py build Pokemon from exactly the
 # same code against the same data.
 import tcg_model as M
+import ability_ir as IR
 
 BASIC_ENERGY_RE = M.BASIC_ENERGY_RE
 build_deck_model = M.build_deck_model
@@ -324,12 +325,51 @@ def try_attack(state, POKEMON, turn, log):
         return
     atk = attacks[0]
     name, cost, dmg = atk["name"], atk["cost"], atk["damage"]
-    needed = len(cost)
+    needed = len(cost) - _cost_discount(state, POKEMON, state.active)
+    needed = max(0, needed)
     if state.active_energy >= needed:
         if state.first_attack_turn is None:
             state.first_attack_turn = turn
         log.append(f"Attack: {state.active} uses {name} for {dmg} "
                    f"({state.active_energy} energy, needed {needed})")
+
+
+_ABILITY_CACHE = {}
+
+
+def _compiled_abilities(name):
+    """Compiled Abilities for a Pokemon name, cached. Matched by name, so
+    a printing-specific Ability can be missed -- fine here, since this is
+    only used for cost discounts."""
+    if name not in _ABILITY_CACHE:
+        cards = M.load_cards()
+        by_name, _ = M.build_card_index(cards)
+        hits = by_name.get(name) or []
+        _ABILITY_CACHE[name] = (IR.compile_card_abilities(hits[0])
+                                if hits else [])
+    return _ABILITY_CACHE[name]
+
+
+def _cost_discount(state, POKEMON, name):
+    """Energy knocked off this Pokemon's attacks by a scaling Ability.
+
+    Crabominable's and Veluza's Food Prep reads "cost Colorless less for
+    each Kofu card in your discard pile" -- without this the baseline
+    priced Haymaker at its printed five Energy in a deck that runs six,
+    and reported a 28% first-attack rate for a deck whose whole point is
+    that the attack becomes nearly free.
+    """
+    total = 0
+    for eff in _compiled_abilities(name):
+        if eff.unsupported:
+            continue
+        for act in eff.actions:
+            if act.op != IR.Op.MODIFY_ATTACK_COST:
+                continue
+            named = act.filter.get("per_named_card_in_discard")
+            if named:
+                total += sum(1 for c in state.discard if c == named)
+    return total
 
 
 def _slots(state):
@@ -527,6 +567,20 @@ def play_items(state, POKEMON, priority, turn, log):
             state.note_online(name, turn)
         log.append(f"Play Buddy-Buddy Poffin -> bench {', '.join(found)}")
 
+    # Brilliant Blender: search up to 5 cards out of the deck and discard
+    # them -- here, the Kofu that Food Prep counts.
+    while ("Item", "Brilliant Blender") in state.hand:
+        wanted = [c for c in state.deck if c[1] == "Kofu"][:5]
+        if not wanted:
+            break
+        state.remove_from_hand("Item", "Brilliant Blender")
+        state.discard.append("Brilliant Blender")
+        for card in wanted:
+            state.deck.remove(card)
+            state.discard.append(card[1])
+        random.shuffle(state.deck)
+        log.append(f"Play Brilliant Blender -> discard {len(wanted)} Kofu")
+
     while ("Item", "Ultra Ball") in state.hand:
         target = choose_search_target(state, POKEMON, priority, allow_rule_box=True)
         if target is None:
@@ -621,6 +675,22 @@ def effect_lillies_determination(state, POKEMON, log):
     state.discard.append("Lillie's Determination")
     state.draw(6)
     log.append("Play Lillie's Determination (shuffle hand, draw 6)")
+    return True
+
+
+def effect_kofu(state, POKEMON, log):
+    """Kofu: bottom 2 cards of your hand, draw 4. In a Food Prep deck each
+    copy played is also one Colorless off Haymaker and Sonic Edge, so it
+    is worth the Supporter slot even from a comfortable hand."""
+    rest = [c for c in state.hand if c != ("Supporter", "Kofu")]
+    if len(rest) < 2:
+        return False
+    state.remove_from_hand("Supporter", "Kofu")
+    state.discard.append("Kofu")
+    for _ in range(2):
+        state.deck.insert(0, state.hand.pop(0))
+    state.draw(4)
+    log.append("Play Kofu (bottom 2, draw 4)")
     return True
 
 
@@ -807,11 +877,12 @@ def effect_carmine(state, POKEMON, log):
     return True
 
 
-SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Dawn", "Hilda",
+SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn", "Hilda",
                       "Lillie's Determination", "Carmine", "Judge",
                       "Janine's Secret Art", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
+    "Kofu": effect_kofu,
     "Janine's Secret Art": effect_janines_secret_art,
     "Team Rocket's Petrel": effect_petrel,
     "Team Rocket's Proton": effect_proton,
@@ -841,7 +912,8 @@ def play_supporter(state, POKEMON, log):
 
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
-                      "Energy Search", "Team Rocket's Transceiver", "Pokégear 3.0"}
+                      "Energy Search", "Team Rocket's Transceiver", "Pokégear 3.0",
+                      "Brilliant Blender"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).

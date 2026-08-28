@@ -722,6 +722,36 @@ def query_ignored_cost_types(pl, spot, opp=None):
     return out
 
 
+def query_cost_reduction(pl, spot, opp=None):
+    """How many Energy of each type come off this Pokemon's attack costs.
+
+    Separate from query_ignored_cost_types, which is the all-or-nothing
+    "ignore every Colorless" shape. This one is a *count*, and for the
+    scaling Abilities it is re-derived every time: Food Prep is worth 0
+    before a Kofu has hit the discard and 4 once they all have.
+    """
+    out = {}
+    for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_ATTACK_COST):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        amount = act.amount or 0
+        if amount <= -99 or amount >= 0:
+            continue
+        named = act.filter.get("per_named_card_in_discard")
+        if named:
+            amount *= sum(1 for c in pl.discard if c == named)
+        elif act.filter.get("per_opponent_prize_taken"):
+            amount *= (6 - getattr(opp, "prizes", 6)) if opp is not None else 0
+        elif act.filter.get("per_opponent_benched"):
+            amount *= len(opp.bench) if opp is not None else 0
+        if amount:
+            t = act.filter.get("type") or "Colorless"
+            out[t] = out.get(t, 0) + -amount
+    return out
+
+
 def query_evolves_early(pl, spot, opp=None):
     """Can this Pokemon be evolved on the turn it was played (or turn 1)?
 

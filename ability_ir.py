@@ -633,8 +633,38 @@ def _r(m, text):
     return [Action(Op.BUFF_DAMAGE, int(m.group(1)), tgt, filt)]
 
 
+@rule("attack_cost_scales_by_named_card_in_discard",
+      r"cost (" + TYPES + r") less for each ([A-Z][\w'\u2019 .-]*?) card in your discard pile")
+def _r(m, text):
+    """Crabominable's and Veluza's Food Prep: "cost Colorless less for each
+    Kofu card in your discard pile."
+
+    The scaling is the card. Compiled as a flat -1 it is wrong in both
+    directions -- a discount before any Kofu has been played, and a
+    quarter of the real discount once four have. Haymaker goes from five
+    Energy to one, and Sonic Edge from four to free.
+    """
+    return [Action(Op.MODIFY_ATTACK_COST, -1, Target.SELF,
+                   {"type": m.group(1).capitalize(),
+                    "per_named_card_in_discard": m.group(2).strip()})]
+
+
+@rule("attack_cost_scales_by_opponent_bench",
+      r"cost (" + TYPES + r") less for each of your opponent'?s benched pok[eé]mon")
+def _r(m, text):
+    """Incineroar ex's Hustle Play -- same shape as Food Prep, counting
+    their Bench instead of your discard."""
+    return [Action(Op.MODIFY_ATTACK_COST, -1, Target.SELF,
+                   {"type": m.group(1).capitalize(),
+                    "per_opponent_benched": True})]
+
+
 @rule("modify_attack_cost", r"cost (" + TYPES + r") less")
 def _r(m, text):
+    # The scaling variants above own their own phrasings; without this the
+    # flat rule fires as well and doubles the reduction.
+    if re.search(r"less for each", text, re.I):
+        return []
     return [Action(Op.MODIFY_ATTACK_COST, -1, Target.SELF, {"type": m.group(1).capitalize()})]
 
 
