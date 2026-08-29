@@ -133,6 +133,82 @@ Keep 2 Crabominable. Haymaker for one Water Energy is still the best
 single attack in the deck when the Stage 1 does land; it just should not
 be what the deck is *waiting on*.
 
+## Damage boosters and control — the full survey
+
+### Why Shaymin and Black Belt's Training are in there
+
+**`Shaymin` DRI 10** — `Flower Curtain`: *"Prevent all damage done to your
+Benched Pokémon that don't have a Rule Box by attacks from your opponent's
+Pokémon."* Every attacker in this deck is single-Prize, so the whole Bench
+is covered except Fezandipiti ex and Meowth ex. For a deck that does not
+attack until turn ~3.5, blanking Bench pressure through the setup turns is
+real value. **Two limits worth knowing:** it stops *attacks* only, so it
+does nothing against Ability-placed damage (`Dusknoir`'s Cursed Blast,
+`Golbat`'s Sneaky Bite), and it does not protect the two ex.
+
+**`Black Belt's Training`** is +40, but **only against a Pokémon ex**, and
+it costs the Supporter slot — the same slot Kofu needs to build the
+discount and Petrel needs to find the Blender. It is a late-game card in a
+deck that spends its early Supporters on the engine.
+
+### Every damage booster in the pool this deck could use
+
+| Card | Boost | Restriction | Slot |
+| --- | --- | --- | --- |
+| `Brave Bangle` PBL 104 / WHT 80 | +30 | vs **ex only**; holder must have no Rule Box ✓ | Tool |
+| `Black Belt's Training` ASC 255 | +40 | vs **ex only** | Supporter |
+| `Kieran` TWM 154 | +30 | vs **ex/V only**; other mode is a free switch | Supporter |
+| `Maximum Belt` TEF 154 | +50 | vs **ex only** | **ACE SPEC** — conflicts with Brilliant Blender |
+| **`Gladion's Final Battle` PBL 108** | **+80** | **any Active**; attacker no Rule Box ✓; **must be your last card** | Supporter |
+
+The headline: **almost every booster in the format is "vs Pokémon ex"
+only.** `Gladion's Final Battle` is the single exception and the biggest
+number — Sonic Edge 110 → 190, Haymaker 250 → 330, against anything.
+`Light Ball`, `Hop's Choice Band`, `Postwick`, `Premium Power Pro`,
+`Binding Mochi` and `Future Booster Energy Capsule` are all locked to a
+family, type or Special Condition this deck does not have.
+
+### Tested: the boosters do not move the needle here
+
+| Build | mean | median | winning |
+| --- | --- | --- | --- |
+| 4 Veluza (no new boosters) | **59.4%** | 56.5% | 20/27 |
+| + 2 Gladion's Final Battle, −Nighttime Mine, −Special Red Card, −Black Belt's | 58.8% | 56.5% | 21/27 |
+
+**Statistically indistinguishable.** The reason is structural, not a
+numbers problem: `Gladion's Final Battle` needs you hellbent, and this
+deck refills to 4+ cards every time it plays Kofu. The two fight each
+other. The Supporter slot is already fully committed — Kofu is the
+discount, Petrel is the search, and there is not a third turn spare for a
+damage buff.
+
+**So the honest answer on damage is: no, and the one card that looked like
+it would fix it does not.** The existing single `Brave Bangle` is the
+right shape, because it is a **Tool** — it costs no Supporter turn at all.
+A second copy is the only boost worth adding.
+
+### Control options that do fit
+
+| Card | Effect | Fit |
+| --- | --- | --- |
+| **`Psyduck` ASC 226** | `Damp` — *Pokémon in play lose any Ability that requires the user to Knock Out itself* | **Basic, 70 HP, Water — Poffin-eligible.** A hard shutdown of every `Cursed Blast` deck (Dusclops/Dusknoir), which is a real archetype |
+| `Golduck` ASC 40 | same Ability, Stage 1 | slower version of the above |
+| `Budew` ASC 16 | free-cost attack, Item lock for a turn | buys a setup turn, but Grass and off-plan |
+| `Walrein` SSP 45 | *Pokémon with 2 or less Energy attached can't attack* | brutal lock, but a Stage 2 — too slow for a deck already starting turn 3 |
+| `Frillish` WHT 126 | Item lock | Psychic, off-type |
+
+`Psyduck` is the one genuinely worth a slot, and it is a sideboard-style
+answer rather than a maindeck improvement — it is dead against everything
+that is not built on a self-Knock-Out Ability.
+
+### One anti-synergy in the current list
+
+`Nighttime Mine` taxes **Tera** Pokémon, and this deck has none — it is
+pure opponent tech. But it is a Stadium, and playing it **discards your
+own `Team Rocket's Factory`**, which is the card drawing you 2 on every
+Petrel turn. Four Stadiums competing for one slot, three of which you
+actually want out.
+
 ## Revised list
 
 ```

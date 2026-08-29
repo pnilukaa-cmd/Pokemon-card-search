@@ -145,6 +145,9 @@ class Player:
         # Set by turn-scoped damage Supporters (Black Belt's Training),
         # cleared at the start of every turn.
         self.turn_buff_vs_ex = 0
+        # Unrestricted version of the same thing (Gladion's Final Battle),
+        # which applies to any Active rather than only a Pokemon ex.
+        self.turn_buff_any = 0
         self.stadium = None
         self.lost_pokemon_last_turn = False
         self.abilities_used = set()
@@ -606,6 +609,18 @@ def play_supporter(pl, opp, turn, log):
         log.append(f"  {pl.name}: Kofu (bottom 2, draw 4)")
         return
 
+    # Gladion's Final Battle: playable only as the last card in hand, and
+    # then +80 for any attacker without a Rule Box -- against ANY Active,
+    # not just an ex. It is the only unrestricted booster in the pool, and
+    # a deck whose attack can cost zero Energy can actually go hellbent to
+    # turn it on.
+    if ("Gladion's Final Battle" in hand_names and len(pl.hand) == 1
+            and pl.active and pl.POKEMON[pl.active.name]["prize_value"] == 1):
+        use("Gladion's Final Battle")
+        pl.turn_buff_any = 80
+        log.append(f"  {pl.name}: Gladion's Final Battle (+80 this turn)")
+        return
+
     # Turn-scoped damage boost, only worth the Supporter slot on a turn the
     # Active can actually attack an ex with it.
     if "Black Belt's Training" in hand_names and pl.active and opp.active:
@@ -748,7 +763,7 @@ KNOWN_TRAINERS = {
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
     "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
-    "Kofu", "Brilliant Blender",
+    "Kofu", "Brilliant Blender", "Gladion's Final Battle",
 }
 
 
@@ -776,6 +791,14 @@ _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 # Tools whose whole job is Retreat Cost. Gravity Gemstone taxes BOTH
 # Actives, which is why it sits on an attacker that never wants to retreat.
 RETREAT_TOOLS = {"Air Balloon": -2, "Rescue Board": -1, "Gravity Gemstone": 1}
+
+# Tools whose whole effect is extra damage. min_prize 2 means "only
+# against a Pokemon ex", which is true of nearly every booster in the pool.
+DAMAGE_TOOLS = {
+    "Brave Bangle": {"amount": 30, "min_prize": 2, "holder_no_rule_box": True},
+    "Maximum Belt": {"amount": 50, "min_prize": 2},
+    "Light Ball": {"amount": 50, "min_prize": 2},
+}
 
 # Stadiums are otherwise unmodeled here. These are the ones whose whole
 # effect is Retreat Cost, which the lock/pivot decks live or die on, so
@@ -1266,7 +1289,20 @@ def attach_tools(pl, log):
     Only Tools carrying a modeled effect (retaliation) are attached -- any
     other Tool would be decoration the engine cannot honor."""
     for kind, name in list(pl.hand):
-        if kind != "Tool" or name not in RETALIATE_CARDS:
+        if kind != "Tool" or (name not in RETALIATE_CARDS
+                              and name not in DAMAGE_TOOLS):
+            continue
+        if name in DAMAGE_TOOLS:
+            if not pl.active or pl.active.tool:
+                continue
+            # Brave Bangle pays out only on an attacker WITHOUT a Rule
+            # Box, so putting it on the deck's lone ex is a dead card.
+            if DAMAGE_TOOLS[name].get("holder_no_rule_box") and \
+                    pl.POKEMON[pl.active.name]["prize_value"] != 1:
+                continue
+            pl.remove_from_hand(kind, name)
+            pl.active.tool = name
+            log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
             continue
         if not pl.active or pl.active.tool:
             continue
@@ -1385,6 +1421,15 @@ def do_attack(pl, opp, log):
     dmg += AE.query_damage_buff(pl, pl.active, opp)
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
+    dmg += pl.turn_buff_any
+    # Tools that add damage. Brave Bangle only pays out for an attacker
+    # WITHOUT a Rule Box, which is the whole reason it fits a deck of
+    # single-Prize attackers.
+    tool = DAMAGE_TOOLS.get(getattr(pl.active, "tool", None))
+    if tool and opp.POKEMON[opp.active.name]["prize_value"] >= tool["min_prize"]:
+        if not tool.get("holder_no_rule_box") or \
+                pl.POKEMON[pl.active.name]["prize_value"] == 1:
+            dmg += tool["amount"]
     reduction = damage_reduction_for(opp, opp.active, pl)
     if reduction:
         dmg = max(0, dmg - reduction)
@@ -1569,6 +1614,7 @@ def opening_hand(pl):
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl.supporter_played = False
     pl.turn_buff_vs_ex = 0
+    pl.turn_buff_any = 0
     pl.abilities_used = set()
     pl.played_supporters_this_turn = set()
     for spot in pl.in_play():
