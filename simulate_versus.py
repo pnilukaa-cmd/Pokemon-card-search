@@ -278,6 +278,36 @@ def ability_key(p, ab):
 ACTIVATED = (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN)
 
 
+def sweep_knocked_out(pl, opp, log):
+    """Remove Pokemon killed outside the attack step and award the Prizes.
+
+    Abilities that Knock their own user Out (Cursed Blast) resolve here --
+    do_attack owns the damage path, and without this the self-KO cost was
+    silently free.
+    """
+    for owner, taker in ((pl, opp), (opp, pl)):
+        for spot in list(owner.in_play()):
+            if spot.damage < owner.POKEMON[spot.name]["hp"]:
+                continue
+            taken = owner.POKEMON[spot.name]["prize_value"]
+            owner.discard.append(spot.name)
+            if spot is owner.active:
+                owner.active = None
+            elif spot in owner.bench:
+                owner.bench.remove(spot)
+            taker.prizes -= taken
+            owner.lost_pokemon_last_turn = True
+            log.append(f"  {owner.name}: {spot.name} Knocked Out "
+                       f"(+{taken} Prize to {taker.name})")
+            if owner.active is None and owner.bench:
+                owner.bench.sort(
+                    key=lambda p: (_ready_damage(owner, taker, p),
+                                   owner.POKEMON[p.name]["hp"] - p.damage),
+                    reverse=True)
+                owner.active = owner.bench.pop(0)
+                log.append(f"  {owner.name}: promotes {owner.active.name}")
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -1637,6 +1667,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     play_items(pl, opp, turn, log, first_turn)
     play_supporter(pl, opp, turn, log)
     use_abilities(pl, opp, turn, log)
+    sweep_knocked_out(pl, opp, log)
     attach_energy(pl, cards_by_name, log)
     attach_tools(pl, log)
     try_evolve(pl, opp, turn, log, first_turn)

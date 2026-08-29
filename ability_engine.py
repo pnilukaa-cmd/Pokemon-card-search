@@ -566,6 +566,13 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
         return False
     # Costs that resolve only after the effect succeeded.
     for c in effect.costs:
+        if c["kind"] == "self_ko" and source is not None:
+            # Dusclops/Dusknoir's Cursed Blast: the Ability Knocks its own
+            # user Out, which hands the opponent a Prize. Leaving this
+            # unpaid made Cursed Blast a free, repeatable 130 damage --
+            # the Prize cost IS the balancing drawback on the card.
+            source.damage = 10 ** 6
+            log.append(f"    {source.name} Knocks itself Out")
         if c["kind"] == "shuffle_self" and source is not None:
             pl.deck.append(("Pokemon", source.name))
             if source is pl.active:

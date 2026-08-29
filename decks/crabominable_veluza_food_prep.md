@@ -151,6 +151,22 @@ it costs the Supporter slot — the same slot Kofu needs to build the
 discount and Petrel needs to find the Blender. It is a late-game card in a
 deck that spends its early Supporters on the engine.
 
+### Other Food Prep cards or Kofu payoffs: there are none
+
+A full-pool phrase sweep is unambiguous. **`Food Prep` exists on exactly
+two cards — `Crabominable` and `Veluza` — and `Kofu` is named by nothing
+else in the format.** Both are already in the list, so the engine is
+maxed; there is no third body and no second payoff to find.
+
+One trap worth naming: `Miracle Headset`, `Phione` and `Audino` all return
+Supporters from the discard pile. In any other deck that is card
+advantage; here it **pulls Kofu back out of the discard and shrinks your
+own discount.** Actively anti-synergistic.
+
+The other discard-scaling payoffs in the pool (`Raging Bolt ex`,
+`Scizor ex`, `Heatran` and the rest) all scale off discarding **Energy**,
+which a seven-Energy deck cannot feed.
+
 ### Every damage booster in the pool this deck could use
 
 | Card | Boost | Restriction | Slot |
@@ -186,6 +202,39 @@ damage buff.
 it would fix it does not.** The existing single `Brave Bangle` is the
 right shape, because it is a **Tool** — it costs no Supporter turn at all.
 A second copy is the only boost worth adding.
+
+### Duskull for extra sniping — tested, and it costs more than it gives
+
+`Dusclops` places 5 damage counters anywhere and `Dusknoir` places **13**
+(130 damage), both as Abilities — no Energy, no attack, and crucially
+**not restricted to Pokémon ex**, which is the limitation on every Trainer
+booster above. On paper it is the right answer to Sonic Edge's 110.
+
+Tested as a 3 Duskull / 2 Dusclops splash (with the Black Belt's → 2nd
+Brave Bangle swap), same 29-deck field, same engine:
+
+| Build | 150 games | 200 games |
+| --- | --- | --- |
+| no Duskull | **59.5%** mean, 56.0% median | — |
+| + Duskull / Dusclops | 56.6%, 54.0% | 56.0%, 53.5% |
+
+**About 3 points worse, consistently.** The reason is the Prize economy,
+and it is specific to *this* deck: `Cursed Blast` Knocks its own user Out,
+handing the opponent a Prize. With no Rare Candy in the list you almost
+never reach Dusknoir, so you are paying **a full Prize for 50 damage** —
+and this deck's entire structural advantage is that every attacker it runs
+is single-Prize. Cursed Blast trades that advantage away.
+
+Dusknoir's 130-for-a-Prize is a fine rate. Dusclops's 50 is not. Getting
+to Dusknoir means Duskull + Dusclops + Dusknoir + Rare Candy — roughly
+seven more slots in a deck that is already choosing between its search and
+its Energy. **If you want the Dusknoir plan, it wants its own deck**; see
+`mega_lopunny_dusknoir_snipe_finisher.md`, which is built for it.
+
+**Confirmed: drop `Black Belt's Training` for a second `Brave Bangle`.**
+Same +30-vs-ex tier, but the Bangle is a Tool, so it does not compete with
+Kofu and Petrel for the one Supporter you get each turn. That was the
+right instinct.
 
 ### Control options that do fit
 

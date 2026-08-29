@@ -131,6 +131,29 @@ Energy: 8
 Total Cards: 60
 ```
 
+## Correction: these numbers were measured with a free Cursed Blast
+
+A later fix to the engine found that **`Cursed Blast`'s self-Knock-Out
+cost was never being paid**. `Dusclops` and `Dusknoir` were placing 5 and
+13 damage counters every turn, repeatedly, without dying and without
+handing the opponent a Prize — the drawback that balances the card was
+simply missing from the simulator.
+
+Re-measured with the cost paid as printed, on the same field:
+
+| | mean | median | winning |
+| --- | --- | --- | --- |
+| as first reported (self-KO free) | 64.9% | 64.5% | 24/27 |
+| **corrected** | **54.0%** | **51.4%** | 17/28 |
+
+**An 11-point drop.** The card-level analysis below still stands — the
+`Cursed Blast` + `Gale Thrust` line really is 360 damage on a chosen
+target, and the Energy finding is unaffected — but the Prize economy
+warning in "Where it loses" turns out to be the dominant fact about the
+deck rather than a footnote. Four activations really is four of the six
+Prizes they need, and the deck has to convert nearly every one into a
+Knock Out to stay ahead.
+
 ## Numbers
 
 Full field, 200 games per matchup — mean **64.9%**, median **64.5%**,
