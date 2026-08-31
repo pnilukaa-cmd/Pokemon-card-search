@@ -463,7 +463,16 @@ def play_items(pl, opp, turn, log, first_turn):
     # whole purpose is loading the discard on demand -- here, four Kofu at
     # once, which turns Food Prep on in a single Item.
     while ("Item", "Brilliant Blender") in pl.hand:
+        # Dump whatever this deck's payoffs actually count in the discard:
+        # Kofu for Food Prep, Basic Grass Energy for Re-Brew. Hard-coding
+        # Kofu made the Blender a blank in a Sinistcha ex build.
         wanted = [c for c in pl.deck if c[1] == "Kofu"][:5]
+        if len(wanted) < 5 and any(
+                "per_discard_card" in a.filter
+                for p in pl.in_play() for e in pl.EFFECTS.get(p.name, [])
+                for a in e.actions):
+            wanted += [c for c in pl.deck
+                       if c[0] == "Energy" and "Grass" in c[1]][:5 - len(wanted)]
         if not wanted:
             break
         pl.remove_from_hand("Item", "Brilliant Blender")
@@ -1130,7 +1139,15 @@ def attack_rider_value(pl, opp, atk):
                 value += pl.POKEMON.get(victim.name, {}).get("hp", 200)
         elif act.op == IR.Op.PLACE_COUNTERS and act.target in (
                 IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):
-            value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
+            per = act.filter.get("per_discard_card")
+            if per:
+                # Re-Brew is worth whatever fuel is sitting in the discard
+                # right now -- zero on an empty pile, 100+ on a loaded one.
+                want = per.replace("basic ", "").strip()
+                fuel = sum(1 for c in pl.discard if want in c.lower())
+                value += (act.amount or 0) * 10 * fuel
+            else:
+                value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
         elif act.op == IR.Op.MOVE_COUNTERS:
             value += 20
         elif act.op == IR.Op.SEARCH_TO_BENCH:

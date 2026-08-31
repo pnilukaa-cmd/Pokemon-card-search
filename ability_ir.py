@@ -544,8 +544,26 @@ def _r(m, text):
 
 # ---- damage / health -----------------------------------------------------
 
+@rule("place_counters_per_discard",
+      r"put (\d+) damage counters? on ([^.]{0,45}?) for each (basic (?:" + TYPES +
+      r") energy) card in your discard pile")
+def _r(m, text):
+    """Sinistcha ex's Re-Brew: 2 counters per Basic Grass Energy in the
+    discard. The count is the card -- flattened to a plain 2 it reads as a
+    20-damage attack instead of a 100+ one. The trailing "shuffle those
+    Energy cards into your deck" is carried as `consumes_fuel`, because it
+    makes Re-Brew a burst rather than a repeatable engine."""
+    return [Action(Op.PLACE_COUNTERS, int(m.group(1)), parse_target(m.group(2)),
+                   {"per_discard_card": m.group(3).lower(),
+                    "consumes_fuel": bool(
+                        re.search(r"shuffle those energy cards into your deck",
+                                  text, re.I))})]
+
+
 @rule("place_counters", r"(?:place|put) (\d+) damage counters? on ([^.]{0,60})")
 def _r(m, text):
+    if re.search(r"for each .{0,30}card in your discard pile", text, re.I):
+        return []          # place_counters_per_discard above owns this
     # "Choose 2 of your opponent's Pokemon and put 2 damage counters on
     # EACH of them" -- the target lives in the *earlier* clause, so
     # parsing only the "on ..." tail read "each of them" as this Pokemon

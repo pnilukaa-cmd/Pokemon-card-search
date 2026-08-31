@@ -206,6 +206,25 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        per = act.filter.get("per_discard_card")
+        if per:
+            # "2 damage counters for each Basic Grass Energy card in your
+            # discard pile" -- count the fuel, then (Re-Brew) spend it.
+            want = per.replace("basic ", "").strip()
+            fuel = [c for c in pl.discard if want in c.lower()]
+            if not fuel or not hits:
+                return False
+            target = max(hits, key=lambda h: pl.POKEMON.get(h.name, {}).get("hp", 0))
+            target.damage += (act.amount or 0) * 10 * len(fuel)
+            log.append(f"    place {(act.amount or 0) * 10 * len(fuel)} damage "
+                       f"({len(fuel)} {want} in discard)")
+            if act.filter.get("consumes_fuel"):
+                for c in fuel:
+                    pl.discard.remove(c)
+                    pl.deck.append((("Energy"), c))
+                random.shuffle(pl.deck)
+                log.append(f"    {len(fuel)} {want} shuffled back into the deck")
+            return True
         if act.target == IR.Target.OPP_ALL:
             chosen = hits
         else:
