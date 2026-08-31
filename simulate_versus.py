@@ -308,6 +308,31 @@ def sweep_knocked_out(pl, opp, log):
                 log.append(f"  {owner.name}: promotes {owner.active.name}")
 
 
+def use_stadium(pl, log):
+    """Once-per-turn Stadium effects the owner can use.
+
+    Prism Tower is a repeatable DISCARD outlet at no Supporter cost, which
+    matters in a deck whose payoff counts its own Pokemon in the discard;
+    Team Rocket's Factory is a draw. Both were previously inert -- every
+    Stadium was.
+    """
+    if pl.stadium == "Prism Tower":
+        # Discard 2 from hand to draw 1. Only worth it when the two cards
+        # going are fuel; otherwise it is straight card disadvantage.
+        fuel = [c for c in pl.hand
+                if c[0] == "Pokemon" and _is_discard_fuel(pl, c[1])][:2]
+        if len(fuel) == 2:
+            for c in fuel:
+                pl.remove_from_hand(*c)
+                pl.discard.append(c[1])
+            pl.draw(1)
+            log.append(f"  {pl.name}: Prism Tower (discard 2 fuel, draw 1)")
+    elif pl.stadium == "Team Rocket's Factory":
+        if any("Team Rocket" in n for n in pl.played_supporters_this_turn):
+            pl.draw(2)
+            log.append(f"  {pl.name}: Team Rocket's Factory (draw 2)")
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -551,7 +576,8 @@ def play_items(pl, opp, turn, log, first_turn):
     # Stadiums: only those with a modeled effect get played, and playing
     # one replaces whatever is already out (on either side).
     for kind, name in list(pl.hand):
-        if kind != "Stadium" or name not in RETREAT_STADIUMS:
+        if kind != "Stadium" or (name not in RETREAT_STADIUMS
+                                 and name not in EFFECT_STADIUMS):
             continue
         if pl.stadium == name:
             continue
@@ -942,6 +968,9 @@ DAMAGE_TOOLS = {
 # effect is Retreat Cost, which the lock/pivot decks live or die on, so
 # they get honoured rather than sitting inert. Value is the modifier;
 # "family" restricts it to Pokemon whose name contains that string.
+# Stadiums with a modeled once-per-turn effect, applied in use_stadium().
+EFFECT_STADIUMS = {"Prism Tower", "Team Rocket's Factory"}
+
 RETREAT_STADIUMS = {
     "N's Castle": {"amount": -99, "family": "N's"},
     "Paradise Resort": {"amount": -1, "family": "Psyduck"},
@@ -1802,6 +1831,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     play_items(pl, opp, turn, log, first_turn)
     play_supporter(pl, opp, turn, log)
     use_abilities(pl, opp, turn, log)
+    use_stadium(pl, log)
     sweep_knocked_out(pl, opp, log)
     attach_energy(pl, cards_by_name, log)
     attach_tools(pl, log)
