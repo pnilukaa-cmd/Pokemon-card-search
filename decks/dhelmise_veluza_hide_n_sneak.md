@@ -119,6 +119,79 @@ the discard.
 Two copies, not one — it is also the deck's only way to push an opposing
 Stadium off the field.
 
+## The finisher problem, and what actually pays off the spread
+
+`Matcha Spin` places 4 counters on **each** of their Pokémon. That reads
+like a win condition and is not one: 40 damage kills nothing, and the
+deck's own `Vengeful Anchor` already hits one target for 170. The spread
+is only worth anything if some card converts a board full of counters
+into a Knock Out.
+
+Every card in the pool that reads damage counters on the opponent, ranked
+for this deck:
+
+| Card | | Verdict |
+| --- | --- | --- |
+| **`Azelf` SSP 80** — `P``C` Neurokinesis 10+ | *10 more damage for each damage counter on **all** of your opponent's Pokémon* | **The one that fits.** Basic, on-type, 2 Energy. Counts the **whole board**, so one Matcha Spin across six Pokémon is 24 counters = **250** |
+| `Trevenant` CRI 39 — `P``P` Overwhelming Pain 60+ | same whole-board scaling, higher base | Higher ceiling (**300** off one Matcha Spin) but it is a Stage 1 off `Phantump` CRI 38, retreat 3, and this deck already runs two evolution lines |
+| `Granbull` PFL 38 — `P``P``C` Finishing Blow 90+ | *+90 if their Active **already has any** counters* | The spread makes this true for their entire Bench, so it stays on after they promote. But 3 Energy in an 8-Energy deck |
+| `Alakazam` TWM 82 — `P` Strange Hacking | Confuse, **and move their counters anywhere on their side** | Consolidates the spread onto one target. Stage 2 off Abra/Kadabra — three more slots |
+| `Shedinja` MEG 144 — `P` Damage Beat 20× | 20 per counter, **Active only** | 4 counters = 80. Worse than Dhelmise for one Energy |
+| `Girafarig` TEF 66 — Psychic Assault 20+ | 10 per counter, Active only | 60 off a full Matcha Spin. Too small |
+| `Dusknoir` SFA 20 — Cursed Blast | Ability: **13 counters (130) on any of their Pokémon**, then this Pokémon is KO'd | Not a spread payoff — a spread *producer*, and the biggest one. Also feeds Azelf. Costs a Stage 2 line and a Prize |
+| `Sableye` — Damage Collection | moves their Bench counters to their Active | Same job as Alakazam, off-type (Darkness) |
+| `N's Vanilluxe` — Snow Coating | **doubles** the counters on each of their Pokémon | Water Stage 2; a whole second deck |
+| `Yveltal ex` — Soul Destroyer | **KO each of their Pokémon with 50 HP or less remaining** | A board wipe after a spread, but Darkness, 3 Energy, and a 2-Prize liability in a single-Prize deck |
+
+**Anti-synergy worth naming: the "exactly 6 counters" cards are traps
+here.** `Mega Absol ex`'s Terminal Period and `Glaceon ex`'s Euclase both
+Knock Out a Pokémon with **exactly** 6 damage counters. Matcha Spin places
+4, and a second one makes 8 — it steps straight over 6 and never lands on
+it. The only bridge in the pool is `Team Rocket's Venture Bomb` DRI 179
+(coin flip, 2 counters), which is a flip and off-plan. Don't build toward
+these.
+
+### Azelf is the pick, and it does not need Matcha Spin
+
+The important thing about Neurokinesis is that it counts **every damage
+counter on their side of the table**, from any source. It does not care
+whether the counters came from Matcha Spin, from a Dhelmise trade that
+left something at 170/300, or from chip on a Bench sitter. In a game that
+has gone long — which is most of this deck's games — their board is
+already carrying counters, and Azelf cashes all of it in at once for two
+Energy off a Basic. Measured ceiling in a real traced game: **340 damage.**
+
+### What the measurement actually says
+
+Full field, 30 decks, 150 games each, all on the same engine:
+
+| Build | mean | median | winning |
+| --- | --- | --- | --- |
+| no Azelf (the previous list) | 68.4% | 66.3% | 28/30 |
+| + 2 Azelf (−1 Bangle, −1 Switch) | 67.1% | 64.0% | 28/30 |
+| **+ 2 Azelf, 3rd Sinistcha** | **68.7%** | **69.0%** | 27/30 |
+| spread-max: 4 Sinistcha, 3 Switch, 2 Azelf | 65.4% | 63.0% | 27/30 |
+
+**Two honest readings of that table.**
+
+First, **going all-in on the spread is actively worse** (65.4%). Four
+Sinistcha and three Switch to get it Active costs more than the plan
+returns. That result is trustworthy and it is a real finding.
+
+Second, **the Azelf rows are inside the ±1 noise band** on mean, and the
+reason is a limitation of the simulator, not a verdict on the card: under
+its AI, **Matcha Spin almost never fires**. Across 75 traced games the
+spread went off zero times, because the AI correctly prefers Dhelmise's
+170 to one target over 40 to each and will not spend a turn switching
+Sinistcha in. Neurokinesis fired 5 times in 25 games, once for 340 and
+four times for its base. So the field numbers here measure a deck that is
+*not executing the combo* — they are a floor for Azelf, not a fair test.
+
+It is kept at 2 on that basis plus the card-level case (Basic, on-type,
+two Energy, no evolution, and it also raises the Basic count enough to cut
+the mulligan from 11.8% to **8.3%**), with the limitation stated rather
+than papered over.
+
 ## The full survey of discard outlets
 
 Everything in Standard that puts **your own** cards into **your own**
@@ -167,15 +240,16 @@ first.
 ## Decklist
 
 ```
-Pokémon: 19
+Pokémon: 22
 4 Veluza SCR 45
 4 Shuppet PBL 33
 4 Poltchageist PBL 5
 3 Dhelmise PBL 39
+3 Sinistcha PBL 6
+2 Azelf SSP 80
 2 Banette PBL 34
-2 Sinistcha PBL 6
 
-Trainer: 33
+Trainer: 30
 4 Kofu SCR 138
 4 Ultra Ball MEG 131
 4 Poké Pad ASC 198
@@ -185,8 +259,7 @@ Trainer: 33
 2 Naveen POR 112
 2 Prism Tower CRI 111
 2 Boss's Orders MEG 114
-2 Switch MEG 130
-2 Brave Bangle WHT 80
+1 Switch MEG 130
 1 Brilliant Blender SSP 164
 1 Redeemable Ticket JTG 156
 
@@ -195,6 +268,9 @@ Energy: 8
 
 Total Cards: 60
 ```
+
+`Brave Bangle` comes out for the Azelf pair: its bonus only applies
+against a Pokémon ex, and the deck's problem was never the ex matchups.
 
 ### Card choices worth stating
 
@@ -222,22 +298,29 @@ Total Cards: 60
 ## Numbers
 
 60 cards, no card over 4 copies, 1 ACE SPEC, no energy-type shortfall.
-Mulligan **11.8%** (15 Basics — down from 16.3%, because Veluza 2 → 4 added
-two more Basics than Poffin's cut removed). *`check_energy_support.py`
+Mulligan **8.3%** (17 Basics — the two Azelf are Basics, on top of the
+Veluza 2 → 4 that already took it from 16.3% to 11.8%). *`check_energy_support.py`
 flags 8 Grass costs as IMPOSSIBLE — all false positives from name-pooling
 other Dhelmise, Poltchageist and Sinistcha printings; every attack in the
 exact list above is Psychic- or Colorless-costed.*
 
-1000-trial baseline, in play by turn 6: **Veluza 96.8% @ turn 1.80**,
-Shuppet 94.9%, Poltchageist 92.6%, **Dhelmise 79.8% @ turn 2.31**,
-Banette 61.3%, Sinistcha 45.8%. First attack by turn 6: **77.8%**.
-(The baseline sim does not model Gwynn, Naveen or Redeemable Ticket —
-their effect shows up in the full-field numbers, not these.)
+1000-trial baseline, in play by turn 6: **Veluza 96.7% @ turn 1.79**,
+Shuppet 93.6%, Poltchageist 87.7%, **Dhelmise 74.4% @ turn 2.14**,
+Sinistcha 54.1%, **Azelf 53.3% @ turn 2.36**, Banette 41.4%. First attack
+by turn 6: **76.2%**. (The baseline sim does not model Gwynn, Naveen or
+Redeemable Ticket — their effect shows up in the full-field numbers, not
+these.)
 
-Full field, 29 decks, 150 games each — mean **70.5%**, median **70.0%**,
-**27/29** winning. Best: Feraligatr/Munkidori 96.0%, T.R. Wobbuffet 92.0%,
-Chandelure mill 92.0%, Eerie Inferno 86.7%, Darkness Mill 85.3%. Worst:
-Steven's Carbink 48.0%, N's Zoroark 49.3%, Panic Poison 51.3%.
+Full field, 30 decks, 150 games each — mean **68.7%**, median **69.0%**,
+**27/30** winning. Best: Feraligatr/Munkidori 96.7%, Chandelure mill
+88.7%, Static Venom 84.7%, T.R. Wobbuffet 84.0%, Eerie Inferno 83.3%.
+Worst: Steven's Carbink 47.3%, N's Zoroark 49.3%, Panic Poison 50.0%. It
+beats the pre-Azelf version of itself **54.7%**.
+
+*(These are lower than the 70.5% this file previously reported for the
+pre-Azelf list, and both changes are real: the field grew by one deck,
+and a simulator fix — see below — stopped Matcha Spin from dealing 40
+free damage on turns its 6-fuel gate was not met.)*
 
 **Variance note.** This exact list run a second time against the same
 field gave **71.6% mean, 70.7% median, 28/29**. At 150 games per matchup
@@ -278,7 +361,20 @@ numbers alone. Per-matchup rows are directional, not precise.
 4. **The AI benched every Basic on sight**, so a deck whose payoff counts
    its own Pokémon in the discard could never turn its payoff on. It now
    holds back a Basic that is worth more as fuel, once a board exists.
-5. **No Stadium did anything.** `Stadium` cards were tracked but never
+5. **Matcha Spin was charged twice, and never gated.** Its counters are
+   placed by the rider path, but `attack_damage` *also* returned a flat 40
+   for it — so the Active took the damage twice, the flat half wrongly
+   picked up Weakness (placing counters ignores Weakness and Resistance),
+   and worst of all that half skipped the attack's own 6-fuel gate, so
+   Matcha Spin was dealing 40 with an empty discard.
+6. **A board-wide spread was priced as if it hit one Pokémon.** The AI
+   valued "4 counters on each of your opponent's Pokémon" at 40 rather
+   than 240, which is part of why it never chose to set its own payoff up.
+7. **Only the Active's counters could be counted.** `Neurokinesis` and
+   `Overwhelming Pain` scale off counters on **all** of the opponent's
+   Pokémon — the entire reason they pair with a spread — and the engine
+   only knew the Active-only wording, scoring Azelf at a flat 10.
+8. **No Stadium did anything.** `Stadium` cards were tracked but never
    executed, so the Factory-vs-Prism-Tower question could not be asked.
    Adds `use_stadium`, with Prism Tower as a repeatable fuel outlet and
    Team Rocket's Factory gated on a Team Rocket Supporter that turn.

@@ -1019,6 +1019,14 @@ def _clause_count(clause, pl, opp, spot):
         return opp.active.energy_count() if opp.active else 0
     if "energy attached to this pok" in c:
         return spot.energy_count()
+    # Azelf's Neurokinesis and Trevenant's Overwhelming Pain count the
+    # WHOLE opposing board, not just the Active -- which is the entire
+    # reason they pair with a spread attack. Checked before the Active-only
+    # clause below, which would otherwise never be reached for this wording
+    # but is the narrower reading either way.
+    if "damage counter on all of your opponent's pok" in c:
+        spots = ([opp.active] if opp.active else []) + list(opp.bench)
+        return sum(s.damage // 10 for s in spots)
     if "damage counter on your opponent's active" in c:
         return (opp.active.damage // 10) if opp.active else 0
     if "damage counter on this pok" in c:
@@ -1176,6 +1184,18 @@ def attack_damage(pl, opp, spot, atk, record=True):
     # Flat damage-counter placement with no scaling clause.
     m = _COUNTERS_RE.search(text)
     if m and not base:
+        # If the rider path is going to place these counters itself, this
+        # function must return 0 or the Active is charged twice -- once as
+        # attack damage (which also wrongly picks up Weakness, since
+        # placing counters ignores Weakness and Resistance) and again as
+        # counters. Returning the flat number here also skipped the
+        # attack's own gate: Matcha Spin was dealing 40 at zero Hide 'n'
+        # Sneak fuel, when it is supposed to do nothing at all below 6.
+        eff = _attack_ir(atk)
+        if not eff.unsupported and any(
+                a.op is IR.Op.PLACE_COUNTERS and a.op in ATTACK_RIDER_OPS
+                for a in eff.actions):
+            return 0
         return int(m.group(1)) * 10
 
     # "This attack does N damage to 1 of your opponent's Pokemon" -- the
@@ -1287,6 +1307,13 @@ def attack_rider_value(pl, opp, atk):
                 want = per.replace("basic ", "").strip()
                 fuel = sum(1 for c in pl.discard if want in c.lower())
                 value += (act.amount or 0) * 10 * fuel
+            elif act.target is IR.Target.OPP_ALL:
+                # A board-wide spread is worth what it actually places:
+                # 4 counters on each of six Pokemon is 240, not 40. Pricing
+                # it as a single target is what kept the AI from ever
+                # setting up its own payoff.
+                spots = ([opp.active] if opp.active else []) + list(opp.bench)
+                value += (act.amount or 0) * 10 * max(len(spots), 1)
             else:
                 value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
         elif act.op == IR.Op.MOVE_COUNTERS:

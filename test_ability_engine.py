@@ -622,6 +622,88 @@ def test_hide_n_sneak_threshold():
     check("Matcha Spin is on at 6", AE.conditions_met(eff, me, opp, spot))
 
 
+def test_matcha_spin_is_not_charged_twice():
+    """A spread attack's counters are placed by the rider, not by damage.
+
+    Matcha Spin has no printed damage -- its whole effect is "place 4
+    damage counters on each of your opponent's Pokemon", which the rider
+    path applies. attack_damage used to ALSO return 40 for it, which both
+    double-charged the Active and skipped the attack's own 6-fuel gate
+    (and picked up Weakness, which counter placement ignores).
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["Sinistcha"], {"Sinistcha": ("PBL", "6")})
+    sin = Spot("Sinistcha")
+    me = FakePlayer("A", POK, EFF, active=sin)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Sinistcha"))
+    matcha = next(a for a in POK["Sinistcha"]["attacks"]
+                  if a["name"] == "Matcha Spin")
+
+    me.discard = []
+    check("Matcha Spin deals no attack damage at 0 fuel",
+          SV.attack_damage(me, opp, sin, matcha, record=False) == 0)
+    me.discard = ["Poltchageist"] * 6
+    check("Matcha Spin still deals no attack damage at 6 fuel "
+          "(the rider places the counters)",
+          SV.attack_damage(me, opp, sin, matcha, record=False) == 0)
+
+
+def test_board_wide_spread_is_priced_across_the_board():
+    """4 counters on each of six Pokemon is worth 240 to the AI, not 40."""
+    import simulate_versus as SV
+    # Poltchageist has to be in the card table or the discard pile cannot
+    # be counted by Ability name at all.
+    POK, EFF = build(["Sinistcha", "Poltchageist"],
+                     {"Sinistcha": ("PBL", "6"), "Poltchageist": ("PBL", "5")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Sinistcha"),
+                    discard=["Poltchageist"] * 6)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Sinistcha"))
+    matcha = next(a for a in POK["Sinistcha"]["attacks"]
+                  if a["name"] == "Matcha Spin")
+
+    opp.bench = []
+    check("lone Active is worth 40", SV.attack_rider_value(me, opp, matcha) == 40)
+    opp.bench = [Spot("Sinistcha") for _ in range(5)]
+    check("a full six-Pokemon board is worth 240",
+          SV.attack_rider_value(me, opp, matcha) == 240,
+          str(SV.attack_rider_value(me, opp, matcha)))
+    me.discard = []
+    check("and nothing at all below the 6-fuel gate",
+          SV.attack_rider_value(me, opp, matcha) == 0)
+
+
+def test_neurokinesis_counts_the_whole_opposing_board():
+    """Azelf scales off counters on ALL their Pokemon, not just the Active.
+
+    That distinction is the entire reason it pairs with a spread attack;
+    the engine only knew the Active-only wording.
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["Azelf"], {"Azelf": ("SSP", "80")})
+    az = Spot("Azelf")
+    me = FakePlayer("A", POK, EFF, active=az)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Azelf"))
+    neuro = next(a for a in POK["Azelf"]["attacks"]
+                 if a["name"] == "Neurokinesis")
+
+    opp.bench = []
+    opp.active.damage = 0
+    check("base 10 on an undamaged board",
+          SV.attack_damage(me, opp, az, neuro, record=False) == 10)
+
+    opp.active.damage = 40
+    check("+10 per counter on the Active",
+          SV.attack_damage(me, opp, az, neuro, record=False) == 50)
+
+    opp.bench = [Spot("Azelf") for _ in range(5)]
+    for b in opp.bench:
+        b.damage = 40
+    # 4 counters on each of 6 Pokemon = 24 counters = +240.
+    check("Bench counters count too: 10 + 240 after one Matcha Spin",
+          SV.attack_damage(me, opp, az, neuro, record=False) == 250,
+          str(SV.attack_damage(me, opp, az, neuro, record=False)))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -645,7 +727,10 @@ def main():
                test_biting_spree_hits_the_opponent,
                test_terminal_period_needs_exactly_six_counters,
                test_food_prep_scales_with_kofu_in_discard,
-               test_hide_n_sneak_threshold]:
+               test_hide_n_sneak_threshold,
+               test_matcha_spin_is_not_charged_twice,
+               test_board_wide_spread_is_priced_across_the_board,
+               test_neurokinesis_counts_the_whole_opposing_board]:
         print(f"{fn.__name__}:")
         try:
             fn()
