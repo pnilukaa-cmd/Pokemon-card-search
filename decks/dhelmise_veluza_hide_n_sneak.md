@@ -94,6 +94,10 @@ Poffin is *better* at the two things you did not want (Shuppet,
 Poltchageist on the Bench) and worse at the two that win games. Full
 field, 29 decks, 150 games each: **68.5% with Poffin, 70.5% without.**
 
+**The baseline table above is the load-bearing evidence, not the field
+gap.** 1000 trials per row makes those setup numbers tight; the 2-point
+field gap on its own sits inside run-to-run noise (below).
+
 The freed slots go to Poké Pad 2 → 4, Gwynn 2 → 3, Brave Bangle 1 → 2.
 
 ## Prism Tower over Team Rocket's Factory
@@ -148,6 +152,7 @@ Deluxe Bomb, Tremendous Bomb, Powerglass). No Tool is a discard outlet.
 | + 3 Hole-Digging Shovel (−Poké Pad, −Lillie's, −Switch) | 56.8% | 52.7% | 16/29 |
 | 4 Veluza, 3 Lillie's, 3 Petrel, Prism Tower, **Poffin kept** | 68.5% | 66.7% | 26/29 |
 | **same, Poffin cut for Poké Pad / Gwynn / Bangle** | **70.5%** | **70.0%** | **27/29** |
+| *(identical list, second run — see the variance note)* | 71.6% | 70.7% | 28/29 |
 
 `Gwynn` was a small mean gain but moved winning matchups **21 → 25**, and
 the reason is that it is the only outlet that pays you for discarding
@@ -233,6 +238,14 @@ Full field, 29 decks, 150 games each — mean **70.5%**, median **70.0%**,
 **27/29** winning. Best: Feraligatr/Munkidori 96.0%, T.R. Wobbuffet 92.0%,
 Chandelure mill 92.0%, Eerie Inferno 86.7%, Darkness Mill 85.3%. Worst:
 Steven's Carbink 48.0%, N's Zoroark 49.3%, Panic Poison 51.3%.
+
+**Variance note.** This exact list run a second time against the same
+field gave **71.6% mean, 70.7% median, 28/29**. At 150 games per matchup
+the mean carries roughly **±1 point**, and a single matchup swings much
+more than that — Steven's Carbink read 48.0% and then 41.3%. So read the
+field mean to one significant figure: this deck is a **~70%** list, and
+any two builds inside 2 points of each other are not separated by these
+numbers alone. Per-matchup rows are directional, not precise.
 
 ## Where it loses
 
