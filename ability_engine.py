@@ -119,6 +119,16 @@ def conditions_met(effect, pl, opp, source):
                 return False
         if k == "own_prizes_equal" and getattr(pl, "prizes", None) != c["count"]:
             return False
+        if k == "named_ability_in_discard":
+            want = c["ability"].lower()
+            n = 0
+            for name in pl.discard:
+                for ab in (pl.POKEMON.get(name, {}).get("abilities") or []):
+                    if (ab.get("name") or "").lower() == want:
+                        n += 1
+                        break
+            if n < c["count"]:
+                return False
         if k == "opponent_active_is_ex":
             if opp is pl or not opp.active:
                 return False

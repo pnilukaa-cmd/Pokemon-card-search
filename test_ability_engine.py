@@ -589,6 +589,39 @@ def test_food_prep_scales_with_kofu_in_discard():
           len(SV.effective_cost(me2, vel, sonic["cost"], opp)) == 4)
 
 
+def test_hide_n_sneak_threshold():
+    """Dhelmise's Vengeful Anchor is 30 damage, or 170 once four Pokemon
+    with the Hide 'n' Sneak Ability are in the discard. Sinistcha's Matcha
+    Spin wants six. Both clauses were being dropped entirely."""
+    import simulate_versus as SV
+    POK, EFF = build(["Dhelmise", "Shuppet", "Sinistcha", "Poltchageist"],
+                     {"Dhelmise": ("PBL", "39"), "Shuppet": ("PBL", "33"),
+                      "Sinistcha": ("PBL", "6"), "Poltchageist": ("PBL", "5")})
+    anchor = next(a for a in POK["Dhelmise"]["attacks"]
+                  if a["name"] == "Vengeful Anchor")
+    spot = Spot("Dhelmise")
+    me = FakePlayer("A", POK, EFF, active=spot)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Dhelmise"))
+    for n, want in ((0, 30), (3, 30), (4, 170), (6, 170)):
+        me.discard = ["Shuppet"] * n
+        got = SV.attack_damage(me, opp, spot, anchor, record=False)
+        check(f"Vengeful Anchor is {want} with {n} in discard",
+              got == want, f"got {got}")
+
+    # A discarded Pokemon WITHOUT the Ability must not count.
+    me.discard = ["Dhelmise"] * 6
+    check("non-Hide-'n'-Sneak Pokemon do not fuel it",
+          SV.attack_damage(me, opp, spot, anchor, record=False) == 30)
+
+    eff = IR.compile_effect("Sinistcha", "Matcha Spin",
+                            next(a for a in POK["Sinistcha"]["attacks"]
+                                 if a["name"] == "Matcha Spin")["text"])
+    me.discard = ["Poltchageist"] * 5
+    check("Matcha Spin is off at 5", not AE.conditions_met(eff, me, opp, spot))
+    me.discard = ["Poltchageist"] * 6
+    check("Matcha Spin is on at 6", AE.conditions_met(eff, me, opp, spot))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -611,7 +644,8 @@ def main():
                test_victory_symbol_is_prize_gated,
                test_biting_spree_hits_the_opponent,
                test_terminal_period_needs_exactly_six_counters,
-               test_food_prep_scales_with_kofu_in_discard]:
+               test_food_prep_scales_with_kofu_in_discard,
+               test_hide_n_sneak_threshold]:
         print(f"{fn.__name__}:")
         try:
             fn()

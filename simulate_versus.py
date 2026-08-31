@@ -354,6 +354,37 @@ def _lead_score(pl, name):
     return (2 if evolves_into else 0) + (1 if has_attack else 0), info["hp"]
 
 
+def _discard_payoffs(pl):
+    """(ability name, threshold) for every payoff this deck runs that
+    counts its own Pokemon in the discard pile."""
+    out = []
+    for name in {n for _, n in pl.deck} | set(pl.in_play_names()):
+        for atk in pl.POKEMON.get(name, {}).get("attacks", []):
+            eff = _attack_ir(atk)
+            for c in eff.conditions:
+                if c["kind"] == "named_ability_in_discard":
+                    out.append((c["ability"].lower(), c["count"]))
+    return out
+
+
+def _is_discard_fuel(pl, name):
+    """Is this Pokemon worth more in the discard than on the Bench?"""
+    payoffs = _discard_payoffs(pl)
+    if not payoffs:
+        return False
+    abilities = [(ab.get("name") or "").lower()
+                 for ab in pl.POKEMON.get(name, {}).get("abilities") or []]
+    for want, need in payoffs:
+        if want not in abilities:
+            continue
+        have = sum(1 for c in pl.discard
+                   if want in [(a.get("name") or "").lower()
+                               for a in pl.POKEMON.get(c, {}).get("abilities") or []])
+        if have < need:
+            return True
+    return False
+
+
 def play_basics(pl, turn, log):
     if pl.active is None:
         bs = basics_in_hand(pl)
@@ -364,6 +395,14 @@ def play_basics(pl, turn, log):
             log.append(f"  {pl.name}: {best} to Active")
     for kind, name in list(pl.hand):
         if kind == "Pokemon" and pl.POKEMON[name]["stage"] == "Basic" and len(pl.bench) < MAX_BENCH:
+            # Hold back a Pokemon whose job is to be DISCARDED. A deck
+            # whose payoff counts its own Pokemon in the discard pile
+            # (Dhelmise's Vengeful Anchor, Sinistcha's Matcha Spin) has to
+            # choose between benching a body and fuelling the attack --
+            # benching everything on sight simply never turned those
+            # attacks on. Only holds back once there is a board already.
+            if len(pl.bench) >= 2 and _is_discard_fuel(pl, name):
+                continue
             pl.remove_from_hand(kind, name)
             pl.bench.append(InPlay(name, turn))
             log.append(f"  {pl.name}: benches {name}")
@@ -635,6 +674,23 @@ def play_supporter(pl, opp, turn, log):
         log.append(f"  {pl.name}: Judge (both hands to 4)")
         return
 
+    # Naveen: discard any number from hand, then draw back to 5. In a
+    # deck whose payoff counts its own Pokemon in the discard, the discard
+    # half IS the effect -- Night Stretcher and friends run it backwards.
+    if "Naveen" in hand_names and len(pl.hand) <= 5:
+        use("Naveen")
+        fuel = [c for c in pl.hand
+                if c[0] == "Pokemon" and any(
+                    (ab.get("name") or "") == "Hide 'n' Sneak"
+                    for ab in pl.POKEMON.get(c[1], {}).get("abilities") or [])]
+        for c in fuel:
+            pl.remove_from_hand(*c)
+            pl.discard.append(c[1])
+        while len(pl.hand) < 5 and pl.deck:
+            pl.draw(1)
+        log.append(f"  {pl.name}: Naveen (discard {len(fuel)} fuel, draw to 5)")
+        return
+
     # Kofu: put 2 cards on the bottom of your deck, draw 4. In a Food Prep
     # deck it is also the discount itself -- every copy played is one more
     # Colorless off Haymaker and Sonic Edge -- so it stays worth playing
@@ -802,7 +858,7 @@ KNOWN_TRAINERS = {
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
     "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
-    "Kofu", "Brilliant Blender", "Gladion's Final Battle",
+    "Kofu", "Brilliant Blender", "Gladion's Final Battle", "Naveen",
 }
 
 
@@ -823,6 +879,7 @@ _MORE_DMG_RE = _re.compile(r"(\d+) more damage for each", _re.I)
 _DOES_DMG_RE = _re.compile(r"does (\d+) damage for each", _re.I)
 _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
+_COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
 _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 
@@ -1000,6 +1057,17 @@ def attack_damage(pl, opp, spot, atk, record=True):
         if copied is not None:
             return copied
 
+    # "If <condition>, this attack does N more damage" -- a flat bonus
+    # gated on something the IR already parses as a condition. Dhelmise's
+    # Vengeful Anchor is 30 that becomes 170 once four Hide 'n' Sneak
+    # Pokemon are in the discard, and nothing was reading the clause.
+    m = _COND_FLAT_BONUS_RE.search(text)
+    if m and not _FOR_EACH_RE.search(text) and opp is not None:
+        eff = _attack_ir(atk)
+        if eff.conditions:
+            return base + (int(m.group(1))
+                           if AE.conditions_met(eff, pl, opp, spot) else 0)
+
     # Coin-flip attacks: actually flip.
     if _FLIP_UNTIL_TAILS_RE.search(text):
         heads = 0
@@ -1110,6 +1178,8 @@ def attack_rider_value(pl, opp, atk):
         return 0
     eff = _attack_ir(atk)
     if eff.unsupported:
+        return 0
+    if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return 0
     value = 0
     for act in eff.actions:
@@ -1572,6 +1642,12 @@ def attack_side_effects(pl, opp, atk, log):
         eff = IR.compile_effect("attack", atk["name"], text)
         _ATTACK_IR_CACHE[key] = eff
     if eff.unsupported:
+        return
+    # An attack's rider can be gated the same way an Ability's is --
+    # Matcha Spin only spreads counters at 6+ Hide 'n' Sneak Pokemon in
+    # the discard. Firing riders unconditionally made those attacks read
+    # as always-on.
+    if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return
     if getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
         return

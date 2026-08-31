@@ -286,6 +286,15 @@ def parse_conditions(text):
     # unconditional, which is a materially different card.
     if re.search(r"if your opponent'?s active pok[eé]mon is a pok[eé]mon ex", t, re.I):
         out.append({"kind": "opponent_active_is_ex"})
+    # "If you have 4 or more Pokemon that have the Hide 'n' Sneak Ability
+    # in your discard pile" -- the whole Hide 'n' Sneak archetype is built
+    # on this threshold, and it appears on Dhelmise, Sinistcha and
+    # Spiritomb at three different counts.
+    m = re.search(r"if you have (\d+) or more pok[eé]mon that have the "
+                  r"(.+?) ability in your discard pile", t, re.I)
+    if m:
+        out.append({"kind": "named_ability_in_discard",
+                    "ability": m.group(2).strip(), "count": int(m.group(1))})
     # N's Sigilyph's Victory Symbol is the only outright "you win this
     # game" card in the format, and it is gated on an exact Prize count.
     m = re.search(r"when you have exactly (\d+) prize cards? remaining", t, re.I)
