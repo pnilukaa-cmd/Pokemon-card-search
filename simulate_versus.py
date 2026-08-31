@@ -498,6 +498,15 @@ def play_items(pl, opp, turn, log, first_turn):
             pl.bench.append(InPlay(n, turn))
         log.append(f"  {pl.name}: Buddy-Buddy Poffin -> {', '.join(got)}")
 
+    # Hole-Digging Shovel: discard the top 2 of your own deck. Item
+    # speed, so it stacks with whatever Supporter you played.
+    while ("Item", "Hole-Digging Shovel") in pl.hand and len(pl.deck) >= 2:
+        pl.remove_from_hand("Item", "Hole-Digging Shovel")
+        pl.discard.append("Hole-Digging Shovel")
+        for _ in range(2):
+            pl.discard.append(pl.deck.pop()[1])
+        log.append(f"  {pl.name}: Hole-Digging Shovel (mill 2)")
+
     # Brilliant Blender: search out up to 5 cards and discard them. Its
     # whole purpose is loading the discard on demand -- here, four Kofu at
     # once, which turns Food Prep on in a single Item.
@@ -673,6 +682,38 @@ def play_supporter(pl, opp, turn, log):
         pl.draw(4)
         log.append(f"  {pl.name}: Judge (both hands to 4)")
         return
+
+    # Gwynn: discard up to 2 Pokemon WITHOUT a Rule Box from hand, and
+    # draw 3 for each. Every Hide 'n' Sneak body is single-Prize, so this
+    # is Naveen's fuelling job and the format's best draw on one card.
+    if "Gwynn" in hand_names:
+        fuel = [c for c in pl.hand
+                if c[0] == "Pokemon"
+                and pl.POKEMON.get(c[1], {}).get("prize_value") == 1][:2]
+        if fuel:
+            use("Gwynn")
+            for c in fuel:
+                pl.remove_from_hand(*c)
+                pl.discard.append(c[1])
+            pl.draw(3 * len(fuel))
+            log.append(f"  {pl.name}: Gwynn (discard {len(fuel)}, "
+                       f"draw {3 * len(fuel)})")
+            return
+
+    # Raifort: look at the top 5 and discard any number -- selective
+    # self-mill, so the fuel never has to reach your hand at all.
+    if "Raifort" in hand_names:
+        top = pl.deck[-5:]
+        keep = [c for c in top if not _is_discard_fuel(pl, c[1])]
+        pitch = [c for c in top if _is_discard_fuel(pl, c[1])]
+        if pitch:
+            use("Raifort")
+            for c in pitch:
+                pl.deck.remove(c)
+                pl.discard.append(c[1])
+            log.append(f"  {pl.name}: Raifort (discard {len(pitch)} fuel "
+                       f"off the top)")
+            return
 
     # Naveen: discard any number from hand, then draw back to 5. In a
     # deck whose payoff counts its own Pokemon in the discard, the discard
@@ -858,7 +899,8 @@ KNOWN_TRAINERS = {
     "Team Rocket's Petrel", "Dawn", "Hilda", "Boss's Orders",
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
     "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
-    "Kofu", "Brilliant Blender", "Gladion's Final Battle", "Naveen",
+    "Kofu", "Brilliant Blender", "Gladion's Final Battle", "Naveen", "Gwynn", "Raifort",
+    "Hole-Digging Shovel",
 }
 
 

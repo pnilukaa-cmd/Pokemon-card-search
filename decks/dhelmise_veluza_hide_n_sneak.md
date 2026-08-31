@@ -60,11 +60,53 @@ With Naveen in and the fuel deliberately held back from the Bench:
 | | mean | median | winning |
 | --- | --- | --- | --- |
 | built the obvious way | 51.2% | 46.0% | 10/29 |
-| **+ 4 Naveen, fuel held for the discard** | **60.9%** | **58.0%** | **21/29** |
+| + 4 Naveen, fuel held for the discard | 60.9% | 58.0% | 21/29 |
+| **+ 2 of those swapped to Gwynn** | **61.7%** | **59.3%** | **25/29** |
 
 **`Night Stretcher` is cut, and it is worth saying why**: it puts a
 Pokémon from your discard back into your hand — it runs the engine
 *backwards*. `Sacred Ash` and `Lana's Aid` are the same trap.
+
+## The full survey of discard outlets
+
+Everything in Standard that puts **your own** cards into **your own**
+discard pile, ranked for this deck:
+
+| Card | | Verdict |
+| --- | --- | --- |
+| **`Gwynn` PBL 109** | Supporter — *discard up to 2 Pokémon **without a Rule Box** from hand, draw **3 for each*** | **The best card here.** Every Hide 'n' Sneak body is single-Prize, so this is Naveen's fuelling job *plus* a 6-card draw on one card |
+| **`Naveen` POR 112** | Supporter — discard any number from hand, draw to 5 | The flexible one; discards fuel you already hold |
+| **`Raifort` TWM 161** | Supporter — look at top 5, **discard any number** | Selective self-mill: fuel never has to reach your hand |
+| **`Brilliant Blender` SSP 164** | ACE SPEC Item — search 5 cards out of the deck and discard them | Five bodies in one Item. Already the ACE SPEC |
+| `Ultra Ball` MEG 131 | Item — discard 2 from hand as its cost | Already in, and the cost is upside here |
+| `Hole-Digging Shovel` POR 74 | Item — discard top 2 of your deck | **Tested and bad — see below** |
+| `Larry's Skill` PRE 115 | Supporter — discard hand, search Pokémon + Supporter + Energy | Uncontrolled; dumps what you wanted to keep |
+| `Carmine` TWM 145 | Supporter — discard hand, draw 5 | Same problem, no tutor |
+| `Secret Box` TWM 163 | ACE SPEC — discard 3, search 4 card types | Competes with Blender for the ACE SPEC |
+| `Slowpoke` PBL 29 | Basic, `All-You-Can-Yeet` `P` — discard any number from hand | On-type and free-choice, but it costs your attack for the turn |
+| `Prism Tower` CRI 111 | Stadium — discard 2 from hand, draw 1 | Card disadvantage, and fights Team Rocket's Factory |
+
+**On Tools specifically: there are none.** Every Pokémon Tool in the
+format whose text contains "discard" is discarding *itself* (the Berries,
+Deluxe Bomb, Tremendous Bomb, Powerglass). No Tool is a discard outlet.
+
+### Tested
+
+| Build | mean | median | winning |
+| --- | --- | --- | --- |
+| 4 Naveen | 60.9% | 58.0% | 21/29 |
+| **2 Naveen + 2 Gwynn** | **61.7%** | **59.3%** | **25/29** |
+| + 3 Hole-Digging Shovel (−Poké Pad, −Lillie's, −Switch) | 56.8% | 52.7% | 16/29 |
+
+`Gwynn` is a small mean gain but moves winning matchups **21 → 25**, and
+the reason is that it is the only outlet that pays you for discarding
+rather than charging you.
+
+**`Hole-Digging Shovel` is a trap.** Milling the top 2 blind is only ~20%
+fuel per card in this list — the other 80% of the time it is throwing away
+Dhelmise, Energy or your search. Random self-mill is not the same thing as
+selective self-mill; `Raifort` does the same job while letting you look
+first.
 
 ## Decklist
 
@@ -79,10 +121,11 @@ Pokémon: 17
 
 Trainer: 35
 4 Kofu SCR 138
-4 Naveen POR 112
 4 Ultra Ball MEG 131
 4 Buddy-Buddy Poffin MEG 167
 4 Team Rocket's Petrel ASC 207
+2 Naveen POR 112
+2 Gwynn PBL 109
 3 Poké Pad ASC 198
 3 Team Rocket's Factory ASC 203
 2 Boss's Orders MEG 114
@@ -127,8 +170,8 @@ Psychic- or Colorless-costed.*
 **Dhelmise 90.9% @ turn 1.92**, Veluza 60.5%, Banette 56.3%, Sinistcha
 45.6%. First attack by turn 6: **75.4%**.
 
-Full field, 29 decks, 150 games each — mean **60.9%**, median **58.0%**,
-**21/29** winning. Best: T.R. Wobbuffet 90.0%, Eerie Inferno 86.0%,
+Full field, 29 decks, 150 games each — mean **61.7%**, median **59.3%**,
+**25/29** winning. Best: T.R. Wobbuffet 90.0%, Eerie Inferno 86.0%,
 Chandelure mill 80.7%, Static Venom 77.3%, Salazzle ex 76.0%. Worst:
 Steven's Carbink 38.7%, Lurantis 40.0%, Panic Poison 42.0%.
 
