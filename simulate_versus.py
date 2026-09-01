@@ -679,6 +679,21 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.hand.append((kind, pick))
         log.append(f"  {pl.name}: Night Stretcher -> {pick}")
 
+    # Every other Item, straight off the card text. Items are unlimited
+    # per turn, so this loops until nothing more resolves -- but each pass
+    # must place at least one card, or a card that fizzles would spin here
+    # forever.
+    for _ in range(12):
+        played = False
+        for kind, name in [c for c in pl.hand if c[0] == "Item"]:
+            if name in KNOWN_TRAINERS:
+                continue
+            if play_trainer_from_ir(pl, opp, kind, name, log, turn):
+                played = True
+                break
+        if not played:
+            break
+
 
 def supporter_draw_to(pl, target, log, label):
     before = len(pl.hand)
@@ -943,6 +958,131 @@ def play_supporter(pl, opp, turn, log):
             opp.active = target
             log.append(f"  {pl.name}: {name} -> drags up {target.name}")
             return
+
+    # Anything the registry above does not know, straight off the card
+    # text. Ordered so a Supporter that draws or searches is tried before
+    # one that only disrupts, which matches how the hand-written cases are
+    # ordered and keeps the AI developing before it interferes.
+    for name in sorted(hand_names, key=lambda n: -_ir_supporter_rank(n)):
+        if play_trainer_from_ir(pl, opp, "Supporter", name, log, turn):
+            return
+
+
+# --------------------------------------------------------------------------
+# Trainers the registry above does not cover, played straight from the IR
+# --------------------------------------------------------------------------
+# The hand-written registry models 30 of the 257 Trainers in Standard.
+# The IR already parses 182 of them and the simulator was throwing all of
+# it away, so any deck built out of anything but a short list of staples
+# had most of its Trainer line sitting inert in hand for the whole game --
+# and every win rate measured here inherited that.
+#
+# Hand-written effects still win where they exist: they encode targeting
+# judgement (which Pokemon to gust, which Energy to attach) that the IR
+# does not carry. This is the fallback for everything else.
+
+# Reminder text printed on every card of a type, carrying no effect.
+_TRAINER_BOILERPLATE = (
+    "You may play any number of Item cards during your turn.",
+    "You may play only 1 Supporter card during your turn.",
+    "You can't have more than 1 ACE SPEC card in your deck.",
+    "You may play only 1 Stadium card during your turn.",
+    "Put it next to the Active Spot, and discard it if another Stadium "
+    "comes into play.",
+    "A Stadium with the same name can't be played.",
+    "You may attach any number of Pokémon Tools to your Pokémon during "
+    "your turn.",
+    "You may attach only 1 Pokémon Tool to each Pokémon, and it stays "
+    "attached.",
+)
+
+_TRAINER_IR_CACHE = {}
+
+
+def trainer_effect_ir(name):
+    """Compiled IR for a Trainer, or None if nothing useful parses."""
+    if name in _TRAINER_IR_CACHE:
+        return _TRAINER_IR_CACHE[name]
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else card
+    eff = None
+    if isinstance(card, dict):
+        text = " ".join(card.get("rules") or [])
+        for boiler in _TRAINER_BOILERPLATE:
+            text = text.replace(boiler, "")
+        text = " ".join(text.split())
+        if text:
+            compiled = IR.compile_effect("trainer", name, text)
+            if not compiled.unsupported and compiled.actions:
+                eff = compiled
+    _TRAINER_IR_CACHE[name] = eff
+    return eff
+
+
+# Ops a Trainer may carry out. Deliberately excludes the passive/static
+# ops, which describe a property of something in play and mean nothing on
+# a card that goes to the discard the moment it resolves.
+TRAINER_IR_OPS = {
+    IR.Op.DRAW, IR.Op.SEARCH_TO_HAND, IR.Op.SEARCH_TO_BENCH,
+    IR.Op.FROM_DISCARD_TO_HAND, IR.Op.ATTACH_ENERGY, IR.Op.MOVE_ENERGY,
+    IR.Op.HEAL, IR.Op.SWITCH, IR.Op.PLACE_COUNTERS, IR.Op.MOVE_COUNTERS,
+    IR.Op.DISCARD_FROM_OPPONENT, IR.Op.DISCARD_ENERGY_FROM_OPPONENT,
+    IR.Op.MILL_OPPONENT, IR.Op.LOOK_AT_DECK, IR.Op.SHUFFLE_SELF_INTO_DECK,
+    IR.Op.REVEAL_OPPONENT_HAND, IR.Op.SET_OPPONENT_HAND, IR.Op.LOCK,
+    IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
+    IR.Op.SWAP_HAND_WITH_DECK, IR.Op.FORCE_BENCH_OPPONENT,
+}
+
+
+_IR_SUPPORTER_VALUE = {
+    IR.Op.SEARCH_TO_HAND: 5, IR.Op.DRAW: 4, IR.Op.SEARCH_TO_BENCH: 4,
+    IR.Op.ATTACH_ENERGY: 4, IR.Op.FROM_DISCARD_TO_HAND: 3,
+    IR.Op.SET_OPPONENT_HAND: 3, IR.Op.HEAL: 2, IR.Op.SWITCH: 2,
+    IR.Op.DISCARD_ENERGY_FROM_OPPONENT: 2, IR.Op.PLACE_COUNTERS: 2,
+}
+
+
+def _ir_supporter_rank(name):
+    eff = trainer_effect_ir(name)
+    if eff is None:
+        return -1
+    return max((_IR_SUPPORTER_VALUE.get(a.op, 1) for a in eff.actions), default=0)
+
+
+def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
+    """Resolve an unregistered Trainer through the compiled IR.
+
+    Returns True only if something actually happened -- a card whose
+    effect fizzles (searching an empty deck, healing an undamaged board)
+    must not be spent, or the AI throws its one Supporter per turn away
+    on a card that did nothing.
+    """
+    eff = trainer_effect_ir(name)
+    if eff is None:
+        return False
+    if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
+        return False
+    actions = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
+    if not actions:
+        return False
+
+    def make_inplay(n):
+        return InPlay(n, turn)
+
+    did = False
+    for act in actions:
+        if AE.apply_action(act, pl, opp, pl.active, log,
+                           make_inplay=make_inplay) is not False:
+            did = True
+    if not did:
+        return False
+    pl.remove_from_hand(kind, name)
+    pl.discard.append(name)
+    if kind == "Supporter":
+        pl.supporter_played = True
+        pl.played_supporters_this_turn.add(name)
+    log.append(f"  {pl.name}: {name} (from card text)")
+    return True
 
 
 KNOWN_TRAINERS = {

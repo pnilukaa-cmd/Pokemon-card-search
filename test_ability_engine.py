@@ -784,6 +784,38 @@ def test_turn_locks_are_applied_not_just_compiled():
           IR.Op.LOCK in SV.ATTACK_RIDER_OPS)
 
 
+def test_unregistered_trainers_resolve_from_card_text():
+    """The IR fallback covers the 227 Trainers the registry never knew.
+
+    The hand-written registry modelled 30 of 257 Trainers. The IR already
+    parsed 182 of them and the simulator discarded all of it, so any deck
+    built out of anything but a short list of staples played most of its
+    Trainer line as blank cards.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    SV._CARDS_BY_NAME.update({c["name"]: c for c in cards})
+    trainers = [c for c in cards if c.get("supertype") == "Trainer"]
+    covered = [c for c in trainers
+               if c["name"] in SV.KNOWN_TRAINERS or SV.trainer_effect_ir(c["name"])]
+    pct = 100 * len(covered) / len(trainers)
+    check(f"Trainer coverage is well past the old 11.7% (now {pct:.1f}%)",
+          pct > 65, f"{len(covered)}/{len(trainers)}")
+
+    # A Supporter whose effect cannot resolve must not be spent.
+    POK, EFF = build(["Dhelmise"], {"Dhelmise": ("PBL", "39")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Dhelmise"))
+    opp = FakePlayer("B", POK, EFF, active=Spot("Dhelmise"))
+    lana = "Lana's Aid"
+    if SV.trainer_effect_ir(lana):
+        me.hand = [("Supporter", lana)]
+        me.discard = []          # nothing to recover -- it should fizzle
+        played = SV.play_trainer_from_ir(me, opp, "Supporter", lana, [])
+        check("a Supporter that would do nothing is not spent",
+              not played and ("Supporter", lana) in me.hand)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -812,7 +844,8 @@ def main():
                test_board_wide_spread_is_priced_across_the_board,
                test_neurokinesis_counts_the_whole_opposing_board,
                test_prevention_walls_check_who_is_attacking,
-               test_turn_locks_are_applied_not_just_compiled]:
+               test_turn_locks_are_applied_not_just_compiled,
+               test_unregistered_trainers_resolve_from_card_text]:
         print(f"{fn.__name__}:")
         try:
             fn()
