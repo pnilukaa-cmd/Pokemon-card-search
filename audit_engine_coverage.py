@@ -36,6 +36,7 @@ import ability_engine as AE
 import tcg_model as M
 
 SIMS = ["simulate_versus.py", "simulate_baseline.py"]
+COVERAGE_FILE = "engine_coverage.json"
 
 
 def all_ops():
@@ -159,8 +160,21 @@ def main():
     if not dead:
         print("  none -- every op present in the pool executed at least once")
 
+    firing = len(present) - len(dead)
     print(f"\n  {len(present)} of {len(all_ops())} ops appear on real cards; "
-          f"{len(present) - len(dead)} of those fired in play.")
+          f"{firing} of those fired in play.")
+
+    # Written so other tools can gate on it without re-running a corpus.
+    # deckopt.py refuses to search for decks until this clears its bar,
+    # because an optimiser maximises whatever the simulator reports and
+    # the simulator's blind spots are the cheapest thing for it to find.
+    import json
+    with open(COVERAGE_FILE, "w") as fh:
+        json.dump({"ops_present": len(present), "ops_firing": firing,
+                   "ops_total": len(all_ops()),
+                   "unwired_queries": unwired,
+                   "dead_ops": [str(o) for o in dead]}, fh, indent=2)
+    print(f"  wrote {COVERAGE_FILE}")
     print("\nA NEVER FIRES line is not automatically a bug -- an op can be rare\n"
           "enough that a short corpus misses it. Raise the game count before\n"
           "concluding, then go look at whether the game loop asks for it.")
