@@ -67,6 +67,7 @@ class GameState:
     def __init__(self, deck):
         self.deck = deck
         self.hand = []
+        self.prizes = []            # six cards set aside, face down, all game
         self.active = None
         self.active_energy = 0
         self.active_entered_turn = 0
@@ -106,12 +107,26 @@ class GameState:
             self.online_turn[name] = turn
 
 
+PRIZE_COUNT = 6
+
+
 def opening_hand(deck, POKEMON):
+    """Draw 7, then set 6 Prizes aside.
+
+    The Prizes matter and were not modeled at all: six of the sixty cards
+    are face down and unavailable for the whole game, so a deck is really
+    searching 53 cards, and any single copy of a card is ~10% likely to be
+    sitting in the Prize pile where no amount of search can reach it. That
+    is a real and frequently-felt part of "I can't find my pieces early",
+    and leaving it out made every development number here optimistic.
+    """
     while True:
         random.shuffle(deck)
         state = GameState(deck)
         state.draw(7)
         if state.has_basic_in_hand(POKEMON):
+            state.prizes = [state.deck.pop() for _ in range(PRIZE_COUNT)
+                            if state.deck]
             return state
         deck.extend(state.hand)
         state.hand = []
@@ -610,6 +625,33 @@ def play_items(state, POKEMON, priority, turn, log):
         state.hand.append(("Pokemon", target))
         log.append(f"Play Poké Pad -> search {target}")
 
+    # Hyper Aroma (ACE SPEC Item): search up to 3 Stage 1 Pokemon into
+    # hand. In an evolution deck whose payoff sits on a Stage 1, this is
+    # the whole line in one card -- the direct answer to "I can't get to
+    # my Stage 1 early". It only takes Stage 1s that evolve from something
+    # already in play or in hand, so the measured value is a real
+    # evolution rather than three dead cards.
+    while ("Item", "Hyper Aroma") in state.hand:
+        have = set(state.in_play_names()) | set(state.hand_names())
+        want = []
+        for kind, name in state.deck:
+            if kind != "Pokemon" or len(want) >= 3:
+                continue
+            info = POKEMON.get(name) or {}
+            if info.get("stage") != "Stage 1":
+                continue
+            if info.get("evolves_from") in have and name not in want:
+                want.append(name)
+        if not want:
+            break
+        state.remove_from_hand("Item", "Hyper Aroma")
+        state.discard.append("Hyper Aroma")
+        for name in want:
+            state.deck.remove(("Pokemon", name))
+            state.hand.append(("Pokemon", name))
+        random.shuffle(state.deck)
+        log.append(f"Play Hyper Aroma -> search {', '.join(want)}")
+
     # Pokegear 3.0: look at the top 7 cards of the deck and take a
     # Supporter from among them. Like Team Rocket's Transceiver above, it
     # only takes a Supporter the registry can actually resolve, so the
@@ -726,7 +768,7 @@ def effect_petrel(state, POKEMON, log):
     if not trainer_cards:
         return False
     want_energy = not any(k == "Energy" for k, _ in state.hand)
-    preferred = ["Energy Search"] if want_energy else ["Ultra Ball", "Poké Pad", "Buddy-Buddy Poffin", "Rare Candy"]
+    preferred = ["Energy Search"] if want_energy else ["Ultra Ball", "Poké Pad", "Buddy-Buddy Poffin", "Hyper Aroma", "Rare Candy"]
     fetch = None
     for want_name in preferred:
         cand = next((c for c in trainer_cards if c[1] == want_name), None)

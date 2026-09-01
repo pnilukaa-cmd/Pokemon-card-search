@@ -119,6 +119,74 @@ the discard.
 Two copies, not one — it is also the deck's only way to push an opposing
 Stadium off the field.
 
+## The setup problem: why the pieces arrive late, and what does not fix it
+
+Measured turn by turn, with the six Prize cards actually set aside (the
+simulators were not doing that until this pass — see below). This is
+"in play by the **end** of turn N", 1500 trials:
+
+| | T1 | T2 | T3 | T4 | T5 | T6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Veluza | 43.8% | 80.9% | 90.7% | 94.3% | 95.7% | 96.3% |
+| Shuppet | 44.5% | 72.7% | 83.9% | 88.9% | 91.9% | 93.7% |
+| Poltchageist | 41.2% | 62.3% | 75.2% | 81.7% | 85.3% | 87.8% |
+| **Dhelmise** | 33.9% | **46.9%** | 57.6% | 65.5% | 70.6% | 73.5% |
+| **Sinistcha** | 0.0% | **13.6%** | 26.9% | 39.2% | 48.4% | 56.8% |
+| Azelf | 24.0% | 32.4% | 41.0% | 46.3% | 50.0% | 52.7% |
+| Banette | 0.0% | 11.1% | 20.2% | 29.4% | 36.6% | 44.7% |
+
+Veluza is fine. **Dhelmise at 46.9% by turn 2 is the real gap** — the
+deck's main attacker is a coin flip on the turn you want it.
+
+**Matcha Spin cannot be an early play, and no card fixes that.** It needs
+Sinistcha (a Stage 1, so turn 2 at the earliest) *in the Active Spot*
+**and** 6 Hide 'n' Sneak Pokémon already in the discard. It is a
+late-game attack by construction. Treat it as a turn-5-plus board reset,
+not something to mulligan toward.
+
+### Two obvious fixes, both measured, both worse
+
+| Build | mean | median | winning |
+| --- | --- | --- | --- |
+| current list | **62.2%** | **62.0%** | **26/30** |
+| + 4 Buddy-Buddy Poffin | 55.5% | 51.3% | 16/30 |
+| `Hyper Aroma` over `Brilliant Blender` | 47.8% | 44.0% | 12/30 |
+| 4 Gwynn (−Redeemable Ticket) | 61.0% | 56.6% | 24/30 |
+| **4 Dhelmise (−Redeemable Ticket)** | 63.2% | 60.4% | 24/30 |
+
+**Buddy-Buddy Poffin gives the best board in the deck and loses 7 points
+of win rate.** It lifts Poltchageist from 41.2% to 62.7% on turn 1 and
+Sinistcha from 13.6% to 23.9% on turn 2 — a huge improvement in exactly
+the number that feels bad — and then loses, because *the board is not the
+bottleneck*. Every Hide 'n' Sneak body Poffin benches is one that is not
+in the discard, and the payoffs count the discard. **The setup curve and
+the win rate point in opposite directions here**, which is the whole
+lesson of this deck.
+
+**`Hyper Aroma` TWM 152 fetches three Stage 1s in one Item** — Sinistcha,
+Sinistcha, Banette — and is the single most on-point card in the pool for
+"I can't get to Matcha Spin". It costs the ACE SPEC slot, and taking
+`Brilliant Blender` out drops the deck to **47.8%**. Blender is the fuel
+engine; without it nothing reaches 4 counters, let alone 6. That is the
+clearest single-card result in this file: **Blender is load-bearing and
+nothing replaces it.**
+
+### What actually helps: the fourth Dhelmise
+
+It is a Basic, so it costs nothing to deploy, and it is the card whose
+absence is felt:
+
+| | T1 | T2 | T3 | T6 |
+| --- | --- | --- | --- | --- |
+| 3 Dhelmise | 33.9% | 46.9% | 57.6% | 73.5% |
+| **4 Dhelmise** | **43.9%** | **58.6%** | **67.8%** | **80.9%** |
+
+Win rate is a wash (63.2% vs 62.2% mean, 60.4% vs 62.0% median — inside
+the noise band), so this is not a power increase. It is a **consistency**
+change: the turn-2 attacker shows up 12 points more often, and the
+mulligan drops from 8.3% to **7.0%**. `Redeemable Ticket` is the cut —
+a single copy is now ~10% likely to be sitting in the Prizes anyway.
+
 ## The finisher problem, and what actually pays off the spread
 
 `Matcha Spin` places 4 counters on **each** of their Pokémon. That reads
@@ -240,16 +308,16 @@ first.
 ## Decklist
 
 ```
-Pokémon: 22
+Pokémon: 23
 4 Veluza SCR 45
 4 Shuppet PBL 33
 4 Poltchageist PBL 5
-3 Dhelmise PBL 39
+4 Dhelmise PBL 39
 3 Sinistcha PBL 6
 2 Azelf SSP 80
 2 Banette PBL 34
 
-Trainer: 30
+Trainer: 29
 4 Kofu SCR 138
 4 Ultra Ball MEG 131
 4 Poké Pad ASC 198
@@ -261,7 +329,6 @@ Trainer: 30
 2 Boss's Orders MEG 114
 1 Switch MEG 130
 1 Brilliant Blender SSP 164
-1 Redeemable Ticket JTG 156
 
 Energy: 8
 8 Basic Psychic Energy
@@ -298,29 +365,31 @@ against a Pokémon ex, and the deck's problem was never the ex matchups.
 ## Numbers
 
 60 cards, no card over 4 copies, 1 ACE SPEC, no energy-type shortfall.
-Mulligan **8.3%** (17 Basics — the two Azelf are Basics, on top of the
-Veluza 2 → 4 that already took it from 16.3% to 11.8%). *`check_energy_support.py`
+Mulligan **7.0%** (18 Basics — two Azelf and the fourth Dhelmise, on top
+of the Veluza 2 → 4 that already took it from 16.3% to 11.8%). *`check_energy_support.py`
 flags 8 Grass costs as IMPOSSIBLE — all false positives from name-pooling
 other Dhelmise, Poltchageist and Sinistcha printings; every attack in the
 exact list above is Psychic- or Colorless-costed.*
 
-1000-trial baseline, in play by turn 6: **Veluza 96.7% @ turn 1.79**,
-Shuppet 93.6%, Poltchageist 87.7%, **Dhelmise 74.4% @ turn 2.14**,
-Sinistcha 54.1%, **Azelf 53.3% @ turn 2.36**, Banette 41.4%. First attack
-by turn 6: **76.2%**. (The baseline sim does not model Gwynn, Naveen or
-Redeemable Ticket — their effect shows up in the full-field numbers, not
-these.)
+1000-trial baseline **with Prize cards set aside**, in play by turn 6:
+**Veluza 96.5% @ turn 1.81**, Shuppet 91.3%, Poltchageist 86.7%,
+**Dhelmise 79.8% @ turn 2.01**, Sinistcha 56.1%, **Azelf 52.5% @ turn
+2.39**, Banette 43.5%. First attack by turn 6: **73.2%**. The turn-by-turn
+curve above is the more useful view. (The baseline sim does not model
+Gwynn or Naveen — their effect shows up in the full-field numbers.)
 
-Full field, 30 decks, 150 games each — mean **68.7%**, median **69.0%**,
-**27/30** winning. Best: Feraligatr/Munkidori 96.7%, Chandelure mill
-88.7%, Static Venom 84.7%, T.R. Wobbuffet 84.0%, Eerie Inferno 83.3%.
-Worst: Steven's Carbink 47.3%, N's Zoroark 49.3%, Panic Poison 50.0%. It
-beats the pre-Azelf version of itself **54.7%**.
+Full field, 30 decks, 150 games each — mean **63.2%**, median **60.4%**,
+**24/30** winning. Best: Feraligatr/Munkidori 98.7%, Chandelure mill
+84.0%, Static Venom 83.3%. Worst: Steven's Carbink 42.0%.
 
-*(These are lower than the 70.5% this file previously reported for the
-pre-Azelf list, and both changes are real: the field grew by one deck,
-and a simulator fix — see below — stopped Matcha Spin from dealing 40
-free damage on turns its 6-fuel gate was not met.)*
+*(Every figure here is lower than the 70.5% this file reported two
+revisions ago, and all of it is real rather than a regression in the
+deck. Three separate things moved: the field grew by one deck; a fix
+stopped Matcha Spin dealing 40 free damage on turns its 6-fuel gate was
+unmet; and — the big one — **the simulators now set the six Prize cards
+aside**, which slows every deck in the field down. Numbers in the other
+deck files in this folder predate that change and are not comparable to
+these until they are re-run.)*
 
 **Variance note.** This exact list run a second time against the same
 field gave **71.6% mean, 70.7% median, 28/29**. At 150 games per matchup
@@ -374,7 +443,15 @@ numbers alone. Per-matchup rows are directional, not precise.
    `Overwhelming Pain` scale off counters on **all** of the opponent's
    Pokémon — the entire reason they pair with a spread — and the engine
    only knew the Active-only wording, scoring Azelf at a flat 10.
-8. **No Stadium did anything.** `Stadium` cards were tracked but never
+8. **The Prize cards were never set aside.** Both simulators tracked
+   Prizes only as a counter and dealt from all 60 cards, so nothing was
+   ever unreachable and every deck's setup looked faster than it plays.
+   Six cards are now removed face-down at setup — a deck is really
+   searching 53, and any single copy is ~10% likely to be somewhere no
+   search can reach — and taking a Prize now puts that card in your hand,
+   so a Knock Out is still worth what it should be. This is the change
+   that made the curve above match what the deck actually feels like.
+9. **No Stadium did anything.** `Stadium` cards were tracked but never
    executed, so the Factory-vs-Prism-Tower question could not be asked.
    Adds `use_stadium`, with Prism Tower as a repeatable fuel outlet and
    Team Rocket's Factory gated on a Team Rocket Supporter that turn.

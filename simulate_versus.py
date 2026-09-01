@@ -141,6 +141,8 @@ class Player:
         self.bench = []
         self.discard = []
         self.prizes = STARTING_PRIZES
+        # The six face-down cards, unreachable all game.
+        self.prize_cards = []
         self.supporter_played = False
         # Set by turn-scoped damage Supporters (Black Belt's Training),
         # cleared at the start of every turn.
@@ -296,6 +298,13 @@ def sweep_knocked_out(pl, opp, log):
             elif spot in owner.bench:
                 owner.bench.remove(spot)
             taker.prizes -= taken
+            # Taking a Prize puts that card in your hand. Now that the
+            # Prizes are really set aside, this is where they come back --
+            # without it, removing them would be a pure cost that never
+            # pays anything back, and a KO would be worth less than it is.
+            for _ in range(taken):
+                if taker.prize_cards:
+                    taker.hand.append(taker.prize_cards.pop())
             owner.lost_pokemon_last_turn = True
             log.append(f"  {owner.name}: {spot.name} Knocked Out "
                        f"(+{taken} Prize to {taker.name})")
@@ -1818,18 +1827,30 @@ def pokemon_checkup(pl, opp, log):
 # --------------------------------------------------------------------------
 
 def opening_hand(pl):
+    """Draw 7 (mulliganing to a Basic), then set the 6 Prizes aside.
+
+    The Prize pile was tracked only as a counter -- both players drew from
+    all 60 cards, so nothing was ever unreachable. In reality six cards
+    are face down for the whole game, which means a deck is searching 53
+    and any single copy is roughly 10% likely to be somewhere no search
+    can reach. Leaving that out made every deck's setup look faster than
+    it plays, and understated exactly the "I can't find my pieces" failure
+    mode that single-copy tech cards actually have.
+    """
     mulligans = 0
     while True:
         random.shuffle(pl.deck)
         pl.hand = []
         pl.draw(7)
         if pl.has_basic_in_hand():
-            return mulligans
+            break
         pl.deck.extend(pl.hand)
         pl.hand = []
         mulligans += 1
         if mulligans > 20:
-            return mulligans
+            break
+    pl.prize_cards = [pl.deck.pop() for _ in range(STARTING_PRIZES) if pl.deck]
+    return mulligans
 
 
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
