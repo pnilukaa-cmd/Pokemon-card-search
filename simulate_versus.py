@@ -1491,6 +1491,24 @@ def attack_rider_value(pl, opp, atk):
             # Worth something only while there is Bench room to fill.
             room = max(0, 5 - len(pl.bench))
             value += 35 * min(act.amount or 1, room)
+        # A3. The setup riders had no price at all, so a 0-damage attack
+        # that accelerated Energy or dug for a piece scored zero and the
+        # AI would never spend a turn on it -- the single clearest reason
+        # this simulator could not pilot a deck that has to set up before
+        # it can threaten anything.
+        elif act.op == IR.Op.ATTACH_ENERGY:
+            # An Energy attach is roughly a turn of tempo, and worth more
+            # while the Active is still short of its own attack cost.
+            short = energy_shortfall(pl, pl.active) if pl.active else 0
+            value += (45 if short else 20) * (act.amount or 1)
+        elif act.op == IR.Op.SEARCH_TO_HAND:
+            value += 25 * (act.amount or 1)
+        elif act.op == IR.Op.DRAW:
+            value += 15 * (act.amount or 1)
+        elif act.op == IR.Op.FROM_DISCARD_TO_HAND:
+            value += 20 * (act.amount or 1)
+        elif act.op == IR.Op.SWITCH:
+            value += 15
     return int(value * getattr(eff, "chance", 1.0))
 
 
@@ -1568,11 +1586,27 @@ def attack_wins_game(pl, opp, spot, atk):
     return False
 
 
+# A Prize is the actual currency of the game, and damage is only a means
+# to one. Scoring an attack purely on damage made 170-into-a-330-HP-body
+# rank equal to 170 that finishes something off, and made every setup play
+# look worthless next to chip damage that took no Prizes.
+KO_BONUS_PER_PRIZE = 120
+
+
 def attack_value(pl, opp, spot, atk):
     if opp is not None and attack_wins_game(pl, opp, spot, atk):
         return 10 ** 6            # nothing outranks winning on the spot
     dmg = attack_damage(pl, opp, spot, atk) if opp is not None else atk["damage"]
-    return dmg + attack_rider_value(pl, opp, atk)
+    value = dmg + attack_rider_value(pl, opp, atk)
+    if opp is not None and opp.active is not None:
+        remaining = effective_hp(opp, opp.active) - opp.active.damage
+        if dmg >= remaining:
+            value += KO_BONUS_PER_PRIZE * opp.POKEMON[opp.active.name]["prize_value"]
+            # Overkill past the Knock Out buys nothing, so a smaller
+            # attack that still kills is preferred and the bigger one is
+            # saved for something that needs it.
+            value -= max(0, dmg - remaining) // 2
+    return value
 
 
 def best_attack(pl, spot, only_payable=True, opp=None):

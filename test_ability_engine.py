@@ -60,6 +60,7 @@ class FakePlayer:
         self.abilities_used = set()
         self.deck_out = False
         self.item_locked = False
+        self.energy_types = {"Psychic", "Colorless"}
 
     def remove_from_hand(self, kind, name):
         self.hand.remove((kind, name))
@@ -851,6 +852,47 @@ def test_hp_tools_are_attached_and_raise_the_KO_threshold():
           spot.tool == "Hero's Cape")
 
 
+def test_ai_values_knockouts_and_setup_rather_than_raw_damage():
+    """A3, partial: the policy scored attacks purely on damage.
+
+    Two consequences it could not see past. A 170 that leaves a 330 HP
+    body standing ranked equal to a 170 that takes three Prizes; and a
+    0-damage attack that accelerated Energy or dug for a piece scored a
+    flat zero, so the AI would never spend a turn setting up.
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["Dhelmise", "Veluza", "Mega Scrafty ex"],
+                     {"Dhelmise": ("PBL", "39"), "Veluza": ("SCR", "45"),
+                      "Mega Scrafty ex": ("MEG", "104")})
+    dh = Spot("Dhelmise")
+    me = FakePlayer("A", POK, EFF, active=dh, discard=["Shuppet"] * 4)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Veluza"))
+    anchor = next(a for a in POK["Dhelmise"]["attacks"]
+                  if a["name"] == "Vengeful Anchor")
+
+    opp.active.damage = 0                       # Veluza is 110 HP
+    healthy = SV.attack_value(me, opp, dh, anchor)
+    opp.active.damage = 100                     # now 10 from a Knock Out
+    lethal = SV.attack_value(me, opp, dh, anchor)
+    check("the same attack is worth more when it actually Knocks Out",
+          lethal > healthy, f"{lethal} vs {healthy}")
+
+    # A Knock Out on a 2-Prize body outranks one on a 1-Prize body.
+    opp2 = FakePlayer("C", POK, EFF, active=Spot("Mega Scrafty ex"))
+    opp2.active.damage = POK["Mega Scrafty ex"]["hp"] - 10
+    big = SV.attack_value(me, opp2, dh, anchor)
+    check("and more still when the Knock Out is worth more Prizes",
+          big > lethal, f"{big} vs {lethal}")
+
+    # Setup riders now carry a price instead of scoring zero.
+    charge = {"name": "Charge Energy", "cost": ["Colorless"], "damage": 0,
+              "text": "Search your deck for a basic Energy card and attach "
+                      "it to this Pokémon. Then, shuffle your deck."}
+    check("a 0-damage Energy-acceleration attack is worth more than nothing",
+          SV.attack_rider_value(me, opp, charge) > 0,
+          str(SV.attack_rider_value(me, opp, charge)))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -881,7 +923,8 @@ def main():
                test_prevention_walls_check_who_is_attacking,
                test_turn_locks_are_applied_not_just_compiled,
                test_unregistered_trainers_resolve_from_card_text,
-               test_hp_tools_are_attached_and_raise_the_KO_threshold]:
+               test_hp_tools_are_attached_and_raise_the_KO_threshold,
+               test_ai_values_knockouts_and_setup_rather_than_raw_damage]:
         print(f"{fn.__name__}:")
         try:
             fn()
