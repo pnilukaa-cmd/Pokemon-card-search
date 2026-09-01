@@ -627,6 +627,56 @@ separately, and leaves them out of the summary. Any result it flags as
 `<- check, near-total result` (>=95% or <=5%) deserves the same suspicion
 before being reported.
 
+### 11c. Run `audit_engine_coverage.py` after ANY engine change, and before trusting a deck's numbers
+
+Every deck-invalidating bug in this project so far has had one shape:
+**something existed, compiled correctly, had a passing unit test, and was
+never reached in a real game.** Not a parsing gap — a wiring gap.
+
+- `query_prevented` was written when Abilities were first wired in, had a
+  passing firing test, and **no code path in `simulate_versus` ever called
+  it**. Every damage-prevention Ability in the pool did nothing, so a
+  user's wall deck measured as if it had no defence.
+- Cursed Blast's `self_ko` cost compiled and was never paid, so the
+  Ability was free forever — 11 points of win rate on one deck.
+- Prize cards were a counter that never removed cards from the deck, in
+  both simulators.
+- Matcha Spin's counters were applied by the rider path *and* charged
+  again as attack damage, skipping the attack's own gate.
+
+`ability_ir`'s 98.6% compilation coverage does not measure any of this,
+and neither does `test_ability_engine.py` — a unit test proves a function
+returns the right answer when called, not that anything calls it.
+
+```
+python3 audit_engine_coverage.py <folder-of-decklists> [pairs] [games]
+```
+
+Two sections, and they catch different halves of the problem:
+
+- **STATIC** — every public `query_*` in `ability_engine`, and whether
+  anything reachable from a simulator calls it. Reachability is
+  transitive (`effective_retreat` calls `query_retreat_modifier`), so a
+  hit here is a genuinely orphaned feature. This is the check that would
+  have caught `query_prevented` on the day it was written.
+- **DYNAMIC** — every IR Op that appears on real cards, and whether it
+  ever executes across a corpus of played games. Instruments both
+  `apply_action` and `_passive_actions`, because passive Abilities
+  (walls, buffs, retreat modifiers) never go through the former.
+
+A `NEVER FIRES` line is not automatically a bug — a rare op can be missed
+by a short corpus. Raise the game count, then go read the game loop.
+
+**Standing rule: after changing the engine, re-run this and the gauntlet
+before quoting any win rate, and say in the deck file that older numbers
+in `decks/` predate the change.** A deck file whose numbers were measured
+on a different engine is not comparable to one measured on this one, and
+saying so is part of reporting the result.
+
+Known open gap as of this writing: **`lock` fires on 0 of 154 card
+effects** — "can't retreat", "can't attack next turn" and friends are
+compiled and ignored, which undervalues every control deck in the folder.
+
 ### 12. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and

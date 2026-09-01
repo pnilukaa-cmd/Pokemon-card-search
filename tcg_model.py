@@ -90,14 +90,21 @@ def build_card_index(cards):
         code = (c.get("set") or {}).get("ptcgoCode")
         num = c.get("number")
         if code and num:
-            by_setnum[(c["name"], code, num)] = c
+            by_setnum[(c["name"], code, str(num))] = c
+        # Functionally identical reprints are deduplicated in the card file,
+        # but each kept card carries every printing the API returned for it.
+        # Indexing only the kept one made a third of all legal SET NUM pairs
+        # unresolvable (1964 of 2916), which showed up as false "not in the
+        # pool" reports against perfectly correct user decklists.
+        for pcode, pnum in (c.get("printings") or []):
+            by_setnum.setdefault((c["name"], pcode, str(pnum)), c)
     return by_name, by_setnum
 
 
 def resolve_card(entry, by_name, by_setnum):
     """Returns (card_or_None, matched_exact_printing: bool)."""
     if entry["set"] and entry["number"]:
-        c = by_setnum.get((entry["name"], entry["set"], entry["number"]))
+        c = by_setnum.get((entry["name"], entry["set"], str(entry["number"])))
         if c:
             return c, True
     matches = by_name.get(entry["name"])

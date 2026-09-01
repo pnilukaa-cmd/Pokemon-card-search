@@ -104,15 +104,46 @@ def card_signature(card):
     )
 
 
+# The Scarlet & Violet promo set comes back from the API with
+# ptcgoCode: null, so every promo silently lost its set code and became
+# unresolvable. PTCG Live calls that set PR-SV.
+SET_CODE_FALLBACK = {"svp": "PR-SV"}
+
+
+def set_code_of(card):
+    s = card.get("set") or {}
+    return s.get("ptcgoCode") or SET_CODE_FALLBACK.get(s.get("id"))
+
+
 def dedupe_by_signature(cards):
-    seen = set()
-    unique_cards = []
+    """Keep one entry per distinct gameplay function -- but record EVERY
+    printing of it.
+
+    This used to drop the reprints outright, keeping only the first set and
+    number seen. That silently made the file unusable for the one job it
+    gets asked to do most: checking a SET NUM off a real decklist. A user's
+    `Poke Pad POR 81`, `Gwynn PBL 78`, `Buddy-Buddy Poffin ASC 184` and
+    `Night Stretcher ASC 196` all came back "not in pool" and all four were
+    correct -- they were simply functionally identical to a printing that
+    happened to be kept instead. Every card now carries a `printings` list
+    of every (ptcgoCode, number) the API returned for it, so any legal
+    printing resolves while the gameplay data stays deduplicated.
+    """
+    by_sig = {}
+    order = []
     for card in cards:
         sig = card_signature(card)
-        if sig not in seen:
-            seen.add(sig)
-            unique_cards.append(card)
-    return unique_cards
+        entry = (set_code_of(card), str(card.get("number")))
+        if sig not in by_sig:
+            by_sig[sig] = card
+            card["printings"] = []
+            order.append(sig)
+        kept = by_sig[sig]
+        if entry[0] and entry not in kept["printings"]:
+            kept["printings"].append(entry)
+    for sig in order:
+        by_sig[sig]["printings"].sort()
+    return [by_sig[sig] for sig in order]
 
 
 def fetch_all_for_mark(mark):
