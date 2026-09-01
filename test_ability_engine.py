@@ -704,6 +704,42 @@ def test_neurokinesis_counts_the_whole_opposing_board():
           str(SV.attack_damage(me, opp, az, neuro, record=False)))
 
 
+def test_prevention_walls_check_who_is_attacking():
+    """Safeguard and Cornerstone Stance are conditional, not invincibility.
+
+    Both compiled to a bare "prevent all damage": Safeguard's restriction
+    ("Pokemon ex") trails the word Pokemon so the attacker pattern missed
+    it, and Cornerstone Stance's ("Pokemon that have an Ability") sat 83
+    characters into the text, outside an 80-character match window. The
+    engine also never checked the attacker at all, and the game loop never
+    called query_prevented in the first place.
+    """
+    POK, EFF = build(["Sylveon", "Cornerstone Mask Ogerpon ex", "Dhelmise",
+                      "Veluza", "Mega Scrafty ex"],
+                     {"Sylveon": ("PRE", "40"),
+                      "Cornerstone Mask Ogerpon ex": ("TWM", "112"),
+                      "Dhelmise": ("PBL", "39"), "Veluza": ("SCR", "45"),
+                      "Mega Scrafty ex": ("MEG", "104")})
+    syl = Spot("Sylveon")
+    me = FakePlayer("A", POK, EFF, active=syl)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Mega Scrafty ex"))
+
+    check("Safeguard stops a Pokemon ex",
+          AE.query_prevented(me, syl, opp, opp.active))
+    opp.active = Spot("Dhelmise")          # single-Prize, has no Ability
+    check("Safeguard does NOT stop a non-ex",
+          not AE.query_prevented(me, syl, opp, opp.active))
+
+    ogre = Spot("Cornerstone Mask Ogerpon ex")
+    me2 = FakePlayer("C", POK, EFF, active=ogre)
+    opp2 = FakePlayer("D", POK, EFF, active=Spot("Veluza"))
+    check("Cornerstone Stance stops an attacker that has an Ability",
+          AE.query_prevented(me2, ogre, opp2, opp2.active))
+    opp2.active = Spot("Dhelmise")         # Dhelmise has no Ability
+    check("Cornerstone Stance does NOT stop an Ability-less attacker",
+          not AE.query_prevented(me2, ogre, opp2, opp2.active))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -730,7 +766,8 @@ def main():
                test_hide_n_sneak_threshold,
                test_matcha_spin_is_not_charged_twice,
                test_board_wide_spread_is_priced_across_the_board,
-               test_neurokinesis_counts_the_whole_opposing_board]:
+               test_neurokinesis_counts_the_whole_opposing_board,
+               test_prevention_walls_check_who_is_attacking]:
         print(f"{fn.__name__}:")
         try:
             fn()

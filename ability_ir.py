@@ -606,7 +606,11 @@ def _r(m, text):
     return [Action(Op.HEAL, int(m.group(1)), parse_target(m.group(2)))]
 
 
-@rule("prevent_damage", r"prevent all (?:damage|effects of attacks)[^.]{0,80}")
+# Window widened from 80 to 140: Cornerstone Stance's restriction ("by
+# your opponent's Pokemon that have an Ability") sits 83 characters in,
+# so the clause that made the card conditional fell outside the match
+# and it compiled as flat, unconditional invincibility.
+@rule("prevent_damage", r"prevent all (?:damage|effects of attacks)[^.]{0,140}")
 def _r(m, text):
     seg = m.group(0)
     tgt = Target.SELF
@@ -616,8 +620,17 @@ def _r(m, text):
         tgt = Target.YOUR_ALL
     filt = {}
     mm = re.search(r"from your opponent's ([\w' ]+?) pok", seg, re.I)
-    if mm:
+    if mm and "done to" not in mm.group(1).lower():
         filt["attacker_is"] = mm.group(1).strip()
+    # The restriction on WHO is being blocked usually trails the word
+    # "Pokemon" rather than preceding it, so the pattern above missed it
+    # entirely and these Abilities compiled to "prevent all damage,
+    # unconditionally" -- Sylveon's Safeguard and Cornerstone Mask
+    # Ogerpon ex's Cornerstone Stance both became flat invincibility.
+    if re.search(r"pok[eé]mon ex\b", seg, re.I):
+        filt["attacker_is_ex"] = True
+    if re.search(r"pok[eé]mon that ha(?:ve|s) an ability", seg, re.I):
+        filt["attacker_has_ability"] = True
     # Shaymin's Flower Curtain shields only the Pokemon WITHOUT a Rule Box.
     # Dropping this clause made it protect the benched ex it is played
     # alongside, which is the exact opposite of how the card plays.

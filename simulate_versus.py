@@ -1654,6 +1654,15 @@ def do_attack(pl, opp, log):
         if not tool.get("holder_no_rule_box") or \
                 pl.POKEMON[pl.active.name]["prize_value"] == 1:
             dmg += tool["amount"]
+    # Outright prevention (Sylveon's Safeguard, Cornerstone Stance,
+    # Rabsca's Spherical Shield). The engine has had query_prevented since
+    # Abilities were first wired in, and the game loop never called it --
+    # so every damage-prevention wall in the pool did nothing at all, and
+    # a deck built out of them measured as if it had no defence.
+    if AE.query_prevented(opp, opp.active, pl, pl.active):
+        log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
+                   f"all damage to {opp.active.name} prevented")
+        return True
     reduction = damage_reduction_for(opp, opp.active, pl)
     if reduction:
         dmg = max(0, dmg - reduction)

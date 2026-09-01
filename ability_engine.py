@@ -656,8 +656,15 @@ def query_damage_buff(pl, spot, opp=None):
     return total
 
 
-def query_prevented(pl, spot, opp=None):
-    """Is all damage to `spot` prevented outright?"""
+def query_prevented(pl, spot, opp=None, attacker=None):
+    """Is all damage to `spot` prevented outright?
+
+    `attacker` is the Pokemon actually swinging. Several of these walls
+    only stop a particular kind of attacker -- Safeguard stops Pokemon ex,
+    Cornerstone Stance stops Pokemon that have an Ability -- and without
+    the attacker in hand those restrictions cannot be checked, so they
+    were silently ignored and the walls read as total immunity.
+    """
     for holder, eff, act in _passive_actions(pl, IR.Op.PREVENT_DAMAGE):
         if act.filter.get("effects_only"):
             continue          # prevents EFFECTS, not damage
@@ -669,6 +676,16 @@ def query_prevented(pl, spot, opp=None):
             continue
         if act.filter.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
             continue
+        if act.filter.get("attacker_is_ex") or act.filter.get("attacker_has_ability"):
+            # An attacker-restricted wall cannot be evaluated without one.
+            if attacker is None or opp is None:
+                continue
+            card = opp.POKEMON.get(attacker.name, {})
+            if act.filter.get("attacker_is_ex") and card.get("prize_value", 1) < 2:
+                continue
+            if act.filter.get("attacker_has_ability") and \
+                    not opp.EFFECTS.get(attacker.name):
+                continue
         return True
     return False
 
