@@ -16,6 +16,7 @@ listed separately and left out of the summary.
 Usage:  python3 gauntlet.py <my-decklist.txt> <dir-of-decklists> [games]
 """
 import glob
+import hashlib
 import os
 import re
 import statistics
@@ -43,9 +44,31 @@ def basics_in(path):
     return n
 
 
+def engine_revision():
+    """Short fingerprint of the code that produced a result.
+
+    A deck file's win rate is only comparable to another measured on the
+    same engine, and this project has repeatedly published numbers that
+    silently predated a fix. Stamping the run makes a stale figure
+    visible instead of merely wrong.
+    """
+    h = hashlib.sha256()
+    for f in sorted(("simulate_versus.py", "ability_engine.py",
+                     "ability_ir.py", "tcg_model.py")):
+        try:
+            h.update(open(f, "rb").read())
+        except OSError:
+            pass
+    return h.hexdigest()[:10]
+
+
 def main():
     me, folder = sys.argv[1], sys.argv[2]
     games = sys.argv[3] if len(sys.argv) > 3 else "150"
+    # A4: --seed=N makes the whole gauntlet reproducible. Without it the
+    # mean moved about a point between identical runs, which is the same
+    # size as most of the changes being measured.
+    seed = next((a for a in sys.argv if a.startswith("--seed=")), None)
     mine = os.path.splitext(os.path.basename(me))[0]
 
     rows, unplayable = [], []
@@ -56,15 +79,20 @@ def main():
         if basics_in(f) == 0:
             unplayable.append(opp)
             continue
-        out = subprocess.run([sys.executable, "simulate_versus.py", me, f, games],
-                             capture_output=True, text=True).stdout
+        cmd = [sys.executable, "simulate_versus.py", me, f, games]
+        if seed:
+            cmd.append(seed)
+        out = subprocess.run(cmd, capture_output=True, text=True).stdout
         m = re.search(r"^\s+" + re.escape(mine) + r"\s+\d+ wins\s+\(\s*([\d.]+)%\)",
                       out, re.M)
         if m:
             rows.append((float(m.group(1)), opp))
 
     rows.sort(reverse=True)
-    print(f"{mine} vs {len(rows)} saved decks, {games} games each\n")
+    stamp = engine_revision()
+    print(f"{mine} vs {len(rows)} saved decks, {games} games each"
+          f"{' seed ' + seed.split('=')[1] if seed else ''}")
+    print(f"engine {stamp}\n")
     for pct, opp in rows:
         flag = "  <- check, near-total result" if pct >= 95 or pct <= 5 else ""
         print(f"  {pct:5.1f}%  {opp:48}{'#' * int(pct / 2)}{flag}")

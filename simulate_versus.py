@@ -85,6 +85,8 @@ Usage
   python3 simulate_versus.py deckA.txt deckB.txt 2000       # N games
   python3 simulate_versus.py deckA.txt deckB.txt --verbose  # one game log
 """
+import hashlib
+import os
 import random
 import sys
 import statistics
@@ -2198,6 +2200,17 @@ def main():
         sys.exit(1)
     pathA, pathB = args[0], args[1]
     n = int(args[2]) if len(args) > 2 else 500
+    # A4: a seed makes a matchup reproducible. Two runs of the same pair
+    # differed by more than a point of win rate, which made it impossible
+    # to tell a real change from noise -- the whole reason deck files kept
+    # carrying numbers nobody could reproduce. Derived from the two deck
+    # names so each matchup gets its own stream and a gauntlet stays
+    # varied, while any single matchup replays exactly.
+    seed_arg = next((a for a in sys.argv if a.startswith("--seed=")), None)
+    if seed_arg:
+        base = int(seed_arg.split("=", 1)[1])
+        key = f"{base}:{os.path.basename(pathA)}:{os.path.basename(pathB)}"
+        random.seed(int(hashlib.sha256(key.encode()).hexdigest()[:12], 16))
 
     modelA, metaA = load_model(pathA, "A")
     modelB, metaB = load_model(pathB, "B")
