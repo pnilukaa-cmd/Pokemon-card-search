@@ -106,7 +106,8 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
-                 "evolved_this_turn", "tool", "conditions", "attack_locked")
+                 "evolved_this_turn", "tool", "conditions", "attack_locked",
+                 "retreat_locked", "attack_locked_by_opponent")
 
     def __init__(self, name, turn):
         self.name = name
@@ -120,6 +121,13 @@ class InPlay:
         # Thunderous Bolt). Without it the AI re-used a 250-damage
         # once-every-other-turn attack every single turn.
         self.attack_locked = False
+        # Set ON THE DEFENDER by "During your opponent's next turn, the
+        # Defending Pokemon can't retreat / can't attack". These are the
+        # two most common lock effects in the pool (44 card effects between
+        # them) and were compiled and then thrown away, so every retreat
+        # -lock control deck measured as if its main line did nothing.
+        self.retreat_locked = False
+        self.attack_locked_by_opponent = False
         self.tool = None
         self.conditions = set()   # asleep / burned / confused / paralyzed / poisoned
 
@@ -155,6 +163,9 @@ class Player:
         self.abilities_used = set()
         self.played_supporters_this_turn = set()
         self.deck_out = False
+        # Set by Budew's Itchy Pollen and friends; cleared at the
+        # start of this player's next turn.
+        self.item_locked = False
         # Energy types this deck can actually put on a Pokemon. Attacks
         # needing a type outside this set can never be cast, so they must
         # not drive Energy attachment -- see energy_shortfall.
@@ -510,6 +521,13 @@ def want_pokemon(pl, name):
 
 
 def play_items(pl, opp, turn, log, first_turn):
+    # Budew's Itchy Pollen and Bronzong's Evolution Jammer shut the Item
+    # phase off for a turn. The flag is consumed here so it lasts exactly
+    # the one turn the card says it does.
+    if pl.item_locked:
+        pl.item_locked = False
+        log.append(f"  {pl.name}: can't play Item cards this turn (locked)")
+        return
     while ("Item", "Rare Candy") in pl.hand:
         if not effect_rare_candy(pl, opp, turn, log, first_turn):
             break
@@ -1584,6 +1602,10 @@ def try_retreat(pl, opp, log):
     """
     if not pl.active or not pl.bench:
         return
+    if pl.active.retreat_locked:
+        pl.active.retreat_locked = False
+        log.append(f"  {pl.name}: {pl.active.name} can't retreat this turn")
+        return
     cost = retreat_of(pl, pl.active, opp)
     if pl.active.energy_count() < cost:
         return
@@ -1616,6 +1638,11 @@ def do_attack(pl, opp, log):
     if pl.active.attack_locked:
         pl.active.attack_locked = False
         log.append(f"  {pl.name}: {pl.active.name} can't attack this turn")
+        return False
+    if pl.active.attack_locked_by_opponent:
+        pl.active.attack_locked_by_opponent = False
+        log.append(f"  {pl.name}: {pl.active.name} can't attack "
+                   f"(locked by opponent)")
         return False
     atk = best_attack(pl, pl.active, opp=opp)
     if not atk:
@@ -1742,8 +1769,16 @@ ATTACK_RIDER_OPS = {
     # a 0-damage setup attack that is the entire early game of a deck
     # built on the Stage 2 above it.
     IR.Op.SEARCH_TO_BENCH,
+    # 58 attacks in the pool search a card into hand as their whole effect
+    # (Noctowl's Talon Hunt, Ponyta's Charge Energy). They were compiled
+    # and dropped because only the bench version was in this set.
+    IR.Op.SEARCH_TO_HAND,
+    IR.Op.FROM_DISCARD_TO_HAND,
+    IR.Op.DISCARD_STADIUM,
+    IR.Op.LOOK_AT_DECK,
     IR.Op.PLACE_COUNTERS,
     IR.Op.MOVE_COUNTERS,
+    IR.Op.LOCK,
 }
 
 

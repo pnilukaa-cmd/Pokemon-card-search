@@ -345,9 +345,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if len(pl.bench) >= 5:
                 break
             want = act.filter.get("name_contains")
-            card = _find_in_deck(pl, lambda k, n: k == "Pokemon"
-                                 and pl.POKEMON[n]["stage"] == "Basic"
-                                 and (not want or want.lower() in n.lower()))
+            stage = act.filter.get("stage", "Basic")
+            ptype = act.filter.get("type")
+
+            def pred(k, n, want=want, stage=stage, ptype=ptype):
+                if k != "Pokemon":
+                    return False
+                info = pl.POKEMON.get(n, {})
+                # Only a Basic can go straight onto the Bench, whatever the
+                # card's own wording says.
+                if info.get("stage") != "Basic":
+                    return False
+                if stage not in (None, "Basic") and info.get("stage") != stage:
+                    return False
+                if ptype and ptype not in (info.get("types") or []):
+                    return False
+                return not want or want.lower() in n.lower()
+
+            card = _find_in_deck(pl, pred)
             if not card:
                 break
             if make_inplay:
@@ -551,6 +566,41 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 h.conditions.add(c)
         log.append(f"    apply {', '.join(conds)}")
         return True
+
+    # Turn-scoped locks ARE executed -- they are riders an attack applies
+    # to a specific Pokemon, not static properties of a card in play.
+    # Lumping every LOCK in with the passives below meant "During your
+    # opponent's next turn, the Defending Pokemon can't retreat" (38 card
+    # effects) and "...can't attack" (6 more) compiled cleanly and then
+    # did nothing at all, which quietly wrote off every retreat-lock
+    # control deck in the folder. The genuinely static locks (Ability
+    # lockdown, "as long as this Pokemon is Active") stay passive.
+    if op == O.LOCK and act.filter.get("what") in ("retreat", "attack", "play"):
+        what = act.filter["what"]
+        if act.target in (IR.Target.OPPONENT, IR.Target.OPP_ACTIVE):
+            if what == "play":
+                opp.item_locked = True
+                log.append("    opponent can't play Item cards next turn")
+                return True
+            victim = opp.active
+            if victim is None:
+                return False
+            if what == "retreat":
+                victim.retreat_locked = True
+            else:
+                victim.attack_locked_by_opponent = True
+            log.append(f"    {victim.name} can't {what} during their next turn")
+            return True
+        if act.target == IR.Target.SELF and source is not None:
+            if what == "retreat":
+                source.retreat_locked = True
+            elif what == "attack":
+                source.attack_locked = True
+            else:
+                return False
+            log.append(f"    {source.name} can't {what} during your next turn")
+            return True
+        return False
 
     # Passive / static ops are queried elsewhere, never "executed".
     if op in (IR.Op.REDUCE_DAMAGE, IR.Op.BUFF_DAMAGE, IR.Op.PREVENT_DAMAGE,

@@ -35,6 +35,9 @@ class Spot:
         self.entered_turn = 0
         self.evolved_this_turn = False
         self.tool = None
+        self.attack_locked = False
+        self.retreat_locked = False
+        self.attack_locked_by_opponent = False
 
     def energy_count(self):
         return len(self.energy)
@@ -56,6 +59,7 @@ class FakePlayer:
         self.played_supporters_this_turn = set()
         self.abilities_used = set()
         self.deck_out = False
+        self.item_locked = False
 
     def draw(self, n=1):
         for _ in range(n):
@@ -740,6 +744,46 @@ def test_prevention_walls_check_who_is_attacking():
           not AE.query_prevented(me2, ogre, opp2, opp2.active))
 
 
+def test_turn_locks_are_applied_not_just_compiled():
+    """"Can't retreat / can't attack next turn" has to reach the board.
+
+    LOCK was classified with the passive ops -- "queried elsewhere, never
+    executed" -- and then nothing queried it, so 44 card effects across the
+    pool compiled cleanly and did nothing. Retreat-lock is the entire game
+    plan of more than one deck in decks/.
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["Dhelmise", "Veluza"],
+                     {"Dhelmise": ("PBL", "39"), "Veluza": ("SCR", "45")})
+    me = FakePlayer("A", POK, EFF, active=Spot("Dhelmise"))
+    opp = FakePlayer("B", POK, EFF, active=Spot("Veluza"))
+    log = []
+
+    beset = IR.compile_effect(
+        "attack", "Beset",
+        "During your opponent's next turn, the Defending Pokémon can't retreat.")
+    AE.apply_action(beset.actions[0], me, opp, me.active, log)
+    check("the DEFENDER is the one locked", opp.active.retreat_locked)
+    check("the attacker is not", not me.active.retreat_locked)
+
+    freeze = IR.compile_effect(
+        "attack", "Freezing Chill",
+        "During your opponent's next turn, the Defending Pokémon can't attack.")
+    AE.apply_action(freeze.actions[0], me, opp, me.active, log)
+    check("attack lock lands on the defender",
+          opp.active.attack_locked_by_opponent)
+
+    itchy = IR.compile_effect(
+        "ability", "Itchy Pollen",
+        "During your opponent's next turn, they can't play any Item cards "
+        "from their hand.")
+    AE.apply_action(itchy.actions[0], me, opp, me.active, log)
+    check("Item lock lands on the opposing player", opp.item_locked)
+
+    check("LOCK is in the attack-rider set so attacks can apply it",
+          IR.Op.LOCK in SV.ATTACK_RIDER_OPS)
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -767,7 +811,8 @@ def main():
                test_matcha_spin_is_not_charged_twice,
                test_board_wide_spread_is_priced_across_the_board,
                test_neurokinesis_counts_the_whole_opposing_board,
-               test_prevention_walls_check_who_is_attacking]:
+               test_prevention_walls_check_who_is_attacking,
+               test_turn_locks_are_applied_not_just_compiled]:
         print(f"{fn.__name__}:")
         try:
             fn()

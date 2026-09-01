@@ -474,11 +474,39 @@ def _r(m, text):
     return [Action(Op.DRAW, 1, Target.SELF)]
 
 
+# Words that qualify WHICH Pokemon a search may take, but are not part of
+# any card's name. Dumping them into name_contains produced filters like
+# "a Pokemon whose name contains 'Basic'", which matches nothing -- so all
+# 88 Bench-search attacks in the pool silently found zero cards.
+STAGE_WORDS = {"basic", "stage 1", "stage 2", "evolution"}
+TYPE_WORDS = {"grass", "fire", "water", "lightning", "psychic", "fighting",
+              "darkness", "metal", "dragon", "colorless", "fairy"}
+
+
+def _search_filter(qualifier):
+    """Split a search's qualifier into stage / type / name-fragment."""
+    q = (qualifier or "").strip()
+    filt = {}
+    low = q.lower()
+    for word in sorted(STAGE_WORDS, key=len, reverse=True):
+        if low.startswith(word):
+            filt["stage"] = "Stage 1" if word == "stage 1" else (
+                "Stage 2" if word == "stage 2" else word.title())
+            low = low[len(word):].strip()
+            break
+    if low in TYPE_WORDS:
+        filt["type"] = low.title()
+        low = ""
+    if low:
+        filt["name_contains"] = q[-len(low):].strip() if len(low) <= len(q) else q
+    return filt
+
+
 @rule("search_to_bench",
       r"search your deck for (?:up to )?(\d+|a|an) ([\w'’ -]*?)pok[eé]mon[^.]{0,60}?onto your bench")
 def _r(m, text):
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
-                   {"name_contains": m.group(2).strip() or None})]
+                   _search_filter(m.group(2)))]
 
 
 @rule("recruit_species_to_bench",
@@ -498,6 +526,12 @@ def _r(m, text):
     species = m.group(2).strip()
     if not species[:1].isupper():
         return []
+    # "Basic Pokemon" / "Stage 2 Pokemon" is a category, not a species, and
+    # search_to_bench above already handles it -- matching here as well
+    # emitted the same action two and three times over.
+    low = species.lower()
+    if low.endswith("pokémon") or low.endswith("pokemon") or low in STAGE_WORDS:
+        return []
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
                    {"name_contains": species})]
 
@@ -508,7 +542,7 @@ def _r(m, text):
     if "onto your bench" in text.lower():
         return []
     return [Action(Op.SEARCH_TO_HAND, _num(m.group(1)), Target.SELF,
-                   {"kind": m.group(3).lower(), "name_contains": (m.group(2) or "").strip() or None})]
+                   dict(_search_filter(m.group(2)), kind=m.group(3).lower()))]
 
 
 @rule("discard_to_hand", r"put (?:up to )?(\d+|a|an) ([\w'’ -]*?)(?:card|pok[eé]mon|energy)[^.]{0,40}from your discard pile into your hand")
@@ -751,8 +785,11 @@ def _r(m, text):
 @rule("search_bench_loose",
       r"search your deck for (?:up to )?(\d+|a|an) ([\w'’ -]*?)pok[eé]mon[^.]{0,80}?put (?:it|them) onto your bench")
 def _r(m, text):
+    # Wider window than search_to_bench, for phrasings that put more words
+    # between the noun and "onto your Bench". Shares the qualifier parser
+    # so it does not re-emit the same action with a junk name filter.
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
-                   {"name_contains": (m.group(2) or "").strip() or None})]
+                   _search_filter(m.group(2)))]
 
 
 @rule("move_energy_between_yours",
@@ -1085,8 +1122,13 @@ def _r(m, text):
 @rule("search_named_to_bench",
       r"search your deck for an? ([A-Z][\w'’ -]+?) and put it onto your bench")
 def _r(m, text):
+    named = m.group(1).strip()
+    low = named.lower()
+    # Same category-vs-species trap as recruit_species_to_bench above.
+    if low.endswith("pokémon") or low.endswith("pokemon") or low in STAGE_WORDS:
+        return []
     return [Action(Op.SEARCH_TO_BENCH, 1, Target.YOUR_BENCHED,
-                   {"name_contains": m.group(1).strip()})]
+                   {"name_contains": named})]
 
 
 @rule("search_energy_and_discard",
@@ -1213,6 +1255,21 @@ def compile_effect(source, name, text):
         if acts:
             eff.actions.extend(acts)
             eff.rules_hit.append(rname)
+
+    # Several rules deliberately overlap to catch different phrasings of
+    # the same sentence, so one card text can produce the identical Action
+    # more than once. That is harmless while an action is only inspected,
+    # and actively wrong once it is EXECUTED -- a duplicated
+    # "search 2 Basic Pokemon onto your Bench" benched four.
+    seen, unique = set(), []
+    for a in eff.actions:
+        key = (a.op, a.amount, a.target,
+               tuple(sorted((str(k), str(v)) for k, v in (a.filter or {}).items())))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(a)
+    eff.actions = unique
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:
