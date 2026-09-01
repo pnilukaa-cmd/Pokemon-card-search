@@ -119,6 +119,86 @@ the discard.
 Two copies, not one — it is also the deck's only way to push an opposing
 Stadium off the field.
 
+## The Knock Out problem, and why 300 is the wrong number to chase
+
+Dhelmise's 170 is efficient, and it is enough almost all of the time.
+Across the 485 opposing Pokémon in the 30-deck field:
+
+| damage | share of the field it Knocks Out |
+| --- | --- |
+| 130 | 74.0% |
+| **170** | **84.9%** |
+| 250 | 89.3% |
+| 280 | 93.4% |
+| 330 | 96.3% |
+
+So 170 already kills five out of six things. What it does not kill is the
+tier that ends games, and **that tier does not sit at 300**:
+
+| HP | count | |
+| --- | --- | --- |
+| 350 | 4 | Mega Chandelure ex |
+| 340 | 2 | Steven's Metagross ex |
+| 330 | 12 | Mega Scrafty ex, Mega Lopunny ex, Hydreigon ex |
+| 320 | 6 | Krookodile ex, Decidueye ex |
+| 310 | 8 | T.R. Crobat ex, Erika's Vileplume ex |
+| 280 | 10 | Mega Absol ex, N's Zoroark ex |
+| 260 | 10 | Lurantis ex, T.R. Persian ex, Salazzle ex |
+
+**300 damage Knocks Out exactly the same 20 of these 52 that 280 does.**
+There is nothing between 281 and 309, so the next real breakpoint above
+280 is **310**, then 330, then 350. Building toward 300 buys literally
+nothing over building toward 280, and reaching the top of the tier needs
+**350+** — that is 170 + Gladion's 80 + Bangle 30 + Dusknoir 130, four
+cards lined up on one turn. It is not a plan.
+
+### Everything tested, and all but one of it lost
+
+| Build | reaches | mean | median | winning |
+| --- | --- | --- | --- | --- |
+| **2 Brave Bangle** (−1 Petrel, −1 Naveen) | 200 vs ex | **63.4%** | **62.6%** | **25/30** |
+| current list | 170 | 63.2% | 60.4% | 24/30 |
+| 2 `Gladion's Final Battle` | 250 | 62.3% | 61.0% | 22/30 |
+| Bangle **and** Gladion's | 280 | 58.8% | 57.0% | 20/30 |
+| `Dusknoir` SFA 20 line (13 counters = 130) | **300** | 55.0% | 49.6% | 14/30 |
+| `Shedinja` MEG 144 (an ex KOing it takes no Prizes) | — | 55.3% | 52.3% | 16/30 |
+
+**The two builds that actually reach the big numbers are the two worst
+results in the file.** The Dusknoir package costs six slots, a Stage 2
+chain and a Prize per activation, and it lost ground *in the very
+matchups it was built for* — Mega Chandelure 55.3% → 47.3%, Orthworm ex
+62.0% → 45.3%. Stacking Bangle with Gladion's to reach 280 costs the
+draw and search that get Dhelmise online at all.
+
+`Brave Bangle` is the only one that pays, and the reason is that it is a
+**Tool**: it costs no Supporter slot, no turn, and only two deck slots.
+
+### The thing that is actually going wrong
+
+Traced over 60 games, here is what Vengeful Anchor is doing when it fires:
+
+| | share |
+| --- | --- |
+| **170** (fuelled) | 44.5% |
+| 140 / 110 / 80 (into a damage-reduction wall) | 19.0% |
+| **30** (fewer than 4 Hide 'n' Sneak in the discard) | 24.1% |
+| **0** (unfuelled *and* walled) | 12.4% |
+
+**More than a third of your attacks land at 30 or 0.** The problem is not
+the ceiling, it is that the deck spends a quarter of its attacks
+unfuelled. That is why `Brilliant Blender` is worth more than any damage
+Tool, and why cutting it (see below) costs 15 points.
+
+### And the prize math is already in your favour
+
+A Mega ex is **3 Prizes**. Every attacker in this deck is **1**. Taking
+two turns to Knock Out a 330 HP Mega ex while it one-shots your 140 HP
+Dhelmise is not losing the race — it is trading 2 of your Prizes for 3 of
+theirs. They need **six** Knock Outs to close a game; you need **two**.
+Do not spend deck slots trying to one-shot something you are already
+beating on rate. Spend them making sure Dhelmise is fuelled when it
+swings.
+
 ## The setup problem: why the pieces arrive late, and what does not fix it
 
 Measured turn by turn, with the six Prize cards actually set aside (the
@@ -321,12 +401,13 @@ Trainer: 29
 4 Kofu SCR 138
 4 Ultra Ball MEG 131
 4 Poké Pad ASC 198
-3 Team Rocket's Petrel ASC 207
 3 Lillie's Determination MEG 119
 3 Gwynn PBL 109
-2 Naveen POR 112
+2 Team Rocket's Petrel ASC 207
+2 Brave Bangle WHT 80
 2 Prism Tower CRI 111
 2 Boss's Orders MEG 114
+1 Naveen POR 112
 1 Switch MEG 130
 1 Brilliant Blender SSP 164
 
@@ -336,8 +417,11 @@ Energy: 8
 Total Cards: 60
 ```
 
-`Brave Bangle` comes out for the Azelf pair: its bonus only applies
-against a Pokémon ex, and the deck's problem was never the ex matchups.
+`Brave Bangle` is back at 2, and the earlier note here — that its bonus
+only applies against a Pokémon ex, so it was not worth a slot — was the
+wrong call. The ex matchups **are** the problem; +30 takes Dhelmise to
+200 into them for no Supporter slot and no turn, and it measured as the
+only damage add in the deck that pays for itself.
 
 ### Card choices worth stating
 
@@ -372,15 +456,14 @@ other Dhelmise, Poltchageist and Sinistcha printings; every attack in the
 exact list above is Psychic- or Colorless-costed.*
 
 1000-trial baseline **with Prize cards set aside**, in play by turn 6:
-**Veluza 96.5% @ turn 1.81**, Shuppet 91.3%, Poltchageist 86.7%,
-**Dhelmise 79.8% @ turn 2.01**, Sinistcha 56.1%, **Azelf 52.5% @ turn
-2.39**, Banette 43.5%. First attack by turn 6: **73.2%**. The turn-by-turn
+**Veluza 94.9% @ turn 1.83**, Shuppet 90.6%, Poltchageist 85.0%,
+**Dhelmise 79.8% @ turn 1.90**, Sinistcha 54.3%, **Azelf 53.2% @ turn
+2.24**, Banette 42.2%. First attack by turn 6: **76.4%**. The turn-by-turn
 curve above is the more useful view. (The baseline sim does not model
 Gwynn or Naveen — their effect shows up in the full-field numbers.)
 
-Full field, 30 decks, 150 games each — mean **63.2%**, median **60.4%**,
-**24/30** winning. Best: Feraligatr/Munkidori 98.7%, Chandelure mill
-84.0%, Static Venom 83.3%. Worst: Steven's Carbink 42.0%.
+Full field, 30 decks, 150 games each — mean **63.4%**, median **62.6%**,
+**25/30** winning.
 
 *(Every figure here is lower than the 70.5% this file reported two
 revisions ago, and all of it is real rather than a regression in the
