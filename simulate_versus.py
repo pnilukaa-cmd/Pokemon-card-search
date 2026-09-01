@@ -302,7 +302,7 @@ def sweep_knocked_out(pl, opp, log):
     """
     for owner, taker in ((pl, opp), (opp, pl)):
         for spot in list(owner.in_play()):
-            if spot.damage < owner.POKEMON[spot.name]["hp"]:
+            if spot.damage < effective_hp(owner, spot):
                 continue
             taken = owner.POKEMON[spot.name]["prize_value"]
             owner.discard.append(spot.name)
@@ -324,7 +324,7 @@ def sweep_knocked_out(pl, opp, log):
             if owner.active is None and owner.bench:
                 owner.bench.sort(
                     key=lambda p: (_ready_damage(owner, taker, p),
-                                   owner.POKEMON[p.name]["hp"] - p.damage),
+                                   effective_hp(owner, p) - p.damage),
                     reverse=True)
                 owner.active = owner.bench.pop(0)
                 log.append(f"  {owner.name}: promotes {owner.active.name}")
@@ -953,7 +953,7 @@ def play_supporter(pl, opp, turn, log):
     # Gust effects: drag up their weakest benched Pokemon
     for name in ("Boss's Orders", "Team Rocket's Giovanni"):
         if name in hand_names and opp.bench and opp.active is not None:
-            target = min(opp.bench, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
+            target = min(opp.bench, key=lambda p: effective_hp(opp, p) - p.damage)
             use(name)
             opp.bench.remove(target)
             opp.bench.append(opp.active)
@@ -1668,13 +1668,55 @@ def _potential_damage(pl, spot):
     return max(printed(a) for a in castable)
 
 
+# Tools whose whole effect is extra HP, discovered from the card text
+# rather than hand-listed. Hero's Cape (+100) is the one that matters:
+# it turns a 210 HP attacker into a 310 HP one, which is the difference
+# between surviving a Mega ex hit and not.
+_HP_TOOLS = None
+
+
+def hp_tools():
+    global _HP_TOOLS
+    if _HP_TOOLS is None:
+        _HP_TOOLS = {}
+        for name, card in _CARDS_BY_NAME.items():
+            card = card[0] if isinstance(card, list) and card else card
+            if not isinstance(card, dict):
+                continue
+            if "Pokémon Tool" not in (card.get("subtypes") or []):
+                continue
+            m = _re.search(r"gets \+(\d+) HP", " ".join(card.get("rules") or []))
+            if m:
+                _HP_TOOLS[name] = int(m.group(1))
+    return _HP_TOOLS
+
+
+def effective_hp(pl, spot):
+    """Printed HP plus whatever a Tool adds. Every Knock Out check goes
+    through here -- reading printed HP directly meant an HP Tool was worth
+    nothing, and the Tool was never even attached."""
+    base = pl.POKEMON[spot.name]["hp"]
+    return base + hp_tools().get(getattr(spot, "tool", None), 0)
+
+
 def attach_tools(pl, log):
     """Attach a Pokemon Tool to whoever will be holding the Active Spot.
     Only Tools carrying a modeled effect (retaliation) are attached -- any
     other Tool would be decoration the engine cannot honor."""
     for kind, name in list(pl.hand):
-        if kind != "Tool" or (name not in RETALIATE_CARDS
-                              and name not in DAMAGE_TOOLS):
+        if kind != "Tool":
+            continue
+        # Retreat and HP Tools were consulted elsewhere in this file but
+        # never actually attached, so Air Balloon, Rescue Board and Hero's
+        # Cape sat in hand for the whole game.
+        if name in hp_tools() or name in RETREAT_TOOLS:
+            if not pl.active or pl.active.tool:
+                continue
+            pl.remove_from_hand(kind, name)
+            pl.active.tool = name
+            log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+            continue
+        if name not in RETALIATE_CARDS and name not in DAMAGE_TOOLS:
             continue
         if name in DAMAGE_TOOLS:
             if not pl.active or pl.active.tool:
@@ -1851,7 +1893,7 @@ def do_attack(pl, opp, log):
     if back:
         pl.active.damage += back
         log.append(f"  {opp.name}: retaliation puts {back} back on {pl.active.name}")
-    if pl.active and pl.active.damage >= pl.POKEMON[pl.active.name]["hp"]:
+    if pl.active and pl.active.damage >= effective_hp(pl, pl.active):
         taken = pl.POKEMON[pl.active.name]["prize_value"]
         log.append(f"  {pl.name}: {pl.active.name} KO'd by retaliation (+{taken} to {opp.name})")
         pl.discard.append(pl.active.name)
@@ -1861,12 +1903,12 @@ def do_attack(pl, opp, log):
         if opp.prizes <= 0:
             return True
         if pl.bench:
-            pl.bench.sort(key=lambda p: pl.POKEMON[p.name]["hp"] - p.damage, reverse=True)
+            pl.bench.sort(key=lambda p: effective_hp(pl, p) - p.damage, reverse=True)
             pl.active = pl.bench.pop(0)
         else:
             return True
 
-    if opp.active.damage >= opp.POKEMON[opp.active.name]["hp"]:
+    if opp.active.damage >= effective_hp(opp, opp.active):
         taken = opp.POKEMON[opp.active.name]["prize_value"]
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
         opp.discard.append(opp.active.name)
@@ -1881,7 +1923,7 @@ def do_attack(pl, opp, log):
             # toolbox piece -- one whose attacks the deck cannot even pay
             # for -- into the Active Spot ahead of the real attacker.
             opp.bench.sort(key=lambda p: (_ready_damage(opp, pl, p),
-                                          opp.POKEMON[p.name]["hp"] - p.damage),
+                                          effective_hp(opp, p) - p.damage),
                            reverse=True)
             opp.active = opp.bench.pop(0)
             log.append(f"  {opp.name}: promotes {opp.active.name}")
@@ -2076,7 +2118,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         if do_attack(pl, opp, log):
             return "win"
     pokemon_checkup(pl, opp, log)
-    if pl.active and pl.active.damage >= pl.POKEMON[pl.active.name]["hp"]:
+    if pl.active and pl.active.damage >= effective_hp(pl, pl.active):
         taken = pl.POKEMON[pl.active.name]["prize_value"]
         log.append(f"  {pl.name}: {pl.active.name} KO'd at checkup (+{taken} to {opp.name})")
         pl.discard.append(pl.active.name)
@@ -2086,7 +2128,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         if opp.prizes <= 0:
             return "loss"
         if pl.bench:
-            pl.bench.sort(key=lambda p: pl.POKEMON[p.name]["hp"] - p.damage, reverse=True)
+            pl.bench.sort(key=lambda p: effective_hp(pl, p) - p.damage, reverse=True)
             pl.active = pl.bench.pop(0)
         else:
             return "no_pokemon"

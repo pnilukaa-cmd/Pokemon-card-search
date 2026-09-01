@@ -61,6 +61,9 @@ class FakePlayer:
         self.deck_out = False
         self.item_locked = False
 
+    def remove_from_hand(self, kind, name):
+        self.hand.remove((kind, name))
+
     def draw(self, n=1):
         for _ in range(n):
             if not self.deck:
@@ -816,6 +819,38 @@ def test_unregistered_trainers_resolve_from_card_text():
               not played and ("Supporter", lana) in me.hand)
 
 
+def test_hp_tools_are_attached_and_raise_the_KO_threshold():
+    """Hero's Cape was never attached, and would not have counted anyway.
+
+    attach_tools only considered damage and retaliation Tools, so retreat
+    and HP Tools sat in hand all game; and every Knock Out check read
+    printed HP directly, so even an attached +100 HP Tool was worth
+    nothing. Both halves had to be fixed for either to matter.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    SV._CARDS_BY_NAME.update({c["name"]: c for c in M.load_cards()})
+
+    tools = SV.hp_tools()
+    check("HP Tools are discovered from card text, not hand-listed",
+          tools.get("Hero's Cape") == 100, str(tools))
+
+    POK, EFF = build(["Cornerstone Mask Ogerpon ex"],
+                     {"Cornerstone Mask Ogerpon ex": ("TWM", "112")})
+    spot = Spot("Cornerstone Mask Ogerpon ex")
+    me = FakePlayer("A", POK, EFF, active=spot)
+    check("printed HP with no Tool", SV.effective_hp(me, spot) == 210)
+    spot.tool = "Hero's Cape"
+    check("+100 HP once the Cape is on", SV.effective_hp(me, spot) == 310,
+          str(SV.effective_hp(me, spot)))
+
+    me.hand = [("Tool", "Hero's Cape")]
+    spot.tool = None
+    SV.attach_tools(me, [])
+    check("and attach_tools actually puts it there",
+          spot.tool == "Hero's Cape")
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -845,7 +880,8 @@ def main():
                test_neurokinesis_counts_the_whole_opposing_board,
                test_prevention_walls_check_who_is_attacking,
                test_turn_locks_are_applied_not_just_compiled,
-               test_unregistered_trainers_resolve_from_card_text]:
+               test_unregistered_trainers_resolve_from_card_text,
+               test_hp_tools_are_attached_and_raise_the_KO_threshold]:
         print(f"{fn.__name__}:")
         try:
             fn()
