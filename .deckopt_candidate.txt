@@ -2,8 +2,8 @@
 4 Shuppet PBL 33
 4 Poltchageist PBL 5
 4 Dhelmise PBL 39
-3 Sinistcha PBL 6
-1 Azelf SSP 80
+4 Sinistcha PBL 6
+2 Azelf SSP 80
 2 Banette PBL 34
 4 Kofu SCR 138
 4 Ultra Ball MEG 131
@@ -13,8 +13,7 @@
 3 Gwynn PBL 109
 1 Naveen POR 112
 2 Brave Bangle WHT 80
-3 Prism Tower CRI 111
+2 Prism Tower CRI 111
 2 Boss's Orders MEG 114
-1 Switch MEG 130
 1 Brilliant Blender SSP 164
 8 Psychic Energy

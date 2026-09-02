@@ -26,8 +26,23 @@ import random
 import subprocess
 import sys
 
+import math
+
 import deckcheck
 import tcg_model as M
+
+
+def basics_in(path):
+    """Basic Pokemon in a decklist -- the screen gauntlet.py already uses."""
+    cards = M.load_cards()
+    by_name, by_setnum = M.build_card_index(cards)
+    n = 0
+    for entry in M.parse_decklist_entries(open(path).read()):
+        card, _ = M.resolve_card(entry, by_name, by_setnum)
+        if card and card.get("supertype") == "Pokémon" \
+                and M.stage_of(card) == "Basic":
+            n += entry["count"]
+    return n
 
 COVERAGE_FILE = "engine_coverage.json"
 MIN_OPS_EXECUTABLE = 44      # of 48 -- can the engine DO the thing at all
@@ -132,8 +147,8 @@ def neighbours(entries, rng):
     out = []
     idxs = list(range(len(entries)))
     rng.shuffle(idxs)
-    for i in idxs[:8]:
-        for j in idxs[:8]:
+    for i in idxs[:14]:
+        for j in idxs[:14]:
             if i == j or entries[i]["count"] <= 0:
                 continue
             cap = 4
@@ -151,6 +166,24 @@ def optimise(path, folder, rounds, games, seed, width):
     entries = parse(open(path).read())
     pool = sorted(f for f in os.listdir(folder) if f.endswith(".txt"))
     sample = [os.path.join(folder, f) for f in pool]
+    # Screen out decks the engine cannot pilot, exactly as gauntlet.py
+    # does. A zero-Basic deck mulligans out and loses on turn 2, so
+    # "beating" it is a free 100% -- and a search will happily tune toward
+    # whatever wins that matchup fastest. This is the blind-spot farming
+    # the gate above exists to prevent, arriving through the sample
+    # instead of through the engine.
+    playable = []
+    for f in sample:
+        try:
+            if basics_in(f) > 0:
+                playable.append(f)
+        except Exception:
+            continue
+    dropped = len(sample) - len(playable)
+    if dropped:
+        print(f"screened out {dropped} deck(s) with no Basic Pokemon "
+              f"(they mulligan out and are a free win)")
+    sample = playable
     rng.shuffle(sample)
     sample = sample[:width]
     print(f"field sample ({len(sample)}): "
@@ -158,17 +191,36 @@ def optimise(path, folder, rounds, games, seed, width):
 
     best = render(entries)
     best_score = score(best, folder, games, seed, sample)
-    print(f"start  {best_score:5.1f}%")
+
+    # A fixed +0.5% acceptance threshold is far inside the noise at any
+    # sample size this search can afford, so it accepts noise as readily
+    # as signal -- and a deck "improved" by noise is exactly the
+    # authoritative-looking garbage this whole gate exists to avoid.
+    # Require the gain to clear two standard errors of a win rate measured
+    # over this many games.
+    n_games = max(games * len(sample), 1)
+    se = 100.0 * math.sqrt(0.25 / n_games)
+    threshold = 2 * se
+    print(f"start  {best_score:5.1f}%   "
+          f"(n={n_games}, 1 s.e. = {se:.1f}%, accepting gains > {threshold:.1f}%)")
+    if threshold > 4:
+        print(f"       NOTE: at this sample size nothing smaller than "
+              f"{threshold:.1f}% is resolvable.\n"
+              f"       Raise --games or --width to see finer differences.")
 
     for r in range(1, rounds + 1):
         improved = False
-        for cand in neighbours(entries, rng)[:6]:
+        # More candidates per round than the original six. A strict hill
+        # climb that gives up after a handful of neighbours reports "no
+        # improvement" when it simply has not looked, which is a different
+        # claim and a misleading one.
+        for cand in neighbours(entries, rng)[:14]:
             text = render(cand)
             res = deckcheck.validate(text)
             if not res.ok:
                 continue
             s = score(text, folder, games, seed, sample)
-            if s > best_score + 0.5:
+            if s > best_score + threshold:
                 entries, best, best_score = cand, text, s
                 print(f"round {r:2}  {s:5.1f}%  accepted")
                 improved = True
