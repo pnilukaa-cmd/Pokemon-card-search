@@ -15,6 +15,7 @@ listed separately and left out of the summary.
 
 Usage:  python3 gauntlet.py <my-decklist.txt> <dir-of-decklists> [games]
 """
+import concurrent.futures as cf
 import glob
 import hashlib
 import os
@@ -44,6 +45,16 @@ def basics_in(path):
     return n
 
 
+def _run_matchup(me, opp_path, games, seed, mine):
+    cmd = [sys.executable, "simulate_versus.py", me, opp_path, games]
+    if seed:
+        cmd.append(seed)
+    out = subprocess.run(cmd, capture_output=True, text=True).stdout
+    m = re.search(r"^\s+" + re.escape(mine) + r"\s+\d+ wins\s+\(\s*([\d.]+)%\)",
+                  out, re.M)
+    return float(m.group(1)) if m else None
+
+
 def engine_revision():
     """Short fingerprint of the code that produced a result.
 
@@ -71,7 +82,7 @@ def main():
     seed = next((a for a in sys.argv if a.startswith("--seed=")), None)
     mine = os.path.splitext(os.path.basename(me))[0]
 
-    rows, unplayable = [], []
+    rows, unplayable, jobs = [], [], []
     for f in sorted(glob.glob(os.path.join(folder, "*.txt"))):
         opp = os.path.splitext(os.path.basename(f))[0]
         if opp == mine or os.path.abspath(f) == os.path.abspath(me):
@@ -79,20 +90,31 @@ def main():
         if basics_in(f) == 0:
             unplayable.append(opp)
             continue
-        cmd = [sys.executable, "simulate_versus.py", me, f, games]
-        if seed:
-            cmd.append(seed)
-        out = subprocess.run(cmd, capture_output=True, text=True).stdout
-        m = re.search(r"^\s+" + re.escape(mine) + r"\s+\d+ wins\s+\(\s*([\d.]+)%\)",
-                      out, re.M)
-        if m:
-            rows.append((float(m.group(1)), opp))
+        jobs.append((f, opp))
+
+    # Every matchup is an independent process, so run them across the
+    # available cores. This was the binding constraint on precision: at
+    # 150 games the standard error is ~1%, and the only way to resolve the
+    # changes an optimiser actually proposes is more games -- which was
+    # unaffordable serially.
+    workers = max(1, min(len(jobs), (os.cpu_count() or 1)))
+    with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(_run_matchup, me, f, games, seed, mine): opp
+                   for f, opp in jobs}
+        for fut in cf.as_completed(futures):
+            pct = fut.result()
+            if pct is not None:
+                rows.append((pct, futures[fut]))
 
     rows.sort(reverse=True)
     stamp = engine_revision()
     print(f"{mine} vs {len(rows)} saved decks, {games} games each"
           f"{' seed ' + seed.split('=')[1] if seed else ''}")
-    print(f"engine {stamp}\n")
+    import math
+    n = int(games)
+    se = 100.0 * math.sqrt(0.25 / max(n, 1))
+    print(f"engine {stamp}   ({workers} workers, 1 s.e. per matchup "
+          f"= {se:.1f}% at {n} games)\n")
     for pct, opp in rows:
         flag = "  <- check, near-total result" if pct >= 95 or pct <= 5 else ""
         print(f"  {pct:5.1f}%  {opp:48}{'#' * int(pct / 2)}{flag}")

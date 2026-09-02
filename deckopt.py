@@ -26,6 +26,7 @@ import random
 import subprocess
 import sys
 
+import concurrent.futures as cf
 import math
 
 import deckcheck
@@ -123,22 +124,35 @@ def score(deck_text, folder, games, seed, sample):
     re-rolls its opponents each round climbs the noise instead of the
     deck.
     """
-    tmp = ".deckopt_candidate.txt"
+    tmp = f".deckopt_candidate_{abs(hash(deck_text)) % 10 ** 8}.txt"
     open(tmp, "w").write(deck_text + "\n")
-    total, n = 0.0, 0
-    for opp in sample:
+    tag = os.path.splitext(os.path.basename(tmp))[0]
+
+    def one(opp):
         out = subprocess.run(
             [sys.executable, "simulate_versus.py", tmp, opp, str(games),
              f"--seed={seed}"], capture_output=True, text=True).stdout
         for line in out.splitlines():
-            if ".deckopt_candidate" in line and "wins" in line:
-                pct = line.split("(")[-1].split("%")[0].strip()
+            if tag in line and "wins" in line:
                 try:
-                    total += float(pct)
-                    n += 1
+                    return float(line.split("(")[-1].split("%")[0].strip())
                 except ValueError:
-                    pass
-    return total / n if n else 0.0
+                    return None
+        return None
+
+    # Each matchup is its own process, so spread them over the cores. The
+    # search is measurement-limited, and every factor of N here is a
+    # factor of sqrt(N) off the resolution it can achieve.
+    try:
+        workers = max(1, min(len(sample), os.cpu_count() or 1))
+        with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+            results = [r for r in pool.map(one, sample) if r is not None]
+    finally:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+    return sum(results) / len(results) if results else 0.0
 
 
 def neighbours(entries, rng):

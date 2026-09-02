@@ -1691,8 +1691,21 @@ def attach_energy(pl, cards_by_name, log):
 
 
 def _ready_damage(pl, opp, spot):
+    """What this Pokemon is worth attacking with RIGHT NOW.
+
+    A3. This ranked on raw damage, which meant the AI could not see the
+    two things that decide who should be holding the Active Spot: that a
+    smaller attack which actually Knocks Out is worth more than a bigger
+    one that does not, and that a setup attack is worth something at all.
+    A Benched Pokemon that could take a Prize this turn lost the
+    comparison to whatever was already Active and hitting for more.
+    """
     atk = best_attack(pl, spot, opp=opp)
-    return attack_damage(pl, opp, spot, atk) if atk else 0
+    if not atk:
+        return 0
+    # Cap the outright-win sentinel so it cannot swamp the arithmetic
+    # everywhere this feeds into.
+    return min(attack_value(pl, opp, spot, atk), 10 ** 5)
 
 
 def _potential_damage(pl, spot):
@@ -1853,7 +1866,12 @@ def try_retreat(pl, opp, log):
     if pl.active.energy_count() < cost:
         return
     here = _ready_damage(pl, opp, pl.active)
-    ready = [p for p in pl.bench if _ready_damage(pl, opp, p) > max(here, 0)]
+    # Retreating costs Energy and a turn of tempo, so a Benched option has
+    # to be better by more than a rounding error. Priced per Energy the
+    # retreat actually discards, otherwise the AI thrashes between two
+    # near-equal attackers and never develops either.
+    margin = 30 * max(cost, 0) + 10
+    ready = [p for p in pl.bench if _ready_damage(pl, opp, p) > max(here, 0) + margin]
     if not ready:
         return
     target = max(ready, key=lambda p: _ready_damage(pl, opp, p))
