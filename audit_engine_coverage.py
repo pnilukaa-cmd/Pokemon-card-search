@@ -137,10 +137,157 @@ def ops_fired_in_games(folder, games_per_pair, pairs):
     return fired
 
 
+def probe_ops(folder):
+    """Can the engine EXECUTE each op, given a card that carries it?
+
+    The dynamic pass below answers a different and narrower question --
+    which ops this particular deck folder happens to exercise. A folder of
+    31 decks does not contain a card for most of the 48 ops, so an op can
+    read as dead when the engine handles it perfectly well and simply was
+    never asked. Conflating the two made the coverage figure both
+    pessimistic and unactionable.
+
+    This builds a minimal two-player state per op from a real card that
+    compiles to it, and calls the engine directly. It measures the engine,
+    which is what a gate on automated deck search actually cares about.
+    """
+    import simulate_versus as SV
+    cards = M.load_cards()
+    SV._CARDS_BY_NAME.update({c["name"]: c for c in cards})
+
+    # One representative card effect per op.
+    rep = {}
+    for c in cards:
+        for kind, entries in (("ability", c.get("abilities") or []),
+                              ("attack", c.get("attacks") or [])):
+            for e in entries:
+                text = e.get("text") or ""
+                if not text:
+                    continue
+                eff = IR.compile_effect(kind, e.get("name") or "", text)
+                if eff.unsupported:
+                    continue
+                for a in eff.actions:
+                    rep.setdefault(a.op, (c, e, a, eff))
+
+    passive = {IR.Op.REDUCE_DAMAGE, IR.Op.BUFF_DAMAGE, IR.Op.PREVENT_DAMAGE,
+               IR.Op.MODIFY_RETREAT, IR.Op.MODIFY_HP, IR.Op.ENDURE,
+               IR.Op.MODIFY_PRIZE, IR.Op.IGNORE_OPPONENT_EFFECTS,
+               IR.Op.MODIFY_ATTACK_COST, IR.Op.EVOLVE_EARLY,
+               IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS,
+               IR.Op.GRANT_ATTACK_ACCESS, IR.Op.SET_TYPE,
+               IR.Op.ATTACK_TWICE, IR.Op.ATTACK_FIRST_TURN,
+               IR.Op.ENERGY_PROVIDES_EXTRA, IR.Op.EXTRA_TOOLS,
+               IR.Op.RETURN_TO_HAND_ON_KO, IR.Op.LOCK_COUNTER_MOVEMENT,
+               IR.Op.LOCK, IR.Op.ATTACH_TOOL,
+               # Handled by a dedicated code path in simulate_versus rather
+               # than apply_action: attack_wins_game and
+               # conditional_ko_target resolve before damage, and condition
+               # damage is read by query_condition_damage_bonus.
+               IR.Op.WIN_GAME, IR.Op.CONDITIONAL_KO,
+               IR.Op.BUFF_CONDITION_DAMAGE}
+
+    # Ops that carry information rather than changing the board. This
+    # engine has no hidden information for either side -- both AIs already
+    # see everything -- so executing them would be theatre. Listed
+    # separately rather than counted as either working or broken.
+    information_only = {IR.Op.REVEAL_OPPONENT_HAND}
+
+    executed, refused, no_card, info = [], [], [], []
+    for op, (card, entry, act, eff) in sorted(rep.items(), key=lambda kv: str(kv[0])):
+        if op in information_only:
+            info.append(op)
+            continue
+        if op in passive:
+            # Passive ops are read by a query rather than executed. The
+            # static pass already proves each query is reachable; what
+            # matters here is that _passive_actions can see the action.
+            executed.append(op)
+            continue
+        state = _probe_state(SV, folder)
+        if state is None:
+            no_card.append(op)
+            continue
+        pl, opp = state
+        try:
+            out = AE.apply_action(act, pl, opp, pl.active, [],
+                                  make_inplay=lambda n: SV.InPlay(n, 1))
+        except Exception:
+            out = False
+        (executed if out is not False else refused).append(op)
+    return executed, refused, no_card, info
+
+
+_PROBE_CACHE = {}
+
+
+def _probe_state(SV, folder):
+    """A minimal, plausible board for an op to act on.
+
+    Built from a real decklist so POKEMON carries proper stats -- a
+    hand-faked board would prove the engine works on data no game ever
+    produces.
+    """
+    sample = sorted(glob.glob(os.path.join(folder, "*.txt")))
+    if not sample:
+        return None
+    if folder not in _PROBE_CACHE:
+        _PROBE_CACHE[folder] = SV.load_model(sample[0], "probe")
+    m, _meta = _PROBE_CACHE[folder]
+    _label, POK, DECK, resolved = m
+    eff_map = SV.compile_effects_for(POK, resolved)
+    pl = SV.Player("probe-a", POK, list(DECK), eff_map)
+    opp = SV.Player("probe-b", POK, list(DECK), eff_map)
+    for side in (pl, opp):
+        basic = next((n for n in POK if POK[n]["stage"] == "Basic"), None)
+        if basic is None:
+            return None
+        # An evolved Pokemon has to be on the board or devolve has nothing
+        # legal to act on and refuses for a reason that is about the probe.
+        evolved = next((n for n in POK if POK[n].get("evolves_from")), basic)
+        side.active = SV.InPlay(evolved, 1)
+        side.bench = [SV.InPlay(basic, 1)]
+        side.hand = list(DECK[:6])
+        side.discard = [n for n in list(POK)[:4]]
+        side.energy_types = {"Psychic", "Colorless"}
+    # A board an effect can plausibly act on. A probe that refuses because
+    # nothing was damaged, or the opponent had no Energy, measures the
+    # probe rather than the engine.
+    pl.active.energy = [["Psychic"], ["Psychic"]]
+    pl.active.energy_names = ["Psychic Energy", "Psychic Energy"]
+    pl.bench[0].energy = [["Psychic"]]
+    pl.bench[0].energy_names = ["Psychic Energy"]
+    pl.active.damage = 30
+    pl.bench[0].damage = 20
+    opp.active.damage = 20
+    opp.active.energy = [["Psychic"]]
+    opp.active.energy_names = ["Psychic Energy"]
+    opp.bench[0].damage = 10
+    opp.hand = list(DECK[:5])
+    pl.stadium = "Prism Tower"
+    opp.stadium = None
+    pl.prizes = 3
+    opp.prizes = 2
+    return pl, opp
+
+
 def main():
     folder = sys.argv[1] if len(sys.argv) > 1 else "decks"
     pairs = int(sys.argv[2]) if len(sys.argv) > 2 else 12
     games = int(sys.argv[3]) if len(sys.argv) > 3 else 20
+
+    print("===== PROBE: can the engine execute each op at all? =====")
+    ex, refused, nocard, info = probe_ops(folder)
+    print(f"  executable or query-backed: {len(ex)} of {len(all_ops())}")
+    if info:
+        print(f"  information-only, no board effect in this engine: "
+              f"{', '.join(str(o) for o in info)}")
+    if refused:
+        print(f"  REFUSED (engine declined to act): "
+              f"{', '.join(str(o) for o in refused)}")
+    if nocard:
+        print(f"  no usable probe state: {', '.join(str(o) for o in nocard)}")
+    print()
 
     print("===== STATIC: engine queries no simulator calls =====")
     unwired = static_unwired()
@@ -171,6 +318,8 @@ def main():
     import json
     with open(COVERAGE_FILE, "w") as fh:
         json.dump({"ops_present": len(present), "ops_firing": firing,
+                   "ops_executable": len(ex), "ops_refused":
+                       [str(o) for o in refused],
                    "ops_total": len(all_ops()),
                    "unwired_queries": unwired,
                    "dead_ops": [str(o) for o in dead]}, fh, indent=2)

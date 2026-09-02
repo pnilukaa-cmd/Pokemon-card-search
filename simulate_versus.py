@@ -109,7 +109,7 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
-                 "retreat_locked", "attack_locked_by_opponent")
+                 "retreat_locked", "attack_locked_by_opponent", "prev_damage")
 
     def __init__(self, name, turn):
         self.name = name
@@ -130,6 +130,11 @@ class InPlay:
         # -lock control deck measured as if its main line did nothing.
         self.retreat_locked = False
         self.attack_locked_by_opponent = False
+        # Damage on this Pokemon immediately BEFORE the current hit. An
+        # "if this Pokemon has full HP" clause is about the state the
+        # attack found it in, not the state it left behind, and reading
+        # spot.damage after the fact makes such a clause never true.
+        self.prev_damage = 0
         self.tool = None
         self.conditions = set()   # asleep / burned / confused / paralyzed / poisoned
 
@@ -302,9 +307,21 @@ def sweep_knocked_out(pl, opp, log):
     """
     for owner, taker in ((pl, opp), (opp, pl)):
         for spot in list(owner.in_play()):
-            if spot.damage < effective_hp(owner, spot):
+            hp = effective_hp(owner, spot)
+            if spot.damage < hp:
+                continue
+            # Resolute Heart and friends: a lethal hit leaves it on 10 HP
+            # instead of Knocking it Out.
+            if AE.query_endures(owner, spot, taker):
+                spot.damage = hp - 10
+                log.append(f"  {owner.name}: {spot.name} endures the hit "
+                           f"(left on 10 HP)")
                 continue
             taken = owner.POKEMON[spot.name]["prize_value"]
+            # Togekiss's Wonder Kiss and friends change how many Prizes a
+            # Knock Out is worth, which is a change to the win condition
+            # itself -- the most consequential thing on the dead-op list.
+            taken = max(0, taken + AE.query_prize_modifier(taker, owner))
             owner.discard.append(spot.name)
             if spot is owner.active:
                 owner.active = None
@@ -1593,6 +1610,13 @@ def attack_wins_game(pl, opp, spot, atk):
 KO_BONUS_PER_PRIZE = 120
 
 
+def attack_ignores_effects(atk):
+    """Does this attack's own text disclaim effects on the defender?"""
+    eff = _attack_ir(atk)
+    return (not eff.unsupported
+            and any(a.op == IR.Op.IGNORE_OPPONENT_EFFECTS for a in eff.actions))
+
+
 def attack_value(pl, opp, spot, atk):
     if opp is not None and attack_wins_game(pl, opp, spot, atk):
         return 10 ** 6            # nothing outranks winning on the spot
@@ -1730,7 +1754,8 @@ def effective_hp(pl, spot):
     through here -- reading printed HP directly meant an HP Tool was worth
     nothing, and the Tool was never even attached."""
     base = pl.POKEMON[spot.name]["hp"]
-    return base + hp_tools().get(getattr(spot, "tool", None), 0)
+    return (base + hp_tools().get(getattr(spot, "tool", None), 0)
+            + AE.query_hp_modifier(pl, spot))
 
 
 def attach_tools(pl, log):
@@ -1904,13 +1929,22 @@ def do_attack(pl, opp, log):
     # Abilities were first wired in, and the game loop never called it --
     # so every damage-prevention wall in the pool did nothing at all, and
     # a deck built out of them measured as if it had no defence.
-    if AE.query_prevented(opp, opp.active, pl, pl.active):
+    # An attacker whose text says its damage "isn't affected by any effects
+    # on your opponent's Active Pokemon" skips BOTH the walls and the
+    # reduction -- that clause exists to answer exactly those cards.
+    # The clause appears on Abilities (Walking Wake ex's Azure Seas) and
+    # equally on the attack itself (Koraidon's Shred), so both have to be
+    # asked -- the passive query only ever sees the Ability half.
+    ignores = (AE.query_ignores_opponent_effects(pl, pl.active, opp)
+               or attack_ignores_effects(atk))
+    if not ignores and AE.query_prevented(opp, opp.active, pl, pl.active):
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
                    f"all damage to {opp.active.name} prevented")
         return True
-    reduction = damage_reduction_for(opp, opp.active, pl)
+    reduction = 0 if ignores else damage_reduction_for(opp, opp.active, pl)
     if reduction:
         dmg = max(0, dmg - reduction)
+    opp.active.prev_damage = opp.active.damage
     opp.active.damage += dmg
     log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} for {dmg}"
                f"{f' (-{reduction} reduced)' if reduction else ''}"

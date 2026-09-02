@@ -38,6 +38,7 @@ class Spot:
         self.attack_locked = False
         self.retreat_locked = False
         self.attack_locked_by_opponent = False
+        self.prev_damage = 0
 
     def energy_count(self):
         return len(self.energy)
@@ -893,6 +894,53 @@ def test_ai_values_knockouts_and_setup_rather_than_raw_damage():
           str(SV.attack_rider_value(me, opp, charge)))
 
 
+def test_wall_breakers_endure_and_ability_hp():
+    """Three effects that all live on the damage path and all did nothing.
+
+    ignore_opponent_effects is the format's answer to a damage wall, and
+    was compiled and never consulted -- so the cards whose entire job is
+    beating a wall did not beat one. modify_hp on an Ability never reached
+    the Knock Out check. And Endure's "if this Pokemon has full HP" clause
+    was evaluated AFTER the hit landed, so it was never true.
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["Koraidon", "Okidogi", "Pikachu ex", "Dhelmise"],
+                     {"Koraidon": ("TEF", "62"), "Okidogi": ("TWM", "122"),
+                      "Pikachu ex": ("SSP", "57"), "Dhelmise": ("PBL", "39")})
+
+    kora = Spot("Koraidon")
+    me = FakePlayer("A", POK, EFF, active=kora)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Dhelmise"))
+    shred = next(a for a in POK["Koraidon"]["attacks"] if a["name"] == "Shred")
+    check("the clause is read off the ATTACK when that is where it sits",
+          SV.attack_ignores_effects(shred))
+    anchor = next(a for a in POK["Dhelmise"]["attacks"]
+                  if a["name"] == "Vengeful Anchor")
+    check("and an ordinary attack does not claim it",
+          not SV.attack_ignores_effects(anchor))
+
+    oki = Spot("Okidogi", energy=[["Darkness"]])
+    me3 = FakePlayer("D", POK, EFF, active=oki)
+    base = POK["Okidogi"]["hp"]
+    check("Adrena-Power's +100 HP reaches effective_hp",
+          SV.effective_hp(me3, oki) == base + 100,
+          f"{SV.effective_hp(me3, oki)} vs {base + 100}")
+    oki_no_energy = Spot("Okidogi")
+    me4 = FakePlayer("E", POK, EFF, active=oki_no_energy)
+    check("and not without the Darkness Energy it requires",
+          SV.effective_hp(me4, oki_no_energy) == base)
+
+    pika = Spot("Pikachu ex")
+    me5 = FakePlayer("F", POK, EFF, active=pika)
+    pika.prev_damage = 0            # the hit found it undamaged
+    pika.damage = 10 ** 4
+    check("Endure fires when the attack found it at full HP",
+          AE.query_endures(me5, pika, opp))
+    pika.prev_damage = 30           # it was already damaged
+    check("and not when it was already damaged",
+          not AE.query_endures(me5, pika, opp))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -924,7 +972,8 @@ def main():
                test_turn_locks_are_applied_not_just_compiled,
                test_unregistered_trainers_resolve_from_card_text,
                test_hp_tools_are_attached_and_raise_the_KO_threshold,
-               test_ai_values_knockouts_and_setup_rather_than_raw_damage]:
+               test_ai_values_knockouts_and_setup_rather_than_raw_damage,
+               test_wall_breakers_endure_and_ability_hp]:
         print(f"{fn.__name__}:")
         try:
             fn()

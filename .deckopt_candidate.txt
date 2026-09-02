@@ -1,19 +1,19 @@
 4 Veluza SCR 45
 4 Shuppet PBL 33
-3 Poltchageist PBL 5
+4 Poltchageist PBL 5
 4 Dhelmise PBL 39
 3 Sinistcha PBL 6
-2 Azelf SSP 80
+1 Azelf SSP 80
 2 Banette PBL 34
 4 Kofu SCR 138
 4 Ultra Ball MEG 131
 4 Poké Pad ASC 198
 2 Team Rocket's Petrel ASC 207
-4 Lillie's Determination MEG 119
+3 Lillie's Determination MEG 119
 3 Gwynn PBL 109
 1 Naveen POR 112
 2 Brave Bangle WHT 80
-2 Prism Tower CRI 111
+3 Prism Tower CRI 111
 2 Boss's Orders MEG 114
 1 Switch MEG 130
 1 Brilliant Blender SSP 164

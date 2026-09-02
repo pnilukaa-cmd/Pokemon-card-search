@@ -1,15 +1,14 @@
 {
   "ops_present": 48,
-  "ops_firing": 20,
+  "ops_firing": 23,
+  "ops_executable": 47,
+  "ops_refused": [],
   "ops_total": 48,
   "unwired_queries": [],
   "dead_ops": [
-    "move_energy",
     "reveal_opponent_hand",
-    "look_at_deck",
     "ignore_opponent_effects",
     "discard_stadium",
-    "from_discard_to_hand",
     "modify_prize",
     "endure",
     "modify_hp",

@@ -31,6 +31,8 @@ from collections import Counter
 
 import ability_ir as IR
 
+STARTING_PRIZES = 6
+
 # Ops that compiled but that the runtime has no handler for. Reported by
 # the simulator so a compiled-but-inert ability is never mistaken for one
 # that actually did something.
@@ -103,8 +105,14 @@ def conditions_met(effect, pl, opp, source):
         if k == "self_has_energy_type":
             if not any(c["type"] in e for e in source.energy):
                 return False
-        if k == "self_full_hp" and source.damage > 0:
-            return False
+        if k == "self_full_hp":
+            # "If this Pokemon has full HP and would be Knocked Out" is
+            # about the state the attack FOUND it in. Checking damage
+            # after the hit has landed makes the clause never true, which
+            # is why every Endure Ability in the pool was inert.
+            before = getattr(source, "prev_damage", None)
+            if (before if before is not None else source.damage) > 0:
+                return False
         if k == "active_is_type":
             if not pl.active:
                 return False
@@ -471,11 +479,23 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             log.append(f"    strip {n} card(s) from opponent's hand")
         return n > 0
 
-    if op == O.LOOK_AT_DECK:
-        # Deck manipulation with no board effect; the closest honest
-        # approximation is that it improves the next draw, which this engine
-        # does not track. Counted as a no-op but NOT as an unhandled op.
-        return False
+    if op == O.DEVOLVE:
+        targets = resolve_targets(act.target, pl, opp, source, attacker)
+        hit = 0
+        for spot in targets:
+            info = pl.POKEMON.get(spot.name) or opp.POKEMON.get(spot.name) or {}
+            prev = info.get("evolves_from")
+            if not prev:
+                continue
+            owner = pl if spot in pl.in_play() else opp
+            owner.discard.append(spot.name)
+            spot.name = prev
+            # Devolving clears damage above the lower stage's HP the same
+            # way any HP change does, and Special Conditions stay.
+            hit += 1
+        if hit:
+            log.append(f"    devolves {hit} Pokemon")
+        return hit > 0
 
     if op == O.SEARCH_TO_DISCARD:
         n = 0
@@ -565,6 +585,40 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     h.conditions -= EXCLUSIVE
                 h.conditions.add(c)
         log.append(f"    apply {', '.join(conds)}")
+        return True
+
+    if op == O.DISCARD_STADIUM:
+        # Stadium removal only started mattering once Stadiums did
+        # anything; before that this was correctly inert and is now
+        # nine live card effects.
+        for side in (pl, opp):
+            if getattr(side, "stadium", None):
+                log.append(f"    discards Stadium {side.stadium}")
+                side.stadium = None
+                if side is not pl and getattr(pl, "stadium", None) is None:
+                    pass
+                return True
+        return False
+
+    if op == O.LOOK_AT_DECK:
+        # Look at the top N and take the most useful one. Without this the
+        # 13 selection Abilities in the pool drew nothing at all; with it
+        # they are worth roughly a tutor, which is what they cost.
+        n = act.amount or 2
+        top = pl.deck[-n:]
+        if not top:
+            return False
+        want = act.filter.get("kind")
+        pick = None
+        for cand in reversed(top):
+            if want and want.lower() not in cand[0].lower():
+                continue
+            pick = cand
+            break
+        pick = pick or top[-1]
+        pl.deck.remove(pick)
+        pl.hand.append(pick)
+        log.append(f"    looks at top {n}, takes {pick[1]}")
         return True
 
     # Turn-scoped locks ARE executed -- they are riders an attack applies
@@ -738,6 +792,73 @@ def query_prevented(pl, spot, opp=None, attacker=None):
                 continue
         return True
     return False
+
+
+def query_ignores_opponent_effects(pl, spot, opp=None):
+    """Does this attacker ignore effects on the Defending Pokemon?
+
+    12 card effects say some version of "this attack's damage isn't
+    affected by any effects on your opponent's Active Pokemon" -- which is
+    precisely the answer to the damage-reduction and prevention walls that
+    only started working recently. Compiled and never consulted, so the
+    cards whose whole job is beating a wall did not beat one.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.IGNORE_OPPONENT_EFFECTS):
+        if holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        return True
+    return False
+
+
+def query_hp_modifier(pl, spot, opp=None):
+    """Extra HP granted by an Ability, e.g. Okidogi's Adrena-Power (+100)."""
+    total = 0
+    for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_HP):
+        if holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        amount = act.amount or 0
+        per = act.filter.get("per_prize_taken")
+        if per:
+            amount *= (STARTING_PRIZES - (opp.prizes if opp else STARTING_PRIZES))
+        total += amount
+    return total
+
+
+def query_endures(pl, spot, opp=None):
+    """Would a lethal hit leave this Pokemon on 10 HP instead of dead?
+
+    Pikachu ex's Resolute Heart and friends. Gated on being at full HP,
+    which the caller checks by passing the pre-damage state.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.ENDURE):
+        if holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        return True
+    return False
+
+
+def query_prize_modifier(taker, loser):
+    """Extra (or fewer) Prizes for a Knock Out, from either side's Abilities."""
+    total = 0
+    for side, sign in ((taker, 1), (loser, 1)):
+        for holder, eff, act in _passive_actions(side, IR.Op.MODIFY_PRIZE):
+            if not conditions_met(eff, side, taker if side is loser else loser,
+                                  holder):
+                continue
+            amount = act.amount or 0
+            if act.filter.get("fewer") or side is loser:
+                amount = -abs(amount)
+            chance = getattr(eff, "chance", 1.0)
+            if chance < 1.0 and random.random() >= chance:
+                continue
+            total += amount
+    return total
 
 
 def query_retaliation(defender, attacker_spot, attacker_player=None):

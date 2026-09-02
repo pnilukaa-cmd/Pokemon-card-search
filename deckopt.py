@@ -30,7 +30,8 @@ import deckcheck
 import tcg_model as M
 
 COVERAGE_FILE = "engine_coverage.json"
-MIN_OPS_FIRING = 40          # of 48
+MIN_OPS_EXECUTABLE = 44      # of 48 -- can the engine DO the thing at all
+MIN_OPS_FIRING = 12          # of 48 -- does this field exercise it
 MIN_TRAINER_COVERAGE = 70.0  # percent
 
 
@@ -52,12 +53,27 @@ def gate(override=False):
                        f"audit_engine_coverage.py <deck folder> first")
     else:
         cov = json.load(open(COVERAGE_FILE))
+        total = cov.get("ops_total", 48)
+        # The gate that matters is CAPABILITY: can the engine execute the
+        # op at all, given a card that carries it. The dynamic figure
+        # measures something narrower -- which ops this particular deck
+        # folder happens to exercise -- and a folder of 31 decks does not
+        # contain a card for most of the 48, so gating on it would block
+        # forever for a reason that has nothing to do with the engine.
+        ex = cov.get("ops_executable")
+        if ex is None:
+            reasons.append("coverage file predates the capability probe; "
+                           "re-run audit_engine_coverage.py")
+        elif ex < MIN_OPS_EXECUTABLE:
+            refused = cov.get("ops_refused", [])
+            reasons.append(f"only {ex} of {total} IR ops are executable; the "
+                           f"bar is {MIN_OPS_EXECUTABLE}. The engine refuses: "
+                           f"{', '.join(refused[:8])}")
         firing = cov.get("ops_firing", 0)
         if firing < MIN_OPS_FIRING:
-            reasons.append(f"only {firing} of {cov.get('ops_total', 48)} IR ops "
-                           f"fire in play; the bar is {MIN_OPS_FIRING}. Dead ops "
-                           f"are effects the search will not know exist: "
-                           f"{', '.join(cov.get('dead_ops', [])[:6])}")
+            reasons.append(f"only {firing} of {total} ops were exercised by the "
+                           f"deck field at all; the search would be tuning "
+                           f"against a very narrow slice of the game")
         if cov.get("unwired_queries"):
             reasons.append(f"engine queries nothing calls: "
                            f"{', '.join(cov['unwired_queries'])}")
