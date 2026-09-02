@@ -45,10 +45,12 @@ def basics_in(path):
     return n
 
 
-def _run_matchup(me, opp_path, games, seed, mine):
+def _run_matchup(me, opp_path, games, seed, mine, seed_tag=None):
     cmd = [sys.executable, "simulate_versus.py", me, opp_path, games]
     if seed:
         cmd.append(seed)
+    if seed_tag:
+        cmd.append(seed_tag)
     out = subprocess.run(cmd, capture_output=True, text=True).stdout
     m = re.search(r"^\s+" + re.escape(mine) + r"\s+\d+ wins\s+\(\s*([\d.]+)%\)",
                   out, re.M)
@@ -80,6 +82,10 @@ def main():
     # mean moved about a point between identical runs, which is the same
     # size as most of the changes being measured.
     seed = next((a for a in sys.argv if a.startswith("--seed=")), None)
+    # --seed-tag makes two DIFFERENT decklists share the same random
+    # streams, so a comparison between them is paired. Unpaired, a one-card
+    # change is only resolvable at about 6%; paired, about 2%.
+    seed_tag = next((a for a in sys.argv if a.startswith("--seed-tag=")), None)
     mine = os.path.splitext(os.path.basename(me))[0]
 
     rows, unplayable, jobs = [], [], []
@@ -99,7 +105,8 @@ def main():
     # unaffordable serially.
     workers = max(1, min(len(jobs), (os.cpu_count() or 1)))
     with cf.ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(_run_matchup, me, f, games, seed, mine): opp
+        futures = {pool.submit(_run_matchup, me, f, games, seed, mine,
+                               seed_tag): opp
                    for f, opp in jobs}
         for fut in cf.as_completed(futures):
             pct = fut.result()

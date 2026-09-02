@@ -22,12 +22,14 @@ search until enough of the engine is demonstrably live.
 
 import json
 import os
+import re
 import random
 import subprocess
 import sys
 
 import concurrent.futures as cf
 import math
+import statistics
 
 import deckcheck
 import tcg_model as M
@@ -117,7 +119,22 @@ def render(entries):
     return "\n".join(out)
 
 
-def score(deck_text, folder, games, seed, sample):
+def score(deck_text, folder, games, seed, sample, seeds=1):
+    """Mean win rate, averaged over `seeds` independent replications.
+
+    Each replication uses common random numbers -- the same stream the
+    incumbent saw -- so what is being compared is the deck, not the
+    shuffle. Measured effect: the resolvable difference on a one-card
+    change fell from ~5.9% to ~1.8% at the same game count.
+    """
+    if seeds > 1:
+        vals = [_score_once(deck_text, folder, games, seed + i, sample)
+                for i in range(seeds)]
+        return sum(vals) / len(vals)
+    return _score_once(deck_text, folder, games, seed, sample)
+
+
+def _score_once(deck_text, folder, games, seed, sample):
     """Mean win rate over a fixed sample of the field.
 
     The SAME sample and seed every round, deliberately: a search that
@@ -131,7 +148,8 @@ def score(deck_text, folder, games, seed, sample):
     def one(opp):
         out = subprocess.run(
             [sys.executable, "simulate_versus.py", tmp, opp, str(games),
-             f"--seed={seed}"], capture_output=True, text=True).stdout
+             f"--seed={seed}", "--seed-tag=candidate"],
+            capture_output=True, text=True).stdout
         for line in out.splitlines():
             if tag in line and "wins" in line:
                 try:
@@ -175,7 +193,7 @@ def neighbours(entries, rng):
     return out
 
 
-def optimise(path, folder, rounds, games, seed, width):
+def optimise(path, folder, rounds, games, seed, width, reps=1):
     rng = random.Random(seed)
     entries = parse(open(path).read())
     pool = sorted(f for f in os.listdir(folder) if f.endswith(".txt"))
@@ -204,7 +222,7 @@ def optimise(path, folder, rounds, games, seed, width):
           f"{', '.join(os.path.basename(s)[:-4] for s in sample)}\n")
 
     best = render(entries)
-    best_score = score(best, folder, games, seed, sample)
+    best_score = score(best, folder, games, seed, sample, reps)
 
     # A fixed +0.5% acceptance threshold is far inside the noise at any
     # sample size this search can afford, so it accepts noise as readily
@@ -212,15 +230,22 @@ def optimise(path, folder, rounds, games, seed, width):
     # authoritative-looking garbage this whole gate exists to avoid.
     # Require the gain to clear two standard errors of a win rate measured
     # over this many games.
-    n_games = max(games * len(sample), 1)
-    se = 100.0 * math.sqrt(0.25 / n_games)
-    threshold = 2 * se
+    # Calibrate the acceptance threshold by MEASURING the noise rather than
+    # assuming it. The binomial formula is badly wrong under common random
+    # numbers -- it ignores the pairing, which is where most of the
+    # variance reduction comes from -- and using it would refuse real
+    # improvements as noise.
+    cal = [_score_once(best, folder, games, seed + i, sample)
+           for i in range(3)]
+    sd = statistics.pstdev(cal) if len(cal) > 1 else 2.0
+    threshold = max(2 * sd / math.sqrt(max(reps, 1)), 0.3)
     print(f"start  {best_score:5.1f}%   "
-          f"(n={n_games}, 1 s.e. = {se:.1f}%, accepting gains > {threshold:.1f}%)")
-    if threshold > 4:
-        print(f"       NOTE: at this sample size nothing smaller than "
-              f"{threshold:.1f}% is resolvable.\n"
-              f"       Raise --games or --width to see finer differences.")
+          f"(measured noise sd {sd:.1f}% over {games} games x {len(sample)} "
+          f"opponents; {reps} replication(s) -> accepting gains "
+          f"> {threshold:.1f}%)")
+    if threshold > 3:
+        print(f"       NOTE: nothing smaller than {threshold:.1f}% is "
+              f"resolvable here. Raise --games, --width or --reps.")
 
     for r in range(1, rounds + 1):
         improved = False
@@ -233,7 +258,7 @@ def optimise(path, folder, rounds, games, seed, width):
             res = deckcheck.validate(text)
             if not res.ok:
                 continue
-            s = score(text, folder, games, seed, sample)
+            s = score(text, folder, games, seed, sample, reps)
             if s > best_score + threshold:
                 entries, best, best_score = cand, text, s
                 print(f"round {r:2}  {s:5.1f}%  accepted")
@@ -274,9 +299,66 @@ def main():
 
     text, s = optimise(args[0], args[1], opt("--rounds=", 10),
                        opt("--games=", 40), opt("--seed=", 1),
-                       opt("--width=", 6))
-    print(f"\nbest {s:.1f}%\n")
+                       opt("--width=", 6), opt("--reps=", 1))
+    print(f"\nbest {s:.1f}% on the search sample\n")
+
+    if "--no-verify" not in sys.argv:
+        verify(args[0], text, args[1], opt("--verify-games=", 250))
     print(text)
+
+
+def verify(baseline_path, candidate_text, folder, games):
+    """Re-measure the search's answer against the WHOLE field, paired,
+    at high game count, under two independent seeds.
+
+    Every optimiser result this project has produced shrank under this,
+    and two of three vanished entirely: one was farming a deck that
+    mulligans out, one was noise on an older engine, one held on a single
+    seed and did not replicate. A search sample is a hypothesis generator;
+    this is the test. Running it automatically is the difference between a
+    tool that finds improvements and one that manufactures them.
+    """
+    tmp = ".deckopt_verify.txt"
+    open(tmp, "w").write(candidate_text + "\n")
+    print("verifying against the full field "
+          f"({games} games, paired, two seeds)\n")
+    rows = []
+    try:
+        for seed in (77, 404):
+            out = []
+            for deck, label in ((baseline_path, "baseline"), (tmp, "candidate")):
+                res = subprocess.run(
+                    [sys.executable, "gauntlet.py", deck, folder, str(games),
+                     f"--seed={seed}", "--seed-tag=verify"],
+                    capture_output=True, text=True).stdout
+                m = re.search(r"mean\s+([\d.]+)%\s+median\s+([\d.]+)%\s+"
+                              r"winning matchups (\d+)/(\d+)", res)
+                out.append(tuple(float(x) for x in m.groups()) if m else None)
+            if all(out):
+                b, c = out
+                rows.append((seed, c[0] - b[0], c[1] - b[1], c[2] - b[2]))
+                print(f"  seed {seed}:  mean {c[0] - b[0]:+5.1f}%   "
+                      f"median {c[1] - b[1]:+5.1f}%   "
+                      f"matchups {int(c[2] - b[2]):+d}")
+    finally:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+
+    if len(rows) < 2:
+        print("\n  VERDICT: could not verify -- treat as unconfirmed.")
+        return
+    means = [r[1] for r in rows]
+    agree = all(m > 0 for m in means) and all(r[3] >= 0 for r in rows)
+    print()
+    if agree and min(means) > 0.5:
+        print(f"  VERDICT: holds. Both seeds improve "
+              f"(mean {min(means):+.1f}% to {max(means):+.1f}%).")
+    else:
+        print(f"  VERDICT: NOT CONFIRMED. The seeds disagree "
+              f"(mean {min(means):+.1f}% to {max(means):+.1f}%). "
+              f"Treat this as a hypothesis, not an improvement.")
 
 
 if __name__ == "__main__":

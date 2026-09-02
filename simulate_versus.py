@@ -2337,7 +2337,16 @@ def main():
     seed_arg = next((a for a in sys.argv if a.startswith("--seed=")), None)
     if seed_arg:
         base = int(seed_arg.split("=", 1)[1])
-        key = f"{base}:{os.path.basename(pathA)}:{os.path.basename(pathB)}"
+        # --seed-tag replaces this deck's filename in the seed key, so two
+        # DIFFERENT decklists can be run on the SAME random stream. That is
+        # common random numbers, and without it a search comparing
+        # candidates was comparing them across independent noise: each
+        # candidate went to its own temp file, which changed the key, which
+        # reshuffled everything. The pairing is most of the variance
+        # reduction available here and it costs nothing.
+        tag_arg = next((a for a in sys.argv if a.startswith("--seed-tag=")), None)
+        tag = tag_arg.split("=", 1)[1] if tag_arg else os.path.basename(pathA)
+        key = f"{base}:{tag}:{os.path.basename(pathB)}"
         random.seed(int(hashlib.sha256(key.encode()).hexdigest()[:12], 16))
 
     modelA, metaA = load_model(pathA, "A")
