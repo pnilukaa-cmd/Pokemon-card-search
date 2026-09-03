@@ -117,7 +117,27 @@ def resolve_card(entry, by_name, by_setnum):
 # Pokemon stats
 # --------------------------------------------------------------------------
 
+# Fossils are Item cards whose own text says to play them AS a Basic
+# Pokemon. Treating them as Items meant a Fossil-based deck had ZERO
+# playable Basics: it mulliganed out and lost on turn 2, which is exactly
+# why selective_bloom_cradily has been sitting in the gauntlet's
+# "unplayable" list all along, and why Tyrantrum -- whose line starts at
+# Antique Jaw Fossil -- could not be simulated at all.
+FOSSIL_RE = re.compile(
+    r"play this card as if it were a (\d+)-HP Basic (\w+) Pok[eé]mon", re.I)
+
+
+def fossil_stats(card):
+    """(hp, type) if this Item plays as a Basic Pokemon, else None."""
+    if card.get("supertype") != "Trainer":
+        return None
+    m = FOSSIL_RE.search(" ".join(card.get("rules") or []))
+    return (int(m.group(1)), m.group(2).capitalize()) if m else None
+
+
 def stage_of(card):
+    if fossil_stats(card):
+        return "Basic"
     subtypes = card.get("subtypes") or []
     if "Basic" in subtypes:
         return "Basic"
@@ -162,6 +182,17 @@ def parse_damage(dmg):
 
 
 def build_pokemon_info(card):
+    fossil = fossil_stats(card)
+    if fossil:
+        hp, ftype = fossil
+        # No attacks, no retreat, immune to Special Conditions -- all
+        # stated on the card itself. It exists to be evolved.
+        return {
+            "stage": "Basic", "evolves_from": None, "hp": hp,
+            "retreat": 99, "rule_box": False, "prize_value": 1,
+            "types": [ftype], "weakness": None, "attacks": [],
+            "is_fossil": True,
+        }
     attacks = []
     for atk in card.get("attacks") or []:
         cost = [c for c in (atk.get("cost") or []) if c != "Free"]
@@ -451,7 +482,7 @@ def build_deck_model(text, cards=None):
         if not exact:
             fallback_pooled.add(name)
         supertype = card.get("supertype")
-        if supertype == "Pokémon":
+        if supertype == "Pokémon" or fossil_stats(card):
             if name not in POKEMON:
                 POKEMON[name] = build_pokemon_info(card)
             DECKLIST += [("Pokemon", name)] * count

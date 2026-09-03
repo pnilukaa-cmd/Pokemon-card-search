@@ -87,7 +87,8 @@ def validate(decklist_text, cards=None):
                 f"carries a different printing; matched by name")
         resolved.append((entry, card))
         r.size += entry["count"]
-        if card.get("supertype") == "Pokémon" and M.stage_of(card) == "Basic":
+        if (card.get("supertype") == "Pokémon" or M.fossil_stats(card)) \
+                and M.stage_of(card) == "Basic":
             r.basics += entry["count"]
         if "ACE SPEC" in (card.get("subtypes") or []):
             # Per COPY, not per name. Counting distinct names let 3 copies

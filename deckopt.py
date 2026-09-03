@@ -42,7 +42,11 @@ def basics_in(path):
     n = 0
     for entry in M.parse_decklist_entries(open(path).read()):
         card, _ = M.resolve_card(entry, by_name, by_setnum)
-        if card and card.get("supertype") == "Pokémon" \
+        # Fossils are Items that play as Basic Pokemon, so they count --
+        # otherwise a Fossil deck reads as having no Basics and gets
+        # screened out as unplayable when it plays perfectly well.
+        if card and (card.get("supertype") == "Pokémon"
+                     or M.fossil_stats(card)) \
                 and M.stage_of(card) == "Basic":
             n += entry["count"]
     return n
