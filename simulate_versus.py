@@ -1502,6 +1502,14 @@ def attack_rider_value(pl, opp, atk):
                 value += (act.amount or 0) * 10 * max(len(spots), 1)
             else:
                 value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
+        elif act.op == IR.Op.MULTIPLY_COUNTERS:
+            # Worth exactly the damage it would add, which is zero on a
+            # clean board and enormous on a spread one. Pricing it flat
+            # would have the AI use it turn one and never again.
+            spots = ([opp.active] if opp.active else []) + list(opp.bench)
+            if act.filter.get("targets"):
+                spots = sorted(spots, key=lambda s: -s.damage)[:act.filter["targets"]]
+            value += sum(s.damage * ((act.amount or 2) - 1) for s in spots)
         elif act.op == IR.Op.MOVE_COUNTERS:
             value += 20
         elif act.op == IR.Op.SEARCH_TO_BENCH:
@@ -2048,6 +2056,7 @@ ATTACK_RIDER_OPS = {
     IR.Op.LOOK_AT_DECK,
     IR.Op.PLACE_COUNTERS,
     IR.Op.MOVE_COUNTERS,
+    IR.Op.MULTIPLY_COUNTERS,
     IR.Op.LOCK,
 }
 

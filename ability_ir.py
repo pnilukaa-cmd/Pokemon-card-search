@@ -78,6 +78,7 @@ class Op:
     MOVE_ENERGY = "move_energy"
     # damage / health
     PLACE_COUNTERS = "place_counters"
+    MULTIPLY_COUNTERS = "multiply_counters"
     MOVE_COUNTERS = "move_counters"
     HEAL = "heal"
     PREVENT_DAMAGE = "prevent_damage"
@@ -586,6 +587,27 @@ def _r(m, text):
 
 
 # ---- damage / health -----------------------------------------------------
+
+@rule("multiply_counters",
+      r"(double|triple|quadruple) the number of damage counters on "
+      r"(each of your opponent'?s pok[eé]mon|each of them)")
+def _r(m, text):
+    """N's Vanilluxe's Snow Coating and Spiritomb's Spiritual End.
+
+    The taxonomy had a `damage_counter_doubler` family for these, but no
+    IR rule and no op, so the text compiled to nothing at all -- a deck
+    whose whole plan is doubling a spread was invisible to the simulator.
+    Multiplying is not the same shape as placing: it scales whatever is
+    already there, which is what makes it exponential across turns.
+    """
+    factor = {"double": 2, "triple": 3, "quadruple": 4}[m.group(1).lower()]
+    # "choose 2 of your opponent's Pokemon and quadruple ... each of them"
+    mm = re.search(r"choose (\d+) of your opponent'?s pok[eé]mon", text, re.I)
+    filt = {"targets": int(mm.group(1))} if mm else {}
+    tgt = Target.OPP_ANY if mm else Target.OPP_ALL
+    return [Action(Op.MULTIPLY_COUNTERS, factor, tgt, filt)]
+
+
 
 @rule("place_counters_per_discard",
       r"put (\d+) damage counters? on ([^.]{0,45}?) for each (basic (?:" + TYPES +

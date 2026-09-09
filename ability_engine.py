@@ -524,6 +524,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         log.append(f"    devolve -> {pre}")
         return True
 
+    if op == O.MULTIPLY_COUNTERS:
+        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        if act.filter.get("targets"):
+            # Pick the ones already carrying the most, since multiplying
+            # nothing is worth nothing.
+            hits = sorted(hits, key=lambda h: -h.damage)[:act.filter["targets"]]
+        factor = act.amount or 2
+        moved = 0
+        for spot in hits:
+            if spot.damage <= 0:
+                continue
+            before = spot.damage
+            spot.damage *= factor
+            moved += spot.damage - before
+        if moved:
+            log.append(f"    multiplies counters x{factor} (+{moved} damage)")
+        return moved > 0
+
     if op == O.DISCARD_STADIUM:
         if getattr(pl, "stadium", None) or getattr(opp, "stadium", None):
             pl.stadium = None

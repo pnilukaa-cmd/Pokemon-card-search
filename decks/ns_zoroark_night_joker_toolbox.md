@@ -1,52 +1,98 @@
 # N's Zoroark ex — Night Joker toolbox
 
-One attacker, a Bench full of borrowed attacks, and two different ways to
-win. Built for setup speed: there is exactly **one evolution step in the
-whole deck**, and every other Pokémon is a Basic that never evolves.
+`N's Zoroark ex` ASC 137, Stage 1, 280 HP.
+**`Night Joker`, `D``D`: choose 1 of your Benched N's Pokémon's attacks
+and use it as this attack.**
 
-## The engine
+## The point, which is not obvious from the card
 
-**N's Zoroark ex** (ASC 137, Stage 1, 280 HP Darkness, from N's Zorua)
+**Night Joker launders the Energy cost.** You pay `D``D` and get the
+chosen attack's *effect*, not its cost. So:
 
-- Ability **Trade** — discard a card, draw 2. Once per turn **per copy**,
-  so a second one on the Bench doubles it, and it never touches the
-  Supporter slot.
-- Attack **Night Joker** — `Darkness / Darkness`: *"Choose 1 of your
-  Benched N's Pokémon's attacks and use it as this attack."*
+| On its own card | Borrowed |
+| --- | --- |
+| `N's Zekrom` Rampaging Thunder — `F``L``L``C`, **250** | **`D``D`, 250** |
+| `N's Reshiram` Virtuous Flame — `F``F``L``C`, **170** | **`D``D`, 170** |
+| `N's Vanilluxe` Blizzard — `W``C``C`, 120 + 10 each Bench | `D``D`, same |
 
-Night Joker pays **two Darkness Energy** and ignores the borrowed attack's
-own cost. That is the whole deck. The Bench is a menu:
+Zekrom and Reshiram are **Basics with four-Energy, two-type attacks that
+this deck can never pay for** — and it never needs to. They sit on the
+Bench as attack-holders and never attack. The deck is mono-Darkness and
+throws 170 every turn.
 
-| Borrowed from | Attack | What it does |
+`Rampaging Thunder` locks its user out of attacking next turn, and **the
+lock follows the copy**, so 250 is an every-other-turn button.
+`Virtuous Flame` at 170 with no drawback is the one you press.
+
+## Where the damage was going missing
+
+The previous build measured **35.9%** and the trace said why — nothing to
+do with damage. Night Joker landed 170 thirty-two times in 25 games, 250
+seven times, and 480 into Weakness. The damage was never the problem.
+
+**Zoroark ex was.** Measured over 1500 openings:
+
+| | T1 | T2 | T3 | T4 | T5 | T6 |
+| --- | --- | --- | --- | --- | --- | --- |
+| N's Zorua | 69.5% | 92.3% | 95.0% | 96.3% | 97.5% | 98.4% |
+| **N's Zoroark ex** | 0% | **29.9%** | 45.4% | 52.7% | 58.8% | **64.3%** |
+
+Zorua is out on turn 2 almost always; the thing that actually attacks is a
+coin flip by turn 4. And the reason is a rules detail that is easy to miss:
+
+**`Poké Pad` cannot fetch `N's Zoroark ex`** — it searches a Pokémon
+*that doesn't have a Rule Box*, and Zoroark ex has one. Four copies of the
+deck's main tutor could not touch its main card. `Ultra Ball` and one
+`Master Ball` were the only outs.
+
+**`Cyrano` SSP 170 — search your deck for up to 3 Pokémon ex** — is the
+answer, and it takes three at once.
+
+The second finding, from `ai_quality.py`: the deck was **idle on 37% of
+its attacking turns, and 87% of those were simply no Energy in hand.**
+Eleven Energy in a deck that needs `D``D` every single turn is too thin.
+
+| change | mean | median | winning |
+| --- | --- | --- | --- |
+| previous build | 35.9% | 34.5% | 4/31 |
+| + Cyrano, Energy 11 → 14, cut dead weight | 44.6% | 42.0% | 9/32 |
+| **+ Basics 10 → 12 (mulligan 25.9% → 19.1%)** | **45.3%** | **42.2%** | **12/32** |
+| *same build, independent seed* | **44.9%** | **45.2%** | **9/32** |
+
+**+9.4 and +8.4 on two independent seeds**, paired, 200 games per matchup.
+
+## Why `N's Vanilluxe` is not in this deck
+
+It was tested, in two separate shells, and it earns nothing.
+
+`Snow Coating` (`C``C`) **doubles the damage counters on each of your
+opponent's Pokémon**. The maths is genuinely exciting — 20 → 40 → 80 →
+160 → 320 — and the maths is the trap. **Doubling zero is zero**, and by
+the time you have placed enough counters for doubling to matter, you would
+rather have attacked twice.
+
+Measured:
+
+| build | mean | winning |
 | --- | --- | --- |
-| **N's Reshiram** ASC 154 | Virtuous Flame | **170**, no drawback — the every-turn workhorse |
-| **N's Zekrom** ASC 155 | Rampaging Thunder | **250**, but locks you out of attacking next turn |
-| **N's Zekrom** ASC 155 | Shred | 70 whose *"damage isn't affected by any effects on your opponent's Active"* — the answer to −30 walls |
-| **N's Sigilyph** JTG 64 | **Victory Symbol** | *"If you use this attack when you have exactly 1 Prize card remaining, **you win this game**."* |
-| **N's Purrloin** JTG 96 | Thieving Swipe | 30, and put a card from their hand on the bottom of their deck |
-| **N's Joltik** JTG 49 | Zapping Short | discards all Tools from their Active first — kills Air Balloon, Maximum Belt |
+| N's Zoroark + Vanilluxe + Uxie seed | 17.5% | 0/32 |
+| leaner version of the same | 11.0% | 0/32 |
+| Palossand ex + Vanilluxe | 35.4% | 6/32 |
+| **the same deck with Vanilluxe removed entirely** | **35.3%** | **5/32** |
 
-The elegant part: `Virtuous Flame` costs `Fire/Fire/Lightning/Colorless`
-and `Victory Symbol` costs `Psychic/Colorless/Colorless`. **Neither is
-castable in this deck** — it runs nothing but Darkness Energy. They are
-only ever borrowed. `check_energy_support.py` flags eight attacks here as
-IMPOSSIBLE and every one of those flags is correct and irrelevant; the
-copy is the point.
+That last pair is the answer: **removing Vanilluxe changed nothing.**
+Palossand ex was carrying the deck; Vanilluxe was a passenger. The
+attack-usage trace on the first build shows why — its most-used attacks
+were `Call for Family` (0 damage), `Scratch` (20), and `Painful Memories`
+(0 damage). Five slots of Stage 2 line to hold a card that never attacked.
 
-## The two win conditions
-
-1. **The prize race.** 170 a turn off two Energy, or 250 when you need to
-   punch through something big.
-2. **N's Sigilyph's Victory Symbol.** At **exactly 1 Prize remaining** you
-   stop needing to Knock anything out — you attack for two Darkness and
-   win, through a 350 HP Mega, through a wall, through anything.
-
-Victory Symbol is **insurance, not a plan**. Reaching exactly 1 Prize
-means steering the count: two 2-Prize KOs plus one 1-Prize KO puts you
-there, whereas three 2-Prize KOs just wins normally at 0. When the last
-Prize is the hard one — they have nothing reachable, or a body you cannot
-break — this is the card that ends it. `Boss's Orders` at 4 copies is
-partly there to pick which Prize value you take.
+**The one place the doubling is real**, recorded because it is a genuinely
+clean piece of maths: `Palossand ex`'s `Barite Jail` puts counters on each
+Benched Pokémon *until its remaining HP is 100*, so a Pokémon with H HP
+takes H−100. Snow Coating doubles that to 2(H−100), which is lethal
+whenever **H ≥ 200** — every ex and Mega ex on their Bench, in two
+attacks. It still measured at 35%, because assembling a Stage 1 ex and a
+Stage 2 across three Energy types costs more than the wipe returns.
 
 ## Decklist
 
@@ -54,137 +100,50 @@ partly there to pick which Prize value you take.
 Pokémon: 17
 4 N's Zorua ASC 136
 4 N's Zoroark ex ASC 137
-3 N's Reshiram ASC 154
-2 N's Sigilyph JTG 64
+4 N's Reshiram ASC 154
 2 N's Zekrom ASC 155
-1 N's Purrloin JTG 96
-1 N's Joltik JTG 49
+2 N's Purrloin JTG 96
+1 N's Darmanitan ASC 33
 
-Trainer: 32
+Trainer: 29
 4 Buddy-Buddy Poffin MEG 167
 4 Ultra Ball MEG 131
-4 Poké Pad ASC 198
-4 Boss's Orders MEG 114
+3 Cyrano SSP 170
+3 Boss's Orders MEG 114
 3 Lillie's Determination MEG 119
-2 Janine's Secret Art SFA 59
-2 N's PP Up ASC 195
+2 Poké Pad ASC 198
+2 Xerosic's Machinations SFA 64
 2 N's Castle JTG 152
+2 N's PP Up ASC 195
 2 Night Stretcher MEG 173
-2 Carmine TWM 145
-2 Hilda WHT 164
+1 Energy Search POR 72
 1 Master Ball TEF 153
 
-Energy: 11
-11 Basic Darkness Energy
+Energy: 14
+14 Basic Darkness Energy
 
 Total Cards: 60
 ```
 
-### Card choices worth stating
-
-- **N's Castle JTG 152** is not filler — it is the second most important
-  card in the deck. *"N's Pokémon in play have no Retreat Cost."*
-  Zoroark ex has printed retreat 2, and the deck's whole pattern is
-  loading a spare Zoroark ex on the Bench and swapping it in the moment
-  the Active one falls. Adding it to the simulator moved every matchup by
-  **9–17 points** (see below) — it is that load-bearing.
-- **Janine's Secret Art SFA 59** — *"Choose up to 2 of your Darkness
-  Pokémon. For each, search your deck for a Basic Darkness Energy and
-  attach it."* Night Joker costs exactly two Darkness, so one Janine's is
-  one fully armed attacker straight out of the deck. Attach to the
-  **Bench**, not the Active — attaching to your Active Poisons it — then
-  bring it in for free under N's Castle. That two-card interaction is the
-  deck's real setup line.
-- **N's PP Up ASC 195** — recycles a Basic Energy from the discard onto a
-  Benched N's Pokémon. This is the answer to losing an armed Zoroark ex.
-- **Poké Pad ASC 198 at 4** — searches any Pokémon *without* a Rule Box,
-  which is the entire toolbox (Sigilyph, Reshiram, Zekrom, Purrloin,
-  Joltik) but not Zoroark ex. `Master Ball` and `Ultra Ball` cover that.
-- **Every Basic is a Bench sitter.** Bench is 5, and the toolbox is
-  exactly Bench-sized: Sigilyph, Reshiram, Zekrom, plus a spare Zorua or
-  Zoroark ex.
+- **`N's Castle` gives every N's Pokémon no Retreat Cost** — including
+  your opponent's, if they run them. It is what lets the toolbox rotate.
+- **`Buddy-Buddy Poffin` reaches Zorua (70), Purrloin (70) and Joltik**
+  but **not** Reshiram or Zekrom at 130. The big attack-holders come from
+  Ultra Ball and Poké Pad, which *can* fetch them — they have no Rule Box.
+- **`Xerosic's Machinations`** puts their hand to 3. It has **no modeled
+  effect in the simulator**, so its disruption is not counted in the
+  figure below.
 
 ## Numbers
 
-`check_energy_support.py`: 60 cards, no card over 4 copies, 1 ACE SPEC.
-(Eight IMPOSSIBLE flags, all on borrowed-only attacks — see above.)
+60 cards, no card over 4, one ACE SPEC, mulligan **19.1%** (12 Basics).
+One UNCASTABLE flag: `N's Reshiram`'s *secondary* attack Powerful Rage
+needs Fire — irrelevant, because Reshiram never attacks from its own card.
+That flag is the deck working as designed.
 
-Mulligan with **13 Basics: 16.3%** — the lowest of any deck in this repo.
+Full field, 32 decks, 200 games each, paired — mean **45.3%**, median
+**42.2%**, **12/32** winning.
 
-1000-trial baseline, in play by turn 6:
-
-| | % | avg turn |
-| --- | --- | --- |
-| N's Zorua | 98.4% | 1.46 |
-| **N's Zoroark ex** | **82.1%** | 2.95 |
-| N's Sigilyph | 76.6% | 2.06 |
-| N's Reshiram | 75.3% | 2.04 |
-| N's Purrloin | 56.9% | 2.11 |
-| N's Zekrom | 54.8% | 2.16 |
-| N's Joltik | 54.3% | 2.08 |
-
-First attack by turn 6: **91.1%**. That 82.1% is the highest main-attacker
-figure in this repo — Decidueye ex reaches 68.3%, Mega Chandelure ex
-64.4%, Chandelure 61.7%. One evolution step is the entire reason.
-
-`simulate_versus.py`, 250 games each:
-
-| Opponent | before N's Castle was modeled | with it |
-| --- | --- | --- |
-| Mega Scrafty ex darkness tank | 39.0% | **54.0%** |
-| Hop's Snorlax stacked buff | 44.5% | **57.6%** |
-| Steven's Carbink damage wall | 34.0% | **45.6%** |
-| Decidueye ex / Judge | 35.5% | **44.8%** |
-| Mega Chandelure ex retreat tax | 40.5% | **61.6%** |
-
-Two caveats on those. `Master Ball` and `N's PP Up` have no modeled effect
-in the baseline sim, and **the AI does not steer the Prize count**, so
-Victory Symbol essentially never fires in simulation — it takes the sixth
-Prize instead. The win rates therefore measure the damage plan only.
-
-## Where this deck loses
-
-- **Zoroark ex is 2 Prizes**, and the deck has no other real attacker.
-  Three Knock Outs on it ends the game. 280 HP is good, not safe.
-- **Weakness.** Zoroark ex is Darkness — Fighting hits it for double.
-- **The Bench is the deck.** Night Joker with an empty or wrong Bench does
-  nothing at all; a bench-snipe deck that removes Reshiram is removing
-  your damage. Keep a second copy down.
-- **Rampaging Thunder's self-lock** means the 250 mode is really 125 a
-  turn. Borrow `Virtuous Flame` unless the 250 actually Knocks something
-  Out.
-- **Ability lock** (`Team Rocket's Watchtower` does not hit it — Zoroark ex
-  is Darkness, not Colorless — but a real ability lock does) turns off
-  Trade and the deck's draw collapses to its Supporters.
-
-## Simulator work this deck required
-
-Six fixes, four of them general rather than deck-specific:
-
-1. **Copying a Benched Pokémon's attack was unmodeled.** Only "use the
-   Defending Pokémon's attack" and Persian ex's deck-reveal shape were
-   handled, so Night Joker — an entire archetype's only attack — scored 0.
-2. **There was no "you win this game" mechanic at all.** Adds
-   `Op.WIN_GAME`, an `own_prizes_equal` condition, and a check in
-   `do_attack` that resolves before damage. It follows the copy, since
-   Victory Symbol is only ever reached through Night Joker.
-3. **Self-attack-lock was ignored** — *"during your next turn, this Pokémon
-   can't attack"*. The AI re-used a 250-damage every-other-turn attack
-   every single turn. Now tracked per Pokémon, and the drawback follows a
-   borrowed copy.
-4. **Borrowed attacks were ranked on raw damage**, so the AI always took
-   the self-locking 250 over an unconditional 170 and attacked half as
-   often. Now ranked on damage *per turn*.
-5. **Energy was fed to Pokémon that could never pay their attacks.**
-   `energy_shortfall` counted every printed attack, so a mono-Darkness
-   deck poured Energy into a Bench Pokémon whose attack costs Fire —
-   starving the one Pokémon that attacks. It now considers only attacks
-   the deck's own Energy types could ever pay, and the Bench target is
-   chosen by what it would hit for rather than list order.
-6. **Promotion after a Knock Out picked the biggest body**, not the one
-   that could fight. Now ranks on ready damage first.
-
-Plus a minimal Stadium model: `RETREAT_STADIUMS` honours the Stadiums
-whose whole effect is Retreat Cost (`N's Castle`, `Paradise Resort`),
-since `Player.stadium` was previously assigned and never read. Every other
-Stadium is still inert in `simulate_versus.py`.
+It is still a below-average deck in this field, and the remaining ceiling
+is structural: **every body that matters is a 2-Prize ex throwing 170**,
+so it needs four Knock Outs to their three.

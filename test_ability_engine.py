@@ -941,6 +941,47 @@ def test_wall_breakers_endure_and_ability_hp():
           not AE.query_endures(me5, pika, opp))
 
 
+def test_counter_multiplier_scales_what_is_already_there():
+    """Snow Coating compiled to nothing at all.
+
+    The taxonomy carried a `damage_counter_doubler` family, but there was
+    no IR rule and no op, so a deck whose entire plan is doubling a spread
+    was invisible to the simulator. Multiplying is a different shape from
+    placing: it is worth zero on a clean board and enormous on a spread
+    one, which is also how the AI has to price it or it uses it on turn
+    one and never again.
+    """
+    import simulate_versus as SV
+    POK, EFF = build(["N's Vanilluxe", "Dhelmise"],
+                     {"N's Vanilluxe": ("ASC", "51"), "Dhelmise": ("PBL", "39")})
+    van = Spot("N's Vanilluxe")
+    me = FakePlayer("A", POK, EFF, active=van)
+    opp = FakePlayer("B", POK, EFF, active=Spot("Dhelmise"))
+    opp.bench = [Spot("Dhelmise"), Spot("Dhelmise")]
+    snow = next(a for a in POK["N's Vanilluxe"]["attacks"]
+                if a["name"] == "Snow Coating")
+
+    for s in [opp.active] + opp.bench:
+        s.damage = 0
+    check("worth nothing on an undamaged board",
+          SV.attack_rider_value(me, opp, snow) == 0)
+
+    opp.active.damage = 40
+    for s in opp.bench:
+        s.damage = 20
+    # doubling adds exactly what is already there: 40 + 20 + 20
+    check("worth what it would add, not a flat number",
+          SV.attack_rider_value(me, opp, snow) == 80,
+          str(SV.attack_rider_value(me, opp, snow)))
+
+    AE.apply_action(IR.compile_effect("attack", "Snow Coating",
+                                      snow["text"]).actions[0],
+                    me, opp, van, [])
+    check("the Active is doubled", opp.active.damage == 80)
+    check("and every Benched Pokemon too",
+          all(s.damage == 40 for s in opp.bench))
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -973,7 +1014,8 @@ def main():
                test_unregistered_trainers_resolve_from_card_text,
                test_hp_tools_are_attached_and_raise_the_KO_threshold,
                test_ai_values_knockouts_and_setup_rather_than_raw_damage,
-               test_wall_breakers_endure_and_ability_hp]:
+               test_wall_breakers_endure_and_ability_hp,
+               test_counter_multiplier_scales_what_is_already_there]:
         print(f"{fn.__name__}:")
         try:
             fn()

@@ -80,9 +80,15 @@ Paired comparison (common random numbers), 200 games per matchup.
 **`Antique Jaw Fossil` (an Item played as a 60 HP Basic) → `Tyrunt`
 (Stage 1) → `Tyrantrum` (Stage 2)** — three steps.
 
-**`Rare Candy` cannot bridge it.** Rare Candy needs a Stage 2 that evolves
-from the Basic it targets; Tyrantrum evolves from Tyrunt, not from the
-Fossil. Checked against the card text, not assumed.
+**Correction — `Rare Candy` DOES bridge it.** An earlier version of this
+file said it could not, reasoning that Tyrantrum's `evolvesFrom` is
+Tyrunt rather than the Fossil. That reading is wrong: no Stage 2 in the
+game literally evolves from a Basic, and Rare Candy's own text ends
+*"...to evolve it, **skipping the Stage 1**"* — the clause exists
+precisely to jump a Basic to the Stage 2 in its line. The Fossil is a
+Basic Pokémon in play, so Rare Candy takes it straight to Tyrantrum and
+the line is **two steps, not three**. The list below does not yet include
+Rare Candy and its measured figure predates the correction.
 
 `Fossil Quarry` PBL 76 searches two Antique Items straight onto the Bench
 and is what makes the line playable at all — but note it is **symmetric**,
