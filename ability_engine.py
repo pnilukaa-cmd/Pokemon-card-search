@@ -260,12 +260,25 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     return (0, room)          # can still climb toward it
                 return (1, -(pl.POKEMON.get(h.name, {}).get("hp", 0) - h.damage))
             chosen = sorted(hits, key=_priority)[:n]
+        # Mega Zygarde ex's Nullifying Zero flips a separate coin for each
+        # of the opponent's Pokemon. Without this the attack either always
+        # landed on everything or (as compiled) did nothing at all.
+        odds = act.filter.get("chance_each")
+        if odds is not None:
+            chosen = [h for h in chosen if random.random() < odds]
+        # Arboliva ex's Oil Salvo chooses a target SIX times and says the
+        # same Pokemon may be chosen more than once, so a 5-Pokemon board
+        # still takes all six hits. Truncating to distinct targets lost a
+        # third of the attack.
+        want = act.filter.get("targets")
+        if want and chosen and len(chosen) < want:
+            chosen = [chosen[i % len(chosen)] for i in range(want)]
         for h in chosen:
             h.damage += (act.amount or 0) * 10
         if chosen:
             log.append(f"    place {(act.amount or 0)*10} damage on "
                        f"{len(chosen)} Pokemon")
-        return True
+        return bool(chosen)
 
     if op == O.CONDITIONAL_KO:
         # Terminal Period / Euclase: a Knock Out keyed off an exact counter

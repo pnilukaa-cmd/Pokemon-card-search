@@ -184,6 +184,15 @@ def build(seed_name, set_code=None, number=None, cards=None):
     seed = None
     if set_code and number:
         seed = by_setnum.get((seed_name, set_code, str(number)))
+        if seed is not None:
+            # Emit the printing that was actually ASKED for. printing_of()
+            # returns printings[0], so asking for "Raging Bolt ex TEF 123"
+            # produced a list saying "PR-SV 145" -- a different line than
+            # the user requested, in a game where printings differ in text.
+            seed = dict(seed)
+            seed["printings"] = ([[set_code, str(number)]]
+                                 + [p for p in (seed.get("printings") or [])
+                                    if list(p) != [set_code, str(number)]])
     if seed is None:
         seed = (by_name.get(seed_name) or [None])[0]
     if seed is None:
@@ -224,7 +233,15 @@ def build(seed_name, set_code=None, number=None, cards=None):
     # Basic that draws cards, which is what a real list would reach for.
     if count_basics() < TARGET_BASICS:
         have = {c["name"] for _, c in pokemon}
-        deck_types = {t for _, c in pokemon for t in (c.get('types') or [])}
+        # Pick fillers against the ENERGY the deck will actually run, not
+        # against the Pokemon's own types. Those are different sets: a
+        # Dragon-typed Raging Bolt ex deck runs Lightning and Fighting
+        # Energy, and ranking fillers by "Dragon" pulled in a Ponyta whose
+        # every attack was uncastable.
+        deck_types = set(t for t, _ in attack_types_needed(
+            [c for _, c in pokemon]).most_common(2))
+        if not deck_types:
+            deck_types = {t for _, c in pokemon for t in (c.get('types') or [])}
         for filler in consistency_basics(cards, deck_types):
             if filler["name"] in have:
                 continue
@@ -297,7 +314,18 @@ def build(seed_name, set_code=None, number=None, cards=None):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    argv = sys.argv[1:]
+    args, skip = [], False
+    for i, a in enumerate(argv):
+        if skip:
+            skip = False
+            continue
+        if a == "--out":
+            skip = True            # the next token is its value, not a card
+            continue
+        if a.startswith("--"):
+            continue
+        args.append(a)
     if not args:
         print(__doc__)
         sys.exit(1)
@@ -318,9 +346,16 @@ def main():
     for w in res.warnings[:6]:
         print(f"# warning {w}")
 
-    out = next((a for a in sys.argv if a.startswith("--out=")), None)
-    if out:
-        path = out.split("=", 1)[1]
+    # Both "--out=path" and "--out path" -- the docstring showed the
+    # space form and only the "=" form worked, so the file was silently
+    # never written.
+    path = None
+    for i, a in enumerate(sys.argv):
+        if a.startswith("--out="):
+            path = a.split("=", 1)[1]
+        elif a == "--out" and i + 1 < len(sys.argv):
+            path = sys.argv[i + 1]
+    if path:
         open(path, "w").write(text + "\n")
         print(f"# written to {path}")
 

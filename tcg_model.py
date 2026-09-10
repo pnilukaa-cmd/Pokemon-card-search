@@ -67,7 +67,14 @@ def parse_decklist_entries(text):
         if tokens and tokens[-1].isdigit():
             number = tokens[-1]
             tokens = tokens[:-1]
-            if tokens and re.fullmatch(r"[A-Za-z0-9]{2,6}", tokens[-1]) and tokens[-1].isupper():
+            # PR-SV (the Scarlet & Violet promo set) is the one code in
+            # this pool with a hyphen in it. Without the hyphen here the
+            # whole line failed to split, "Raging Bolt ex PR-SV" became the
+            # card NAME, nothing resolved, and the card vanished from every
+            # count -- deckcheck reported a 12-Basic deck as having 8 and a
+            # 34.6% mulligan rate that was really 15.5%.
+            if tokens and re.fullmatch(r"[A-Za-z0-9-]{2,8}", tokens[-1]) \
+                    and tokens[-1].isupper():
                 set_code = tokens[-1]
                 tokens = tokens[:-1]
         name = " ".join(tokens).strip()

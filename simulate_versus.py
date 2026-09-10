@@ -1790,7 +1790,11 @@ def attack_rider_value(pl, opp, atk):
                 # it as a single target is what kept the AI from ever
                 # setting up its own payoff.
                 spots = ([opp.active] if opp.active else []) + list(opp.bench)
-                value += (act.amount or 0) * 10 * max(len(spots), 1)
+                # A per-target coin flip is worth its expectation, not its
+                # ceiling. Mega Zygarde ex's Nullifying Zero priced at the
+                # ceiling would be chosen over a guaranteed Knock Out.
+                odds = act.filter.get("chance_each", 1.0)
+                value += int((act.amount or 0) * 10 * max(len(spots), 1) * odds)
             else:
                 value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
         elif act.op == IR.Op.MULTIPLY_COUNTERS:
@@ -1864,6 +1868,17 @@ def conditional_ko_target(pl, opp, atk):
         pool = [p for p in pool if p is not None]
         # Mega Darkrai ex's Abyss Eye: any Special Condition on the Active
         # is the whole requirement.
+        # Team Rocket's Moltres ex discards the Active outright; Alolan
+        # Exeggutor ex Knocks Out a Basic on either side of its flip.
+        if act.filter.get("unconditional"):
+            return pool[0] if pool else None
+        if act.filter.get("basic_only"):
+            basics = [p for p in pool
+                      if (opp.POKEMON.get(p.name) or {}).get("stage") == "Basic"]
+            if basics:
+                return max(basics, key=lambda p:
+                           (opp.POKEMON.get(p.name) or {}).get("hp") or 0)
+            continue
         if act.filter.get("needs_special_condition"):
             for p in pool:
                 if getattr(p, "conditions", None):

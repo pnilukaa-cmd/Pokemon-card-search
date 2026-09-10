@@ -1002,9 +1002,54 @@ def _r(m, text):
                    {"condition": m.group(2).lower()})]
 
 
-@rule("devolve", r"devolve 1 of your opponent'?s evolved pok[eé]mon")
+@rule("devolve", r"devolve (1|each) of your opponent'?s evolved pok[eé]mon")
 def _r(m, text):
+    """Espeon ex's Amazez devolves the WHOLE board, not one Pokemon --
+    the "each" wording had no rule and the attack compiled to nothing."""
+    if m.group(1).lower() == "each":
+        return [Action(Op.DEVOLVE, 99, Target.OPP_ALL)]
     return [Action(Op.DEVOLVE, 1, Target.OPP_ANY)]
+
+
+@rule("ko_active_outright",
+      r"discard your opponent'?s active pok[eé]mon and all attached cards")
+def _r(m, text):
+    """Team Rocket's Moltres ex's Evil Incineration removes the Active
+    outright. Scored on damage it read as a 0-damage attack."""
+    return [Action(Op.CONDITIONAL_KO, 0, Target.OPP_ACTIVE,
+                   {"unconditional": True})]
+
+
+@rule("flip_ko_a_basic",
+      r"flip a coin\. if heads, knock out your opponent'?s active basic "
+      r"pok[eé]mon")
+def _r(m, text):
+    """Alolan Exeggutor ex's Swinging Sphene. Either side of the flip is a
+    Knock Out -- heads the Active, tails a Benched one -- so it is a
+    guaranteed Knock Out on a Basic, which is not a 0-damage attack."""
+    return [Action(Op.CONDITIONAL_KO, 0, Target.OPP_ANY,
+                   {"basic_only": True})]
+
+
+@rule("spread_choose_n_times",
+      r"choose 1 of your opponent'?s pok[eé]mon (\d+) times.*?"
+      r"do (\d+) damage to it")
+def _r(m, text):
+    """Arboliva ex's Oil Salvo: six separate 20s aimed anywhere. Worth 120
+    spread across the board, and it compiled to nothing."""
+    return [Action(Op.PLACE_COUNTERS, int(m.group(2)) // 10, Target.OPP_ANY,
+                   {"targets": int(m.group(1))})]
+
+
+@rule("flip_per_opponent_pokemon",
+      r"for each of your opponent'?s pok[eé]mon, flip a coin\. if heads, "
+      r"this attack does (\d+) damage to that pok[eé]mon")
+def _r(m, text):
+    """Mega Zygarde ex's Nullifying Zero: a coin per opposing Pokemon, 150
+    on each heads. Expected value across a full board is the biggest
+    single attack in the pool, and it scored zero."""
+    return [Action(Op.PLACE_COUNTERS, int(m.group(1)) // 10, Target.OPP_ALL,
+                   {"chance_each": 0.5})]
 
 
 @rule("each_player_draws", r"each player draws? (?:a card|(\d+) cards?)")
