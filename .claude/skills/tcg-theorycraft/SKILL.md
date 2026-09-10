@@ -691,6 +691,34 @@ never reaching the board, the A/B measured the deck's card count, not the
 card. Three lines of instrumentation, and it inverted a conclusion that
 four gauntlet runs had agreed on.
 
+### 11d. Sweep a whole card CLASS, not one card at a time
+
+Auditing all 195 ex / Mega ex in one pass found bugs that a per-deck check
+had missed for months, because the failures cluster by TEXT SHAPE rather
+than by card. `audit_ex.py` asks whether text compiles; `audit_ex_damage.py`
+evaluates every attack on one fixed board and prints the number, which is
+the question that matters -- the IR saying "no rule matched" does not mean
+damage is lost, because `attack_damage()` is a separate path. Run both, then
+build a deck for every member of the class and play it.
+
+Three failure modes, in order of how badly they mislead:
+
+- **Silently wrong numbers.** Worse than a gap, because nothing reports
+  them. Typed Energy scalers counted every Energy rather than the type
+  named (Kingdra ex read 250 where the card says 150) and the error always
+  points the same way: it inflates any deck running a second Energy type.
+- **Scored as zero.** Eleven attacks buy damage by discarding Energy at
+  attack time; all eleven scored their printed base, so Raging Bolt ex was
+  a 70-damage attacker instead of a 420-damage one.
+- **Never chosen.** An attack with no price in `attack_rider_value` scores
+  0 and the AI never picks it, so it may as well not be in the deck.
+  Espeon ex's Amazez was never used once in 120 games.
+
+The check that catches the third kind: for every card in the class, ask
+whether `attack_value` is ever positive on a realistic board, then PLAY the
+deck and count how often the card actually swings. A card that never swings
+is inert, and inert is a bug even when every unit test passes.
+
 Known open gap as of this writing: **`lock` fires on 0 of 154 card
 effects** — "can't retreat", "can't attack next turn" and friends are
 compiled and ignored, which undervalues every control deck in the folder.

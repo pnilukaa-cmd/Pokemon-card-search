@@ -338,7 +338,18 @@ def build(seed_name, set_code=None, number=None, cards=None):
     if uncovered:
         prism = by_setnum.get(("Prism Energy", "ASC", "216"))
         if prism is not None:
-            take = min(MAX_COPIES, len(uncovered) + 2)
+            # If a SINGLE attack cost names three or more different types,
+            # the deck needs Prism at full count: each copy satisfies
+            # exactly one of the requirements, so three Basic colours plus
+            # three Prism still misses about half the time. Eevee ex's
+            # Coruscating Quartz (Fire/Water/Lightning) was payable on 14
+            # of the 28 turns it stood Active holding three Energy.
+            widest = max((len({t for t in (a.get("cost") or [])
+                               if t != "Colorless"})
+                          for _, c in pokemon
+                          for a in (c.get("attacks") or [])), default=0)
+            take = MAX_COPIES if widest >= 3 else min(MAX_COPIES,
+                                                      len(uncovered) + 2)
             energy[0] = (max(1, energy[0][0] - take), energy[0][1])
             energy.append((take, "Prism Energy ASC 216"))
             energy_total = sum(n for n, _ in energy)
@@ -348,7 +359,16 @@ def build(seed_name, set_code=None, number=None, cards=None):
     # Trainers fill whatever is left.
     room = DECK_SIZE - poke_count - energy_total
     trainers = []
-    for n, name in SHELL:
+    # A Stage 2 deck without Rare Candy is structurally too slow: the line
+    # takes two evolution turns from a Basic that had to survive one first.
+    # None of the 200 decks this builder produced ran a single copy, and 42
+    # of the ex seeds are Stage 2 -- Empoleon ex never attacked once in 30
+    # games. Rare Candy goes in FIRST, ahead of the generic shell, so it
+    # cannot be squeezed out by the room calculation.
+    shell = list(SHELL)
+    if any(M.stage_of(c) == "Stage 2" for _, c in pokemon):
+        shell.insert(0, (4, "Rare Candy"))
+    for n, name in shell:
         if room <= 0:
             break
         card = (by_name.get(name) or [None])[0]
