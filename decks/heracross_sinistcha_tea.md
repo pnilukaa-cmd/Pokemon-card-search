@@ -1,5 +1,17 @@
 # Mega Heracross ex / Sinistcha — Spill the Tea
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **52.4% mean · 50.8% median · 17 of 34 winning matchups · rank 17 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `lurantis_heal_punish` 28%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 > **CORRECTION (re-measured after the ex audit).** The numbers first
 > recorded here — 66.4% mean, 32 of 34 winning — were measured on an
 > engine in which **`Spill the Tea` never paid its cost.** The attack

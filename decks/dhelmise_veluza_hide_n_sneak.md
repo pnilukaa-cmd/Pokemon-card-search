@@ -1,5 +1,17 @@
 # Dhelmise / Veluza — Hide 'n' Sneak fuel + Food Prep
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **56.9% mean · 54.0% median · 24 of 34 winning matchups · rank 8 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 88% · worst `lurantis_heal_punish` 34%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Food Prep without Crabominable, paired with the Hide 'n' Sneak discard
 package. Mono-Psychic, and the whole deck runs on **filling your own
 discard pile on purpose**.

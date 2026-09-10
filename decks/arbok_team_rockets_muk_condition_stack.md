@@ -1,5 +1,17 @@
 # Arbok / Team Rocket's Muk Condition Stack (Pure Darkness)
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **55.6% mean · 53.0% median · 19 of 34 winning matchups · rank 10 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 92% · worst `lurantis_heal_punish` 27%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Replaces an earlier Fire/Darkness draft (Salazzle ex + Team Rocket's Muk)
 with an all-Darkness version once research turned up a strictly stronger,
 type-clean core: `Arbok` alone hits the 3-condition, 300-damage ceiling

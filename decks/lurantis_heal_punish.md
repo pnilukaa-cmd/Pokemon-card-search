@@ -1,5 +1,17 @@
 # Lurantis ex Heal-Punish
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **73.1% mean · 72.5% median · 32 of 34 winning matchups · rank 1 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 98% · worst `panic_poison_paralysis` 48%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 **The question this deck answers**: can you build a deck that just out-heals the meta?
 
 Short answer, honestly: **no, not as pure stall.** Prize cards are the actual win condition

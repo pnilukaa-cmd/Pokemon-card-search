@@ -1,5 +1,17 @@
 # Decidueye ex / Vivillon — "exactly 4" cost lock
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **51.2% mean · 49.5% median · 16 of 34 winning matchups · rank 20 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 86% · worst `lurantis_heal_punish` 18%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 A deck whose entire job is to keep the opponent's hand at exactly four
 cards, because that is the switch on `Decidueye ex`'s Ability.
 

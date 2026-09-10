@@ -1,5 +1,17 @@
 # Mega Lopunny ex / Dusknoir — snipe and finish
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **50.0% mean · 47.5% median · 15 of 34 winning matchups · rank 22 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 82% · worst `ns_zoroark_night_joker_toolbox` 29%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Analysis of a user-supplied list, plus the three-card change that took it
 from **57.1%** to **64.9%** mean win rate across the full field.
 

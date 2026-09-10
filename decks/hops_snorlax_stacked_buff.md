@@ -1,5 +1,17 @@
 # Hop's Snorlax Stacked-Buff
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **42.7% mean · 40.5% median · 8 of 34 winning matchups · rank 30 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 88% · worst `panic_poison_paralysis` 14%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Built to match a real deck the user lost to fast — "two Snorlax, a
 Phantump, and a Stadium" before they could get started. That's the
 Hop's-named-family archetype already logged in

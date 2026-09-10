@@ -1,5 +1,17 @@
 # Orthworm ex Metal Retaliation
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **52.1% mean · 51.2% median · 19 of 34 winning matchups · rank 19 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 92% · worst `scovillain_salazzle_spicy_rage` 20%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 A beefy-attacker deck built around the `counterattack_on_hit` mechanic family
 (17 real cards in the pool: Iron Jugulis, Mega Slowbro ex, Mega Scrafty ex,
 Bouffalant, Spiky Energy, and others) — cards that punish the opponent for

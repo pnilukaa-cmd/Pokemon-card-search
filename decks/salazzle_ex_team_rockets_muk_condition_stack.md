@@ -1,5 +1,17 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **30.2% mean · 27.2% median · 4 of 34 winning matchups · rank 32 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 58% · worst `lurantis_heal_punish` 16%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Built from a card-name lookup ("Slazzle ex" -> Salazzle ex), then a search
 for a real synergy piece rather than just packing the best individual
 Salazzle cards. Salazzle ex's own attack applies two Special Conditions in

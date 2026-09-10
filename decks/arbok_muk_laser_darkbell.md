@@ -1,5 +1,17 @@
 # Arbok / Team Rocket's Muk — Dangerous Laser + Dark Bell variant
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **56.1% mean · 55.5% median · 23 of 34 winning matchups · rank 9 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 92% · worst `lurantis_heal_punish` 24%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 The other of two sibling variants branching from
 `arbok_team_rockets_muk_condition_stack.md` — see
 `arbok_muk_trolley_darkbell.md` for the Precious Trolley branch. Same

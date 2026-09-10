@@ -1,5 +1,17 @@
 # Mega Chandelure ex — retreat tax
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **55.3% mean · 55.0% median · 20 of 34 winning matchups · rank 12 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 86% · worst `panic_poison_paralysis` 28%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 > **Superseded for the deck it was derived from.** This file read the
 > retreat tax as a *damage* scaler. The user's actual plan was to use it
 > as a **lock** — trap a harmless Pokémon Active and win by decking the

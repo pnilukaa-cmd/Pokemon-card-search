@@ -1,5 +1,17 @@
 # Panic Poison (Ekans/Arbok + Team Rocket's Muk)
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **72.1% mean · 71.2% median · 33 of 34 winning matchups · rank 2 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 98% · worst `toxic_slumber_vileplume_ex` 42%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 One of five decks built around the same-turn Special Condition stacking research in this repo
 (see `combo_patterns.md` Pattern 5 and its "persistent vs. action-denial" refinement). This is
 the most direct execution of that pattern: a Basic Pokémon line that guarantees a

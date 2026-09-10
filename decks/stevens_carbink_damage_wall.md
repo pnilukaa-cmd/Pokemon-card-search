@@ -1,5 +1,17 @@
 # Steven's Carbink Damage Wall
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **48.9% mean · 46.5% median · 15 of 34 winning matchups · rank 24 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 80% · worst `lurantis_heal_punish` 28%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 The mirror image of the Hop's Snorlax stacked-buff deck: instead of
 stacking +30 damage-dealt bonuses onto your own attacks, this stacks a
 flat -30 damage-*taken* reduction across your whole team. Found while

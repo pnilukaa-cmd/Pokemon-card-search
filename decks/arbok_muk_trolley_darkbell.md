@@ -1,5 +1,17 @@
 # Arbok / Team Rocket's Muk — Precious Trolley + Dark Bell variant
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **54.0% mean · 52.5% median · 21 of 34 winning matchups · rank 15 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 91% · worst `toxic_slumber_vileplume_ex` 21%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 One of two sibling variants branching from `arbok_team_rockets_muk_condition_stack.md`
 after adding `Dark Bell` and testing the ACE SPEC slot (`Precious Trolley`
 vs `Dangerous Laser`) head to head. This is the **Trolley** branch — see

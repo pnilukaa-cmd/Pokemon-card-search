@@ -1,5 +1,17 @@
 # Krookodile ex / Relicanth Hand Disruption
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **55.4% mean · 55.2% median · 23 of 34 winning matchups · rank 11 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 92% · worst `lurantis_heal_punish` 14%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Built around a specific request: a Basic-or-Stage-1 attack that strips the
 opponent's hand down, paired with a Stage 2/ex-level HP shell to survive
 long enough for the disruption to matter. Krokorok's `Tighten Up` (a

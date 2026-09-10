@@ -1,5 +1,17 @@
 # Water Aggro
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **58.7% mean · 55.0% median · 25 of 34 winning matchups · rank 6 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 94% · worst `panic_poison_paralysis` 30%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 > **Decklist corrected.** Every line in this list originally carried a bare card name with no `SET NUM`. The simulator resolves a bare name to the *first* printing in the pool, which for `Palafin` is **TEF 49** — a printing with no `Zero to Hero` Ability. `Palafin ex`'s rule is "put this Pokémon into play **only** with the effect of Palafin's Zero to Hero", so the deck's 250-damage finisher had no legal route into play in any game this deck ever played. The line is now pinned to `Finizen TWM 59 / Palafin TWM 60 / Palafin ex TWM 61` and every card carries an exact set number.
 
 

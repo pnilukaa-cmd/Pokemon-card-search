@@ -1,5 +1,17 @@
 # Team Rocket's Wobbuffet / Orbeetle Damage-Laundering Control
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **19.4% mean · 15.5% median · 1 of 34 winning matchups · rank 34 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 66% · worst `panic_poison_paralysis` 2%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 A different shape than every other deck built this session: instead of
 applying Special Conditions or scaling off a count, this one turns
 **damage your own Pokémon take** into offense. Found while ranking the

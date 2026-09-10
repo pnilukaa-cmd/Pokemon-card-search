@@ -1,5 +1,17 @@
 # Eerie Inferno (Vulpix / Ninetales + Numel + Magmar / Magmortar)
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **50.0% mean · 48.5% median · 15 of 34 winning matchups · rank 23 of 35**
+>
+> Best `feraligatr_munkidori_damage_transfer` 78% · worst `water_aggro` 22%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 Fifth of five decks built around the Special Condition stacking research in this repo (see
 `combo_patterns.md` Pattern 5). Unlike the four Grass/Darkness decks above, this one pairs a
 guaranteed condition-applicator with a card that mechanically *amplifies* one of the two

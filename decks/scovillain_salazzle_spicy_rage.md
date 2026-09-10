@@ -1,5 +1,17 @@
 # Scovillain ex / Salazzle ex — Spicy Rage
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **53.8% mean · 52.2% median · 21 of 34 winning matchups · rank 16 of 35**
+>
+> Best `orthworm_ex_metal_retaliation` 80% · worst `water_aggro` 25%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 `Scovillain ex` **SSP 216**, Stage 1 from Capsakid, **260 HP**, Fire.
 `F``F` **Spicy Rage 10+ — 70 more damage for each damage counter on this
 Pokémon.**

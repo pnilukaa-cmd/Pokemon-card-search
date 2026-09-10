@@ -1,5 +1,17 @@
 # Mega Scrafty ex Darkness Tank — Playbook
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **52.4% mean · 51.2% median · 18 of 34 winning matchups · rank 18 of 35**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `lurantis_heal_punish` 20%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
+
+
 The final landing point of a long iteration chain this session: started as
 a Krookodile ex/Relicanth hand-disruption deck, pivoted through a
 Koffing/Weezing bench-refill package, settled on Scraggy/Mega Scrafty ex
