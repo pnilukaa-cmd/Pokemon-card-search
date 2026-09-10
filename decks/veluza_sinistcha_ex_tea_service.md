@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-10
-> **45.1% mean · 41.5% median · 10 of 34 winning matchups · rank 26 of 35**
+> **45.0% mean · 42.5% median · 14 of 37 winning matchups · rank 28 of 38**
 >
-> Best `feraligatr_munkidori_damage_transfer` 79% · worst `panic_poison_paralysis` 21%.
+> Best `feraligatr_munkidori_damage_transfer` 82% · worst `panic_poison_paralysis` 20%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
 <!-- field-results -->
+
+
 
 
 

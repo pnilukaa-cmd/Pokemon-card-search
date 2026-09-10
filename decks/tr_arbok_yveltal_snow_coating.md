@@ -1,5 +1,15 @@
 # Team Rocket's Arbok / Yveltal / N's Vanilluxe — the Snow Coating deck
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **43.2% mean · 44.0% median · 11 of 37 winning matchups · rank 31 of 38**
+>
+> Best `feraligatr_munkidori_damage_transfer` 92% · worst `lurantis_heal_punish` 14%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
 **50.8% mean · 50.5% median · 18 of 35 winning matchups**, and 50.7% on an
 independent seed.
 

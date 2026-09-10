@@ -1,87 +1,95 @@
 # Field results — every deck against every other deck
 
-Full round robin over **35 decks**, **200 games** per pairing, 595 pairings, 119,000 games. Each pairing uses its own fixed seed, so a re-run of this field reproduces exactly.
+Full round robin over **38 decks**, **200 games** per pairing, 703 pairings, 140,600 games. Each pairing uses its own fixed seed, so a re-run of this field reproduces exactly.
 
-Measured 2026-09-10, after the ex audit. **These supersede every number recorded in the deck files before this date** — the audit changed damage on a large number of cards (typed Energy scalers counting the wrong Energy, discard-cost attacks that were never charged, attack gates that were never enforced), so older figures are not comparable with these or with each other.
+Measured 2026-09-10 on a rules-validated engine. **These supersede every number recorded in the deck files before this date.** The engine changed substantially in getting here: Pokémon Checkup now resolves BOTH players' Active (it resolved only one, halving every Poison and Burn and doubling how long Sleep lasted), Resistance now exists at all (369 cards carry one and it was not modelled), every coin flip is actually flipped (all 158 cards phrased "Flip a coin. If heads..." parsed as certain), typed Energy scalers count the type they name, and a long list of attack costs that were never charged now are. Older figures are not comparable with these or with each other.
 
-Three changes to the field itself: `selective_bloom_cradily` had been **excluded from every past measurement as unplayable** — the Basic count used by the gauntlet tooling required `supertype == "Pokémon"`, so `Antique Root Fossil` (an Item that plays *as* a 60 HP Basic) did not count and the deck read as having zero Basics. That check was never updated when Fossils were made playable. It measures 5th. `AAA_tr_crobat_absol_snipe` was a byte-identical duplicate of `tr_crobat_absol_bench_snipe` and had been inflating that archetype's presence in every past measurement; `veluza_sinistcha_ex_tea_service` had a deck file but no entry in the field and had never been measured at all.
+Four changes to the field itself: the two TCGplayer September 2026 Dragapult lists were added; `selective_bloom_cradily` had been **excluded from every past measurement as unplayable**, because the Basic count required `supertype == "Pokémon"` and `Antique Root Fossil` (an Item that plays *as* a 60 HP Basic) did not count; `AAA_tr_crobat_absol_snipe` was a byte-identical duplicate of `tr_crobat_absol_bench_snipe` and had been inflating that archetype's presence in every past measurement; and `veluza_sinistcha_ex_tea_service` had a deck file but no entry in the field and had never been measured at all.
+
+> **On the two meta lists.** `meta_dragapult_pure` places 17th and `meta_dragapult_dusknoir` 25th, and that is a statement about this simulator, not about the decks. Both sides here run the same greedy AI, which does not aim Phantom Dive's six counters at a prize map, does not hold a knockout back to deny Fezandipiti ex and Unfair Stamp, and does not sequence Crushing Hammer. Those are exactly the skills the article says the archetype wins on. A real list piloted by a policy that cannot pilot it is a lower bound. `AAA_tr_crobat_absol_snipe` was a byte-identical duplicate of `tr_crobat_absol_bench_snipe` and had been inflating that archetype's presence in every past measurement; `veluza_sinistcha_ex_tea_service` had a deck file but no entry in the field and had never been measured at all.
 
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
-| 1 | `lurantis_heal_punish` | **73.1%** | 72.5% | 32/34 | team_rockets_wobbuffet_orbeetle_damage_launder (98%) | panic_poison_paralysis (48%) |
-| 2 | `panic_poison_paralysis` | **72.1%** | 71.2% | 33/34 | team_rockets_wobbuffet_orbeetle_damage_launder (98%) | toxic_slumber_vileplume_ex (42%) |
-| 3 | `toxic_slumber_vileplume_ex` | **63.7%** | 63.0% | 28/34 | team_rockets_wobbuffet_orbeetle_damage_launder (94%) | eerie_inferno_ninetales_burn (41%) |
-| 4 | `team_rockets_persian_ex_attack_theft` | **63.4%** | 63.5% | 30/34 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | panic_poison_paralysis (31%) |
-| 5 | `selective_bloom_cradily` | **59.0%** | 57.2% | 24/34 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | scovillain_salazzle_spicy_rage (32%) |
-| 6 | `water_aggro` | **58.7%** | 55.0% | 25/34 | feraligatr_munkidori_damage_transfer (94%) | panic_poison_paralysis (30%) |
-| 7 | `tr_crobat_absol_bench_snipe` | **58.1%** | 58.8% | 25/34 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | panic_poison_paralysis (32%) |
-| 8 | `dhelmise_veluza_hide_n_sneak` | **56.9%** | 54.0% | 24/34 | feraligatr_munkidori_damage_transfer (88%) | lurantis_heal_punish (34%) |
-| 9 | `arbok_muk_laser_darkbell` | **56.1%** | 55.5% | 23/34 | feraligatr_munkidori_damage_transfer (92%) | lurantis_heal_punish (24%) |
-| 10 | `arbok_team_rockets_muk_condition_stack` | **55.6%** | 53.0% | 19/34 | feraligatr_munkidori_damage_transfer (92%) | lurantis_heal_punish (27%) |
-| 11 | `krookodile_ex_relicanth_hand_disruption` | **55.4%** | 55.2% | 23/34 | team_rockets_wobbuffet_orbeetle_damage_launder (92%) | lurantis_heal_punish (14%) |
-| 12 | `mega_chandelure_ex_retreat_tax` | **55.3%** | 55.0% | 20/34 | feraligatr_munkidori_damage_transfer (86%) | panic_poison_paralysis (28%) |
-| 13 | `kangaskhan_tyrantrum_flip_mill` | **55.3%** | 53.0% | 23/34 | feraligatr_munkidori_damage_transfer (83%) | panic_poison_paralysis (36%) |
-| 14 | `kyurem_vanilluxe_blizzard` | **54.6%** | 50.8% | 18/34 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | panic_poison_paralysis (27%) |
-| 15 | `arbok_muk_trolley_darkbell` | **54.0%** | 52.5% | 21/34 | team_rockets_wobbuffet_orbeetle_damage_launder (91%) | toxic_slumber_vileplume_ex (21%) |
-| 16 | `scovillain_salazzle_spicy_rage` | **53.8%** | 52.2% | 21/34 | orthworm_ex_metal_retaliation (80%) | water_aggro (25%) |
-| 17 | `heracross_sinistcha_tea` | **52.4%** | 50.8% | 17/34 | team_rockets_wobbuffet_orbeetle_damage_launder (87%) | lurantis_heal_punish (28%) |
-| 18 | `mega_scrafty_ex_darkness_tank` | **52.4%** | 51.2% | 18/34 | team_rockets_wobbuffet_orbeetle_damage_launder (87%) | lurantis_heal_punish (20%) |
-| 19 | `orthworm_ex_metal_retaliation` | **52.1%** | 51.2% | 19/34 | team_rockets_wobbuffet_orbeetle_damage_launder (92%) | scovillain_salazzle_spicy_rage (20%) |
-| 20 | `decidueye_ex_judge_sniper_lock` | **51.2%** | 49.5% | 16/34 | feraligatr_munkidori_damage_transfer (86%) | lurantis_heal_punish (18%) |
-| 21 | `team_rockets_koffing_weezing_bench_swarm` | **51.0%** | 51.8% | 18/34 | feraligatr_munkidori_damage_transfer (90%) | toxic_slumber_vileplume_ex (16%) |
-| 22 | `mega_lopunny_dusknoir_snipe_finisher` | **50.0%** | 47.5% | 15/34 | feraligatr_munkidori_damage_transfer (82%) | ns_zoroark_night_joker_toolbox (29%) |
-| 23 | `eerie_inferno_ninetales_burn` | **50.0%** | 48.5% | 15/34 | feraligatr_munkidori_damage_transfer (78%) | water_aggro (22%) |
-| 24 | `stevens_carbink_damage_wall` | **48.9%** | 46.5% | 15/34 | feraligatr_munkidori_damage_transfer (80%) | lurantis_heal_punish (28%) |
-| 25 | `ns_zoroark_night_joker_toolbox` | **45.6%** | 45.8% | 9/34 | static_venom_drapion (80%) | arbok_muk_laser_darkbell (22%) |
-| 26 | `veluza_sinistcha_ex_tea_service` | **45.1%** | 41.5% | 10/34 | feraligatr_munkidori_damage_transfer (79%) | panic_poison_paralysis (21%) |
-| 27 | `team_rockets_spidops_swarm` | **44.9%** | 41.2% | 11/34 | team_rockets_wobbuffet_orbeetle_damage_launder (85%) | lurantis_heal_punish (18%) |
-| 28 | `chandelure_centiskorch_deck_out` | **43.1%** | 41.5% | 9/34 | salazzle_ex_team_rockets_muk_condition_stack (79%) | lurantis_heal_punish (16%) |
-| 29 | `darkness_mill_hand_lock` | **42.8%** | 39.8% | 8/34 | chandelure_centiskorch_deck_out (78%) | lurantis_heal_punish (10%) |
-| 30 | `hops_snorlax_stacked_buff` | **42.7%** | 40.5% | 8/34 | feraligatr_munkidori_damage_transfer (88%) | panic_poison_paralysis (14%) |
-| 31 | `crabominable_veluza_food_prep` | **35.5%** | 34.0% | 4/34 | feraligatr_munkidori_damage_transfer (66%) | panic_poison_paralysis (12%) |
-| 32 | `salazzle_ex_team_rockets_muk_condition_stack` | **30.2%** | 27.2% | 4/34 | feraligatr_munkidori_damage_transfer (58%) | lurantis_heal_punish (16%) |
-| 33 | `static_venom_drapion` | **28.7%** | 26.8% | 3/34 | team_rockets_wobbuffet_orbeetle_damage_launder (68%) | lurantis_heal_punish (14%) |
-| 34 | `team_rockets_wobbuffet_orbeetle_damage_launder` | **19.4%** | 15.5% | 1/34 | feraligatr_munkidori_damage_transfer (66%) | panic_poison_paralysis (2%) |
-| 35 | `feraligatr_munkidori_damage_transfer` | **18.9%** | 17.2% | 0/34 | salazzle_ex_team_rockets_muk_condition_stack (42%) | lurantis_heal_punish (4%) |
+| 1 | `panic_poison_paralysis` | **73.8%** | 73.0% | 36/37 | feraligatr_munkidori_damage_transfer (97%) | team_rockets_persian_ex_attack_theft (50%) |
+| 2 | `lurantis_heal_punish` | **72.7%** | 73.0% | 35/37 | team_rockets_wobbuffet_orbeetle_damage_launder (97%) | scovillain_salazzle_spicy_rage (39%) |
+| 3 | `team_rockets_persian_ex_attack_theft` | **71.0%** | 70.0% | 35/37 | team_rockets_wobbuffet_orbeetle_damage_launder (96%) | lurantis_heal_punish (50%) |
+| 4 | `toxic_slumber_vileplume_ex` | **61.7%** | 59.5% | 30/37 | feraligatr_munkidori_damage_transfer (91%) | team_rockets_persian_ex_attack_theft (36%) |
+| 5 | `water_aggro` | **60.5%** | 56.0% | 32/37 | feraligatr_munkidori_damage_transfer (92%) | team_rockets_persian_ex_attack_theft (30%) |
+| 6 | `scovillain_salazzle_spicy_rage` | **58.9%** | 61.0% | 30/37 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | panic_poison_paralysis (32%) |
+| 7 | `arbok_muk_laser_darkbell` | **57.7%** | 56.0% | 27/37 | team_rockets_wobbuffet_orbeetle_damage_launder (97%) | toxic_slumber_vileplume_ex (26%) |
+| 8 | `tr_crobat_absol_bench_snipe` | **57.1%** | 55.5% | 26/37 | team_rockets_wobbuffet_orbeetle_damage_launder (95%) | lurantis_heal_punish (24%) |
+| 9 | `arbok_team_rockets_muk_condition_stack` | **56.9%** | 54.0% | 24/37 | feraligatr_munkidori_damage_transfer (94%) | lurantis_heal_punish (28%) |
+| 10 | `dhelmise_veluza_hide_n_sneak` | **56.7%** | 56.0% | 24/37 | feraligatr_munkidori_damage_transfer (86%) | team_rockets_persian_ex_attack_theft (35%) |
+| 11 | `arbok_muk_trolley_darkbell` | **56.0%** | 57.5% | 24/37 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | toxic_slumber_vileplume_ex (25%) |
+| 12 | `kyurem_vanilluxe_blizzard` | **56.0%** | 53.0% | 24/37 | feraligatr_munkidori_damage_transfer (84%) | panic_poison_paralysis (27%) |
+| 13 | `mega_chandelure_ex_retreat_tax` | **55.7%** | 56.0% | 25/37 | feraligatr_munkidori_damage_transfer (86%) | panic_poison_paralysis (22%) |
+| 14 | `krookodile_ex_relicanth_hand_disruption` | **55.2%** | 55.5% | 27/37 | team_rockets_wobbuffet_orbeetle_damage_launder (88%) | lurantis_heal_punish (22%) |
+| 15 | `selective_bloom_cradily` | **54.8%** | 52.0% | 20/37 | darkness_mill_hand_lock (88%) | scovillain_salazzle_spicy_rage (30%) |
+| 16 | `orthworm_ex_metal_retaliation` | **54.7%** | 51.5% | 19/37 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | scovillain_salazzle_spicy_rage (20%) |
+| 17 | `meta_dragapult_pure` | **52.8%** | 50.5% | 19/37 | static_venom_drapion (80%) | panic_poison_paralysis (30%) |
+| 18 | `heracross_sinistcha_tea` | **51.4%** | 50.0% | 18/37 | team_rockets_wobbuffet_orbeetle_damage_launder (86%) | lurantis_heal_punish (26%) |
+| 19 | `stevens_carbink_damage_wall` | **51.4%** | 50.0% | 18/37 | feraligatr_munkidori_damage_transfer (74%) | panic_poison_paralysis (31%) |
+| 20 | `team_rockets_koffing_weezing_bench_swarm` | **50.5%** | 50.0% | 17/37 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | toxic_slumber_vileplume_ex (11%) |
+| 21 | `decidueye_ex_judge_sniper_lock` | **49.8%** | 49.5% | 17/37 | feraligatr_munkidori_damage_transfer (86%) | lurantis_heal_punish (16%) |
+| 22 | `kangaskhan_tyrantrum_flip_mill` | **49.8%** | 48.0% | 15/37 | crabominable_veluza_food_prep (76%) | team_rockets_persian_ex_attack_theft (20%) |
+| 23 | `mega_lopunny_dusknoir_snipe_finisher` | **49.4%** | 48.0% | 15/37 | feraligatr_munkidori_damage_transfer (84%) | panic_poison_paralysis (27%) |
+| 24 | `eerie_inferno_ninetales_burn` | **49.0%** | 47.5% | 18/37 | feraligatr_munkidori_damage_transfer (84%) | water_aggro (21%) |
+| 25 | `meta_dragapult_dusknoir` | **48.9%** | 48.0% | 16/37 | team_rockets_wobbuffet_orbeetle_damage_launder (81%) | panic_poison_paralysis (28%) |
+| 26 | `ns_zoroark_night_joker_toolbox` | **46.7%** | 46.0% | 11/37 | static_venom_drapion (83%) | lurantis_heal_punish (27%) |
+| 27 | `mega_scrafty_ex_darkness_tank` | **46.3%** | 46.0% | 11/37 | team_rockets_wobbuffet_orbeetle_damage_launder (86%) | lurantis_heal_punish (14%) |
+| 28 | `veluza_sinistcha_ex_tea_service` | **45.0%** | 42.5% | 14/37 | feraligatr_munkidori_damage_transfer (82%) | panic_poison_paralysis (20%) |
+| 29 | `team_rockets_spidops_swarm` | **44.1%** | 40.5% | 12/37 | feraligatr_munkidori_damage_transfer (84%) | lurantis_heal_punish (14%) |
+| 30 | `hops_snorlax_stacked_buff` | **43.5%** | 40.0% | 9/37 | feraligatr_munkidori_damage_transfer (92%) | panic_poison_paralysis (10%) |
+| 31 | `tr_arbok_yveltal_snow_coating` | **43.2%** | 44.0% | 11/37 | feraligatr_munkidori_damage_transfer (92%) | lurantis_heal_punish (14%) |
+| 32 | `darkness_mill_hand_lock` | **41.5%** | 36.0% | 10/37 | feraligatr_munkidori_damage_transfer (85%) | lurantis_heal_punish (9%) |
+| 33 | `chandelure_centiskorch_deck_out` | **41.3%** | 40.5% | 10/37 | salazzle_ex_team_rockets_muk_condition_stack (71%) | lurantis_heal_punish (11%) |
+| 34 | `crabominable_veluza_food_prep` | **36.3%** | 34.5% | 3/37 | feraligatr_munkidori_damage_transfer (72%) | panic_poison_paralysis (18%) |
+| 35 | `salazzle_ex_team_rockets_muk_condition_stack` | **31.0%** | 29.0% | 3/37 | ns_zoroark_night_joker_toolbox (57%) | lurantis_heal_punish (14%) |
+| 36 | `static_venom_drapion` | **30.0%** | 27.5% | 3/37 | team_rockets_wobbuffet_orbeetle_damage_launder (68%) | panic_poison_paralysis (11%) |
+| 37 | `team_rockets_wobbuffet_orbeetle_damage_launder` | **20.9%** | 18.0% | 2/37 | feraligatr_munkidori_damage_transfer (80%) | lurantis_heal_punish (3%) |
+| 38 | `feraligatr_munkidori_damage_transfer` | **18.1%** | 16.0% | 0/37 | salazzle_ex_team_rockets_muk_condition_stack (45%) | panic_poison_paralysis (3%) |
 
 ## Full matrix
 
 Row's win rate against column.
 
-| |lurantis_heal_|panic_poison_p|toxic_slumber_|team_rockets_p|selective_bloo|water_aggro|tr_crobat_abso|dhelmise_veluz|arbok_muk_lase|arbok_team_roc|krookodile_ex_|mega_chandelur|kangaskhan_tyr|kyurem_vanillu|arbok_muk_trol|scovillain_sal|heracross_sini|mega_scrafty_e|orthworm_ex_me|decidueye_ex_j|team_rockets_k|mega_lopunny_d|eerie_inferno_|stevens_carbin|ns_zoroark_nig|veluza_sinistc|team_rockets_s|chandelure_cen|darkness_mill_|hops_snorlax_s|crabominable_v|salazzle_ex_te|static_venom_d|team_rockets_w|feraligatr_mun|
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **lurantis_heal_** |—|48|57|64|64|68|64|66|76|73|86|52|60|58|70|48|72|80|75|82|84|71|72|72|77|69|82|84|90|84|72|84|86|98|96|
-| **panic_poison_p** |52|—|42|69|62|70|68|62|73|72|60|72|64|73|72|70|70|62|71|74|74|64|72|68|69|79|78|70|78|86|88|84|86|98|95|
-| **toxic_slumber_** |43|58|—|45|50|60|64|50|70|68|66|53|56|62|79|46|66|62|64|56|84|64|41|68|60|62|59|62|66|72|69|80|80|94|87|
-| **team_rockets_p** |36|31|55|—|55|54|51|54|52|50|62|52|60|53|50|56|64|66|72|75|53|68|61|66|76|68|74|73|76|75|74|80|82|90|90|
-| **selective_bloo** |36|38|50|45|—|47|58|35|67|65|68|58|41|51|70|32|46|73|58|56|76|52|56|56|34|56|57|73|80|74|60|72|80|93|89|
-| **water_aggro** |32|30|40|46|53|—|54|43|48|52|48|46|47|55|55|75|52|51|62|57|58|53|78|58|54|66|61|74|60|68|74|79|80|92|94|
-| **tr_crobat_abso** |36|32|36|49|42|46|—|47|62|60|50|63|48|52|54|56|50|50|52|60|58|62|56|60|66|62|67|70|63|66|66|78|78|93|88|
-| **dhelmise_veluz** |34|38|50|46|65|57|53|—|42|52|40|51|52|49|42|59|52|55|48|62|48|56|64|46|53|64|74|64|60|68|72|66|81|84|88|
-| **arbok_muk_lase** |24|27|30|48|33|52|38|58|—|55|46|64|55|58|52|58|51|44|46|52|47|49|57|58|78|64|69|56|58|70|74|78|77|90|92|
-| **arbok_team_roc** |27|28|32|50|35|48|40|48|45|—|40|64|56|63|48|48|51|38|50|58|44|55|60|50|72|67|69|56|64|67|76|80|76|92|92|
-| **krookodile_ex_** |14|40|34|38|32|52|50|60|54|60|—|53|50|50|54|48|46|52|62|38|66|54|56|56|61|60|58|62|62|64|70|78|74|92|86|
-| **mega_chandelur** |48|28|47|48|42|54|37|49|36|36|47|—|58|62|39|63|60|48|56|76|48|54|54|60|44|64|64|64|62|60|67|72|64|84|86|
-| **kangaskhan_tyr** |40|36|44|40|59|53|52|48|45|44|50|42|—|52|50|54|58|50|62|53|40|58|56|58|52|64|62|42|56|70|78|74|74|82|83|
-| **kyurem_vanillu** |42|27|38|47|49|45|48|51|42|37|50|38|48|—|47|69|66|47|42|48|46|66|66|52|54|62|60|64|61|64|66|72|72|90|78|
-| **arbok_muk_trol** |30|28|21|50|30|45|46|58|48|52|46|61|50|53|—|52|43|42|46|54|46|45|53|55|73|62|64|57|58|64|74|78|74|91|87|
-| **scovillain_sal** |52|30|54|44|68|25|44|41|42|52|52|37|46|31|48|—|68|53|80|52|52|69|46|61|62|58|75|41|54|58|47|72|78|73|67|
-| **heracross_sini** |28|30|34|36|54|48|50|48|49|49|54|40|42|34|57|32|—|62|50|46|62|54|40|48|52|63|62|55|76|54|66|70|73|87|78|
-| **mega_scrafty_e** |20|38|38|34|27|49|50|45|56|62|48|52|50|53|58|47|38|—|50|40|56|42|60|60|48|51|52|58|61|60|63|76|72|87|82|
-| **orthworm_ex_me** |25|29|36|28|42|38|48|52|54|50|38|44|38|58|54|20|50|50|—|39|66|46|50|60|52|53|65|62|56|78|70|70|75|92|79|
-| **decidueye_ex_j** |18|26|44|25|44|43|40|38|48|42|62|24|47|52|46|48|54|60|61|—|54|50|44|50|64|52|48|50|76|55|64|74|72|82|86|
-| **team_rockets_k** |16|26|16|47|24|42|42|52|53|56|34|52|60|54|54|48|38|44|34|46|—|52|45|46|59|74|54|63|45|56|80|72|71|90|90|
-| **mega_lopunny_d** |29|36|36|32|48|47|38|44|51|45|46|46|42|34|55|31|46|58|54|50|48|—|60|48|29|45|58|67|62|58|60|69|70|78|82|
-| **eerie_inferno_** |28|28|59|39|44|22|44|36|43|40|44|46|44|34|47|54|60|40|50|56|55|40|—|68|50|40|61|60|58|58|57|73|71|72|78|
-| **stevens_carbin** |28|32|32|34|44|42|40|54|42|50|44|40|42|48|45|39|52|40|40|50|54|52|32|—|58|64|50|40|51|60|73|65|72|72|80|
-| **ns_zoroark_nig** |23|31|40|24|66|46|34|47|22|28|39|56|48|46|27|38|48|52|48|36|41|71|50|42|—|50|46|44|59|42|58|43|80|60|66|
-| **veluza_sinistc** |31|21|38|32|44|34|38|36|36|33|40|36|36|38|38|42|37|49|47|48|26|55|60|36|50|—|50|50|66|45|59|52|78|73|79|
-| **team_rockets_s** |18|22|41|26|43|39|33|26|31|31|42|36|38|40|36|25|38|48|35|52|46|42|39|50|54|50|—|58|70|55|63|64|72|85|80|
-| **chandelure_cen** |16|30|38|27|27|26|30|36|44|44|38|36|58|36|43|59|45|42|38|50|37|33|40|60|56|50|42|—|22|42|64|79|60|60|64|
-| **darkness_mill_** |10|22|34|24|20|40|37|40|42|36|38|38|44|39|42|46|24|39|44|24|55|38|42|49|41|34|30|78|—|55|52|77|66|78|77|
-| **hops_snorlax_s** |16|14|28|25|26|32|34|32|30|33|36|40|30|36|36|42|46|40|22|45|44|42|42|40|58|55|45|58|45|—|66|76|72|77|88|
-| **crabominable_v** |28|12|31|26|40|26|34|28|26|24|30|33|22|34|26|53|34|37|30|36|20|40|43|27|42|41|37|36|48|34|—|45|64|53|66|
-| **salazzle_ex_te** |16|16|20|20|28|21|22|34|22|20|22|28|26|28|22|28|30|24|30|26|28|31|27|35|57|48|36|21|23|24|55|—|47|56|58|
-| **static_venom_d** |14|14|20|18|20|20|22|19|23|24|26|36|26|28|26|22|27|28|25|28|29|30|29|28|20|22|28|40|34|28|36|53|—|68|65|
-| **team_rockets_w** |2|2|6|10|7|8|7|16|10|8|8|16|18|10|9|27|13|13|8|18|10|22|28|28|40|27|15|40|22|23|47|44|32|—|66|
-| **feraligatr_mun** |4|5|13|10|11|6|12|12|8|8|14|14|17|22|13|33|22|18|21|14|10|18|22|20|34|21|20|36|23|12|34|42|35|34|—|
+| |panic_poison_p|lurantis_heal_|team_rockets_p|toxic_slumber_|water_aggro|scovillain_sal|arbok_muk_lase|tr_crobat_abso|arbok_team_roc|dhelmise_veluz|arbok_muk_trol|kyurem_vanillu|mega_chandelur|krookodile_ex_|selective_bloo|orthworm_ex_me|meta_dragapult|heracross_sini|stevens_carbin|team_rockets_k|decidueye_ex_j|kangaskhan_tyr|mega_lopunny_d|eerie_inferno_|meta_dragapult|ns_zoroark_nig|mega_scrafty_e|veluza_sinistc|team_rockets_s|hops_snorlax_s|tr_arbok_yvelt|darkness_mill_|chandelure_cen|crabominable_v|salazzle_ex_te|static_venom_d|team_rockets_w|feraligatr_mun|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **panic_poison_p** |—|54|50|52|67|68|70|66|71|64|72|73|78|62|64|77|70|70|69|76|79|77|73|78|72|70|73|80|74|90|84|80|78|82|85|89|96|97|
+| **lurantis_heal_** |46|—|50|60|67|39|73|76|72|56|71|58|63|78|68|62|62|74|64|84|84|74|68|69|68|73|86|72|86|86|86|91|89|78|86|86|97|90|
+| **team_rockets_p** |50|50|—|64|70|61|56|62|56|65|67|59|58|61|66|78|64|69|66|70|76|80|72|74|68|70|80|74|82|72|85|82|82|82|84|86|96|90|
+| **toxic_slumber_** |48|40|36|—|52|39|74|56|66|54|75|58|48|70|42|52|56|60|64|89|54|52|54|38|65|53|73|66|63|78|76|76|58|68|80|69|89|91|
+| **water_aggro** |33|33|30|48|—|68|48|52|55|54|50|53|55|51|56|56|57|54|56|60|62|53|54|79|56|54|68|68|68|70|76|69|81|74|82|78|88|92|
+| **scovillain_sal** |32|61|39|61|32|—|55|58|52|54|61|38|42|58|70|80|61|72|61|58|56|54|72|49|64|68|64|58|74|65|68|56|35|56|68|70|84|69|
+| **arbok_muk_lase** |30|27|44|26|52|45|—|50|52|52|56|54|60|39|40|59|58|52|56|50|67|62|50|60|54|70|54|62|68|66|62|66|64|74|79|84|97|96|
+| **tr_crobat_abso** |34|24|38|44|48|42|50|—|44|50|54|51|65|53|40|53|58|48|54|56|56|68|58|53|60|61|56|70|64|59|62|64|64|70|81|80|95|86|
+| **arbok_team_roc** |29|28|44|34|45|48|48|56|—|49|54|49|64|43|48|53|50|50|52|59|62|60|52|59|50|68|54|64|62|67|59|64|69|74|73|79|92|94|
+| **dhelmise_veluz** |36|44|35|46|46|46|48|50|51|—|43|52|44|46|59|50|56|59|46|44|65|49|60|66|62|56|56|67|68|62|56|64|66|74|72|84|83|86|
+| **arbok_muk_trol** |28|29|33|25|50|39|44|46|46|57|—|48|60|42|42|54|54|47|62|53|62|60|58|66|58|64|58|60|63|64|55|66|68|74|72|80|93|90|
+| **kyurem_vanillu** |27|42|41|42|47|62|46|49|51|48|52|—|44|46|57|44|50|56|42|53|56|53|65|68|62|52|53|65|65|66|72|59|58|64|75|76|80|84|
+| **mega_chandelur** |22|37|42|52|45|58|40|35|36|56|40|56|—|48|49|52|54|61|68|47|76|64|66|60|56|43|55|65|59|66|62|59|63|72|70|60|82|86|
+| **krookodile_ex_** |38|22|39|30|49|42|61|47|57|54|58|54|52|—|40|58|52|40|58|62|38|53|51|56|59|54|58|56|56|66|66|64|60|68|78|73|88|86|
+| **selective_bloo** |36|32|34|58|44|30|60|60|52|41|58|43|51|60|—|36|44|44|38|66|48|45|50|56|45|42|71|44|64|67|78|88|76|58|70|72|84|83|
+| **orthworm_ex_me** |23|38|22|48|44|20|41|47|47|50|46|56|48|42|64|—|54|66|58|68|52|38|48|49|52|44|42|72|72|74|80|68|70|66|71|75|90|81|
+| **meta_dragapult** |30|38|36|44|43|39|42|42|50|44|46|50|46|48|56|46|—|60|36|50|62|50|62|60|58|54|48|51|60|56|67|66|59|56|62|80|74|78|
+| **heracross_sini** |30|26|31|40|46|28|48|52|50|41|53|44|39|60|56|34|40|—|38|56|49|46|60|41|52|55|72|67|60|46|56|78|44|72|60|73|86|74|
+| **stevens_carbin** |31|36|34|36|44|39|44|46|48|54|38|58|32|42|62|42|64|62|—|46|47|54|48|38|65|54|50|68|64|53|55|54|40|70|67|70|72|74|
+| **team_rockets_k** |24|16|30|11|40|42|50|44|41|56|47|47|53|38|34|32|50|44|54|—|50|58|58|42|46|59|44|70|66|60|53|50|60|78|72|68|90|89|
+| **decidueye_ex_j** |21|16|24|46|38|44|33|44|38|35|38|44|24|62|52|48|38|51|53|50|—|60|50|42|46|62|69|53|51|64|39|70|50|66|79|74|82|86|
+| **kangaskhan_tyr** |23|26|20|48|47|46|38|32|40|51|40|47|36|47|55|62|50|54|46|42|40|—|62|42|58|50|50|64|56|60|55|46|40|76|66|76|74|76|
+| **mega_lopunny_d** |27|32|28|46|46|28|50|42|48|40|42|35|34|49|50|52|38|40|52|42|50|38|—|56|48|36|53|43|62|60|62|68|73|56|65|70|81|84|
+| **eerie_inferno_** |22|31|26|62|21|51|40|47|41|34|34|32|40|44|44|51|40|59|62|58|58|58|44|—|48|54|48|43|46|52|54|59|60|56|71|69|72|84|
+| **meta_dragapult** |28|32|32|35|44|36|46|40|50|38|42|38|44|41|55|48|42|48|35|54|54|42|52|52|—|44|54|46|56|54|61|59|58|54|64|74|81|74|
+| **ns_zoroark_nig** |30|27|30|47|46|32|30|39|32|44|36|48|57|46|58|56|46|45|46|41|38|50|64|46|56|—|57|44|46|41|46|62|45|52|43|83|60|59|
+| **mega_scrafty_e** |27|14|20|27|32|36|46|44|46|44|42|47|45|42|29|58|52|28|50|56|31|50|47|52|46|43|—|38|48|56|48|46|54|66|76|66|86|76|
+| **veluza_sinistc** |20|28|26|34|32|42|38|30|36|33|40|35|35|44|56|28|49|33|32|30|47|36|57|57|54|56|62|—|54|40|44|64|52|59|56|70|72|82|
+| **team_rockets_s** |26|14|18|37|32|26|32|36|38|32|37|35|41|44|36|28|40|40|36|34|49|44|38|54|44|54|52|46|—|50|56|64|60|63|66|68|78|84|
+| **hops_snorlax_s** |10|14|28|22|30|35|34|41|33|38|36|34|34|34|33|26|44|54|47|40|36|40|40|48|46|59|44|60|50|—|46|46|58|67|72|62|76|92|
+| **tr_arbok_yvelt** |16|14|15|24|24|32|38|38|41|44|45|28|38|34|22|20|33|44|45|47|61|45|38|46|39|54|52|56|44|54|—|44|68|66|67|57|72|92|
+| **darkness_mill_** |20|9|18|24|31|44|34|36|36|36|34|41|41|36|12|32|34|22|46|50|30|54|32|41|41|38|54|36|36|54|56|—|76|58|70|62|78|85|
+| **chandelure_cen** |22|11|18|42|19|65|36|36|31|34|32|42|37|40|24|30|41|56|60|40|50|60|27|40|42|55|46|48|40|42|32|24|—|58|71|50|58|68|
+| **crabominable_v** |18|22|18|32|26|44|26|30|26|26|26|36|28|32|42|34|44|28|30|22|34|24|44|44|46|48|34|41|37|33|34|42|42|—|48|68|64|72|
+| **salazzle_ex_te** |15|14|16|20|18|32|21|19|27|28|28|25|30|22|30|29|38|40|33|28|21|34|35|29|36|57|24|44|34|28|33|30|29|52|—|44|49|55|
+| **static_venom_d** |11|14|14|31|22|30|16|20|21|16|20|24|40|27|28|25|20|27|30|32|26|24|30|31|26|17|34|30|32|38|43|38|50|32|56|—|68|68|
+| **team_rockets_w** |4|3|4|11|12|16|3|5|8|17|7|20|18|12|16|10|26|14|28|10|18|26|19|28|19|40|14|28|22|24|28|22|42|36|51|32|—|80|
+| **feraligatr_mun** |3|10|10|9|8|31|4|14|6|14|10|16|14|14|17|19|22|26|26|11|14|24|16|16|26|41|24|18|16|8|8|15|32|28|45|32|20|—|

@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-10
-> **45.6% mean · 45.8% median · 9 of 34 winning matchups · rank 25 of 35**
+> **46.7% mean · 46.0% median · 11 of 37 winning matchups · rank 26 of 38**
 >
-> Best `static_venom_drapion` 80% · worst `arbok_muk_laser_darkbell` 22%.
+> Best `static_venom_drapion` 83% · worst `lurantis_heal_punish` 27%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
 <!-- field-results -->
+
+
 
 
 

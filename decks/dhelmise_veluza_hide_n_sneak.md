@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-10
-> **56.9% mean · 54.0% median · 24 of 34 winning matchups · rank 8 of 35**
+> **56.7% mean · 56.0% median · 24 of 37 winning matchups · rank 10 of 38**
 >
-> Best `feraligatr_munkidori_damage_transfer` 88% · worst `lurantis_heal_punish` 34%.
+> Best `feraligatr_munkidori_damage_transfer` 86% · worst `team_rockets_persian_ex_attack_theft` 35%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
 <!-- field-results -->
+
+
 
 
 

@@ -1,5 +1,15 @@
 # Dragapult ex / Dusknoir — TCGplayer, September 2026
 
+<!-- field-results -->
+> ### Field results — 2026-09-10
+> **48.9% mean · 48.0% median · 16 of 37 winning matchups · rank 25 of 38**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 81% · worst `panic_poison_paralysis` 28%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+<!-- field-results -->
+
+
 **Not my list.** Taken from Natalie Millar's *The Best Pokémon TCG Decks
 Right Now (September 2026)* on TCGplayer, published 2026-08-25, and
 reproduced here card-for-card. The Dusknoir variant: `extra knockout potential at the cost of giving your opponent prize cards`, and per the article better than the straight build against Zoroark and single-Prize decks.

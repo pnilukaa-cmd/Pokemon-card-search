@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-10
-> **54.6% mean · 50.8% median · 18 of 34 winning matchups · rank 14 of 35**
+> **56.0% mean · 53.0% median · 24 of 37 winning matchups · rank 12 of 38**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 90% · worst `panic_poison_paralysis` 27%.
+> Best `feraligatr_munkidori_damage_transfer` 84% · worst `panic_poison_paralysis` 27%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
 <!-- field-results -->
+
+
 
 
 

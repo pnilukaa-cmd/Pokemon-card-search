@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-10
-> **43.1% mean · 41.5% median · 9 of 34 winning matchups · rank 28 of 35**
+> **41.3% mean · 40.5% median · 10 of 37 winning matchups · rank 33 of 38**
 >
-> Best `salazzle_ex_team_rockets_muk_condition_stack` 79% · worst `lurantis_heal_punish` 16%.
+> Best `salazzle_ex_team_rockets_muk_condition_stack` 71% · worst `lurantis_heal_punish` 11%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
 <!-- field-results -->
+
+
 
 
 
