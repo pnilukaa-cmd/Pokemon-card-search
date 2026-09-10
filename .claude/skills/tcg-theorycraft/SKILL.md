@@ -673,6 +673,24 @@ in `decks/` predate the change.** A deck file whose numbers were measured
 on a different engine is not comparable to one measured on this one, and
 saying so is part of reporting the result.
 
+**When a card measures as worthless, check that it reached play at all
+before concluding anything about the card.** `N's Vanilluxe` was built and
+measured in four separate shells and lost points in three of them. The
+fifth build finally instrumented it and found the line was reaching play
+**zero times in 408 games**: `effect_rare_candy` looked the intervening
+Stage 1 up in `pl.POKEMON`, which is built from the DECKLIST, so in the
+normal Rare Candy construction (Basic + Stage 2, no Stage 1) it silently
+refused every time. Four measurements had been comparing a deck against
+the same deck with five dead cards in it.
+
+The cheap check that catches this: before reporting that a card does not
+earn its slots, patch `pokemon_checkup` and `do_attack` to count how often
+the card is (a) in play, (b) in the Active Spot, and (c) able to pay for
+anything, and print the mean effect when its op does fire. If the card is
+never reaching the board, the A/B measured the deck's card count, not the
+card. Three lines of instrumentation, and it inverted a conclusion that
+four gauntlet runs had agreed on.
+
 Known open gap as of this writing: **`lock` fires on 0 of 154 card
 effects** — "can't retreat", "can't attack next turn" and friends are
 compiled and ignored, which undervalues every control deck in the folder.

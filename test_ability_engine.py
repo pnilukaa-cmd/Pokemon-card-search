@@ -982,6 +982,57 @@ def test_counter_multiplier_scales_what_is_already_there():
           all(s.damage == 40 for s in opp.bench))
 
 
+def test_rare_candy_bridges_a_line_the_deck_does_not_own():
+    """Rare Candy refused to work in the normal way people build the card.
+
+    The card says "skipping the Stage 1", so the middle Pokemon only has
+    to exist in the CARD POOL. The simulator looked it up in `pl.POKEMON`,
+    which is built from the DECKLIST -- so in the usual construction (run
+    the Basic and the Stage 2, skip the Stage 1 entirely) the lookup
+    returned None and Rare Candy silently did nothing, every game.
+
+    Same shape as every other bug in this engine's history: the code
+    existed, the card compiled, a test passed, and nothing in the field
+    ever reached it. Measured cost: N's Vanilluxe reached play 0 times in
+    408 games of a deck running 4 Rare Candy and 2 N's Vanilluxe.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+
+    deck = ("""Pokemon: 2
+3 N's Vanillite ASC 49
+2 N's Vanilluxe ASC 51
+
+Trainer: 4
+4 Rare Candy MEG 125
+
+Energy: 0
+
+Total Cards: 6
+""")
+    POK, DECKLIST, _, _ = M.build_deck_model(deck)
+    check("the deck really does NOT run the Stage 1",
+          "N's Vanillish" not in POK)
+
+    eff = SV.compile_effects_for(POK, M.resolve_deck_cards(deck))
+    pl = SV.Player("A", POK, DECKLIST, eff)
+    opp = SV.Player("B", POK, DECKLIST, eff)
+    pl.hand = [("Item", "Rare Candy"), ("Pokemon", "N's Vanilluxe")]
+    spot = SV.InPlay("N's Vanillite", 1)
+    pl.active = spot
+    pl.bench = []
+
+    ok = SV.effect_rare_candy(pl, opp, 2, [], first_turn=False)
+    check("Rare Candy bridges Basic -> Stage 2 with no Stage 1 in the deck",
+          ok and pl.active.name == "N's Vanilluxe", pl.active.name)
+    check("and it costs the Rare Candy",
+          ("Item", "Rare Candy") not in pl.hand)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1015,7 +1066,8 @@ def main():
                test_hp_tools_are_attached_and_raise_the_KO_threshold,
                test_ai_values_knockouts_and_setup_rather_than_raw_damage,
                test_wall_breakers_endure_and_ability_hp,
-               test_counter_multiplier_scales_what_is_already_there]:
+               test_counter_multiplier_scales_what_is_already_there,
+               test_rare_candy_bridges_a_line_the_deck_does_not_own]:
         print(f"{fn.__name__}:")
         try:
             fn()

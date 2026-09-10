@@ -500,6 +500,20 @@ def try_evolve(pl, opp, turn, log, first_turn):
                 break
 
 
+def _evolves_from_in_pool(name):
+    """What a card evolves from, looked up in the whole card pool.
+
+    Needed because a Rare Candy deck usually does NOT run the Stage 1 it
+    is skipping, so the deck's own POKEMON map cannot answer the question.
+    """
+    card = _CARDS_BY_NAME.get(name)
+    if isinstance(card, list):
+        card = card[0] if card else None
+    if isinstance(card, dict):
+        return card.get("evolvesFrom")
+    return None
+
+
 def effect_rare_candy(pl, opp, turn, log, first_turn):
     if first_turn:
         return False
@@ -509,8 +523,17 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
             continue
         for name in s2:
             s1 = pl.POKEMON[name]["evolves_from"]
-            s1info = pl.POKEMON.get(s1)
-            if s1info and s1info["evolves_from"] == spot.name:
+            # Rare Candy says "skipping the Stage 1", so the middle card
+            # only has to exist in the CARD POOL -- not in this deck. Reading
+            # it out of pl.POKEMON (which is built from the decklist) made
+            # Rare Candy silently refuse in every deck that runs the Basic
+            # and the Stage 2 without the Stage 1, which is the normal way
+            # to build a Rare Candy line.
+            if pl.POKEMON.get(s1):
+                s1_from = pl.POKEMON[s1]["evolves_from"]
+            else:
+                s1_from = _evolves_from_in_pool(s1)
+            if s1_from == spot.name:
                 pl.remove_from_hand("Item", "Rare Candy")
                 pl.discard.append("Rare Candy")
                 pl.remove_from_hand("Pokemon", name)
