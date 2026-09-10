@@ -185,7 +185,7 @@ Trainer: 26
 Energy: 14
 2 Spiky Energy JTG 159
 2 Shadowy Darkness Energy PBL 83
-10 Basic Darkness Energy MEE 7
+10 Basic Darkness Energy
 
 Total Cards: 60
 ```

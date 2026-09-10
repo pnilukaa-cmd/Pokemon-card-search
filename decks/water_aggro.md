@@ -1,5 +1,8 @@
 # Water Aggro
 
+> **Decklist corrected.** Every line in this list originally carried a bare card name with no `SET NUM`. The simulator resolves a bare name to the *first* printing in the pool, which for `Palafin` is **TEF 49** — a printing with no `Zero to Hero` Ability. `Palafin ex`'s rule is "put this Pokémon into play **only** with the effect of Palafin's Zero to Hero", so the deck's 250-damage finisher had no legal route into play in any game this deck ever played. The line is now pinned to `Finizen TWM 59 / Palafin TWM 60 / Palafin ex TWM 61` and every card carries an exact set number.
+
+
 Built around three centerpieces from `pokemon_standard_cards_deckbuilding.json` (Standard, regulation marks H/I/J).
 
 ## Centerpieces (ranked)
@@ -56,24 +59,24 @@ Mono-Water energy works throughout since every attack in the deck costs Water + 
 ```
 Pokémon: 15
 3 Chien-Pao SSP 56
-2 Arrokuda
-2 Barraskewda
-3 Finizen
-3 Palafin
-2 Palafin ex
+2 Arrokuda DRI 62
+2 Barraskewda DRI 63
+3 Finizen TWM 59
+3 Palafin TWM 60
+2 Palafin ex TWM 61
 
 Trainer: 33
-4 Boss's Orders
-4 Crispin
-4 Lacey
-4 Ultra Ball
-4 Buddy-Buddy Poffin
-3 Switch
-3 Night Stretcher
-2 Great Haul Net
-2 Rescue Board
-2 Air Balloon
-1 Prime Catcher
+4 Boss's Orders MEG 114
+4 Crispin SCR 133
+4 Lacey SCR 139
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+3 Switch MEG 130
+3 Night Stretcher MEG 173
+2 Great Haul Net CRI 78
+2 Rescue Board TEF 159
+2 Air Balloon ASC 181
+1 Prime Catcher TEF 157
 
 Energy: 12
 12 Basic Water Energy
