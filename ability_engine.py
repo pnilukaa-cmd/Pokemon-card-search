@@ -524,6 +524,23 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         log.append(f"    devolve -> {pre}")
         return True
 
+    if op == O.DAMAGE_TO_HP_THRESHOLD:
+        # "Put damage counters until its remaining HP is N." Counters, not
+        # attack damage, so Weakness and damage reduction do not apply --
+        # the same reason Matcha Spin goes through this path.
+        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        placed = 0
+        for spot in hits:
+            hp = (opp.POKEMON.get(spot.name) or {}).get("hp") or 0
+            want = max(0, hp - (act.amount or 0))
+            if want > spot.damage:
+                placed += want - spot.damage
+                spot.damage = want
+        if placed:
+            log.append(f"    damage counters to {act.amount} HP remaining "
+                       f"(+{placed})")
+        return placed > 0
+
     if op == O.MULTIPLY_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
         if act.filter.get("targets"):

@@ -1033,6 +1033,123 @@ Total Cards: 6
 
 
 
+def _ex_board(card_name):
+    """The audit board: my ex Active with 2 own-type + 2 Psychic, 3 Bench."""
+    import audit_ex_damage as A
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    card = [c for c in cards if c["name"] == card_name][0]
+    me, op, spot = A.build_board(card, by_name)
+    me.active = spot
+    atks = {a["name"]: a for a in M.build_pokemon_info(card)["attacks"]}
+    return me, op, spot, atks
+
+
+def test_typed_energy_scalers_count_only_that_type():
+    """Every typed Energy scaler in the pool over-counted.
+
+    "for each Psychic Energy attached to this Pokemon" was read as "for
+    each Energy attached to this Pokemon", so an attacker holding two
+    on-type and two off-type Energy was paid for all four. That silently
+    inflates any deck running a second Energy type -- which is most of
+    the interesting ones.
+    """
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Kingdra ex")     # Water; board 2 W + 2 P
+    check("Hydro Pump counts the 2 Water, not all 4 Energy",
+          SV.attack_damage(me, op, spot, atks["Hydro Pump"]) == 150,
+          SV.attack_damage(me, op, spot, atks["Hydro Pump"]))
+
+    me, op, spot, atks = _ex_board("Dialga ex")      # Metal; board 2 M + 2 P
+    check("Metal Blast likewise", 
+          SV.attack_damage(me, op, spot, atks["Metal Blast"]) == 140,
+          SV.attack_damage(me, op, spot, atks["Metal Blast"]))
+
+
+def test_bench_counts_honour_their_filter():
+    """Gourgeist ex pays per Benched Pokemon *that has damage counters*.
+
+    The count ignored the trailing filter and paid for the whole Bench.
+    """
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Gourgeist ex")   # bench: 2 damaged, 1 not
+    check("Horrifying Rondo counts only the 2 damaged Benched Pokemon",
+          SV.attack_damage(me, op, spot, atks["Horrifying Rondo"]) == 130,
+          SV.attack_damage(me, op, spot, atks["Horrifying Rondo"]))
+
+
+def test_type_words_are_types_not_name_fragments():
+    """"for each of your Grass Pokemon in play" is a TYPE.
+
+    It was matched as a name substring, so Torterra ex's Forest March
+    counted zero Grass Pokemon on a board where Torterra ex itself is the
+    Grass Pokemon, scored 0, and the AI never used the attack.
+    """
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Torterra ex")
+    check("Forest March sees the Grass Pokemon it is standing on",
+          SV.attack_damage(me, op, spot, atks["Forest March"]) == 30,
+          SV.attack_damage(me, op, spot, atks["Forest March"]))
+
+
+def test_discard_scalers_are_paid_for():
+    """Eleven ex attacks buy damage by discarding Energy at attack time.
+
+    All of them scored their printed base and nothing else -- Raging Bolt
+    ex read as a 70-damage attacker. The cost must be charged where the
+    damage is credited, or the attack is free and repeatable, which is
+    exactly the bug Cursed Blast's self-KO had.
+    """
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Raging Bolt ex")
+    atk = atks["Bellowing Thunder"]
+    on_board = spot.energy_count() + sum(b.energy_count() for b in me.bench)
+    check("board starts with 7 Energy", on_board == 7, on_board)
+    check("Bellowing Thunder is worth far more than its printed 70",
+          SV.attack_damage(me, op, spot, atk) == 420,
+          SV.attack_damage(me, op, spot, atk))
+    SV.attack_side_effects(me, op, atk, [])
+    left = spot.energy_count() + sum(b.energy_count() for b in me.bench)
+    check("and the Energy is actually discarded", left == 1, left)
+    check("so the next swing is not free",
+          SV.attack_damage(me, op, spot, atk) == 0)
+
+    me, op, spot, atks = _ex_board("Scizor ex")
+    check("Cross Breaker discards 2 Metal for 240",
+          SV.attack_damage(me, op, spot, atks["Cross Breaker"]) == 240,
+          SV.attack_damage(me, op, spot, atks["Cross Breaker"]))
+
+
+def test_hp_threshold_and_conditional_kos_execute():
+    """Compiling a Knock Out is not the same as performing one."""
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Medicham ex")
+    atk = atks["Chi-Atsu"]                    # opp Active is 280 HP on 50
+    check("Chi-Atsu is worth the 180 counters it places",
+          SV.attack_rider_value(me, op, atk) == 180,
+          SV.attack_rider_value(me, op, atk))
+    SV.attack_side_effects(me, op, atk, [])
+    check("and it places them", op.active.damage == 230, op.active.damage)
+
+    me, op, spot, atks = _ex_board("Mega Darkrai ex")
+    atk = atks["Abyss Eye"]
+    check("Abyss Eye is worth nothing against a healthy Active",
+          SV.conditional_ko_target(me, op, atk) is None)
+    op.active.conditions = {"poisoned"}
+    check("and Knocks Out a Poisoned one regardless of HP",
+          SV.conditional_ko_target(me, op, atk) is op.active)
+
+    me, op, spot, atks = _ex_board("Yveltal ex")
+    atk = atks["Soul Destroyer"]
+    op.active.damage = 250                    # 280 HP -> 30 remaining
+    check("Soul Destroyer reaches anything under its HP line",
+          SV.conditional_ko_target(me, op, atk) is op.active)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1067,7 +1184,12 @@ def main():
                test_ai_values_knockouts_and_setup_rather_than_raw_damage,
                test_wall_breakers_endure_and_ability_hp,
                test_counter_multiplier_scales_what_is_already_there,
-               test_rare_candy_bridges_a_line_the_deck_does_not_own]:
+               test_rare_candy_bridges_a_line_the_deck_does_not_own,
+               test_typed_energy_scalers_count_only_that_type,
+               test_bench_counts_honour_their_filter,
+               test_type_words_are_types_not_name_fragments,
+               test_discard_scalers_are_paid_for,
+               test_hp_threshold_and_conditional_kos_execute]:
         print(f"{fn.__name__}:")
         try:
             fn()

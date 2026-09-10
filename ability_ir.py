@@ -119,6 +119,7 @@ class Op:
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
     CONDITIONAL_KO = "conditional_ko"
+    DAMAGE_TO_HP_THRESHOLD = "damage_to_hp_threshold"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -454,6 +455,40 @@ def _r(m, text):
     n = int(m.group(1) or m.group(2))
     tgt = Target.OPP_ACTIVE if m.group(1) else Target.OPP_ANY
     return [Action(Op.CONDITIONAL_KO, n, tgt, {"exact_counters": n})]
+
+
+@rule("ko_on_special_condition",
+      r"if your opponent'?s active pok[eé]mon is affected by a special "
+      r"condition, it is knocked out")
+def _r(m, text):
+    """Mega Darkrai ex's Abyss Eye. A 0-damage attack that takes Prizes,
+    and the payoff for every Special Conditions deck in the pool."""
+    return [Action(Op.CONDITIONAL_KO, 0, Target.OPP_ACTIVE,
+                   {"needs_special_condition": True})]
+
+
+@rule("ko_below_remaining_hp",
+      r"knock out each of your opponent'?s pok[eé]mon that has (\d+) hp or "
+      r"less remaining")
+def _r(m, text):
+    """Yveltal ex's Soul Destroyer: a board wipe on anything already
+    softened. Worth every Pokemon it removes, not zero."""
+    return [Action(Op.CONDITIONAL_KO, int(m.group(1)), Target.OPP_ALL,
+                   {"max_remaining_hp": int(m.group(1))})]
+
+
+@rule("damage_until_remaining_hp",
+      r"put damage counters on (each of your opponent'?s benched pok[eé]mon|"
+      r"your opponent'?s active pok[eé]mon) until (?:its|their) remaining "
+      r"hp is (\d+)")
+def _r(m, text):
+    """Medicham ex's Chi-Atsu and Palossand ex's Barite Jail. These place
+    counters up to a fixed remaining HP, so on a big target they are the
+    largest single hit in the pool -- Chi-Atsu is 230 against a 280 HP
+    Active. Both read as 0-damage attacks."""
+    tgt = (Target.OPP_BENCHED if "benched" in m.group(1).lower()
+           else Target.OPP_ACTIVE)
+    return [Action(Op.DAMAGE_TO_HP_THRESHOLD, int(m.group(2)), tgt, {})]
 
 
 @rule("win_game", r"you win this game")

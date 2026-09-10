@@ -1204,6 +1204,59 @@ def retreat_of(pl, spot, opp=None):
     return AE.effective_retreat(pl, spot, opp, tool_mod)
 
 
+ENERGY_TYPES = ("Grass", "Fire", "Water", "Lightning", "Psychic",
+                "Fighting", "Darkness", "Metal", "Dragon", "Fairy",
+                "Colorless")
+
+_TYPED_ENERGY_RE = _re.compile(
+    r"\b(grass|fire|water|lightning|psychic|fighting|darkness|metal|dragon|"
+    r"fairy|colorless)\s+energy", _re.I)
+
+
+def _energy_matching(clause, spots):
+    """Energy on `spots`, restricted to the type the clause names.
+
+    "for each Psychic Energy attached to this Pokemon" was being counted as
+    "for each Energy attached to this Pokemon" -- every typed scaler in the
+    pool over-counted by exactly the off-type Energy attached, which
+    silently inflates any deck running a second Energy type. Azumarill ex
+    read as 220 where the card says 140.
+    """
+    m = _TYPED_ENERGY_RE.search(clause or "")
+    want = m.group(1).capitalize() if m else None
+    n = 0
+    for s in spots:
+        if s is None:
+            continue
+        if want is None:
+            n += s.energy_count()
+        else:
+            n += sum(1 for prov in s.energy if want in prov)
+    return n
+
+
+_BENCH_FILTERS = (
+    ("that has any damage counters on it", lambda s: s.damage > 0),
+    ("that has damage counters on it", lambda s: s.damage > 0),
+    ("that has any energy attached", lambda s: s.energy_count() > 0),
+    ("that has a pok\u00e9mon tool attached", lambda s: getattr(s, "tool", None)),
+)
+
+
+def _bench_matching(clause, spots):
+    """Bench count, honouring a trailing "that has ..." filter.
+
+    Gourgeist ex's Horrifying Rondo pays per Benched Pokemon *that has any
+    damage counters on it*; the count ignored the filter and paid for the
+    whole Bench.
+    """
+    c = (clause or "").lower()
+    for phrase, pred in _BENCH_FILTERS:
+        if phrase in c:
+            return sum(1 for s in spots if s is not None and pred(s))
+    return len([s for s in spots if s is not None])
+
+
 def _clause_count(clause, pl, opp, spot):
     """How many times a 'for each ...' clause applies right now, or None."""
     c = clause.lower()
@@ -1218,16 +1271,33 @@ def _clause_count(clause, pl, opp, spot):
         return len(pl.hand)
     if "card in your opponent's hand" in c:
         return len(opp.hand)
+    # "Your opponent reveals their hand. This attack does 50 damage for
+    # each Trainer card you find there." -- "there" is the revealed hand.
+    if "you find there" in c:
+        kinds = {"trainer": ("Item", "Supporter", "Stadium", "Tool"),
+                 "item": ("Item",), "supporter": ("Supporter",),
+                 "pok": ("Pokemon",), "energy": ("Energy",)}
+        for word, want in kinds.items():
+            if word in c:
+                return sum(1 for k, _ in opp.hand if k in want)
+        return len(opp.hand)
     if "benched pok" in c and "both yours and your opponent" in c:
-        return len(pl.bench) + len(opp.bench)
+        return _bench_matching(c, list(pl.bench) + list(opp.bench))
     if "your opponent's benched pok" in c:
-        return len(opp.bench)
+        return _bench_matching(c, opp.bench)
     if "your benched pok" in c:
-        return len(pl.bench)
+        return _bench_matching(c, pl.bench)
     if "energy attached to your opponent's active" in c:
-        return opp.active.energy_count() if opp.active else 0
+        return _energy_matching(c, [opp.active]) if opp and opp.active else 0
+    # "attached to all of your Pokemon" counts the whole board, not the
+    # Active -- Hydrapple ex's Syrup Storm and Mega Gardevoir ex's Mega
+    # Symphonia are both board-wide and were scoring base damage only.
+    # Checked before the Active-only clause, which "to all of your Pokemon"
+    # would otherwise never reach.
+    if "energy attached to all of your pok" in c:
+        return _energy_matching(c, ([pl.active] if pl.active else []) + list(pl.bench))
     if "energy attached to this pok" in c:
-        return spot.energy_count()
+        return _energy_matching(c, [spot])
     # Azelf's Neurokinesis and Trevenant's Overwhelming Pain count the
     # WHOLE opposing board, not just the Active -- which is the entire
     # reason they pair with a spread attack. Checked before the Active-only
@@ -1242,6 +1312,43 @@ def _clause_count(clause, pl, opp, spot):
         return spot.damage // 10
     if "prize card your opponent has taken" in c:
         return STARTING_PRIZES - opp.prizes
+    if "prize card you have taken" in c:
+        return STARTING_PRIZES - pl.prizes
+    # Energy counted somewhere other than one Pokemon.
+    if "energy attached to all of your opponent's pok" in c:
+        return _energy_matching(
+            c, ([opp.active] if opp.active else []) + list(opp.bench))
+    if "energy attached to both active pok" in c:
+        return _energy_matching(c, [pl.active, opp.active if opp else None])
+    if "energy card in your discard pile" in c:
+        return sum(1 for x in pl.discard if "energy" in str(x).lower())
+    if "energy card in your opponent's discard pile" in c:
+        return sum(1 for x in opp.discard if "energy" in str(x).lower())
+    # "for each Stage 2 Pokemon on your Bench" and friends -- a stage
+    # filter on a Bench count, which the plain Bench clauses above do not
+    # reach because the wording puts the filter first.
+    m = _re.search(r"(basic|stage 1|stage 2) pok[eé]mon on your bench", c)
+    if m:
+        want = m.group(1).title().replace("Stage 1", "Stage 1")
+        return sum(1 for b in pl.bench
+                   if (pl.POKEMON.get(b.name) or {}).get("stage") == want)
+    # "for each of your opponent's Pokemon ex in play". Checked before the
+    # generic "of your <family> Pokemon in play" rule below, which would
+    # otherwise read "opponent's" as a name fragment and count MY board.
+    if "opponent's pok" in c and "in play" in c:
+        spots = ([opp.active] if opp.active else []) + list(opp.bench)
+        if "pok\u00e9mon ex" in c or "pokemon ex" in c:
+            return sum(1 for sp in spots
+                       if (opp.POKEMON.get(sp.name) or {}).get("prize_value", 1) >= 2)
+        return len(spots)
+    # "for each of your <A> and <B> in play" -- Beedrill ex counts both its
+    # own printings, which is a name list rather than a family word.
+    m = _re.search(r"of your ([\w'’ ]+?) and ([\w'’ ]+?) in play", c)
+    if m:
+        names = pl.in_play_names()
+        a, b = m.group(1).strip(), m.group(2).strip()
+        return sum(1 for n in names
+                   if n.lower() == a or n.lower() == b)
     # "for each of your <Family> Pokemon in play" / "of your Pokemon in play"
     m = _re.search(r"of your ([\w'’ -]*?)\s*pok[eé]mon in play", c)
     if m:
@@ -1249,6 +1356,22 @@ def _clause_count(clause, pl, opp, spot):
         names = pl.in_play_names()
         if not fam:
             return len(names)
+        # "for each of your GRASS Pokemon in play" is a TYPE, not a name.
+        # Matching it as a name substring meant Torterra ex's Forest March
+        # counted zero Grass Pokemon on a board where Torterra ex itself is
+        # the Grass Pokemon -- the attack scored 0 and the AI never used it.
+        # Same for the stage words.
+        if fam.capitalize() in ENERGY_TYPES:
+            want = fam.capitalize()
+            return sum(1 for n in names
+                       if want in ((pl.POKEMON.get(n) or {}).get("types") or []))
+        if fam.lower() in ("basic", "stage 1", "stage 2", "evolution"):
+            want = fam.title()
+            if want == "Evolution":
+                return sum(1 for n in names
+                           if (pl.POKEMON.get(n) or {}).get("stage") != "Basic")
+            return sum(1 for n in names
+                       if (pl.POKEMON.get(n) or {}).get("stage") == want)
         return sum(1 for n in names if fam.lower() in n.lower())
     return None
 
@@ -1335,6 +1458,137 @@ def _copied_attack_damage(pl, opp, spot, text):
     return None
 
 
+# --------------------------------------------------------------------------
+# "Discard N, and this attack does X damage for each card you discarded"
+# --------------------------------------------------------------------------
+# Eleven ex attacks in this pool -- Raging Bolt ex, Mega Charizard X ex,
+# Scizor ex, Team Rocket's Mewtwo ex, Jolteon ex, Mega Clefable ex, Mega
+# Diancie ex, Wugtrio ex and friends -- pay for their damage by discarding
+# Energy they choose at attack time. Every one of them was scoring its
+# PRINTED base and nothing else, so Raging Bolt ex read as a 70-damage
+# attacker rather than a 350-damage one.
+#
+# The count has to be computed the same way in two places (valuation, which
+# runs many times per turn and must not mutate anything, and execution,
+# which must actually pay the cost) or the attack becomes free damage --
+# which is exactly the bug Cursed Blast's self-KO had.
+
+_DISCARDED_THIS_WAY_RE = _re.compile(r"you discarded in this way", _re.I)
+_DISCARD_CLAUSE_RE = _re.compile(
+    r"discard (?:up to |any amount of )?(\d+)?\s*"
+    r"(?:(basic|special)\s+)?"
+    r"(?:(grass|fire|water|lightning|psychic|fighting|darkness|metal|dragon|"
+    r"fairy|colorless)\s+)?"
+    r"energy(?:\s+cards?)?\s+from\s+"
+    r"(?:among\s+)?(this pok[eé]mon|your hand|your benched pok[eé]mon|"
+    r"your pok[eé]mon)", _re.I)
+_DISCARD_DMG_RE = _re.compile(
+    r"does (\d+) (more )?damage[^.]*?for each (?:card|energy card)", _re.I)
+
+
+def _energy_type_of(name):
+    """The type a Basic Energy card name provides, or None."""
+    m = _re.match(r"(?:basic\s+)?(\w+) energy", (name or "").strip(), _re.I)
+    return m.group(1).capitalize() if m else None
+
+
+def _discard_scaler(text):
+    """(max_count, per_damage, is_bonus, where, etype, basic_only) or None."""
+    if not _DISCARDED_THIS_WAY_RE.search(text or ""):
+        return None
+    dc = _DISCARD_CLAUSE_RE.search(text)
+    dm = _DISCARD_DMG_RE.search(text)
+    if not dc or not dm:
+        return None
+    cap = int(dc.group(1)) if dc.group(1) else 99
+    basic_only = (dc.group(2) or "").lower() == "basic"
+    etype = dc.group(3).capitalize() if dc.group(3) else None
+    where = dc.group(4).lower()
+    return (cap, int(dm.group(1)), bool(dm.group(2)), where, etype, basic_only)
+
+
+def _discard_candidates(pl, spot, where, etype, basic_only):
+    """Energy that may be discarded, cheapest-to-lose first.
+
+    Bench Energy is spent before the Active's, and the Active keeps enough
+    to pay for an attack next turn -- otherwise the sim happily strips its
+    own attacker bare every single turn, which no player would do.
+    """
+    out = []
+    if "hand" in where:
+        for i, (k, n) in enumerate(pl.hand):
+            if k != "Energy":
+                continue
+            t = _energy_type_of(n)
+            if etype and t != etype:
+                continue
+            if basic_only and "basic" not in n.lower() and t is None:
+                continue
+            out.append(("hand", i, n))
+        return out
+
+    spots = []
+    if "this pok" in where:
+        spots = [(spot, 0)]
+    elif "benched" in where:
+        spots = [(b, 0) for b in pl.bench]
+    else:                                   # "your Pokemon" / "among your Pokemon"
+        spots = [(b, 0) for b in pl.bench] + [(spot, 1)]
+    for sp, is_active in spots:
+        if sp is None:
+            continue
+        keep = 0
+        if is_active:
+            info = pl.POKEMON.get(sp.name) or {}
+            costs = [len(a["cost"]) for a in info.get("attacks") or []]
+            keep = min(costs) if costs else 0
+        avail = list(range(len(sp.energy)))
+        if etype:
+            avail = [i for i in avail if etype in sp.energy[i]]
+        drop = max(0, len(avail) - (len(sp.energy) - keep))
+        if drop:
+            avail = avail[:-drop] if drop < len(avail) else []
+        for i in avail:
+            out.append(("spot", sp, i))
+    return out
+
+
+def discard_scaler_damage(pl, spot, atk):
+    """Damage this attack gets from what it CAN discard right now, or None."""
+    parsed = _discard_scaler(atk.get("text") or "")
+    if not parsed:
+        return None
+    cap, per, is_bonus, where, etype, basic_only = parsed
+    n = min(cap, len(_discard_candidates(pl, spot, where, etype, basic_only)))
+    base = atk["damage"] or 0
+    return (base + per * n) if is_bonus else (per * n)
+
+
+def pay_discard_scaler(pl, spot, atk, log):
+    """Actually discard what discard_scaler_damage() was paid for."""
+    parsed = _discard_scaler(atk.get("text") or "")
+    if not parsed:
+        return
+    cap, per, is_bonus, where, etype, basic_only = parsed
+    picks = _discard_candidates(pl, spot, where, etype, basic_only)[:cap]
+    if not picks:
+        return
+    hand_idx = sorted((i for kind, i, _ in picks if kind == "hand"), reverse=True)
+    for i in hand_idx:
+        pl.discard.append(pl.hand[i][1])
+        pl.hand.pop(i)
+    by_spot = {}
+    for kind, sp, i in picks:
+        if kind == "spot":
+            by_spot.setdefault(id(sp), (sp, []))[1].append(i)
+    for sp, idxs in by_spot.values():
+        for i in sorted(idxs, reverse=True):
+            sp.energy.pop(i)
+            pl.discard.append("Energy")
+    log.append(f"  {pl.name}: discards {len(picks)} for {atk['name']}")
+
+
+
 def attack_damage(pl, opp, spot, atk, record=True):
     """Best-effort damage for one attack in the current board state."""
     text = atk.get("text") or ""
@@ -1344,6 +1598,10 @@ def attack_damage(pl, opp, spot, atk, record=True):
         copied = _copied_attack_damage(pl, opp, spot, text)
         if copied is not None:
             return copied
+
+    scaled = discard_scaler_damage(pl, spot, atk)
+    if scaled is not None:
+        return scaled
 
     # "If <condition>, this attack does N more damage" -- a flat bonus
     # gated on something the IR already parses as a condition. Dhelmise's
@@ -1502,6 +1760,16 @@ def attack_rider_value(pl, opp, atk):
             value += (act.amount or 1) / left * 6 * 250
         elif act.op == IR.Op.DISCARD_FROM_OPPONENT:
             value += 10 * (act.amount or 1)
+        elif act.op == IR.Op.DAMAGE_TO_HP_THRESHOLD:
+            # Worth exactly the counters it would place, which on a big
+            # Active is the largest single hit in the pool.
+            spots = ([opp.active] if act.target is IR.Target.OPP_ACTIVE
+                     else list(opp.bench))
+            for sp in spots:
+                if sp is None:
+                    continue
+                hp = (opp.POKEMON.get(sp.name) or {}).get("hp") or 0
+                value += max(0, max(0, hp - (act.amount or 0)) - sp.damage)
         elif act.op == IR.Op.CONDITIONAL_KO:
             victim = conditional_ko_target(pl, opp, atk)
             if victim is not None:
@@ -1591,11 +1859,31 @@ def conditional_ko_target(pl, opp, atk):
     for act in eff.actions:
         if act.op != IR.Op.CONDITIONAL_KO:
             continue
-        want = (act.filter.get("exact_counters") or 0) * 10
         pool = ([opp.active] if act.target == IR.Target.OPP_ACTIVE
                 else opp.in_play())
+        pool = [p for p in pool if p is not None]
+        # Mega Darkrai ex's Abyss Eye: any Special Condition on the Active
+        # is the whole requirement.
+        if act.filter.get("needs_special_condition"):
+            for p in pool:
+                if getattr(p, "conditions", None):
+                    return p
+            continue
+        # Yveltal ex's Soul Destroyer: everything already below a remaining
+        # HP line. Returns the biggest such Pokemon -- the caller KOs one
+        # target, so this at least stops the attack reading as 0 damage.
+        cap = act.filter.get("max_remaining_hp")
+        if cap is not None:
+            hurt = [p for p in pool
+                    if ((opp.POKEMON.get(p.name) or {}).get("hp") or 0)
+                    - p.damage <= cap]
+            if hurt:
+                return max(hurt, key=lambda p:
+                           (opp.POKEMON.get(p.name) or {}).get("hp") or 0)
+            continue
+        want = (act.filter.get("exact_counters") or 0) * 10
         for p in pool:
-            if p is not None and p.damage == want:
+            if p.damage == want:
                 return p
     return None
 
@@ -2061,6 +2349,11 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
+    # Medicham ex's Chi-Atsu / Palossand ex's Barite Jail. These are
+    # counters, not attack damage, so they belong on the rider path
+    # (no Weakness, no damage reduction) -- and without this entry
+    # they compiled, were valued, and then never executed.
+    IR.Op.DAMAGE_TO_HP_THRESHOLD,
     IR.Op.APPLY_CONDITION,
     IR.Op.DISCARD_ENERGY_FROM_OPPONENT,
     IR.Op.MILL_OPPONENT,
@@ -2089,6 +2382,9 @@ def attack_side_effects(pl, opp, atk, log):
     text = atk.get("text") or ""
     if not text:
         return
+    # Pay for the damage discard_scaler_damage() already charged the
+    # opponent for. Skipping this makes the attack free and repeatable.
+    pay_discard_scaler(pl, pl.active, atk, log)
     key = (atk["name"], text)
     eff = _ATTACK_IR_CACHE.get(key)
     if eff is None:
