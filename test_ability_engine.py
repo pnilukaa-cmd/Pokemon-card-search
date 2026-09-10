@@ -1202,6 +1202,80 @@ def test_promo_set_codes_parse():
 
 
 
+def test_attack_costs_that_were_never_paid():
+    """Three whole families of attack cost were free.
+
+    Every one inflates its user, which is the dangerous direction: a cost
+    that is never charged never shows up as a missing feature, only as a
+    deck that looks better than it is.
+    """
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Ceruledge ex")
+    before = spot.energy_count()
+    SV.attack_side_effects(me, op, atks["Raging Amethyst"], [])
+    check("'Discard all Energy from this Pokemon' actually discards it",
+          before == 4 and spot.energy_count() == 0, spot.energy_count())
+
+    me, op, spot, atks = _ex_board("Armarouge ex")
+    SV.attack_side_effects(me, op, atks["Armor Cannon"], [])
+    check("and a single typed discard takes exactly one",
+          spot.energy_count() == 3, spot.energy_count())
+
+    # ... but the "discarded in this way" scalers must not be charged
+    # twice, since they pay for themselves in a different code path.
+    me, op, spot, atks = _ex_board("Raging Bolt ex")
+    SV.attack_side_effects(me, op, atks["Bellowing Thunder"], [])
+    left = spot.energy_count() + sum(b.energy_count() for b in me.bench)
+    check("a discard-scaler is charged once, not twice", left == 1, left)
+
+    POK, EFF = build(["Fomantis"], {"Fomantis": ("PBL", "3")})
+    fom = Spot("Fomantis")
+    me2 = FakePlayer("A", POK, EFF, active=fom)
+    op2 = FakePlayer("B", POK, EFF, active=Spot("Fomantis"))
+    atk = next(a for a in POK["Fomantis"]["attacks"]
+               if a["name"] == "Reckless Charge")
+    fom.damage = 0
+    SV.attack_side_effects(me2, op2, atk, [])
+    check("recoil damages its own user", fom.damage == 10, fom.damage)
+
+
+def test_heal_scaling_and_spread_are_counted_once():
+    """Lurantis ex's payoff, and the snipe shapes it sits beside."""
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Lurantis ex")
+    cutter = atks["Lively Cutter"]
+    spot.healed_this_turn = False
+    check("Lively Cutter is 60 when nothing healed it",
+          SV.attack_damage(me, op, spot, cutter) == 60,
+          SV.attack_damage(me, op, spot, cutter))
+    spot.healed_this_turn = True
+    check("and 260 on a turn it was healed",
+          SV.attack_damage(me, op, spot, cutter) == 260,
+          SV.attack_damage(me, op, spot, cutter))
+
+    # A free-target snipe carries ALL its damage in the text, so it must be
+    # applied exactly once -- as counters (no Weakness on the Bench), not
+    # as counters AND main damage.
+    me, op, spot, atks = _ex_board("Fezandipiti ex")
+    arrow = atks["Cruel Arrow"]
+    before = sum(s.damage for s in [op.active] + op.bench)
+    main = SV.attack_damage(me, op, spot, arrow, record=False)
+    SV.attack_side_effects(me, op, arrow, [])
+    after = sum(s.damage for s in [op.active] + op.bench)
+    check("Cruel Arrow places its 100 once", main == 0 and after - before == 100,
+          (main, after - before))
+
+    me, op, spot, atks = _ex_board("Farigiraf ex")
+    beam = atks["Dirty Beam"]
+    before = sum(s.damage for s in [op.active] + op.bench)
+    main = SV.attack_damage(me, op, spot, beam, record=False)
+    SV.attack_side_effects(me, op, beam, [])
+    after = sum(s.damage for s in [op.active] + op.bench)
+    check("but an 'also does 30 to a Benched' rider is on TOP of the base",
+          main == 160 and after - before == 30, (main, after - before))
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1243,7 +1317,9 @@ def main():
                test_discard_scalers_are_paid_for,
                test_hp_threshold_and_conditional_kos_execute,
                test_attack_gates_are_conditional_and_enforced,
-               test_promo_set_codes_parse]:
+               test_promo_set_codes_parse,
+               test_attack_costs_that_were_never_paid,
+               test_heal_scaling_and_spread_are_counted_once]:
         print(f"{fn.__name__}:")
         try:
             fn()

@@ -126,6 +126,8 @@ def conditions_met(effect, pl, opp, source):
         if k == "self_has_energy_type":
             if not any(c["type"] in e for e in source.energy):
                 return False
+        if k == "healed_this_turn" and not getattr(source, "healed_this_turn", False):
+            return False
         if k == "self_full_hp":
             # "If this Pokemon has full HP and would be Knocked Out" is
             # about the state the attack FOUND it in. Checking damage
@@ -335,9 +337,36 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             amt = h.damage if act.filter.get("all") else min(h.damage, (act.amount or 0))
             h.damage -= amt
             healed += amt
+            if amt:
+                # Lurantis ex's Lively Cutter is 60 that becomes 260 "if
+                # this Pokemon was healed during this turn", and nothing
+                # recorded that it had been.
+                h.healed_this_turn = True
         if healed:
             log.append(f"    heal {healed}")
         return healed > 0
+
+    if op == O.DISCARD_SELF_ENERGY:
+        if source is None or not source.energy:
+            return False
+        want = (act.filter or {}).get("type")
+        idxs = [i for i in range(len(source.energy))
+                if not want or want in source.energy[i]]
+        if act.amount is not None:
+            idxs = idxs[:act.amount]
+        for i in sorted(idxs, reverse=True):
+            source.energy.pop(i)
+            pl.discard.append("Energy")
+        if idxs:
+            log.append(f"    {source.name} discards {len(idxs)} Energy")
+        return bool(idxs)
+
+    if op == O.SELF_DAMAGE:
+        if source is not None:
+            source.damage += act.amount or 0
+            log.append(f"    {source.name} takes {act.amount} recoil")
+            return True
+        return False
 
     if op == O.ATTACH_ENERGY:
         src = act.filter.get("from")

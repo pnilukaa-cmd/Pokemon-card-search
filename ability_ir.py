@@ -121,6 +121,8 @@ class Op:
     CONDITIONAL_KO = "conditional_ko"
     DAMAGE_TO_HP_THRESHOLD = "damage_to_hp_threshold"
     ATTACK_GATE = "attack_gate"
+    SELF_DAMAGE = "self_damage"
+    DISCARD_SELF_ENERGY = "discard_self_energy"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -268,6 +270,12 @@ def parse_conditions(text):
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
+    # Lurantis ex's Lively Cutter is 60 that becomes 260 "if this Pokemon
+    # was healed during this turn" -- the payoff the whole heal-punish
+    # archetype is built on, and the clause had no condition kind, so
+    # attack_damage() had nothing to gate the bonus on and paid the base.
+    if re.search(r"was healed during this turn", t, re.I):
+        out.append({"kind": "healed_this_turn"})
     # Spiritomb-style: the Ability protects your ACTIVE, gated on its type,
     # and fires from anywhere in play. Without this the type gate is lost and
     # a Darkness-only retaliator wrongly fires for a Psychic Active.
@@ -818,6 +826,72 @@ def _r(m, text):
     tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
     return [Action(Op.APPLY_CONDITION, None, tgt,
                    {"conditions": sorted({c.lower() for c in conds})})]
+
+
+@rule("attack_bench_spread",
+      r"this attack also does (\d+) damage to (each|\d+) of your opponent'?s "
+      r"benched pok[eé]mon")
+def _r(m, text):
+    """17 attacks carry a Bench spread rider and none of them compiled --
+    Dragapult ex aside, every "also does 30 to a Benched Pokemon" in the
+    pool was doing nothing. Modelled as counters, not attack damage,
+    because the printed reminder says Weakness and Resistance do not
+    apply on the Bench."""
+    amt = int(m.group(1)) // 10
+    who = m.group(2).lower()
+    if who == "each":
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED)]
+    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
+                   {"targets": int(who)})]
+
+
+@rule("attack_snipe_any",
+      r"this attack does (\d+) damage to (each|\d+) of your opponent'?s "
+      r"pok[eé]mon")
+def _r(m, text):
+    """Free-target snipes -- Fezandipiti ex's Cruel Arrow, Electivire ex's
+    Dual Bolt, Cinderace ex's Garnet Volley. Their printed damage field is
+    empty because ALL of the damage is in this clause, so scored on the
+    damage field alone they read as 0-damage attacks."""
+    amt = int(m.group(1)) // 10
+    who = m.group(2).lower()
+    if who == "each":
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL)]
+    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY,
+                   {"targets": int(who)})]
+
+
+@rule("discard_own_energy_cost",
+      r"discard (all|a|an|\d+) (?:(grass|fire|water|lightning|psychic|fighting|"
+      r"darkness|metal|dragon|fairy|colorless) )?energy (?:cards? )?from this "
+      r"pok[eé]mon")
+def _r(m, text):
+    """59 attacks pay for themselves by dumping their own Energy and none
+    of them did. Ceruledge ex's Raging Amethyst and Cynthia's Garchomp
+    ex's Draconic Buster are supposed to discard ALL Energy and rebuild;
+    instead they fired at full price every turn, forever.
+
+    Attacks worded "... for each card you discarded in this way" are a
+    different shape -- the amount is chosen at attack time and both the
+    damage and the payment are handled together in simulate_versus -- so
+    they are left alone here to avoid charging twice.
+    """
+    if re.search(r"discarded in this way", text, re.I):
+        return []
+    n = m.group(1).lower()
+    amount = None if n == "all" else (1 if n in ("a", "an") else int(n))
+    filt = {"type": m.group(2).capitalize()} if m.group(2) else {}
+    return [Action(Op.DISCARD_SELF_ENERGY, amount, Target.SELF, filt)]
+
+
+@rule("self_damage_recoil",
+      r"this pok[eé]mon (?:also )?does (\d+) damage to itself")
+def _r(m, text):
+    """Recoil. 75 attacks in the pool say this and not one of them
+    compiled, so every recoil attacker in the format was swinging for
+    free -- Koraidon ex's Kaiser Tackle took 60 a turn it never paid.
+    """
+    return [Action(Op.SELF_DAMAGE, int(m.group(1)), Target.SELF)]
 
 
 @rule("attack_gate",

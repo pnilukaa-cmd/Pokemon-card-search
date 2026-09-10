@@ -109,7 +109,8 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
-                 "retreat_locked", "attack_locked_by_opponent", "prev_damage")
+                 "retreat_locked", "attack_locked_by_opponent", "prev_damage",
+                 "healed_this_turn")
 
     def __init__(self, name, turn):
         self.name = name
@@ -118,6 +119,9 @@ class InPlay:
         self.energy_names = []    # parallel list of the Energy cards' names
         self.entered_turn = turn
         self.evolved_this_turn = False
+        # Lurantis ex's Lively Cutter is 60 that becomes 260 "if this
+        # Pokemon was healed during this turn".
+        self.healed_this_turn = False
         # Set by attacks that lock their own user out of attacking next
         # turn (N's Zekrom's Rampaging Thunder, Iono's Bellibolt ex's
         # Thunderous Bolt). Without it the AI re-used a 250-damage
@@ -1670,6 +1674,16 @@ def attack_damage(pl, opp, spot, atk, record=True):
     # in the damage field.
     m = _FLAT_DOES_RE.search(text)
     if m and not base:
+        # Same trap as the counter branch above: now that the snipe shape
+        # compiles to a rider that places the counters itself, returning
+        # the number here as well charges the target twice -- and as
+        # attack damage it would wrongly pick up Weakness, which the
+        # card's own reminder text says does not apply on the Bench.
+        eff = _attack_ir(atk)
+        if not eff.unsupported and any(
+                a.op is IR.Op.PLACE_COUNTERS and a.op in ATTACK_RIDER_OPS
+                for a in eff.actions):
+            return 0
         return int(m.group(1))
 
     if not base and text and record:
@@ -2424,6 +2438,13 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
+    # Recoil. 75 attacks in the pool say "this Pokemon also does N
+    # damage to itself" and none of them compiled, so every recoil
+    # attacker in the format was swinging for free.
+    IR.Op.SELF_DAMAGE,
+    # 59 attacks pay for themselves by discarding their own Energy and
+    # none of them did, so they fired at full price every turn.
+    IR.Op.DISCARD_SELF_ENERGY,
     IR.Op.DEVOLVE,
     # Medicham ex's Chi-Atsu / Palossand ex's Barite Jail. These are
     # counters, not attack damage, so they belong on the rider path
@@ -2572,6 +2593,9 @@ def opening_hand(pl):
 
 
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
+    # "healed during this turn" is scoped to the turn it happened in.
+    for _s in ([pl.active] if pl.active else []) + list(pl.bench):
+        _s.healed_this_turn = False
     pl.supporter_played = False
     pl.turn_buff_vs_ex = 0
     pl.turn_buff_any = 0
