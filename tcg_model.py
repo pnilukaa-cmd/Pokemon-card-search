@@ -160,6 +160,25 @@ def is_rule_box(card):
     return bool(subtypes - {"Basic", "Stage 1", "Stage 2", "Restored"})
 
 
+def resistance_of(card):
+    """(type, amount) this Pokemon resists, or None.
+
+    369 of the cards in this pool carry a Resistance and it was not
+    modelled at all -- not even carried on the Pokemon record -- so every
+    attack into a resisted type dealt 30 more damage than the game allows.
+    """
+    for r in card.get("resistances") or []:
+        t = r.get("type")
+        v = str(r.get("value") or "-30").strip()
+        try:
+            amount = abs(int(v.replace("-", "").replace("+", "")))
+        except ValueError:
+            amount = 30
+        if t:
+            return (t, amount)
+    return None
+
+
 def prize_value(card):
     """How many Prize cards the opponent takes when this is Knocked Out.
     Mega Evolution ex give up 3, other ex/V-style rule-box Pokemon give up
@@ -197,7 +216,8 @@ def build_pokemon_info(card):
         return {
             "stage": "Basic", "evolves_from": None, "hp": hp,
             "retreat": 99, "rule_box": False, "prize_value": 1,
-            "types": [ftype], "weakness": None, "attacks": [],
+            "types": [ftype], "weakness": None, "resistance": None,
+            "attacks": [],
             "is_fossil": True,
         }
     attacks = []
@@ -225,6 +245,7 @@ def build_pokemon_info(card):
         "prize_value": prize_value(card),
         "types": card.get("types") or [],
         "weakness": weak,
+        "resistance": resistance_of(card),
         "attacks": attacks,
         "abilities": [classify_ability(ab) for ab in (card.get("abilities") or [])],
     }

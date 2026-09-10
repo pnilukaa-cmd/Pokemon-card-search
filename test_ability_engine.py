@@ -343,6 +343,46 @@ def test_checkup_damage_and_clearing():
     V.pokemon_checkup(p3, o, [])
     check("Paralysis clears after the turn", "paralyzed" not in c.conditions)
 
+    # A Pokemon Checkup resolves BOTH players' Active Pokemon. Resolving
+    # only the turn-ending player's checked each Pokemon once per ROUND
+    # instead of twice, which halved every Poison and Burn in the game and
+    # doubled how long Sleep lasted.
+    mine, theirs = Spot("Toucannon"), Spot("Toucannon")
+    mine.conditions, theirs.conditions = {"poisoned"}, {"poisoned"}
+    pa = FakePlayer("A", POK, EFF, active=mine)
+    pb = FakePlayer("B", POK, EFF, active=theirs)
+    V.pokemon_checkup(pa, pb, [])
+    check("the turn-ending player's Active takes Poison", mine.damage == 10,
+          mine.damage)
+    check("and so does the opponent's", theirs.damage == 10, theirs.damage)
+
+    # ... but Paralysis is cured only at the end of the AFFECTED player's
+    # next turn, so it must survive the checkup in between.
+    mine2, theirs2 = Spot("Toucannon"), Spot("Toucannon")
+    mine2.conditions, theirs2.conditions = set(), {"paralyzed"}
+    pa2 = FakePlayer("A", POK, EFF, active=mine2)
+    pb2 = FakePlayer("B", POK, EFF, active=theirs2)
+    V.pokemon_checkup(pa2, pb2, [])
+    check("Paralysis survives the opponent's checkup",
+          "paralyzed" in theirs2.conditions)
+
+
+def test_resistance_is_applied():
+    """369 cards in this pool carry a Resistance and none of it existed.
+
+    It was not on the Pokemon record at all, so every attack into a
+    resisted type dealt 30 more damage than the game allows.
+    """
+    import tcg_model as M
+    cards = M.load_cards()
+    sc = [c for c in cards if c["name"] == "Scizor ex"][0]
+    info = M.build_pokemon_info(sc)
+    check("Scizor ex resists Grass by 30", info["resistance"] == ("Grass", 30),
+          info["resistance"])
+    dun = [c for c in cards if c["name"] == "Dunsparce"][0]
+    check("a Pokemon with no Resistance reports None",
+          M.build_pokemon_info(dun)["resistance"] is None)
+
 
 def test_conditions_clear_on_retreat_and_evolve():
     import simulate_versus as V
@@ -1365,7 +1405,8 @@ def main():
                test_attack_costs_that_were_never_paid,
                test_heal_scaling_and_spread_are_counted_once,
                test_special_energy_provides_what_it_says,
-               test_rare_candy_bridges_in_the_baseline_sim_too]:
+               test_rare_candy_bridges_in_the_baseline_sim_too,
+               test_resistance_is_applied]:
         print(f"{fn.__name__}:")
         try:
             fn()

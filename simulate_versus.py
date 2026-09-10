@@ -1517,7 +1517,7 @@ def _copied_attack_damage(pl, opp, spot, text):
 
 _DISCARDED_THIS_WAY_RE = _re.compile(r"you discarded in this way", _re.I)
 _DISCARD_CLAUSE_RE = _re.compile(
-    r"discard (?:up to |any amount of )?(\d+)?\s*"
+    r"discard (?:up to |any amount of )?(all|\d+)?\s*"
     r"(?:(basic|special)\s+)?"
     r"(?:(grass|fire|water|lightning|psychic|fighting|darkness|metal|dragon|"
     r"fairy|colorless)\s+)?"
@@ -1534,6 +1534,67 @@ def _energy_type_of(name):
     return m.group(1).capitalize() if m else None
 
 
+_MILL_SCALER_RE = _re.compile(
+    r"discard the top (\d+|)\s*cards? of (?:your|each player'?s) deck", _re.I)
+_MILL_DMG_RE = _re.compile(
+    r"does (\d+) (more )?damage[^.]*?for each (?:(basic )?([a-z]+) )?"
+    r"(?:energy )?card", _re.I)
+
+
+_HAND_NAME_SCALER_RE = _re.compile(
+    r"discard any number of (supporter|item|pok[eé]mon|trainer) cards? that "
+    r"have \"([^\"]+)\" in their name from your hand", _re.I)
+
+
+def hand_name_scaler_damage(pl, atk):
+    """"Discard any number of Supporters with X in their name ... N each".
+
+    Team Rocket's Honchkrow's Rocket Feathers, which scored a flat 60
+    instead of 60 per card discarded.
+    """
+    text = atk.get("text") or ""
+    if not _DISCARDED_THIS_WAY_RE.search(text):
+        return None
+    hm = _HAND_NAME_SCALER_RE.search(text)
+    dm = _DISCARD_DMG_RE.search(text)
+    if not hm or not dm:
+        return None
+    frag = hm.group(2).lower()
+    n = sum(1 for k, name in pl.hand if frag in str(name).lower())
+    base = atk["damage"] or 0
+    return (base + int(dm.group(1)) * n) if dm.group(2) else int(dm.group(1)) * n
+
+
+def mill_scaler_damage(pl, atk):
+    """Damage from "discard the top N of your deck, X per <card> found".
+
+    Five attacks in the pool score this way (Magcargo ex, Quagsire, Mega
+    Abomasnow ex, Misty's Gyarados, Avalugg) and all of them read as their
+    printed base. Counts the ACTUAL top N of the deck rather than guessing,
+    so the number matches what the discard will really turn up.
+    """
+    text = atk.get("text") or ""
+    if not _DISCARDED_THIS_WAY_RE.search(text):
+        return None
+    mm = _MILL_SCALER_RE.search(text)
+    dm = _MILL_DMG_RE.search(text)
+    if not mm or not dm:
+        return None
+    n = int(mm.group(1)) if mm.group(1) else 1   # "the top card" = 1
+    want = (dm.group(4) or "").lower()
+    hits = 0
+    for kind, name in pl.deck[:n]:
+        low = str(name).lower()
+        if want and want not in ("card", "cards"):
+            if want in low:
+                hits += 1
+        elif kind == "Energy":
+            hits += 1
+    per = int(dm.group(1))
+    base = atk["damage"] or 0
+    return (base + per * hits) if dm.group(2) else (per * hits)
+
+
 def _discard_scaler(text):
     """(max_count, per_damage, is_bonus, where, etype, basic_only) or None."""
     if not _DISCARDED_THIS_WAY_RE.search(text or ""):
@@ -1542,7 +1603,12 @@ def _discard_scaler(text):
     dm = _DISCARD_DMG_RE.search(text)
     if not dc or not dm:
         return None
-    cap = int(dc.group(1)) if dc.group(1) else 99
+    # "Discard ALL Fire Energy from this Pokemon ... for each card you
+    # discarded in this way" -- Heatran's Steel Burst and Galvantula's
+    # Discharge. The clause accepted "up to N" and "any amount" but not
+    # "all", so these got neither the scaling damage nor the cost charged.
+    g = (dc.group(1) or "").lower()
+    cap = 99 if g in ("", "all") else int(g)
     basic_only = (dc.group(2) or "").lower() == "basic"
     etype = dc.group(3).capitalize() if dc.group(3) else None
     where = dc.group(4).lower()
@@ -1644,6 +1710,12 @@ def attack_damage(pl, opp, spot, atk, record=True):
     scaled = discard_scaler_damage(pl, spot, atk)
     if scaled is not None:
         return scaled
+    milled = mill_scaler_damage(pl, atk)
+    if milled is not None:
+        return milled
+    handed = hand_name_scaler_damage(pl, atk)
+    if handed is not None:
+        return handed
 
     # "If <condition>, this attack does N more damage" -- a flat bonus
     # gated on something the IR already parses as a condition. Dhelmise's
@@ -2373,9 +2445,17 @@ def do_attack(pl, opp, log):
     if dmg <= 0 and attack_rider_value(pl, opp, atk) <= 0:
         return False
     atk_types = pl.POKEMON[pl.active.name]["types"]
-    weak = opp.POKEMON[opp.active.name]["weakness"]
+    defender = opp.POKEMON[opp.active.name]
+    weak = defender["weakness"]
     if weak and weak in atk_types:
         dmg *= 2
+    # Resistance. 369 cards in this pool carry one and it was not modelled
+    # at all, so every attack into a resisted type dealt 30 more damage
+    # than the game allows. Applied AFTER Weakness, as the rules order it,
+    # and never below zero.
+    resist = defender.get("resistance")
+    if resist and resist[0] in atk_types and not attack_ignores_effects(atk):
+        dmg = max(0, dmg - resist[1])
     dmg += AE.query_damage_buff(pl, pl.active, opp)
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
@@ -2520,6 +2600,21 @@ def attack_side_effects(pl, opp, atk, log):
     # Pay for the damage discard_scaler_damage() already charged the
     # opponent for. Skipping this makes the attack free and repeatable.
     pay_discard_scaler(pl, pl.active, atk, log)
+    mm = _MILL_SCALER_RE.search(text)
+    if mm and _DISCARDED_THIS_WAY_RE.search(text):
+        n = int(mm.group(1)) if mm.group(1) else 1
+        for _ in range(min(n, len(pl.deck))):
+            pl.discard.append(pl.deck.pop(0)[1])
+        log.append(f"  {pl.name}: mills {n} for {atk['name']}")
+    hm = _HAND_NAME_SCALER_RE.search(text)
+    if hm and _DISCARDED_THIS_WAY_RE.search(text):
+        frag = hm.group(2).lower()
+        keep = [(k, n2) for k, n2 in pl.hand if frag not in str(n2).lower()]
+        gone = len(pl.hand) - len(keep)
+        if gone:
+            pl.discard.extend(n2 for k, n2 in pl.hand if frag in str(n2).lower())
+            pl.hand[:] = keep
+            log.append(f"  {pl.name}: discards {gone} named cards for {atk['name']}")
     key = (atk["name"], text)
     eff = _ATTACK_IR_CACHE.get(key)
     if eff is None:
@@ -2577,9 +2672,28 @@ def condition_blocks_attack(pl, log):
 
 
 def pokemon_checkup(pl, opp, log):
-    """Between-turns damage from Poisoned/Burned, plus recovery flips."""
+    """Pokemon Checkup, for BOTH players.
+
+    The official rule is that a Pokemon Checkup happens between every turn
+    and BOTH players resolve Special Conditions on their Active at it. This
+    resolved only the Active of the player whose turn had just ended, so
+    each Pokemon was checked once per ROUND instead of twice:
+
+      * Poison and Burn dealt exactly HALF their real damage.
+      * Asleep got half as many wake-up flips, so Sleep lasted twice as
+        long as it should.
+
+    Paralysis is the exception and stays on the turn-ending player only:
+    it is cured "at the end of the affected player's next turn", which is
+    this checkup and not the one in between.
+    """
+    _checkup_side(pl, opp, log, clear_paralysis=True)
+    _checkup_side(opp, pl, log, clear_paralysis=False)
+
+
+def _checkup_side(pl, opp, log, clear_paralysis):
     a = pl.active
-    if not a or not a.conditions:
+    if not a or not getattr(a, "conditions", None):
         return
     if "poisoned" in a.conditions:
         extra = AE.query_condition_damage_bonus(opp, "poisoned")
@@ -2595,8 +2709,10 @@ def pokemon_checkup(pl, opp, log):
             a.conditions.discard("burned")
     if "asleep" in a.conditions and random.random() < 0.5:
         a.conditions.discard("asleep")
-    # Paralysis clears at the end of the affected player's next turn.
-    a.conditions.discard("paralyzed")
+    # Paralysis clears at the end of the affected player's next turn --
+    # which is this player's own checkup, not the one in between.
+    if clear_paralysis:
+        a.conditions.discard("paralyzed")
 
 
 # --------------------------------------------------------------------------
@@ -2670,20 +2786,28 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         if do_attack(pl, opp, log):
             return "win"
     pokemon_checkup(pl, opp, log)
-    if pl.active and pl.active.damage >= effective_hp(pl, pl.active):
-        taken = pl.POKEMON[pl.active.name]["prize_value"]
-        log.append(f"  {pl.name}: {pl.active.name} KO'd at checkup (+{taken} to {opp.name})")
-        pl.discard.append(pl.active.name)
-        pl.active = None
-        pl.lost_pokemon_last_turn = True
-        opp.prizes -= taken
-        if opp.prizes <= 0:
-            return "loss"
-        if pl.bench:
-            pl.bench.sort(key=lambda p: effective_hp(pl, p) - p.damage, reverse=True)
-            pl.active = pl.bench.pop(0)
-        else:
+    # Either Active can now die at checkup, since both resolve their
+    # conditions there.
+    for side, other, mine in ((pl, opp, True), (opp, pl, False)):
+        if not (side.active and side.active.damage >= effective_hp(side, side.active)):
+            continue
+        taken = side.POKEMON[side.active.name]["prize_value"]
+        log.append(f"  {side.name}: {side.active.name} KO'd at checkup "
+                   f"(+{taken} to {other.name})")
+        side.discard.append(side.active.name)
+        side.active = None
+        side.lost_pokemon_last_turn = True
+        other.prizes -= taken
+        if other.prizes <= 0:
+            return "loss" if mine else "win"
+        if side.bench:
+            side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
+                            reverse=True)
+            side.active = side.bench.pop(0)
+        elif mine:
             return "no_pokemon"
+        else:
+            return "win"
     return None
 
 
