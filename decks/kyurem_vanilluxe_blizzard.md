@@ -143,6 +143,72 @@ Best: Feraligatr 82.0%, T.R. Wobbuffet 76.5%, Salazzle ex 74.0%,
 Crabominable 69.5%. Worst: Panic Poison 30.0%, Steven's Carbink 34.5%,
 the Kangaskhan flip deck 34.5%.
 
+## Counter engines tested as Snow Coating partners
+
+Asked directly whether `Hide 'n' Sneak` pairs with Snow Coating, and
+whether any **Ability** can place counters from the Bench. Both were
+searched properly and the promising ones were measured.
+
+**There are 22 Abilities in Standard that place damage counters.** These
+are the ones that work from the Bench without spending your attack:
+
+| Ability | | |
+| --- | --- | --- |
+| **`Dusknoir` PRE 37** — Cursed Blast | **13 counters (130 damage)** on 1 of their Pokémon, then this Pokémon is Knocked Out | The biggest single placement in the format. Doubled: **260** |
+| `Dusclops` PRE 36 — Cursed Blast | 5 counters, same self-KO | The Stage 1 version |
+| **`Froslass` TWM 53** — Freezing Shroud | During Checkup, **1 counter on each Pokémon that has an Ability**, both sides, except Froslass | Passive, free, board-wide, from the Bench |
+| `T.R. Ampharos` DRI 74 — Darkest Impulse | 4 counters whenever *they* evolve | Reactive |
+| `T.R. Crobat ex` DRI 122 — Biting Spree | counters on 2 of their Pokémon when you evolve into it | One-shot |
+| `T.R. Dugtrio` ASC 101 — Holes | 2 counters whenever their Active moves to the Bench | Pairs with your own `Boss's Orders` |
+| `T.R. Tyranitar` DRI 96 — Sand Stream | 2 counters on each of their **Basics** each Checkup | Must be Active, so it is not a Bench engine |
+
+### Froslass — right shape, wrong rate
+
+`Froslass` is Water, so it costs no second Energy type, and the deck's
+key Pokémon — Vanilluxe, Kyurem ex, Vanillite — **have no Abilities**, so
+Freezing Shroud does not touch them. It looked ideal.
+
+| | mean | median | winning |
+| --- | --- | --- | --- |
+| this deck | **51.4%** | 51.2% | **17/34** |
+| + 4 Snorunt / 2 Froslass | 48.6% | 45.2% | 12/34 |
+
+**−2.8 points.** One counter per turn, only on Pokémon that happen to
+have Abilities, is not worth six slots. Note it also forced `Dudunsparce`
+out of the deck — Run Away Draw is an Ability, so the draw engine would
+have been damaging itself every Checkup.
+
+### Hide 'n' Sneak — the maths is real and the deck is not
+
+`Sinistcha` PBL 6's `Matcha Spin` places **4 counters on each of their
+Pokémon**; Snow Coating doubles that to **8 counters — 80 damage on every
+one of their Pokémon**, about **480 across a full board from two
+attacks.** That is a genuine combo on paper.
+
+**Measured: 22.5% mean, 1/34 winning.**
+
+Matcha Spin is gated on **6 Hide 'n' Sneak Pokémon in your discard
+pile**, which needs the entire twelve-card fuel package *and* the
+discard outlets to get them there — and then a Stage 2 Water line on top.
+Two complete engines do not fit in one 60, and the Grass/Water split
+makes it worse.
+
+**The better version of the same idea, if you want to build it:**
+`Sinistcha` **TWM 22** — a different card from PBL 6 — has
+`Cursed Drop` for a single `Grass`: *"put 4 damage counters on your
+opponent's Pokémon in any way you like."* **Same four counters, no fuel
+gate at all**, and you choose where they land. That is strictly the
+better Snow Coating partner, at the cost of going Grass instead of Water.
+
+### The pattern, now measured three times
+
+Every attempt to bolt a second counter engine onto this deck has lost:
+Froslass **−2.8**, Hide 'n' Sneak **−28.9**, and in an earlier shell the
+Vanilluxe line itself was worth **0.0** next to Palossand ex. A second
+package costs six to eight slots, and this deck does not have six to
+eight slots spare — it is already paying for a Stage 2 line and fifteen
+Energy.
+
 ## The honest ceiling
 
 This is a middle-of-the-field deck, not a top one — the Scovillain ex
