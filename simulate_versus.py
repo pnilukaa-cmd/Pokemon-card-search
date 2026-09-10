@@ -1089,6 +1089,11 @@ def trainer_effect_ir(name):
     """Compiled IR for a Trainer, or None if nothing useful parses."""
     if name in _TRAINER_IR_CACHE:
         return _TRAINER_IR_CACHE[name]
+    # The card index is filled by run_game. Anything that asks before then
+    # (load_model's coverage report does) would otherwise cache a None for
+    # every Trainer and the IR fallback would be dead for the whole run.
+    if not _CARDS_BY_NAME:
+        _CARDS_BY_NAME.update(M.build_card_index(M.load_cards())[0])
     card = _CARDS_BY_NAME.get(name)
     card = card[0] if isinstance(card, list) and card else card
     eff = None
@@ -1151,6 +1156,17 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     actions = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
     if not actions:
         return False
+    # A Trainer whose text is a coin flip has to actually flip. Crushing
+    # Hammer is "Flip a coin. If heads, discard an Energy" and was resolving
+    # unconditionally once it resolved at all.
+    if getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
+        pl.remove_from_hand(kind, name)
+        pl.discard.append(name)
+        if kind == "Supporter":
+            pl.supporter_played = True
+            pl.played_supporters_this_turn.add(name)
+        log.append(f"  {pl.name}: {name} -- flipped tails")
+        return True
 
     def make_inplay(n):
         return InPlay(n, turn)
@@ -1200,6 +1216,9 @@ _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
 _COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
 _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
+_MORE_DMG_FLIP_RE = _re.compile(
+    r"flip a coin[^.]{0,30}\.?\s*if heads, this attack does (\d+) more damage",
+    _re.I)
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 
 
@@ -1727,6 +1746,16 @@ def attack_damage(pl, opp, spot, atk, record=True):
         if eff.conditions:
             return base + (int(m.group(1))
                            if AE.conditions_met(eff, pl, opp, spot) else 0)
+
+    # "Flip a coin. If heads, this attack does N more damage." The
+    # conditional-bonus path below needs a parsed CONDITION to gate on and
+    # a coin flip is not one, so these silently paid base damage. Now
+    # actually flipped, at the odds parse_chance reports.
+    m = _MORE_DMG_FLIP_RE.search(text)
+    if m and not _FOR_EACH_RE.search(text):
+        odds = _attack_ir(atk).chance
+        if odds < 1.0:
+            return base + (int(m.group(1)) if random.random() < odds else 0)
 
     # Coin-flip attacks: actually flip.
     if _FLIP_UNTIL_TAILS_RE.search(text):
@@ -2895,8 +2924,13 @@ def compile_effects_for(POKEMON, resolved_cards):
 def load_model(path, label):
     text = open(path).read()
     POKEMON, DECKLIST, pooled, unresolved = M.build_deck_model(text)
+    # A Trainer outside KNOWN_TRAINERS is still played if the IR can
+    # compile its text, so listing every non-registry name as "no modeled
+    # effect" over-reports and invites acting on a gap that is not there.
     unmodeled = sorted({n for k, n in DECKLIST
-                        if k in ("Item", "Supporter") and n not in KNOWN_TRAINERS})
+                        if k in ("Item", "Supporter")
+                        and n not in KNOWN_TRAINERS
+                        and trainer_effect_ir(n) is None})
     eff_map = compile_effects_for(POKEMON, M.resolve_deck_cards(text))
     live = sorted(f"{n}/{e.name}" for n, es in eff_map.items()
                   for e in es if not e.unsupported)

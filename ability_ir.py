@@ -328,12 +328,16 @@ def parse_chance(text):
     calculations, not ability gates, so they are left at 1.0 here.
     """
     t = text.lower()
-    m = re.search(r"flip (\d+) coins?[^.]{0,40}if all of them are heads", t)
+    # The printed phrasing puts a FULL STOP between the clauses -- "Flip a
+    # coin. If heads, ..." -- and [^.] cannot cross one. Every card in this
+    # pool written that way (158 of them) parsed as chance 1.0, so EVERY
+    # coin flip in the game was a guaranteed success: Ekans always
+    # Confused, Crushing Hammer always discarded, and a coin-flip deck in
+    # decks/ was measured never missing a flip.
+    m = re.search(r"flip (\d+) coins?[^.]{0,40}\.?\s*if all of them are heads", t)
     if m:
         return 0.5 ** int(m.group(1))
-    if re.search(r"flip a coin[^.]{0,30}if heads", t):
-        return 0.5
-    if re.search(r"flip a coin[^.]{0,30}if tails", t):
+    if re.search(r"flip a coin[^.]{0,30}\.?\s*if (heads|tails)", t):
         return 0.5
     m = re.search(r"flip (\d+) coins", t)
     if m and "for each heads" not in t:
@@ -429,6 +433,12 @@ def _r(m, text):
     # the only thing that matters about the effect: the resulting count.
     if re.search(r"(?:have your opponent shuffle|your opponent shuffles) their hand",
                  text, re.I):
+        return []
+    # Unfair Stamp's draw is lopsided ("you draw 5, your opponent draws 2")
+    # and asymmetric_hand_reset owns it. Left here as well it added a
+    # symmetric "both draw 5" on top, handing the opponent three free cards
+    # off a card whose entire point is that the draw is one-sided.
+    if re.search(r"then, you draw \d+ cards?, and your opponent draws", text, re.I):
         return []
     if re.search(r"each player draw|your opponent .{0,20}draw|they draw", text, re.I):
         return [Action(Op.DRAW, int(m.group(1)), Target.BOTH_ALL)]
@@ -585,6 +595,11 @@ def _r(m, text):
       r"search your deck for (?:up to )?(\d+|a|an)? ?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
 def _r(m, text):
     if "onto your bench" in text.lower():
+        return []
+    # Crispin searches TWO and puts only ONE in hand, attaching the other.
+    # search_energy_split owns that shape; matching here as well put both
+    # into hand and then attached a third.
+    if re.search(r"put 1 of them into your hand\. attach the other", text, re.I):
         return []
     return [Action(Op.SEARCH_TO_HAND, _num(m.group(1)), Target.SELF,
                    dict(_search_filter(m.group(2)), kind=m.group(3).lower()))]
@@ -861,6 +876,39 @@ def _r(m, text):
                    {"targets": int(who)})]
 
 
+@rule("asymmetric_hand_reset",
+      r"each player shuffles their hand into their deck\. then, you draw "
+      r"(\d+) cards?, and your opponent draws (\d+) cards?")
+def _r(m, text):
+    """Unfair Stamp. The generic "each player draws N" rule read this as
+    BOTH players drawing 5, handing the opponent three free cards off a
+    card whose whole point is that the draw is lopsided in your favour."""
+    return [Action(Op.DRAW, int(m.group(1)), Target.SELF),
+            Action(Op.SET_OPPONENT_HAND, int(m.group(2)), Target.OPPONENT)]
+
+
+@rule("coin_flip_discard_opponent_energy",
+      r"flip a coin\. if heads, discard an energy from 1 of your "
+      r"opponent'?s pok[eé]mon")
+def _r(m, text):
+    """Crushing Hammer -- four copies in both of the current top meta
+    Dragapult lists, and it compiled to nothing at all."""
+    eff = [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ANY)]
+    return eff
+
+
+@rule("search_energy_split",
+      r"search your deck for up to 2 basic energy cards of different types,"
+      r" reveal them, and put 1 of them into your hand\. attach the other")
+def _r(m, text):
+    """Crispin. Only the search half compiled, so the card fetched Energy
+    and never accelerated any -- and acceleration is the entire reason the
+    current Dragapult lists play it, to pay Phantom Dive's two colours."""
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF,
+                   {"stage": "Basic", "kind": "energy"}),
+            Action(Op.ATTACH_ENERGY, 1, Target.YOUR_ANY, {"from": "deck"})]
+
+
 @rule("discard_own_energy_cost",
       r"discard (all|a|an|\d+) (?:(grass|fire|water|lightning|psychic|fighting|"
       r"darkness|metal|dragon|fairy|colorless) )?energy (?:cards? )?from this "
@@ -1084,6 +1132,13 @@ def _r(m, text):
 @rule("attach_energy_from_discard_loose",
       r"attach up to (\d+) basic energy cards? from your discard pile")
 def _r(m, text):
+    # attach_named_energy_from_discard matches the same sentence and
+    # produces its own attach, so emitting one here too doubled the
+    # acceleration -- Rosa's Encouragement attached FOUR Energy off a card
+    # that says up to two.
+    if re.search(r"attach up to \d+ basic energy cards? from your discard "
+                 r"pile to 1 of your", text, re.I):
+        return []
     return [Action(Op.ATTACH_ENERGY, int(m.group(1)), Target.YOUR_ANY, {"from": "discard"})]
 
 

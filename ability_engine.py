@@ -514,6 +514,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.DISCARD_ENERGY_FROM_OPPONENT:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        # "Discard an Energy from 1 of your opponent's Pokemon" lets you
+        # CHOOSE which. Taking hits[:1] took whatever happened to be first
+        # -- usually an Active with nothing attached -- so the card fizzled
+        # and was never even spent. Crushing Hammer was attempted 255 times
+        # in 30 games and resolved zero.
+        if act.target in (IR.Target.OPP_ANY, IR.Target.OPP_ALL):
+            hits = sorted(hits, key=lambda h: -len(getattr(h, "energy", [])))
         n = 0
         for h in hits[:1]:
             for _ in range(act.amount or 1):

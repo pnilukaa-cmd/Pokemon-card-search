@@ -1360,6 +1360,77 @@ def test_rare_candy_bridges_in_the_baseline_sim_too():
 
 
 
+def test_coin_flips_are_actually_flipped():
+    """Every coin flip in the pool was a guaranteed success.
+
+    parse_chance matched "flip a coin[^.]{0,30}if heads" -- but the printed
+    phrasing puts a FULL STOP between the clauses, and [^.] cannot cross
+    one. All 158 cards written that way parsed as chance 1.0: Ekans always
+    Confused, Crushing Hammer always discarded an Energy, and an entire
+    coin-flip deck in decks/ was measured never missing a flip.
+    """
+    check("a single flip is 0.5",
+          IR.parse_chance("Flip a coin. If heads, discard an Energy.") == 0.5)
+    check("two coins, all heads, is 0.25",
+          IR.parse_chance("Flip 2 coins. If all of them are heads, this "
+                          "attack does 100 more damage.") == 0.25)
+    check("flip-until-tails is a damage calculation, not a gate",
+          IR.parse_chance("Flip a coin until you get tails.") == 1.0)
+    check("damage-per-heads is likewise not a gate",
+          IR.parse_chance("Flip 2 coins. This attack does 90 damage for "
+                          "each heads.") == 1.0)
+    check("text with no flip is certain",
+          IR.parse_chance("Your opponent's Active Pokemon is now Confused.")
+          == 1.0)
+
+    # And the damage side of the same clause: the conditional-bonus path
+    # needs a parsed CONDITION to gate on, and a coin flip is not one, so
+    # these silently paid base damage.
+    import random
+    import simulate_versus as SV
+    me, op, spot, atks = _ex_board("Amoonguss ex")
+    atk = atks["Champignon's Swing"]
+    random.seed(1)
+    vals = {SV.attack_damage(me, op, spot, atk, record=False)
+            for _ in range(400)}
+    check("a flipped damage bonus lands on both outcomes",
+          vals == {100, 180}, sorted(vals))
+
+
+def test_meta_trainers_compile_once_and_correctly():
+    """Four Trainers from the current top meta lists, all mis-modelled.
+
+    Overlapping rules ACCUMULATE actions and the dedupe only drops exactly
+    identical ones, so two rules matching the same sentence with slightly
+    different arguments both fired.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    by_name, _ = M.build_card_index(M.load_cards())
+    SV._CARDS_BY_NAME.update(by_name)
+    SV._TRAINER_IR_CACHE.clear()
+
+    def ops(name):
+        eff = SV.trainer_effect_ir(name)
+        return [] if eff is None else [(str(a.op), a.amount) for a in eff.actions]
+
+    check("Crushing Hammer exists at all",
+          ops("Crushing Hammer") == [("discard_energy_from_opponent", 1)],
+          ops("Crushing Hammer"))
+    check("and it is a coin flip",
+          SV.trainer_effect_ir("Crushing Hammer").chance == 0.5)
+    check("Rosa's Encouragement attaches 2, not 4",
+          ops("Rosa's Encouragement") == [("attach_energy", 2)],
+          ops("Rosa's Encouragement"))
+    check("Crispin searches 1 and attaches 1",
+          ops("Crispin") == [("search_to_hand", 1), ("attach_energy", 1)],
+          ops("Crispin"))
+    check("Unfair Stamp draws 5 for YOU and sets the opponent to 2",
+          ops("Unfair Stamp") == [("draw", 5), ("set_opponent_hand", 2)],
+          ops("Unfair Stamp"))
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1406,7 +1477,9 @@ def main():
                test_heal_scaling_and_spread_are_counted_once,
                test_special_energy_provides_what_it_says,
                test_rare_candy_bridges_in_the_baseline_sim_too,
-               test_resistance_is_applied]:
+               test_resistance_is_applied,
+               test_coin_flips_are_actually_flipped,
+               test_meta_trainers_compile_once_and_correctly]:
         print(f"{fn.__name__}:")
         try:
             fn()
