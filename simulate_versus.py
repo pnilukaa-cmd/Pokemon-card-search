@@ -87,6 +87,7 @@ Usage
 """
 import hashlib
 import os
+import re as _re
 import random
 import sys
 import statistics
@@ -231,17 +232,56 @@ def build_retaliate_index(cards):
 _CARDS_BY_NAME = {}
 
 
-def energy_types_for(card_name, cards_by_name):
-    """What types a single Energy card provides."""
+_PROVIDES_ONE_RE = _re.compile(
+    r"it provides (" + "|".join(M.REAL_TYPES) + r") Energy", _re.I)
+_PROVIDES_EVERY_RE = _re.compile(r"provides every type of energy", _re.I)
+_PROVIDES_N_RE = _re.compile(
+    r"provides (\d+) in any combination of (.+?)(?:\.|$)", _re.I)
+
+
+def energy_provisions(card_name, cards_by_name):
+    """The Energy a single card provides, as one entry PER Energy.
+
+    Special Energy was previously all treated as "any type", because the
+    fallback for an unrecognised card was the whole type list. Every
+    Special Energy in this pool hit that fallback -- Shadowy Darkness
+    Energy says plainly "it provides Darkness Energy" and was being
+    counted as able to pay a Fire cost. It also ignored the ones that
+    provide more than one: Team Rocket's Energy provides TWO, which is
+    the entire reason a 3-Energy attack like Spinning Tail is playable.
+    """
     m = M.BASIC_ENERGY_RE.match(card_name)
     if m:
-        return [m.group(1)]
+        return [[m.group(1)]]
     card = (cards_by_name.get(card_name) or [None])[0]
-    if card:
-        listed = card.get("types") or []
-        if listed:
-            return list(listed)
-    return list(M.REAL_TYPES)  # unknown Special Energy: treat as any
+    if not card:
+        return [list(M.REAL_TYPES)]
+    text = " ".join(card.get("rules") or [])
+
+    m = _PROVIDES_N_RE.search(text)
+    if m:
+        types = [t.capitalize() for t in
+                 _re.findall(r"(" + "|".join(M.REAL_TYPES) + r") Energy",
+                             m.group(2), _re.I)]
+        return [types or list(M.REAL_TYPES)] * int(m.group(1))
+    # "provides every type ... but only 1 at a time" -- and the two cards
+    # that upgrade INTO that clause conditionally (Prism on a Basic, Neo
+    # Upper on a Stage 2) are treated as having met it, which is how both
+    # are actually played.
+    if _PROVIDES_EVERY_RE.search(text):
+        return [list(M.REAL_TYPES)]
+    m = _PROVIDES_ONE_RE.search(text)
+    if m:
+        return [[m.group(1).capitalize()]]
+    listed = card.get("types") or []
+    if listed:
+        return [list(listed)]
+    return [list(M.REAL_TYPES)]
+
+
+def energy_types_for(card_name, cards_by_name):
+    """What types the FIRST Energy provided by this card covers."""
+    return energy_provisions(card_name, cards_by_name)[0]
 
 
 def effective_cost(pl, spot, cost, opp=None):
@@ -669,7 +709,7 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.remove_from_hand("Item", "N's PP Up")
         pl.discard.append("N's PP Up")
         pl.discard.remove(e)
-        target.energy.append(energy_types_for(e, _CARDS_BY_NAME))
+        target.energy.extend(energy_provisions(e, _CARDS_BY_NAME))
         target.energy_names.append(e)
         log.append(f"  {pl.name}: N's PP Up -> {e} onto {target.name}")
 
@@ -1146,8 +1186,6 @@ KNOWN_TRAINERS = {
 # --------------------------------------------------------------------------
 # Energy attachment, retreat, attacking
 # --------------------------------------------------------------------------
-
-import re as _re
 
 # Scaling clauses this engine understands. Anything else falls back to the
 # attack's printed base damage, and the attack name is recorded in
@@ -2084,7 +2122,7 @@ def attach_energy(pl, cards_by_name, log):
     if target is None:
         return
     kind, name = pl.hand.pop(idx)
-    target.energy.append(energy_types_for(name, cards_by_name))
+    target.energy.extend(energy_provisions(name, cards_by_name))
     target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
 

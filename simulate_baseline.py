@@ -179,6 +179,20 @@ def try_evolve(state, POKEMON, turn, log):
             use_draw_abilities(state, POKEMON, log, evolved_name=name)
 
 
+_POOL_EVOLVES_FROM = None
+
+
+def _pool_evolves_from(name):
+    """What a card evolves from, looked up across the whole card pool."""
+    global _POOL_EVOLVES_FROM
+    if _POOL_EVOLVES_FROM is None:
+        _POOL_EVOLVES_FROM = {}
+        for c in M.load_cards():
+            if c.get("supertype") == "Pokémon":
+                _POOL_EVOLVES_FROM.setdefault(c["name"], c.get("evolvesFrom"))
+    return _POOL_EVOLVES_FROM.get(name)
+
+
 def rare_candy_targets(state, POKEMON, turn):
     if turn <= 1:
         return []
@@ -193,8 +207,17 @@ def rare_candy_targets(state, POKEMON, turn):
     for loc, basic_name in candidates:
         for s2name in stage2_in_hand:
             s1name = POKEMON.get(s2name, {}).get("evolves_from")
+            # Rare Candy says "skipping the Stage 1", so the middle card
+            # only has to exist in the CARD POOL -- and the usual Rare
+            # Candy build does not run it. Reading it out of POKEMON (built
+            # from the decklist) made Rare Candy silently refuse, exactly
+            # as it did in simulate_versus: N's Vanilluxe reported 0.0%
+            # in play by turn 6 in a deck the match simulator plays it in
+            # every game.
             s1info = POKEMON.get(s1name) if s1name else None
-            if s1info and s1info.get("evolves_from") == basic_name:
+            s1_from = (s1info.get("evolves_from") if s1info
+                       else _pool_evolves_from(s1name))
+            if s1_from == basic_name:
                 results.append((loc, basic_name, s2name))
     return results
 

@@ -1276,6 +1276,50 @@ def test_heal_scaling_and_spread_are_counted_once():
 
 
 
+def test_special_energy_provides_what_it_says():
+    """Every Special Energy in the pool was treated as "any type".
+
+    The fallback for an unrecognised Energy card was the whole type list,
+    and all 18 Special Energy hit it -- Shadowy Darkness Energy says
+    plainly "it provides Darkness Energy" and was being counted as able to
+    pay a Fire cost. The opposite error sat next to it: Team Rocket's
+    Energy provides TWO, and was attached as one, which is the whole
+    reason a three-Energy attack on a Stage 1 is castable.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    by_name, _ = M.build_card_index(M.load_cards())
+    check("a typed Special Energy provides only its type",
+          SV.energy_provisions("Shadowy Darkness Energy", by_name)
+          == [["Darkness"]],
+          SV.energy_provisions("Shadowy Darkness Energy", by_name))
+    check("a Colorless one likewise",
+          SV.energy_provisions("Spiky Energy", by_name) == [["Colorless"]])
+    tr = SV.energy_provisions("Team Rocket's Energy", by_name)
+    check("Team Rocket's Energy provides TWO", len(tr) == 2, tr)
+    check("and only Psychic or Darkness",
+          all(sorted(x) == ["Darkness", "Psychic"] for x in tr), tr)
+    check("Prism still provides every type, one at a time",
+          len(SV.energy_provisions("Prism Energy", by_name)) == 1
+          and len(SV.energy_provisions("Prism Energy", by_name)[0]) > 5)
+    check("Spinning Tail is payable off two Team Rocket's Energy",
+          SV.can_pay(["Darkness", "Darkness", "Darkness"], tr + tr))
+
+
+def test_rare_candy_bridges_in_the_baseline_sim_too():
+    """The same Stage-1 lookup bug lived in simulate_baseline.
+
+    It reported N's Vanilluxe at 0.0% in play by turn 6 for a deck the
+    match simulator plays it in every game -- the two simulators
+    disagreeing is the signal that one of them is wrong.
+    """
+    import simulate_baseline as SB
+    check("the pool knows what N's Vanilluxe's Stage 1 evolves from",
+          SB._pool_evolves_from("N's Vanillish") == "N's Vanillite",
+          SB._pool_evolves_from("N's Vanillish"))
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1319,7 +1363,9 @@ def main():
                test_attack_gates_are_conditional_and_enforced,
                test_promo_set_codes_parse,
                test_attack_costs_that_were_never_paid,
-               test_heal_scaling_and_spread_are_counted_once]:
+               test_heal_scaling_and_spread_are_counted_once,
+               test_special_energy_provides_what_it_says,
+               test_rare_candy_bridges_in_the_baseline_sim_too]:
         print(f"{fn.__name__}:")
         try:
             fn()

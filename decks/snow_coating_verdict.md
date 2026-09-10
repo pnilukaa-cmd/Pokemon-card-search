@@ -135,7 +135,48 @@ ever touches the Active Pokémon — a doubler that reads "each of your
 opponent's Pokémon" gains nothing from a single-target stack that is
 already lethal on its own.
 
-## Verdict
+## UPDATE — the verdict changed, and here is why
+
+Everything above was measured on an engine in which **15 free-target
+spread attacks compiled to nothing at all.** One of them is
+`Team Rocket's Arbok`'s **`Spinning Tail`**: `D``D``D` for **30 damage to
+each of your opponent's Pokémon** — 180 across a full board, every turn,
+repeatable. It placed zero damage in every game any of the eight shells
+above ever played.
+
+That is not an incidental card. It is the single best input Snow Coating
+has in the format, and the doubler was being judged without it.
+
+Rebuilt around it (see
+[tr_arbok_yveltal_snow_coating.md](tr_arbok_yveltal_snow_coating.md)),
+with `Yveltal` SFA 35's one-Energy `Corrosive Winds` as the follow-up and
+`N's PP Up` charging Vanilluxe on the Bench so it can attack the turn it
+switches in:
+
+| shell | with | control | delta |
+| --- | --- | --- | --- |
+| Arbok, before Yveltal fixed it | 32.4% | 27.0% | **+5.4** |
+| *second seed* | 32.3% | 26.8% | **+5.5** |
+| **Arbok / Yveltal (the good version)** | **50.8%** | 50.0% | **+0.8** |
+| *second seed* | 50.7% | 49.1% | **+1.6** |
+
+Read those four rows together, because they say two different things. In
+the weak shell the doubler is worth five points — but that is Snow Coating
+compensating for a deck that could not attack on 29% of its turns. Once
+the shell actually works, the same A/B collapses to about a point.
+
+Snow Coating fires 99 times per 210 games in that deck for a **mean of
++185 damage, max +560**, Knocking Out a mean of 0.65 Pokémon per use and
+as many as **5 at once**. It is a real effect. It is just that the deck
+built to enable it is roughly as good without it.
+
+**So: it is no longer a trap, and it is still not a build-around.** Nine
+shells, and the honest summary is that Snow Coating now pays for its six
+slots instead of costing three to sixteen points. The `win-more` reading
+below is still the right one — the difference is that the board it wants
+can now actually be built.
+
+## Verdict (as measured before the spread fix)
 
 Snow Coating is a **win-more** attack. It is worth exactly what is already
 on the board, and the decks that put a lot on the board are decks that
