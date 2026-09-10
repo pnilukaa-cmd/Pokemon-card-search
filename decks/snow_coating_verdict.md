@@ -89,6 +89,12 @@ attacker — a Water deck paying `Water``Colorless``Colorless` for 120 plus
 Second seed, same field, 200 games each: Dragapult −4.1, combo −16.2.
 Both deltas reproduce.
 
+**Re-measured after the ex audit**, which changed damage on a large number
+of cards (typed Energy scalers, discard scalers, attack gates): Dragapult
+51.6% vs 55.0% (**−3.4**), combo 22.8% vs 39.1% (**−16.3**). The verdict
+is unchanged on the corrected engine, and the monotonic relationship —
+more Snow Coating, worse deck — survives it.
+
 The last row is the informative one. **The more Snow Coating a deck runs,
 the worse it does** — 4 Vanillite / 3 Vanilluxe is a 15-point hole, where
 3/2 in a better shell is a 5-point hole. The relationship is monotonic,

@@ -1,7 +1,21 @@
 # Mega Heracross ex / Sinistcha — Spill the Tea
 
-**66.4% mean / 65.0% median / 32-34 winning**, and 65.3% / 65.5% / 30-34
-on an independent seed. The strongest deck in this folder.
+> **CORRECTION (re-measured after the ex audit).** The numbers first
+> recorded here — 66.4% mean, 32 of 34 winning — were measured on an
+> engine in which **`Spill the Tea` never paid its cost.** The attack
+> reads "discard up to 3 Grass Energy cards from your Pokémon. This
+> attack does 70 damage for each card **you discarded in this way**",
+> and the simulator credited the damage without performing the discard.
+> It was free 210 every turn.
+>
+> With the cost charged, this deck measures **49.3% mean / 49.0% median /
+> 15 of 33 winning**. It is a fine deck, not the strongest in the folder,
+> and the recycling engine below is what keeps it playable rather than
+> what makes it dominant: `Tea Server` returning one Basic Grass Energy
+> per turn does not refill three.
+>
+> Everything below this line is the original write-up. The card reasoning
+> stands; the numbers in it do not.
 
 It arrived by accident, and the honest version of how is worth more than
 the list: the deck was built to test `Munkidori` laundering damage off a
