@@ -165,17 +165,46 @@ def consistency_basics(cards, prefer_types=()):
 
     # Cheap to retreat first, then durable: this body is support, not an
     # attacker, and one that gets stuck in the Active Spot is a liability.
+    def payable(c):
+        """Can every attack on this filler be paid by the deck's Energy?"""
+        for a in c.get("attacks") or []:
+            for cost in a.get("cost") or []:
+                if cost != "Colorless" and cost not in prefer_types:
+                    return False
+        return True
+
     def rank(c):
-        # On-type first: an off-type filler drags UNCASTABLE warnings into
-        # an otherwise clean list and cannot share the Energy line.
-        off = 0 if set(c.get("types") or []) & set(prefer_types) else 1
-        return (off, int(c.get("convertedRetreatCost") or 9),
+        # Three tiers, not two. On-type is best, but the fallback that
+        # matters is whether the filler's attacks are PAYABLE at all: a
+        # Colorless-cost body shares any Energy line, while an off-type
+        # one drags UNCASTABLE warnings into an otherwise clean list.
+        # Ranking only on type put three Ponyta (Fire, in a Fighting deck)
+        # ahead of Dunsparce, whose attacks cost Colorless.
+        # Payability comes FIRST, on-type second. A Pokemon's own type and
+        # its attack costs are not the same thing: Zarude is a Grass
+        # Pokemon whose every attack costs Darkness, so checking type
+        # first waved it into a Grass deck it cannot attack in.
+        on_type = 0 if set(c.get("types") or []) & set(prefer_types) else 1
+        return (0 if payable(c) else 1, on_type,
+                int(c.get("convertedRetreatCost") or 9),
                 -int(c.get("hp") or 0))
 
-    out.sort(key=rank)
-    tier2.sort(key=rank)
-    tier3.sort(key=rank)
-    return out + tier2 + tier3
+    # Sort the three draw-tiers TOGETHER, with payability as the primary
+    # key. Sorting each list separately and concatenating meant a
+    # draw-tier-2 Ponyta outranked a draw-tier-3 Dunsparce even though
+    # Ponyta's attacks are uncastable in the deck and Dunsparce's cost
+    # Colorless -- the draw tier is a nicety, being able to attack is not.
+    tagged = ([(0, c) for c in out] + [(1, c) for c in tier2]
+              + [(2, c) for c in tier3])
+    tagged.sort(key=lambda t: (rank(t[1])[0], rank(t[1])[1], t[0])
+              + rank(t[1])[2:])
+    ranked, seen_names = [], set()
+    for _, c in tagged:
+        if c["name"] in seen_names:
+            continue
+        seen_names.add(c["name"])
+        ranked.append(c)
+    return ranked
 
 
 def build(seed_name, set_code=None, number=None, cards=None):
@@ -215,6 +244,41 @@ def build(seed_name, set_code=None, number=None, cards=None):
                 continue
             pokemon.append((2 if i == len(pchain) - 1 else 3, c))
         notes.append(f"mechanic partner: {partner['name']}")
+
+    # An attack gate is a deckbuilding requirement, not a nicety. Team
+    # Rocket's Mewtwo ex cannot attack at all unless four Team Rocket's
+    # Pokemon are in play, and a shell built without them produced a deck
+    # that was blocked from attacking on 738 turns out of 120 games.
+    for ab in (seed.get("abilities") or []):
+        eff = IR.compile_effect("ability", ab.get("name") or "",
+                                ab.get("text") or "")
+        for act in eff.actions:
+            if act.op is not IR.Op.ATTACK_GATE:
+                continue
+            fam = (act.filter or {}).get("family", "")
+            if not fam:
+                continue
+            have = sum(n for n, c in pokemon if fam.lower() in c["name"].lower())
+            pool = sorted(
+                (c for c in cards
+                 if c.get("supertype") == "Pokémon"
+                 and fam.lower() in c["name"].lower()
+                 and M.stage_of(c) == "Basic"
+                 and not ({"ex", "MEGA", "V"} & set(c.get("subtypes") or []))
+                 and not any(c["name"] == p["name"] for _, p in pokemon)),
+                key=lambda c: int(c.get("convertedRetreatCost") or 9))
+            seen_f = set()
+            for c in pool:
+                if have >= (act.amount or 0) + 2:
+                    break
+                if c["name"] in seen_f:
+                    continue
+                seen_f.add(c["name"])
+                take = min(MAX_COPIES, (act.amount or 0) + 2 - have)
+                pokemon.append((take, c))
+                have += take
+                notes.append(f"{fam} Pokemon added to satisfy "
+                             f"{ab.get('name')}: {c['name']} x{take}")
 
     # Basics floor: a deck that mulligans is not a deck. Four Basics is a
     # ~60% mulligan rate, which is what a naive build lands on whenever the
@@ -263,6 +327,23 @@ def build(seed_name, set_code=None, number=None, cards=None):
     for i, t in enumerate(types):
         n = per + (energy_total - per * len(types) if i == 0 else 0)
         energy.append((n, f"Basic {t} Energy"))
+
+    # A two-colour Basic Energy line cannot pay a three-type attack cost,
+    # and several ex have one: Alolan Exeggutor ex's Swinging Sphene is
+    # Grass/Water/Fighting, Espeon ex's Amazez is Grass/Psychic/Darkness.
+    # Those attacks were simply left uncastable. Prism Energy provides
+    # every type to a Basic Pokemon, which is how a real list covers a
+    # third colour without diluting the line.
+    uncovered = [t for t in needed if t not in types]
+    if uncovered:
+        prism = by_setnum.get(("Prism Energy", "ASC", "216"))
+        if prism is not None:
+            take = min(MAX_COPIES, len(uncovered) + 2)
+            energy[0] = (max(1, energy[0][0] - take), energy[0][1])
+            energy.append((take, "Prism Energy ASC 216"))
+            energy_total = sum(n for n, _ in energy)
+            notes.append("Prism Energy added to cover a third Energy type: "
+                         + ", ".join(sorted(uncovered)))
 
     # Trainers fill whatever is left.
     room = DECK_SIZE - poke_count - energy_total

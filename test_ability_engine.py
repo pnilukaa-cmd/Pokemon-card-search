@@ -1150,6 +1150,58 @@ def test_hp_threshold_and_conditional_kos_execute():
 
 
 
+def test_attack_gates_are_conditional_and_enforced():
+    """"Can't attack unless you have 4 or more X" was doubly broken.
+
+    The generic "lock" rule matched "can't attack" and threw the whole
+    "unless ..." clause away, compiling a conditional gate into an
+    unconditional one -- and nothing in the game loop consumed it either,
+    so in practice the gate did not exist. A Team Rocket's Mewtwo ex deck
+    holding four Team Rocket's Pokemon in sixty cards attacked freely on
+    182 turns across 120 games and measured 24.2%; with the gate enforced
+    it is blocked on 738 turns and measures 12.5%.
+    """
+    import ability_engine as AE
+    import simulate_versus as SV
+    txt = ("This Pokémon can't attack unless you have 4 or more "
+           "Team Rocket's Pokémon in play.")
+    eff = IR.compile_effect("ability", "Power Saver", txt)
+    ops = [a.op for a in eff.actions]
+    check("it compiles to a gate", IR.Op.ATTACK_GATE in ops)
+    check("and NOT to a blanket attack lock", IR.Op.LOCK not in ops)
+
+    POK, EFF = build(["Team Rocket's Mewtwo ex", "Team Rocket's Diglett"],
+                     {"Team Rocket's Mewtwo ex": ("ASC", "281"),
+                      "Team Rocket's Diglett": ("ASC", "100")})
+    mewtwo = Spot("Team Rocket's Mewtwo ex")
+    me = FakePlayer("A", POK, EFF, active=mewtwo)
+    me.bench = []
+    check("one Team Rocket's Pokemon in play is not enough",
+          AE.query_attack_gate(me, mewtwo) is False)
+    me.bench = [Spot("Team Rocket's Diglett") for _ in range(3)]
+    check("four is", AE.query_attack_gate(me, mewtwo) is True)
+    me.bench = [Spot("Team Rocket's Diglett")]
+    check("and dropping back below blocks it again",
+          AE.query_attack_gate(me, mewtwo) is False)
+
+
+def test_promo_set_codes_parse():
+    """PR-SV is the one set code in this pool with a hyphen in it.
+
+    The set-code pattern allowed none, so the code stayed glued to the
+    card name, the line resolved to nothing, and the card vanished from
+    every count: deckcheck called a 12-Basic deck an 8-Basic deck.
+    """
+    import tcg_model as M
+    entries = M.parse_decklist_entries("4 Raging Bolt ex PR-SV 145\n")
+    check("the name is the name", entries[0]["name"] == "Raging Bolt ex",
+          entries[0]["name"])
+    check("and the promo set code is kept",
+          (entries[0]["set"], entries[0]["number"]) == ("PR-SV", "145"),
+          (entries[0]["set"], entries[0]["number"]))
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1189,7 +1241,9 @@ def main():
                test_bench_counts_honour_their_filter,
                test_type_words_are_types_not_name_fragments,
                test_discard_scalers_are_paid_for,
-               test_hp_threshold_and_conditional_kos_execute]:
+               test_hp_threshold_and_conditional_kos_execute,
+               test_attack_gates_are_conditional_and_enforced,
+               test_promo_set_codes_parse]:
         print(f"{fn.__name__}:")
         try:
             fn()

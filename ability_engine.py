@@ -89,6 +89,27 @@ def matches_filter(pl, spot, filt):
 # Conditions and costs
 # --------------------------------------------------------------------------
 
+def query_attack_gate(pl, spot):
+    """False when an Ability forbids this Pokemon from attacking.
+
+    "This Pokemon can't attack unless you have 4 or more Team Rocket's
+    Pokemon in play" is a standing requirement re-checked every turn, not
+    a one-off lock.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.ATTACK_GATE):
+        if holder is not spot:
+            continue            # the gate is on its own Pokemon only
+        if True:
+            fam = (act.filter or {}).get("family", "").lower()
+            names = pl.in_play_names()
+            if fam in ("", "pokemon", "pokémon"):
+                have = len(names)
+            else:
+                have = sum(1 for n in names if fam in n.lower())
+            if have < (act.amount or 0):
+                return False
+    return True
+
 def conditions_met(effect, pl, opp, source):
     for c in effect.conditions:
         k = c["kind"]

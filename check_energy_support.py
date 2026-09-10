@@ -65,8 +65,27 @@ def load_cards():
         return json.load(f)
 
 
+def printings_for(name, code, num, cards_by_name):
+    """The card versions a decklist line refers to.
+
+    Pooling every printing of a name together is what produced false
+    UNCASTABLE warnings: three different Zarude share a name, two Grass
+    and one Darkness, and a Grass deck running "Zarude SSP 11" was
+    reported as unable to pay the DARKNESS Zarude's attacks -- a card it
+    does not contain. Our decklists always carry SET NUM, so use it.
+    """
+    matches = cards_by_name.get(name) or []
+    if code and num:
+        exact = [c for c in matches
+                 if any(list(p) == [code, str(num)]
+                        for p in (c.get("printings") or []))]
+        if exact:
+            return exact
+    return matches
+
+
 def parse_decklist(text):
-    """Returns list of (count, name) tuples, in the order they appear."""
+    """Returns list of (count, name, set_code, number) tuples, in order."""
     lines = []
     for raw in text.splitlines():
         m = LINE_RE.match(raw)
@@ -77,9 +96,16 @@ def parse_decklist(text):
         # last one or two whitespace-separated tokens, if the very last
         # token is numeric. Names never end in a bare number in this pool.
         tokens = rest.split()
+        code = num = None
         if tokens and tokens[-1].isdigit():
+            num = tokens[-1]
             tokens = tokens[:-1]
-            if tokens and re.fullmatch(r"[A-Za-z0-9]{2,6}", tokens[-1]) and tokens[-1].isupper():
+            # PR-SV is the one set code in this pool with a hyphen; without
+            # it here the code stayed glued to the card name and nothing
+            # resolved.
+            if tokens and re.fullmatch(r"[A-Za-z0-9-]{2,8}", tokens[-1]) \
+                    and tokens[-1].isupper():
+                code = tokens[-1]
                 tokens = tokens[:-1]
         name = " ".join(tokens).strip()
         if not name:
@@ -97,7 +123,7 @@ def parse_decklist(text):
         # (which pokemontcg.io doesn't carry at all; see BASIC_ENERGY_RE
         # below for why that's handled separately from a dataset lookup).
         name = re.sub(r"^Basic (\w+) Energy$", r"\1 Energy", name)
-        lines.append((count, name))
+        lines.append((count, name, code, num))
     return lines
 
 
@@ -117,13 +143,13 @@ def energy_type_supply(deck_lines, cards_by_name):
     their own plain "<Type> Energy" name pattern directly, before falling
     through to a dataset lookup for genuine Special Energy cards."""
     supply = defaultdict(int)
-    for count, name in deck_lines:
+    for count, name, _code, _num in deck_lines:
         basic = BASIC_ENERGY_RE.match(name)
         if basic:
             supply[basic.group(1)] += count
             continue
 
-        matches = cards_by_name.get(name)
+        matches = printings_for(name, _code, _num, cards_by_name)
         if not matches:
             continue
         card = matches[0]
@@ -146,8 +172,8 @@ def attack_requirements(deck_lines, cards_by_name):
     """Returns list of (pokemon_name, attack_name, cost_list, max_simultaneous_by_type)."""
     seen_attacks = set()
     reqs = []
-    for count, name in deck_lines:
-        matches = cards_by_name.get(name)
+    for count, name, _code, _num in deck_lines:
+        matches = printings_for(name, _code, _num, cards_by_name)
         if not matches or matches[0].get("supertype") != "Pokémon":
             continue
         for card in matches:
@@ -171,8 +197,8 @@ def attack_requirements(deck_lines, cards_by_name):
 def scan_attack_gating_abilities(deck_lines, cards_by_name):
     hits = []
     seen = set()
-    for count, name in deck_lines:
-        matches = cards_by_name.get(name)
+    for count, name, _code, _num in deck_lines:
+        matches = printings_for(name, _code, _num, cards_by_name)
         if not matches or matches[0].get("supertype") != "Pokémon":
             continue
         for card in matches:
@@ -196,9 +222,9 @@ def check_deck_construction_legality(deck_lines, cards_by_name):
     combined count across the whole decklist exceeds 1 (the real limit is
     per-deck, not per-card-name -- two different ACE SPEC cards still only
     get 1 total between them)."""
-    total_cards = sum(count for count, _ in deck_lines)
+    total_cards = sum(count for count, *_ in deck_lines)
     counts = defaultdict(int)
-    for count, name in deck_lines:
+    for count, name, _code, _num in deck_lines:
         counts[name] += count
     over_limit = []
     for name, count in counts.items():
@@ -238,7 +264,8 @@ def main():
     for c in cards:
         cards_by_name[c["name"]].append(c)
 
-    unmatched = [name for _, name in deck_lines if name not in cards_by_name and "Energy" not in name]
+    unmatched = [name for _, name, _c, _n in deck_lines
+                 if name not in cards_by_name and "Energy" not in name]
     supply = energy_type_supply(deck_lines, cards_by_name)
     reqs = attack_requirements(deck_lines, cards_by_name)
     gating = scan_attack_gating_abilities(deck_lines, cards_by_name)

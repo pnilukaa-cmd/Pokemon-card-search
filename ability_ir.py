@@ -120,6 +120,7 @@ class Op:
     WIN_GAME = "win_game"
     CONDITIONAL_KO = "conditional_ko"
     DAMAGE_TO_HP_THRESHOLD = "damage_to_hp_threshold"
+    ATTACK_GATE = "attack_gate"
     # meta
     GRANT_ATTACK_ACCESS = "grant_attack_access"
 
@@ -819,8 +820,30 @@ def _r(m, text):
                    {"conditions": sorted({c.lower() for c in conds})})]
 
 
+@rule("attack_gate",
+      r"this pok[eé]mon can'?t attack unless you have (\d+) or more "
+      r"([\w'’ -]+?) pok[eé]mon in play")
+def _r(m, text):
+    """Team Rocket's Mewtwo ex's Power Saver and friends.
+
+    This MUST sit above the generic "lock" rule, which matched "can't
+    attack" and threw the whole "unless ..." clause away -- compiling a
+    conditional gate into an unconditional one. Nothing consumed it
+    either, so in practice the gate simply did not exist and a deck with
+    four Team Rocket's Pokemon in sixty cards attacked freely.
+    """
+    return [Action(Op.ATTACK_GATE, int(m.group(1)), Target.SELF,
+                   {"family": m.group(2).strip()})]
+
+
 @rule("lock", r"can'?t (attack|retreat|play|use)")
 def _r(m, text):
+    # "can't attack UNLESS ..." is a conditional gate, owned by the
+    # attack_gate rule above. Falling through to here as well stapled an
+    # unconditional attack lock onto the same card, which would stop it
+    # attacking even with the requirement met.
+    if re.search(r"can'?t attack unless", text, re.I):
+        return []
     what = m.group(1).lower()
     tgt = Target.OPPONENT if "your opponent" in text.lower() else Target.SELF
     return [Action(Op.LOCK, None, tgt, {"what": what})]

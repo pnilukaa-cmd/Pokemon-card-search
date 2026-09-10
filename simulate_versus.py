@@ -1771,10 +1771,26 @@ def attack_rider_value(pl, opp, atk):
                 hp = (opp.POKEMON.get(sp.name) or {}).get("hp") or 0
                 value += max(0, max(0, hp - (act.amount or 0)) - sp.damage)
         elif act.op == IR.Op.CONDITIONAL_KO:
-            victim = conditional_ko_target(pl, opp, atk)
-            if victim is not None:
+            for victim in conditional_ko_targets(pl, opp, atk):
                 # Worth the whole Pokemon: it dies regardless of HP.
-                value += pl.POKEMON.get(victim.name, {}).get("hp", 200)
+                value += opp.POKEMON.get(victim.name, {}).get("hp", 200)
+        elif act.op == IR.Op.DEVOLVE:
+            # Espeon ex's Amazez had no price at all, so it scored 0 beside
+            # a 160-damage alternative and was never chosen in 120 games.
+            # Devolving is worth the Stage it removes: the card goes back to
+            # hand, the HP drops, and any excess damage carries over.
+            targets = ([opp.active] if act.target is IR.Target.OPP_ACTIVE
+                       else opp.in_play())
+            hit = [t for t in targets if t is not None
+                   and (opp.POKEMON.get(t.name) or {}).get("evolves_from")]
+            if act.amount and act.amount < 99:
+                hit = sorted(hit, key=lambda t:
+                             -((opp.POKEMON.get(t.name) or {}).get("hp") or 0)
+                             )[:act.amount]
+            for t in hit:
+                info = opp.POKEMON.get(t.name) or {}
+                prev = opp.POKEMON.get(info.get("evolves_from")) or {}
+                value += max(0, (info.get("hp") or 0) - (prev.get("hp") or 0))
         elif act.op == IR.Op.PLACE_COUNTERS and act.target in (
                 IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):
             per = act.filter.get("per_discard_card")
@@ -1847,6 +1863,41 @@ def _borrowed_text(pl, opp, spot, atk):
         return text
     chosen = _best_borrowed(pl, opp, spot, text)
     return (chosen.get("text") or "") if chosen else text
+
+
+def conditional_ko_targets(pl, opp, atk):
+    """EVERY opposing Pokemon this attack Knocks Out, not just one.
+
+    Yveltal ex's Soul Destroyer Knocks Out *each* Pokemon at or below its
+    HP line. Returning a single victim priced it as one Knock Out, so the
+    AI always preferred Dark Strike's flat 210 and the attack was never
+    used in 120 games.
+    """
+    eff = _attack_ir(atk)
+    if eff.unsupported:
+        return []
+    out = []
+    for act in eff.actions:
+        if act.op != IR.Op.CONDITIONAL_KO:
+            continue
+        pool = ([opp.active] if act.target == IR.Target.OPP_ACTIVE
+                else opp.in_play())
+        pool = [p for p in pool if p is not None]
+        cap = act.filter.get("max_remaining_hp")
+        if cap is not None:
+            out += [p for p in pool
+                    if ((opp.POKEMON.get(p.name) or {}).get("hp") or 0)
+                    - p.damage <= cap]
+            continue
+        one = conditional_ko_target(pl, opp, atk)
+        if one is not None:
+            out.append(one)
+    seen, uniq = set(), []
+    for p in out:
+        if id(p) not in seen:
+            seen.add(id(p))
+            uniq.append(p)
+    return uniq
 
 
 def conditional_ko_target(pl, opp, atk):
@@ -2025,6 +2076,8 @@ def attach_energy(pl, cards_by_name, log):
 
 
 def _ready_damage(pl, opp, spot):
+    if not AE.query_attack_gate(pl, spot):
+        return 0        # it cannot attack, so it is not an upgrade
     """What this Pokemon is worth attacking with RIGHT NOW.
 
     A3. This ranked on raw damage, which meant the AI could not see the
@@ -2239,6 +2292,14 @@ def do_attack(pl, opp, log):
         log.append(f"  {pl.name}: {pl.active.name} can't attack "
                    f"(locked by opponent)")
         return False
+    # Standing attack gates -- Team Rocket's Mewtwo ex's Power Saver wants
+    # 4 or more Team Rocket's Pokemon in play. Re-checked every turn, and
+    # until now not checked at all: a deck with four of them in sixty
+    # cards attacked freely 182 times in 120 games.
+    if not AE.query_attack_gate(pl, pl.active):
+        log.append(f"  {pl.name}: {pl.active.name} can't attack "
+                   f"(requirement not met)")
+        return False
     atk = best_attack(pl, pl.active, opp=opp)
     if not atk:
         return False
@@ -2247,11 +2308,10 @@ def do_attack(pl, opp, log):
         pl.prizes = 0
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- WINS THE GAME OUTRIGHT")
         return True
-    victim = conditional_ko_target(pl, opp, atk)
-    if victim is not None:
+    for victim in conditional_ko_targets(pl, opp, atk):
         victim.damage = 10 ** 6      # forced Knock Out, HP is irrelevant
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
-                   f"{victim.name} Knocked Out outright (exact counters)")
+                   f"{victim.name} Knocked Out outright")
 
     dmg = attack_damage(pl, opp, pl.active, atk)
     # A 0-damage attack is still worth using when it carries a rider --
@@ -2364,6 +2424,7 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
+    IR.Op.DEVOLVE,
     # Medicham ex's Chi-Atsu / Palossand ex's Barite Jail. These are
     # counters, not attack damage, so they belong on the rider path
     # (no Weakness, no damage reduction) -- and without this entry
