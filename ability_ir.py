@@ -65,6 +65,10 @@ class Trigger:
     PASSIVE = "passive"                  # continuously true, no activation
 
 
+ALL_SPECIAL_CONDITIONS = frozenset(
+    {"asleep", "burned", "confused", "paralyzed", "poisoned"})
+
+
 class Op:
     # card flow
     DRAW = "draw"
@@ -271,6 +275,12 @@ def parse_conditions(text):
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
+    # "If Festival Grounds is in play, this Pokemon may use an attack it
+    # has twice." The Stadium clause was dropped entirely, so the gate on
+    # an archetype-defining Ability did not exist.
+    m = re.search(r"\b[Ii]f ([A-Z][\w'’ -]+?) is in play", t)
+    if m:
+        out.append({"kind": "stadium_in_play", "name": m.group(1).strip()})
     # Lurantis ex's Lively Cutter is 60 that becomes 260 "if this Pokemon
     # was healed during this turn" -- the payoff the whole heal-punish
     # archetype is built on, and the clause had no condition kind, so
@@ -1248,6 +1258,28 @@ def _r(m, text):
 def _r(m, text):
     return [Action(Op.CONDITION_IMMUNITY, None, Target.SELF,
                    {"conditions": [m.group(1).lower()]})]
+
+
+# Blanket immunity. Ten Standard-legal cards say "can't be affected by any
+# Special Conditions" rather than naming one, and the narrow rule above
+# matched none of them -- the seven Antique Fossils, Ancient Booster Energy
+# Capsule, Bubbly Water Energy and Festival Grounds.
+@rule("condition_immunity_all",
+      r"can'?t be affected by (?:any )?special conditions")
+def _r(m, text):
+    t = text.lower()
+    if "both yours and your opponent" in t:
+        tgt = Target.BOTH_ALL
+    elif re.search(r"\byour pok[eé]mon\b", t):
+        tgt = Target.YOUR_ALL
+    else:
+        tgt = Target.SELF
+    f = {"conditions": sorted(ALL_SPECIAL_CONDITIONS)}
+    # Festival Grounds only shelters a Pokemon with Energy on it, which is
+    # the whole cost of the effect.
+    if re.search(r"has any energy attached", t):
+        f["requires_energy"] = True
+    return [Action(Op.CONDITION_IMMUNITY, None, tgt, f)]
 
 
 @rule("move_energy_any_amount",

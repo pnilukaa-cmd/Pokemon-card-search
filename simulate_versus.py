@@ -193,6 +193,8 @@ class Player:
         # because a measurement harness with no way to vary the thing it
         # measures is worse than useless.
         self.policy = DEFAULT_POLICY
+        # Re-entry guard for Festival Lead's second attack.
+        self._attacking_twice = False
         # Energy types this deck can actually put on a Pokemon. Attacks
         # needing a type outside this set can never be cast, so they must
         # not drive Energy attachment -- see energy_shortfall.
@@ -406,8 +408,44 @@ def sweep_knocked_out(pl, opp, log):
                 log.append(f"  {owner.name}: promotes {owner.active.name}")
 
 
+# Stadiums whose text does nothing for the player who plays them, or
+# whose effect this engine does not act on. Everything else with a
+# compiled effect is worth putting down.
+_STADIUM_OPS_WORTH_PLAYING = None
+
+
 def _stadium_has_effect(name, pl):
-    """Does this Stadium do anything this player can use right now?"""
+    """Does this Stadium do anything this player can use right now?
+
+    Two reasons to put one down: my own cards are gated on it by name, or
+    its own text compiles to an effect this engine models. The Bench-cap
+    case additionally checks that this player can benefit.
+
+    Originally this only recognised a Bench-cap Stadium.
+    """
+    # A Stadium my own cards NAME is worth playing whatever its own text
+    # does. Festival Grounds is the case that exposed this: its printed
+    # effect (Special Condition immunity for anything with Energy on it)
+    # compiles to nothing this engine models, so "does the Stadium do
+    # something?" answered no -- while three Pokemon in the deck read "if
+    # Festival Grounds is in play, this Pokemon may use an attack it has
+    # twice". The gate matters even when the gate-keeper's own text does
+    # not.
+    for effs in pl.EFFECTS.values():
+        for eff in effs:
+            if eff.unsupported:
+                continue
+            for cond in (eff.conditions or []):
+                if (cond.get("kind") == "stadium_in_play"
+                        and cond.get("name") == name):
+                    return True
+
+    global _STADIUM_OPS_WORTH_PLAYING
+    if _STADIUM_OPS_WORTH_PLAYING is None:
+        _STADIUM_OPS_WORTH_PLAYING = TRAINER_IR_OPS | {
+            IR.Op.BENCH_CAP, IR.Op.CONDITION_IMMUNITY, IR.Op.MODIFY_RETREAT,
+            IR.Op.BUFF_DAMAGE, IR.Op.REDUCE_DAMAGE, IR.Op.MODIFY_HP,
+        }
     eff = trainer_effect_ir(name)
     if eff is None or eff.unsupported:
         return False
@@ -416,9 +454,12 @@ def _stadium_has_effect(name, pl):
             need = (act.filter or {}).get("requires_subtype")
             if not need:
                 return True
-            return any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes")
-                                or [])
-                       for p in pl.in_play())
+            if any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes")
+                            or [])
+                   for p in pl.in_play()):
+                return True
+        elif act.op in _STADIUM_OPS_WORTH_PLAYING:
+            return True
     return False
 
 
@@ -1094,7 +1135,8 @@ def play_supporter(pl, opp, turn, log):
                 t.energy.append(["Darkness"])
                 t.energy_names.append(e[1])
                 attached.append(t.name)
-                if t is pl.active:
+                if t is pl.active and not AE.query_condition_immunity(
+                        pl, t, "poisoned", opp):
                     t.conditions.add("poisoned")
             random.shuffle(pl.deck)
             log.append(f"  {pl.name}: Janine's Secret Art -> {', '.join(attached)}")
@@ -1181,6 +1223,12 @@ def trainer_effect_ir(name):
 # Ops a Trainer may carry out. Deliberately excludes the passive/static
 # ops, which describe a property of something in play and mean nothing on
 # a card that goes to the discard the moment it resolves.
+# ability_engine needs a Trainer's compiled IR (a Tool or Energy granting
+# Special Condition immunity, a Stadium doing the same) and cannot import
+# this module back. Hand it the function.
+AE.TRAINER_IR = trainer_effect_ir
+
+
 TRAINER_IR_OPS = {
     IR.Op.DRAW, IR.Op.SEARCH_TO_HAND, IR.Op.SEARCH_TO_BENCH,
     IR.Op.FROM_DISCARD_TO_HAND, IR.Op.ATTACH_ENERGY, IR.Op.MOVE_ENERGY,
@@ -2655,6 +2703,32 @@ def do_attack(pl, opp, log):
     atk = best_attack(pl, pl.active, opp=opp)
     if not atk:
         return False
+    # Festival Lead (Dipplin, Seaking, Goldeen): "if Festival Grounds is in
+    # play, this Pokemon may use an attack it has twice." The op compiled,
+    # was catalogued as a known passive, and nothing ever asked for it, so
+    # the whole archetype dealt exactly half its damage. Resolved as a
+    # second pass through do_attack rather than doubling the number, so the
+    # riders fire twice too and the second swing sees the board the first
+    # one left behind -- which is what the card actually does.
+    if not pl._attacking_twice and AE.query_attacks_twice(pl, pl.active, opp):
+        pl._attacking_twice = True
+        try:
+            # do_attack's return value is "the game ended", NOT "the attack
+            # happened" -- it returns False on the ordinary case of a hit
+            # that did not take the last Prize. Reading it the other way
+            # round and bailing on False suppressed the second swing in
+            # every game, so mind the contract here.
+            if do_attack(pl, opp, log):
+                return True
+            # The card's second sentence is explicit that a Knock Out does
+            # not stop it: the opponent promotes (resolved inside the first
+            # call) and is attacked into. Only an empty Active Spot on
+            # either side ends it early.
+            if pl.active is None or opp.active is None:
+                return False
+            return do_attack(pl, opp, log)
+        finally:
+            pl._attacking_twice = False
     # The alternate win condition resolves before damage and ends the game.
     if attack_wins_game(pl, opp, pl.active, atk):
         pl.prizes = 0

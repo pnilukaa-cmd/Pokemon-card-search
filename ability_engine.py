@@ -38,6 +38,14 @@ STARTING_PRIZES = 6
 # that actually did something.
 UNEXECUTED_OPS = Counter()
 
+# Compiled IR for a Trainer / Tool / Energy card by name. Injected by the
+# simulator at import time: simulate_versus imports this module, so this
+# module cannot import it back to reach trainer_effect_ir. Defaults to
+# "nothing compiles", which keeps this module importable on its own.
+def TRAINER_IR(name):
+    return None
+
+
 
 # --------------------------------------------------------------------------
 # Target resolution
@@ -112,6 +120,91 @@ def query_weakness_override(attacker_player, defender_player, defender_spot):
             return to
     return None
 
+def query_condition_immunity(pl, spot, condition, opp=None):
+    """Is this Pokemon immune to being given this Special Condition?
+
+    CONDITION_IMMUNITY was in the same state ATTACK_TWICE was: the op
+    compiled, it sat in the known-passive list so nothing reported it as
+    missing, and no caller ever asked. Every "can't be Paralyzed" Ability,
+    every Antique Fossil, Bubbly Water Energy and Festival Grounds were
+    inert.
+
+    Three sources, because immunity is printed on three kinds of card:
+    an Ability on something in play, a Tool or Energy attached to the
+    Pokemon itself, and the Stadium (which shelters BOTH players).
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.CONDITION_IMMUNITY):
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if act.target in (IR.Target.YOUR_ALL, IR.Target.BOTH_ALL):
+            if not matches_filter(pl, spot, act.filter):
+                continue
+        if condition in ((act.filter or {}).get("conditions") or []):
+            return True
+
+    if _attached_grants_immunity(pl, spot, condition):
+        return True
+
+    # The Stadium is shared, so either player's copy shelters this spot.
+    stadium = getattr(pl, "stadium", None) or (
+        getattr(opp, "stadium", None) if opp is not None else None)
+    if stadium and _stadium_grants_immunity(pl, spot, condition, stadium):
+        return True
+    return False
+
+
+def _attached_grants_immunity(pl, spot, condition):
+    """Immunity printed on a Tool or Energy attached to this Pokemon."""
+    names = []
+    tool = getattr(spot, "tool", None)
+    if tool:
+        names.append(tool)
+    names.extend(getattr(spot, "energy_names", None) or [])
+    for name in names:
+        eff = TRAINER_IR(name)
+        if eff is None or eff.unsupported:
+            continue
+        for act in eff.actions:
+            if act.op is IR.Op.CONDITION_IMMUNITY and condition in (
+                    (act.filter or {}).get("conditions") or []):
+                return True
+    return False
+
+
+def _stadium_grants_immunity(pl, spot, condition, stadium):
+    eff = TRAINER_IR(stadium)
+    if eff is None or eff.unsupported:
+        return False
+    for act in eff.actions:
+        if act.op is not IR.Op.CONDITION_IMMUNITY:
+            continue
+        if condition not in ((act.filter or {}).get("conditions") or []):
+            continue
+        if (act.filter or {}).get("requires_energy") and not spot.energy:
+            continue
+        return True
+    return False
+
+
+def query_attacks_twice(pl, spot, opp=None):
+    """May this Pokemon use its attack twice this turn?
+
+    Dipplin, Seaking and Goldeen all carry Festival Lead, whose whole text
+    is "if Festival Grounds is in play, this Pokemon may use an attack it
+    has twice". The op compiled, was catalogued as a known passive, and
+    nothing ever asked for it -- so an entire archetype dealt exactly half
+    its damage.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.ATTACK_TWICE):
+        if holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        return True
+    return False
+
 def query_attack_gate(pl, spot):
     """False when an Ability forbids this Pokemon from attacking.
 
@@ -148,6 +241,11 @@ def conditions_met(effect, pl, opp, source):
             return False
         if k == "self_has_energy_type":
             if not any(c["type"] in e for e in source.energy):
+                return False
+        if k == "stadium_in_play":
+            want = c["name"]
+            if want not in (getattr(pl, "stadium", None),
+                            getattr(opp, "stadium", None)):
                 return False
         if k == "healed_this_turn" and not getattr(source, "healed_this_turn", False):
             return False
@@ -746,10 +844,23 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             # Asleep/Confused/Paralyzed are mutually exclusive; Burned and
             # Poisoned stack alongside one of them.
             EXCLUSIVE = {"asleep", "confused", "paralyzed"}
+            # An Ability, an attached Tool or Energy, or the Stadium can
+            # make the target immune. Owner is whichever side `h` is on --
+            # immunity is read off the defender's own board, not the
+            # attacker's.
+            owner, other = (pl, opp) if h in pl.in_play() else (opp, pl)
+            applied = []
             for c in conds:
+                if query_condition_immunity(owner, h, c, other):
+                    continue
                 if c in EXCLUSIVE:
                     h.conditions -= EXCLUSIVE
                 h.conditions.add(c)
+                applied.append(c)
+            conds = applied
+        if not conds:
+            log.append("    condition(s) prevented")
+            return False
         log.append(f"    apply {', '.join(conds)}")
         return True
 
