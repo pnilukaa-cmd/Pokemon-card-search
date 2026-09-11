@@ -105,6 +105,10 @@ class Op:
     DEVOLVE = "devolve"
     MODIFY_PRIZE = "modify_prize"
     CONDITION_IMMUNITY = "condition_immunity"
+    # Swap a Pokemon in play for one in the discard, in place:
+    # attachments, damage, Special Conditions and turns in play all
+    # stay on the new Pokemon. Transformation Tome and Ogre's Mask.
+    SWAP_IN_PLACE = "swap_in_place"
     ATTACK_FIRST_TURN = "attack_first_turn"
     SET_WEAKNESS = "set_weakness"
     REVEAL_OPPONENT_HAND = "reveal_opponent_hand"
@@ -364,12 +368,21 @@ def parse_costs(text):
         out.append({"kind": "discard_hand", "amount": _num(m.group(1))})
     if re.search(r"put a card from your hand on the bottom of your deck in order to use", t, re.I):
         out.append({"kind": "discard_hand", "amount": 1})
+    # The Item phrasing of the same cost. "You can use this card only if you
+    # discard 3 other cards from your hand" is Secret Box, and it parsed as
+    # free -- the card matched no rule at all, so nothing noticed.
+    m = re.search(r"only if you discard (\d+|a|an|two|three) other cards?"
+                  r" from your hand", t, re.I)
+    if m:
+        out.append({"kind": "discard_hand", "amount": _num(m.group(1))})
     m = re.search(r"discard a basic (" + TYPES + r") energy card from your hand", t, re.I)
     if m:
         out.append({"kind": "discard_energy_from_hand", "type": m.group(1).capitalize()})
     m = re.search(r"discard a basic (" + TYPES + r") energy from this pok[eé]mon", t, re.I)
     if m:
         out.append({"kind": "discard_energy_from_self", "type": m.group(1).capitalize()})
+    if re.search(r"you must play 2 [\w'’ -]+ cards? at once", t, re.I):
+        out.append({"kind": "play_two_copies"})
     if re.search(r"shuffle this pok[eé]mon and all attached cards into your deck", t, re.I):
         out.append({"kind": "shuffle_self"})
     if re.search(r"this pok[eé]mon is knocked out", t, re.I) and "if you use this ability" in t.lower():
@@ -614,6 +627,41 @@ def _r(m, text):
         return []
     return [Action(Op.SEARCH_TO_HAND, _num(m.group(1)), Target.SELF,
                    dict(_search_filter(m.group(2)), kind=m.group(3).lower()))]
+
+
+# Secret Box: one sentence naming four different kinds of card. The
+# general search_to_hand rule reads a single kind, so this shape compiled
+# to nothing at all -- an ACE SPEC that fetches an Item, a Tool, a
+# Supporter AND a Stadium did nothing in any deck running it.
+@rule("search_multi_kind",
+      r"search your deck for an item card, a pok[eé]mon tool card,"
+      r" a supporter card, and a stadium card")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": k})
+            for k in ("item", "tool", "supporter", "stadium")]
+
+
+# In-place swap: the Pokemon in the discard takes over the board position
+# of one in play, keeping everything attached to it. Two cards in Standard
+# do this -- Transformation Tome (four copies in N's Zoroark, where it is
+# the deck's whole engine) and Ogre's Mask -- and neither compiled.
+@rule("swap_in_place",
+      r"choose a [\w'’ -]{0,40}?pok[eé]mon[^.]{0,60}?in your discard pile"
+      r"[^.]{0,60}?switch it with 1 of your [^.]{0,60}?in play")
+def _r(m, text):
+    t = text.lower()
+    f = {}
+    if "basic pok" in t:
+        f["stage"] = "Basic"
+    # The name restriction is quoted, and the quoted phrase is the same on
+    # both halves of the sentence -- read it off the whole text rather than
+    # trying to capture it twice inside an already long pattern.
+    fam = re.search(r"has [\"“']([^\"”']+)[\"”'] in its name", text)
+    if fam:
+        f["family"] = fam.group(1)
+    if re.search(r"pok[eé]mon ex", t):
+        f["rule_box"] = True
+    return [Action(Op.SWAP_IN_PLACE, 1, Target.YOUR_ANY, f)]
 
 
 @rule("discard_to_hand", r"put (?:up to )?(\d+|a|an) ([\w'’ -]*?)(?:card|pok[eé]mon|energy)[^.]{0,40}from your discard pile into your hand")

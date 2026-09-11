@@ -612,7 +612,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     return False
                 if kind == "energy" and k != "Energy":
                     return False
-                if kind in ("supporter", "item", "stadium") and k.lower() != kind:
+                # "Tool" is its own kind in the deck model (a Pokemon Tool
+                # is an Item subtype but the model splits it out), and this
+                # predicate did not know the word -- so a search naming a
+                # Tool matched anything at all.
+                if kind in ("supporter", "item", "stadium", "tool") \
+                        and k.lower() != kind:
                     return False
                 return not want or want.lower() in n.lower()
             card = _find_in_deck(pl, pred)
@@ -623,6 +628,58 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if got:
             log.append(f"    search {', '.join(got)}")
         return bool(got)
+
+    if op == O.SWAP_IN_PLACE:
+        # The discarded Pokemon takes over a board position outright: the
+        # card says attachments, damage counters, Special Conditions and
+        # turns in play all remain, so only the NAME changes. Everything
+        # else about the spot is left exactly as it was.
+        f = act.filter or {}
+
+        def ok(name):
+            info = pl.POKEMON.get(name)
+            if not info:
+                return False
+            if f.get("stage") and info.get("stage") != f["stage"]:
+                return False
+            if f.get("family") and f["family"].lower() not in name.lower():
+                return False
+            if f.get("rule_box") and info.get("prize_value", 1) < 2:
+                return False
+            return True
+
+        spots = [p for p in pl.in_play() if ok(p.name)]
+        cand = sorted({n for n in pl.discard if ok(n)})
+        if not spots or not cand:
+            return False
+
+        # The point of the card is to put a big body where the Energy
+        # already is, so score the PAIR: HP gained, heavily weighted by
+        # what is already attached to that spot and by whether it is the
+        # one doing the attacking. Swapping a 1-Prize Basic for a 2-Prize
+        # one hands the opponent an extra Prize, so that is priced in.
+        def score(spot, n):
+            info, cur = pl.POKEMON[n], pl.POKEMON[spot.name]
+            gain = info["hp"] - cur["hp"]
+            if gain <= 0:
+                return None
+            v = gain + 50 * spot.energy_count()
+            if spot is pl.active:
+                v += 25
+            v -= 120 * (info.get("prize_value", 1) - cur.get("prize_value", 1))
+            return v
+
+        pairs = [(score(sp, n), sp, n) for sp in spots for n in cand]
+        pairs = [x for x in pairs if x[0] is not None and x[0] > 0]
+        if not pairs:
+            return False
+        _, spot, best = max(pairs, key=lambda x: (x[0], x[2]))
+        pl.discard.remove(best)
+        pl.discard.append(spot.name)
+        log.append(f"    swap {spot.name} -> {best} (keeps "
+                   f"{spot.energy_count()} Energy, {spot.damage} damage)")
+        spot.name = best
+        return True
 
     if op == O.FROM_DISCARD_TO_HAND:
         got = []

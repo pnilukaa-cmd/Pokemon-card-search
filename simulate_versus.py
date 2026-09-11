@@ -1238,6 +1238,7 @@ TRAINER_IR_OPS = {
     IR.Op.REVEAL_OPPONENT_HAND, IR.Op.SET_OPPONENT_HAND, IR.Op.LOCK,
     IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.FORCE_BENCH_OPPONENT,
+    IR.Op.SWAP_IN_PLACE,
 }
 
 
@@ -1287,15 +1288,33 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     def make_inplay(n):
         return InPlay(n, turn)
 
+    # Costs. This path never paid them, so Secret Box fetched four cards
+    # for free and Transformation Tome would have swapped once per copy
+    # instead of once per PAIR. The card being played is taken out of hand
+    # first so it cannot be discarded to pay for itself, and put back if
+    # the cost turns out to be unaffordable.
+    extra = 1 if any(c["kind"] == "play_two_copies" for c in eff.costs) else 0
+    if pl.hand.count((kind, name)) < 1 + extra:
+        return False
+    for _ in range(1 + extra):
+        pl.remove_from_hand(kind, name)
+    if eff.costs and not AE.pay_costs(eff, pl, pl.active, log):
+        pl.hand.extend([(kind, name)] * (1 + extra))
+        return False
+
     did = False
     for act in actions:
         if AE.apply_action(act, pl, opp, pl.active, log,
                            make_inplay=make_inplay) is not False:
             did = True
     if not did:
+        # Nothing happened, so the card was not spent -- but a cost already
+        # paid cannot be taken back, and the only costs here discard from
+        # hand or from the board. Return the card and accept that; the
+        # alternative is a snapshot/restore of the whole player.
+        pl.hand.extend([(kind, name)] * (1 + extra))
         return False
-    pl.remove_from_hand(kind, name)
-    pl.discard.append(name)
+    pl.discard.extend([name] * (1 + extra))
     if kind == "Supporter":
         pl.supporter_played = True
         pl.played_supporters_this_turn.add(name)
