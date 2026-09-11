@@ -266,6 +266,44 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 random.shuffle(pl.deck)
                 log.append(f"    {len(fuel)} {want} shuffled back into the deck")
             return True
+        # A "put N damage counters ... in any way you like" budget is
+        # SPLIT across targets, and how it is split decides whether the
+        # attack takes a Prize or nothing. The old rule topped Pokemon up
+        # toward a flat KO_THRESHOLD of 60 regardless of their real HP,
+        # and sorted so that an UNDAMAGED Pokemon outranked one five
+        # counters from dying: Phantom Dive put all six on a fresh 70 HP
+        # Basic while two sat at 20, and Knocked Out nothing.
+        if act.filter.get("distribute") and (act.amount or 0) > 0:
+            budget = act.amount
+            pool = [h for h in hits if h is not None]
+            owner = opp
+            def _left(h):
+                hp = (owner.POKEMON.get(h.name) or {}).get("hp") or 0
+                return max(0, hp - h.damage)
+            def _prize(h):
+                return (owner.POKEMON.get(h.name) or {}).get("prize_value", 1)
+            # Finish whatever can be finished, richest Prize first, then
+            # cheapest to finish.
+            placed = 0
+            for h in sorted(pool, key=lambda x: (-_prize(x), _left(x))):
+                need = (_left(h) + 9) // 10
+                if 0 < need <= budget:
+                    h.damage += need * 10
+                    budget -= need
+                    placed += need
+            # Anything left goes on the most valuable survivor, which is
+            # what sets up next turn's Knock Out.
+            if budget:
+                alive = [h for h in pool if _left(h) > 0]
+                if alive:
+                    tgt = max(alive, key=lambda x: (_prize(x), -_left(x)))
+                    tgt.damage += budget * 10
+                    placed += budget
+            if placed:
+                log.append(f"    place {placed * 10} damage, split to finish "
+                           f"what it could")
+            return placed > 0
+
         if act.target == IR.Target.OPP_ALL:
             chosen = hits
         else:

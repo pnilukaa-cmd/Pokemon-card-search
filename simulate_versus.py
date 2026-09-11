@@ -100,6 +100,7 @@ import ability_engine as AE
 
 MAX_BENCH = 5
 STARTING_PRIZES = 6
+DEFAULT_POLICY = "v2"
 MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 
@@ -178,6 +179,11 @@ class Player:
         # Set by Budew's Itchy Pollen and friends; cleared at the
         # start of this player's next turn.
         self.item_locked = False
+        # Which pilot this player uses. Every AI change applies to BOTH
+        # sides by default, which makes a win rate blind to whether the
+        # change is an improvement -- so the policy is per-player and a
+        # mirror match can put v2 against v1 with the deck held fixed.
+        self.policy = DEFAULT_POLICY
         # Energy types this deck can actually put on a Pokemon. Attacks
         # needing a type outside this set can never be cast, so they must
         # not drive Energy attachment -- see energy_shortfall.
@@ -1037,7 +1043,9 @@ def play_supporter(pl, opp, turn, log):
     # Gust effects: drag up their weakest benched Pokemon
     for name in ("Boss's Orders", "Team Rocket's Giovanni"):
         if name in hand_names and opp.bench and opp.active is not None:
-            target = min(opp.bench, key=lambda p: effective_hp(opp, p) - p.damage)
+            target = choose_gust_target(pl, opp)
+            if target is None:
+                continue          # nothing on the Bench beats the Active
             use(name)
             opp.bench.remove(target)
             opp.bench.append(opp.active)
@@ -1716,13 +1724,29 @@ def pay_discard_scaler(pl, spot, atk, log):
 
 
 
+_COPY_DEPTH = [0]
+_MAX_COPY_DEPTH = 2
+
+
 def attack_damage(pl, opp, spot, atk, record=True):
     """Best-effort damage for one attack in the current board state."""
     text = atk.get("text") or ""
     base = atk["damage"]
 
+    # A copy-attack evaluates the attack it borrows, which can itself be a
+    # copy-attack -- Team Rocket's Persian ex's Haughty Order reads the
+    # opponent's DECK, and in a mirror that deck contains another Persian
+    # ex, so it copied itself forever. Only a mirror (or two copier decks
+    # meeting) reaches it, which is why the field never crashed and the
+    # self-play harness did on its first run.
     if opp is not None and _USE_AS_THIS_RE.search(text):
-        copied = _copied_attack_damage(pl, opp, spot, text)
+        if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
+            return base or 0
+        _COPY_DEPTH[0] += 1
+        try:
+            copied = _copied_attack_damage(pl, opp, spot, text)
+        finally:
+            _COPY_DEPTH[0] -= 1
         if copied is not None:
             return copied
 
@@ -2411,6 +2435,23 @@ def try_retreat(pl, opp, log):
     # retreat actually discards, otherwise the AI thrashes between two
     # near-equal attackers and never develops either.
     margin = 30 * max(cost, 0) + 10
+    # v2: when the Active cannot attack AT ALL, the tempo argument for
+    # staying put evaporates -- there is no tempo to lose. The flat margin
+    # was still being applied, so with a retreat cost of 2 a Benched
+    # attacker had to beat 70 damage before the AI would swap to it while
+    # the Active stood there doing nothing. Measured: a Benched Pokemon
+    # could have attacked on 25% of all idle turns.
+    if here <= 0:
+        if pl.policy == "v2a":
+            margin = 0                    # any Benched attacker will do
+        elif pl.policy == "v2b":
+            # Only when the swap is FREE. Retreating discards Energy off
+            # the Active, so trading a stalled-but-invested Active for a
+            # 20-damage Basic throws the investment away -- which is what
+            # made the unconditional version 3 points worse.
+            margin = 0 if cost == 0 else margin
+        elif pl.policy == "v2c":
+            margin = 0 if cost == 0 else 30
     ready = [p for p in pl.bench if _ready_damage(pl, opp, p) > max(here, 0) + margin]
     if not ready:
         return
@@ -2544,8 +2585,7 @@ def do_attack(pl, opp, log):
         if opp.prizes <= 0:
             return True
         if pl.bench:
-            pl.bench.sort(key=lambda p: effective_hp(pl, p) - p.damage, reverse=True)
-            pl.active = pl.bench.pop(0)
+            pl.active = promote_from_bench(pl, opp)
         else:
             return True
 
@@ -2830,14 +2870,70 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         if other.prizes <= 0:
             return "loss" if mine else "win"
         if side.bench:
-            side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
-                            reverse=True)
-            side.active = side.bench.pop(0)
+            side.active = promote_from_bench(side, other)
         elif mine:
             return "no_pokemon"
         else:
             return "win"
     return None
+
+
+def _gust_score(pl, opp, spot):
+    """How good a Knock Out target this Pokemon is, if dragged up.
+
+    A gust is one of the few genuinely strategic cards the AI holds, and
+    it was picking the Benched Pokemon with the lowest remaining HP --
+    which ignores the only two things that matter: whether the target can
+    actually be Knocked Out this turn, and how many Prizes it is worth.
+    Dragging up a 40 HP Basic to take one Prize, while a damaged two-Prize
+    ex sits beside it, is the single most common way to lose a Prize race.
+    """
+    info = opp.POKEMON.get(spot.name) or {}
+    left = effective_hp(opp, spot) - spot.damage
+    best = 0
+    if pl.active is not None:
+        atk = best_attack(pl, pl.active, True, opp)
+        if atk is not None:
+            best = attack_damage(pl, opp, pl.active, atk, record=False)
+            weak = info.get("weakness")
+            if weak and weak in (pl.POKEMON[pl.active.name]["types"] or []):
+                best *= 2
+    can_ko = 1 if best >= left else 0
+    return (can_ko, info.get("prize_value", 1) if can_ko else 0, -left)
+
+
+def choose_gust_target(pl, opp):
+    """The Benched Pokemon worth dragging up, or None to hold the card."""
+    if not opp.bench or opp.active is None:
+        return None
+    best = max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
+    # Holding the gust is a real option: if the Active is already at least
+    # as good a target, spending a Supporter to swap it out is a wasted
+    # card AND a free switch for the opponent.
+    if getattr(pl, "policy", "v1") != "v1":
+        if _gust_score(pl, opp, best) <= _gust_score(pl, opp, opp.active):
+            return None
+    return best
+
+def promote_from_bench(side, opp=None):
+    """Choose the new Active after a Knock Out.
+
+    Promoting the healthiest body sounds safe and is often wrong: a fresh
+    Basic with no Energy cannot attack, so the turn after a Knock Out is
+    handed over for free. A real player promotes something that can DO
+    something and falls back on durability only when nothing can.
+    """
+    if not side.bench:
+        return None
+    if getattr(side, "policy", "v1") == "v1" or opp is None:
+        side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
+                        reverse=True)
+        return side.bench.pop(0)
+    side.bench.sort(
+        key=lambda p: (_ready_damage(side, opp, p),
+                       effective_hp(side, p) - p.damage),
+        reverse=True)
+    return side.bench.pop(0)
 
 
 def run_game(modelA, modelB, verbose=False):

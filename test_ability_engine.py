@@ -1431,6 +1431,37 @@ def test_meta_trainers_compile_once_and_correctly():
 
 
 
+def test_counter_budgets_are_allocated_to_take_a_knockout():
+    """"Put N damage counters ... in any way you like" is a BUDGET.
+
+    It was being spent by topping Pokemon up toward a flat KO_THRESHOLD of
+    60 regardless of their real HP, and the sort put an UNDAMAGED Pokemon
+    ahead of one five counters from dying. Phantom Dive put all six
+    counters on a fresh 60 HP Basic while two sat at 20 damage, and
+    Knocked Out nothing.
+    """
+    import audit_ex_damage as A
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    card = [c for c in cards if c["name"] == "Dragapult ex"][0]
+    me, op, spot = A.build_board(card, by_name)
+    me.active = spot
+    atk = next(a for a in M.build_pokemon_info(card)["attacks"]
+               if a["name"] == "Phantom Dive")
+    hp = op.POKEMON["Dunsparce"]["hp"]
+    before = sum(s.damage for s in op.bench)
+    SV.attack_side_effects(me, op, atk, [])
+    placed = (sum(s.damage for s in op.bench) - before) // 10
+    check("it spends exactly its budget", placed == 6, placed)
+    check("and finishes something rather than killing nothing",
+          any(b.damage >= hp for b in op.bench),
+          [b.damage for b in op.bench])
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1479,7 +1510,8 @@ def main():
                test_rare_candy_bridges_in_the_baseline_sim_too,
                test_resistance_is_applied,
                test_coin_flips_are_actually_flipped,
-               test_meta_trainers_compile_once_and_correctly]:
+               test_meta_trainers_compile_once_and_correctly,
+               test_counter_budgets_are_allocated_to_take_a_knockout]:
         print(f"{fn.__name__}:")
         try:
             fn()

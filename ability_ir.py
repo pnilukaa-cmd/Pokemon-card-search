@@ -697,7 +697,14 @@ def _r(m, text):
     if mm:
         return [Action(Op.PLACE_COUNTERS, int(mm.group(2)), Target.OPP_ANY,
                        {"targets": int(mm.group(1))})]
-    return [Action(Op.PLACE_COUNTERS, int(m.group(1)), parse_target(m.group(2)))]
+    # "... in any way you like" is a BUDGET to split, not N counters on
+    # each target. Carried through so the engine can allocate it to take
+    # an actual Knock Out instead of dumping the lot on one Pokemon.
+    filt = {}
+    if re.search(r"in any way you like", text, re.I):
+        filt["distribute"] = True
+    return [Action(Op.PLACE_COUNTERS, int(m.group(1)),
+                   parse_target(m.group(2)), filt)]
 
 
 @rule("move_counters", r"move (?:up to )?(\d+) damage counters? from ([^.]{0,40}?) to ([^.]{0,40})")
