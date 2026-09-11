@@ -1,13 +1,15 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **31.0% mean · 29.0% median · 3 of 37 winning matchups · rank 35 of 38**
+> ### Field results — 2026-09-11
+> **34.2% mean · 32.0% median · 5 of 43 winning matchups · rank 40 of 44**
 >
-> Best `ns_zoroark_night_joker_toolbox` 57% · worst `lurantis_heal_punish` 14%.
+> Best `meta_ns_zoroark` 92% · worst `team_rockets_persian_ex_attack_theft` 12%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

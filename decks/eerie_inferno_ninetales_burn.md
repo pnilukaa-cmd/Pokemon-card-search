@@ -1,13 +1,15 @@
 # Eerie Inferno (Vulpix / Ninetales + Numel + Magmar / Magmortar)
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **49.0% mean · 47.5% median · 18 of 37 winning matchups · rank 24 of 38**
+> ### Field results — 2026-09-11
+> **48.9% mean · 47.5% median · 20 of 43 winning matchups · rank 26 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 84% · worst `water_aggro` 21%.
+> Best `meta_ns_zoroark` 90% · worst `water_aggro` 18%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

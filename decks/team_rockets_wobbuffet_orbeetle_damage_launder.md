@@ -1,13 +1,15 @@
 # Team Rocket's Wobbuffet / Orbeetle Damage-Laundering Control
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **20.9% mean · 18.0% median · 2 of 37 winning matchups · rank 37 of 38**
+> ### Field results — 2026-09-11
+> **23.6% mean · 19.5% median · 2 of 43 winning matchups · rank 42 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 80% · worst `lurantis_heal_punish` 3%.
+> Best `meta_ns_zoroark` 82% · worst `arbok_muk_trolley_darkbell` 3%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

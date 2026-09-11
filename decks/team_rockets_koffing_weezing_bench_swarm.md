@@ -1,13 +1,15 @@
 # Team Rocket's Koffing/Weezing Bench Swarm
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **50.5% mean · 50.0% median · 17 of 37 winning matchups · rank 20 of 38**
+> ### Field results — 2026-09-11
+> **51.2% mean · 51.5% median · 23 of 43 winning matchups · rank 23 of 44**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 90% · worst `toxic_slumber_vileplume_ex` 11%.
+> Best `meta_ns_zoroark` 92% · worst `toxic_slumber_vileplume_ex` 12%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

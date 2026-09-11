@@ -1,13 +1,15 @@
 # N's Zoroark ex — Night Joker toolbox
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **46.7% mean · 46.0% median · 11 of 37 winning matchups · rank 26 of 38**
+> ### Field results — 2026-09-11
+> **46.6% mean · 45.5% median · 13 of 43 winning matchups · rank 30 of 44**
 >
-> Best `static_venom_drapion` 83% · worst `lurantis_heal_punish` 27%.
+> Best `static_venom_drapion` 79% · worst `lurantis_heal_punish` 26%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Hop's Snorlax Stacked-Buff
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **43.5% mean · 40.0% median · 9 of 37 winning matchups · rank 30 of 38**
+> ### Field results — 2026-09-11
+> **44.2% mean · 41.0% median · 12 of 43 winning matchups · rank 34 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 92% · worst `panic_poison_paralysis` 10%.
+> Best `meta_ns_zoroark` 96% · worst `panic_poison_paralysis` 14%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

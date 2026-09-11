@@ -1,5 +1,15 @@
 # festival_lead — TCGplayer, September 2026
 
+<!-- field-results -->
+> ### Field results — 2026-09-11
+> **36.0% mean · 35.5% median · 6 of 43 winning matchups · rank 39 of 44**
+>
+> Best `meta_ns_zoroark` 82% · worst `orthworm_ex_metal_retaliation` 12%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+<!-- field-results -->
+
+
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.
 
@@ -11,6 +21,18 @@ written without a set code, as everywhere else here.
 `Dipplin` and `Seaking`. The engine of the deck is `Festival Lead` itself:
 *"if Festival Grounds is in play, this Pokémon may use an attack it has
 twice."* That is two `Do the Wave`s a turn off one Grass Energy.
+
+**Rank 39 of 44 at 36.0%, and that is after the fix that made the deck
+work at all.** `Festival Grounds` was never being played, because the
+engine only put a Stadium down if the Stadium's OWN text did something it
+modelled — and Festival Grounds' printed effect is Special Condition
+immunity, which compiled to nothing. So the gate was never open, the
+double attack never fired, and this deck dealt exactly half its damage in
+every game it ever played here. Against `meta_dragapult_pure` over 400
+games it went from **5.0% to 32.5%** once the Stadium reached the table:
+556 grants, 1075 second swings that land. The archetype is real; 36th
+percentile is what a two-swing 130 looks like against a field of
+one-swing 250s when nobody is sequencing.
 
 **One claim from the article does not survive the arithmetic.** It rates
 the Prize trade as the format's most efficient on the strength of

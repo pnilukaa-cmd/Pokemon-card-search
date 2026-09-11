@@ -1,13 +1,15 @@
 # Dhelmise / Veluza — Hide 'n' Sneak fuel + Food Prep
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **56.7% mean · 56.0% median · 24 of 37 winning matchups · rank 10 of 38**
+> ### Field results — 2026-09-11
+> **58.1% mean · 57.5% median · 30 of 43 winning matchups · rank 11 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 86% · worst `team_rockets_persian_ex_attack_theft` 35%.
+> Best `meta_ns_zoroark` 94% · worst `panic_poison_paralysis` 34%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Mega Chandelure ex — retreat tax
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **55.7% mean · 56.0% median · 25 of 37 winning matchups · rank 13 of 38**
+> ### Field results — 2026-09-11
+> **55.8% mean · 56.5% median · 29 of 43 winning matchups · rank 15 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 86% · worst `panic_poison_paralysis` 22%.
+> Best `feraligatr_munkidori_damage_transfer` 86% · worst `panic_poison_paralysis` 24%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

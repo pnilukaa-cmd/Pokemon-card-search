@@ -1,5 +1,15 @@
 # ns_zoroark — TCGplayer, September 2026
 
+<!-- field-results -->
+> ### Field results — 2026-09-11
+> **12.6% mean · 10.5% median · 0 of 43 winning matchups · rank 44 of 44**
+>
+> Best `static_venom_drapion` 42% · worst `stevens_carbink_damage_wall` 4%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+<!-- field-results -->
+
+
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.
 
@@ -12,8 +22,8 @@ usually `N's Zekrom` or `N's Darmanitan`. Note that
 `check_energy_support` flags those two as uncastable and is right: they
 are attack DONORS and never attack themselves.
 
-**This deck's placement is a floor, not an evaluation, and I can say
-exactly why.** Every card in it is now modelled -- `Transformation Tome`
+**Last of 44 at 12.6%, and that is a floor, not an evaluation. I can
+say exactly why.** Every card in it is now modelled -- `Transformation Tome`
 (4 copies, the last unmodeled card here) resolves 49 times per 120 games
 and `Secret Box` 198 -- and the placement barely moved when they went
 live. The engine is copying the right attack: over 150 games against

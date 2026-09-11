@@ -1,13 +1,15 @@
 # Krookodile ex / Relicanth Hand Disruption
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **55.2% mean · 55.5% median · 27 of 37 winning matchups · rank 14 of 38**
+> ### Field results — 2026-09-11
+> **57.9% mean · 59.5% median · 32 of 43 winning matchups · rank 12 of 44**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 88% · worst `lurantis_heal_punish` 22%.
+> Best `meta_ns_zoroark` 93% · worst `lurantis_heal_punish` 20%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

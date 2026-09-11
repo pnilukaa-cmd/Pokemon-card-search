@@ -1,13 +1,15 @@
 # Pure Dragapult ex — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-10
-> **52.8% mean · 50.5% median · 19 of 37 winning matchups · rank 17 of 38**
+> ### Field results — 2026-09-11
+> **54.7% mean · 54.0% median · 28 of 43 winning matchups · rank 18 of 44**
 >
-> Best `static_venom_drapion` 80% · worst `panic_poison_paralysis` 30%.
+> Best `meta_ns_zoroark` 87% · worst `team_rockets_persian_ex_attack_theft` 27%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the ex audit and is not comparable**: that audit corrected typed-Energy scalers that counted the wrong Energy, discard-cost attacks that were never charged, and attack gates that were never enforced.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 **Not my list.** Taken from Natalie Millar's *The Best Pokémon TCG Decks

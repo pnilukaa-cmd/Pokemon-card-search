@@ -1,5 +1,15 @@
 # dragapult_blaziken — TCGplayer, September 2026
 
+<!-- field-results -->
+> ### Field results — 2026-09-11
+> **51.3% mean · 49.0% median · 20 of 43 winning matchups · rank 22 of 44**
+>
+> Best `meta_ns_zoroark` 88% · worst `meta_raging_bolt` 32%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+<!-- field-results -->
+
+
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.
 

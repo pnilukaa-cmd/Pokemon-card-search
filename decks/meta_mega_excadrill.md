@@ -1,5 +1,15 @@
 # mega_excadrill — TCGplayer, September 2026
 
+<!-- field-results -->
+> ### Field results — 2026-09-11
+> **63.5% mean · 61.0% median · 37 of 43 winning matchups · rank 4 of 44**
+>
+> Best `meta_ns_zoroark` 94% · worst `scovillain_salazzle_spicy_rage` 39%.
+>
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+<!-- field-results -->
+
+
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.
 
