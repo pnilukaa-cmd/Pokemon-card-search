@@ -123,6 +123,12 @@ class Op:
     DISCARD_ENERGY_FROM_OPPONENT = "discard_energy_from_opponent"
     SWAP_HAND_WITH_DECK = "swap_hand_with_deck"
     SET_OPPONENT_HAND = "set_opponent_hand"
+    # Discard down to a hand size -- the symmetric half of
+    # DISCARD_FROM_OPPONENT, for Hand Trimmer.
+    DISCARD_FROM_SELF = "discard_from_self"
+    # Shuffle cards from the discard pile back into the deck.
+    DISCARD_TO_DECK = "discard_to_deck"
+    CLEAR_CONDITIONS = "clear_conditions"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -486,6 +492,60 @@ def _r(m, text):
     return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT)]
 
 
+# "Your opponent discards cards from their hand until they have N cards"
+# -- Xerosic's Machinations, in five decks here, and Hand Trimmer, which
+# does it to both players. Distinct from the shuffle-and-redraw hand
+# resets: nothing is drawn back.
+@rule("discard_opponent_hand_down_to",
+      r"(your opponent|each player) discards? cards? from their hand"
+      r" until they have (\d+) cards?")
+def _r(m, text):
+    acts = [Action(Op.DISCARD_FROM_OPPONENT, None, Target.OPPONENT,
+                   {"down_to": int(m.group(2))})]
+    if m.group(1).lower() == "each player":
+        acts.append(Action(Op.DISCARD_FROM_SELF, None, Target.SELF,
+                           {"down_to": int(m.group(2))}))
+    return acts
+
+
+# Shuffle cards back out of the discard pile. Three shapes of the same
+# effect -- Sacred Ash (Pokemon), Energy Recycler (Basic Energy), Great
+# Haul Net (either or both, Water only) -- and none compiled. Against a
+# mill deck this is the difference between decking out and not.
+@rule("shuffle_discard_into_deck",
+      r"shuffle up to (\d+) (" + TYPES + r")? ?(pok[eé]mon|basic energy|energy)"
+      r"(?: cards?)? from your discard pile into your deck")
+def _r(m, text):
+    kind = "Pokemon" if m.group(3).lower().startswith("pok") else "Energy"
+    f = {"kind": kind}
+    if m.group(2):
+        f["type"] = m.group(2).capitalize()
+    return [Action(Op.DISCARD_TO_DECK, int(m.group(1)), Target.SELF, f)]
+
+
+# Lumiose Galette: 20 HP back and one Special Condition off the Active.
+# Two actions from one sentence; the heal rules read the number and the
+# condition-clearing half was dropped.
+@rule("heal_and_clear_condition",
+      r"heal (\d+) damage and remove a special condition from your active")
+def _r(m, text):
+    return [Action(Op.HEAL, int(m.group(1)), Target.YOUR_ACTIVE),
+            Action(Op.CLEAR_CONDITIONS, None, Target.YOUR_ACTIVE)]
+
+
+# Dark Bell: "Both Active non-Darkness Pokemon are now Confused." The
+# type exclusion is the whole card -- it reads as symmetric and is not,
+# because the deck playing it is mono-Darkness.
+@rule("condition_both_actives_except_type",
+      r"both active non-(" + TYPES + r") pok[eé]mon are now"
+      r" (asleep|burned|confused|paralyzed|poisoned)")
+def _r(m, text):
+    return [Action(Op.APPLY_CONDITION, None, Target.BOTH_ALL,
+                   {"conditions": [m.group(2).lower()],
+                    "type_not": m.group(1).capitalize(),
+                    "active_only": True})]
+
+
 @rule("conditional_ko_on_counters",
       r"(?:if your opponent'?s active pok[eé]mon has exactly (\d+) damage counters"
       r" on it, that pok[eé]mon is knocked out"
@@ -582,9 +642,15 @@ def _search_filter(qualifier):
 
 
 @rule("search_to_bench",
-      r"search your deck for (?:up to )?(\d+|a|an) ([\w'’ -]*?)pok[eé]mon[^.]{0,60}?onto your bench")
+      r"search your deck for (?:up to )?(\d+|a|an|any number of)"
+      r" ([\w'’ -]*?)pok[eé]mon[^.]{0,60}?onto your bench")
 def _r(m, text):
-    return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
+    # "any number of" is Precious Trolley, an ACE SPEC that fills the Bench
+    # in one card and appears in seven decks here. The count alternation
+    # only knew digits and articles, so it matched nothing.
+    n = m.group(1).lower()
+    amount = 5 if n == "any number of" else _num(n)
+    return [Action(Op.SEARCH_TO_BENCH, amount, Target.YOUR_BENCHED,
                    _search_filter(m.group(2)))]
 
 
@@ -1239,9 +1305,16 @@ def _r(m, text):
 def _r(m, text):
     """Espeon ex's Amazez devolves the WHOLE board, not one Pokemon --
     the "each" wording had no rule and the attack compiled to nothing."""
+    # Where the Evolution card goes is printed on every one of these
+    # cards, and it is never the discard pile: five say "into your
+    # opponent's hand", Espeon ex says "shuffling ... into your opponent's
+    # deck".
+    to = "deck" if re.search(r"shuffl\w+ the highest stage evolution card"
+                             r"[^.]{0,40}into your opponent'?s deck",
+                             text, re.I) else "hand"
     if m.group(1).lower() == "each":
-        return [Action(Op.DEVOLVE, 99, Target.OPP_ALL)]
-    return [Action(Op.DEVOLVE, 1, Target.OPP_ANY)]
+        return [Action(Op.DEVOLVE, 99, Target.OPP_ALL, {"to": to})]
+    return [Action(Op.DEVOLVE, 1, Target.OPP_ANY, {"to": to})]
 
 
 @rule("ko_active_outright",

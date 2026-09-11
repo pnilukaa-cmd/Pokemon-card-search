@@ -86,6 +86,9 @@ def matches_filter(pl, spot, filt):
     typ = filt.get("type")
     if typ and typ not in (info.get("types") or []):
         return False
+    not_typ = filt.get("type_not")
+    if not_typ and not_typ in (info.get("types") or []):
+        return False
     if filt.get("stage") and info.get("stage") != filt["stage"]:
         return False
     if filt.get("stage_not") and info.get("stage") == filt["stage_not"]:
@@ -750,7 +753,14 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return n > 0
 
     if op == O.DISCARD_FROM_OPPONENT:
-        n = min(act.amount or 1, len(opp.hand))
+        # "until they have N cards in their hand" is an absolute floor, not
+        # a count to remove -- and a hand already at or below it discards
+        # nothing at all, so the card must not be spent.
+        down_to = (act.filter or {}).get("down_to")
+        if down_to is not None:
+            n = max(0, len(opp.hand) - down_to)
+        else:
+            n = min(act.amount or 1, len(opp.hand))
         for _ in range(n):
             kind, name = opp.hand.pop(random.randrange(len(opp.hand)))
             # "shuffles them into their deck" vs discard -- the IR records
@@ -765,6 +775,49 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             log.append(f"    strip {n} card(s) from opponent's hand")
         return n > 0
 
+    if op == O.DISCARD_TO_DECK:
+        f = act.filter or {}
+        want, typ = f.get("kind"), f.get("type")
+
+        def ok(name):
+            if want == "Pokemon":
+                if name not in pl.POKEMON:
+                    return False
+                return not typ or typ in (pl.POKEMON[name].get("types") or [])
+            if not name.endswith("Energy"):
+                return False
+            return not typ or typ in name
+
+        moved = 0
+        for name in [n for n in list(pl.discard) if ok(n)][:act.amount or 1]:
+            pl.discard.remove(name)
+            pl.deck.append(("Pokemon" if want == "Pokemon" else "Energy", name))
+            moved += 1
+        if moved:
+            random.shuffle(pl.deck)
+            log.append(f"    shuffle {moved} {want} back into deck")
+        return moved > 0
+
+    if op == O.CLEAR_CONDITIONS:
+        hits = [h for h in resolve_targets(act.target, pl, opp, source, attacker)
+                if getattr(h, "conditions", None)]
+        if not hits:
+            return False
+        for h in hits:
+            h.conditions = set()
+        log.append(f"    clear Special Conditions on {len(hits)}")
+        return True
+
+    if op == O.DISCARD_FROM_SELF:
+        down_to = (act.filter or {}).get("down_to")
+        n = (max(0, len(pl.hand) - down_to) if down_to is not None
+             else min(act.amount or 1, len(pl.hand)))
+        for _ in range(n):
+            pl.discard.append(pl.hand.pop(random.randrange(len(pl.hand)))[1])
+        if n:
+            log.append(f"    discard {n} from own hand")
+        return True          # a symmetric cost is paid even at zero
+
     if op == O.DEVOLVE:
         targets = resolve_targets(act.target, pl, opp, source, attacker)
         hit = 0
@@ -774,7 +827,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if not prev:
                 continue
             owner = pl if spot in pl.in_play() else opp
-            owner.discard.append(spot.name)
+            # The Evolution card goes back to its owner's HAND (or, on
+            # Espeon ex, is shuffled into their deck) -- it is never
+            # discarded, and discarding it handed the opponent a free
+            # Night Stretcher target instead of a card they have to
+            # re-draw and re-play.
+            if (act.filter or {}).get("to") == "deck":
+                owner.deck.append(("Pokemon", spot.name))
+                random.shuffle(owner.deck)
+            else:
+                owner.hand.append(("Pokemon", spot.name))
             spot.name = prev
             # Devolving clears damage above the lower stage's HP the same
             # way any HP change does, and Special Conditions stay.
@@ -797,18 +859,6 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.REVEAL_OPPONENT_HAND:
         return False        # information only; no state change to model
-
-    if op == O.DEVOLVE:
-        evolved = [q for q in opp.in_play()
-                   if opp.POKEMON.get(q.name, {}).get("evolves_from")]
-        if not evolved:
-            return False
-        tgt = max(evolved, key=lambda q: opp.POKEMON[q.name]["hp"])
-        pre = opp.POKEMON[tgt.name]["evolves_from"]
-        opp.hand.append(("Pokemon", tgt.name))
-        tgt.name = pre
-        log.append(f"    devolve -> {pre}")
-        return True
 
     if op == O.DAMAGE_TO_HP_THRESHOLD:
         # "Put damage counters until its remaining HP is N." Counters, not
@@ -894,7 +944,18 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         conds = act.filter.get("conditions") or []
         if act.filter.get("choose_one") and conds:
             conds = [conds[0]]
-        for h in hits[:1]:
+        # Dark Bell hits BOTH Active Pokemon, and only those -- a board-wide
+        # target with an "active_only" restriction, since there is no
+        # Target for "both Active Spots".
+        if act.filter.get("active_only"):
+            hits = [h for h in hits if h is pl.active or h is opp.active]
+        if act.filter.get("type_not"):
+            hits = [h for h in hits
+                    if matches_filter(pl if h in pl.in_play() else opp,
+                                      h, act.filter)]
+        if not hits:
+            return False
+        for h in (hits if act.filter.get("active_only") else hits[:1]):
             existing = getattr(h, "conditions", None)
             if existing is None:
                 return False          # board object has no condition slot

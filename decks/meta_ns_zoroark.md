@@ -7,7 +7,27 @@ The published lists give collector numbers without set codes, so every
 line was resolved by number against this repo's pool. Basic Energy is
 written without a set code, as everywhere else here.
 
-`N's Zoroark ex`'s `Night Joker` copies a Benched N's Pokemon's attack -- usually `N's Zekrom` or `N's Darmanitan`. Note that `check_energy_support` flags those two as uncastable and is right: they are attack DONORS and never attack themselves.
+`N's Zoroark ex`'s `Night Joker` copies a Benched N's Pokémon's attack --
+usually `N's Zekrom` or `N's Darmanitan`. Note that
+`check_energy_support` flags those two as uncastable and is right: they
+are attack DONORS and never attack themselves.
+
+**This deck's placement is a floor, not an evaluation, and I can say
+exactly why.** Every card in it is now modelled -- `Transformation Tome`
+(4 copies, the last unmodeled card here) resolves 49 times per 120 games
+and `Secret Box` 198 -- and the placement barely moved when they went
+live. The engine is copying the right attack: over 150 games against
+`meta_dragapult_pure`, `Night Joker` fires 188 times and picks
+`Rampaging Thunder` for 250. The problem is the other half of that
+card's text. *"During your next turn, this Pokémon can't use attacks"*
+is copied along with the damage, so `N's Zoroark ex` sits out the
+following turn -- 76 skipped attack turns in those same 150 games. A
+human alternates: `Shred` for 70 when no Knock Out is on offer,
+`Rampaging Thunder` when one is. The greedy policy takes the bigger
+number every time (halved in scoring for the lock, 125 vs 70, so it
+still wins) and eats the lock. That is a pilot limitation, not a
+modelling gap, and six measured attempts at a smarter pilot all came
+back at no detectable difference.
 
 ## Decklist
 

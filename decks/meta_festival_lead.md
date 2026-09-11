@@ -7,7 +7,19 @@ The published lists give collector numbers without set codes, so every
 line was resolved by number against this repo's pool. Basic Energy is
 written without a set code, as everywhere else here.
 
-`Thwackey`'s `Boom Boom Groove` feeding the Festival Lead Abilities on `Dipplin` and `Seaking`. The article rates its Prize trade the most efficient in the format -- `Dipplin` one-shots an unmodified `Mega Excadrill ex` through its Grass Resistance.
+`Thwackey`'s `Boom Boom Groove` feeding the Festival Lead Abilities on
+`Dipplin` and `Seaking`. The engine of the deck is `Festival Lead` itself:
+*"if Festival Grounds is in play, this Pokémon may use an attack it has
+twice."* That is two `Do the Wave`s a turn off one Grass Energy.
+
+**One claim from the article does not survive the arithmetic.** It rates
+the Prize trade as the format's most efficient on the strength of
+`Dipplin` one-shotting an unmodified `Mega Excadrill ex` through its
+Grass Resistance. `Mega Excadrill ex` is 340 HP with `-30` Grass
+Resistance, and `Do the Wave` on a full Bench is 100, +30 from
+`Brave Bangle` (the attacker has no Rule Box and the target is an ex),
++30 from `Kieran`'s damage mode, −30 Resistance = **130 a swing, 260 for
+both swings**. It is a clean two-turn Knock Out, not a one-shot.
 
 ## Decklist
 
