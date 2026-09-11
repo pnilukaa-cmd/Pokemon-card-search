@@ -1462,14 +1462,14 @@ def test_counter_budgets_are_allocated_to_take_a_knockout():
 
 
 
-def test_gust_targeting_is_policy_split():
-    """The two pilots must actually differ, or the mirror measures nothing.
+def test_gust_targeting_prefers_prizes_and_is_otherwise_identical():
+    """A gust should take the Knock Out that is worth the most Prizes.
 
-    This caught a flaw in my own experiment: the prize-aware gust targeting
-    was written UNCONDITIONALLY, so both seats of the mirror used it and the
-    comparison silently measured only the other half of the change. A
-    policy-gated behaviour needs a test that the gate works, exactly like an
-    Ability needs a test that it fires.
+    This is applied unconditionally, on the same footing as Phantom Dive's
+    counter budget: the card says you choose, so choosing well is
+    correctness. It is safe to apply everywhere because it provably
+    collapses to the old "lowest HP left" rule whenever nothing can be
+    Knocked Out, which is 81.8% of gust decisions.
     """
     import simulate_versus as SV
     import tcg_model as M
@@ -1488,12 +1488,16 @@ def test_gust_targeting_is_policy_split():
     ex.damage = 270                       # 10 HP left, worth 3 Prizes
     op.bench = [low, ex]
 
-    me.policy = "v1"
-    check("v1 drags up whatever has least HP left",
-          SV.choose_gust_target(me, op) is low)
-    me.policy = "v2g"
-    check("v2g drags up the same-effort target worth three times as much",
+    check("it drags up the same-effort target worth three times as much",
           SV.choose_gust_target(me, op) is ex)
+
+    # ... and when nothing can be Knocked Out it collapses to the old rule
+    # exactly, which is why it is safe to apply unconditionally: every
+    # score is (0, 0, -left), so the max IS "lowest HP left".
+    a.energy = []                          # now it cannot KO anything
+    check("with no Knock Out available it picks the lowest HP left",
+          SV.choose_gust_target(me, op) is
+          min(op.bench, key=lambda p: SV.effective_hp(op, p) - p.damage))
 
 
 
@@ -1547,7 +1551,7 @@ def main():
                test_coin_flips_are_actually_flipped,
                test_meta_trainers_compile_once_and_correctly,
                test_counter_budgets_are_allocated_to_take_a_knockout,
-               test_gust_targeting_is_policy_split]:
+               test_gust_targeting_prefers_prizes_and_is_otherwise_identical]:
         print(f"{fn.__name__}:")
         try:
             fn()

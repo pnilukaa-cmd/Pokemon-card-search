@@ -7,6 +7,21 @@ one policy, player B runs another, both playing the SAME decklist, so the
 only difference between them is the decision-making. Anything meaningfully
 above 50% is a better pilot.
 
+On a null change it reads exactly +0.00 with a zero-width interval --
+identical policies on identical seeds produce identical games -- so any
+non-zero reading is real behaviour rather than noise. Note that a change
+applied to BOTH seats is invisible here by construction: Phantom Dive's
+counter allocation and the prize-aware gust targeting are both correctness
+fixes rather than policy choices, and neither can be measured this way.
+
+There are currently no policy-gated behaviours, so every comparison reads
+0.00 until someone adds one. The measured history so far:
+
+  retreat into a Benched attacker when the Active is stalled   -3.0
+  ... free swaps only / reduced margin                       no effect
+  promote the best attacker after a Knock Out                  -0.11
+  prize-aware gust targeting + hold the card                   +0.37 (ns)
+
 Usage:  python3 ai_selfplay.py <folder> [games-per-deck] [polA] [polB]
 """
 import glob

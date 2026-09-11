@@ -181,8 +181,17 @@ class Player:
         self.item_locked = False
         # Which pilot this player uses. Every AI change applies to BOTH
         # sides by default, which makes a win rate blind to whether the
-        # change is an improvement -- so the policy is per-player and a
-        # mirror match can put v2 against v1 with the deck held fixed.
+        # change is an improvement -- so the policy is per-player and
+        # ai_selfplay.py can put one pilot against another with the deck
+        # held fixed.
+        #
+        # NOTHING READS THIS RIGHT NOW. Five pilot variations were measured
+        # on that harness and four were rejected outright; the one that was
+        # kept (prize-aware gust targeting) turned out to be provably safe
+        # to apply unconditionally, so it needed no gate. The hook is left
+        # in place because the next pilot idea needs it on day one, and
+        # because a measurement harness with no way to vary the thing it
+        # measures is worse than useless.
         self.policy = DEFAULT_POLICY
         # Energy types this deck can actually put on a Pokemon. Attacks
         # needing a type outside this set can never be cast, so they must
@@ -2441,17 +2450,12 @@ def try_retreat(pl, opp, log):
     # attacker had to beat 70 damage before the AI would swap to it while
     # the Active stood there doing nothing. Measured: a Benched Pokemon
     # could have attacked on 25% of all idle turns.
-    if here <= 0:
-        if pl.policy == "v2a":
-            margin = 0                    # any Benched attacker will do
-        elif pl.policy == "v2b":
-            # Only when the swap is FREE. Retreating discards Energy off
-            # the Active, so trading a stalled-but-invested Active for a
-            # 20-damage Basic throws the investment away -- which is what
-            # made the unconditional version 3 points worse.
-            margin = 0 if cost == 0 else margin
-        elif pl.policy == "v2c":
-            margin = 0 if cost == 0 else 30
+    # Loosening this margin when the Active cannot attack looks obviously
+    # right -- a Benched Pokemon could have attacked on 25% of all idle
+    # turns -- and measured 3 points WORSE. Retreating discards Energy off
+    # the Active, so trading a stalled-but-invested Active for a 20-damage
+    # Basic throws the investment away. Free-swaps-only and a reduced
+    # margin were also tried; neither beat this rule. Do not re-derive it.
     ready = [p for p in pl.bench if _ready_damage(pl, opp, p) > max(here, 0) + margin]
     if not ready:
         return
@@ -2906,17 +2910,25 @@ def choose_gust_target(pl, opp):
     """The Benched Pokemon worth dragging up, or None to hold the card."""
     if not opp.bench or opp.active is None:
         return None
-    if "g" not in getattr(pl, "policy", "v1"):
-        # v1: whatever has the least HP left, regardless of whether it can
-        # be Knocked Out or what it is worth.
-        return min(opp.bench, key=lambda p: effective_hp(opp, p) - p.damage)
-    best = max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
-    # Holding the gust is a real option: if the Active is already at least
-    # as good a target, spending a Supporter to swap it out is a wasted
-    # card AND a free switch for the opponent.
-    if _gust_score(pl, opp, best) <= _gust_score(pl, opp, opp.active):
-        return None
-    return best
+    # Prize-aware, and deliberately NOT policy-gated -- it is the same kind
+    # of change as Phantom Dive's counter budget: the card says you choose,
+    # so choosing well is correctness, not strategy. It is also provably
+    # safe. When nothing on the Bench can be Knocked Out (81.8% of gust
+    # decisions) every score collapses to (0, 0, -left) and picking the max
+    # of that IS "lowest HP left" -- the old rule, exactly. The two differ
+    # in 1.4% of decisions, always toward the target worth more Prizes.
+    #
+    # Too rare to measure: +0.37 points, 95% CI [-1.42, +2.15] over 5,700
+    # paired games, which is a coin flip. Kept on the argument that it is
+    # strictly better in the cases where it applies and identical in the
+    # rest, not on a number.
+    #
+    # The other half of this idea -- HOLDING the gust when the Active is
+    # already the better target -- was removed. It changed 39.3% of gust
+    # decisions and bought nothing measurable, and a rule that fires that
+    # often with no demonstrated benefit is exactly the kind of complexity
+    # that rots in this codebase.
+    return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
 
 def promote_from_bench(side, opp=None):
     """Choose the new Active after a Knock Out: the healthiest body.
