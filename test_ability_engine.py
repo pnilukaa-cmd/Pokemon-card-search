@@ -1651,6 +1651,34 @@ def test_copy_attacks_cannot_recurse_forever():
 
 
 
+def test_copied_attack_survives_a_missing_attacker():
+    """attack_rider_value() has no attacker argument and uses pl.active.
+
+    The Bench is sorted inside do_attack() at a moment when the Active has
+    just been Knocked Out, so pl.active is None -- and the borrowed attack
+    was then scored against a None attacker. The whole field run died on
+    the AttributeError, on the SECOND attempt, after the recursion fix.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    sk = [c for c in cards if c["name"] == "Slowking"
+          and ["SCR", "58"] in (c.get("printings") or [])][0]
+    POK = {"Slowking": M.build_pokemon_info(sk)}
+    me, op = SV.Player("A", POK, []), SV.Player("B", POK, [])
+    me.active = None
+    op.active = SV.InPlay("Slowking", 0)
+    seek = next(a for a in POK["Slowking"]["attacks"]
+                if a["name"] == "Seek Inspiration")
+    check("no attacker means nothing is borrowed, not a crash",
+          SV.copied_attack(me, op, None, seek["text"]) is None)
+    check("and valuing it is still safe",
+          SV.attack_rider_value(me, op, seek) == 0)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1705,7 +1733,8 @@ def main():
                test_area_zero_underdepths_raises_the_bench_cap,
                test_fairy_zone_rewrites_weakness,
                test_copied_attacks_carry_their_riders,
-               test_copy_attacks_cannot_recurse_forever]:
+               test_copy_attacks_cannot_recurse_forever,
+               test_copied_attack_survives_a_missing_attacker]:
         print(f"{fn.__name__}:")
         try:
             fn()

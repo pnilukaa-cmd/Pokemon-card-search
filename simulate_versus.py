@@ -1566,7 +1566,12 @@ def copied_attack(pl, opp, spot, text):
     # attack_rider_value() and into copied_attack() again. Guarding only
     # the recursive call left that inner path unbounded, and the field run
     # blew the stack on a deck holding two different copy-attacks.
-    if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
+    # spot can be None: attack_rider_value() has no attacker argument and
+    # passes pl.active, and the Bench is sorted inside do_attack() at a
+    # moment when the Active has just been Knocked Out. Without this the
+    # borrowed attack was scored against a None attacker and the whole
+    # field run died on an AttributeError.
+    if spot is None or _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
         return None
     _COPY_DEPTH[0] += 1
     try:
@@ -1962,7 +1967,7 @@ def attack_damage(pl, opp, spot, atk, record=True):
             if base:
                 return base * count
         elif record:
-            UNSCORED_ATTACKS.add(f"{spot.name}/{atk['name']}")
+            UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
         return base
 
     # Flat damage-counter placement with no scaling clause.
@@ -2000,7 +2005,7 @@ def attack_damage(pl, opp, spot, atk, record=True):
         return int(m.group(1))
 
     if not base and text and record:
-        UNSCORED_ATTACKS.add(f"{spot.name}/{atk['name']}")
+        UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
     return base
 
 
