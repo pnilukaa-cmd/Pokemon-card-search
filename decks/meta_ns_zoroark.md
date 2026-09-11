@@ -22,22 +22,45 @@ usually `N's Zekrom` or `N's Darmanitan`. Note that
 `check_energy_support` flags those two as uncastable and is right: they
 are attack DONORS and never attack themselves.
 
-**Last of 44 at 12.6%, and that is a floor, not an evaluation. I can
-say exactly why.** Every card in it is now modelled -- `Transformation Tome`
-(4 copies, the last unmodeled card here) resolves 49 times per 120 games
-and `Secret Box` 198 -- and the placement barely moved when they went
-live. The engine is copying the right attack: over 150 games against
-`meta_dragapult_pure`, `Night Joker` fires 188 times and picks
-`Rampaging Thunder` for 250. The problem is the other half of that
-card's text. *"During your next turn, this Pokémon can't use attacks"*
-is copied along with the damage, so `N's Zoroark ex` sits out the
-following turn -- 76 skipped attack turns in those same 150 games. A
-human alternates: `Shred` for 70 when no Knock Out is on offer,
-`Rampaging Thunder` when one is. The greedy policy takes the bigger
-number every time (halved in scoring for the lock, 125 vs 70, so it
-still wins) and eats the lock. That is a pilot limitation, not a
-modelling gap, and six measured attempts at a smarter pilot all came
-back at no detectable difference.
+**Last of the field, and the reason is not the one first written here.**
+
+The first version of this note blamed `Rampaging Thunder`'s self-lock:
+*"during your next turn, this Pokémon can't use attacks"* is copied along
+with the damage by `Night Joker`, so `N's Zoroark ex` sits out the
+following turn. That is true and it is not the cause. Over 300 games
+against `meta_dragapult_pure` the deck reaches its attack step 2563 times
+and attacks on 769 of them. The lock accounts for **134** of the 1794
+failures -- 7%.
+
+The real entry is four times bigger: **`N's Zoroark ex` could not pay for
+`Night Joker` on 528 turns.** It sat on exactly 1 of the 2 Darkness it
+needs for 359 of them. Tracing where the Energy went found the actual
+defect, and it was not in this deck or in the pilot:
+
+> Paying a "discard a card from your hand" cost picked `hand[0]`. Over
+> those 300 games the deck pitched **282 Basic Darkness Energy** -- out of
+> the 8 it owns -- and **183 copies of `N's Zoroark ex`**, its only win
+> condition. The same blind pick sat in `Ultra Ball` (`others[:2]`) and
+> `Kofu`. `Ultra Ball` is in all 44 decks here.
+
+With that fixed: attacks that actually happen 878 -> 965, turns unable to
+pay 528 -> 462, and Energy is no longer near the top of the pitch list.
+
+Two attempts to fix the *pilot* were measured and neither is in the
+engine. Making the self-lock penalty conditional on the swing taking a
+Prize ("lockaware") scored **-3.80 points** over 1500 mirror games on each
+of the two decks that own a copy-attack, worse on both -- waiving the
+penalty on a lethal swing makes the locking attack more attractive, so it
+got picked more (4450 borrows vs 4021) and spent more turns locked out
+(150 vs 130), the exact opposite of the intent. An Energy-targeting rule
+that deprioritised copy-attack donors moved 26 of 1423 attachments and 3
+of 528 failures, and was dropped as unmeasurable complexity.
+
+So the placement is still a floor rather than an evaluation -- every card
+here is modelled, and `Night Joker` does pick the right attack, 188 times
+in 150 games -- but the honest remaining cause is Energy density against a
+draw engine that has to discard to work, not a decision the pilot is
+getting wrong.
 
 ## Decklist
 

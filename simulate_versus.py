@@ -1275,6 +1275,16 @@ def cards_to_pitch(pl, n, exclude=None):
     "discard a card from your hand" cost. Ultra Ball is in all 44 decks
     here, so the blind version ran in essentially every game ever
     measured.
+
+    Measured against the unfixed engine on identical seeds, 44 decks x 8
+    opponents x 100 games: mean -0.03 points, 95% CI [-0.81, +0.74]. Read
+    that as "field-neutral", NOT as "no effect" -- the aggregate is zero
+    by construction, because the panel opponents get the fix too. The
+    per-deck numbers are where it shows: 43 of 44 decks moved, mean
+    absolute change 2.07 points, 22 decks moved by 2 or more, range -6.50
+    (arbok_team_rockets_muk_condition_stack) to +6.25
+    (toxic_slumber_vileplume_ex). It is a substantial re-ranking that
+    happens to sum to nothing.
     """
     idx = [i for i, c in enumerate(pl.hand) if c != exclude]
     idx.sort(key=lambda i: (pitch_rank(pl, *pl.hand[i]), i))
