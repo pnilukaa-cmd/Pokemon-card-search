@@ -829,9 +829,8 @@ def play_items(pl, opp, turn, log, first_turn):
             break
         pl.remove_from_hand("Item", "Ultra Ball")
         pl.discard.append("Ultra Ball")
-        for c in others[:2]:
-            pl.remove_from_hand(*c)
-            pl.discard.append(c[1])
+        for i in cards_to_pitch(pl, 2):
+            pl.discard.append(pl.hand.pop(i)[1])
         pl.hand.append(("Pokemon", n))
         log.append(f"  {pl.name}: Ultra Ball -> {n}")
 
@@ -999,9 +998,10 @@ def play_supporter(pl, opp, turn, log):
     # even from a hand that does not need the cards.
     if "Kofu" in hand_names and len(pl.hand) >= 3:
         use("Kofu")
-        for _ in range(2):
-            if pl.hand:
-                pl.deck.insert(0, pl.hand.pop(0))
+        # Bottoming a card is not discarding it, but it is still the two
+        # cards you least want, not the two at the front of the list.
+        for i in cards_to_pitch(pl, 2):
+            pl.deck.insert(0, pl.hand.pop(i))
         pl.draw(4)
         log.append(f"  {pl.name}: Kofu (bottom 2, draw 4)")
         return
@@ -1226,6 +1226,62 @@ def trainer_effect_ir(name):
 # ability_engine needs a Trainer's compiled IR (a Tool or Energy granting
 # Special Condition immunity, a Stadium doing the same) and cannot import
 # this module back. Hand it the function.
+def pitch_rank(pl, kind, name):
+    """How badly this player wants to KEEP a card. Low pitches first.
+
+    Only used to pay a "discard a card from your hand" cost, which the
+    engine used to pay with hand[0] -- whatever happened to be sitting
+    there. The ordering is deliberately coarse; the point is not to find
+    the optimal discard but to stop throwing away the two things a deck
+    can least afford.
+
+    Energy is ranked by whether anything in play is actually short of it,
+    so a deck that is paid up pitches spares freely and a deck that is
+    starving holds them. A Pokemon is worth keeping while it can still be
+    put into play or evolve something already there -- a fourth copy of a
+    Stage 2 with no Stage 1 down is just a card.
+    """
+    if kind == "Energy":
+        short = any(energy_shortfall(pl, p) > 0 for p in pl.in_play())
+        return 30 if short else 10
+    if kind == "Pokemon":
+        info = pl.POKEMON.get(name) or {}
+        if info.get("stage") == "Basic":
+            # A Basic is the thing you cannot come back without, but a
+            # fifth one with a full Bench is not.
+            return 25 if len(pl.in_play()) < 4 else 12
+        pre = info.get("evolves_from")
+        if pre in pl.in_play_names():
+            return 28
+        # A Stage 1 with no Stage 1 target is NOT a dead card while its
+        # pre-evolution is still in the deck -- that is next turn's Poffin.
+        # Ranking it dead pitched N's Zoroark ex, the deck's only win
+        # condition, 317 times in 300 games.
+        if any(n == pre for _, n in pl.deck) or any(n == pre for _, n in pl.hand):
+            return 22
+        return 5                      # the line is genuinely unreachable
+    if kind == "Supporter":
+        return 15
+    if kind == "Stadium":
+        return 8
+    return 6                          # Items and Tools are the spare change
+
+
+def cards_to_pitch(pl, n, exclude=None):
+    """The n cards in hand this player can most afford to lose.
+
+    Three places paid a hand cost by taking whatever sat at the front of
+    the list -- Ultra Ball's two, Kofu's two, and every compiled
+    "discard a card from your hand" cost. Ultra Ball is in all 44 decks
+    here, so the blind version ran in essentially every game ever
+    measured.
+    """
+    idx = [i for i, c in enumerate(pl.hand) if c != exclude]
+    idx.sort(key=lambda i: (pitch_rank(pl, *pl.hand[i]), i))
+    return sorted(idx[:n], reverse=True)      # reverse: safe to pop in order
+
+
+AE.PITCH_RANK = pitch_rank
 AE.TRAINER_IR = trainer_effect_ir
 
 
@@ -1240,6 +1296,7 @@ TRAINER_IR_OPS = {
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.FORCE_BENCH_OPPONENT,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
+    IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES,
 }
 
 
@@ -1598,6 +1655,15 @@ def _best_borrowed(pl, opp, spot, text):
     Rampaging Thunder (250, self-locking) is worth 125/turn against N's
     Reshiram's Virtuous Flame (170, no drawback). Ranking on raw damage
     alone had the AI pick the 250 every time and attack half as often.
+
+    Making that halving CONDITIONAL on the swing taking a Prize was tried
+    and rejected: "lockaware" waived the penalty on a lethal swing, on the
+    theory that a lock which buys a Prize has paid for itself. It scored
+    -3.80 points over 1500 mirror games on each of the two decks that own
+    a copy-attack, worse on both, and the diagnosis says why -- waiving
+    the penalty makes the locking attack MORE attractive, so it was picked
+    more often (4450 vs 4021 borrows) and spent MORE turns locked out (150
+    vs 130), which is the opposite of the intent.
     """
     m = _COPY_OWN_BENCH_RE.search(text)
     if not m:

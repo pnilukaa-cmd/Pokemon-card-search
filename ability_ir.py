@@ -129,6 +129,13 @@ class Op:
     # Shuffle cards from the discard pile back into the deck.
     DISCARD_TO_DECK = "discard_to_deck"
     CLEAR_CONDITIONS = "clear_conditions"
+    # Search the deck and put what you find on TOP of it, not into
+    # hand -- a turn slower than a search, which is the whole
+    # difference between Ciphermaniac's Codebreaking and Ultra Ball.
+    SEARCH_TO_TOP_OF_DECK = "search_to_top_of_deck"
+    # Put the Prize cards on the bottom of the deck and take that
+    # many fresh ones off the top. Redeemable Ticket.
+    REROLL_PRIZES = "reroll_prizes"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -1414,6 +1421,28 @@ def _r(m, text):
 @rule("search_any_card", r"search your deck for a card\b")
 def _r(m, text):
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "card"})]
+
+
+# Ciphermaniac's Codebreaking. Modelled exactly rather than as a search:
+# the cards go on TOP of the deck, so they arrive next turn's draw, and
+# treating that as "into your hand" would make the card a strictly faster
+# Ultra Ball than the one that is printed.
+@rule("search_to_top_of_deck",
+      r"search your deck for (\d+|a|an) cards?[^.]{0,60}?"
+      r"put (?:those|that) cards? on top of it")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_TOP_OF_DECK, _num(m.group(1)), Target.SELF)]
+
+
+# Redeemable Ticket. Prize cards are real cards in this engine -- dealt off
+# the deck at setup and taken into hand on a Knock Out -- so re-rolling
+# them genuinely changes which cards the deck can still reach. A deck that
+# prized its one copy of something gets another roll at it.
+@rule("reroll_prizes",
+      r"count your prize cards, shuffle them, and put them on the bottom"
+      r" of your deck")
+def _r(m, text):
+    return [Action(Op.REROLL_PRIZES, None, Target.SELF)]
 
 
 @rule("discard_to_bench",

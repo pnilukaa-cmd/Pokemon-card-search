@@ -46,6 +46,13 @@ def TRAINER_IR(name):
     return None
 
 
+# How much this player wants to KEEP a card in hand, low = pitch it first.
+# Injected by the simulator, which is where deck knowledge lives. Defaults
+# to "no preference", which reproduces the old blind behaviour.
+def PITCH_RANK(pl, kind, name):
+    return 0
+
+
 
 # --------------------------------------------------------------------------
 # Target resolution
@@ -319,9 +326,16 @@ def pay_costs(effect, pl, source, log):
     for c in effect.costs:
         k = c["kind"]
         if k == "discard_hand":
-            for _ in range(c["amount"]):
-                kind, name = pl.hand.pop(0)
-                pl.discard.append(name)
+            # Pitch the least useful cards, not hand[0]. Paying blind, N's
+            # Zoroark ex's Trade fed 282 Darkness Energy and 183 copies of
+            # the deck's own attacker to the discard over 300 games -- in a
+            # deck holding 8 Energy that could not pay for its attack on
+            # 528 turns. Every "discard a card from your hand" cost in the
+            # format was doing this.
+            order = sorted(range(len(pl.hand)),
+                           key=lambda i: (PITCH_RANK(pl, *pl.hand[i]), i))
+            for i in sorted(order[:c["amount"]], reverse=True):
+                pl.discard.append(pl.hand.pop(i)[1])
         elif k == "discard_energy_from_hand":
             i = next(i for i, (kind, name) in enumerate(pl.hand)
                      if kind == "Energy" and c["type"] in name)
@@ -774,6 +788,52 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if n:
             log.append(f"    strip {n} card(s) from opponent's hand")
         return n > 0
+
+    if op == O.SEARCH_TO_TOP_OF_DECK:
+        # A generic want-list, because the card names no restriction: a
+        # Basic while the board is still thin, then a Supporter if the
+        # hand has none, then Energy, then anything. The cards go on TOP
+        # (pl.deck[-1] is the next draw), so this is next turn's draw
+        # being chosen rather than this turn's hand.
+        def wants():
+            if len(pl.in_play()) < 3:
+                yield lambda k, n: (k == "Pokemon"
+                                    and pl.POKEMON.get(n, {}).get("stage")
+                                    == "Basic")
+            if not any(k == "Supporter" for k, _ in pl.hand):
+                yield lambda k, n: k == "Supporter"
+            if not any(k == "Energy" for k, _ in pl.hand):
+                yield lambda k, n: k == "Energy"
+            yield lambda k, n: True
+
+        picked = []
+        for pred in wants():
+            if len(picked) >= (act.amount or 1):
+                break
+            card = _find_in_deck(pl, pred)
+            if card:
+                picked.append(card)
+        while len(picked) < (act.amount or 1):
+            card = _find_in_deck(pl, lambda k, n: True)
+            if not card:
+                break
+            picked.append(card)
+        if not picked:
+            return False
+        pl.deck.extend(picked)          # last appended is drawn first
+        log.append(f"    to top of deck: {', '.join(c[1] for c in picked)}")
+        return True
+
+    if op == O.REROLL_PRIZES:
+        n = len(getattr(pl, "prize_cards", []) or [])
+        if not n or len(pl.deck) < n:
+            return False
+        old = pl.prize_cards
+        random.shuffle(old)
+        pl.deck = old + pl.deck          # index 0 is the BOTTOM of the deck
+        pl.prize_cards = [pl.deck.pop() for _ in range(n)]
+        log.append(f"    re-roll {n} Prize cards")
+        return True
 
     if op == O.DISCARD_TO_DECK:
         f = act.filter or {}
