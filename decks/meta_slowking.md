@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **40.3% mean · 39.0% median · 8 of 43 winning matchups · rank 38 of 44**
+> **45.2% mean · 46.0% median · 18 of 43 winning matchups · rank 31 of 44**
 >
-> Best `meta_ns_zoroark` 84% · worst `arbok_muk_laser_darkbell` 16%.
+> Best `meta_ns_zoroark` 82% · worst `tr_crobat_absol_bench_snipe` 22%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right

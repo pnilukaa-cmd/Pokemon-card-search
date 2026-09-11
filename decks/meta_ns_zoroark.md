@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **12.6% mean · 10.5% median · 0 of 43 winning matchups · rank 44 of 44**
+> **13.8% mean · 13.0% median · 0 of 43 winning matchups · rank 44 of 44**
 >
-> Best `static_venom_drapion` 42% · worst `stevens_carbink_damage_wall` 4%.
+> Best `static_venom_drapion` 40% · worst `scovillain_salazzle_spicy_rage` 5%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right

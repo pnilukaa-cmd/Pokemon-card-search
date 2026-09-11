@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **61.1% mean · 62.5% median · 34 of 43 winning matchups · rank 6 of 44**
+> **60.6% mean · 62.0% median · 35 of 43 winning matchups · rank 7 of 44**
 >
-> Best `meta_ns_zoroark` 90% · worst `team_rockets_persian_ex_attack_theft` 31%.
+> Best `feraligatr_munkidori_damage_transfer` 90% · worst `team_rockets_persian_ex_attack_theft` 28%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **46.6% mean · 45.5% median · 13 of 43 winning matchups · rank 30 of 44**
+> **49.3% mean · 47.5% median · 17 of 43 winning matchups · rank 27 of 44**
 >
-> Best `static_venom_drapion` 79% · worst `lurantis_heal_punish` 26%.
+> Best `meta_ns_zoroark` 78% · worst `arbok_muk_trolley_darkbell` 34%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

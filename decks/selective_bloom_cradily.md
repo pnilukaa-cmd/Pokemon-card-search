@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **52.8% mean · 51.5% median · 24 of 43 winning matchups · rank 20 of 44**
+> **52.0% mean · 48.5% median · 21 of 43 winning matchups · rank 24 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 88% · worst `meta_mega_excadrill` 15%.
+> Best `feraligatr_munkidori_damage_transfer` 86% · worst `meta_mega_excadrill` 22%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

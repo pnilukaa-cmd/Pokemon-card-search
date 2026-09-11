@@ -2,12 +2,14 @@
 
 <!-- field-results -->
 > ### Field results — 2026-09-11
-> **48.9% mean · 47.5% median · 20 of 43 winning matchups · rank 26 of 44**
+> **49.1% mean · 46.5% median · 19 of 43 winning matchups · rank 28 of 44**
 >
-> Best `meta_ns_zoroark` 90% · worst `water_aggro` 18%.
+> Best `meta_ns_zoroark` 93% · worst `panic_poison_paralysis` 24%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 
