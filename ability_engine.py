@@ -236,21 +236,64 @@ def query_attack_gate(pl, spot):
                 return False
     return True
 
-def conditions_met(effect, pl, opp, source):
+def conditions_met(effect, pl, opp, source, atk=None):
     for c in effect.conditions:
         k = c["kind"]
         if k == "self_is_active" and source is not pl.active:
             return False
         if k == "self_is_benched" and source not in pl.bench:
             return False
-        if k == "lost_pokemon_last_turn" and not getattr(pl, "lost_pokemon_last_turn", False):
-            return False
+        if k == "lost_pokemon_last_turn":
+            if not getattr(pl, "lost_pokemon_last_turn", False):
+                return False
+            fam = c.get("family")
+            if fam and fam.lower() not in (
+                    getattr(pl, "lost_pokemon_names", None) or ""):
+                return False
         if k == "named_in_play" and c["name"] not in pl.in_play_names():
             return False
         if k == "played_this_turn" and c["name"] not in getattr(pl, "played_supporters_this_turn", set()):
             return False
         if k == "self_has_energy_type":
             if not any(c["type"] in e for e in source.energy):
+                return False
+        if k == "energy_in_play_at_least":
+            have = sum(1 for p in pl.in_play() for e in p.energy if c["type"] in e)
+            if have < c["count"]:
+                return False
+        if k == "opponent_active_is_type":
+            if not opp.active:
+                return False
+            types = (opp.POKEMON.get(opp.active.name) or {}).get("types") or []
+            if c["type"] not in types:
+                return False
+        if k == "self_has_tool" and not getattr(source, "tool", None):
+            return False
+        if k == "self_extra_energy":
+            # "at least N extra Energy attached (in addition to THIS
+            # ATTACK'S cost)" -- so it needs the attack being scored, which
+            # is why conditions_met takes an optional atk. Falling back to
+            # the Pokemon's most expensive attack when it is not given.
+            if atk is not None:
+                cost = len(atk["cost"])
+            else:
+                costs = [len(a["cost"]) for a in
+                         (pl.POKEMON.get(source.name) or {}).get("attacks") or []]
+                cost = max(costs) if costs else 0
+            if source.energy_count() - cost < c["count"]:
+                return False
+        if k == "self_promoted_this_turn" and not getattr(
+                source, "promoted_this_turn", False):
+            return False
+        if k == "any_stadium_in_play":
+            if not (getattr(pl, "stadium", None) or getattr(opp, "stadium", None)):
+                return False
+        if k == "self_used_attack_last_turn":
+            if getattr(source, "last_attack_used", None) != c["name"]:
+                return False
+        if k == "played_supporter_named":
+            played = getattr(pl, "played_supporters_this_turn", set())
+            if not any(c["name"].lower() in n.lower() for n in played):
                 return False
         if k == "stadium_in_play":
             want = c["name"]

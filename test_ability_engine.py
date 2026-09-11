@@ -1679,9 +1679,51 @@ def test_copied_attack_survives_a_missing_attacker():
 
 
 
+def test_a_card_already_pitched_is_not_played_from_a_stale_snapshot():
+    """play_items iterates a SNAPSHOT of the hand.
+
+    Once play_trainer_from_ir began paying costs, a play that fails can
+    still discard from hand -- so a later entry in that snapshot can name
+    a card that is no longer there. The existence check sat below the
+    coin-flip branch, which had already called remove_from_hand, and two
+    shards of a 946-pairing field run died on ValueError.
+    """
+    import simulate_versus as SV
+    pl = SV.Player("A", {}, [])
+    opp = SV.Player("B", {}, [])
+    pl.hand = []                      # the card the snapshot still names
+    before = list(pl.discard)
+    crashed = False
+    try:
+        got = SV.play_trainer_from_ir(pl, opp, "Item", "Crushing Hammer", [], 0)
+    except ValueError:
+        crashed, got = True, None
+    check("a card that is no longer in hand is simply not played",
+          not crashed and got is False, f"crashed={crashed} got={got}")
+    check("and nothing is discarded on its behalf", pl.discard == before,
+          f"discard={pl.discard}")
+
+    # the ordinary case still works from a hand that HAS it
+    pl2 = SV.Player("A", {}, [])
+    opp2 = SV.Player("B", {}, [])
+    pl2.hand = [("Item", "Crushing Hammer")]
+    opp2.active = SV.InPlay("Dunsparce", 0)
+    opp2.active.energy = [["Water"]]
+    opp2.active.energy_names = ["Water Energy"]
+    opp2.POKEMON = {"Dunsparce": {"types": ["Colorless"], "hp": 70,
+                                  "attacks": [], "stage": "Basic",
+                                  "prize_value": 1, "weakness": None,
+                                  "resistance": None, "evolves_from": None,
+                                  "subtypes": ["Basic"]}}
+    SV.play_trainer_from_ir(pl2, opp2, "Item", "Crushing Hammer", [], 0)
+    check("and a card that IS in hand still leaves it",
+          ("Item", "Crushing Hammer") not in pl2.hand, f"hand={pl2.hand}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_draw_fires, test_draw_with_discard_cost,
+    for fn in [test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,
+               test_draw_fires, test_draw_with_discard_cost,
                test_cost_unaffordable_blocks, test_active_only_condition,
                test_ko_condition, test_energy_type_condition_and_counter_move,
                test_passive_damage_reduction, test_passive_damage_buff,

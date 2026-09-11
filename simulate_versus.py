@@ -112,7 +112,7 @@ class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
                  "retreat_locked", "attack_locked_by_opponent", "prev_damage",
-                 "healed_this_turn")
+                 "healed_this_turn", "promoted_this_turn", "last_attack_used")
 
     def __init__(self, name, turn):
         self.name = name
@@ -143,6 +143,12 @@ class InPlay:
         self.prev_damage = 0
         self.tool = None
         self.conditions = set()   # asleep / burned / confused / paralyzed / poisoned
+        # Mega Lopunny ex's Gale Thrust is 60 that becomes 230 "if this
+        # Pokemon moved from your Bench to the Active Spot this turn".
+        self.promoted_this_turn = False
+        # Weezing's Crazy Blast is 50 that becomes 170 "if this Pokemon
+        # used Pervasive Gas during your last turn".
+        self.last_attack_used = None
 
     def energy_count(self):
         return len(self.energy)
@@ -173,6 +179,10 @@ class Player:
         self.turn_buff_any = 0
         self.stadium = None
         self.lost_pokemon_last_turn = False
+        # The names, lower-cased and joined, so a family-scoped clause
+        # ("if any of your HOP'S Pokemon were Knocked Out...") can tell
+        # whose Knock Out it was.
+        self.lost_pokemon_names = ""
         self.abilities_used = set()
         self.played_supporters_this_turn = set()
         self.deck_out = False
@@ -384,6 +394,7 @@ def sweep_knocked_out(pl, opp, log):
             # itself -- the most consequential thing on the dead-op list.
             taken = max(0, taken + AE.query_prize_modifier(taker, owner))
             owner.discard.append(spot.name)
+            owner.lost_pokemon_names += spot.name.lower() + "|"
             if spot is owner.active:
                 owner.active = None
             elif spot in owner.bench:
@@ -405,6 +416,7 @@ def sweep_knocked_out(pl, opp, log):
                                    effective_hp(owner, p) - p.damage),
                     reverse=True)
                 owner.active = owner.bench.pop(0)
+                owner.active.promoted_this_turn = True
                 log.append(f"  {owner.name}: promotes {owner.active.name}")
 
 
@@ -1336,6 +1348,15 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     eff = trainer_effect_ir(name)
     if eff is None:
         return False
+    # The card has to still BE in hand. play_items iterates a snapshot of
+    # the hand, and since this function started paying costs a failed play
+    # can discard from hand -- so a later entry in that snapshot may name a
+    # card that has already been pitched. Checking this only further down,
+    # after the coin-flip branch had already called remove_from_hand,
+    # crashed two shards of a 946-pairing field run.
+    extra = 1 if any(c["kind"] == "play_two_copies" for c in eff.costs) else 0
+    if pl.hand.count((kind, name)) < 1 + extra:
+        return False
     if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return False
     actions = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
@@ -1361,9 +1382,6 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     # instead of once per PAIR. The card being played is taken out of hand
     # first so it cannot be discarded to pay for itself, and put back if
     # the cost turns out to be unaffordable.
-    extra = 1 if any(c["kind"] == "play_two_copies" for c in eff.costs) else 0
-    if pl.hand.count((kind, name)) < 1 + extra:
-        return False
     for _ in range(1 + extra):
         pl.remove_from_hand(kind, name)
     if eff.costs and not AE.pay_costs(eff, pl, pl.active, log):
@@ -2068,7 +2086,7 @@ def attack_damage(pl, opp, spot, atk, record=True):
         eff = _attack_ir(atk)
         if eff.conditions:
             return base + (int(m.group(1))
-                           if AE.conditions_met(eff, pl, opp, spot) else 0)
+                           if AE.conditions_met(eff, pl, opp, spot, atk) else 0)
 
     # "Flip a coin. If heads, this attack does N more damage." The
     # conditional-bonus path below needs a parsed CONDITION to gate on and
@@ -2557,6 +2575,15 @@ def energy_shortfall(pl, spot):
     # Eye) can be off next turn, so keep loading Energy toward the real
     # printed cost rather than stopping at the discounted one.
     need = max(len(a["cost"]) for a in castable)
+    # An attack that pays MORE for Energy beyond its cost is not "paid up"
+    # at its printed cost. Mega Excadrill ex's Maximum Drilling is 200 that
+    # becomes 330 with 2 Energy beyond its MMM, and attachment stopped at
+    # three -- so the bonus was reachable in principle and reached zero
+    # times in 148 uses.
+    for a in castable:
+        for c in _attack_ir(a).conditions or []:
+            if c.get("kind") == "self_extra_energy":
+                need = max(need, len(a["cost"]) + c["count"])
     return max(0, need - spot.energy_count())
 
 
@@ -2791,6 +2818,7 @@ def try_retreat(pl, opp, log):
     clear_conditions(pl.active, "retreated", log, pl.name)
     pl.bench.append(pl.active)
     pl.active = target
+    pl.active.promoted_this_turn = True
     log.append(f"  {pl.name}: retreats into {target.name}")
 
 
@@ -2918,6 +2946,8 @@ def do_attack(pl, opp, log):
                f"{f' (-{reduction} reduced)' if reduction else ''}"
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
 
+    pl.active.last_attack_used = atk["name"]
+
     if _SELF_ATTACK_LOCK_RE.search(_borrowed_text(pl, opp, pl.active, atk)):
         pl.active.attack_locked = True
 
@@ -2933,6 +2963,7 @@ def do_attack(pl, opp, log):
         taken = pl.POKEMON[pl.active.name]["prize_value"]
         log.append(f"  {pl.name}: {pl.active.name} KO'd by retaliation (+{taken} to {opp.name})")
         pl.discard.append(pl.active.name)
+        pl.lost_pokemon_names += pl.active.name.lower() + "|"
         pl.active = None
         pl.lost_pokemon_last_turn = True
         opp.prizes -= taken
@@ -2940,6 +2971,8 @@ def do_attack(pl, opp, log):
             return True
         if pl.bench:
             pl.active = promote_from_bench(pl, opp)
+            if pl.active:
+                pl.active.promoted_this_turn = True
         else:
             return True
 
@@ -2947,6 +2980,7 @@ def do_attack(pl, opp, log):
         taken = opp.POKEMON[opp.active.name]["prize_value"]
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
         opp.discard.append(opp.active.name)
+        opp.lost_pokemon_names += opp.active.name.lower() + "|"
         opp.active = None
         opp.lost_pokemon_last_turn = True
         pl.prizes -= taken
@@ -2961,6 +2995,7 @@ def do_attack(pl, opp, log):
                                           effective_hp(opp, p) - p.damage),
                            reverse=True)
             opp.active = opp.bench.pop(0)
+            opp.active.promoted_this_turn = True
             log.append(f"  {opp.name}: promotes {opp.active.name}")
         else:
             return True
@@ -3225,6 +3260,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         log.append(f"  {side.name}: {side.active.name} KO'd at checkup "
                    f"(+{taken} to {other.name})")
         side.discard.append(side.active.name)
+        side.lost_pokemon_names += side.active.name.lower() + "|"
         side.active = None
         side.lost_pokemon_last_turn = True
         other.prizes -= taken
@@ -3232,6 +3268,8 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
             return "loss" if mine else "win"
         if side.bench:
             side.active = promote_from_bench(side, other)
+            if side.active:
+                side.active.promoted_this_turn = True
         elif mine:
             return "no_pokemon"
         else:
@@ -3347,6 +3385,9 @@ def run_game(modelA, modelB, verbose=False):
             pl.lost_pokemon_last_turn_snapshot = pl.lost_pokemon_last_turn
             result = take_turn(pl, opp, round_no, goes_first, cards_by_name, log)
             pl.lost_pokemon_last_turn = False
+            pl.lost_pokemon_names = ""
+            for spot in pl.in_play():
+                spot.promoted_this_turn = False
             if result == "win":
                 winner = pl
                 break

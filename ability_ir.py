@@ -292,6 +292,52 @@ def parse_conditions(text):
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
+    # ---- conditional flat damage bonuses ---------------------------------
+    # attack_damage() can already pay "if <condition>, this attack does N
+    # more damage", but only when parse_conditions recognised the clause.
+    # Nine such bonuses on cards in this repo's decks had no matching
+    # condition kind and were silently dropped -- including 130 on Mega
+    # Excadrill ex's Maximum Drilling and 100 on Team Rocket's Kangaskhan
+    # ex's Wicked Impact, both on top-five decks.
+    m = re.search(r"if you have at least (\d+) (" + TYPES + r") energy in play",
+                  t, re.I)
+    if m:
+        out.append({"kind": "energy_in_play_at_least",
+                    "count": int(m.group(1)), "type": m.group(2).capitalize()})
+    m = re.search(r"if your opponent'?s active pok[eé]mon is an? (" + TYPES
+                  + r") pok[eé]mon", t, re.I)
+    if m:
+        out.append({"kind": "opponent_active_is_type",
+                    "type": m.group(1).capitalize()})
+    if re.search(r"if this pok[eé]mon has an? pok[eé]mon tool( card)? attached",
+                 t, re.I):
+        out.append({"kind": "self_has_tool"})
+    m = re.search(r"if this pok[eé]mon has at least (\d+) extra energy attached",
+                  t, re.I)
+    if m:
+        out.append({"kind": "self_extra_energy", "count": int(m.group(1))})
+    if re.search(r"if this pok[eé]mon moved from your bench to the active spot"
+                 r" this turn", t, re.I):
+        out.append({"kind": "self_promoted_this_turn"})
+    if re.search(r"if a stadium( card)? is in play", t, re.I):
+        out.append({"kind": "any_stadium_in_play"})
+    m = re.search(r"if this pok[eé]mon used ([\w'’ -]+?) during your last turn",
+                  t, re.I)
+    if m:
+        out.append({"kind": "self_used_attack_last_turn",
+                    "name": m.group(1).strip()})
+    m = re.search(r"if you played a supporter card that has \"([^\"]+)\" in its"
+                  r" name from your hand during this turn", t, re.I)
+    if m:
+        out.append({"kind": "played_supporter_named", "name": m.group(1)})
+    m = re.search(r"if any of your ([\w'’ -]+?) pok[eé]mon were knocked out"
+                  r" by damage from an attack during your opponent'?s last turn",
+                  t, re.I)
+    if m:
+        out.append({"kind": "lost_pokemon_last_turn", "family": m.group(1).strip()})
+    elif re.search(r"if any of your pok[eé]mon were knocked out by damage from an"
+                   r" attack during your opponent'?s last turn", t, re.I):
+        out.append({"kind": "lost_pokemon_last_turn"})
     # "If Festival Grounds is in play, this Pokemon may use an attack it
     # has twice." The Stadium clause was dropped entirely, so the gate on
     # an archetype-defining Ability did not exist.
