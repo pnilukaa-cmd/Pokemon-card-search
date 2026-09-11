@@ -121,6 +121,7 @@ class Op:
     CONDITIONAL_KO = "conditional_ko"
     DAMAGE_TO_HP_THRESHOLD = "damage_to_hp_threshold"
     ATTACK_GATE = "attack_gate"
+    BENCH_CAP = "bench_cap"
     SELF_DAMAGE = "self_damage"
     DISCARD_SELF_ENERGY = "discard_self_energy"
     # meta
@@ -947,6 +948,21 @@ def _r(m, text):
     free -- Koraidon ex's Kaiser Tackle took 60 a turn it never paid.
     """
     return [Action(Op.SELF_DAMAGE, int(m.group(1)), Target.SELF)]
+
+
+@rule("bench_cap",
+      r"can have up to (\d+) pok[eé]mon on their bench")
+def _r(m, text):
+    """Area Zero Underdepths. The Bench limit was a hard constant of 5, so
+    the Stadium that raises it to 8 for a player with a Tera Pokemon in
+    play did nothing at all -- in a deck built on a Tera attacker, three
+    Bench slots is a third of the board."""
+    filt = {}
+    mm = re.search(r"each player who has any ([\w' -]+?) pok[eé]mon in play",
+                   text, re.I)
+    if mm:
+        filt["requires_subtype"] = mm.group(1).strip().title()
+    return [Action(Op.BENCH_CAP, int(m.group(1)), Target.BOTH_ALL, filt)]
 
 
 @rule("attack_gate",

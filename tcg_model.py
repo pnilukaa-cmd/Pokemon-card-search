@@ -217,6 +217,7 @@ def build_pokemon_info(card):
             "stage": "Basic", "evolves_from": None, "hp": hp,
             "retreat": 99, "rule_box": False, "prize_value": 1,
             "types": [ftype], "weakness": None, "resistance": None,
+            "subtypes": ["Basic"],
             "attacks": [],
             "is_fossil": True,
         }
@@ -246,6 +247,10 @@ def build_pokemon_info(card):
         "types": card.get("types") or [],
         "weakness": weak,
         "resistance": resistance_of(card),
+        # Needed by anything that keys off Tera / Ancient / Future /
+        # MEGA, e.g. Area Zero Underdepths raising the Bench cap for a
+        # player with a Tera Pokemon in play.
+        "subtypes": list(card.get("subtypes") or []),
         "attacks": attacks,
         "abilities": [classify_ability(ab) for ab in (card.get("abilities") or [])],
     }

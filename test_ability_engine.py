@@ -1501,6 +1501,117 @@ def test_gust_targeting_prefers_prizes_and_is_otherwise_identical():
 
 
 
+def test_area_zero_underdepths_raises_the_bench_cap():
+    """The Bench limit was a module constant, so the Stadium was inert.
+
+    Area Zero Underdepths gives a player with a Tera Pokemon in play up to
+    8 Bench slots. In a deck built on a Tera attacker that is a third of
+    the board, and one of the meta lists runs four copies. The AI also
+    would not have played it: Stadiums were only played if they appeared in
+    one of two hand-written registries.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    by_name, _ = M.build_card_index(M.load_cards())
+    SV._CARDS_BY_NAME.update(by_name)
+    pult = [c for c in (by_name.get("Dragapult ex") or [])
+            if ["TWM", "130"] in (c.get("printings") or [])][0]
+    POK = {"Dragapult ex": M.build_pokemon_info(pult),
+           "Dunsparce": M.build_pokemon_info(
+               (by_name.get("Dunsparce") or [None])[0])}
+    check("Tera is on the Pokemon record at all",
+          "Tera" in POK["Dragapult ex"]["subtypes"])
+    pl = SV.Player("A", POK, [])
+    pl.active = SV.InPlay("Dunsparce", 0)
+    check("no Stadium: five", SV.bench_cap(pl) == 5)
+    pl.stadium = "Area Zero Underdepths"
+    check("Stadium but no Tera: still five", SV.bench_cap(pl) == 5)
+    pl.bench = [SV.InPlay("Dragapult ex", 0)]
+    check("Stadium and a Tera Pokemon: eight", SV.bench_cap(pl) == 8)
+
+
+def test_fairy_zone_rewrites_weakness():
+    """Lillie's Clefairy ex makes every opposing Dragon weak to Psychic.
+
+    SET_WEAKNESS compiled, was listed as a known passive op, and nothing
+    ever queried it -- so a card teched into a Dragapult mirror precisely
+    to punish Dragons did nothing at all.
+    """
+    import ability_engine as AE
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    names = ["Lillie's Clefairy ex", "Dragapult ex"]
+    POK, EFF = {}, {}
+    for n in names:
+        c = [x for x in cards if x["name"] == n][0]
+        POK[n] = M.build_pokemon_info(c)
+        EFF[n] = [IR.compile_effect(n, a.get("name") or "", a.get("text") or "")
+                  for a in (c.get("abilities") or [])]
+    me = SV.Player("A", POK, [], EFF)
+    op = SV.Player("B", POK, [], EFF)
+    me.active = SV.InPlay("Lillie's Clefairy ex", 0)
+    op.active = SV.InPlay("Dragapult ex", 0)
+    check("Dragapult ex has no printed Weakness",
+          POK["Dragapult ex"]["weakness"] is None)
+    check("Fairy Zone gives it one",
+          AE.query_weakness_override(me, op, op.active) == "Psychic")
+    op2 = SV.Player("B", POK, [], EFF)
+    op2.active = SV.InPlay("Lillie's Clefairy ex", 0)
+    check("and leaves non-Dragons alone",
+          AE.query_weakness_override(me, op2, op2.active) is None)
+
+
+def test_copied_attacks_carry_their_riders():
+    """Copying an attack has to copy what the attack DOES, not its number.
+
+    Slowking's Seek Inspiration discards the top card of your own deck and
+    uses that Pokemon's attack. It matched the copy-attack regex and then
+    none of the branches that resolve one, so it fell through to a printed
+    damage of nothing. Kyurem's Trifrost carries ALL of its damage in a
+    rider, so even once the branch existed the copy scored zero and the AI
+    passed it over for a 120-damage attack -- the win condition of a
+    top-meta deck, resolving to nothing.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    POK = {}
+    for n, pr in (("Slowking", ["SCR", "58"]), ("Kyurem", None),
+                  ("Dunsparce", None), ("Mega Heracross ex", None)):
+        c = [x for x in cards if x["name"] == n
+             and (pr is None or pr in (x.get("printings") or []))][0]
+        POK[n] = M.build_pokemon_info(c)
+    me, op = SV.Player("A", POK, []), SV.Player("B", POK, [])
+    sk = SV.InPlay("Slowking", 0)
+    sk.energy = [["Psychic"]] * 3
+    me.active = sk
+    op.active = SV.InPlay("Mega Heracross ex", 0)
+    op.bench = [SV.InPlay("Dunsparce", 0) for _ in range(3)]
+    seek = next(a for a in POK["Slowking"]["attacks"]
+                if a["name"] == "Seek Inspiration")
+
+    me.deck = [("Pokemon", "Kyurem")]
+    check("the AI values the copy at what it borrows",
+          SV.attack_value(me, op, sk, seek) == 330,
+          SV.attack_value(me, op, sk, seek))
+    check("and picks it over its own 120-damage attack",
+          SV.best_attack(me, sk, True, op)["name"] == "Seek Inspiration")
+    before = sum(s.damage for s in [op.active] + op.bench)
+    SV.attack_side_effects(me, op, seek, [])
+    check("and the borrowed rider actually resolves",
+          sum(s.damage for s in [op.active] + op.bench) - before == 330)
+
+    me.deck = [("Energy", "Psychic Energy")]
+    check("a non-Pokemon on top copies nothing",
+          SV.attack_damage(me, op, sk, seek, record=False) == 0)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1551,7 +1662,10 @@ def main():
                test_coin_flips_are_actually_flipped,
                test_meta_trainers_compile_once_and_correctly,
                test_counter_budgets_are_allocated_to_take_a_knockout,
-               test_gust_targeting_prefers_prizes_and_is_otherwise_identical]:
+               test_gust_targeting_prefers_prizes_and_is_otherwise_identical,
+               test_area_zero_underdepths_raises_the_bench_cap,
+               test_fairy_zone_rewrites_weakness,
+               test_copied_attacks_carry_their_riders]:
         print(f"{fn.__name__}:")
         try:
             fn()

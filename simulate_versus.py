@@ -406,6 +406,50 @@ def sweep_knocked_out(pl, opp, log):
                 log.append(f"  {owner.name}: promotes {owner.active.name}")
 
 
+def _stadium_has_effect(name, pl):
+    """Does this Stadium do anything this player can use right now?"""
+    eff = trainer_effect_ir(name)
+    if eff is None or eff.unsupported:
+        return False
+    for act in eff.actions:
+        if act.op is IR.Op.BENCH_CAP:
+            need = (act.filter or {}).get("requires_subtype")
+            if not need:
+                return True
+            return any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes")
+                                or [])
+                       for p in pl.in_play())
+    return False
+
+
+def bench_cap(pl):
+    """How many Benched Pokemon this player may have right now.
+
+    Five, unless a Stadium in play says otherwise. Area Zero Underdepths
+    raises it to 8 for any player with a Tera Pokemon in play, and the cap
+    was a module constant so the Stadium was inert -- three Bench slots in
+    a deck built on a Tera attacker.
+    """
+    stadium = pl.stadium or getattr(pl, "_opp_stadium", None)
+    if not stadium:
+        return MAX_BENCH
+    eff = trainer_effect_ir(stadium)
+    if eff is None or eff.unsupported:
+        return MAX_BENCH
+    for act in eff.actions:
+        if act.op is not IR.Op.BENCH_CAP:
+            continue
+        need = (act.filter or {}).get("requires_subtype")
+        if need:
+            have = any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes")
+                                or [])
+                       for p in pl.in_play())
+            if not have:
+                continue
+        return max(MAX_BENCH, act.amount or MAX_BENCH)
+    return MAX_BENCH
+
+
 def use_stadium(pl, log):
     """Once-per-turn Stadium effects the owner can use.
 
@@ -517,7 +561,7 @@ def play_basics(pl, turn, log):
             pl.active = InPlay(best, turn)
             log.append(f"  {pl.name}: {best} to Active")
     for kind, name in list(pl.hand):
-        if kind == "Pokemon" and pl.POKEMON[name]["stage"] == "Basic" and len(pl.bench) < MAX_BENCH:
+        if kind == "Pokemon" and pl.POKEMON[name]["stage"] == "Basic" and len(pl.bench) < bench_cap(pl):
             # Hold back a Pokemon whose job is to be DISCARDED. A deck
             # whose payoff counts its own Pokemon in the discard pile
             # (Dhelmise's Vengeful Anchor, Sinistcha's Matcha Spin) has to
@@ -633,10 +677,10 @@ def play_items(pl, opp, turn, log, first_turn):
         if not effect_rare_candy(pl, opp, turn, log, first_turn):
             break
 
-    while ("Item", "Buddy-Buddy Poffin") in pl.hand and len(pl.bench) < MAX_BENCH:
+    while ("Item", "Buddy-Buddy Poffin") in pl.hand and len(pl.bench) < bench_cap(pl):
         got = []
         for _ in range(2):
-            if len(pl.bench) + len(got) >= MAX_BENCH:
+            if len(pl.bench) + len(got) >= bench_cap(pl):
                 break
             n = search_pokemon_from_deck(
                 pl, lambda x: pl.POKEMON[x]["stage"] == "Basic" and pl.POKEMON[x]["hp"] <= 70)
@@ -704,8 +748,15 @@ def play_items(pl, opp, turn, log, first_turn):
     # Stadiums: only those with a modeled effect get played, and playing
     # one replaces whatever is already out (on either side).
     for kind, name in list(pl.hand):
-        if kind != "Stadium" or (name not in RETREAT_STADIUMS
-                                 and name not in EFFECT_STADIUMS):
+        # A Stadium is worth playing if it has ANY modelled effect, not
+        # only if it is in one of the two hand-written registries. Area
+        # Zero Underdepths raises the Bench cap to 8 for a Tera deck and
+        # was never played at all, because nothing had added it to a set --
+        # the same "it compiles, nothing reaches it" gap as everywhere else.
+        if kind != "Stadium":
+            continue
+        if (name not in RETREAT_STADIUMS and name not in EFFECT_STADIUMS
+                and not _stadium_has_effect(name, pl)):
             continue
         if pl.stadium == name:
             continue
@@ -1457,6 +1508,9 @@ def _clause_count(clause, pl, opp, spot):
 _REVEAL_TOP_RE = _re.compile(
     r"reveal the top (\d+) cards of your opponent's deck", _re.I)
 _USE_AS_THIS_RE = _re.compile(r"use it as this attack", _re.I)
+_SELF_TOP_COPY_RE = _re.compile(
+    r"discard the top card of your deck.{0,90}?use it as this attack",
+    _re.I | _re.S)
 _COPY_DEFENDING_RE = _re.compile(
     r"choose 1 of your opponent's active pok[eé]mon's attacks and use it as this attack", _re.I)
 # N's Zoroark ex's Night Joker: "Choose 1 of your Benched N's Pokemon's
@@ -1497,6 +1551,56 @@ def _best_borrowed(pl, opp, spot, text):
     return best
 
 
+def copied_attack(pl, opp, spot, text):
+    """The actual attack dict a copy-attack is borrowing, or None.
+
+    Copying an attack has to copy its RIDERS too, not just its damage
+    number. Kyurem's Trifrost carries all of its damage in a rider (110 to
+    three Pokemon), so a Slowking copying it scored zero -- the win
+    condition of a top-meta deck resolving to nothing at all. Picking the
+    borrowed attack once, here, lets both attack_damage and
+    attack_side_effects work from the same choice.
+    """
+    if _COPY_OWN_BENCH_RE.search(text):
+        return _best_borrowed(pl, opp, spot, text)
+    if _COPY_DEFENDING_RE.search(text) and opp.active:
+        best, val = None, -1
+        for a in opp.POKEMON[opp.active.name]["attacks"]:
+            v = attack_value(opp, pl, opp.active, a)
+            if v > val:
+                best, val = a, v
+        return best
+    if _SELF_TOP_COPY_RE.search(text):
+        if not pl.deck:
+            return None
+        kind, name = pl.deck[0]
+        if kind != "Pokemon":
+            return None
+        info = pl.POKEMON.get(name) or {}
+        if info.get("rule_box"):
+            return None
+        best, val = None, -1
+        for a in info.get("attacks") or []:
+            v = attack_value(pl, opp, spot, a)
+            if v > val:
+                best, val = a, v
+        return best
+    m = _REVEAL_TOP_RE.search(text)
+    if m and _USE_AS_THIS_RE.search(text):
+        depth = int(m.group(1))
+        top = opp.deck[:depth]
+        best, val = None, -1
+        for kind, name in top:
+            if kind != "Pokemon":
+                continue
+            for a in (opp.POKEMON.get(name) or {}).get("attacks") or []:
+                v = attack_value(pl, opp, spot, a)
+                if v > val:
+                    best, val = a, v
+        return best
+    return None
+
+
 def _copied_attack_damage(pl, opp, spot, text):
     """Attacks that borrow another Pokemon's attack. Returns damage or None.
 
@@ -1518,6 +1622,28 @@ def _copied_attack_damage(pl, opp, spot, text):
         best = 0
         for a in opp.POKEMON[opp.active.name]["attacks"]:
             best = max(best, attack_damage(opp, pl, opp.active, a, record=False))
+        return best
+
+    # "Discard the top card of your deck, and if that card is a Pokemon that
+    # doesn't have a Rule Box, choose 1 of its attacks and use it as this
+    # attack." -- Slowking's Seek Inspiration. It matched the copy-attack
+    # regex and then neither branch below, so it fell through to a printed
+    # damage of nothing: the whole win condition of a top-meta deck scored
+    # 0. Kyurem is in that list to be COPIED, not cast, which is also why
+    # check_energy_support flags Trifrost as uncastable there and is right
+    # to but harmless.
+    if _SELF_TOP_COPY_RE.search(text):
+        if not pl.deck:
+            return 0
+        kind, name = pl.deck[0]
+        if kind != "Pokemon":
+            return 0
+        info = pl.POKEMON.get(name) or {}
+        if info.get("rule_box"):
+            return 0
+        best = 0
+        for a in info.get("attacks") or []:
+            best = max(best, attack_damage(pl, opp, spot, a, record=False))
         return best
 
     m = _REVEAL_TOP_RE.search(text)
@@ -1920,6 +2046,18 @@ def attack_rider_value(pl, opp, atk):
     text = atk.get("text") or ""
     if not text or opp is None or not opp.active:
         return 0
+    # A copy-attack is worth what the attack it borrows is worth. Without
+    # this the AI never CHOSE one: Slowking's Seek Inspiration resolves a
+    # copied Trifrost for 330 across three Pokemon and still scored zero,
+    # so it was passed over for a 120-damage Super Psy Bolt every time.
+    if _USE_AS_THIS_RE.search(text) and _COPY_DEPTH[0] < _MAX_COPY_DEPTH:
+        borrowed = copied_attack(pl, opp, pl.active, text)
+        if borrowed is not None and borrowed is not atk:
+            _COPY_DEPTH[0] += 1
+            try:
+                return attack_rider_value(pl, opp, borrowed)
+            finally:
+                _COPY_DEPTH[0] -= 1
     eff = _attack_ir(atk)
     if eff.unsupported:
         return 0
@@ -2520,7 +2658,10 @@ def do_attack(pl, opp, log):
         return False
     atk_types = pl.POKEMON[pl.active.name]["types"]
     defender = opp.POKEMON[opp.active.name]
-    weak = defender["weakness"]
+    # An Ability can rewrite the defender's Weakness -- Lillie's Clefairy
+    # ex's Fairy Zone makes every opposing Dragon weak to Psychic, which is
+    # the whole reason it is teched into a Dragapult mirror.
+    weak = AE.query_weakness_override(pl, opp, opp.active) or defender["weakness"]
     if weak and weak in atk_types:
         dmg *= 2
     # Resistance. 369 cards in this pool carry one and it was not modelled
@@ -2670,6 +2811,17 @@ def attack_side_effects(pl, opp, atk, log):
     text = atk.get("text") or ""
     if not text:
         return
+    # A copy-attack resolves the attack it borrowed, riders and all.
+    if _USE_AS_THIS_RE.search(text) and _COPY_DEPTH[0] < _MAX_COPY_DEPTH:
+        borrowed = copied_attack(pl, opp, pl.active, text)
+        if borrowed is not None and borrowed is not atk:
+            _COPY_DEPTH[0] += 1
+            try:
+                attack_side_effects(pl, opp, borrowed, log)
+            finally:
+                _COPY_DEPTH[0] -= 1
+            return
+
     # Pay for the damage discard_scaler_damage() already charged the
     # opponent for. Skipping this makes the attack free and repeatable.
     pay_discard_scaler(pl, pl.active, atk, log)

@@ -89,6 +89,29 @@ def matches_filter(pl, spot, filt):
 # Conditions and costs
 # --------------------------------------------------------------------------
 
+def query_weakness_override(attacker_player, defender_player, defender_spot):
+    """The Weakness a defending Pokemon has right now, or None.
+
+    Lillie's Clefairy ex's Fairy Zone rewrites the Weakness of every Dragon
+    Pokemon your opponent has in play. The op compiled and was listed as a
+    known passive, and nothing ever asked for it -- so a card whose entire
+    job is to make the mirror's Dragapult ex fall to a Psychic attack did
+    nothing at all.
+    """
+    info = defender_player.POKEMON.get(defender_spot.name) or {}
+    types = info.get("types") or []
+    for holder, eff, act in _passive_actions(attacker_player,
+                                             IR.Op.SET_WEAKNESS):
+        if not conditions_met(eff, attacker_player, defender_player, holder):
+            continue
+        want = (act.filter or {}).get("from_type")
+        if want and want not in types:
+            continue
+        to = (act.filter or {}).get("to_type")
+        if to:
+            return to
+    return None
+
 def query_attack_gate(pl, spot):
     """False when an Ability forbids this Pokemon from attacking.
 
