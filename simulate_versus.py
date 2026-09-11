@@ -2906,13 +2906,16 @@ def choose_gust_target(pl, opp):
     """The Benched Pokemon worth dragging up, or None to hold the card."""
     if not opp.bench or opp.active is None:
         return None
+    if "g" not in getattr(pl, "policy", "v1"):
+        # v1: whatever has the least HP left, regardless of whether it can
+        # be Knocked Out or what it is worth.
+        return min(opp.bench, key=lambda p: effective_hp(opp, p) - p.damage)
     best = max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
     # Holding the gust is a real option: if the Active is already at least
     # as good a target, spending a Supporter to swap it out is a wasted
     # card AND a free switch for the opponent.
-    if getattr(pl, "policy", "v1") != "v1":
-        if _gust_score(pl, opp, best) <= _gust_score(pl, opp, opp.active):
-            return None
+    if _gust_score(pl, opp, best) <= _gust_score(pl, opp, opp.active):
+        return None
     return best
 
 def promote_from_bench(side, opp=None):
@@ -2925,7 +2928,7 @@ def promote_from_bench(side, opp=None):
     """
     if not side.bench:
         return None
-    if getattr(side, "policy", "v1") == "v1" or opp is None:
+    if opp is None or "p" not in getattr(side, "policy", "v1"):
         side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
                         reverse=True)
         return side.bench.pop(0)

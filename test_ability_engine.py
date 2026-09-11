@@ -1462,6 +1462,41 @@ def test_counter_budgets_are_allocated_to_take_a_knockout():
 
 
 
+def test_gust_targeting_is_policy_split():
+    """The two pilots must actually differ, or the mirror measures nothing.
+
+    This caught a flaw in my own experiment: the prize-aware gust targeting
+    was written UNCONDITIONALLY, so both seats of the mirror used it and the
+    comparison silently measured only the other half of the change. A
+    policy-gated behaviour needs a test that the gate works, exactly like an
+    Ability needs a test that it fires.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    by_name, _ = M.build_card_index(M.load_cards())
+    SV._CARDS_BY_NAME.update(by_name)
+    POK = {n: M.build_pokemon_info((by_name.get(n) or [None])[0])
+           for n in ("Dunsparce", "Mega Heracross ex")}
+    me, op = SV.Player("A", POK, []), SV.Player("B", POK, [])
+    a = SV.InPlay("Dunsparce", 0)
+    a.energy = [["Colorless"]] * 3
+    me.active = a
+    op.active = SV.InPlay("Dunsparce", 0)
+    low = SV.InPlay("Dunsparce", 0)
+    low.damage = 50                       # 10 HP left, worth 1 Prize
+    ex = SV.InPlay("Mega Heracross ex", 0)
+    ex.damage = 270                       # 10 HP left, worth 3 Prizes
+    op.bench = [low, ex]
+
+    me.policy = "v1"
+    check("v1 drags up whatever has least HP left",
+          SV.choose_gust_target(me, op) is low)
+    me.policy = "v2g"
+    check("v2g drags up the same-effort target worth three times as much",
+          SV.choose_gust_target(me, op) is ex)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1511,7 +1546,8 @@ def main():
                test_resistance_is_applied,
                test_coin_flips_are_actually_flipped,
                test_meta_trainers_compile_once_and_correctly,
-               test_counter_budgets_are_allocated_to_take_a_knockout]:
+               test_counter_budgets_are_allocated_to_take_a_knockout,
+               test_gust_targeting_is_policy_split]:
         print(f"{fn.__name__}:")
         try:
             fn()
