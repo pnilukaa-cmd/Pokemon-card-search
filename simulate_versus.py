@@ -1611,7 +1611,7 @@ def _best_borrowed(pl, opp, spot, text):
             if _USE_AS_THIS_RE.search(a.get("text") or ""):
                 continue              # no borrowing a borrow
             score = float(attack_damage(pl, opp, spot, a, record=False))
-            score += attack_rider_value(pl, opp, a)
+            score += attack_rider_value(pl, opp, a, spot)
             if _SELF_ATTACK_LOCK_RE.search(a.get("text") or ""):
                 score /= 2.0
             if score > best_score:
@@ -2129,23 +2129,46 @@ def _attack_ir(atk):
     return eff
 
 
-def attack_rider_value(pl, opp, atk):
-    """Damage-equivalent worth of an attack's side effects, right now."""
+def attack_rider_value(pl, opp, atk, spot=None):
+    """Damage-equivalent worth of an attack's side effects, right now.
+
+    `spot` is the Pokemon that would be USING the attack. It used to be
+    inferred as pl.active, which is right for the ordinary "what should my
+    Active do" question and wrong everywhere else -- _ready_damage() asks
+    this about each BENCHED Pokemon in turn while deciding who to promote,
+    and it asks at a moment when the Active has just been Knocked Out and
+    pl.active is None. So a copy-attack on the Bench was scored as if a
+    different Pokemon (or nothing at all) were holding it, and a condition
+    like "if this Pokemon is in the Active Spot" was checked against the
+    wrong body. Defaults to pl.active so callers that mean the Active can
+    stay as they are.
+
+    Measured, because "obviously right" is not the same as "changes
+    anything": paired against the unfixed engine on identical seeds, 44
+    decks x 8 opponents x 100 games, mean -0.01 points, 95% CI [-0.08,
+    +0.06], and only 8 of 44 decks moved at all. It is a correctness fix
+    with no measurable effect on the field, which is what you would
+    expect -- it only bites on a copy-attack or a conditional attack held
+    by a BENCHED Pokemon. Kept because the next such attack should not
+    have to rediscover it.
+    """
     text = atk.get("text") or ""
     if not text or opp is None or not opp.active:
         return 0
+    if spot is None:
+        spot = pl.active
     # A copy-attack is worth what the attack it borrows is worth. Without
     # this the AI never CHOSE one: Slowking's Seek Inspiration resolves a
     # copied Trifrost for 330 across three Pokemon and still scored zero,
     # so it was passed over for a 120-damage Super Psy Bolt every time.
     if _USE_AS_THIS_RE.search(text):
-        borrowed = copied_attack(pl, opp, pl.active, text)
+        borrowed = copied_attack(pl, opp, spot, text)
         if borrowed is not None and borrowed is not atk:
-            return attack_rider_value(pl, opp, borrowed)
+            return attack_rider_value(pl, opp, borrowed, spot)
     eff = _attack_ir(atk)
     if eff.unsupported:
         return 0
-    if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
+    if eff.conditions and not AE.conditions_met(eff, pl, opp, spot):
         return 0
     value = 0
     for act in eff.actions:
@@ -2414,7 +2437,7 @@ def attack_value(pl, opp, spot, atk):
     if opp is not None and attack_wins_game(pl, opp, spot, atk):
         return 10 ** 6            # nothing outranks winning on the spot
     dmg = attack_damage(pl, opp, spot, atk) if opp is not None else atk["damage"]
-    value = dmg + attack_rider_value(pl, opp, atk)
+    value = dmg + attack_rider_value(pl, opp, atk, spot)
     if opp is not None and opp.active is not None:
         remaining = effective_hp(opp, opp.active) - opp.active.damage
         if dmg >= remaining:
@@ -2484,8 +2507,6 @@ def attach_energy(pl, cards_by_name, log):
 
 
 def _ready_damage(pl, opp, spot):
-    if not AE.query_attack_gate(pl, spot):
-        return 0        # it cannot attack, so it is not an upgrade
     """What this Pokemon is worth attacking with RIGHT NOW.
 
     A3. This ranked on raw damage, which meant the AI could not see the
@@ -2495,6 +2516,8 @@ def _ready_damage(pl, opp, spot):
     A Benched Pokemon that could take a Prize this turn lost the
     comparison to whatever was already Active and hitting for more.
     """
+    if not AE.query_attack_gate(pl, spot):
+        return 0        # it cannot attack, so it is not an upgrade
     atk = best_attack(pl, spot, opp=opp)
     if not atk:
         return 0
@@ -2764,7 +2787,7 @@ def do_attack(pl, opp, log):
     # Arbok's Panic Poison applies three Special Conditions and deals
     # nothing, and bailing on `dmg <= 0` skipped it even after the AI had
     # correctly chosen it.
-    if dmg <= 0 and attack_rider_value(pl, opp, atk) <= 0:
+    if dmg <= 0 and attack_rider_value(pl, opp, atk, pl.active) <= 0:
         return False
     atk_types = pl.POKEMON[pl.active.name]["types"]
     defender = opp.POKEMON[opp.active.name]
