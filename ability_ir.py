@@ -292,6 +292,10 @@ def parse_conditions(text):
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
+    m = re.search(r"if your opponent has any cards? in their discard pile"
+                  r" that have \"([^\"]+)\" in the name", t, re.I)
+    if m:
+        out.append({"kind": "opponent_discard_has_name", "name": m.group(1)})
     # ---- conditional flat damage bonuses ---------------------------------
     # attack_damage() can already pay "if <condition>, this attack does N
     # more damage", but only when parse_conditions recognised the clause.
@@ -1620,6 +1624,18 @@ def _r(m, text):
 
 @rule("conditional_attack_access", r"this pok[eé]mon can use the ([\w'’ -]+?) attack")
 def _r(m, text):
+    # "...can use the Trifrost attack for [C]" is a COST OVERRIDE, not
+    # access: Kyurem already has Trifrost. Compiled as GRANT_ATTACK_ACCESS
+    # it named an op with no consumer, so the ability was inert -- and had
+    # it been implemented as written it would have granted an attack the
+    # card already has, for free, with the "if your opponent has a Colress
+    # card in their discard pile" gate missing entirely.
+    cost = re.search(r"attack for ((?:" + TYPES + r")(?:\s*(?:" + TYPES
+                     + r"))*)\b", text, re.I)
+    if cost:
+        n = len(re.findall(TYPES, cost.group(1), re.I))
+        return [Action(Op.MODIFY_ATTACK_COST, -99, Target.SELF,
+                       {"attack": m.group(1).strip(), "cost_becomes": n})]
     return [Action(Op.GRANT_ATTACK_ACCESS, None, Target.SELF,
                    {"attack": m.group(1).strip()})]
 

@@ -295,6 +295,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
             played = getattr(pl, "played_supporters_this_turn", set())
             if not any(c["name"].lower() in n.lower() for n in played):
                 return False
+        if k == "opponent_discard_has_name":
+            if not any(c["name"].lower() in n.lower() for n in opp.discard):
+                return False
         if k == "stadium_in_play":
             want = c["name"]
             if want not in (getattr(pl, "stadium", None),
@@ -1440,8 +1443,89 @@ def query_ignored_cost_types(pl, spot, opp=None):
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
         if (act.amount or 0) <= -99:
+            if act.filter.get("cost_becomes") is not None:
+                continue          # an override, not an ignore -- see below
             out.add(act.filter.get("type") or "ALL")
     return out
+
+
+def query_types(pl, spot, opp=None):
+    """This Pokemon's types RIGHT NOW, after any Ability that rewrites them.
+
+    Carbink's Double Type: "as long as this Pokemon is in play, it is
+    Fighting and Psychic type". SET_TYPE compiled and nothing read it, so
+    the second type did not exist -- it changes which Weakness applies to
+    the card and which typed Energy requirements it can meet.
+    """
+    base = (pl.POKEMON.get(spot.name) or {}).get("types") or []
+    for holder, eff, act in _passive_actions(pl, IR.Op.SET_TYPE):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        types = (act.filter or {}).get("types")
+        if types:
+            return list(types)
+    return base
+
+
+def query_extra_attacks(pl, spot):
+    """Attacks this Pokemon may use that are not printed on it.
+
+    Relicanth's Memory Dive: "each of your evolved Pokemon can use any
+    attack from its previous Evolutions". Walks the evolution chain down
+    from this Pokemon and returns the attacks of everything it evolved
+    from that the deck actually owns. The Energy still has to be paid,
+    which best_attack enforces as it does for a printed attack.
+    """
+    extra, seen = [], {a["name"] for a in
+                       (pl.POKEMON.get(spot.name) or {}).get("attacks") or []}
+    granted = False
+    for holder, eff, act in _passive_actions(pl, IR.Op.GRANT_ATTACK_ACCESS):
+        if (act.filter or {}).get("attack"):
+            continue                  # the named-attack shape, not this one
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, pl, holder):
+            continue
+        granted = True
+    if not granted:
+        return extra
+    name = (pl.POKEMON.get(spot.name) or {}).get("evolves_from")
+    while name:
+        info = pl.POKEMON.get(name)
+        if not info:
+            break
+        for a in info.get("attacks") or []:
+            if a["name"] not in seen:
+                seen.add(a["name"])
+                extra.append(a)
+        name = info.get("evolves_from")
+    return extra
+
+
+def query_cost_override(pl, spot, atk_name, opp=None):
+    """A named attack's cost REPLACED wholesale, or None.
+
+    Kyurem's Plasma Bane: "if your opponent has any cards in their discard
+    pile that have 'Colress' in the name, this Pokemon can use the Trifrost
+    attack for [C]". Trifrost's printed cost is five Energy and this makes
+    it one -- not free, which is what routing it through the existing
+    ignore-everything path would have done.
+    """
+    for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_ATTACK_COST):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        becomes = (act.filter or {}).get("cost_becomes")
+        if becomes is None:
+            continue
+        want = (act.filter or {}).get("attack")
+        if want and want.lower() != (atk_name or "").lower():
+            continue
+        if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        return becomes
+    return None
 
 
 def query_cost_reduction(pl, spot, opp=None):

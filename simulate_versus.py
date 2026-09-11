@@ -311,12 +311,18 @@ def energy_types_for(card_name, cards_by_name):
     return energy_provisions(card_name, cards_by_name)[0]
 
 
-def effective_cost(pl, spot, cost, opp=None):
+def effective_cost(pl, spot, cost, opp=None, atk_name=None):
     """The attack cost as it stands right now, after any Ability that
     ignores part of it. Decidueye ex's Sniper's Eye turns Crushing Arrow
     from GrassColorlessColorlessColorless into a single Grass -- but only
     while the opponent holds exactly 4 cards, so this is re-derived on
     every pricing rather than baked into the card."""
+    # A wholesale override replaces the printed cost outright, so it is
+    # settled before any of the subtractive machinery below.
+    override = AE.query_cost_override(pl, spot, atk_name, opp)
+    if override is not None:
+        return ["Colorless"] * override
+
     ignored = AE.query_ignored_cost_types(pl, spot, opp)
     if "ALL" in ignored:
         return []
@@ -2188,7 +2194,7 @@ def retaliation_from(defender, attacker_spot, attacker_player=None):
         return 0
     total = AE.query_retaliation(defender, attacker_spot, attacker_player)
     act = defender.active
-    act_types = defender.POKEMON[act.name]["types"]
+    act_types = AE.query_types(defender, act)
     for cname in ([act.tool] if act.tool else []) + list(getattr(act, "energy_names", [])):
         r = RETALIATE_CARDS.get(cname)
         if not r:
@@ -2546,8 +2552,12 @@ def attack_value(pl, opp, spot, atk):
 def best_attack(pl, spot, only_payable=True, opp=None):
     info = pl.POKEMON[spot.name]
     best, best_val = None, -1
-    for atk in info["attacks"]:
-        if only_payable and not can_pay(effective_cost(pl, spot, atk["cost"], opp),
+    # Relicanth's Memory Dive lends every evolved Pokemon its own
+    # pre-evolutions' attacks. They are priced and paid for exactly like a
+    # printed one.
+    for atk in list(info["attacks"]) + AE.query_extra_attacks(pl, spot):
+        if only_payable and not can_pay(effective_cost(pl, spot, atk["cost"], opp,
+                                                       atk.get("name")),
                                         spot.energy):
             continue
         val = attack_value(pl, opp, spot, atk)
@@ -2893,7 +2903,7 @@ def do_attack(pl, opp, log):
     # correctly chosen it.
     if dmg <= 0 and attack_rider_value(pl, opp, atk, pl.active) <= 0:
         return False
-    atk_types = pl.POKEMON[pl.active.name]["types"]
+    atk_types = AE.query_types(pl, pl.active, opp)
     defender = opp.POKEMON[opp.active.name]
     # An Ability can rewrite the defender's Weakness -- Lillie's Clefairy
     # ex's Fairy Zone makes every opposing Dragon weak to Psychic, which is
