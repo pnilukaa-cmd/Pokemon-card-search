@@ -1561,6 +1561,21 @@ def copied_attack(pl, opp, spot, text):
     borrowed attack once, here, lets both attack_damage and
     attack_side_effects work from the same choice.
     """
+    # The guard belongs HERE, not around the callers: this function scores
+    # candidate attacks with attack_value(), which routes back through
+    # attack_rider_value() and into copied_attack() again. Guarding only
+    # the recursive call left that inner path unbounded, and the field run
+    # blew the stack on a deck holding two different copy-attacks.
+    if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
+        return None
+    _COPY_DEPTH[0] += 1
+    try:
+        return _copied_attack_inner(pl, opp, spot, text)
+    finally:
+        _COPY_DEPTH[0] -= 1
+
+
+def _copied_attack_inner(pl, opp, spot, text):
     if _COPY_OWN_BENCH_RE.search(text):
         return _best_borrowed(pl, opp, spot, text)
     if _COPY_DEFENDING_RE.search(text) and opp.active:
@@ -2050,14 +2065,10 @@ def attack_rider_value(pl, opp, atk):
     # this the AI never CHOSE one: Slowking's Seek Inspiration resolves a
     # copied Trifrost for 330 across three Pokemon and still scored zero,
     # so it was passed over for a 120-damage Super Psy Bolt every time.
-    if _USE_AS_THIS_RE.search(text) and _COPY_DEPTH[0] < _MAX_COPY_DEPTH:
+    if _USE_AS_THIS_RE.search(text):
         borrowed = copied_attack(pl, opp, pl.active, text)
         if borrowed is not None and borrowed is not atk:
-            _COPY_DEPTH[0] += 1
-            try:
-                return attack_rider_value(pl, opp, borrowed)
-            finally:
-                _COPY_DEPTH[0] -= 1
+            return attack_rider_value(pl, opp, borrowed)
     eff = _attack_ir(atk)
     if eff.unsupported:
         return 0
@@ -2812,14 +2823,10 @@ def attack_side_effects(pl, opp, atk, log):
     if not text:
         return
     # A copy-attack resolves the attack it borrowed, riders and all.
-    if _USE_AS_THIS_RE.search(text) and _COPY_DEPTH[0] < _MAX_COPY_DEPTH:
+    if _USE_AS_THIS_RE.search(text):
         borrowed = copied_attack(pl, opp, pl.active, text)
         if borrowed is not None and borrowed is not atk:
-            _COPY_DEPTH[0] += 1
-            try:
-                attack_side_effects(pl, opp, borrowed, log)
-            finally:
-                _COPY_DEPTH[0] -= 1
+            attack_side_effects(pl, opp, borrowed, log)
             return
 
     # Pay for the damage discard_scaler_damage() already charged the

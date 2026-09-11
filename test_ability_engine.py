@@ -1612,6 +1612,45 @@ def test_copied_attacks_carry_their_riders():
 
 
 
+def test_copy_attacks_cannot_recurse_forever():
+    """Copy-attacks evaluate other attacks, which can be copy-attacks.
+
+    Two separate stack overflows came out of this. Team Rocket's Persian
+    ex's Haughty Order reads the opponent's DECK, and in a mirror that deck
+    holds another Persian ex. Then the fix for it guarded only the
+    recursive call, while the function that PICKS the borrowed attack
+    scores candidates with attack_value() -- which routes straight back in.
+    A whole field run died on a pairing of two different copy-attack decks.
+
+    The guard belongs at the entry point, so every path through is bounded.
+    """
+    import simulate_versus as SV
+    import tcg_model as M
+    cards = M.load_cards()
+    by_name, _ = M.build_card_index(cards)
+    SV._CARDS_BY_NAME.update(by_name)
+    check("the depth counter starts clean", SV._COPY_DEPTH[0] == 0)
+
+    POK = {}
+    for n, pr in (("Slowking", ["SCR", "58"]), ("Dunsparce", None)):
+        c = [x for x in cards if x["name"] == n
+             and (pr is None or pr in (x.get("printings") or []))][0]
+        POK[n] = M.build_pokemon_info(c)
+    me, op = SV.Player("A", POK, []), SV.Player("B", POK, [])
+    sk = SV.InPlay("Slowking", 0)
+    sk.energy = [["Psychic"]] * 3
+    me.active = sk
+    op.active = SV.InPlay("Dunsparce", 0)
+    seek = next(a for a in POK["Slowking"]["attacks"]
+                if a["name"] == "Seek Inspiration")
+    # A Slowking on top of its own deck: the copy would copy a copy.
+    me.deck = [("Pokemon", "Slowking")]
+    SV.attack_value(me, op, sk, seek)
+    check("and is left clean afterwards, however deep it went",
+          SV._COPY_DEPTH[0] == 0)
+
+
+
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_draw_fires, test_draw_with_discard_cost,
@@ -1665,7 +1704,8 @@ def main():
                test_gust_targeting_prefers_prizes_and_is_otherwise_identical,
                test_area_zero_underdepths_raises_the_bench_cap,
                test_fairy_zone_rewrites_weakness,
-               test_copied_attacks_carry_their_riders]:
+               test_copied_attacks_carry_their_riders,
+               test_copy_attacks_cannot_recurse_forever]:
         print(f"{fn.__name__}:")
         try:
             fn()
