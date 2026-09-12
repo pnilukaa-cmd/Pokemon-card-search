@@ -1,6 +1,7 @@
 """Fetch all Standard-legal Pokemon TCG cards and save them to a local JSON file."""
 
 import json
+import sys
 import time
 
 import requests
@@ -164,15 +165,63 @@ def fetch_all_for_mark(mark):
     return cards
 
 
+# Marks to probe for existence even though they are not in the active set.
+# A brand-new expansion can introduce a mark, and the failure mode is silent:
+# the fetch returns exactly the same cards as last time and nothing says the
+# newest set is missing. Checked when 30th Celebration (30C) was announced --
+# mark K was empty then, so the pool legitimately had nothing to add, but
+# "empty" and "not looked at" have to be distinguishable.
+PROBE_REGULATION_MARKS = {"K", "L"}
+
+
+def mark_count(mark):
+    """How many cards the API has for a regulation mark, or None on error."""
+    for attempt in range(1, 4):
+        try:
+            r = requests.get(API_URL, params={"q": f"regulationMark:{mark}",
+                                              "pageSize": 1})
+            if r.status_code >= 500:
+                time.sleep(min(2 ** attempt, MAX_WAIT_SECONDS))
+                continue
+            r.raise_for_status()
+            return r.json().get("totalCount")
+        except Exception:
+            time.sleep(min(2 ** attempt, MAX_WAIT_SECONDS))
+    return None
+
+
+def warn_about_new_marks():
+    """Shout if a regulation mark outside the active set has cards.
+
+    Rotation and new-set legality are decided by an announcement, never by
+    this API (see ACTIVE_REGULATION_MARKS), so this does NOT add the mark
+    automatically. It just makes the omission impossible to miss.
+    """
+    for mark in sorted(PROBE_REGULATION_MARKS - ACTIVE_REGULATION_MARKS):
+        n = mark_count(mark)
+        if n is None:
+            print(f"  regulationMark:{mark}: could not be checked")
+        elif n:
+            print(f"  *** regulationMark:{mark} now has {n} cards and is NOT "
+                  f"in ACTIVE_REGULATION_MARKS. If that mark is Standard-legal, "
+                  f"add it there -- otherwise this fetch is silently missing "
+                  f"an entire set. ***")
+        else:
+            print(f"  regulationMark:{mark}: 0 cards, nothing to add")
+
+
 def fetch_all_standard_cards():
     all_cards = []
     for mark in sorted(ACTIVE_REGULATION_MARKS):
         print(f"Fetching regulationMark:{mark}...")
         all_cards.extend(fetch_all_for_mark(mark))
+    print("Checking for regulation marks outside the active set...")
+    warn_about_new_marks()
     return all_cards
 
 
 def main():
+    check_only = "--check" in sys.argv
     cards = fetch_all_standard_cards()
 
     # Each card was already fetched by an exact regulationMark:X query, so no
@@ -184,6 +233,33 @@ def main():
 
     unique_cards = dedupe_by_signature(cards)
     print(f"Deduped cosmetic reprints (alt art, rarity, etc.): {len(unique_cards)} unique cards")
+
+    # --check reports what WOULD change and writes nothing. The output file is
+    # the input to every measurement in this repo, so "is the pool current?"
+    # must be answerable without risking it on an API having a bad day.
+    if check_only:
+        try:
+            with open(OUTPUT_FILE) as f:
+                on_disk = json.load(f)
+        except FileNotFoundError:
+            on_disk = []
+        have = {c["name"] for c in on_disk}
+        fetched_names = {c["name"] for c in unique_cards}
+        new_names = sorted(fetched_names - have)
+        gone = sorted(have - fetched_names)
+        # Records and NAMES are different counts -- a name can hold more than
+        # one record when two printings differ in gameplay text (Ultra Ball
+        # MEG 131 and ASC 213 are separate records). Print both, labelled, so
+        # the comparison is not read as a discrepancy.
+        print(f"\n--check: {len(unique_cards)} records fetched "
+              f"({len(fetched_names)} distinct names) vs {len(on_disk)} "
+              f"records on disk ({len(have)} distinct names)")
+        print(f"  new names: {len(new_names)}"
+              + (f" -> {', '.join(new_names[:12])}" if new_names else ""))
+        print(f"  names on disk but not fetched: {len(gone)}"
+              + (f" -> {', '.join(gone[:12])}" if gone else ""))
+        print("  nothing written")
+        return
 
     with open(OUTPUT_FILE, "w") as f:
         json.dump(unique_cards, f, indent=4)
