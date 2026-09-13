@@ -1,13 +1,15 @@
 # Team Rocket's Koffing/Weezing Bench Swarm
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **55.8% mean · 52.5% median · 25 of 43 winning matchups · rank 14 of 44**
+> ### Field results — 2026-09-13
+> **56.3% mean · 53.5% median · 28 of 43 winning matchups · rank 13 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 93% · worst `lurantis_heal_punish` 19%.
+> Best `feraligatr_munkidori_damage_transfer` 91% · worst `lurantis_heal_punish` 19%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

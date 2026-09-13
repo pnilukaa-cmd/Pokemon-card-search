@@ -1,13 +1,15 @@
 # Mega Lopunny ex / Dusknoir — snipe and finish
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **53.7% mean · 49.5% median · 21 of 43 winning matchups · rank 20 of 44**
+> ### Field results — 2026-09-13
+> **53.7% mean · 51.5% median · 23 of 43 winning matchups · rank 17 of 44**
 >
-> Best `feraligatr_munkidori_damage_transfer` 84% · worst `scovillain_salazzle_spicy_rage` 34%.
+> Best `feraligatr_munkidori_damage_transfer` 85% · worst `meta_mega_excadrill` 33%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

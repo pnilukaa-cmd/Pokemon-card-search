@@ -1,13 +1,15 @@
 # Feraligatr / Munkidori Damage-Transfer Engine
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **20.0% mean · 16.5% median · 1 of 43 winning matchups · rank 43 of 44**
+> ### Field results — 2026-09-13
+> **19.5% mean · 17.5% median · 1 of 43 winning matchups · rank 43 of 44**
 >
-> Best `meta_ns_zoroark` 80% · worst `panic_poison_paralysis` 4%.
+> Best `meta_ns_zoroark` 80% · worst `arbok_muk_laser_darkbell` 4%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

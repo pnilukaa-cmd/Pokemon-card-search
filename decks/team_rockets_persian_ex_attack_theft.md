@@ -1,13 +1,15 @@
 # Team Rocket's Persian ex — Attack Theft (full-toolkit rebuild)
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **71.0% mean · 72.0% median · 42 of 43 winning matchups · rank 3 of 44**
+> ### Field results — 2026-09-13
+> **70.8% mean · 71.5% median · 41 of 43 winning matchups · rank 3 of 44**
 >
-> Best `meta_ns_zoroark` 94% · worst `lurantis_heal_punish` 49%.
+> Best `meta_ns_zoroark` 96% · worst `panic_poison_paralysis` 41%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

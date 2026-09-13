@@ -1,13 +1,15 @@
 # Eerie Inferno (Vulpix / Ninetales + Numel + Magmar / Magmortar)
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **49.1% mean · 46.5% median · 19 of 43 winning matchups · rank 28 of 44**
+> ### Field results — 2026-09-13
+> **49.2% mean · 47.0% median · 18 of 43 winning matchups · rank 28 of 44**
 >
-> Best `meta_ns_zoroark` 93% · worst `panic_poison_paralysis` 24%.
+> Best `meta_ns_zoroark` 89% · worst `panic_poison_paralysis` 20%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

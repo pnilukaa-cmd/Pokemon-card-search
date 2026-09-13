@@ -1,13 +1,15 @@
 # Crabominable / Veluza — Food Prep
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **39.3% mean · 36.5% median · 9 of 43 winning matchups · rank 38 of 44**
+> ### Field results — 2026-09-13
+> **40.5% mean · 39.0% median · 8 of 43 winning matchups · rank 37 of 44**
 >
-> Best `meta_ns_zoroark` 91% · worst `team_rockets_persian_ex_attack_theft` 20%.
+> Best `meta_ns_zoroark` 87% · worst `meta_mega_excadrill` 20%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

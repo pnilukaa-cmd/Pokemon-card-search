@@ -1,13 +1,15 @@
 # Lurantis ex Heal-Punish
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **72.9% mean · 71.0% median · 41 of 43 winning matchups · rank 1 of 44**
+> ### Field results — 2026-09-13
+> **72.7% mean · 73.5% median · 41 of 43 winning matchups · rank 1 of 44**
 >
 > Best `team_rockets_wobbuffet_orbeetle_damage_launder` 97% · worst `meta_raging_bolt` 44%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

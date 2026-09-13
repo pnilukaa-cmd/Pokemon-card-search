@@ -1,13 +1,15 @@
 # festival_lead — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-11
-> **35.4% mean · 34.5% median · 6 of 43 winning matchups · rank 39 of 44**
+> ### Field results — 2026-09-13
+> **36.4% mean · 35.5% median · 6 of 43 winning matchups · rank 39 of 44**
 >
-> Best `meta_ns_zoroark` 82% · worst `orthworm_ex_metal_retaliation` 10%.
+> Best `meta_ns_zoroark` 80% · worst `orthworm_ex_metal_retaliation` 10%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 
