@@ -334,6 +334,72 @@ def parse_conditions(text):
                   r" name from your hand during this turn", t, re.I)
     if m:
         out.append({"kind": "played_supporter_named", "name": m.group(1)})
+    # ---- more conditional flat bonuses -----------------------------------
+    # A pool-wide sweep found 85 attacks whose "if <clause>, this attack does
+    # N more damage" had no condition kind, so attack_damage had nothing to
+    # gate on and every one of them quietly paid base damage. These cover the
+    # clauses that appear more than once.
+    if re.search(r"if your opponent'?s active pok[eé]mon already has any damage"
+                 r" counters on it", t, re.I):
+        out.append({"kind": "opponent_active_has_damage"})
+    if re.search(r"if your opponent'?s active pok[eé]mon is an evolution"
+                 r" pok[eé]mon", t, re.I):
+        out.append({"kind": "opponent_active_is_evolution"})
+    m = re.search(r"if your opponent'?s active pok[eé]mon is a stage (\d+)"
+                  r" pok[eé]mon", t, re.I)
+    if m:
+        out.append({"kind": "opponent_active_is_stage", "stage": int(m.group(1))})
+    if re.search(r"if your benched pok[eé]mon have any damage counters on them",
+                 t, re.I):
+        out.append({"kind": "your_bench_has_damage"})
+    m = re.search(r"if your opponent'?s active pok[eé]mon is"
+                  r" (asleep|burned|confused|paralyzed|poisoned)", t, re.I)
+    if m:
+        out.append({"kind": "opponent_active_has_condition",
+                    "condition": m.group(1).lower()})
+    if re.search(r"if your opponent'?s active pok[eé]mon is affected by a"
+                 r" special condition", t, re.I):
+        out.append({"kind": "opponent_active_has_any_condition"})
+    m = re.search(r"if your opponent has (\d+) or fewer prize cards remaining",
+                  t, re.I)
+    if m:
+        out.append({"kind": "opponent_prizes_at_most", "count": int(m.group(1))})
+    if re.search(r"if you have more prize cards remaining than your opponent",
+                 t, re.I):
+        out.append({"kind": "more_prizes_than_opponent"})
+    m = re.search(r"if you have any (" + TYPES + r") pok[eé]mon on your bench",
+                  t, re.I)
+    if m:
+        out.append({"kind": "bench_has_type", "type": m.group(1).capitalize()})
+    if re.search(r"if this pok[eé]mon and your opponent'?s active pok[eé]mon"
+                 r" have the same amount of energy attached", t, re.I):
+        out.append({"kind": "same_energy_as_opponent_active"})
+    if re.search(r"if this pok[eé]mon has no damage counters on it", t, re.I):
+        out.append({"kind": "self_no_damage"})
+    elif re.search(r"if this pok[eé]mon has any damage counters on it", t, re.I):
+        out.append({"kind": "self_has_damage"})
+    if re.search(r"if this pok[eé]mon has any special energy attached", t, re.I):
+        out.append({"kind": "self_has_special_energy"})
+    # Named Energy, e.g. "any Team Rocket's Energy attached". Deliberately
+    # NOT the elemental types -- "any Darkness Energy attached" is already
+    # self_has_energy_type, which reads the attached card's TYPE rather than
+    # its name, and adding a second name-based check for the same clause
+    # made Munkidori's Adrena-Brain fail against Basic Darkness Energy.
+    m = re.search(r"if this pok[eé]mon has any ([\w'’ ]+?) energy attached",
+                  t, re.I)
+    if m:
+        nm = m.group(1).strip()
+        if (nm.lower() not in ("special",)
+                and not re.fullmatch(TYPES, nm, re.I)):
+            out.append({"kind": "self_has_named_energy", "name": nm})
+    if re.search(r"if your opponent'?s active pok[eé]mon has a pok[eé]mon tool"
+                 r" attached", t, re.I):
+        out.append({"kind": "opponent_active_has_tool"})
+    m = re.search(r"if you have (\d+) or more energy in play", t, re.I)
+    if m:
+        out.append({"kind": "energy_in_play_at_least", "count": int(m.group(1)),
+                    "type": None})
+
     m = re.search(r"if any of your ([\w'’ -]+?) pok[eé]mon were knocked out"
                   r" by damage from an attack during your opponent'?s last turn",
                   t, re.I)

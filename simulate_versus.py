@@ -1443,6 +1443,14 @@ _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
 _COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
 _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
+# "Flip a coin. If tails, this attack does nothing." Twenty attacks in the
+# pool say this and every one of them was paying full damage on every use --
+# parse_chance reads the odds correctly, but nothing in the damage model
+# applied them, because the clause carries no damage NUMBER of its own for
+# the bonus paths to latch onto.
+_FLIP_ALL_OR_NOTHING_RE = _re.compile(
+    r"flip (?:a coin|(\d+) coins)[^.]{0,40}\.?\s*if (?:tails|you get tails)"
+    r"[^.]{0,20}this attack does nothing", _re.I)
 _MORE_DMG_FLIP_RE = _re.compile(
     r"flip a coin[^.]{0,30}\.?\s*if heads, this attack does (\d+) more damage",
     _re.I)
@@ -2103,6 +2111,16 @@ def attack_damage(pl, opp, spot, atk, record=True):
         odds = _attack_ir(atk).chance
         if odds < 1.0:
             return base + (int(m.group(1)) if random.random() < odds else 0)
+
+    # All-or-nothing flip: the whole attack is called off on tails. Checked
+    # BEFORE the scaling flips below, because "flip 2 coins ... if either is
+    # tails, this attack does nothing" matches _FLIP_N_RE too and would
+    # otherwise be treated as a per-heads scaler.
+    if _FLIP_ALL_OR_NOTHING_RE.search(text):
+        odds = _attack_ir(atk).chance
+        if odds >= 1.0:
+            odds = 0.5
+        return base if random.random() < odds else 0
 
     # Coin-flip attacks: actually flip.
     if _FLIP_UNTIL_TAILS_RE.search(text):

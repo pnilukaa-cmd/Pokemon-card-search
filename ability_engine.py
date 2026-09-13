@@ -236,6 +236,19 @@ def query_attack_gate(pl, spot):
                 return False
     return True
 
+def _is_special_energy(name):
+    """Special Energy, as opposed to a Basic one.
+
+    The pool holds only Special Energy records -- Basic Energy is handled by
+    name and never appears as a card -- so a name that resolves to a card
+    here IS special, and "Basic X Energy" never is.
+    """
+    if name.lower().startswith("basic "):
+        return False
+    eff = TRAINER_IR(name)
+    return eff is not None or not name.lower().startswith("basic")
+
+
 def conditions_met(effect, pl, opp, source, atk=None):
     for c in effect.conditions:
         k = c["kind"]
@@ -258,7 +271,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
             if not any(c["type"] in e for e in source.energy):
                 return False
         if k == "energy_in_play_at_least":
-            have = sum(1 for p in pl.in_play() for e in p.energy if c["type"] in e)
+            typ = c.get("type")
+            have = sum(1 for p in pl.in_play() for e in p.energy
+                       if typ is None or typ in e)
             if have < c["count"]:
                 return False
         if k == "opponent_active_is_type":
@@ -294,6 +309,60 @@ def conditions_met(effect, pl, opp, source, atk=None):
         if k == "played_supporter_named":
             played = getattr(pl, "played_supporters_this_turn", set())
             if not any(c["name"].lower() in n.lower() for n in played):
+                return False
+        if k == "opponent_active_has_damage":
+            if not opp.active or opp.active.damage <= 0:
+                return False
+        if k == "opponent_active_is_evolution":
+            if not opp.active:
+                return False
+            if not (opp.POKEMON.get(opp.active.name) or {}).get("evolves_from"):
+                return False
+        if k == "opponent_active_is_stage":
+            if not opp.active:
+                return False
+            want = f"Stage {c['stage']}"
+            if want not in ((opp.POKEMON.get(opp.active.name) or {})
+                            .get("subtypes") or []):
+                return False
+        if k == "your_bench_has_damage":
+            if not any(p.damage > 0 for p in pl.bench):
+                return False
+        if k == "opponent_active_has_condition":
+            if not opp.active or c["condition"] not in (
+                    getattr(opp.active, "conditions", None) or set()):
+                return False
+        if k == "opponent_active_has_any_condition":
+            if not opp.active or not (
+                    getattr(opp.active, "conditions", None) or set()):
+                return False
+        if k == "opponent_prizes_at_most":
+            if getattr(opp, "prizes", STARTING_PRIZES) > c["count"]:
+                return False
+        if k == "more_prizes_than_opponent":
+            if getattr(pl, "prizes", 0) <= getattr(opp, "prizes", 0):
+                return False
+        if k == "bench_has_type":
+            if not any(c["type"] in ((pl.POKEMON.get(p.name) or {}).get("types")
+                                     or []) for p in pl.bench):
+                return False
+        if k == "same_energy_as_opponent_active":
+            if not opp.active or source.energy_count() != opp.active.energy_count():
+                return False
+        if k == "self_has_damage" and source.damage <= 0:
+            return False
+        if k == "self_no_damage" and source.damage > 0:
+            return False
+        if k == "self_has_special_energy":
+            names = getattr(source, "energy_names", None) or []
+            if not any(_is_special_energy(n) for n in names):
+                return False
+        if k == "self_has_named_energy":
+            names = getattr(source, "energy_names", None) or []
+            if not any(c["name"].lower() in n.lower() for n in names):
+                return False
+        if k == "opponent_active_has_tool":
+            if not opp.active or not getattr(opp.active, "tool", None):
                 return False
         if k == "opponent_discard_has_name":
             if not any(c["name"].lower() in n.lower() for n in opp.discard):
