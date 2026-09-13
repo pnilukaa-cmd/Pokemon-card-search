@@ -494,6 +494,13 @@ def _stadium_has_effect(name, pl):
             IR.Op.BENCH_CAP, IR.Op.CONDITION_IMMUNITY, IR.Op.MODIFY_RETREAT,
             IR.Op.BUFF_DAMAGE, IR.Op.REDUCE_DAMAGE, IR.Op.MODIFY_HP,
         }
+    # A Stadium whose only value is its ONCE-PER-TURN effect is still worth
+    # putting down. Checking the passive IR alone meant Fossil Quarry never
+    # reached the table even after use_stadium learned to resolve it -- the
+    # same shape as Festival Grounds, one layer further in.
+    if stadium_turn_effect_ir(name) is not None:
+        return True
+
     eff = trainer_effect_ir(name)
     if eff is None or eff.unsupported:
         return False
@@ -539,6 +546,54 @@ def bench_cap(pl):
     return MAX_BENCH
 
 
+_STADIUM_ONCE_RE = _re.compile(
+    r"once during each player'?s turn, that player may ", _re.I)
+# The card is written from a neutral third person ("that player may search
+# THEIR deck"); every rule in ability_ir is written for the card's own
+# controller ("your deck"). Normalising the person is the whole difference
+# between these compiling and not.
+_STADIUM_PERSON = [
+    ("their deck", "your deck"), ("their hand", "your hand"),
+    ("their discard pile", "your discard pile"),
+    ("their Bench", "your Bench"), ("their Active", "your Active"),
+    ("their Benched", "your Benched"), ("their Prize", "your Prize"),
+    ("that player shuffles", "you shuffle"),
+    ("that player draws", "you draw"),
+]
+_STADIUM_TURN_CACHE = {}
+
+
+def stadium_turn_effect_ir(name):
+    """Compiled IR for a "once during each player's turn" Stadium, or None.
+
+    use_stadium was a hand-written if/elif over two cards -- the exact
+    one-card-at-a-time shape the IR exists to replace. Four more Stadiums
+    in the pool compile once the person is normalised (Fossil Quarry,
+    Levincia, Lumiose City, Spikemuth Gym) and any future one comes along
+    for free.
+    """
+    if name in _STADIUM_TURN_CACHE:
+        return _STADIUM_TURN_CACHE[name]
+    eff = None
+    if not _CARDS_BY_NAME:
+        _CARDS_BY_NAME.update(M.build_card_index(M.load_cards())[0])
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else card
+    if isinstance(card, dict):
+        text = " ".join(card.get("rules") or [])
+        for boiler in _TRAINER_BOILERPLATE:
+            text = text.replace(boiler, "")
+        if _STADIUM_ONCE_RE.search(text):
+            text = _STADIUM_ONCE_RE.sub("you may ", text)
+            for a, b in _STADIUM_PERSON:
+                text = text.replace(a, b)
+            compiled = IR.compile_effect("trainer", name, " ".join(text.split()))
+            if not compiled.unsupported and compiled.actions:
+                eff = compiled
+    _STADIUM_TURN_CACHE[name] = eff
+    return eff
+
+
 def use_stadium(pl, log):
     """Once-per-turn Stadium effects the owner can use.
 
@@ -562,6 +617,27 @@ def use_stadium(pl, log):
         if any("Team Rocket" in n for n in pl.played_supporters_this_turn):
             pl.draw(2)
             log.append(f"  {pl.name}: Team Rocket's Factory (draw 2)")
+        return
+    # Everything else, straight off the card text. The Stadium in play may
+    # be the OPPONENT's -- "each player" means each player -- so this fires
+    # on whichever Stadium is on the table.
+    else:
+        name = pl.stadium or getattr(pl, "_opp_stadium", None)
+        if not name:
+            return
+        eff = stadium_turn_effect_ir(name)
+        if eff is None:
+            return
+        acts = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
+        if not acts:
+            return
+        did = False
+        for act in acts:
+            if AE.apply_action(act, pl, pl, pl.active, log,
+                               make_inplay=lambda n: InPlay(n, 0)) is not False:
+                did = True
+        if did:
+            log.append(f"  {pl.name}: {name} (from card text)")
 
 
 def use_abilities(pl, opp, turn, log, just_evolved=None):

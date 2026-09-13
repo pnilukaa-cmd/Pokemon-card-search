@@ -789,6 +789,20 @@ def _r(m, text):
                    _search_filter(m.group(2)))]
 
 
+# Fossil Quarry: "search your deck for up to 2 Item cards that have
+# "Antique" in their name and put them onto your Bench". The Fossils are
+# Items that PLAY AS Basic Pokemon, and build_deck_model already files them
+# under kind "Pokemon", so the ordinary Bench-search handler can place them
+# -- the wording just never matched a rule, because it says "Item cards"
+# where every other Bench search says "Pokemon".
+@rule("search_named_item_to_bench",
+      r"search your deck for (?:up to )?(\d+|a|an) item cards? that have"
+      r" [\"“']([^\"”']+)[\"”'] in their name and put them onto your bench")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
+                   {"name_contains": m.group(2)})]
+
+
 @rule("recruit_species_to_bench",
       r"search your deck for (?:up to )?(\d+|a|an) ([\w'’ .-]+?) and put (?:it|them) onto your bench")
 def _r(m, text):
