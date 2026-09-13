@@ -38,6 +38,13 @@ STARTING_PRIZES = 6
 # that actually did something.
 UNEXECUTED_OPS = Counter()
 
+# How much damage the attack currently resolving actually put on the
+# defender. "Heal from this Pokemon the same amount of damage you did" needs
+# it, and the rider path is handed the attack but not its result. A
+# one-slot list rather than an argument, because every apply_action handler
+# shares one signature.
+DAMAGE_JUST_DEALT = [0]
+
 # Compiled IR for a Trainer / Tool / Energy card by name. Injected by the
 # simulator at import time: simulate_versus imports this module, so this
 # module cannot import it back to reach trainer_effect_ir. Defaults to
@@ -948,6 +955,68 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         pl.deck = old + pl.deck          # index 0 is the BOTTOM of the deck
         pl.prize_cards = [pl.deck.pop() for _ in range(n)]
         log.append(f"    re-roll {n} Prize cards")
+        return True
+
+    if op == O.FORCE_SWITCH_OPPONENT:
+        # THEY choose the replacement, so they take their best body -- this
+        # is the weak cousin of a gust, and modelling it as a gust (which
+        # drags up the weakest) would invert the card.
+        if not opp.bench or not opp.active:
+            return False
+        pick = max(opp.bench,
+                   key=lambda p: (opp.POKEMON.get(p.name) or {}).get("hp", 0)
+                   - p.damage)
+        opp.bench.remove(pick)
+        opp.bench.append(opp.active)
+        opp.active = pick
+        log.append(f"    opponent switches in {pick.name}")
+        return True
+
+    if op == O.DISCARD_TOOL_FROM_OPPONENT:
+        if not opp.active or not getattr(opp.active, "tool", None):
+            return False
+        log.append(f"    discard {opp.active.tool} from {opp.active.name}")
+        opp.discard.append(opp.active.tool)
+        opp.active.tool = None
+        return True
+
+    if op == O.SELF_BENCH_DAMAGE:
+        n = act.amount or 0
+        hit = 0
+        for spot in list(pl.bench):
+            spot.prev_damage = spot.damage
+            spot.damage += n
+            hit += 1
+        if hit:
+            log.append(f"    {n} to each of own Bench ({hit})")
+        return hit > 0
+
+    if op == O.SELF_ENERGY_TO_HAND:
+        if not source or not source.energy:
+            return False
+        source.energy.pop()
+        name = (source.energy_names.pop()
+                if getattr(source, "energy_names", None) else "Energy")
+        pl.hand.append(("Energy", name))
+        log.append(f"    {name} back to hand")
+        return True
+
+    if op == O.WEAKEN_DEFENDER:
+        if not opp.active:
+            return False
+        opp.active.damage_penalty = (
+            getattr(opp.active, "damage_penalty", 0) + (act.amount or 0))
+        log.append(f"    {opp.active.name} attacks for "
+                   f"{opp.active.damage_penalty} less next turn")
+        return True
+
+    if op == O.HEAL_AS_DEALT:
+        dealt = DAMAGE_JUST_DEALT[0]
+        if not source or dealt <= 0 or source.damage <= 0:
+            return False
+        healed = min(dealt, source.damage)
+        source.damage -= healed
+        log.append(f"    heals {healed} from {source.name}")
         return True
 
     if op == O.DISCARD_TO_DECK:

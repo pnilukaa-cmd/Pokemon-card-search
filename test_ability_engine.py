@@ -1720,9 +1720,119 @@ def test_a_card_already_pitched_is_not_played_from_a_stale_snapshot():
           ("Item", "Crushing Hammer") not in pl2.hand, f"hand={pl2.hand}")
 
 
+def test_rider_shapes_that_no_deck_here_carries():
+    """Six rider shapes were compiling to nothing pool-wide.
+
+    Two of them (force_switch_opponent, self_energy_to_hand) are exercised
+    by real decks in this repo and were verified in play. The other four are
+    not on any Pokemon in any deck here, so a field run cannot reach them --
+    which is exactly how an op ends up inert for months. Driven directly
+    instead, so "it works" is a measured claim rather than an assumption.
+    """
+    import simulate_versus as SV
+
+    def board():
+        pok = {"A": {"types": ["Colorless"], "hp": 200, "attacks": [],
+                     "stage": "Basic", "prize_value": 1, "weakness": None,
+                     "resistance": None, "evolves_from": None,
+                     "subtypes": ["Basic"]},
+               "D": {"types": ["Colorless"], "hp": 300, "attacks": [],
+                     "stage": "Basic", "prize_value": 1, "weakness": None,
+                     "resistance": None, "evolves_from": None,
+                     "subtypes": ["Basic"]}}
+        pl = SV.Player("A", pok, []); op = SV.Player("B", pok, [])
+        pl.active = SV.InPlay("A", 0); op.active = SV.InPlay("D", 0)
+        pl.bench = [SV.InPlay("A", 0) for _ in range(2)]
+        op.bench = [SV.InPlay("D", 0)]
+        return pl, op
+
+    def run(text, pl, op):
+        eff = IR.compile_effect("attack", "Probe", text)
+        check(f"compiles: {text[:44]}", not eff.unsupported, str(eff))
+        for act in eff.actions:
+            AE.apply_action(act, pl, op, pl.active, [])
+        return eff
+
+    pl, op = board()
+    run("This attack also does 20 damage to each of your Benched Pokémon.", pl, op)
+    check("self_bench_damage hits every Benched Pokemon",
+          all(b.damage == 20 for b in pl.bench),
+          f"{[b.damage for b in pl.bench]}")
+    check("and leaves the Active alone", pl.active.damage == 0,
+          f"active={pl.active.damage}")
+
+    pl, op = board()
+    op.active.tool = "Air Balloon"
+    run("Before doing damage, discard all Pokémon Tools from your opponent's "
+        "Active Pokémon.", pl, op)
+    check("discard_tool_from_opponent removes the Tool", op.active.tool is None,
+          f"tool={op.active.tool}")
+    check("and it goes to their discard", "Air Balloon" in op.discard,
+          f"discard={op.discard}")
+
+    pl, op = board()
+    run("During your opponent's next turn, attacks used by the Defending "
+        "Pokémon do 30 less damage (before applying Weakness and Resistance).",
+        pl, op)
+    check("weaken_defender marks the defender", op.active.damage_penalty == 30,
+          f"penalty={op.active.damage_penalty}")
+
+    pl, op = board()
+    pl.active.damage = 90
+    AE.DAMAGE_JUST_DEALT[0] = 50
+    run("Heal from this Pokémon the same amount of damage you did to your "
+        "opponent's Active Pokémon.", pl, op)
+    check("heal_as_dealt heals exactly what was dealt", pl.active.damage == 40,
+          f"damage={pl.active.damage}")
+    pl, op = board()
+    pl.active.damage = 20
+    AE.DAMAGE_JUST_DEALT[0] = 50
+    run("Heal from this Pokémon the same amount of damage you did to your "
+        "opponent's Active Pokémon.", pl, op)
+    check("and never past full HP", pl.active.damage == 0,
+          f"damage={pl.active.damage}")
+
+
+def test_resistance_can_be_ignored_and_all_or_nothing_flips_flip():
+    """Two damage-model clauses that were being dropped silently."""
+    import simulate_versus as SV
+    import random as _r
+    pok = {"A": {"types": ["Grass"], "hp": 200, "attacks": [], "stage": "Basic",
+                 "prize_value": 1, "weakness": None, "resistance": None,
+                 "evolves_from": None, "subtypes": ["Basic"]},
+           "D": {"types": ["Metal"], "hp": 300, "attacks": [], "stage": "Basic",
+                 "prize_value": 1, "weakness": None,
+                 "resistance": ("Grass", 30), "evolves_from": None,
+                 "subtypes": ["Basic"]}}
+
+    def swing(text):
+        pl = SV.Player("A", pok, []); op = SV.Player("B", pok, [])
+        atk = {"name": "Probe", "cost": ["Colorless"], "damage": 100, "text": text}
+        pl.POKEMON["A"]["attacks"] = [atk]
+        pl.active = SV.InPlay("A", 0); op.active = SV.InPlay("D", 0)
+        pl.active.energy = [["Colorless"]]; pl.active.energy_names = ["E"]
+        SV.do_attack(pl, op, [])
+        return op.active.damage
+
+    check("Resistance still applies by default", swing("") == 70, str(swing("")))
+    check("but not when the attack says it is not affected by Resistance",
+          swing("This attack's damage isn't affected by Resistance.") == 100,
+          str(swing("This attack's damage isn't affected by Resistance.")))
+
+    vals = []
+    for i in range(400):
+        _r.seed(i)
+        vals.append(swing("Flip a coin. If tails, this attack does nothing."))
+    zero = sum(1 for v in vals if v == 0)
+    check("an all-or-nothing flip whiffs about half the time",
+          120 < zero < 280, f"{zero}/400 whiffed")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,
+    for fn in [test_rider_shapes_that_no_deck_here_carries,
+               test_resistance_can_be_ignored_and_all_or_nothing_flips_flip,
+               test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,
                test_draw_fires, test_draw_with_discard_cost,
                test_cost_unaffordable_blocks, test_active_only_condition,
                test_ko_condition, test_energy_type_condition_and_counter_move,

@@ -112,7 +112,8 @@ class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
                  "retreat_locked", "attack_locked_by_opponent", "prev_damage",
-                 "healed_this_turn", "promoted_this_turn", "last_attack_used")
+                 "healed_this_turn", "promoted_this_turn", "last_attack_used",
+                 "damage_penalty")
 
     def __init__(self, name, turn):
         self.name = name
@@ -149,6 +150,11 @@ class InPlay:
         # Weezing's Crazy Blast is 50 that becomes 170 "if this Pokemon
         # used Pervasive Gas during your last turn".
         self.last_attack_used = None
+        # "During your opponent's next turn, attacks used by the Defending
+        # Pokemon do N less damage." Ten attacks in the pool say this and
+        # none of them did anything. Cleared when the penalised player's
+        # turn ends, so it lasts exactly the one turn the card says.
+        self.damage_penalty = 0
 
     def energy_count(self):
         return len(self.energy)
@@ -266,7 +272,16 @@ _PROVIDES_N_RE = _re.compile(
     r"provides (\d+) in any combination of (.+?)(?:\.|$)", _re.I)
 
 
-def energy_provisions(card_name, cards_by_name):
+# "If this card is attached to a <stage> Pokemon, this card provides every
+# type of Energy but provides only N Energy at a time." Prism Energy (Basic)
+# and Neo Upper Energy (Stage 2).
+_PROVIDES_EVERY_IF_RE = _re.compile(
+    r"if this card is attached to an? ([\w ]+?) pok[eé]mon, this card"
+    r" provides every type of energy but provides only (\d+) energy at a time",
+    _re.I)
+
+
+def energy_provisions(card_name, cards_by_name, stage=None):
     """The Energy a single card provides, as one entry PER Energy.
 
     Special Energy was previously all treated as "any type", because the
@@ -291,10 +306,21 @@ def energy_provisions(card_name, cards_by_name):
                  _re.findall(r"(" + "|".join(M.REAL_TYPES) + r") Energy",
                              m.group(2), _re.I)]
         return [types or list(M.REAL_TYPES)] * int(m.group(1))
-    # "provides every type ... but only 1 at a time" -- and the two cards
-    # that upgrade INTO that clause conditionally (Prism on a Basic, Neo
-    # Upper on a Stage 2) are treated as having met it, which is how both
-    # are actually played.
+    # "provides every type ... but only N at a time". Two cards reach that
+    # clause CONDITIONALLY on what they are attached to -- Prism Energy on a
+    # Basic, Neo Upper Energy on a Stage 2 -- and both were treated as
+    # having met it unconditionally, on the grounds that it is how they are
+    # played. That is an assumption, and where the caller knows the stage
+    # there is no need to make it. It also hid a real undercount: Neo Upper
+    # provides TWO Energy at a time, the same shape as Team Rocket's Energy,
+    # and was counted as one.
+    m = _PROVIDES_EVERY_IF_RE.search(text)
+    if m:
+        want, count = m.group(1).strip().lower(), int(m.group(2))
+        if stage is None or stage.lower() == want:
+            return [list(M.REAL_TYPES)] * count
+        mm = _PROVIDES_ONE_RE.search(text)
+        return [[mm.group(1).capitalize()]] if mm else [["Colorless"]]
     if _PROVIDES_EVERY_RE.search(text):
         return [list(M.REAL_TYPES)]
     m = _PROVIDES_ONE_RE.search(text)
@@ -307,7 +333,11 @@ def energy_provisions(card_name, cards_by_name):
 
 
 def energy_types_for(card_name, cards_by_name):
-    """What types the FIRST Energy provided by this card covers."""
+    """What types the FIRST Energy provided by this card covers.
+
+    No stage is passed: this feeds the deck-wide set of Energy types the
+    deck can ever produce, where the permissive reading is the right one.
+    """
     return energy_provisions(card_name, cards_by_name)[0]
 
 
@@ -834,7 +864,8 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.remove_from_hand("Item", "N's PP Up")
         pl.discard.append("N's PP Up")
         pl.discard.remove(e)
-        target.energy.extend(energy_provisions(e, _CARDS_BY_NAME))
+        target.energy.extend(energy_provisions(
+            e, _CARDS_BY_NAME, (pl.POKEMON.get(target.name) or {}).get("stage")))
         target.energy_names.append(e)
         log.append(f"  {pl.name}: N's PP Up -> {e} onto {target.name}")
 
@@ -1442,6 +1473,11 @@ _DOES_DMG_RE = _re.compile(r"does (\d+) damage for each", _re.I)
 _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
 _COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
+# "This attack's damage isn't affected by Resistance." Nine attacks say it
+# and Resistance was applied to all of them -- 30 damage a swing, on cards
+# whose whole point is punching through a resisted type.
+_IGNORES_RESISTANCE_RE = _re.compile(
+    r"damage isn'?t affected by resistance", _re.I)
 _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
 # "Flip a coin. If tails, this attack does nothing." Twenty attacks in the
 # pool say this and every one of them was paying full damage on every use --
@@ -2632,7 +2668,8 @@ def attach_energy(pl, cards_by_name, log):
     if target is None:
         return
     kind, name = pl.hand.pop(idx)
-    target.energy.extend(energy_provisions(name, cards_by_name))
+    target.energy.extend(energy_provisions(
+        name, cards_by_name, (pl.POKEMON.get(target.name) or {}).get("stage")))
     target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
 
@@ -2696,8 +2733,20 @@ _HP_TOOLS = None
 
 
 def hp_tools():
+    """Tool name -> HP it grants, discovered from card text.
+
+    The card index is filled by run_game. Anything that reaches this before
+    then -- a unit test driving do_attack directly, or any future caller
+    outside the match loop -- used to build an EMPTY registry and cache it
+    for the life of the process, silently switching off every HP Tool in
+    the format. trainer_effect_ir already guards its cache the same way;
+    this one did not, and a test that called do_attack without run_game
+    found it.
+    """
     global _HP_TOOLS
     if _HP_TOOLS is None:
+        if not _CARDS_BY_NAME:
+            _CARDS_BY_NAME.update(M.build_card_index(M.load_cards())[0])
         _HP_TOOLS = {}
         for name, card in _CARDS_BY_NAME.items():
             card = card[0] if isinstance(card, list) and card else card
@@ -2934,8 +2983,15 @@ def do_attack(pl, opp, log):
     # than the game allows. Applied AFTER Weakness, as the rules order it,
     # and never below zero.
     resist = defender.get("resistance")
-    if resist and resist[0] in atk_types and not attack_ignores_effects(atk):
+    if (resist and resist[0] in atk_types
+            and not attack_ignores_effects(atk)
+            and not _IGNORES_RESISTANCE_RE.search(
+                _borrowed_text(pl, opp, pl.active, atk))):
         dmg = max(0, dmg - resist[1])
+    # A debuff the DEFENDER put on this Pokemon last turn.
+    pen = getattr(pl.active, "damage_penalty", 0)
+    if pen:
+        dmg = max(0, dmg - pen)
     dmg += AE.query_damage_buff(pl, pl.active, opp)
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
@@ -2975,6 +3031,9 @@ def do_attack(pl, opp, log):
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
 
     pl.active.last_attack_used = atk["name"]
+    # "Heal from this Pokemon the same amount of damage you did" is resolved
+    # on the rider path, which is handed the attack but not its result.
+    AE.DAMAGE_JUST_DEALT[0] = dmg
 
     if _SELF_ATTACK_LOCK_RE.search(_borrowed_text(pl, opp, pl.active, atk)):
         pl.active.attack_locked = True
@@ -3075,6 +3134,12 @@ ATTACK_RIDER_OPS = {
     IR.Op.MOVE_COUNTERS,
     IR.Op.MULTIPLY_COUNTERS,
     IR.Op.LOCK,
+    IR.Op.FORCE_SWITCH_OPPONENT,
+    IR.Op.DISCARD_TOOL_FROM_OPPONENT,
+    IR.Op.SELF_BENCH_DAMAGE,
+    IR.Op.SELF_ENERGY_TO_HAND,
+    IR.Op.WEAKEN_DEFENDER,
+    IR.Op.HEAL_AS_DEALT,
 }
 
 
@@ -3416,6 +3481,8 @@ def run_game(modelA, modelB, verbose=False):
             pl.lost_pokemon_names = ""
             for spot in pl.in_play():
                 spot.promoted_this_turn = False
+                # The debuff was for exactly this turn, and this turn is over.
+                spot.damage_penalty = 0
             if result == "win":
                 winner = pl
                 break

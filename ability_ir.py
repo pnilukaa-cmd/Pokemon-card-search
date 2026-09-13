@@ -136,6 +136,18 @@ class Op:
     # Put the Prize cards on the bottom of the deck and take that
     # many fresh ones off the top. Redeemable Ticket.
     REROLL_PRIZES = "reroll_prizes"
+    # Send the opponent's Active to the Bench -- THEY choose the
+    # replacement, which is strictly weaker than a gust.
+    FORCE_SWITCH_OPPONENT = "force_switch_opponent"
+    DISCARD_TOOL_FROM_OPPONENT = "discard_tool_from_opponent"
+    # "This attack also does N damage to each of YOUR Benched Pokemon."
+    SELF_BENCH_DAMAGE = "self_bench_damage"
+    SELF_ENERGY_TO_HAND = "self_energy_to_hand"
+    # "During your opponent's next turn, attacks used by the Defending
+    # Pokemon do N less damage."
+    WEAKEN_DEFENDER = "weaken_defender"
+    # "Heal from this Pokemon the same amount of damage you did."
+    HEAL_AS_DEALT = "heal_as_dealt"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -1559,6 +1571,45 @@ def _r(m, text):
       r" of your deck")
 def _r(m, text):
     return [Action(Op.REROLL_PRIZES, None, Target.SELF)]
+
+
+# Seven rider shapes that compiled to nothing at all. Counts are attacks in
+# the pool carrying each.
+@rule("force_switch_opponent",                                  # 11
+      r"switch out your opponent'?s active pok[eé]mon to the bench")
+def _r(m, text):
+    return [Action(Op.FORCE_SWITCH_OPPONENT, None, Target.OPPONENT)]
+
+
+@rule("discard_tool_from_opponent",                             # 6
+      r"discard (?:all|a|any) pok[eé]mon tools? from your opponent'?s active")
+def _r(m, text):
+    return [Action(Op.DISCARD_TOOL_FROM_OPPONENT, None, Target.OPP_ACTIVE)]
+
+
+@rule("self_bench_damage",                                      # 5
+      r"this attack also does (\d+) damage to each of your benched pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.SELF_BENCH_DAMAGE, int(m.group(1)), Target.YOUR_BENCHED)]
+
+
+@rule("self_energy_to_hand",                                    # 4
+      r"put an energy attached to this pok[eé]mon into your hand")
+def _r(m, text):
+    return [Action(Op.SELF_ENERGY_TO_HAND, 1, Target.SELF)]
+
+
+@rule("weaken_defender",                                        # 10
+      r"during your opponent'?s next turn, attacks used by the defending"
+      r" pok[eé]mon do (\d+) less damage")
+def _r(m, text):
+    return [Action(Op.WEAKEN_DEFENDER, int(m.group(1)), Target.OPP_ACTIVE)]
+
+
+@rule("heal_as_dealt",                                          # 5
+      r"heal from this pok[eé]mon the same amount of damage you did")
+def _r(m, text):
+    return [Action(Op.HEAL_AS_DEALT, None, Target.SELF)]
 
 
 @rule("discard_to_bench",
