@@ -97,6 +97,7 @@ sys.path.insert(0, ".")
 import tcg_model as M
 import ability_ir as IR
 import ability_engine as AE
+import policies as POL
 
 MAX_BENCH = 5
 STARTING_PRIZES = 6
@@ -1386,7 +1387,7 @@ def pitch_rank(pl, kind, name):
     """
     if kind == "Energy":
         short = any(energy_shortfall(pl, p) > 0 for p in pl.in_play())
-        return 30 if short else 10
+        return (30 if short else 10) * POL.knob(pl, "pitch_energy_guard")
     if kind == "Pokemon":
         info = pl.POKEMON.get(name) or {}
         if info.get("stage") == "Basic":
@@ -1878,7 +1879,7 @@ def _best_borrowed(pl, opp, spot, text):
             score = float(attack_damage(pl, opp, spot, a, record=False))
             score += attack_rider_value(pl, opp, a, spot)
             if _SELF_ATTACK_LOCK_RE.search(a.get("text") or ""):
-                score /= 2.0
+                score /= POL.knob(pl, "self_lock_divisor")
             if score > best_score:
                 best, best_score = a, score
     return best
@@ -2579,7 +2580,22 @@ def attack_rider_value(pl, opp, atk, spot=None):
             value += 20 * (act.amount or 1)
         elif act.op == IR.Op.SWITCH:
             value += 15
-    return int(value * getattr(eff, "chance", 1.0))
+    # How much this pilot cares about a rider at all, and separately about
+    # the ones that BUILD the board rather than affect the opponent. setup
+    # pays well over the odds for the second kind; aggro discounts both.
+    scale = POL.knob(pl, "rider_scale")
+    if any(a.op in _SETUP_RIDER_OPS for a in eff.actions):
+        scale = POL.knob(pl, "setup_scale")
+    return int(value * scale * getattr(eff, "chance", 1.0))
+
+
+# Riders that develop your own board rather than doing anything to the
+# opponent. A deck that has to assemble something lives on these.
+_SETUP_RIDER_OPS = {
+    IR.Op.ATTACH_ENERGY, IR.Op.SEARCH_TO_BENCH, IR.Op.SEARCH_TO_HAND,
+    IR.Op.DRAW, IR.Op.FROM_DISCARD_TO_HAND, IR.Op.RECOVER_TO_BENCH,
+    IR.Op.HEAL, IR.Op.MOVE_ENERGY,
+}
 
 
 _SELF_ATTACK_LOCK_RE = _re.compile(
@@ -2744,11 +2760,24 @@ def attack_value(pl, opp, spot, atk):
     if opp is not None and opp.active is not None:
         remaining = effective_hp(opp, opp.active) - opp.active.damage
         if dmg >= remaining:
-            value += KO_BONUS_PER_PRIZE * opp.POKEMON[opp.active.name]["prize_value"]
+            prize = opp.POKEMON[opp.active.name]["prize_value"]
+            ko_bonus = POL.knob(pl, "ko_bonus_per_prize")
+            # A Knock Out is worth more when it finishes more of the race.
+            # prizewise scales it by how much of the six it actually takes;
+            # every other pilot reads a flat rate, which is what the engine
+            # has always done.
+            if POL.knob(pl, "prize_liability") and getattr(pl, "prizes", 6) > 0:
+                ko_bonus = ko_bonus * (1.0 + prize / max(pl.prizes, 1))
+            value += ko_bonus * prize
             # Overkill past the Knock Out buys nothing, so a smaller
             # attack that still kills is preferred and the bigger one is
             # saved for something that needs it.
-            value -= max(0, dmg - remaining) // 2
+            value -= max(0, dmg - remaining) * POL.knob(pl, "overkill_penalty")
+    # What this attacker is worth losing. A 3-Prize MEGA ex standing in the
+    # Active Spot is a liability the greedy pilot never priced.
+    liab = POL.knob(pl, "prize_liability")
+    if liab and spot is not None:
+        value -= liab * ((pl.POKEMON.get(spot.name) or {}).get("prize_value", 1) - 1)
     return value
 
 
@@ -2805,7 +2834,10 @@ def attach_energy(pl, cards_by_name, log):
     if idx is None:
         return
     target = None
-    if pl.active and energy_shortfall(pl, pl.active) > 0:
+    # setup spreads Energy onto whatever will hit hardest once it is paid
+    # up, rather than always feeding the Active first.
+    if (POL.knob(pl, "energy_to_active")
+            and pl.active and energy_shortfall(pl, pl.active) > 0):
         target = pl.active
     else:
         # Among Benched Pokemon that still need Energy, feed the one that
@@ -3031,7 +3063,8 @@ def try_retreat(pl, opp, log):
     # to be better by more than a rounding error. Priced per Energy the
     # retreat actually discards, otherwise the AI thrashes between two
     # near-equal attackers and never develops either.
-    margin = 30 * max(cost, 0) + 10
+    margin = (POL.knob(pl, "retreat_per_energy") * max(cost, 0)
+              + POL.knob(pl, "retreat_flat"))
     # v2: when the Active cannot attack AT ALL, the tempo argument for
     # staying put evaporates -- there is no tempo to lose. The flat margin
     # was still being applied, so with a retreat cost of 2 a Benched
@@ -3626,8 +3659,16 @@ def promote_from_bench(side, opp=None):
     """
     if not side.bench:
         return None
-    side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
-                    reverse=True)
+    if POL.knob(side, "promote") == "attacker":
+        # Measured at -0.11 for the greedy pilot and kept off there, but it
+        # is a real style: aggro wants to keep swinging, and eating a hit to
+        # do it is the trade it is built to make.
+        side.bench.sort(key=lambda p: (_ready_damage(side, opp, p),
+                                       effective_hp(side, p) - p.damage),
+                        reverse=True)
+    else:
+        side.bench.sort(key=lambda p: effective_hp(side, p) - p.damage,
+                        reverse=True)
     return side.bench.pop(0)
 
 
