@@ -1828,9 +1828,58 @@ def test_resistance_can_be_ignored_and_all_or_nothing_flips_flip():
           120 < zero < 280, f"{zero}/400 whiffed")
 
 
+def test_recall_puts_cards_in_the_right_zone():
+    """hand and deck hold (kind, name); the discard holds bare names.
+
+    The recall ops (put this Pokemon and all attached cards into your hand /
+    shuffle into your deck / discard it) share one helper, and it appended a
+    bare string to the DECK. 115 of 528 smoke-test games died on "too many
+    values to unpack" before this was caught -- by a smoke test, not by the
+    unit suite, which is why it is now in the unit suite.
+    """
+    import simulate_versus as SV
+    pok = {"A": {"types": ["Colorless"], "hp": 200, "attacks": [],
+                 "stage": "Basic", "prize_value": 1, "weakness": None,
+                 "resistance": None, "evolves_from": None,
+                 "subtypes": ["Basic"]}}
+
+    def board():
+        pl = SV.Player("A", pok, []); op = SV.Player("B", pok, [])
+        pl.active = SV.InPlay("A", 0)
+        pl.active.energy = [["Colorless"]]
+        pl.active.energy_names = ["Basic Colorless Energy"]
+        pl.active.tool = "Air Balloon"
+        pl.bench = [SV.InPlay("A", 0)]
+        op.active = SV.InPlay("A", 0)
+        return pl, op
+
+    for text, zone in (
+            ("Put this Pokémon and all attached cards into your hand.", "hand"),
+            ("Shuffle this Pokémon and all attached cards into your deck.", "deck"),
+            ("Discard this Pokémon and all attached cards.", "discard")):
+        pl, op = board()
+        eff = IR.compile_effect("attack", "Probe", text)
+        check(f"compiles: {zone}", not eff.unsupported, str(eff))
+        for act in eff.actions:
+            AE.apply_action(act, pl, op, pl.active, [])
+        got = getattr(pl, zone)
+        if zone == "discard":
+            check("discard holds bare names",
+                  all(isinstance(x, str) for x in got), str(got))
+        else:
+            check(f"{zone} holds (kind, name) pairs",
+                  all(isinstance(x, tuple) and len(x) == 2 for x in got),
+                  str(got))
+        check(f"{zone}: the Pokemon and both attachments moved",
+              len(got) == 3, f"{len(got)}: {got}")
+        check(f"{zone}: and the Bench was promoted into the Active Spot",
+              pl.active is not None and not pl.bench, str(pl.active))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_rider_shapes_that_no_deck_here_carries,
+    for fn in [test_recall_puts_cards_in_the_right_zone,
+               test_rider_shapes_that_no_deck_here_carries,
                test_resistance_can_be_ignored_and_all_or_nothing_flips_flip,
                test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,
                test_draw_fires, test_draw_with_discard_cost,

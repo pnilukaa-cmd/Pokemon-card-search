@@ -47,6 +47,35 @@ def classify():
     return names, executed, read, orphan
 
 
+# Ops that are modelled as nothing ON PURPOSE. They exist so a card whose
+# text describes a deckbuilding rule, a setup-phase rule, or hidden
+# information the engine has no notion of stops reading as an unhandled gap.
+# They are excluded from the orphan list because an orphan means "nobody
+# remembered to wire this up", which is a different thing entirely.
+DELIBERATE_NO_OPS = {"NO_OP_INFORMATION", "NO_OP_SETUP_RULE"}
+
+
+def uncalled_queries():
+    """query_* functions that read an op but that NOBODY CALLS.
+
+    The orphan check above asks whether an op has a reader. That is not the
+    same as the op doing anything: a query_* function can read an op
+    perfectly and still be dead code if the simulator never calls it. Adding
+    a query and forgetting to wire it is the same defect as never writing
+    one, so it gets the same treatment.
+    """
+    ae = open("ability_engine.py").read()
+    sv = open("simulate_versus.py").read()
+    out = []
+    for m in re.finditer(r"^def (query_\w+)\(", ae, re.M):
+        fn = m.group(1)
+        body = ae[:m.start()] + ae[m.end():]
+        if re.search(r"\b%s\(" % fn, body) or re.search(r"\b%s\(" % fn, sv):
+            continue
+        out.append(fn)
+    return out
+
+
 def cards_for(ops):
     import tcg_model as M
     hit = collections.defaultdict(set)
@@ -92,10 +121,20 @@ def deck_pokemon():
 
 def main():
     names, executed, read, orphan = classify()
+    orphan = [n for n in orphan if n not in DELIBERATE_NO_OPS]
     print(f"{len(names)} ops   executed {len(executed)}   "
           f"read as passive {len(read)}   ORPHAN {len(orphan)}\n")
+    dead = uncalled_queries()
+    if dead:
+        print(f"  {len(dead)} query function(s) READ an op but are never "
+              f"called -- dead code, same effect as no reader at all:")
+        for fn in dead:
+            print(f"    {fn}")
+        print()
     if not orphan:
         print("  every op has a reader")
+        if not dead:
+            print("  and every reader is called")
         return
     if "--cards" not in sys.argv:
         for n in orphan:

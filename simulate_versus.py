@@ -113,7 +113,9 @@ class InPlay:
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
                  "retreat_locked", "attack_locked_by_opponent", "prev_damage",
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
-                 "damage_penalty")
+                 "damage_penalty", "takes_more", "next_turn_attack_buff",
+                 "delayed_discard", "extra_prize", "no_weakness",
+                 "damage_taken_last_turn", "retaliate_counters")
 
     def __init__(self, name, turn):
         self.name = name
@@ -155,6 +157,22 @@ class InPlay:
         # none of them did anything. Cleared when the penalised player's
         # turn ends, so it lasts exactly the one turn the card says.
         self.damage_penalty = 0
+        # "During your next turn, the Defending Pokemon takes N more damage."
+        self.takes_more = 0
+        # "During your next turn, this Pokemon's <named> attack does N more
+        # damage" (or has base damage N). (attack name, amount, absolute).
+        self.next_turn_attack_buff = None
+        # "At the end of your opponent's next turn, discard the Defending
+        # Pokemon", "take 1 more Prize card if it is Knocked Out", and
+        # "during your opponent's next turn, this Pokemon has no Weakness".
+        self.delayed_discard = False
+        self.extra_prize = 0
+        self.no_weakness = False
+        # Mega Heracross ex's Juggernaut Horn adds however much this Pokemon
+        # was hit for last turn; Zamazenta's Strong Bash puts counters back
+        # on whatever hits it.
+        self.damage_taken_last_turn = 0
+        self.retaliate_counters = 0
 
     def energy_count(self):
         return len(self.energy)
@@ -1552,8 +1570,24 @@ _COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
 # "This attack's damage isn't affected by Resistance." Nine attacks say it
 # and Resistance was applied to all of them -- 30 damage a swing, on cards
 # whose whole point is punching through a resisted type.
+# "isn't affected by Resistance", and the wider "isn't affected by Weakness
+# or Resistance, or by any effects on your opponent's Active Pokemon" -- six
+# more attacks whose whole purpose is punching through a resisted type.
 _IGNORES_RESISTANCE_RE = _re.compile(
-    r"damage isn'?t affected by resistance", _re.I)
+    r"damage isn'?t affected by (?:weakness or )?resistance", _re.I)
+_IGNORES_WEAKNESS_RE = _re.compile(
+    r"damage isn'?t affected by weakness", _re.I)
+# "If <clause>, this attack does nothing." Always written as the FAILURE
+# case, so parse_conditions turns each into the positive REQUIREMENT and
+# this returns 0 when the requirement is not met. Twelve attacks in the
+# pool, every one of which was dealing full damage unconditionally.
+_BASE_DAMAGE_IS_RE = _re.compile(r"this attack'?s base damage is (\d+)", _re.I)
+_REFLECT_DAMAGE_RE = _re.compile(
+    r"was damaged by an attack during your opponent'?s last turn, this attack"
+    r" does that much more damage", _re.I)
+_ATTACK_REQUIRES_RE = _re.compile(
+    r"\bif [^.]{4,120}?, this attack does nothing"
+    r"|you can use this attack only if ", _re.I)
 _FLIP_UNTIL_TAILS_RE = _re.compile(r"flip a coin until you get tails", _re.I)
 # "Flip a coin. If tails, this attack does nothing." Twenty attacks in the
 # pool say this and every one of them was paying full damage on every use --
@@ -1619,6 +1653,17 @@ ENERGY_TYPES = ("Grass", "Fire", "Water", "Lightning", "Psychic",
 _TYPED_ENERGY_RE = _re.compile(
     r"\b(grass|fire|water|lightning|psychic|fighting|darkness|metal|dragon|"
     r"fairy|colorless)\s+energy", _re.I)
+
+
+def energy_units(pl, spot):
+    """How many Energy this Pokemon effectively has, after any Ability that
+    makes one card provide more (Meganium's Wild Growth)."""
+    total = len(spot.energy)
+    for e in spot.energy:
+        for typ in e:
+            total += AE.query_energy_bonus(pl, spot, typ)
+            break
+    return total
 
 
 def _energy_matching(clause, spots):
@@ -2176,6 +2221,26 @@ def attack_damage(pl, opp, spot, atk, record=True):
     text = atk.get("text") or ""
     base = atk["damage"]
 
+    # "During your next turn, this Pokemon's <named> attack does N more
+    # damage" / "...'s base damage is N". Metagross's Meteor Mash and three
+    # others build on themselves and none of them did.
+    buff = getattr(spot, "next_turn_attack_buff", None)
+    if buff and buff[0] and buff[0].lower() == (atk.get("name") or "").lower():
+        base = buff[1] if buff[2] else (base or 0) + buff[1]
+
+    # "If this Pokemon was damaged by an attack during your opponent's last
+    # turn, this attack does THAT MUCH more damage." No number in the text
+    # for the flat-bonus path to read; the number is on the board.
+    if _REFLECT_DAMAGE_RE.search(text):
+        base = (base or 0) + getattr(spot, "damage_taken_last_turn", 0)
+
+    # "If <clause>, this attack's base damage is N."
+    m = _BASE_DAMAGE_IS_RE.search(text)
+    if m and opp is not None:
+        eff = _attack_ir(atk)
+        if not eff.conditions or AE.conditions_met(eff, pl, opp, spot, atk):
+            base = int(m.group(1))
+
     # A copy-attack evaluates the attack it borrows, which can itself be a
     # copy-attack -- Team Rocket's Persian ex's Haughty Order reads the
     # opponent's DECK, and in a mirror that deck contains another Persian
@@ -2223,6 +2288,14 @@ def attack_damage(pl, opp, spot, atk, record=True):
         odds = _attack_ir(atk).chance
         if odds < 1.0:
             return base + (int(m.group(1)) if random.random() < odds else 0)
+
+    # A requirement the board has to satisfy, or the attack is called off.
+    # Checked before the flips so a card carrying both resolves the
+    # requirement first.
+    if opp is not None and _ATTACK_REQUIRES_RE.search(text):
+        eff = _attack_ir(atk)
+        if eff.conditions and not AE.conditions_met(eff, pl, opp, spot, atk):
+            return 0
 
     # All-or-nothing flip: the whole attack is called off on tails. Checked
     # BEFORE the scaling flips below, because "flip 2 coins ... if either is
@@ -2846,6 +2919,16 @@ def effective_hp(pl, spot):
 
 
 def attach_tools(pl, log):
+    # Farfetch'd's Impromptu Carrier pulls a Tool out of the DECK, so the
+    # hand loop below would never see it.
+    if AE.query_tool_from_deck(pl, pl.active) and pl.active and not pl.active.tool:
+        i = next((i for i, (k, n) in enumerate(pl.deck) if k == "Tool"), None)
+        if i is not None:
+            k, n = pl.deck.pop(i)
+            pl.active.tool = n
+            random.shuffle(pl.deck)
+            log.append(f"  {pl.name}: attaches {n} from deck to {pl.active.name}")
+
     """Attach a Pokemon Tool to whoever will be holding the Active Spot.
     Only Tools carrying a modeled effect (retaliation) are attached -- any
     other Tool would be decoration the engine cannot honor."""
@@ -2856,7 +2939,11 @@ def attach_tools(pl, log):
         # never actually attached, so Air Balloon, Rescue Board and Hero's
         # Cape sat in hand for the whole game.
         if name in hp_tools() or name in RETREAT_TOOLS:
-            if not pl.active or pl.active.tool:
+            # Rotom ex's Multi Adapter allows a second Tool; without it a
+            # Pokemon holds exactly one.
+            if not pl.active:
+                continue
+            if pl.active.tool and not AE.query_extra_tool_slots(pl, pl.active):
                 continue
             pl.remove_from_hand(kind, name)
             pl.active.tool = name
@@ -3052,7 +3139,10 @@ def do_attack(pl, opp, log):
     # ex's Fairy Zone makes every opposing Dragon weak to Psychic, which is
     # the whole reason it is teched into a Dragapult mirror.
     weak = AE.query_weakness_override(pl, opp, opp.active) or defender["weakness"]
-    if weak and weak in atk_types:
+    if (weak and weak in atk_types
+            and not getattr(opp.active, "no_weakness", False)
+            and not _IGNORES_WEAKNESS_RE.search(
+                _borrowed_text(pl, opp, pl.active, atk))):
         dmg *= 2
     # Resistance. 369 cards in this pool carry one and it was not modelled
     # at all, so every attack into a resisted type dealt 30 more damage
@@ -3068,6 +3158,9 @@ def do_attack(pl, opp, log):
     pen = getattr(pl.active, "damage_penalty", 0)
     if pen:
         dmg = max(0, dmg - pen)
+    # "During your next turn, the Defending Pokemon takes N more damage
+    # from attacks" -- after Weakness and Resistance, as the card says.
+    dmg += getattr(opp.active, "takes_more", 0)
     dmg += AE.query_damage_buff(pl, pl.active, opp)
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
@@ -3102,6 +3195,15 @@ def do_attack(pl, opp, log):
         dmg = max(0, dmg - reduction)
     opp.active.prev_damage = opp.active.damage
     opp.active.damage += dmg
+    opp.active.damage_taken_last_turn = dmg
+    # Counters put back on whatever just hit it, win or lose.
+    back_counters = getattr(opp.active, "retaliate_counters", 0)
+    if back_counters == -1:
+        back_counters = dmg          # "equal to the damage done to this Pokemon"
+    if back_counters and dmg > 0 and pl.active is not None:
+        pl.active.damage += back_counters
+        log.append(f"  {opp.name}: {opp.active.name} puts {back_counters} "
+                   f"back on {pl.active.name}")
     log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} for {dmg}"
                f"{f' (-{reduction} reduced)' if reduction else ''}"
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
@@ -3140,9 +3242,13 @@ def do_attack(pl, opp, log):
             return True
 
     if opp.active.damage >= effective_hp(opp, opp.active):
-        taken = opp.POKEMON[opp.active.name]["prize_value"]
+        taken = (opp.POKEMON[opp.active.name]["prize_value"]
+                 + getattr(opp.active, "extra_prize", 0))
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
-        opp.discard.append(opp.active.name)
+        if AE.query_returns_to_hand_on_ko(opp, opp.active):
+            opp.hand.append(("Pokemon", opp.active.name))
+        else:
+            opp.discard.append(opp.active.name)
         opp.lost_pokemon_names += opp.active.name.lower() + "|"
         opp.active = None
         opp.lost_pokemon_last_turn = True
@@ -3216,6 +3322,16 @@ ATTACK_RIDER_OPS = {
     IR.Op.SELF_ENERGY_TO_HAND,
     IR.Op.WEAKEN_DEFENDER,
     IR.Op.HEAL_AS_DEALT,
+    IR.Op.SELF_TO_HAND, IR.Op.SELF_TO_DECK, IR.Op.SELF_DISCARD,
+    IR.Op.BENCH_TO_HAND, IR.Op.OPP_BENCH_TO_DECK, IR.Op.OPP_ENERGY_TO_HAND,
+    IR.Op.DISCARD_TOOL_FROM_ALL_OPPONENT, IR.Op.RECOVER_TO_BENCH,
+    IR.Op.KO_OUTRIGHT, IR.Op.SELF_KO, IR.Op.BUFF_NAMED_ATTACK_NEXT_TURN,
+    IR.Op.DEFENDER_TAKES_MORE, IR.Op.CLEAR_CONDITIONS,
+    IR.Op.BENCH_SPLASH, IR.Op.SELF_TAKES_MORE,
+    IR.Op.DELAYED_DISCARD_DEFENDER, IR.Op.EXTRA_PRIZE_ON_KO,
+    IR.Op.REMOVE_WEAKNESS, IR.Op.SET_WEAKNESS, IR.Op.MOVE_ENERGY,
+    IR.Op.ATTACH_ENERGY, IR.Op.RETALIATE_COUNTERS,
+    IR.Op.OPP_ATTACH_FROM_DISCARD,
 }
 
 
@@ -3416,7 +3532,9 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     try_evolve(pl, opp, turn, log, first_turn)
     try_retreat(pl, opp, log)
 
-    if not first_turn:
+    # Meloetta ex's Debut Performance is the one card that may attack on the
+    # very first turn.
+    if not first_turn or AE.query_can_attack_first_turn(pl):
         if do_attack(pl, opp, log):
             return "win"
     pokemon_checkup(pl, opp, log)
@@ -3555,10 +3673,29 @@ def run_game(modelA, modelB, verbose=False):
             result = take_turn(pl, opp, round_no, goes_first, cards_by_name, log)
             pl.lost_pokemon_last_turn = False
             pl.lost_pokemon_names = ""
+            # "At the end of your opponent's next turn, discard the
+            # Defending Pokemon" -- resolved at the end of the turn it was
+            # aimed at, which is this one.
+            for spot in list(pl.in_play()):
+                if getattr(spot, "delayed_discard", False):
+                    pl.discard.append(spot.name)
+                    if spot is pl.active:
+                        pl.active = None
+                    elif spot in pl.bench:
+                        pl.bench.remove(spot)
+                    log.append(f"  {pl.name}: {spot.name} is discarded")
+            if pl.active is None and pl.bench:
+                pl.active = pl.bench.pop(0)
             for spot in pl.in_play():
                 spot.promoted_this_turn = False
                 # The debuff was for exactly this turn, and this turn is over.
                 spot.damage_penalty = 0
+                spot.takes_more = 0
+                spot.next_turn_attack_buff = None
+                spot.no_weakness = False
+                spot.extra_prize = 0
+                spot.damage_taken_last_turn = 0
+                spot.retaliate_counters = 0
             if result == "win":
                 winner = pl
                 break

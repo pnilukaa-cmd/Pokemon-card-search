@@ -148,6 +148,32 @@ class Op:
     WEAKEN_DEFENDER = "weaken_defender"
     # "Heal from this Pokemon the same amount of damage you did."
     HEAL_AS_DEALT = "heal_as_dealt"
+    # Bounce / recall shapes.
+    SELF_TO_HAND = "self_to_hand"
+    SELF_TO_DECK = "self_to_deck"
+    SELF_DISCARD = "self_discard"
+    BENCH_TO_HAND = "bench_to_hand"
+    OPP_BENCH_TO_DECK = "opp_bench_to_deck"
+    OPP_ENERGY_TO_HAND = "opp_energy_to_hand"
+    DISCARD_TOOL_FROM_ALL_OPPONENT = "discard_tool_from_all_opponent"
+    RECOVER_TO_BENCH = "recover_to_bench"
+    KO_OUTRIGHT = "ko_outright"
+    SELF_KO = "self_ko_now"
+    BUFF_NAMED_ATTACK_NEXT_TURN = "buff_named_attack_next_turn"
+    DEFENDER_TAKES_MORE = "defender_takes_more"
+    SET_BASE_DAMAGE = "set_base_damage"
+    BENCH_SPLASH = "bench_splash"
+    SELF_TAKES_MORE = "self_takes_more"
+    DELAYED_DISCARD_DEFENDER = "delayed_discard_defender"
+    EXTRA_PRIZE_ON_KO = "extra_prize_on_ko"
+    REMOVE_WEAKNESS = "remove_weakness"
+    NO_OP_INFORMATION = "no_op_information"
+    RETALIATE_COUNTERS = "retaliate_counters"
+    OPP_ATTACH_FROM_DISCARD = "opp_attach_from_discard"
+    DISCARD_TOOL_ANY = "discard_tool_any"
+    # Rules about deckbuilding or the setup phase, which happen before
+    # a game state exists. Modelled as nothing ON PURPOSE.
+    NO_OP_SETUP_RULE = "no_op_setup_rule"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -346,6 +372,44 @@ def parse_conditions(text):
                   r" name from your hand during this turn", t, re.I)
     if m:
         out.append({"kind": "played_supporter_named", "name": m.group(1)})
+    # ---- requirements phrased as "otherwise this attack does nothing" ----
+    # Always written as the FAILURE case ("if your opponent's Active isn't
+    # Burned, this attack does nothing"), so each is parsed as the positive
+    # requirement and attack_damage returns 0 when it is not met.
+    m = re.search(r"if your opponent'?s active pok[eé]mon isn'?t"
+                  r" (asleep|burned|confused|paralyzed|poisoned)", t, re.I)
+    if m:
+        out.append({"kind": "opponent_active_has_condition",
+                    "condition": m.group(1).lower()})
+    if re.search(r"if your opponent'?s active pok[eé]mon isn'?t a pok[eé]mon ex",
+                 t, re.I):
+        out.append({"kind": "opponent_active_is_ex"})
+    if re.search(r"if your opponent'?s active pok[eé]mon has no damage counters"
+                 r" on it before this attack does damage", t, re.I):
+        out.append({"kind": "opponent_active_has_damage"})
+    m = re.search(r"if you don'?t have exactly (\d+) cards? in your hand", t, re.I)
+    if m:
+        out.append({"kind": "own_hand_size", "count": int(m.group(1))})
+    if re.search(r"if you don'?t have the same number of cards in your hand as"
+                 r" your opponent", t, re.I):
+        out.append({"kind": "hand_size_matches_opponent"})
+    if re.search(r"if there is no stadium in play", t, re.I):
+        out.append({"kind": "any_stadium_in_play"})
+    # re.I is required: the clause starts a sentence, so "If you don't" is
+    # capitalised and a case-sensitive pattern silently never matched.
+    m = re.search(r"if you don'?t have ([\w'’ -]+?) on your bench", t, re.I)
+    if m:
+        for nm in re.split(r"\s+and\s+", m.group(1)):
+            out.append({"kind": "named_in_play", "name": nm.strip()})
+    m = re.search(r"if your opponent doesn'?t have exactly (\d+) or (\d+) prize"
+                  r" cards? remaining", t, re.I)
+    if m:
+        out.append({"kind": "opponent_prizes_exactly",
+                    "counts": [int(m.group(1)), int(m.group(2))]})
+    m = re.search(r"if you have (\d+) or fewer benched pok[eé]mon", t, re.I)
+    if m:
+        out.append({"kind": "own_bench_more_than", "count": int(m.group(1))})
+
     # ---- more conditional flat bonuses -----------------------------------
     # A pool-wide sweep found 85 attacks whose "if <clause>, this attack does
     # N more damage" had no condition kind, so attack_damage had nothing to
@@ -1450,7 +1514,10 @@ def _r(m, text):
                    {"condition": m.group(2).lower()})]
 
 
-@rule("devolve", r"devolve (1|each) of your opponent'?s evolved pok[eé]mon")
+@rule("devolve",
+      r"devolve (1|each) of your opponent'?s evolved pok[eé]mon"
+      r"|if your opponent'?s active pok[eé]mon is an evolved pok[eé]mon,"
+      r" (devolve) it")
 def _r(m, text):
     """Espeon ex's Amazez devolves the WHOLE board, not one Pokemon --
     the "each" wording had no rule and the attack compiled to nothing."""
@@ -1461,7 +1528,7 @@ def _r(m, text):
     to = "deck" if re.search(r"shuffl\w+ the highest stage evolution card"
                              r"[^.]{0,40}into your opponent'?s deck",
                              text, re.I) else "hand"
-    if m.group(1).lower() == "each":
+    if (m.group(1) or "").lower() == "each":
         return [Action(Op.DEVOLVE, 99, Target.OPP_ALL, {"to": to})]
     return [Action(Op.DEVOLVE, 1, Target.OPP_ANY, {"to": to})]
 
@@ -1624,6 +1691,601 @@ def _r(m, text):
       r"heal from this pok[eé]mon the same amount of damage you did")
 def _r(m, text):
     return [Action(Op.HEAL_AS_DEALT, None, Target.SELF)]
+
+
+# ---- the long tail of one-off attack riders -------------------------------
+# Each of these appears on one to three attacks. They are here because the
+# alternative is a pool where 6% of attacks silently do half of what they
+# say, and because the shapes recur in every new set.
+
+@rule("self_to_hand",
+      r"put this pok[eé]mon and all attached cards into your hand"
+      r"|you may put this pok[eé]mon into your hand")
+def _r(m, text):
+    return [Action(Op.SELF_TO_HAND, 1, Target.SELF)]
+
+
+@rule("self_to_deck",
+      r"shuffle this pok[eé]mon and all attached cards into your deck")
+def _r(m, text):
+    return [Action(Op.SELF_TO_DECK, 1, Target.SELF)]
+
+
+@rule("self_discard_now", r"discard this pok[eé]mon and all attached cards")
+def _r(m, text):
+    return [Action(Op.SELF_DISCARD, 1, Target.SELF)]
+
+
+@rule("bench_to_hand",
+      r"put (\d+) of your benched pok[eé]mon and all attached cards into your hand")
+def _r(m, text):
+    return [Action(Op.BENCH_TO_HAND, int(m.group(1)), Target.YOUR_BENCHED)]
+
+
+@rule("bench_to_deck",
+      r"shuffle (\d+) of your benched pok[eé]mon and all attached cards into"
+      r" your deck")
+def _r(m, text):
+    return [Action(Op.SELF_TO_DECK, int(m.group(1)), Target.YOUR_BENCHED)]
+
+
+# NOTE the [^.] -> [\s\S] here. "Choose 2 of your opponent's Benched
+# Pokemon. Shuffle those Pokemon ... into your opponent's deck." puts a FULL
+# STOP between the two halves, and a [^.] bridge cannot cross it. That is
+# the third time this exact mistake has cost a card in this project
+# (parse_chance's coin flips, and the flat-bonus bridge before it).
+@rule("opp_bench_to_deck",
+      r"choose (\d+) of your opponent'?s benched pok[eé]mon[\s\S]{0,60}?shuffle"
+      r"[\s\S]{0,60}?into your opponent'?s deck"
+      r"|shuffle (\d+) of your opponent'?s benched pok[eé]mon and all attached"
+      r" cards into their deck")
+def _r(m, text):
+    n = m.group(1) or m.group(2) or 1
+    return [Action(Op.OPP_BENCH_TO_DECK, int(n), Target.OPP_BENCHED)]
+
+
+@rule("opp_energy_to_hand",
+      r"you may put (\d+) energy attached to your opponent'?s active"
+      r"[\w ]*? pok[eé]mon into their hand")
+def _r(m, text):
+    return [Action(Op.OPP_ENERGY_TO_HAND, int(m.group(1)), Target.OPP_ACTIVE)]
+
+
+@rule("discard_special_energy_from_opponent",
+      r"discard (?:a|all) special energy from (?:your opponent'?s active"
+      r" pok[eé]mon|all of your opponent'?s pok[eé]mon)")
+def _r(m, text):
+    board = "all of your opponent" in text.lower()
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 99 if board else 1,
+                   Target.OPP_ALL if board else Target.OPP_ACTIVE,
+                   {"special": True})]
+
+
+@rule("discard_tools_and_special_energy",
+      r"discard all pok[eé]mon tools and special energy from"
+      r" (?:your opponent'?s active pok[eé]mon|all of your opponent'?s pok[eé]mon)")
+def _r(m, text):
+    board = "all of your opponent" in text.lower()
+    return [Action(Op.DISCARD_TOOL_FROM_ALL_OPPONENT if board
+                   else Op.DISCARD_TOOL_FROM_OPPONENT, None,
+                   Target.OPP_ALL if board else Target.OPP_ACTIVE),
+            Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 99 if board else 1,
+                   Target.OPP_ALL if board else Target.OPP_ACTIVE,
+                   {"special": True})]
+
+
+@rule("discard_tools_from_opponent_pokemon",
+      r"discard up to (\d+) pok[eé]mon tools? from your opponent'?s pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_TOOL_FROM_ALL_OPPONENT, int(m.group(1)),
+                   Target.OPP_ALL)]
+
+
+@rule("recover_to_bench",
+      r"put up to (\d+) ([\w'’ -]*?) ?(?:pok[eé]mon )?from your discard pile"
+      r" onto your bench")
+def _r(m, text):
+    f = {}
+    what = (m.group(2) or "").strip()
+    if what and what.lower() not in ("basic", ""):
+        if re.fullmatch(TYPES, what, re.I):
+            f["type"] = what.capitalize()
+        else:
+            f["name_contains"] = what
+    return [Action(Op.RECOVER_TO_BENCH, int(m.group(1)), Target.YOUR_BENCHED, f)]
+
+
+@rule("search_combination_to_bench",
+      r"search your deck for up to (\d+) in any combination of ([\w'’ ]+?) and"
+      r" [\w'’ ]+? and put them onto your bench")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_BENCH, int(m.group(1)), Target.YOUR_BENCHED,
+                   {"name_contains": m.group(2).strip()})]
+
+
+@rule("ko_by_property",
+      r"if your opponent'?s active pok[eé]mon (?:has any special energy attached|"
+      r"is a basic pok[eé]mon), it is knocked out")
+def _r(m, text):
+    f = ({"requires_special_energy": True}
+         if "special energy" in text.lower() else {"stage": "Basic"})
+    return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE, f)]
+
+
+@rule("ko_both_actives", r"both active pok[eé]mon are knocked out")
+def _r(m, text):
+    return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE),
+            Action(Op.SELF_KO, 1, Target.SELF)]
+
+
+@rule("ko_lowest_hp",
+      r"choose a pok[eé]mon in play \(yours or your opponent'?s\) that has the"
+      r" least hp remaining, except for this pok[eé]mon, and it is knocked out")
+def _r(m, text):
+    return [Action(Op.KO_OUTRIGHT, 1, Target.BOTH_ALL, {"lowest_hp": True})]
+
+
+@rule("buff_named_attack_next_turn",
+      r"during your next turn, this pok[eé]mon'?s ([\w'’ -]+?) attack"
+      r"(?:'?s base damage is (\d+)| does (\d+) more damage)")
+def _r(m, text):
+    if m.group(2):
+        return [Action(Op.BUFF_NAMED_ATTACK_NEXT_TURN, int(m.group(2)),
+                       Target.SELF, {"attack": m.group(1).strip(),
+                                     "absolute": True})]
+    return [Action(Op.BUFF_NAMED_ATTACK_NEXT_TURN, int(m.group(3)),
+                   Target.SELF, {"attack": m.group(1).strip()})]
+
+
+@rule("defender_takes_more",
+      r"during your next turn, the defending pok[eé]mon takes (\d+) more damage"
+      r" from attacks")
+def _r(m, text):
+    return [Action(Op.DEFENDER_TAKES_MORE, int(m.group(1)), Target.OPP_ACTIVE)]
+
+
+@rule("set_base_damage_on_condition",
+      r"this attack'?s base damage is (\d+)")
+def _r(m, text):
+    return [Action(Op.SET_BASE_DAMAGE, int(m.group(1)), Target.SELF)]
+
+
+@rule("self_clear_conditions", r"this pok[eé]mon recovers from all special conditions")
+def _r(m, text):
+    return [Action(Op.CLEAR_CONDITIONS, None, Target.SELF)]
+
+
+@rule("opponent_hand_to_deck_random",
+      r"choose a random card from your opponent'?s hand[,.]? (?:and )?your"
+      r" opponent reveals that card and shuffles it into their deck")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_OPPONENT, 1, Target.OPPONENT,
+                   {"to": "deck"})]
+
+
+@rule("opponent_chooses_to_deck",
+      r"your opponent chooses (\d+) cards? from their hand and shuffles those"
+      r" cards into their deck")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_OPPONENT, int(m.group(1)), Target.OPPONENT,
+                   {"to": "deck"})]
+
+
+@rule("opponent_discards_n",
+      r"your opponent discards (\d+|a) cards? from their hand")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_OPPONENT, _num(m.group(1)), Target.OPPONENT)]
+
+
+@rule("trade_a_discard",
+      r"discard a card from your hand\. if you do, your opponent discards a"
+      r" card from their hand")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_SELF, 1, Target.SELF),
+            Action(Op.DISCARD_FROM_OPPONENT, 1, Target.OPPONENT)]
+
+
+@rule("may_discard_any_hand", r"you may discard any number of cards from your hand")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_SELF, 0, Target.SELF)]
+
+
+@rule("bench_splash",
+      r"this attack also does (\d+) damage to (each|\d+) benched pok[eé]mon"
+      r"(?: that has any damage counters on it)? \(both yours and your"
+      r" opponent'?s\)"
+      r"|this attack also does (\d+) damage to (\d+) of your benched pok[eé]mon")
+def _r(m, text):
+    t = text.lower()
+    if m.group(1):
+        amount, who = int(m.group(1)), m.group(2)
+        n = None if who == "each" else int(who)
+        f = {"side": "both"}
+        if "damage counters on it" in t:
+            f["damaged_only"] = True
+    else:
+        amount, n, f = int(m.group(3)), int(m.group(4)), {"side": "yours"}
+    return [Action(Op.BENCH_SPLASH, amount, Target.BOTH_ALL,
+                   dict(f, count=n))]
+
+
+@rule("defender_attack_may_fail",
+      r"during your opponent'?s next turn, if the defending pok[eé]mon tries to"
+      r" use an attack, your opponent flips (a coin|\d+ coins)")
+def _r(m, text):
+    odds = 0.5 if m.group(1) == "a coin" else 0.75   # "if either is tails"
+    return [Action(Op.LOCK, None, Target.OPP_ACTIVE,
+                   {"what": "attack", "chance_to_block": odds})]
+
+
+@rule("no_energy_attach_to_defender",
+      r"during your opponent'?s next turn, energy can'?t be attached from your"
+      r" opponent'?s hand to the defending pok[eé]mon"
+      r"|during your opponent'?s next turn, if they attach an energy card from"
+      r" their hand to the defending pok[eé]mon, their turn ends")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.OPP_ACTIVE, {"what": "attach_energy"})]
+
+
+@rule("delayed_discard_defender",
+      r"at the end of your opponent'?s next turn, discard the defending"
+      r" pok[eé]mon and all attached cards")
+def _r(m, text):
+    return [Action(Op.DELAYED_DISCARD_DEFENDER, 1, Target.OPP_ACTIVE)]
+
+
+@rule("extra_prize_on_ko",
+      r"during your next turn, if the defending pok[eé]mon is knocked out,"
+      r" take (\d+) more prize cards?")
+def _r(m, text):
+    return [Action(Op.EXTRA_PRIZE_ON_KO, int(m.group(1)), Target.OPP_ACTIVE)]
+
+
+@rule("self_takes_more",
+      r"during your opponent'?s next turn, this pok[eé]mon takes (\d+) more"
+      r" damage from attacks")
+def _r(m, text):
+    return [Action(Op.SELF_TAKES_MORE, int(m.group(1)), Target.SELF)]
+
+
+@rule("remove_own_weakness",
+      r"during your opponent'?s next turn, this pok[eé]mon has no weakness")
+def _r(m, text):
+    return [Action(Op.REMOVE_WEAKNESS, None, Target.SELF)]
+
+
+@rule("set_defender_weakness_colorless",
+      r"the defending pok[eé]mon'?s weakness is now colorless")
+def _r(m, text):
+    return [Action(Op.SET_WEAKNESS, None, Target.OPP_ACTIVE,
+                   {"to_type": "Colorless"})]
+
+
+@rule("move_all_energy_to_bench",
+      r"move all energy from this pok[eé]mon to (?:(\d+) of )?your benched"
+      r" pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.MOVE_ENERGY, 99, Target.YOUR_BENCHED,
+                   {"from": Target.SELF})]
+
+
+@rule("move_basic_energy_to_bench",
+      r"move a basic energy from this pok[eé]mon to (\d+) of your benched"
+      r" pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.MOVE_ENERGY, 1, Target.YOUR_BENCHED,
+                   {"from": Target.SELF})]
+
+
+@rule("attach_any_basic_from_hand",
+      r"(?:you|each player) may attach (?:any number of|up to \d+) basic energy"
+      r" cards? from (?:your|their) hand to (?:your|their) pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.ATTACH_ENERGY, 2, Target.YOUR_ANY, {"from": "hand"})]
+
+
+@rule("move_counters_bench_to_opponent",
+      r"move all damage counters from (\d+) of your benched ([\w'’ ]*?) ?"
+      r"pok[eé]mon to (?:your opponent'?s active pok[eé]mon|\d+ of your"
+      r" opponent'?s pok[eé]mon)")
+def _r(m, text):
+    f = {}
+    fam = (m.group(2) or "").strip()
+    if fam:
+        f["family"] = fam
+    return [Action(Op.MOVE_COUNTERS, 99, Target.OPP_ACTIVE,
+                   dict(f, **{"from": Target.YOUR_BENCHED}))]
+
+
+@rule("information_only",
+      r"look at the top (?:\d+ cards?|card) of your opponent'?s deck"
+      r"|look at \d+ of your opponent'?s face-down prize cards")
+def _r(m, text):
+    # Deliberately a no-op with a name: the engine has no hidden information
+    # for a player to act on, so there is nothing to model -- but leaving it
+    # UNSUPPORTED made these read as gaps in every audit.
+    return [Action(Op.NO_OP_INFORMATION, None, Target.SELF)]
+
+
+@rule("keep_n_of_opponent_bench",
+      r"choose (\d+) of your opponent'?s benched pok[eé]mon\. if you do,"
+      r" shuffle all of your opponent'?s benched pok[eé]mon that you didn'?t"
+      r" choose")
+def _r(m, text):
+    # Shiftry's Expelling Tornado keeps N and shuffles the REST away, which
+    # is the inverse of every other Bench-bounce in the pool.
+    return [Action(Op.OPP_BENCH_TO_DECK, None, Target.OPP_BENCHED,
+                   {"keep": int(m.group(1))})]
+
+
+@rule("free_cost_when_conditioned",
+      r"if this pok[eé]mon is affected by a special condition, ignore all"
+      r" energy in this attack'?s cost")
+def _r(m, text):
+    return [Action(Op.MODIFY_ATTACK_COST, -99, Target.SELF)]
+
+
+@rule("cost_becomes_type_when_damaged",
+      r"if this pok[eé]mon has any damage counters on it, this attack can be"
+      r" used for (" + TYPES + r")")
+def _r(m, text):
+    # "can be used for Fighting" means the printed cost is replaced by a
+    # single Energy of that type.
+    return [Action(Op.MODIFY_ATTACK_COST, -99, Target.SELF,
+                   {"cost_becomes": 1, "type": m.group(1).capitalize()})]
+
+
+@rule("opponent_attaches_from_their_discard",
+      r"attach up to (\d+) energy cards? from your opponent'?s discard pile to"
+      r" their pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.OPP_ATTACH_FROM_DISCARD, int(m.group(1)), Target.OPP_ANY)]
+
+
+@rule("damaged_last_turn_reflects_damage",
+      r"if this pok[eé]mon was damaged by an attack during your opponent'?s"
+      r" last turn, this attack does that much more damage")
+def _r(m, text):
+    # The bonus is the damage this Pokemon took, so there is no number in
+    # the text for the flat-bonus path to read. attack_damage resolves it.
+    return [Action(Op.NO_OP_INFORMATION, None, Target.SELF,
+                   {"handled_by": "damage_model"})]
+
+
+@rule("retaliate_counters",
+      r"during your opponent'?s next turn, if this pok[eé]mon is damaged by an"
+      r" attack[\s\S]{0,40}?, put (?:(\d+) damage counters?|damage counters)"
+      r" on the attacking pok[eé]mon"
+      r"(?: equal to the damage done to this pok[eé]mon)?")
+def _r(m, text):
+    # "equal to the damage done to this Pokemon" has no number of its own;
+    # -1 is the sentinel for "however much it took", resolved on the board.
+    return [Action(Op.RETALIATE_COUNTERS,
+                   int(m.group(1)) if m.group(1) else -1, Target.SELF)]
+
+
+# ---- Trainers: the last of the tail --------------------------------------
+
+@rule("berry_type_damage_reduction",
+      r"if the pok[eé]mon this card is attached to is damaged by an attack from"
+      r" your opponent'?s (" + TYPES + r") pok[eé]mon, it takes (\d+) less damage")
+def _r(m, text):
+    return [Action(Op.REDUCE_DAMAGE, int(m.group(2)), Target.SELF,
+                   {"attacker_type": m.group(1).capitalize()})]
+
+
+@rule("discard_tools_any_side",
+      r"choose up to (\d+) pok[eé]mon tools? attached to pok[eé]mon \(yours or"
+      r" your opponent'?s\) and discard them")
+def _r(m, text):
+    return [Action(Op.DISCARD_TOOL_ANY, int(m.group(1)), Target.BOTH_ALL)]
+
+
+@rule("discard_tool_and_special_energy_one",
+      r"discard a pok[eé]mon tool and a special energy from 1 of your"
+      r" opponent'?s pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_TOOL_FROM_ALL_OPPONENT, 1, Target.OPP_ALL),
+            Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ANY,
+                   {"special": True})]
+
+
+@rule("discard_special_energy_one_opponent",
+      r"discard a special energy from 1 of your opponent'?s pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ANY,
+                   {"special": True})]
+
+
+@rule("discard_energy_one_opponent",
+      r"discard an energy from 1 of your opponent'?s pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ANY)]
+
+
+@rule("scoop_up_own_pokemon",
+      r"put 1 of your pok[eé]mon and all attached cards into your hand")
+def _r(m, text):
+    return [Action(Op.SELF_TO_HAND, 1, Target.YOUR_ANY)]
+
+
+@rule("stadium_tools_have_no_effect",
+      r"pok[eé]mon tools attached to each pok[eé]mon \(both yours and your"
+      r" opponent'?s\) have no effect")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.BOTH_ALL, {"what": "tools"})]
+
+
+@rule("stadium_stage2_hp_penalty",
+      r"each stage (\d+) pok[eé]mon in play \(both yours and your opponent'?s\)"
+      r" gets ([+-]\d+) hp")
+def _r(m, text):
+    return [Action(Op.MODIFY_HP, int(m.group(2)), Target.BOTH_ALL,
+                   {"stage": f"Stage {m.group(1)}"})]
+
+
+@rule("stadium_extra_poison",
+      r"during pok[eé]mon checkup, put (\d+) more damage counters? on each"
+      r" poisoned non-(" + TYPES + r") pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.BUFF_CONDITION_DAMAGE, int(m.group(1)) * 10,
+                   Target.BOTH_ALL, {"condition": "poisoned",
+                                     "type_not": m.group(2).capitalize()})]
+
+
+@rule("stadium_tera_cost_more",
+      r"attacks used by each ([\w]+) pok[eé]mon in play \(both yours and your"
+      r" opponent'?s\) cost colorless more")
+def _r(m, text):
+    return [Action(Op.MODIFY_ATTACK_COST, 1, Target.BOTH_ALL,
+                   {"requires_subtype": m.group(1).capitalize()})]
+
+
+@rule("search_named_tools_to_hand",
+      r"search your deck for up to (\d+) pok[eé]mon tool cards? that have"
+      r" [\"“']([^\"”']+)[\"”'] in their name, reveal them, and put them into"
+      r" your hand")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_HAND, int(m.group(1)), Target.SELF,
+                   {"kind": "tool", "name_contains": m.group(2)})]
+
+
+@rule("look_at_bottom_for_pokemon",
+      r"look at the bottom (\d+) cards of your deck\. you may reveal a"
+      r" pok[eé]mon you find there and put it into your hand")
+def _r(m, text):
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "pokémon"})]
+
+
+@rule("discard_hand_then_search_three",
+      r"discard your hand and search your deck for a pok[eé]mon, a supporter"
+      r" card, and a basic energy card")
+def _r(m, text):
+    return [Action(Op.DISCARD_FROM_SELF, 99, Target.SELF),
+            Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "pokémon"}),
+            Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "supporter"}),
+            Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "energy"})]
+
+
+@rule("move_energy_bench_to_active",
+      r"move up to (\d+) energy from your benched pok[eé]mon to your active"
+      r" pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.MOVE_ENERGY, int(m.group(1)), Target.YOUR_ACTIVE,
+                   {"from": Target.YOUR_BENCHED})]
+
+
+@rule("opponent_hand_to_bottom_redraw",
+      r"your opponent counts the cards in their hand, shuffles those cards, and"
+      r" puts them on the bottom of their deck")
+def _r(m, text):
+    return [Action(Op.SET_OPPONENT_HAND, None, Target.OPPONENT,
+                   {"redraw_same": True})]
+
+
+@rule("tool_grants_its_own_attack",
+      r"the [\w'’ ]+ this card is attached to can use the attack on this card")
+def _r(m, text):
+    return [Action(Op.GRANT_ATTACK_ACCESS, None, Target.SELF,
+                   {"from_tool": True})]
+
+
+@rule("tera_attack_costs_less",
+      r"when the tera pok[eé]mon this card is attached to uses an attack, that"
+      r" attack costs (\d+) energy less")
+def _r(m, text):
+    return [Action(Op.MODIFY_ATTACK_COST, -int(m.group(1)), Target.SELF,
+                   {"type": "Colorless"})]
+
+
+@rule("setup_or_deckbuilding_rule",
+      r"put this pok[eé]mon into play only with the effect of"
+      r"|if this pok[eé]mon is in your hand when you are setting up to play"
+      r"|this pok[eé]mon can evolve into any pok[eé]mon ex that evolves from")
+def _r(m, text):
+    # Deckbuilding and setup-phase rules. There is no turn on which these
+    # "happen", so they are modelled as nothing ON PURPOSE rather than
+    # falling out of the audit as unhandled gaps. Zero to Hero, which is the
+    # half of Palafin that DOES happen during a turn, compiles separately.
+    return [Action(Op.NO_OP_SETUP_RULE, None, Target.SELF)]
+
+
+@rule("zero_to_hero",
+      r"when this pok[eé]mon moves from the active spot to the bench, you may"
+      r" search your deck for an? ([\w'’ ]+?) and switch it with this pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.SWAP_IN_PLACE, 1, Target.SELF,
+                   {"name_contains": m.group(1).strip(), "from": "deck"})]
+
+
+@rule("heavy_baton",
+      r"if the pok[eé]mon this card is attached to has a retreat cost of exactly"
+      r" (\d+)[\s\S]{0,90}?is knocked out by damage from an attack")
+def _r(m, text):
+    # The payoff is always "move its Energy to a Benched Pokemon".
+    return [Action(Op.MOVE_ENERGY, 99, Target.YOUR_BENCHED,
+                   {"from": Target.SELF, "on_ko": True})]
+
+
+@rule("first_turn_energy_bounce",
+      r"put an energy attached to 1 of your opponent'?s pok[eé]mon into their"
+      r" hand")
+def _r(m, text):
+    return [Action(Op.OPP_ENERGY_TO_HAND, 1, Target.OPP_ANY)]
+
+
+@rule("stadium_type_evolve_early",
+      r"each player'?s (" + TYPES + r") pok[eé]mon can evolve into \1 pok[eé]mon"
+      r" during the turn they play those pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.EVOLVE_EARLY, None, Target.BOTH_ALL,
+                   {"type": m.group(1).capitalize()})]
+
+
+@rule("devolve_own",
+      r"devolve (\d+) of your evolved (" + TYPES + r")? ?pok[eé]mon by putting"
+      r" any number of evolution cards on it into your hand")
+def _r(m, text):
+    f = {"to": "hand", "own": True}
+    if m.group(2):
+        f["type"] = m.group(2).capitalize()
+    return [Action(Op.DEVOLVE, int(m.group(1)), Target.YOUR_ANY, f)]
+
+
+@rule("stadium_confusion_sticks",
+      r"confused pok[eé]mon \(both yours and your opponent'?s\) don'?t recover"
+      r" from that special condition when they evolve or devolve")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.BOTH_ALL,
+                   {"what": "clear_confusion_on_evolve"})]
+
+
+@rule("named_team_required",
+      r"you can use this card only if you have ([\w'’ ,]+?(?:, and [\w'’ ]+?)?)"
+      r" in play")
+def _r(m, text):
+    # The requirement is the card; whatever it then does is compiled by the
+    # other rules matching the rest of the text.
+    return [Action(Op.NO_OP_SETUP_RULE, None, Target.SELF,
+                   {"requires": m.group(1)})]
+
+
+@rule("reveal_prize_and_hand",
+      r"turn (\d+) of your opponent'?s face-down prize cards? face up and choose"
+      r" a random card from your opponent'?s hand")
+def _r(m, text):
+    return [Action(Op.NO_OP_INFORMATION, None, Target.SELF),
+            Action(Op.DISCARD_FROM_OPPONENT, 1, Target.OPPONENT, {"to": "deck"})]
+
+
+@rule("reflip_coins",
+      r"after you flip any coins for an attack[\s\S]{0,80}?you may ignore all"
+      r" results of those coin flips")
+def _r(m, text):
+    # Backtrack Badge re-rolls a coin-flip attack. Modelled as a second
+    # chance at the same odds, which is what "flip them again" amounts to.
+    return [Action(Op.NO_OP_INFORMATION, None, Target.SELF,
+                   {"handled_by": "damage_model"})]
 
 
 @rule("discard_to_bench",

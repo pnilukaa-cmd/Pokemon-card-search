@@ -137,6 +137,71 @@ def query_weakness_override(attacker_player, defender_player, defender_spot):
             return to
     return None
 
+def query_energy_bonus(pl, spot, typ):
+    """Extra Energy a single attached card of `typ` provides.
+
+    Meganium's Wild Growth: "each Grass Energy attached to your Pokemon
+    provides 1 extra Grass Energy". The op compiled and nothing asked.
+    """
+    extra = 0
+    for holder, eff, act in _passive_actions(pl, IR.Op.ENERGY_PROVIDES_EXTRA):
+        if not conditions_met(eff, pl, pl, holder):
+            continue
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if (act.filter or {}).get("type") not in (None, typ):
+            continue
+        extra += act.amount or 1
+    return extra
+
+
+def query_extra_tool_slots(pl, spot):
+    """How many MORE Tools than the usual one this Pokemon may hold."""
+    n = 0
+    for holder, eff, act in _passive_actions(pl, IR.Op.EXTRA_TOOLS):
+        if not conditions_met(eff, pl, pl, holder):
+            continue
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        n = max(n, (act.amount or 1) - 1)
+    return n
+
+
+def query_can_attack_first_turn(pl):
+    """Meloetta ex's Debut Performance lets it attack on turn one."""
+    for holder, eff, act in _passive_actions(pl, IR.Op.ATTACK_FIRST_TURN):
+        if conditions_met(eff, pl, pl, holder):
+            return True
+    return False
+
+
+def query_returns_to_hand_on_ko(pl, spot):
+    """Gengar's Infinite Shadow goes back to hand instead of the discard."""
+    for holder, eff, act in _passive_actions(pl, IR.Op.RETURN_TO_HAND_ON_KO):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if conditions_met(eff, pl, pl, holder):
+            return True
+    return False
+
+
+def query_counters_locked(pl, opp=None):
+    """Patrat's Watchful Eye stops damage counters being MOVED at all."""
+    for side in (pl, opp) if opp is not None else (pl,):
+        for holder, eff, act in _passive_actions(side, IR.Op.LOCK_COUNTER_MOVEMENT):
+            if conditions_met(eff, side, opp or side, holder):
+                return True
+    return False
+
+
+def query_tool_from_deck(pl, spot):
+    """Farfetch'd's Impromptu Carrier attaches a Tool straight off the deck."""
+    for holder, eff, act in _passive_actions(pl, IR.Op.ATTACH_TOOL):
+        if conditions_met(eff, pl, pl, holder):
+            return True
+    return False
+
+
 def query_condition_immunity(pl, spot, condition, opp=None):
     """Is this Pokemon immune to being given this Special Condition?
 
@@ -317,6 +382,15 @@ def conditions_met(effect, pl, opp, source, atk=None):
             played = getattr(pl, "played_supporters_this_turn", set())
             if not any(c["name"].lower() in n.lower() for n in played):
                 return False
+        if k == "own_hand_size" and len(pl.hand) != c["count"]:
+            return False
+        if k == "hand_size_matches_opponent" and len(pl.hand) != len(opp.hand):
+            return False
+        if k == "opponent_prizes_exactly":
+            if getattr(opp, "prizes", None) not in c["counts"]:
+                return False
+        if k == "own_bench_more_than" and len(pl.bench) <= c["count"]:
+            return False
         if k == "opponent_active_has_damage":
             if not opp.active or opp.active.damage <= 0:
                 return False
@@ -608,6 +682,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return False
 
     if op == O.MOVE_COUNTERS:
+        if query_counters_locked(pl, opp):
+            log.append("    counter movement is locked")
+            return False
         src = act.filter.get("from")
         if src in (IR.Target.OPP_BENCHED, IR.Target.OPP_ANY, IR.Target.OPP_ALL):
             pool = opp.bench if src == IR.Target.OPP_BENCHED else opp.in_play()
@@ -876,13 +953,27 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # in 30 games and resolved zero.
         if act.target in (IR.Target.OPP_ANY, IR.Target.OPP_ALL):
             hits = sorted(hits, key=lambda h: -len(getattr(h, "energy", [])))
+        # "Discard a/all SPECIAL Energy" only takes the Special ones, and
+        # reaches the whole board when the card says all of them.
+        special = (act.filter or {}).get("special")
+        board = special and act.target == IR.Target.OPP_ALL
         n = 0
-        for h in hits[:1]:
+        for h in (hits if board else hits[:1]):
             for _ in range(act.amount or 1):
+                names = getattr(h, "energy_names", None) or []
+                if special:
+                    i = next((j for j, nm in enumerate(names)
+                              if _is_special_energy(nm)), None)
+                    if i is None:
+                        break
+                    h.energy.pop(i)
+                    opp.discard.append(names.pop(i))
+                    n += 1
+                    continue
                 if h.energy:
                     h.energy.pop()
-                    if getattr(h, "energy_names", None):
-                        opp.discard.append(h.energy_names.pop())
+                    if names:
+                        opp.discard.append(names.pop())
                     n += 1
         if n:
             log.append(f"    discard {n} Energy from opponent")
@@ -1018,6 +1109,280 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         source.damage -= healed
         log.append(f"    heals {healed} from {source.name}")
         return True
+
+    def _strip(owner, spot, where):
+        """Take a Pokemon off the board, attachments and all.
+
+        The three destination zones do NOT hold the same shape: hand and
+        deck hold (kind, name) tuples, the discard pile holds bare names.
+        Appending a string to the deck crashed 115 of 528 smoke-test games
+        with "too many values to unpack".
+        """
+        tupled = where is not owner.discard
+
+        def put(kind, name):
+            where.append((kind, name) if tupled else name)
+
+        for nm in list(getattr(spot, "energy_names", None) or []):
+            put("Energy", nm)
+        if getattr(spot, "tool", None):
+            put("Tool", spot.tool)
+        put("Pokemon", spot.name)
+        if spot is owner.active:
+            owner.active = None
+        elif spot in owner.bench:
+            owner.bench.remove(spot)
+
+    if op in (O.SELF_TO_HAND, O.SELF_TO_DECK, O.SELF_DISCARD):
+        # "Put this Pokemon and all attached cards into your hand" resets
+        # damage, Special Conditions and turns in play -- it is the cheapest
+        # heal in the format and it was doing nothing.
+        spots = ([source] if act.target == IR.Target.SELF
+                 else list(pl.bench)[:act.amount or 1])
+        spots = [x for x in spots if x is not None]
+        if not spots:
+            return False
+        if act.target == IR.Target.SELF and source is pl.active and not pl.bench:
+            return False          # nothing left to promote into
+        for spot in spots:
+            if op == O.SELF_TO_HAND:
+                _strip(pl, spot, pl.hand)
+            elif op == O.SELF_TO_DECK:
+                _strip(pl, spot, pl.deck)
+                random.shuffle(pl.deck)
+            else:
+                _strip(pl, spot, pl.discard)
+        if pl.active is None and pl.bench:
+            pl.active = pl.bench.pop(0)
+        log.append(f"    recalls {len(spots)} Pokemon")
+        return True
+
+    if op == O.BENCH_TO_HAND:
+        spots = list(pl.bench)[:act.amount or 1]
+        if not spots:
+            return False
+        for spot in spots:
+            _strip(pl, spot, pl.hand)
+        log.append(f"    {len(spots)} Benched Pokemon back to hand")
+        return True
+
+    if op == O.OPP_BENCH_TO_DECK:
+        ranked = sorted(opp.bench,
+                        key=lambda p: (opp.POKEMON.get(p.name) or {}).get("hp", 0),
+                        reverse=True)
+        keep = (act.filter or {}).get("keep")
+        # Shiftry's Expelling Tornado keeps N and shuffles the REST away.
+        spots = ranked[keep:] if keep is not None else ranked[:act.amount or 1]
+        if not spots:
+            return False
+        for spot in spots:
+            _strip(opp, spot, opp.deck)
+        random.shuffle(opp.deck)
+        log.append(f"    {len(spots)} of the opponent's Bench shuffled away")
+        return True
+
+    if op == O.OPP_ENERGY_TO_HAND:
+        if not opp.active or not opp.active.energy:
+            return False
+        n = min(act.amount or 1, len(opp.active.energy))
+        for _ in range(n):
+            opp.active.energy.pop()
+            nm = (opp.active.energy_names.pop()
+                  if getattr(opp.active, "energy_names", None) else "Energy")
+            opp.hand.append(("Energy", nm))
+        log.append(f"    {n} Energy off {opp.active.name} back to their hand")
+        return True
+
+    if op == O.DISCARD_TOOL_FROM_ALL_OPPONENT:
+        hit = 0
+        for spot in opp.in_play():
+            if getattr(spot, "tool", None):
+                opp.discard.append(spot.tool)
+                spot.tool = None
+                hit += 1
+                if act.amount and hit >= act.amount:
+                    break
+        if hit:
+            log.append(f"    discard {hit} Tool(s) from the opponent")
+        return hit > 0
+
+    if op == O.RECOVER_TO_BENCH:
+        f = act.filter or {}
+        placed = []
+        for _ in range(act.amount or 1):
+            if len(pl.bench) >= 5:
+                break
+            nm = next((n for n in pl.discard
+                       if n in pl.POKEMON
+                       and (pl.POKEMON[n].get("stage") == "Basic")
+                       and (not f.get("type")
+                            or f["type"] in (pl.POKEMON[n].get("types") or []))
+                       and (not f.get("name_contains")
+                            or f["name_contains"].lower() in n.lower())), None)
+            if not nm:
+                break
+            pl.discard.remove(nm)
+            if make_inplay:
+                pl.bench.append(make_inplay(nm))
+            placed.append(nm)
+        if placed:
+            log.append(f"    recover {', '.join(placed)} to the Bench")
+        return bool(placed)
+
+    if op == O.KO_OUTRIGHT:
+        f = act.filter or {}
+        victim = None
+        if f.get("lowest_hp"):
+            pool = [(pl, p) for p in pl.in_play() if p is not source] + \
+                   [(opp, p) for p in opp.in_play()]
+            if pool:
+                owner, victim = min(
+                    pool, key=lambda x: (x[0].POKEMON.get(x[1].name) or {})
+                    .get("hp", 0) - x[1].damage)
+        elif opp.active is not None:
+            info = opp.POKEMON.get(opp.active.name) or {}
+            ok_ = True
+            if f.get("stage") and info.get("stage") != f["stage"]:
+                ok_ = False
+            if f.get("requires_special_energy"):
+                names = getattr(opp.active, "energy_names", None) or []
+                ok_ = ok_ and any(_is_special_energy(n) for n in names)
+            if ok_:
+                victim = opp.active
+        if victim is None:
+            return False
+        victim.damage = 10 ** 6       # the match loop resolves the Knock Out
+        log.append(f"    {victim.name} is Knocked Out outright")
+        return True
+
+    if op == O.SELF_KO:
+        if source is None:
+            return False
+        source.damage = 10 ** 6
+        log.append(f"    {source.name} is Knocked Out too")
+        return True
+
+    if op == O.BUFF_NAMED_ATTACK_NEXT_TURN:
+        if source is None:
+            return False
+        source.next_turn_attack_buff = (
+            (act.filter or {}).get("attack"), act.amount or 0,
+            bool((act.filter or {}).get("absolute")))
+        log.append(f"    {source.name}'s next {(act.filter or {}).get('attack')} "
+                   f"is boosted")
+        return True
+
+    if op == O.DEFENDER_TAKES_MORE:
+        if not opp.active:
+            return False
+        opp.active.takes_more = (getattr(opp.active, "takes_more", 0)
+                                 + (act.amount or 0))
+        log.append(f"    {opp.active.name} takes {opp.active.takes_more} more")
+        return True
+
+    if op == O.SET_BASE_DAMAGE:
+        return False      # resolved inside attack_damage, not here
+
+    if op == O.BENCH_SPLASH:
+        f = act.filter or {}
+        n = act.amount or 0
+        pool = list(pl.bench) + (list(opp.bench) if f.get("side") == "both" else [])
+        if f.get("damaged_only"):
+            pool = [p for p in pool if p.damage > 0]
+        if f.get("count"):
+            pool = sorted(pool, key=lambda p: -p.damage)[:f["count"]]
+        if not pool:
+            return False
+        for spot in pool:
+            spot.prev_damage = spot.damage
+            spot.damage += n
+        log.append(f"    {n} to {len(pool)} Benched Pokemon")
+        return True
+
+    if op == O.SELF_TAKES_MORE:
+        if source is None:
+            return False
+        source.takes_more = getattr(source, "takes_more", 0) + (act.amount or 0)
+        return True
+
+    if op == O.DELAYED_DISCARD_DEFENDER:
+        if not opp.active:
+            return False
+        opp.active.delayed_discard = True
+        log.append(f"    {opp.active.name} is discarded at the end of their turn")
+        return True
+
+    if op == O.EXTRA_PRIZE_ON_KO:
+        if not opp.active:
+            return False
+        opp.active.extra_prize = (getattr(opp.active, "extra_prize", 0)
+                                  + (act.amount or 0))
+        return True
+
+    if op == O.REMOVE_WEAKNESS:
+        if source is None:
+            return False
+        source.no_weakness = True
+        return True
+
+    if op == O.RETALIATE_COUNTERS:
+        if source is None:
+            return False
+        source.retaliate_counters = (getattr(source, "retaliate_counters", 0)
+                                     + (act.amount or 0))
+        return True
+
+    if op == O.OPP_ATTACH_FROM_DISCARD:
+        # Grafaiai's Mischievous Painting hands the OPPONENT Energy off
+        # their own discard -- a real cost paid for a big number, and it was
+        # free.
+        moved = 0
+        for _ in range(act.amount or 1):
+            nm = next((n for n in opp.discard if n.endswith("Energy")), None)
+            tgt = opp.active or (opp.bench[0] if opp.bench else None)
+            if not nm or tgt is None:
+                break
+            opp.discard.remove(nm)
+            tgt.energy.append(["Colorless"])
+            if getattr(tgt, "energy_names", None) is not None:
+                tgt.energy_names.append(nm)
+            moved += 1
+        if moved:
+            log.append(f"    opponent gets {moved} Energy back")
+        return moved > 0
+
+    if op == O.DISCARD_TOOL_ANY:
+        # Tool Scrapper reaches EITHER side. Take the opponent's first --
+        # discarding your own Tool is only right when theirs is already gone.
+        hit = 0
+        for owner in (opp, pl):
+            for spot in owner.in_play():
+                if hit >= (act.amount or 1):
+                    break
+                if getattr(spot, "tool", None):
+                    owner.discard.append(spot.tool)
+                    spot.tool = None
+                    hit += 1
+            if hit >= (act.amount or 1):
+                break
+        if hit:
+            log.append(f"    scrap {hit} Tool(s)")
+        return hit > 0
+
+    if op == O.NO_OP_SETUP_RULE:
+        # Deckbuilding and setup-phase rules -- "put this Pokemon into play
+        # only with the effect of X", "you may put it face down in the Active
+        # Spot when setting up". There is no turn on which these happen, so
+        # they are modelled as nothing DELIBERATELY. Named rather than left
+        # uncompiled so they stop reading as gaps in the coverage audit.
+        return False
+
+    if op == O.NO_OP_INFORMATION:
+        # Named on purpose. There is no hidden information in this engine for
+        # a player to act on, so "look at the top 3 cards of your opponent's
+        # deck" genuinely changes nothing -- but it is MODELLED as nothing
+        # rather than falling out of the audit as an unhandled gap.
+        return False
 
     if op == O.DISCARD_TO_DECK:
         f = act.filter or {}
