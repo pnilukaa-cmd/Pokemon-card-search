@@ -1,13 +1,15 @@
 # Mega Kangaskhan ex / Tyrantrum — flip-until-tails
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **51.7% mean · 50.5% median · 22 of 43 winning matchups · rank 23 of 44**
+> ### Field results — 2026-09-15
+> **50.6% mean · 50.0% median · 21 of 43 winning matchups · rank 25 of 44**
 >
-> Best `meta_ns_zoroark` 92% · worst `panic_poison_paralysis` 26%.
+> Best `meta_ns_zoroark` 90% · worst `team_rockets_persian_ex_attack_theft` 26%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

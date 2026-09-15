@@ -1,13 +1,15 @@
 # Mega Heracross ex / Sinistcha — Spill the Tea
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **53.3% mean · 50.5% median · 23 of 43 winning matchups · rank 18 of 44**
+> ### Field results — 2026-09-15
+> **60.2% mean · 60.0% median · 33 of 43 winning matchups · rank 8 of 44**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 90% · worst `scovillain_salazzle_spicy_rage` 27%.
+> Best `meta_ns_zoroark` 92% · worst `scovillain_salazzle_spicy_rage` 27%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

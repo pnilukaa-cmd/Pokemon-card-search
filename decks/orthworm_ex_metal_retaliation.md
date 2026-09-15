@@ -1,13 +1,15 @@
 # Orthworm ex Metal Retaliation
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **53.1% mean · 50.0% median · 21 of 43 winning matchups · rank 20 of 44**
+> ### Field results — 2026-09-15
+> **52.2% mean · 50.0% median · 19 of 43 winning matchups · rank 21 of 44**
 >
-> Best `meta_festival_lead` 90% · worst `scovillain_salazzle_spicy_rage` 20%.
+> Best `meta_festival_lead` 90% · worst `scovillain_salazzle_spicy_rage` 12%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

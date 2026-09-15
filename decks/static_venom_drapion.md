@@ -1,13 +1,15 @@
 # Static Venom (Skorupi / Drapion)
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **30.4% mean · 28.0% median · 4 of 43 winning matchups · rank 41 of 44**
+> ### Field results — 2026-09-15
+> **29.3% mean · 25.5% median · 5 of 43 winning matchups · rank 41 of 44**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 66% · worst `panic_poison_paralysis` 9%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 65% · worst `panic_poison_paralysis` 9%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

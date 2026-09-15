@@ -1,13 +1,15 @@
 # Krookodile ex / Relicanth Hand Disruption
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **59.0% mean · 59.0% median · 34 of 43 winning matchups · rank 9 of 44**
+> ### Field results — 2026-09-15
+> **63.7% mean · 63.0% median · 37 of 43 winning matchups · rank 5 of 44**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 92% · worst `lurantis_heal_punish` 24%.
+> Best `meta_ns_zoroark` 92% · worst `lurantis_heal_punish` 28%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

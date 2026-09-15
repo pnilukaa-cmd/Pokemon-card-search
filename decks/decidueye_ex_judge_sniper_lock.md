@@ -1,13 +1,15 @@
 # Decidueye ex / Vivillon — "exactly 4" cost lock
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **48.2% mean · 44.5% median · 15 of 43 winning matchups · rank 30 of 44**
+> ### Field results — 2026-09-15
+> **48.0% mean · 44.5% median · 16 of 43 winning matchups · rank 31 of 44**
 >
 > Best `feraligatr_munkidori_damage_transfer` 94% · worst `panic_poison_paralysis` 16%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 

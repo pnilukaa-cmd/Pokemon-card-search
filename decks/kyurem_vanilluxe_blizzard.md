@@ -1,13 +1,15 @@
 # Kyurem ex / N's Vanilluxe — Blizzard
 
 <!-- field-results -->
-> ### Field results — 2026-09-13
-> **56.9% mean · 56.0% median · 29 of 43 winning matchups · rank 12 of 44**
+> ### Field results — 2026-09-15
+> **56.8% mean · 56.0% median · 27 of 43 winning matchups · rank 13 of 44**
 >
-> Best `meta_ns_zoroark` 90% · worst `panic_poison_paralysis` 28%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 89% · worst `team_rockets_persian_ex_attack_theft` 29%.
 >
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
 <!-- field-results -->
+
+
 
 
 
