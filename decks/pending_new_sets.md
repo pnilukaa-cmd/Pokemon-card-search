@@ -1,7 +1,8 @@
-# Pending — nine lists awaiting the 30th Celebration data
+# Pending — ten lists awaiting the 30th Celebration data
 
-**Not my lists.** Supplied by the user from a pastebin dated 2026-09-14,
-held here until the card data exists. No fenced decklist per deck on
+**Not my lists.** Nine supplied by the user from a pastebin dated
+2026-09-14, plus a tenth supplied 2026-09-16 (see the last section).
+Held here until the card data exists. No fenced decklist per deck on
 purpose: several do not resolve, and `check_decks.py` would be right to
 reject them.
 
@@ -40,6 +41,7 @@ and Basic Energy carries **no set code** in this repo. Rewrite
 | `greninja` | 59/60 | `Greninja ex` **M6a 15** |
 | `mew_mega` | 58/60 | `Mew ex` **M6a 57** |
 | `exeggutor` | 57/60 | `Alolan Exeggutor` **MP 148** |
+| `ogerpon_exeggutor` | 57/60 | `Alolan Exeggutor` **30C 2** |
 | `sylveon` | 60/60 | — none |
 | `gengar` | 57/60 | `Gengar ex` **M6a 76** |
 | `salamence` | 58/60 | `Salamence ex` **M6a 88** |
@@ -379,4 +381,67 @@ Energy: 9
 4 Fire Energy MEE 2
 3 Water Energy MEE 3
 2 Psychic Energy MEE 5
+```
+
+## A tenth list, supplied 2026-09-16 — `ogerpon_exeggutor`
+
+Same archetype as `exeggutor` above, but a **different build**, and it
+names the blocked card under a **different printing**:
+`Alolan Exeggutor 30C 2` here versus `Alolan Exeggutor MP 148` in the
+pastebin list. Neither set code is in the pool, so both lists are blocked
+on the same card for the same reason; when 30C lands, `30C 2` is the one
+that should resolve directly.
+
+Resolution as supplied: **57/60**, unresolved `Alolan Exeggutor` only.
+Legality check: clean.
+
+Two things were normalised before checking, and are normalised in the
+transcription below:
+
+- `12 Basic {G} Energy MEE 1` → `12 Basic Grass Energy`. `MEE` is the 30th
+  Celebration foil Basic Energy subset; Basic Energy carries no set code
+  in this repo. Same rewrite as every other list in this file.
+- `Bug Catching Set TWM 143` arrived split across two lines, `3` and `1`.
+  Merged to `4`. The split is legal in PTCGL's exporter but
+  `check_decks.py` counts lines, not cards.
+
+The header counts are line counts, not card counts — `Pokémon: 9` is 9
+lines / 18 cards, `Trainer: 14` is 14 lines / 30 cards, `Energy: 1` is 1
+line / 12 cards. 18 + 30 + 12 = 60, so the deck itself is legal; only the
+headers are wrong. Rewritten below with true card counts.
+
+Deck differences worth noting against the pastebin `exeggutor`: this one
+runs `Dawn PFL 87` and `Ciphermaniac's Codebreaking TEF 145` over
+`Gwynn PBL 78` / `Lana's Aid TWM 155` / `Jumbo Ice Cream PFL 91`, trades a
+`Chikorita MEG 8` for `Chikorita ASC 8`, adds `Meowth ex POR 62`,
+`Special Red Card CRI 82` and `Air Balloon ASC 181`, and goes to 12 Energy
+from 11.
+
+```text
+Pokémon: 18
+4 Teal Mask Ogerpon ex TWM 25
+2 Meganium MEG 10
+3 Alolan Exeggutor 30C 2
+2 Exeggcute SSP 1
+2 Chikorita ASC 8
+2 Bayleef MEG 9
+1 Fezandipiti ex ASC 142
+1 Exeggcute MEG 4
+1 Meowth ex POR 62
+Trainer: 30
+4 Bug Catching Set TWM 143
+2 Dawn PFL 87
+3 Poké Pad POR 81
+1 Hero's Cape TEF 152
+3 Ultra Ball ASC 213
+1 Special Red Card CRI 82
+1 Night Stretcher ASC 196
+4 Lillie's Determination ASC 192
+3 Forest of Vitality ASC 188
+1 Ciphermaniac's Codebreaking TEF 145
+2 Boss's Orders ASC 183
+1 Air Balloon ASC 181
+4 Energy Switch MEG 115
+Energy: 12
+12 Basic Grass Energy
 ```
