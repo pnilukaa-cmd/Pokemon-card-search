@@ -223,13 +223,18 @@ class Player:
         # ai_selfplay.py can put one pilot against another with the deck
         # held fixed.
         #
-        # NOTHING READS THIS RIGHT NOW. Five pilot variations were measured
-        # on that harness and four were rejected outright; the one that was
-        # kept (prize-aware gust targeting) turned out to be provably safe
-        # to apply unconditionally, so it needed no gate. The hook is left
-        # in place because the next pilot idea needs it on day one, and
-        # because a measurement harness with no way to vary the thing it
-        # measures is worse than useless.
+        # Read at eleven decision points via POL.knob -- attack valuation,
+        # overkill, Prize liability, rider and setup weighting, retreat,
+        # self-lock, Energy attachment, hand-cost pitching and promotion.
+        # policies.py names the pilots; GREEDY reproduces the engine's
+        # historical behaviour exactly, so a greedy-vs-greedy run reading
+        # anything other than +0.00 means the plumbing is broken rather
+        # than the pilot being interesting.
+        #
+        # What is NOT here, and what the next pilot will want: the turn
+        # number. run_game keeps turn_no as a local, so no knob can vary
+        # with the phase of the game -- `setup` is "always setup" rather
+        # than "setup until the board is built".
         self.policy = DEFAULT_POLICY
         # Re-entry guard for Festival Lead's second attack.
         self._attacking_twice = False
