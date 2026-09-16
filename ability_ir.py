@@ -174,6 +174,8 @@ class Op:
     # Rules about deckbuilding or the setup phase, which happen before
     # a game state exists. Modelled as nothing ON PURPOSE.
     NO_OP_SETUP_RULE = "no_op_setup_rule"
+    # Grand Tree: evolve straight out of the deck, Stage 1 then Stage 2.
+    EVOLVE_FROM_DECK = "evolve_from_deck"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -2286,6 +2288,17 @@ def _r(m, text):
     # chance at the same odds, which is what "flip them again" amounts to.
     return [Action(Op.NO_OP_INFORMATION, None, Target.SELF,
                    {"handled_by": "damage_model"})]
+
+
+@rule("evolve_from_deck",
+      r"search your deck for a stage 1 pok[eé]mon that evolves from 1 of your"
+      r" basic pok[eé]mon and put it onto that pok[eé]mon to evolve it")
+def _r(m, text):
+    # Grand Tree. The second sentence chains a Stage 2 onto whatever was
+    # just evolved, so this is up to two stages in one activation.
+    chain = bool(re.search(r"search your deck for a stage 2 pok[eé]mon", text,
+                           re.I))
+    return [Action(Op.EVOLVE_FROM_DECK, 2 if chain else 1, Target.YOUR_ANY)]
 
 
 @rule("discard_to_bench",

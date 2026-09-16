@@ -203,6 +203,9 @@ class Player:
         # which applies to any Active rather than only a Pokemon ex.
         self.turn_buff_any = 0
         self.stadium = None
+        # The Stadium the OTHER player put down. A Stadium is shared, so
+        # both sides read whichever one is on the table.
+        self._opp_stadium = None
         self.lost_pokemon_last_turn = False
         # The names, lower-cased and joined, so a family-scoped clause
         # ("if any of your HOP'S Pokemon were Knocked Out...") can tell
@@ -381,6 +384,12 @@ def effective_cost(pl, spot, cost, opp=None, atk_name=None):
     # card in your discard pile"). Colorless symbols come off first --
     # a typed requirement can only be removed by a reduction naming that
     # type, which is why Haymaker still needs its one Water.
+    # A tax is added before any discount is taken off, so a card that both
+    # taxes and discounts nets out rather than one silently winning.
+    tax = AE.query_cost_tax(pl, spot, opp)
+    if tax:
+        cost += ["Colorless"] * tax
+
     reduce = AE.query_cost_reduction(pl, spot, opp)
     for typ, n in reduce.items():
         for _ in range(n):
@@ -571,6 +580,10 @@ _STADIUM_ONCE_RE = _re.compile(
 # THEIR deck"); every rule in ability_ir is written for the card's own
 # controller ("your deck"). Normalising the person is the whole difference
 # between these compiling and not.
+# Ordered: the multi-word forms first, then a general "their X" -> "your X"
+# sweep and a general "that player <verb>" -> "you <verb>". The hand-listed
+# pairs alone left "1 of THEIR Basic Pokemon" and a second "THAT PLAYER may"
+# standing in Grand Tree, so it compiled to nothing.
 _STADIUM_PERSON = [
     ("their deck", "your deck"), ("their hand", "your hand"),
     ("their discard pile", "your discard pile"),
@@ -578,6 +591,15 @@ _STADIUM_PERSON = [
     ("their Benched", "your Benched"), ("their Prize", "your Prize"),
     ("that player shuffles", "you shuffle"),
     ("that player draws", "you draw"),
+]
+_STADIUM_PERSON_RE = [
+    (_re.compile(r"\bthat player may\b", _re.I), "you may"),
+    (_re.compile(r"\bthat player\b", _re.I), "you"),
+    # NOT "in their name" -- there, "their" refers to the CARDS being
+    # searched for, not the player, and rewriting it broke Fossil Quarry
+    # which had been working.
+    (_re.compile(r"\btheir\b(?! name\b)"), "your"),
+    (_re.compile(r"\bthey may\b", _re.I), "you may"),
 ]
 _STADIUM_TURN_CACHE = {}
 
@@ -606,6 +628,8 @@ def stadium_turn_effect_ir(name):
             text = _STADIUM_ONCE_RE.sub("you may ", text)
             for a, b in _STADIUM_PERSON:
                 text = text.replace(a, b)
+            for rx, b in _STADIUM_PERSON_RE:
+                text = rx.sub(b, text)
             compiled = IR.compile_effect("trainer", name, " ".join(text.split()))
             if not compiled.unsupported and compiled.actions:
                 eff = compiled
@@ -948,6 +972,12 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.discard.append(name)
         pl.stadium = name
         opp.stadium = None
+        # A Stadium is SHARED -- "both yours and your opponent's" is the
+        # standard wording -- so the other player has to be able to see it.
+        # _opp_stadium was read in three places and assigned in none, which
+        # meant a Stadium your opponent played did nothing to you at all.
+        pl._opp_stadium = None
+        opp._opp_stadium = name
         log.append(f"  {pl.name}: plays Stadium {name}")
         break
 
@@ -1450,7 +1480,7 @@ TRAINER_IR_OPS = {
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.FORCE_BENCH_OPPONENT,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
-    IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES,
+    IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
 }
 
 
@@ -1637,7 +1667,10 @@ def retreat_of(pl, spot, opp=None):
     if st and (not st["family"] or st["family"].lower() in spot.name.lower()):
         if st["amount"] <= -99:
             return 0
-    tool_mod = RETREAT_TOOLS.get(getattr(spot, "tool", None), 0)
+    tool = getattr(spot, "tool", None)
+    if tool and AE.query_tools_disabled(pl, opp):
+        tool = None                     # Jamming Tower
+    tool_mod = RETREAT_TOOLS.get(tool, 0)
     if st and st["amount"] > -99:
         if not st["family"] or st["family"].lower() in spot.name.lower():
             tool_mod += st["amount"]
@@ -3204,7 +3237,8 @@ def do_attack(pl, opp, log):
     # Tools that add damage. Brave Bangle only pays out for an attacker
     # WITHOUT a Rule Box, which is the whole reason it fits a deck of
     # single-Prize attackers.
-    tool = DAMAGE_TOOLS.get(getattr(pl.active, "tool", None))
+    tool = (None if AE.query_tools_disabled(pl, opp)
+            else DAMAGE_TOOLS.get(getattr(pl.active, "tool", None)))
     if tool and opp.POKEMON[opp.active.name]["prize_value"] >= tool["min_prize"]:
         if not tool.get("holder_no_rule_box") or \
                 pl.POKEMON[pl.active.name]["prize_value"] == 1:

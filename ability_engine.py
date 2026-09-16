@@ -1384,6 +1384,34 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # rather than falling out of the audit as an unhandled gap.
         return False
 
+    if op == O.EVOLVE_FROM_DECK:
+        # Evolve a Basic straight out of the deck, and chain a Stage 2 onto
+        # it if the card says so. The turn-in-play restriction is the
+        # ordinary evolution rule and is enforced by the caller.
+        placed = []
+        for _ in range(act.amount or 1):
+            base = None
+            for spot in pl.in_play():
+                nxt = next((n for n, i in pl.POKEMON.items()
+                            if i.get("evolves_from") == spot.name
+                            and any(k == "Pokemon" and x == n for k, x in pl.deck)),
+                           None)
+                if nxt and not getattr(spot, "evolved_this_turn", False):
+                    base = (spot, nxt)
+                    break
+            if not base:
+                break
+            spot, nxt = base
+            pl.deck.remove(("Pokemon", nxt))
+            pl.discard.append(spot.name)
+            spot.name = nxt
+            spot.evolved_this_turn = True
+            placed.append(nxt)
+        if placed:
+            random.shuffle(pl.deck)
+            log.append(f"    evolves from deck: {', '.join(placed)}")
+        return bool(placed)
+
     if op == O.DISCARD_TO_DECK:
         f = act.filter or {}
         want, typ = f.get("kind"), f.get("type")
@@ -1505,9 +1533,17 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return moved > 0
 
     if op == O.DISCARD_STADIUM:
-        if getattr(pl, "stadium", None) or getattr(opp, "stadium", None):
-            pl.stadium = None
-            opp.stadium = None
+        # There were TWO of these branches and the second was unreachable --
+        # the same duplicate-branch shape as the DEVOLVE bug. The dead one
+        # carried the better logging and the live one the better semantics,
+        # which is how a duplicate survives review. Merged here.
+        gone = getattr(pl, "stadium", None) or getattr(opp, "stadium", None)
+        if gone:
+            log.append(f"    discards Stadium {gone}")
+            pl.stadium = opp.stadium = None
+            # Both sides' view of it has to go too, or the Stadium keeps
+            # working for whoever did not own it.
+            pl._opp_stadium = opp._opp_stadium = None
             return True
         return False
 
@@ -1590,19 +1626,6 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         log.append(f"    apply {', '.join(conds)}")
         return True
-
-    if op == O.DISCARD_STADIUM:
-        # Stadium removal only started mattering once Stadiums did
-        # anything; before that this was correctly inert and is now
-        # nine live card effects.
-        for side in (pl, opp):
-            if getattr(side, "stadium", None):
-                log.append(f"    discards Stadium {side.stadium}")
-                side.stadium = None
-                if side is not pl and getattr(pl, "stadium", None) is None:
-                    pass
-                return True
-        return False
 
     if op == O.LOOK_AT_DECK:
         # Look at the top N and take the most useful one. Without this the
@@ -1726,7 +1749,22 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
 # --------------------------------------------------------------------------
 
 def _passive_actions(pl, op):
-    """Yield (holder, action) for every in-play passive of a given op."""
+    """Yield (holder, effect, action) for every in-play passive of a given op.
+
+    This read Pokemon Abilities ONLY, which meant the Stadium in play was
+    invisible to every query_* in this module. Twenty Standard Stadiums
+    compile a passive -- Gravity Mountain's -30 HP on Stage 2s, Full Metal
+    Lab's damage reduction, Postwick's damage buff, Nighttime Mine's Tera
+    tax, Jamming Tower switching Tools off -- and not one of them did
+    anything. Three were special-cased elsewhere (the Bench cap, Special
+    Condition immunity, and the is-it-worth-playing check), which is
+    exactly the shape of a gap that hides: the cards that were looked at
+    worked, so nobody asked about the rest.
+
+    The Stadium is SHARED, so whichever side played it, both players read
+    it. Its holder is None -- a Stadium is not a Pokemon, and every
+    `act.target == SELF and holder is not spot` guard correctly skips it.
+    """
     for holder in pl.in_play():
         for eff in pl.EFFECTS.get(holder.name, []):
             if eff.unsupported:
@@ -1734,6 +1772,14 @@ def _passive_actions(pl, op):
             for act in eff.actions:
                 if act.op == op:
                     yield holder, eff, act
+
+    stadium = getattr(pl, "stadium", None) or getattr(pl, "_opp_stadium", None)
+    if stadium:
+        eff = TRAINER_IR(stadium)
+        if eff is not None and not eff.unsupported:
+            for act in eff.actions:
+                if act.op == op:
+                    yield None, eff, act
 
 
 def query_damage_reduction(pl, spot, opp=None):
@@ -2005,6 +2051,52 @@ def query_extra_attacks(pl, spot):
                 extra.append(a)
         name = info.get("evolves_from")
     return extra
+
+
+def query_cost_tax(pl, spot, opp=None):
+    """Extra Energy this Pokemon's attacks cost, from a tax rather than a
+    discount.
+
+    query_cost_reduction skips any positive amount outright, so a card that
+    makes attacks cost MORE had no consumer at all. Six cards do it --
+    Nighttime Mine's Tera tax, Ariados, Carnivine, Rillaboom, Mega
+    Chandelure ex and Antique Root Fossil -- and the tax reaches across the
+    table, so the opponent's is read too.
+    """
+    total = 0
+    for side, other in ((pl, opp), (opp, pl)) if opp is not None else ((pl, None),):
+        if side is None:
+            continue
+        for holder, eff, act in _passive_actions(side, IR.Op.MODIFY_ATTACK_COST):
+            amount = act.amount or 0
+            if amount <= 0:
+                continue
+            f = act.filter or {}
+            if act.target == IR.Target.SELF and holder is not spot:
+                continue
+            if side is not pl and act.target not in (IR.Target.OPP_ACTIVE,
+                                                     IR.Target.OPP_ALL,
+                                                     IR.Target.BOTH_ALL):
+                continue
+            need = f.get("requires_subtype")
+            if need and need not in ((pl.POKEMON.get(spot.name) or {})
+                                     .get("subtypes") or []):
+                continue
+            if not conditions_met(eff, side, other or side, holder):
+                continue
+            total += amount
+    return total
+
+
+def query_tools_disabled(pl, opp=None):
+    """Jamming Tower: Tools attached to every Pokemon have no effect."""
+    for side in (pl, opp) if opp is not None else (pl,):
+        if side is None:
+            continue
+        for holder, eff, act in _passive_actions(side, IR.Op.LOCK):
+            if (act.filter or {}).get("what") == "tools":
+                return True
+    return False
 
 
 def query_cost_override(pl, spot, atk_name, opp=None):
