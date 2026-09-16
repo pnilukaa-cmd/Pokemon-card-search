@@ -5,6 +5,12 @@
 knobs, every one read at the decision point rather than baked into a
 constant.
 
+Re-measured 2026-09-16 on the post-Stadium-fix engine and the 45-deck
+field. **This supersedes the 2026-09-15 pilot run**: that run predates
+three engine fixes (20 inert Stadium passives, Stadiums a deck wanted
+but did not name never being played, and blind discard costs pitching
+unranked cards) and its numbers are not comparable with these.
+
 ## The result, stated the way it should be
 
 **Overall, no pilot beats greedy.** All four alternatives are
@@ -12,79 +18,154 @@ statistically tied with it across the field:
 
 | pilot | vs greedy | 95% CI | better on |
 |---|---|---|---|
-| control | −0.08 | [−1.64, +1.49] | 23/44 |
-| setup | −0.38 | [−2.88, +2.12] | 21/44 |
-| aggro | −0.72 | [−2.68, +1.24] | 20/44 |
-| prizewise | −0.76 | [−2.57, +1.05] | 16/44 |
+| aggro | -0.36 | [-1.73, +1.02] | 22/45 |
+| prizewise | -0.66 | [-2.06, +0.75] | 16/45 |
+| control | -0.71 | [-2.36, +0.94] | 21/45 |
+| setup | -1.58 | [-3.60, +0.44] | 17/45 |
 
-**And most of the per-deck gains were noise.** Picking each deck's best
-pilot and re-measuring that choice on fresh seeds:
+Every interval spans zero. This is the second independent field to say
+so — the first said it about a 44-deck field on a materially different
+engine, which makes it a property of the pilots rather than of one
+measurement.
 
-| | mean gain |
-|---|---|
-| selection run (seed 12345) | **+6.64** [+5.34, +7.95] |
-| held-out run (seed 777) | **+1.57** [−0.54, +3.68] |
+**And most of the per-deck gains are noise.** Picking each deck's best
+pilot and re-measuring that same choice on seeds it was not chosen on:
 
-**76% of the apparent gain evaporated, and the held-out interval spans
-zero.** Six decks flipped sign outright — `team_rockets_persian_ex` looked
-like +15.0 and measured −4.7; `meta_dragapult_blaziken` +12.5 became
-−10.7. Reporting the selection numbers as findings would have been
-straightforwardly wrong, which is the entire reason the held-out run
-exists.
+| | mean gain | 95% CI |
+|---|---|---|
+| selection run (seed 12345) | **+3.88** | [+2.53, +5.22] |
+| held-out run (seed 777) | **+0.84** | [-0.68, +2.37] |
+
+**78% of the apparent gain evaporates.** max-of-4 is biased
+upward by construction: pick the best of four noisy draws per deck and
+you have measured the noise as much as the pilot. 19 decks flipped sign outright.
 
 ## What survives
 
-Eight decks gain at least 4 points on BOTH independent runs. These are the
-credible ones:
+8 decks gain at least 4 points on BOTH independent
+runs. These are the credible ones:
 
 | worst case | selection | held out | driver | deck |
 |---|---|---|---|---|
-| **+10.0** | +10.0 | +11.3 | `setup` | `heracross_sinistcha_tea` |
-| **+9.2** | +9.2 | +12.0 | `prizewise` | `salazzle_ex_team_rockets_muk_condition_stack` |
-| **+8.3** | +8.3 | +10.0 | `setup` | `team_rockets_koffing_weezing_bench_swarm` |
-| **+8.0** | +15.8 | +8.0 | `setup` | `eerie_inferno_ninetales_burn` |
-| **+6.7** | +8.3 | +6.7 | `aggro` | `tr_arbok_yveltal_snow_coating` |
-| **+6.0** | +6.7 | +6.0 | `setup` | `kyurem_vanilluxe_blizzard` |
-| **+4.7** | +10.0 | +4.7 | `setup` | `team_rockets_wobbuffet_orbeetle_damage_launder` |
-| **+4.7** | +6.7 | +4.7 | `control` | `dhelmise_veluza_hide_n_sneak` |
+| **+12.0** | +12.0 | +13.5 | `setup` | `heracross_sinistcha_tea` |
+| **+9.0** | +9.0 | +10.5 | `prizewise` | `salazzle_ex_team_rockets_muk_condition_stack` |
+| **+8.0** | +15.5 | +8.0 | `setup` | `eerie_inferno_ninetales_burn` |
+| **+8.0** | +8.0 | +12.0 | `setup` | `team_rockets_koffing_weezing_bench_swarm` |
+| **+7.5** | +7.5 | +12.0 | `prizewise` | `metal_metang_excadrill` |
+| **+7.0** | +8.5 | +7.0 | `setup` | `kyurem_vanilluxe_blizzard` |
+| **+7.0** | +7.0 | +8.0 | `control` | `meta_slowking` |
+| **+4.0** | +10.0 | +4.0 | `control` | `stevens_carbink_damage_wall` |
 
-Eight of forty-four. Not the twenty-one the first pass suggested.
+8 of 45. Not the 34 the selection run suggested.
 
-`setup` accounts for five of the eight, and the shape is consistent: decks
-that have to assemble something before they threaten anything. `heracross_sinistcha_tea` and
-`kyurem_vanilluxe_blizzard` both want a board built before they start
-attacking, and the greedy pilot spends those turns swinging for small
-numbers instead.
+Which pilot survives, and how often: `setup` 4, `prizewise` 2, `control` 2.
 
-## Two null tests guard the baseline
+## The strongest evidence here: what reproduced across engines
 
-A policy layer that silently moved the default would invalidate every
-number in this repo, so:
+The 2026-09-15 run also found eight survivors. **Five are the same
+deck with the same driver**, which means they held up across two seed
+sets AND across an engine change that moved the field by a mean of
+5.6 points per pairing. That is a far higher bar than either run
+clears on its own:
 
-1. `greedy` vs `greedy` reads **+0.00 with a zero-width interval**.
-   Identical policies on identical seeds produce identical games.
-2. Stronger: eight committed field pairings re-run with the layer in place
-   return **byte-identical win counts** (98/98, 101/101, 146/146 ...).
-   Test 1 only proves self-consistency; test 2 proves the baseline behind
-   every earlier field run did not move.
+| deck | driver | 09-15 worst case | 09-16 worst case |
+|---|---|---|---|
+| `heracross_sinistcha_tea` | `setup` | +10.0 | +12.0 |
+| `salazzle_ex_team_rockets_muk_condition_stack` | `prizewise` | +9.2 | +9.0 |
+| `team_rockets_koffing_weezing_bench_swarm` | `setup` | +8.3 | +8.0 |
+| `eerie_inferno_ninetales_burn` | `setup` | +8.0 | +8.0 |
+| `kyurem_vanilluxe_blizzard` | `setup` | +6.0 | +7.0 |
 
-## One pilot was broken rather than bad
+Three from the old list did not reproduce —
+`tr_arbok_yveltal_snow_coating` (aggro),
+`team_rockets_wobbuffet_orbeetle_damage_launder` (setup) and
+`dhelmise_veluza_hide_n_sneak` (control). Three are new:
+`meta_slowking` and `stevens_carbink_damage_wall` under `control`, and
+`metal_metang_excadrill` under `prizewise` — that last one was not in
+the old field at all.
 
-`setup` first measured **−12.58, losing on 43 of 44 decks**. No coherent
-strategy is that uniformly bad, and it wasn't one: with
-`energy_to_active` off, `attach_energy` fell through to a branch scanning
-`pl.bench` only, so setup's Active **never received Energy at all**. It
-starved every game. Fixed, it measures −0.38.
+`setup` is the interesting case. It is the WORST pilot overall at
+-1.58, and it owns four of the eight survivors. That is not a
+contradiction, it is the finding: `setup` is not a better driver, it
+is a driver that is right for a specific kind of deck — one that has
+to assemble something before it threatens anything — and badly wrong
+for everything else. Its per-deck spread is the widest of the four.
 
-The tell was the shape of the loss, not its size. A style that is wrong
-for the field loses to greedy on sixty or seventy percent of decks; one
-that loses on 43 of 44 is broken.
+## The control is the self-test
+
+greedy-vs-greedy, both seats, 90 deck-runs of 200 games:
+**49.94%** to seat A, 95% CI [49.26, 50.62].
+
+Two things follow. First, `greedy` reproduces the engine's historical
+behaviour exactly, so a mirror that read anything other than an even
+split plus seat bias would mean the policy plumbing had changed
+behaviour on its own — it has not. Second, **the seat bias of 51.6%
+this repo has been quoting is not reproduced on the current engine.**
+The interval above contains 50.00, so on this evidence there is no
+detectable first-player advantage. That does not change the method:
+the control run is subtracted regardless, because it also cancels
+most of the shared variance, which is the only reason a 1-point
+effect is visible at this sample size.
 
 ## Usage
 
     python3 ai_selfplay.py <deck-folder> <games> <pilot-A> <pilot-B>
 
 Both seats play the same deck, so the only difference is the driver. A
-control run of B-vs-B is subtracted to cancel the seat bias (seat A wins
-51.6% of mirrors). Always validate a per-deck pick on seeds it was not
-chosen on.
+control run of B-vs-B is subtracted. Always validate a per-deck pick on
+seeds it was not chosen on — the two tables above are the whole reason
+that sentence is here.
+
+## Per-deck detail
+
+Every deck, its best alternative pilot on the selection seeds, and what
+that same choice measured on the held-out seeds. Read the third column,
+not the second.
+
+| deck | driver | selection | held out |
+|---|---|---|---|
+| `heracross_sinistcha_tea` | `setup` | +12.0 | +13.5 |
+| `salazzle_ex_team_rockets_muk_condition_stack` | `prizewise` | +9.0 | +10.5 |
+| `eerie_inferno_ninetales_burn` | `setup` | +15.5 | +8.0 |
+| `team_rockets_koffing_weezing_bench_swarm` | `setup` | +8.0 | +12.0 |
+| `metal_metang_excadrill` | `prizewise` | +7.5 | +12.0 |
+| `kyurem_vanilluxe_blizzard` | `setup` | +8.5 | +7.0 |
+| `meta_slowking` | `control` | +7.0 | +8.0 |
+| `stevens_carbink_damage_wall` | `control` | +10.0 | +4.0 |
+| `dhelmise_veluza_hide_n_sneak` | `aggro` | +3.5 | +7.5 |
+| `arbok_muk_trolley_darkbell` | `setup` | +5.5 | +1.5 |
+| `mega_chandelure_ex_retreat_tax` | `aggro` | +1.5 | +6.0 |
+| `selective_bloom_cradily` | `control` | +2.5 | +1.0 |
+| `darkness_mill_hand_lock` | `aggro` | +7.0 | +0.0 |
+| `feraligatr_munkidori_damage_transfer` | `prizewise` | +0.0 | +0.0 |
+| `meta_festival_lead` | `prizewise` | +9.5 | +0.0 |
+| `orthworm_ex_metal_retaliation` | `prizewise` | +0.0 | +2.5 |
+| `team_rockets_wobbuffet_orbeetle_damage_launder` | `setup` | +8.5 | +0.0 |
+| `arbok_muk_laser_darkbell` | `setup` | +2.5 | -0.5 |
+| `hops_snorlax_stacked_buff` | `control` | +1.5 | -0.5 |
+| `mega_lopunny_dusknoir_snipe_finisher` | `aggro` | -0.5 | +2.5 |
+| `meta_raging_bolt` | `control` | -1.0 | -0.5 |
+| `static_venom_drapion` | `setup` | +2.5 | -1.0 |
+| `tr_crobat_absol_bench_snipe` | `prizewise` | +3.0 | -1.0 |
+| `water_aggro` | `prizewise` | -1.0 | +0.5 |
+| `krookodile_ex_relicanth_hand_disruption` | `aggro` | +1.5 | -1.5 |
+| `scovillain_salazzle_spicy_rage` | `control` | +13.5 | -1.5 |
+| `veluza_sinistcha_ex_tea_service` | `aggro` | +5.0 | -1.5 |
+| `meta_ns_zoroark` | `control` | +3.5 | -2.0 |
+| `toxic_slumber_vileplume_ex` | `setup` | +6.5 | -2.0 |
+| `tr_arbok_yveltal_snow_coating` | `prizewise` | +4.5 | -2.0 |
+| `kangaskhan_tyrantrum_flip_mill` | `prizewise` | -2.5 | +1.5 |
+| `ns_zoroark_night_joker_toolbox` | `prizewise` | -2.5 | -2.0 |
+| `panic_poison_paralysis` | `prizewise` | +3.0 | -2.5 |
+| `crabominable_veluza_food_prep` | `control` | +1.5 | -3.0 |
+| `meta_mega_excadrill` | `prizewise` | +4.0 | -3.0 |
+| `meta_dragapult_blaziken` | `aggro` | -1.5 | -3.5 |
+| `meta_dragapult_pure` | `setup` | -4.0 | +5.5 |
+| `chandelure_centiskorch_deck_out` | `control` | +6.0 | -4.5 |
+| `arbok_team_rockets_muk_condition_stack` | `prizewise` | -2.5 | -5.0 |
+| `mega_scrafty_ex_darkness_tank` | `aggro` | -5.0 | +3.5 |
+| `team_rockets_spidops_swarm` | `setup` | +2.5 | -5.0 |
+| `meta_dragapult_dusknoir` | `prizewise` | +3.5 | -6.0 |
+| `team_rockets_persian_ex_attack_theft` | `aggro` | +5.5 | -6.0 |
+| `lurantis_heal_punish` | `setup` | +7.0 | -6.5 |
+| `decidueye_ex_judge_sniper_lock` | `prizewise` | +2.5 | -8.0 |

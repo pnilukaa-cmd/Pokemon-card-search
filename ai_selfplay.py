@@ -67,10 +67,13 @@ def main():
     for f in sorted(glob.glob(os.path.join(folder, "*.txt"))):
         name = os.path.splitext(os.path.basename(f))[0]
         # PAIRED: the same deck, the same seed, the only difference being
-        # which policy sits in seat A. Subtracting the control run cancels
-        # the seat bias (seat A wins 51.6% of v1-vs-v1 mirrors) and most of
-        # the shared variance, which is the only way a 1-point effect is
-        # visible at this sample size.
+        # which policy sits in seat A. The control run is subtracted mainly
+        # to cancel the shared variance, which is the only way a 1-point
+        # effect is visible at this sample size. It also cancels any seat
+        # bias -- though measured over 90 deck-runs of 200 games on
+        # 2026-09-16 there is none to cancel: seat A takes 49.94%, 95% CI
+        # [49.26, 50.62]. The 51.6% this comment used to assert does not
+        # reproduce on the current engine.
         test = mirror(f, games, pol_a, pol_b)
         ctrl = mirror(f, games, pol_b, pol_b)
         rows.append((100.0 * (test - ctrl) / games, name))
