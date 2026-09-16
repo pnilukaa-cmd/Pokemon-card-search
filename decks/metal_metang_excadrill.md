@@ -121,3 +121,23 @@ worst variant, so that suspicion is untested on its own.
 **Conclusion: the list is at a local optimum for everything tried.** Four
 proposed changes, four failures. The only defensible edits are the three
 resolution fixes above.
+
+## And the pilot excuse does not hold either
+
+I closed the first review by saying 56.1% was "a floor, not a ceiling",
+on the grounds that this deck's search-toolbox structure is the kind a
+human pilots better than a greedy AI. That was a hand-wave offered
+immediately after being wrong three times about this same deck, so it got
+measured too — the same list under all five pilots in `PILOT_RESULTS.md`:
+
+| pilot | mean | vs greedy |
+|---|---|---|
+| aggro | 56.9% | **+0.77** |
+| **greedy** | **56.1%** | — |
+| prizewise | 55.5% | −0.64 |
+| setup | 53.7% | −2.39 |
+| control | 51.0% | −5.10 |
+
+The best alternative driver is worth **+0.77 points**, which is inside
+noise, and three of the four are worse. This deck is not being held back
+by its pilot. 56.1% is where it sits.
