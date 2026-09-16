@@ -150,4 +150,25 @@ measured too — the same list under all five pilots in `PILOT_RESULTS.md`:
 
 The best alternative driver is worth **+0.77 points**, which is inside
 noise, and three of the four are worse. This deck is not being held back
-by its pilot. 56.1% is where it sits.
+by its pilot.
+
+**Re-tested 2026-09-16 on the fixed engine, because one measurement said
+otherwise.** The mirror test in `PILOT_RESULTS.md` — this deck driven by
+`prizewise` against a copy of itself driven by greedy — read **+7.5 on the
+selection seeds and +12.0 held out**, which would have reversed the
+paragraph above. It does not survive contact with the field. Replaying all
+44 pairings with the same CRN seeds and only this deck's pilot changed:
+
+| | mean vs field |
+|---|---|
+| greedy | 55.5% |
+| prizewise | 55.3% |
+
+**−0.20, 95% CI [−1.69, +1.29].** The mirror gain does not convert. That
+is not specific to this deck: across all eight decks that passed held-out
+validation, mean mirror gain was +9.38 and mean field gain +2.66, with a
+correlation of +0.27. This deck is one of the five where the field delta
+is flatly zero.
+
+So the original finding stands, now on better evidence than it had: **this
+deck is not being held back by its pilot.**

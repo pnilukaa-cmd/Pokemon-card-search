@@ -9,6 +9,26 @@
 > Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
 
+## This deck is piloted badly by greedy — and it is measurable
+
+Every number in this file, and every number in `FIELD_RESULTS.md`, is
+measured under the `greedy` pilot. This deck is one of **three in the
+whole field** where a different driver survives all the way to a field
+measurement. Replaying all 44 pairings with the same CRN seeds and only
+this deck's pilot changed to `setup`:
+
+| pilot | mean vs field | rank |
+|---|---|---|
+| greedy | 55.8% | 13 of 45 |
+| **`setup`** | **58.9%** | **10 of 45** |
+
+**+3.06 points, 95% CI [+1.48, +4.63].** The shape is the same for all three
+converters: a deck that has to assemble a board before it threatens
+anything, driven by a pilot that spends those turns swinging for small
+numbers. See `PILOT_RESULTS.md` — and note that five other decks looked
+just as good on the mirror test and gained nothing against the field.
+
+
 
 
 

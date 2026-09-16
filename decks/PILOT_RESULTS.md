@@ -169,3 +169,59 @@ not the second.
 | `team_rockets_persian_ex_attack_theft` | `aggro` | +5.5 | -6.0 |
 | `lurantis_heal_punish` | `setup` | +7.0 | -6.5 |
 | `decidueye_ex_judge_sniper_lock` | `prizewise` | +2.5 | -8.0 |
+
+## Does a mirror gain convert into a FIELD gain? Mostly not.
+
+Everything above is a **mirror** measurement: driven by pilot P, does a
+deck beat a copy of itself driven by greedy? That is sensitive and
+well-paired, and it is not the question anyone cares about, which is
+whether the deck wins more **against the field**.
+
+So it was measured directly. Every one of the eight survivors replayed
+against all 44 opponents, same CRN seeds as the recorded round robin,
+with only that deck's pilot changed and the opponent left on greedy.
+Subtracting the recorded greedy result is an exactly-paired field delta.
+
+| deck | pilot | greedy | with pilot | **field delta** | 95% CI | mirror (sel/held) |
+|---|---|---|---|---|---|---|
+| `heracross_sinistcha_tea` | `setup` | 59.6% | 68.1% | **+8.42** | [+6.81, +10.03] | +12.0/+13.5 |
+| `eerie_inferno_ninetales_burn` | `setup` | 48.9% | 55.8% | **+6.89** | [+5.59, +8.19] | +15.5/+8.0 |
+| `kyurem_vanilluxe_blizzard` | `setup` | 55.8% | 58.9% | **+3.06** | [+1.48, +4.63] | +8.5/+7.0 |
+| `team_rockets_koffing_weezing_bench_swarm` | `setup` | 54.7% | 56.1% | +1.45 | [-0.05, +2.96] | +8.0/+12.0 |
+| `salazzle_ex_team_rockets_muk_condition_stack` | `prizewise` | 33.8% | 34.9% | +1.17 | [-0.37, +2.71] | +9.0/+10.5 |
+| `stevens_carbink_damage_wall` | `control` | 51.0% | 51.5% | +0.53 | [-0.91, +1.98] | +10.0/+4.0 |
+| `meta_slowking` | `control` | 43.6% | 43.6% | +0.00 | [-1.53, +1.53] | +7.0/+8.0 |
+| `metal_metang_excadrill` | `prizewise` | 55.5% | 55.3% | -0.20 | [-1.69, +1.29] | +7.5/+12.0 |
+
+**Mean mirror gain +9.38. Mean field gain +2.66. Correlation +0.27.**
+The mirror test overstates by roughly a factor of three and barely ranks
+the decks in the right order. Five of the eight survivors — including two
+that reproduced across both earlier runs — show **no field gain at all**.
+
+Three convert, and all three run `setup`:
+
+| deck | rank under greedy | rank under `setup` |
+|---|---|---|
+| `heracross_sinistcha_tea` | 59.6% (9) | 68.1% (4) |
+| `eerie_inferno_ninetales_burn` | 48.9% (30) | 55.8% (14) |
+| `kyurem_vanilluxe_blizzard` | 55.8% (13) | 58.9% (10) |
+
+That is the whole harvest of the pilot programme: **three decks, one
+pilot.** `setup` is the worst driver in the field on average and the only
+one whose per-deck wins survive all the way to a field measurement. The
+decks it helps are the ones that must assemble a board before they
+threaten anything, and greedy spends those turns swinging for small
+numbers.
+
+### What this retracts
+
+The eight-survivor table above, and the equivalent table in the
+2026-09-15 run, were both presented as *the credible ones*. Held-out
+validation had already cut 21 candidates to 8; it turns out that was not
+enough, because held-out validation of a mirror test only removes
+selection bias — it cannot tell you the mirror was the wrong question.
+**Read the field-delta column, not the mirror columns.** The mirror test
+stays useful for one thing: it is cheap enough to screen 45 decks x 4
+pilots, and everything it rejected can be trusted as rejected. What it
+accepts has to be confirmed against the field.
+
