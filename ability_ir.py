@@ -176,6 +176,11 @@ class Op:
     NO_OP_SETUP_RULE = "no_op_setup_rule"
     # Grand Tree: evolve straight out of the deck, Stage 1 then Stage 2.
     EVOLVE_FROM_DECK = "evolve_from_deck"
+    # Backtrack Badge: re-flip an attack's coins once and keep the
+    # better result. A real reroll, not "a second chance at the odds".
+    REFLIP_COINS = "reflip_coins"
+    # Heavy Baton: on a Knock Out, salvage Energy to the Bench.
+    SALVAGE_ENERGY_ON_KO = "salvage_energy_on_ko"
     EXTRA_TOOLS = "extra_tools"
     LOCK_COUNTER_MOVEMENT = "lock_counter_movement"
     WIN_GAME = "win_game"
@@ -2016,6 +2021,8 @@ def _r(m, text):
 def _r(m, text):
     # Shiftry's Expelling Tornado keeps N and shuffles the REST away, which
     # is the inverse of every other Bench-bounce in the pool.
+    # KEEPS N and shuffles the REST away -- the inverse of every other
+    # Bench-bounce in the pool, so the count is a keep, not a take.
     return [Action(Op.OPP_BENCH_TO_DECK, None, Target.OPP_BENCHED,
                    {"keep": int(m.group(1))})]
 
@@ -2222,11 +2229,14 @@ def _r(m, text):
 
 @rule("heavy_baton",
       r"if the pok[eé]mon this card is attached to has a retreat cost of exactly"
-      r" (\d+)[\s\S]{0,90}?is knocked out by damage from an attack")
+      r" (\d+)[\s\S]{0,90}?is knocked out by damage from an attack"
+      r"[\s\S]{0,60}?move up to (\d+) basic energy")
 def _r(m, text):
-    # The payoff is always "move its Energy to a Benched Pokemon".
-    return [Action(Op.MOVE_ENERGY, 99, Target.YOUR_BENCHED,
-                   {"from": Target.SELF, "on_ko": True})]
+    # Fires ON A KNOCK OUT, which MOVE_ENERGY's ordinary path never checks
+    # -- it was compiled with an on_ko flag nothing read, so the Tool did
+    # nothing. Its own op, resolved where Knock Outs are resolved.
+    return [Action(Op.SALVAGE_ENERGY_ON_KO, int(m.group(2)), Target.YOUR_BENCHED,
+                   {"retreat_exactly": int(m.group(1))})]
 
 
 @rule("first_turn_energy_bounce",
@@ -2284,10 +2294,14 @@ def _r(m, text):
       r"after you flip any coins for an attack[\s\S]{0,80}?you may ignore all"
       r" results of those coin flips")
 def _r(m, text):
-    # Backtrack Badge re-rolls a coin-flip attack. Modelled as a second
-    # chance at the same odds, which is what "flip them again" amounts to.
-    return [Action(Op.NO_OP_INFORMATION, None, Target.SELF,
-                   {"handled_by": "damage_model"})]
+    # "You MAY ignore the results and flip again" -- you only re-flip when
+    # the first result was bad, so it is take-the-better-of-two, not a
+    # second roll at the same odds. It was a NO_OP placeholder, which
+    # counted as "accounted for" while doing nothing.
+    m2 = re.search(r"of the ([\w]+) pok[eé]mon this card is attached to", text,
+                   re.I)
+    f = {"type": m2.group(1).capitalize()} if m2 else {}
+    return [Action(Op.REFLIP_COINS, 1, Target.SELF, f)]
 
 
 @rule("evolve_from_deck",

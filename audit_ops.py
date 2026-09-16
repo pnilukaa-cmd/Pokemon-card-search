@@ -41,6 +41,12 @@ def classify():
             executed.add(n)
         if re.search(r"_passive_actions\(\s*[^)]*?IR\.Op\.%s\b" % n, ae_noack, re.S):
             read.add(n)
+        # An op can also be read off a Tool's or Stadium's compiled effect
+        # via TRAINER_IR, which never goes through _passive_actions. Missing
+        # that reported REFLIP_COINS and SALVAGE_ENERGY_ON_KO as orphans
+        # when both had working readers.
+        if re.search(r"act\.op (?:is not|is|==|!=) IR\.Op\.%s\b" % n, ae_noack):
+            read.add(n)
         if re.search(r"(IR\.)?Op\.%s\b" % n, sv):
             read.add(n)
     orphan = sorted(n for n in names if n not in executed and n not in read)

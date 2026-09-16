@@ -1612,6 +1612,7 @@ _IGNORES_WEAKNESS_RE = _re.compile(
 # case, so parse_conditions turns each into the positive REQUIREMENT and
 # this returns 0 when the requirement is not met. Twelve attacks in the
 # pool, every one of which was dealing full damage unconditionally.
+_FLIP_ANY_RE = _re.compile(r"flip (?:a coin|\d+ coins)", _re.I)
 _BASE_DAMAGE_IS_RE = _re.compile(r"this attack'?s base damage is (\d+)", _re.I)
 _REFLECT_DAMAGE_RE = _re.compile(
     r"was damaged by an attack during your opponent'?s last turn, this attack"
@@ -2250,6 +2251,35 @@ _COPY_DEPTH = [0]
 _MAX_COPY_DEPTH = 2
 
 
+def _flip_damage(pl, opp, spot, atk, base, text):
+    """Resolve only the coin-flip damage shapes, or None if none apply.
+
+    Split out so Backtrack Badge can evaluate them twice and keep the
+    better roll without re-running the whole damage model.
+    """
+    if _FLIP_ALL_OR_NOTHING_RE.search(text):
+        odds = _attack_ir(atk).chance
+        return base if random.random() < (odds if odds < 1.0 else 0.5) else 0
+    if _FLIP_UNTIL_TAILS_RE.search(text):
+        heads = 0
+        while random.random() < 0.5:
+            heads += 1
+        m = _MORE_DMG_RE.search(text)
+        per = int(m.group(1)) if m else base
+        return base + per * heads if m else per * heads
+    m = _FLIP_N_RE.search(text)
+    if m and "for each heads" in text.lower():
+        heads = sum(1 for _ in range(int(m.group(1))) if random.random() < 0.5)
+        m2 = _DOES_DMG_RE.search(text)
+        return (int(m2.group(1)) if m2 else base) * heads
+    m = _MORE_DMG_FLIP_RE.search(text)
+    if m and not _FOR_EACH_RE.search(text):
+        odds = _attack_ir(atk).chance
+        if odds < 1.0:
+            return base + (int(m.group(1)) if random.random() < odds else 0)
+    return None
+
+
 def attack_damage(pl, opp, spot, atk, record=True):
     """Best-effort damage for one attack in the current board state."""
     text = atk.get("text") or ""
@@ -2326,6 +2356,15 @@ def attack_damage(pl, opp, spot, atk, record=True):
     # A requirement the board has to satisfy, or the attack is called off.
     # Checked before the flips so a card carrying both resolves the
     # requirement first.
+    # Backtrack Badge lets a Colorless attacker re-flip its coins once and
+    # keep the better result, so the whole flip block is evaluated twice.
+    if (opp is not None and spot is not None
+            and _FLIP_ANY_RE.search(text) and AE.query_reflip(pl, spot)):
+        first = _flip_damage(pl, opp, spot, atk, base, text)
+        second = _flip_damage(pl, opp, spot, atk, base, text)
+        if first is not None and second is not None:
+            return max(first, second)
+
     if opp is not None and _ATTACK_REQUIRES_RE.search(text):
         eff = _attack_ir(atk)
         if eff.conditions and not AE.conditions_met(eff, pl, opp, spot, atk):
@@ -3312,6 +3351,7 @@ def do_attack(pl, opp, log):
             return True
 
     if opp.active.damage >= effective_hp(opp, opp.active):
+        AE.salvage_energy_on_ko(opp, opp.active, log)
         taken = (opp.POKEMON[opp.active.name]["prize_value"]
                  + getattr(opp.active, "extra_prize", 0))
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")

@@ -2053,6 +2053,65 @@ def query_extra_attacks(pl, spot):
     return extra
 
 
+def query_reflip(pl, spot):
+    """Does a Tool let this Pokemon re-flip an attack's coins once?
+
+    Backtrack Badge. "You MAY ignore the results and flip again" means you
+    only re-flip a bad result, so it is take-the-better-of-two.
+    """
+    tool = getattr(spot, "tool", None)
+    if not tool or query_tools_disabled(pl):
+        return False
+    eff = TRAINER_IR(tool)
+    if eff is None or eff.unsupported:
+        return False
+    for act in eff.actions:
+        if act.op is not IR.Op.REFLIP_COINS:
+            continue
+        want = (act.filter or {}).get("type")
+        if want and want not in ((pl.POKEMON.get(spot.name) or {})
+                                 .get("types") or []):
+            continue
+        return True
+    return False
+
+
+def salvage_energy_on_ko(pl, spot, log):
+    """Heavy Baton: move Energy off a Knocked Out Pokemon to the Bench.
+
+    Fires at the Knock Out, which MOVE_ENERGY's ordinary path never checks,
+    so this is resolved where Knock Outs are resolved rather than as a
+    passive query.
+    """
+    tool = getattr(spot, "tool", None)
+    if not tool or not pl.bench or query_tools_disabled(pl):
+        return 0
+    eff = TRAINER_IR(tool)
+    if eff is None or eff.unsupported:
+        return 0
+    for act in eff.actions:
+        if act.op is not IR.Op.SALVAGE_ENERGY_ON_KO:
+            continue
+        need = (act.filter or {}).get("retreat_exactly")
+        printed = len((pl.POKEMON.get(spot.name) or {}).get("retreat") or [])
+        if need is not None and printed != need:
+            continue
+        moved = 0
+        target = max(pl.bench, key=lambda p: len(p.energy))
+        for _ in range(act.amount or 1):
+            if not spot.energy:
+                break
+            target.energy.append(spot.energy.pop())
+            if getattr(spot, "energy_names", None):
+                target.energy_names.append(spot.energy_names.pop())
+            moved += 1
+        if moved:
+            log.append(f"  {pl.name}: {tool} salvages {moved} Energy to "
+                       f"{target.name}")
+        return moved
+    return 0
+
+
 def query_cost_tax(pl, spot, opp=None):
     """Extra Energy this Pokemon's attacks cost, from a tax rather than a
     discount.
