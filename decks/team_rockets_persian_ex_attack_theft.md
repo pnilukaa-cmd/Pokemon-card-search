@@ -1,13 +1,15 @@
 # Team Rocket's Persian ex — Attack Theft (full-toolkit rebuild)
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **70.5% mean · 70.0% median · 41 of 43 winning matchups · rank 3 of 44**
+> ### Field results — 2026-09-16
+> **70.6% mean · 69.8% median · 42 of 44 winning matchups · rank 3 of 45**
 >
 > Best `feraligatr_munkidori_damage_transfer` 94% · worst `panic_poison_paralysis` 44%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

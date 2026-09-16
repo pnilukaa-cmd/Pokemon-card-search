@@ -1,13 +1,15 @@
 # Arbok / Team Rocket's Muk — Precious Trolley + Dark Bell variant
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **57.1% mean · 57.0% median · 29 of 43 winning matchups · rank 11 of 44**
+> ### Field results — 2026-09-16
+> **56.7% mean · 56.0% median · 31 of 44 winning matchups · rank 11 of 45**
 >
 > Best `meta_ns_zoroark` 94% · worst `lurantis_heal_punish` 24%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Chandelure / Centiskorch — trap-and-deck-out
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **39.6% mean · 38.0% median · 11 of 43 winning matchups · rank 37 of 44**
+> ### Field results — 2026-09-16
+> **44.1% mean · 44.8% median · 14 of 44 winning matchups · rank 34 of 45**
 >
-> Best `meta_ns_zoroark` 87% · worst `water_aggro` 13%.
+> Best `meta_ns_zoroark` 86% · worst `team_rockets_persian_ex_attack_theft` 14%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

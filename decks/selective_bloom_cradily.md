@@ -1,13 +1,15 @@
 # Selective Bloom (Antique Root Fossil / Lileep / Cradily)
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **51.9% mean · 49.0% median · 21 of 43 winning matchups · rank 22 of 44**
+> ### Field results — 2026-09-16
+> **51.1% mean · 48.0% median · 20 of 44 winning matchups · rank 25 of 45**
 >
-> Best `feraligatr_munkidori_damage_transfer` 86% · worst `meta_mega_excadrill` 15%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 86% · worst `meta_mega_excadrill` 15%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

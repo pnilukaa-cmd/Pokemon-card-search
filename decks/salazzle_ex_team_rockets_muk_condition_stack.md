@@ -1,13 +1,15 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **34.3% mean · 32.0% median · 4 of 43 winning matchups · rank 40 of 44**
+> ### Field results — 2026-09-16
+> **33.8% mean · 30.8% median · 4 of 44 winning matchups · rank 41 of 45**
 >
 > Best `meta_ns_zoroark` 87% · worst `panic_poison_paralysis` 13%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # raging_bolt — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **62.8% mean · 63.5% median · 36 of 43 winning matchups · rank 6 of 44**
+> ### Field results — 2026-09-16
+> **63.0% mean · 62.8% median · 37 of 44 winning matchups · rank 6 of 45**
 >
 > Best `meta_ns_zoroark` 93% · worst `arbok_muk_laser_darkbell` 36%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

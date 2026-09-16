@@ -1,13 +1,15 @@
 # Scovillain ex / Salazzle ex — Spicy Rage
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **63.9% mean · 64.5% median · 35 of 43 winning matchups · rank 4 of 44**
+> ### Field results — 2026-09-16
+> **63.8% mean · 64.2% median · 37 of 44 winning matchups · rank 4 of 45**
 >
 > Best `meta_ns_zoroark` 94% · worst `team_rockets_persian_ex_attack_theft` 38%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

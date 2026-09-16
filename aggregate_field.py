@@ -9,8 +9,12 @@ wins = {}
 unplayable = set()
 # base run first, then the re-run of the two decks that were fixed
 # mid-flight -- same per-pair seeds, so the override is exact.
-for f in (sorted(glob.glob(os.path.join(SP, "rr_[0-9]*.json")))
-          + sorted(glob.glob(os.path.join(SP, "rrfix_*.json")))):
+# Run directory: pass it on the command line, e.g. `run2`. The default is
+# the scratchpad root, which is where the 2026-09-15 field landed.
+RUN = os.path.join(SP, sys.argv[1]) if len(sys.argv) > 1 else SP
+
+for f in (sorted(glob.glob(os.path.join(RUN, "rr_[0-9]*.json")))
+          + sorted(glob.glob(os.path.join(RUN, "rrfix_*.json")))):
     d = json.load(open(f))
     games = d["games"]
     unplayable |= set(d.get("unplayable") or [])
@@ -44,17 +48,28 @@ out = [f"# Field results — every deck against every other deck\n",
        f"**{games} games** per pairing, {len(wins)} pairings, "
        f"{len(wins)*games:,} games. Each pairing uses its own fixed seed, so "
        f"a re-run of this field reproduces exactly.\n",
-       f"Measured {stamp}, after the ex audit. **These supersede every "
-       f"number recorded in the deck files before this date** — the audit "
-       f"changed damage on a large number of cards (typed Energy scalers "
-       f"counting the wrong Energy, discard-cost attacks that were never "
-       f"charged, attack gates that were never enforced), so older figures "
-       f"are not comparable with these or with each other.\n",
-       "Two changes to the field itself: `AAA_tr_crobat_absol_snipe` was a "
-       "byte-identical duplicate of `tr_crobat_absol_bench_snipe` and had "
-       "been inflating that archetype's presence in every past measurement; "
-       "`veluza_sinistcha_ex_tea_service` had a deck file but no entry in "
-       "the field and had never been measured at all.\n",
+       f"Measured {stamp}, after the Stadium-passive fix. **These "
+       f"supersede every number in the deck files before this date** and "
+       f"are not comparable with the 2026-09-15 field: the engine changed "
+       f"materially in between.\n",
+       "What changed since 2026-09-15. Three engine bugs, each of which had "
+       "been silently suppressing real card text:\n"
+       "- **20 Stadium passives were inert.** `_passive_actions` only ever "
+       "walked Pokemon Abilities, so a Stadium's own compiled effect reached "
+       "nothing. Stadiums now contribute their actions with `holder=None`, "
+       "and third-person Stadium text (\"that player may search *their* "
+       "deck\") is normalised to first person before it compiles.\n"
+       "- **Stadiums a deck wanted but did not name were never played.** "
+       "`_stadium_has_effect` asked only whether the Stadium\u2019s own text "
+       "compiled. A Stadium that any of your cards *names* is now worth "
+       "playing, which is why `Festival Grounds` had never once hit the "
+       "table.\n"
+       "- **Blind discards threw away the wrong cards.** Costs that discard "
+       "from hand picked arbitrarily; they now rank by `pitch_rank`.\n",
+       "One new deck joined the field: `metal_metang_excadrill`, the list "
+       "reviewed on 2026-09-16. Every other deck is unchanged, so a "
+       "like-for-like delta against the previous field is in the section "
+       "below the table.\n",
        "| # | deck | mean | median | winning | best matchup | worst |",
        "|---|---|---|---|---|---|---|"]
 for i, n in enumerate(order, 1):

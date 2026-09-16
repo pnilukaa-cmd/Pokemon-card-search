@@ -34,10 +34,11 @@ for md in sorted(glob.glob(os.path.join(REPO, "decks", "*.md"))):
         f">\n"
         f"> Full round robin, {games} games per pairing, every deck against "
         f"every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win "
-        f"rate written in the body below this box predates the ex audit and "
-        f"is not comparable**: that audit corrected typed-Energy scalers "
-        f"that counted the wrong Energy, discard-cost attacks that were "
-        f"never charged, and attack gates that were never enforced.\n"
+        f"rate written in the body below this box predates the "
+        f"Stadium-passive fix and is not comparable**: 20 Stadiums had inert "
+        f"passives, Stadiums a deck wanted but did not name by text were "
+        f"never played at all, and blind discard costs pitched arbitrary "
+        f"cards instead of ranking them.\n"
         f"{MARK}\n"
     )
     # strip any previous block, then insert after the H1

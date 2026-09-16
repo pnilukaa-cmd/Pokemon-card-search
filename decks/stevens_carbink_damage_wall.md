@@ -1,13 +1,15 @@
 # Steven's Carbink Damage Wall
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **51.4% mean · 48.0% median · 19 of 43 winning matchups · rank 23 of 44**
+> ### Field results — 2026-09-16
+> **51.0% mean · 47.5% median · 18 of 44 winning matchups · rank 26 of 45**
 >
 > Best `meta_ns_zoroark` 93% · worst `scovillain_salazzle_spicy_rage` 26%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

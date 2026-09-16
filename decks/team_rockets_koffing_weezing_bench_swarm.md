@@ -1,13 +1,15 @@
 # Team Rocket's Koffing/Weezing Bench Swarm
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **55.2% mean · 53.5% median · 27 of 43 winning matchups · rank 16 of 44**
+> ### Field results — 2026-09-16
+> **54.7% mean · 54.0% median · 28 of 44 winning matchups · rank 15 of 45**
 >
 > Best `feraligatr_munkidori_damage_transfer` 91% · worst `lurantis_heal_punish` 19%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Arbok / Team Rocket's Muk — Dangerous Laser + Dark Bell variant
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **59.1% mean · 59.0% median · 30 of 43 winning matchups · rank 10 of 44**
+> ### Field results — 2026-09-16
+> **58.7% mean · 59.0% median · 31 of 44 winning matchups · rank 10 of 45**
 >
 > Best `feraligatr_munkidori_damage_transfer` 96% · worst `panic_poison_paralysis` 28%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 

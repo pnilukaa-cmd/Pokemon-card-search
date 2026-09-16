@@ -1,13 +1,15 @@
 # Darkness Hand-Lock / Mill
 
 <!-- field-results -->
-> ### Field results — 2026-09-15
-> **37.5% mean · 33.5% median · 8 of 43 winning matchups · rank 38 of 44**
+> ### Field results — 2026-09-16
+> **37.6% mean · 36.0% median · 8 of 44 winning matchups · rank 39 of 45**
 >
 > Best `feraligatr_munkidori_damage_transfer` 86% · worst `lurantis_heal_punish` 6%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box was measured on an older engine and is not comparable** — not with this number and not with each other.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
 <!-- field-results -->
+
+
 
 
 
