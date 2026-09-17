@@ -54,6 +54,14 @@ def load_cards(path=CARDS_PATH):
 # Decklist parsing
 # --------------------------------------------------------------------------
 
+# PR-SV (the Scarlet & Violet promo set) is the one code in this pool with
+# a hyphen in it. Without it the whole line failed to split, "Raging Bolt
+# ex PR-SV" became the card NAME, nothing resolved, and the card vanished
+# from every count -- deckcheck reported a 12-Basic deck as having 8 and a
+# 34.6% mulligan rate that was really 15.5%.
+SET_CODE_RE = re.compile(r"[A-Z0-9]{2,7}[a-z]?|[A-Z]{2,4}-[A-Z]{2,4}")
+
+
 def parse_decklist_entries(text):
     """Returns [{count, name, set, number}], keeping SET/NUM when present."""
     out = []
@@ -73,8 +81,15 @@ def parse_decklist_entries(text):
             # card NAME, nothing resolved, and the card vanished from every
             # count -- deckcheck reported a 12-Basic deck as having 8 and a
             # 34.6% mulligan rate that was really 15.5%.
-            if tokens and re.fullmatch(r"[A-Za-z0-9-]{2,8}", tokens[-1]) \
-                    and tokens[-1].isupper():
+            # A set code is all upper case / digits, optionally with ONE
+            # trailing lower-case letter: M6a, the Japanese-style code the
+            # user's 30th Celebration lists arrived with. `.isupper()`
+            # rejected those, so "Mew ex M6a 57" parsed with the NAME as
+            # "Mew ex M6a" -- which then failed every lookup and reported
+            # the card as missing from the pool when the real problem was
+            # here. Requiring two upper-case characters before the optional
+            # suffix keeps short name tokens ("Ho", "ex") out.
+            if tokens and SET_CODE_RE.fullmatch(tokens[-1]):
                 set_code = tokens[-1]
                 tokens = tokens[:-1]
         name = " ".join(tokens).strip()
