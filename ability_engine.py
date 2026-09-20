@@ -53,6 +53,13 @@ def TRAINER_IR(name):
     return None
 
 
+# Fires when a Pokemon is PUT ONTO THE BENCH from hand or deck. Injected by
+# the simulator, which owns the card index and the Stadium text. Defaults to
+# a no-op, which is what every caller saw before Risky Ruins needed it.
+def ON_BENCH_ENTRY(pl, spot, log=None):
+    return None
+
+
 # How much this player wants to KEEP a card in hand, low = pitch it first.
 # Injected by the simulator, which is where deck knowledge lives. Defaults
 # to "no preference", which reproduces the old blind behaviour.
@@ -813,6 +820,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 break
             if make_inplay:
                 pl.bench.append(make_inplay(card[1]))
+                ON_BENCH_ENTRY(pl, pl.bench[-1], log)
                 placed.append(card[1])
         if placed:
             log.append(f"    bench {', '.join(placed)}")
@@ -1224,6 +1232,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pl.discard.remove(nm)
             if make_inplay:
                 pl.bench.append(make_inplay(nm))
+                ON_BENCH_ENTRY(pl, pl.bench[-1], log)
             placed.append(nm)
         if placed:
             log.append(f"    recover {', '.join(placed)} to the Bench")

@@ -786,6 +786,51 @@ def play_basics(pl, turn, log):
             pl.remove_from_hand(kind, name)
             pl.bench.append(InPlay(name, turn))
             log.append(f"  {pl.name}: benches {name}")
+            on_bench_entry(pl, pl.bench[-1], log)
+
+
+# Risky Ruins is the only card in this pool that fires when a Pokemon is
+# PUT ONTO THE BENCH, and the Ability IR has no such trigger: it compiled
+# the card as a plain `passive` PLACE_COUNTERS, which no consumer reads, so
+# the Stadium was played and then did nothing at all. Matched on the
+# WORDING rather than the card name so a second printing of the same text
+# is covered without another edit.
+_BENCH_ENTRY_RE = _re.compile(
+    r"whenever any player puts a (?P<basic>basic )?"
+    r"(?:non-(?P<not_type>[\w]+) )?pok[e\u00e9]mon onto their bench"
+    r"[^.]*?place (?P<n>\d+) damage counters? on that pok[e\u00e9]mon",
+    _re.I)
+
+
+def on_bench_entry(pl, spot, log=None):
+    """Apply the in-play Stadium's bench-entry text to a Pokemon just benched.
+
+    Called from every site that puts a Pokemon onto the Bench from hand or
+    deck -- NOT from retreat or promotion, which move a Pokemon that is
+    already in play and are not "puts onto their Bench".
+    """
+    name = getattr(pl, "stadium", None) or getattr(pl, "_opp_stadium", None)
+    if not name:
+        return
+    if not _CARDS_BY_NAME:
+        _CARDS_BY_NAME.update(M.build_card_index(M.load_cards())[0])
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else card
+    if not isinstance(card, dict):
+        return
+    m = _BENCH_ENTRY_RE.search(" ".join(card.get("rules") or []))
+    if not m:
+        return
+    info = pl.POKEMON.get(spot.name) or {}
+    if m.group("basic") and info.get("stage") != "Basic":
+        return
+    not_type = m.group("not_type")
+    if not_type and not_type.capitalize() in (info.get("types") or []):
+        return
+    spot.damage += int(m.group("n")) * 10
+    if log is not None:
+        log.append(f"  {pl.name}: {name} puts {int(m.group('n'))} counters "
+                   f"on {spot.name}")
 
 
 def try_evolve(pl, opp, turn, log, first_turn):
@@ -906,6 +951,7 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.discard.append("Buddy-Buddy Poffin")
         for n in got:
             pl.bench.append(InPlay(n, turn))
+            on_bench_entry(pl, pl.bench[-1], log)
         log.append(f"  {pl.name}: Buddy-Buddy Poffin -> {', '.join(got)}")
 
     # Hole-Digging Shovel: discard the top 2 of your own deck. Item
@@ -1472,6 +1518,7 @@ def cards_to_pitch(pl, n, exclude=None):
 
 AE.PITCH_RANK = pitch_rank
 AE.TRAINER_IR = trainer_effect_ir
+AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
 
 
 TRAINER_IR_OPS = {
@@ -1638,6 +1685,8 @@ _MORE_DMG_FLIP_RE = _re.compile(
     r"flip a coin[^.]{0,30}\.?\s*if heads, this attack does (\d+) more damage",
     _re.I)
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
+_FLIP_PER_EACH_RE = _re.compile(r"flip a coin for each ([^.]+)", _re.I)
+_PER_HEADS_DMG_RE = _re.compile(r"does (\d+) damage[^.]*?for each heads", _re.I)
 
 
 # Tools whose whole job is Retreat Cost. Gravity Gemstone taxes BOTH
@@ -1842,6 +1891,26 @@ def _clause_count(clause, pl, opp, spot):
         a, b = m.group(1).strip(), m.group(2).strip()
         return sum(1 for n in names
                    if n.lower() == a or n.lower() == b)
+    # "for each of your Pokemon that has \"Tauros\" in its name" -- a NAME
+    # fragment in quotes rather than a family word, optionally narrowed to
+    # the ones carrying damage. Both of this shape's users are the Tauros
+    # pair: Target Together flips one coin per named Pokemon in play, and
+    # Raging Charge counts only the damaged ones. Checked BEFORE the generic
+    # "of your <family> Pokemon in play" rule below, which matches the same
+    # text with an empty family and would count the whole board.
+    m = _re.search(
+        r"of your pok[eé]mon(?: in play)? that has [\"“']([^\"”']+)[\"”'] in its name"
+        r"(?P<dmg> that has any damage counters on it)?", c)
+    if m:
+        want = m.group(1).strip().lower()
+        spots = ([spot] if spot else []) + [
+            b for b in pl.bench if b is not spot]
+        if pl.active is not None and pl.active is not spot:
+            spots.append(pl.active)
+        hits = [sp for sp in spots if want in sp.name.lower()]
+        if m.group("dmg"):
+            hits = [sp for sp in hits if sp.damage > 0]
+        return len(hits)
     # "for each of your <Family> Pokemon in play" / "of your Pokemon in play"
     m = _re.search(r"of your ([\w'’ -]*?)\s*pok[eé]mon in play", c)
     if m:
@@ -2399,6 +2468,35 @@ def attack_damage(pl, opp, spot, atk, record=True):
         m2 = _DOES_DMG_RE.search(text)
         per = int(m2.group(1)) if m2 else base
         return per * heads
+
+    # "Flip a coin for each of your Pokemon that has X in its name. This
+    # attack does 50 damage for each heads." The coin COUNT is itself a
+    # board scaler, so neither _FLIP_N_RE (which wants a literal digit) nor
+    # the generic "for each" block below reads it correctly -- the latter
+    # finds the FLIP clause first and returns the all-heads figure, i.e.
+    # exactly double the true mean.
+    m = _FLIP_PER_EACH_RE.search(text)
+    if m and "for each heads" in text.lower():
+        n = _clause_count(m.group(1), pl, opp, spot)
+        if n is not None:
+            if AE.query_reflip(pl, spot):
+                # Backtrack Badge re-flips the whole set once and keeps the
+                # better result, which is the entire reason this deck plays it.
+                a = sum(1 for _ in range(n) if random.random() < 0.5)
+                b = sum(1 for _ in range(n) if random.random() < 0.5)
+                heads = max(a, b)
+            else:
+                heads = sum(1 for _ in range(n) if random.random() < 0.5)
+            # NOT _DOES_DMG_RE: that is "does N damage for each", and this
+            # card says "does 50 damage TO THE CHOSEN POKEMON for each
+            # heads". The interposed phrase breaks the adjacent match and
+            # the per-heads figure silently fell back to base, which is 0
+            # on this card -- so the attack dealt nothing at all.
+            m2 = _PER_HEADS_DMG_RE.search(text) or _DOES_DMG_RE.search(text)
+            per = int(m2.group(1)) if m2 else (base or 0)
+            return per * heads
+        elif record:
+            UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
 
     fe = _FOR_EACH_RE.search(text)
     if fe:
