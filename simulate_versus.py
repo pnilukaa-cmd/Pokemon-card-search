@@ -308,6 +308,11 @@ _PROVIDES_EVERY_IF_RE = _re.compile(
     _re.I)
 
 
+_PROVIDES_N_IF_RE = _re.compile(
+    r"if this card is attached to an? ([\w' ]+?) pok[e\u00e9]mon, "
+    r"it provides ([A-Za-z]+) energy instead", _re.I)
+
+
 def energy_provisions(card_name, cards_by_name, stage=None):
     """The Energy a single card provides, as one entry PER Energy.
 
@@ -350,6 +355,25 @@ def energy_provisions(card_name, cards_by_name, stage=None):
         return [[mm.group(1).capitalize()]] if mm else [["Colorless"]]
     if _PROVIDES_EVERY_RE.search(text):
         return [list(M.REAL_TYPES)]
+    # "If this card is attached to an Evolution Pokemon, it provides
+    # ColorlessColorlessColorless Energy INSTEAD." Ignition Energy is the
+    # only card in the pool with this shape, and _PROVIDES_ONE_RE below
+    # matched its first sentence and returned a single Colorless -- a third
+    # of what it provides on the Stage 2s it is played for. Checked before
+    # that rule, which would otherwise always win.
+    m = _PROVIDES_N_IF_RE.search(text)
+    if m:
+        want = m.group(1).strip().lower()
+        types = [t.capitalize() for t in
+                 _re.findall("|".join(M.REAL_TYPES), m.group(2), _re.I)]
+        met = (stage is not None
+               and (stage.lower() != "basic" if want == "evolution"
+                    else stage.lower() == want))
+        if met and types:
+            return [[t] for t in types]
+        mm = _PROVIDES_ONE_RE.search(text)
+        if mm:
+            return [[mm.group(1).capitalize()]]
     m = _PROVIDES_ONE_RE.search(text)
     if m:
         return [[m.group(1).capitalize()]]
@@ -1690,6 +1714,7 @@ _MORE_DMG_FLIP_RE = _re.compile(
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 _FLIP_PER_EACH_RE = _re.compile(r"flip a coin for each ([^.]+)", _re.I)
 _PER_HEADS_DMG_RE = _re.compile(r"does (\d+) damage[^.]*?for each heads", _re.I)
+_DOES_DMG_LOOSE_RE = _re.compile(r"does (\d+) damage[^.]*?for each", _re.I)
 
 
 # Tools whose whole job is Retreat Cost. Gravity Gemstone taxes BOTH
@@ -1853,6 +1878,14 @@ def _clause_count(clause, pl, opp, spot):
         return sum(s.damage // 10 for s in spots)
     if "damage counter on your opponent's active" in c:
         return (opp.active.damage // 10) if opp.active else 0
+    # "does 30 damage to 1 of your opponent's Pokemon for each damage
+    # counter on THAT POKEMON" -- Greninja ex 30C's Stealthy Slash. "That
+    # Pokemon" is whichever one the attack chose; the engine resolves
+    # damage against the Active, so that is the one this counts. The Bench
+    # reading is the card's real power and is NOT modelled, so this is a
+    # floor on the attack, never an overstatement.
+    if "damage counter on that pok" in c:
+        return (opp.active.damage // 10) if opp and opp.active else 0
     if "damage counter on this pok" in c:
         return spot.damage // 10
     if "prize card your opponent has taken" in c:
@@ -2511,7 +2544,11 @@ def attack_damage(pl, opp, spot, atk, record=True):
             m = _MORE_DMG_RE.search(text)
             if m:                      # "does N more damage for each X"
                 return base + int(m.group(1)) * count
-            m = _DOES_DMG_RE.search(text)
+            # _DOES_DMG_RE wants "does N damage for each" adjacent. Cards
+            # that name their target in between ("does 30 damage to 1 of
+            # your opponent's Pokemon for each damage counter") broke the
+            # match and fell through to base, which is 0 on those cards.
+            m = _DOES_DMG_RE.search(text) or _DOES_DMG_LOOSE_RE.search(text)
             if m:                      # "does N damage for each X"
                 return int(m.group(1)) * count
             if base:
