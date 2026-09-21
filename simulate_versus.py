@@ -1715,6 +1715,8 @@ _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 _FLIP_PER_EACH_RE = _re.compile(r"flip a coin for each ([^.]+)", _re.I)
 _PER_HEADS_DMG_RE = _re.compile(r"does (\d+) damage[^.]*?for each heads", _re.I)
 _DOES_DMG_LOOSE_RE = _re.compile(r"does (\d+) damage[^.]*?for each", _re.I)
+_ALSO_DOES_FOR_EACH_RE = _re.compile(
+    r"also does (\d+) damage to[^.]*?for each", _re.I)
 
 
 # Tools whose whole job is Retreat Cost. Gravity Gemstone taxes BOTH
@@ -2533,6 +2535,17 @@ def attack_damage(pl, opp, spot, atk, record=True):
             return per * heads
         elif record:
             UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
+
+    # "This attack does 130 damage. It ALSO does 10 damage to each of your
+    # opponent's Benched Pokemon FOR EACH Prize card your opponent has
+    # taken." The scaling clause belongs to the SECONDARY sentence; the
+    # main damage is the printed base and the splash is a rider. Kyurem ex
+    # and Palafin are the two cards in the pool shaped this way, and both
+    # were being scored as base * count -- 130 x three Prizes is 390 for an
+    # attack that hits the Active for 130.
+    also = _ALSO_DOES_FOR_EACH_RE.search(text)
+    if also and (not _FOR_EACH_RE.search(text[:also.start()])):
+        return base
 
     fe = _FOR_EACH_RE.search(text)
     if fe:
