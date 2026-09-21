@@ -150,3 +150,54 @@ engine's answer, not a deckbuilding instruction.
 
 The parts that are mechanically explicable and safe either way: the three
 Darkness Energy pay no `F` cost, and Tatsugiri cannot attack.
+
+## Under the pilot team: greedy wins, and the Energy finding survives all five
+
+The recommended list against the whole field under each pilot. **Field
+deltas**, pilot varied only on the Tauros side, CRN seed held per pairing.
+
+| pilot | selection Δ | held-out Δ | held-out 95% CI |
+|---|---|---|---|
+| prizewise | +0.20 | **+1.06** | [−0.16, +2.27] |
+| control | −0.39 | **+0.97** | [−0.37, +2.30] |
+| aggro | −1.58 | **−0.23** | [−1.20, +0.73] |
+| setup | −2.49 | **−1.84** | [−3.33, −0.36] |
+
+Nothing beats greedy: the two positives both span zero on both seed sets.
+`setup` is significantly worse on both, which is now the third deck in a
+row where it is the weakest driver.
+
+Best pilot per opponent: **+2.34** on selection seeds, **+0.36** held out.
+Noise, again.
+
+### The 16-Energy caveat, tested rather than left hanging
+
+This file recorded a caveat: 16 Basic Energy in a 60-card deck is very
+high for real play, and the result might be an artifact of a pilot that
+attaches on every legal turn and never holds a card back. The pilots
+differ in exactly those behaviours — `setup` sets `energy_to_active:
+False`, `control` weights `pitch_energy_guard` at 1.8 against greedy's
+1.0 — so the list AS SUBMITTED was run under all five as well.
+
+**Every pilot agrees, and by almost the same margin:**
+
+| pilot | 9 Energy | 16 Fighting | gap | 95% CI |
+|---|---|---|---|---|
+| greedy | 45.70% | 62.80% | **+17.10** | [+15.07, +19.13] |
+| prizewise | 46.07% | 63.00% | **+16.93** | [+14.81, +19.06] |
+| setup | 43.94% | 60.31% | **+16.37** | [+14.06, +18.67] |
+| aggro | 45.10% | 61.22% | **+16.12** | [+13.89, +18.36] |
+| control | 46.66% | 62.41% | **+15.76** | [+13.92, +17.59] |
+
+The spread of pilot deltas is **2.69 points on the 16-Energy list and 2.71
+on the 9-Energy list** — the pilots disagree about the two lists by the
+same negligible amount. No driver with different attachment or pitch
+discipline rescues the thin list or punishes the fat one.
+
+**What that does and does not settle.** It rules out the specific worry
+written above: the result is not sensitive to these five pilots' knobs. It
+does not show a human would agree — a person sequences in ways no knob
+here captures, and none of these pilots can hold a card for the turn it
+matters. The caveat is narrowed, not withdrawn. 12–13 Energy still
+captures most of the gain in a list that looks like something a person
+would build.
