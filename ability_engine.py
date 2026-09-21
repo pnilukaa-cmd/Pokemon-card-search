@@ -26,6 +26,7 @@ Ops with no handler here are counted in `UNEXECUTED_OPS` and reported, so
 "the IR understood this card" and "the engine can act on it" stay
 separate, honestly-measured things.
 """
+import re
 import random
 from collections import Counter
 
@@ -1734,7 +1735,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
               IR.Op.MODIFY_RETREAT, IR.Op.LOCK, IR.Op.MODIFY_HP,
               IR.Op.MODIFY_ATTACK_COST, IR.Op.GRANT_ATTACK_ACCESS,
               IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,
-              IR.Op.WEAKNESS_MULTIPLIER,   # query_weakness_multiplier   # EVOLVE_EARLY: query_evolves_early
+              IR.Op.WEAKNESS_MULTIPLIER,   # query_weakness_multiplier
+              IR.Op.GRANT_BENCH_ATTACKS,   # query_extra_attacks   # EVOLVE_EARLY: query_evolves_early
               IR.Op.ATTACK_FIRST_TURN, IR.Op.MODIFY_PRIZE, IR.Op.ENDURE,
               IR.Op.BUFF_CONDITION_DAMAGE, IR.Op.SET_TYPE,
               IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,
@@ -2085,6 +2087,25 @@ def query_extra_attacks(pl, spot):
         if not conditions_met(eff, pl, pl, holder):
             continue
         granted = True
+    # Mew ex's Memory Helix lends the whole BENCH, not an evolution chain.
+    # Copy-attacks are excluded so a borrow cannot borrow a borrow, which is
+    # the recursion test_copy_attacks_cannot_recurse_forever guards.
+    for holder, eff, act in _passive_actions(pl, IR.Op.GRANT_BENCH_ATTACKS):
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if not conditions_met(eff, pl, pl, holder):
+            continue
+        for b in pl.bench:
+            if b is spot:
+                continue
+            for a in (pl.POKEMON.get(b.name) or {}).get("attacks") or []:
+                if a["name"] in seen:
+                    continue
+                if re.search(r"use it as this attack|can use the attacks of",
+                             a.get("text") or "", re.I):
+                    continue
+                seen.add(a["name"])
+                extra.append(a)
     if not granted:
         return extra
     name = (pl.POKEMON.get(spot.name) or {}).get("evolves_from")

@@ -110,6 +110,9 @@ class Op:
     # stay on the new Pokemon. Transformation Tome and Ogre's Mask.
     SWAP_IN_PLACE = "swap_in_place"
     ATTACK_FIRST_TURN = "attack_first_turn"
+    # Mew ex's Memory Helix: every Benched Pokemon's attacks, not just
+    # the pre-evolution chain GRANT_ATTACK_ACCESS already walks.
+    GRANT_BENCH_ATTACKS = "grant_bench_attacks"
     SET_WEAKNESS = "set_weakness"
     # "apply Weakness for both Active Pokemon as x3". The engine had no
     # multiplier concept at all -- Weakness was a hard-coded `dmg *= 2`.
@@ -2338,6 +2341,12 @@ def _r(m, text):
 @rule("attack_first_turn", r"can use attacks during your first turn")
 def _r(m, text):
     return [Action(Op.ATTACK_FIRST_TURN, None, Target.SELF)]
+
+
+@rule("grant_bench_attacks",
+      r"can use the attacks of any of your benched pok[e\u00e9]mon")
+def _r(m, text):
+    return [Action(Op.GRANT_BENCH_ATTACKS, None, Target.SELF)]
 
 
 @rule("weakness_multiplier",
