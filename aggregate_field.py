@@ -48,28 +48,35 @@ out = [f"# Field results — every deck against every other deck\n",
        f"**{games} games** per pairing, {len(wins)} pairings, "
        f"{len(wins)*games:,} games. Each pairing uses its own fixed seed, so "
        f"a re-run of this field reproduces exactly.\n",
-       f"Measured {stamp}, after the Stadium-passive fix. **These "
-       f"supersede every number in the deck files before this date** and "
-       f"are not comparable with the 2026-09-15 field: the engine changed "
-       f"materially in between.\n",
-       "What changed since 2026-09-15. Three engine bugs, each of which had "
-       "been silently suppressing real card text:\n"
-       "- **20 Stadium passives were inert.** `_passive_actions` only ever "
-       "walked Pokemon Abilities, so a Stadium's own compiled effect reached "
-       "nothing. Stadiums now contribute their actions with `holder=None`, "
-       "and third-person Stadium text (\"that player may search *their* "
-       "deck\") is normalised to first person before it compiles.\n"
-       "- **Stadiums a deck wanted but did not name were never played.** "
-       "`_stadium_has_effect` asked only whether the Stadium\u2019s own text "
-       "compiled. A Stadium that any of your cards *names* is now worth "
-       "playing, which is why `Festival Grounds` had never once hit the "
-       "table.\n"
-       "- **Blind discards threw away the wrong cards.** Costs that discard "
-       "from hand picked arbitrarily; they now rank by `pitch_rank`.\n",
-       "One new deck joined the field: `metal_metang_excadrill`, the list "
-       "reviewed on 2026-09-16. Every other deck is unchanged, so a "
-       "like-for-like delta against the previous field is in the section "
-       "below the table.\n",
+       f"Measured {stamp}, after the Fossil-setup fix. **These supersede "
+       f"every number in the deck files before this date.**\n",
+       "What changed, and what did NOT.\n",
+       "- **A Fossil is an Item, so it cannot be your opening Pokemon.** Its "
+       "text says to play it *as if it were* a Basic Pokemon, and Items are "
+       "played during your turn -- setup is not your turn. Fossils had been "
+       "counted as Basics everywhere, including for the opening hand. This is "
+       "the only change that moved the field, and it moved one deck: "
+       "`selective_bloom_cradily` runs 4 Lileep, 4 Cradily and 4 Antique Root "
+       "Fossil, has **zero Basic Pokemon**, and cannot start a game at all. It "
+       "goes from 51.1% at rank 25 to **0.3% at rank 45**. Its old placement "
+       "was never real. The deck file is kept rather than deleted, because "
+       "dropping a deck changes every other deck's mean.\n"
+       "- **\"100 damage for each Special Condition\" now scales** (Cradily's "
+       "Miasma Wind, Team Rocket's Muk's Hazardous Venom); it had been a flat "
+       "100.\n"
+       "- **Asleep, Confused and Paralyzed are now mutually exclusive**, so "
+       "the real ceiling is three conditions at once rather than five.\n",
+       "Those last two were expected to shake the top of the table -- five "
+       "decks run Team Rocket's Muk, including `panic_poison_paralysis` at "
+       "rank 2. **They did not.** Excluding the collapsed deck, whose free "
+       "win inflates everyone by about a point, the five Muk decks move "
+       "between -0.87 and +0.40, all inside a 1.5-point noise floor. The "
+       "scaler makes the attack hit harder and the exclusivity cap means "
+       "fewer conditions to count; the two cancel. The only decks clearing "
+       "the floor are `kyurem_vanilluxe_blizzard` (+1.66) and "
+       "`meta_dragapult_pure` (+1.55), and both match the Blizzard Burst and "
+       "Risky Ruins deltas already measured against this same stale baseline "
+       "-- they are not today's work.\n",
        "| # | deck | mean | median | winning | best matchup | worst |",
        "|---|---|---|---|---|---|---|"]
 for i, n in enumerate(order, 1):

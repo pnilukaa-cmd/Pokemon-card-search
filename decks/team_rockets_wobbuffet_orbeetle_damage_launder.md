@@ -1,13 +1,15 @@
 # Team Rocket's Wobbuffet / Orbeetle Damage-Laundering Control
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **25.0% mean · 21.5% median · 4 of 44 winning matchups · rank 43 of 45**
+> ### Field results — 2026-09-21
+> **27.1% mean · 22.8% median · 4 of 44 winning matchups · rank 42 of 45**
 >
-> Best `meta_ns_zoroark` 82% · worst `lurantis_heal_punish` 5%.
+> Best `selective_bloom_cradily` 100% · worst `lurantis_heal_punish` 5%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

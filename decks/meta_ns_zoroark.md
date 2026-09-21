@@ -1,13 +1,15 @@
 # ns_zoroark — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **13.0% mean · 10.2% median · 0 of 44 winning matchups · rank 45 of 45**
+> ### Field results — 2026-09-21
+> **14.8% mean · 10.2% median · 1 of 44 winning matchups · rank 44 of 45**
 >
-> Best `static_venom_drapion` 41% · worst `dhelmise_veluza_hide_n_sneak` 4%.
+> Best `selective_bloom_cradily` 100% · worst `dhelmise_veluza_hide_n_sneak` 4%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

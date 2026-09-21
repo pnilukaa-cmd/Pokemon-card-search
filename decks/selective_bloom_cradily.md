@@ -1,13 +1,41 @@
 # Selective Bloom (Antique Root Fossil / Lileep / Cradily)
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **51.1% mean · 48.0% median · 20 of 44 winning matchups · rank 25 of 45**
+> ### Field results — 2026-09-21
+> **0.3% mean · 0.0% median · 0 of 44 winning matchups · rank 45 of 45**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 86% · worst `meta_mega_excadrill` 15%.
+> Best `chandelure_centiskorch_deck_out` 2% · worst `arbok_muk_laser_darkbell` 0%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+## This deck cannot start a game
+
+It runs 4 Lileep (Stage 1), 4 Cradily (Stage 2) and 4 Antique Root Fossil,
+and **no Basic Pokemon at all**.
+
+A Fossil is an **Item** whose text says to play it "as if it were a 60-HP
+Basic Colorless Pokemon". Items are played during your turn; setup is not
+your turn. So a Fossil cannot be your opening Pokemon and does not stop a
+mulligan. This deck therefore mulligans forever and loses on turn 1 —
+measured at **0.3%** across the field, 0 of 20 against
+`meta_mega_excadrill`.
+
+Every number recorded for this deck before 2026-09-21 was produced by an
+engine that counted Fossils as Basics. Its 51.1% at rank 25 was never real.
+
+The fix that created this state is the same one that was originally made to
+*rescue* this deck: `build_pokemon_info` began treating Fossils as Basics
+because treating them as Items left this list with zero playable Basics, so
+it mulliganed out and lost on turn 2. That outcome was correct. The rescue
+was the bug.
+
+**To make this deck playable, it needs real Basic Pokemon** — the Fossil
+line alone cannot open. The file is kept rather than deleted because
+dropping a deck from the field changes every other deck's mean.
+
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **33.8% mean · 30.8% median · 4 of 44 winning matchups · rank 41 of 45**
+> ### Field results — 2026-09-21
+> **35.7% mean · 34.0% median · 6 of 44 winning matchups · rank 40 of 45**
 >
-> Best `meta_ns_zoroark` 87% · worst `panic_poison_paralysis` 13%.
+> Best `selective_bloom_cradily` 99% · worst `team_rockets_persian_ex_attack_theft` 15%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

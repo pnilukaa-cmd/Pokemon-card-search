@@ -1,13 +1,15 @@
 # Kyurem ex / N's Vanilluxe — Blizzard
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **55.8% mean · 55.0% median · 27 of 44 winning matchups · rank 13 of 45**
+> ### Field results — 2026-09-21
+> **58.2% mean · 57.5% median · 28 of 44 winning matchups · rank 11 of 45**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 89% · worst `team_rockets_persian_ex_attack_theft` 29%.
+> Best `selective_bloom_cradily` 100% · worst `meta_mega_excadrill` 25%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 ## This deck is piloted badly by greedy — and it is measurable
 

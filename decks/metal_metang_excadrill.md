@@ -1,13 +1,15 @@
 # metal_metang_excadrill — Metal Maker / Mega Excadrill ex
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **55.5% mean · 55.2% median · 27 of 44 winning matchups · rank 14 of 45**
+> ### Field results — 2026-09-21
+> **55.7% mean · 53.2% median · 25 of 44 winning matchups · rank 15 of 45**
 >
-> Best `meta_ns_zoroark` 90% · worst `scovillain_salazzle_spicy_rage` 28%.
+> Best `selective_bloom_cradily` 100% · worst `scovillain_salazzle_spicy_rage` 28%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 **Not my list.** Submitted by the user for review. Reproduced card-for-card

@@ -1,13 +1,15 @@
 # Toxic Slumber (Erika's Oddish / Gloom / Vileplume ex)
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **59.9% mean · 62.0% median · 34 of 44 winning matchups · rank 8 of 45**
+> ### Field results — 2026-09-21
+> **60.4% mean · 62.0% median · 33 of 44 winning matchups · rank 8 of 45**
 >
-> Best `feraligatr_munkidori_damage_transfer` 94% · worst `lurantis_heal_punish` 32%.
+> Best `selective_bloom_cradily` 100% · worst `lurantis_heal_punish` 32%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

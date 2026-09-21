@@ -1,13 +1,15 @@
 # Feraligatr / Munkidori Damage-Transfer Engine
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **18.6% mean · 15.0% median · 1 of 44 winning matchups · rank 44 of 45**
+> ### Field results — 2026-09-21
+> **20.3% mean · 15.2% median · 2 of 44 winning matchups · rank 43 of 45**
 >
-> Best `meta_ns_zoroark` 80% · worst `arbok_muk_laser_darkbell` 4%.
+> Best `selective_bloom_cradily` 98% · worst `panic_poison_paralysis` 5%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

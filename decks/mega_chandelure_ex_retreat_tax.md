@@ -1,13 +1,15 @@
 # Mega Chandelure ex — retreat tax
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **56.6% mean · 59.0% median · 31 of 44 winning matchups · rank 12 of 45**
+> ### Field results — 2026-09-21
+> **56.8% mean · 58.8% median · 29 of 44 winning matchups · rank 13 of 45**
 >
-> Best `feraligatr_munkidori_damage_transfer` 88% · worst `panic_poison_paralysis` 28%.
+> Best `selective_bloom_cradily` 100% · worst `panic_poison_paralysis` 27%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 

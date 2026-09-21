@@ -1,13 +1,15 @@
 # Mega Kangaskhan ex / Tyrantrum — flip-until-tails
 
 <!-- field-results -->
-> ### Field results — 2026-09-16
-> **50.1% mean · 49.8% median · 21 of 44 winning matchups · rank 27 of 45**
+> ### Field results — 2026-09-21
+> **52.5% mean · 52.8% median · 25 of 44 winning matchups · rank 23 of 45**
 >
-> Best `meta_ns_zoroark` 90% · worst `team_rockets_persian_ex_attack_theft` 26%.
+> Best `selective_bloom_cradily` 100% · worst `team_rockets_persian_ex_attack_theft` 24%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Stadium-passive fix and is not comparable**: 20 Stadiums had inert passives, Stadiums a deck wanted but did not name by text were never played at all, and blind discard costs pitched arbitrary cards instead of ranking them.
+> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
 <!-- field-results -->
+
+
 
 
 
