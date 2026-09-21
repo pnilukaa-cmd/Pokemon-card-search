@@ -2688,6 +2688,24 @@ def _attack_ir(atk):
     return eff
 
 
+def _expected_heads(flips, reflip):
+    """Expected heads from `flips` coins, or from the better of two sets
+    when a Tool lets you re-flip (Backtrack Badge)."""
+    if flips <= 0:
+        return 0.0
+    if not reflip:
+        return flips / 2.0
+    from math import comb
+    p = [comb(flips, k) / (2 ** flips) for k in range(flips + 1)]
+    cdf, out, run = [], 0.0, 0.0
+    for k in range(flips + 1):
+        run += p[k]; cdf.append(run)
+    for k in range(flips + 1):
+        below = cdf[k - 1] if k else 0.0
+        out += k * (cdf[k] ** 2 - below ** 2)
+    return out
+
+
 def attack_rider_value(pl, opp, atk, spot=None):
     """Damage-equivalent worth of an attack's side effects, right now.
 
@@ -2747,7 +2765,18 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # play the deck-out plan at all -- the same shape of bug that
             # made Special-Condition decks unplayable before RIDER_VALUE.
             left = max(len(opp.deck), 1)
-            value += (act.amount or 1) / left * 6 * 250
+            # "for each heads" mills act.amount PER HEADS, with one coin per
+            # Maushold in play. Pricing it at the flat act.amount valued a
+            # full board's 5.1 cards at 2, so the greedy pilot preferred
+            # Pound's 40 damage and used the deck-out attack 3.5 times in a
+            # 21-turn game. The executor already scales the mill itself;
+            # this is the valuation catching up.
+            per = (act.filter or {}).get("per_heads")
+            n = (act.amount or 1)
+            if per:
+                flips = _clause_count(per, pl, opp, spot)
+                n = n * _expected_heads(flips or 0, AE.query_reflip(pl, spot))
+            value += n / left * 6 * 250
         elif act.op == IR.Op.DISCARD_FROM_OPPONENT:
             value += 10 * (act.amount or 1)
         elif act.op == IR.Op.DAMAGE_TO_HP_THRESHOLD:
