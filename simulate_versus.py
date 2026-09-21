@@ -1557,6 +1557,9 @@ def cards_to_pitch(pl, n, exclude=None):
 AE.PITCH_RANK = pitch_rank
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
+# A lambda, not the function object: the hooks are wired well above
+# where _clause_count is defined, so bind it at call time.
+AE.CLAUSE_COUNT = lambda clause, pl, opp, spot: _clause_count(clause, pl, opp, spot)
 
 
 TRAINER_IR_OPS = {
@@ -1967,6 +1970,12 @@ def _clause_count(clause, pl, opp, spot):
         if m.group("dmg"):
             hits = [sp for sp in hits if sp.damage > 0]
         return len(hits)
+    # "flip a coin for each MAUSHOLD YOU HAVE IN PLAY" -- a bare card name
+    # with no "Pokemon" in the phrase, which none of the rules above reach.
+    m = _re.search(r"^([\w'’ -]+?) you have in play$", clause.strip(), _re.I)
+    if m:
+        want = m.group(1).strip().lower()
+        return sum(1 for n in pl.in_play_names() if want in n.lower())
     # "for each of your <Family> Pokemon in play" / "of your Pokemon in play"
     m = _re.search(r"of your ([\w'’ -]*?)\s*pok[eé]mon in play", c)
     if m:

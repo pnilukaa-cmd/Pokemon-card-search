@@ -92,6 +92,12 @@ def ON_BENCH_ENTRY(pl, spot, log=None):
     return None
 
 
+# How many times a "for each ..." clause applies right now. Injected by the
+# simulator, which owns the board vocabulary. None means "cannot count it".
+def CLAUSE_COUNT(clause, pl, opp, spot):
+    return None
+
+
 # How much this player wants to KEEP a card in hand, low = pitch it first.
 # Injected by the simulator, which is where deck knowledge lives. Defaults
 # to "no preference", which reproduces the old blind behaviour.
@@ -972,7 +978,22 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return bool(got)
 
     if op == O.MILL_OPPONENT:
-        n = min(act.amount or 1, len(opp.deck))
+        each = act.amount or 1
+        per = (act.filter or {}).get("per_heads")
+        if per:
+            # "Flip a coin for each Maushold you have in play. For each
+            # heads, discard the top 2 cards." The coin COUNT is a board
+            # count and the mill happens once per heads, so a flat
+            # act.amount milled a third of the real figure on a full board.
+            flips = CLAUSE_COUNT(per, pl, opp, source)
+            if flips is None:
+                flips = 1
+            heads = sum(1 for _ in range(flips) if random.random() < 0.5)
+            if source is not None and query_reflip(pl, source):
+                again = sum(1 for _ in range(flips) if random.random() < 0.5)
+                heads = max(heads, again)
+            each = each * heads
+        n = min(each, len(opp.deck))
         for _ in range(n):
             opp.discard.append(opp.deck.pop()[1])
         if n:

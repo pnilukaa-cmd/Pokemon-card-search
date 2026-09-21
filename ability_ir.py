@@ -1491,6 +1491,16 @@ def _r(m, text):
 
 @rule("mill_opponent", r"discard the (?:top|bottom) (?:(\d+) )?cards? of your opponent'?s deck")
 def _r(m, text):
+    # "Flip a coin for each Maushold you have in play. FOR EACH HEADS,
+    # discard the top 2 cards of your opponent's deck." The mill is not a
+    # flat amount -- it happens once per heads, and the number of coins is
+    # itself a board count. Maushold's Gnaw Together is the only card in
+    # the pool with this shape; the other seven "flip a coin for each X ...
+    # for each heads" attacks all scale DAMAGE, which attack_damage owns.
+    per = re.search(r"flip a coin for each ([^.]+)\.", text, re.I)
+    if per and re.search(r"for each heads", text, re.I):
+        return [Action(Op.MILL_OPPONENT, _num(m.group(1)), Target.OPPONENT,
+                       {"per_heads": per.group(1).strip()})]
     return [Action(Op.MILL_OPPONENT, _num(m.group(1)), Target.OPPONENT)]
 
 
