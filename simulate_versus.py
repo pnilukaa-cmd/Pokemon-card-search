@@ -259,7 +259,18 @@ class Player:
         return [p.name for p in self.in_play()]
 
     def has_basic_in_hand(self):
-        return any(k == "Pokemon" and self.POKEMON[n]["stage"] == "Basic"
+        """A Basic Pokemon you could legally open on.
+
+        A Fossil is an ITEM whose text says to play it "as if it were" a
+        Basic Pokemon -- and Items are played during your turn, which setup
+        is not. So a Fossil does NOT satisfy the opening-hand requirement
+        and does not stop a mulligan. Counting it as one made a deck whose
+        only "Basics" are Fossils look playable when it cannot start a game
+        at all.
+        """
+        return any(k == "Pokemon"
+                   and self.POKEMON[n]["stage"] == "Basic"
+                   and not self.POKEMON[n].get("is_fossil")
                    for k, n in self.hand)
 
     def remove_from_hand(self, kind, name):

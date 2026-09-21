@@ -29,6 +29,7 @@ MIN_BASICS_ADVISED = 8
 class Result:
     size: int = 0
     basics: int = 0
+    fossils: int = 0
     mulligan_pct: float = 0.0
     ace_specs: list = field(default_factory=list)
     errors: list = field(default_factory=list)
@@ -87,8 +88,13 @@ def validate(decklist_text, cards=None):
                 f"carries a different printing; matched by name")
         resolved.append((entry, card))
         r.size += entry["count"]
-        if (card.get("supertype") == "Pokémon" or M.fossil_stats(card)) \
-                and M.stage_of(card) == "Basic":
+        # A Fossil is an Item that plays "as if it were" a Basic Pokemon
+        # DURING YOUR TURN. Setup is not your turn, so it cannot be your
+        # opening Pokemon and does not stop a mulligan. Counted separately:
+        # it is a body you can get onto the Bench, but not an opener.
+        if M.fossil_stats(card):
+            r.fossils += entry["count"]
+        elif card.get("supertype") == "Pokémon" and M.stage_of(card) == "Basic":
             r.basics += entry["count"]
         if "ACE SPEC" in (card.get("subtypes") or []):
             # Per COPY, not per name. Counting distinct names let 3 copies
@@ -117,6 +123,14 @@ def validate(decklist_text, cards=None):
 
     # --- playability ------------------------------------------------------
     r.mulligan_pct = mulligan_pct(r.basics, r.size or 60)
+    # basics == 0 already raises "no Basic Pokemon" below; adding a second
+    # error for the same fact would just double-report it.
+    if r.fossils:
+        r.warnings.append(
+            f"{r.fossils} Fossil(s) are Items, not Basics: they do not stop "
+            f"a mulligan. Mulligan is {r.mulligan_pct:.2f}% on {r.basics} "
+            f"real Basics, not "
+            f"{mulligan_pct(r.basics + r.fossils, r.size or 60):.2f}%")
     if r.basics == 0:
         r.errors.append("no Basic Pokemon: this deck cannot start a game")
     elif r.basics < MIN_BASICS_ADVISED:
