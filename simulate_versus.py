@@ -729,7 +729,8 @@ def _lead_score(pl, name):
     by HP led with support pieces like Munkidori (110 HP, Ability-only) over
     the deck's actual attacker."""
     info = pl.POKEMON[name]
-    evolves_into = any(o["evolves_from"] == name for o in pl.POKEMON.values())
+    printed = M.base_of(pl.POKEMON, name)
+    evolves_into = any(o["evolves_from"] == printed for o in pl.POKEMON.values())
     has_attack = any(a["damage"] > 0 for a in info["attacks"])
     return (2 if evolves_into else 0) + (1 if has_attack else 0), info["hp"]
 
@@ -841,7 +842,7 @@ def try_evolve(pl, opp, turn, log, first_turn):
         if not pre:
             continue
         for spot in pl.in_play():
-            if spot.name != pre:
+            if M.base_of(pl.POKEMON, spot.name) != pre:
                 continue
             # Normal timing: the Pokemon must have been in play since a
             # previous turn, and one Pokemon evolves at most once per turn.
@@ -890,11 +891,12 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
             # Rare Candy silently refuse in every deck that runs the Basic
             # and the Stage 2 without the Stage 1, which is the normal way
             # to build a Rare Candy line.
-            if pl.POKEMON.get(s1):
-                s1_from = pl.POKEMON[s1]["evolves_from"]
+            mid = M.info_named(pl.POKEMON, s1)
+            if mid:
+                s1_from = mid["evolves_from"]
             else:
                 s1_from = _evolves_from_in_pool(s1)
-            if s1_from == spot.name:
+            if s1_from == M.base_of(pl.POKEMON, spot.name):
                 pl.remove_from_hand("Item", "Rare Candy")
                 pl.discard.append("Rare Candy")
                 pl.remove_from_hand("Pokemon", name)
@@ -920,7 +922,8 @@ def want_pokemon(pl, name):
     info = pl.POKEMON[name]
     if info["stage"] == "Basic":
         return True
-    return info["evolves_from"] in pl.in_play_names()
+    return info["evolves_from"] in [M.base_of(pl.POKEMON, n)
+                                    for n in pl.in_play_names()]
 
 
 def play_items(pl, opp, turn, log, first_turn):
@@ -1476,7 +1479,7 @@ def pitch_rank(pl, kind, name):
             # fifth one with a full Bench is not.
             return 25 if len(pl.in_play()) < 4 else 12
         pre = info.get("evolves_from")
-        if pre in pl.in_play_names():
+        if pre in [M.base_of(pl.POKEMON, n) for n in pl.in_play_names()]:
             return 28
         # A Stage 1 with no Stage 1 target is NOT a dead card while its
         # pre-evolution is still in the deck -- that is next turn's Poffin.
@@ -2699,7 +2702,7 @@ def attack_rider_value(pl, opp, atk, spot=None):
                              )[:act.amount]
             for t in hit:
                 info = opp.POKEMON.get(t.name) or {}
-                prev = opp.POKEMON.get(info.get("evolves_from")) or {}
+                prev = M.info_named(opp.POKEMON, info.get("evolves_from")) or {}
                 value += max(0, (info.get("hp") or 0) - (prev.get("hp") or 0))
         elif act.op == IR.Op.PLACE_COUNTERS and act.target in (
                 IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):

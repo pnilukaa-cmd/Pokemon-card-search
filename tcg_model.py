@@ -254,6 +254,12 @@ def build_pokemon_info(card):
         break
     return {
         "stage": stage_of(card),
+        # The name as PRINTED. A decklist may legally hold two different
+        # cards under one name (Greninja ex TWM 106 and 30C 21; Applin
+        # TWM 17 and TWM 126), and build_deck_model then keys them apart --
+        # but `evolves_from` on every other card still names the printed
+        # form, so evolution has to match on this rather than on the key.
+        "base_name": card.get("name"),
         "evolves_from": card.get("evolvesFrom"),
         "hp": int(card.get("hp") or 0),
         "retreat": retreat,
@@ -518,6 +524,7 @@ def build_deck_model(text, cards=None):
     by_name, by_setnum = build_card_index(cards)
     POKEMON, DECKLIST = {}, []
     fallback_pooled, unresolved = set(), []
+    collisions = {}
     for entry in entries:
         name, count = entry["name"], entry["count"]
         if BASIC_ENERGY_RE.match(name):
@@ -531,9 +538,21 @@ def build_deck_model(text, cards=None):
             fallback_pooled.add(name)
         supertype = card.get("supertype")
         if supertype == "Pokémon" or fossil_stats(card):
-            if name not in POKEMON:
-                POKEMON[name] = build_pokemon_info(card)
-            DECKLIST += [("Pokemon", name)] * count
+            # Two entries can share a name and be DIFFERENT cards. Keeping
+            # "first one wins" silently turned 2 Greninja ex 30C 21 into 2
+            # more Greninja ex TWM 106 -- a different type, different HP and
+            # a different pair of attacks -- with nothing reported. When
+            # that happens, key the later printings apart.
+            key = name
+            if name in POKEMON and POKEMON[name].get("_card_id") != card.get("id"):
+                key = (f"{name} ({entry['set']} {entry['number']})"
+                       if entry.get("set") and entry.get("number")
+                       else f"{name} #{len(POKEMON)}")
+                collisions.setdefault(name, []).append(key)
+            if key not in POKEMON:
+                POKEMON[key] = build_pokemon_info(card)
+                POKEMON[key]["_card_id"] = card.get("id")
+            DECKLIST += [("Pokemon", key)] * count
         elif supertype == "Energy":
             DECKLIST += [("Energy", name)] * count
         else:
@@ -547,7 +566,26 @@ def build_deck_model(text, cards=None):
             else:
                 kind = "Item"
             DECKLIST += [(kind, name)] * count
+    build_deck_model.collisions = collisions
     return POKEMON, DECKLIST, fallback_pooled, unresolved
+
+
+def base_of(POKEMON, key):
+    """The printed name behind a (possibly disambiguated) POKEMON key."""
+    return (POKEMON.get(key) or {}).get("base_name", key)
+
+
+def keys_named(POKEMON, printed):
+    """Every POKEMON key whose printed name is `printed`."""
+    return [k for k, v in POKEMON.items()
+            if (v.get("base_name") or k) == printed]
+
+
+def info_named(POKEMON, printed):
+    """One info dict for a printed name, or None. Use where the old code
+    said POKEMON.get(some_evolves_from_value)."""
+    ks = keys_named(POKEMON, printed)
+    return POKEMON[ks[0]] if ks else None
 
 
 # --------------------------------------------------------------------------

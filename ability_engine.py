@@ -45,6 +45,20 @@ UNEXECUTED_OPS = Counter()
 # shares one signature.
 DAMAGE_JUST_DEALT = [0]
 
+
+def _printed(pl, key):
+    """The name as printed behind a POKEMON key. build_deck_model keys two
+    different cards that share a name apart, and `evolves_from` always names
+    the printed form, so every evolution comparison goes through this."""
+    return ((getattr(pl, "POKEMON", None) or {}).get(key) or {}).get("base_name", key)
+
+
+def _info_named(POKEMON, printed):
+    for k, v in POKEMON.items():
+        if (v.get("base_name") or k) == printed:
+            return v
+    return None
+
 # Compiled IR for a Trainer / Tool / Energy card by name. Injected by the
 # simulator at import time: simulate_versus imports this module, so this
 # module cannot import it back to reach trainer_effect_ir. Defaults to
@@ -1402,7 +1416,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             base = None
             for spot in pl.in_play():
                 nxt = next((n for n, i in pl.POKEMON.items()
-                            if i.get("evolves_from") == spot.name
+                            if i.get("evolves_from") == _printed(pl, spot.name)
                             and any(k == "Pokemon" and x == n for k, x in pl.deck)),
                            None)
                 if nxt and not getattr(spot, "evolved_this_turn", False):
@@ -2051,7 +2065,7 @@ def query_extra_attacks(pl, spot):
         return extra
     name = (pl.POKEMON.get(spot.name) or {}).get("evolves_from")
     while name:
-        info = pl.POKEMON.get(name)
+        info = _info_named(pl.POKEMON, name)
         if not info:
             break
         for a in info.get("attacks") or []:
