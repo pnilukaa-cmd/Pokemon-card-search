@@ -158,6 +158,29 @@ def query_weakness_override(attacker_player, defender_player, defender_spot):
             return to
     return None
 
+def query_weakness_multiplier(pl, opp):
+    """The Weakness multiplier in force right now. 2 unless something says so.
+
+    Weakness was a hard-coded `dmg *= 2` -- the engine had no multiplier
+    concept at all, so Illumise's Supereffective Pheromones ("if you have
+    Volbeat in play, apply Weakness for both Active Pokemon as x3") did
+    nothing whatsoever, in a deck built on exactly that.
+
+    It says BOTH Active Pokemon, so whichever player holds it, both sides
+    read the same multiplier -- including the opponent attacking into YOUR
+    Weakness. Both boards are checked for that reason.
+    """
+    mult = 2
+    for side, other in ((pl, opp), (opp, pl)):
+        if side is None:
+            continue
+        for holder, eff, act in _passive_actions(side, IR.Op.WEAKNESS_MULTIPLIER):
+            if not conditions_met(eff, side, other, holder):
+                continue
+            mult = max(mult, act.amount or 2)
+    return mult
+
+
 def query_energy_bonus(pl, spot, typ):
     """Extra Energy a single attached card of `typ` provides.
 
@@ -1710,7 +1733,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op in (IR.Op.REDUCE_DAMAGE, IR.Op.BUFF_DAMAGE, IR.Op.PREVENT_DAMAGE,
               IR.Op.MODIFY_RETREAT, IR.Op.LOCK, IR.Op.MODIFY_HP,
               IR.Op.MODIFY_ATTACK_COST, IR.Op.GRANT_ATTACK_ACCESS,
-              IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,   # EVOLVE_EARLY: query_evolves_early
+              IR.Op.CONDITION_IMMUNITY, IR.Op.SET_WEAKNESS, IR.Op.EVOLVE_EARLY,
+              IR.Op.WEAKNESS_MULTIPLIER,   # query_weakness_multiplier   # EVOLVE_EARLY: query_evolves_early
               IR.Op.ATTACK_FIRST_TURN, IR.Op.MODIFY_PRIZE, IR.Op.ENDURE,
               IR.Op.BUFF_CONDITION_DAMAGE, IR.Op.SET_TYPE,
               IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,

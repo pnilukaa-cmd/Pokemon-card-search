@@ -3407,7 +3407,7 @@ def do_attack(pl, opp, log):
             and not getattr(opp.active, "no_weakness", False)
             and not _IGNORES_WEAKNESS_RE.search(
                 _borrowed_text(pl, opp, pl.active, atk))):
-        dmg *= 2
+        dmg *= AE.query_weakness_multiplier(pl, opp)
     # Resistance. 369 cards in this pool carry one and it was not modelled
     # at all, so every attack into a resisted type dealt 30 more damage
     # than the game allows. Applied AFTER Weakness, as the rules order it,
@@ -3595,7 +3595,8 @@ ATTACK_RIDER_OPS = {
     IR.Op.DEFENDER_TAKES_MORE, IR.Op.CLEAR_CONDITIONS,
     IR.Op.BENCH_SPLASH, IR.Op.SELF_TAKES_MORE,
     IR.Op.DELAYED_DISCARD_DEFENDER, IR.Op.EXTRA_PRIZE_ON_KO,
-    IR.Op.REMOVE_WEAKNESS, IR.Op.SET_WEAKNESS, IR.Op.MOVE_ENERGY,
+    IR.Op.REMOVE_WEAKNESS, IR.Op.SET_WEAKNESS, IR.Op.WEAKNESS_MULTIPLIER,
+    IR.Op.MOVE_ENERGY,
     IR.Op.ATTACH_ENERGY, IR.Op.RETALIATE_COUNTERS,
     IR.Op.OPP_ATTACH_FROM_DISCARD,
 }
@@ -3849,7 +3850,7 @@ def _gust_score(pl, opp, spot):
             best = attack_damage(pl, opp, pl.active, atk, record=False)
             weak = info.get("weakness")
             if weak and weak in (pl.POKEMON[pl.active.name]["types"] or []):
-                best *= 2
+                best *= AE.query_weakness_multiplier(pl, opp)
     can_ko = 1 if best >= left else 0
     return (can_ko, info.get("prize_value", 1) if can_ko else 0, -left)
 

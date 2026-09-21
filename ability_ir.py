@@ -111,6 +111,9 @@ class Op:
     SWAP_IN_PLACE = "swap_in_place"
     ATTACK_FIRST_TURN = "attack_first_turn"
     SET_WEAKNESS = "set_weakness"
+    # "apply Weakness for both Active Pokemon as x3". The engine had no
+    # multiplier concept at all -- Weakness was a hard-coded `dmg *= 2`.
+    WEAKNESS_MULTIPLIER = "weakness_multiplier"
     REVEAL_OPPONENT_HAND = "reveal_opponent_hand"
     ATTACH_TOOL = "attach_tool"
     SET_TYPE = "set_type"
@@ -326,7 +329,12 @@ def parse_conditions(text):
     m = re.search(r"were knocked out during your opponent'?s last turn", t, re.I)
     if m:
         out.append({"kind": "lost_pokemon_last_turn"})
-    m = re.search(r"if you have ([A-Z][\w'’ -]+?) in play", t)
+    # Case-sensitive on the leading "if" meant this only ever fired when the
+    # clause appeared MID-sentence. Three cards put it first -- Illumise,
+    # Shelmet and Karrablast -- and a dropped condition is worse than a
+    # missed effect: the effect then applies UNCONDITIONALLY. The name
+    # capture stays case-sensitive, since a card name is capitalised.
+    m = re.search(r"[Ii]f you have ([A-Z][\w'’ -]+?) in play", t)
     if m:
         out.append({"kind": "named_in_play", "name": m.group(1).strip()})
     m = re.search(r"if you played ([A-Z][\w'’ -]+?) from your hand this turn", t)
@@ -2330,6 +2338,14 @@ def _r(m, text):
 @rule("attack_first_turn", r"can use attacks during your first turn")
 def _r(m, text):
     return [Action(Op.ATTACK_FIRST_TURN, None, Target.SELF)]
+
+
+@rule("weakness_multiplier",
+      r"apply weakness for both active pok[e\u00e9]mon as\s*[x\u00d7]\s*(\d+)")
+def _r(m, text):
+    # Applies to BOTH Active Pokemon, so it cuts in both directions -- the
+    # opponent attacking into your Weakness gets the same multiplier.
+    return [Action(Op.WEAKNESS_MULTIPLIER, int(m.group(1)), Target.BOTH_ALL)]
 
 
 @rule("set_weakness", r"weakness of each of your opponent'?s (\w+) pok[eé]mon in play is now (\w+)")
