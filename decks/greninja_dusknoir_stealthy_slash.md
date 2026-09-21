@@ -146,3 +146,40 @@ and both `Duskull` attacks are uncastable. That is deliberate — they are
 there for Skyliner and Cursed Blast, which are Abilities — but anything
 from that line dragged into the Active Spot is a passed turn, and `Boss's
 Orders` exists.
+
+## Under the pilot team: greedy wins, and `setup` is measurably worse
+
+The recommended list against the whole field under each pilot. **Field
+deltas, not mirror deltas** — a mirror gain overstates by roughly 3x and
+correlates only +0.27 with the field, so this varies the pilot on the
+Greninja side, leaves every opponent on greedy, and keeps the CRN seed per
+pairing. Two independent seed sets, because max-of-4 is biased upward.
+
+| pilot | selection Δ | held-out Δ | held-out 95% CI |
+|---|---|---|---|
+| aggro | +0.92 | **−0.08** | [−1.38, +1.22] |
+| control | −1.13 | **−1.46** | [−2.70, −0.21] |
+| prizewise | −0.98 | **−1.47** | [−2.57, −0.37] |
+| setup | −1.71 | **−1.70** | [−2.99, −0.41] |
+
+`aggro` looked like +0.92 on the selection seeds — an interval already
+spanning zero — and measured **−0.08** held out. Nothing beats greedy.
+
+Picking the best pilot per OPPONENT reads **+2.67** on the selection seeds
+and **−0.50** held out. All of it was noise, again.
+
+**A prediction stated before the run, and wrong.** `setup` is the only
+pilot that has ever converted a mirror gain into a field gain, and it did
+so for decks that must assemble a board before they threaten anything —
+which is exactly what a Stage 2 deck with Rare Candy, Grand Tree and a
+six-card Duskull line looks like. `setup` is the **worst** pilot here, by
+−1.70 held out, and significantly so on both seed sets.
+
+The plausible reason, offered as speculation rather than measurement: this
+deck's assembly is bought with Trainers — Rare Candy, Grand Tree,
+Buddy-Buddy Poffin, Ultra Ball — not with attack turns. A pilot that
+trades tempo for board development has nothing left to buy, and only gives
+up the tempo.
+
+The list's own number reproduced across three independent seed sets:
+**67.08%**, **67.11%**, **67.87%**, rank 4 of 46 every time.
