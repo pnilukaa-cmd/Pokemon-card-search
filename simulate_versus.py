@@ -1400,7 +1400,7 @@ def play_supporter(pl, opp, turn, log):
                 attached.append(t.name)
                 if t is pl.active and not AE.query_condition_immunity(
                         pl, t, "poisoned", opp):
-                    t.conditions.add("poisoned")
+                    AE.apply_condition(t, "poisoned")
             random.shuffle(pl.deck)
             log.append(f"  {pl.name}: Janine's Secret Art -> {', '.join(attached)}")
             return
@@ -1897,6 +1897,13 @@ def _clause_count(clause, pl, opp, spot):
     # damage against the Active, so that is the one this counts. The Bench
     # reading is the card's real power and is NOT modelled, so this is a
     # floor on the attack, never an overstatement.
+    # "100 damage for each Special Condition affecting your opponent's
+    # Active Pokemon" -- Cradily's Miasma Wind and Team Rocket's Muk's
+    # Hazardous Venom, both of which were scoring a flat 100 because no
+    # clause rule counted conditions. Capped in practice at three by the
+    # Asleep/Confused/Paralyzed exclusivity AE.apply_condition enforces.
+    if "special condition affecting your opponent's active" in c:
+        return len(opp.active.conditions) if opp and opp.active else 0
     if "damage counter on that pok" in c:
         return (opp.active.damage // 10) if opp and opp.active else 0
     if "damage counter on this pok" in c:

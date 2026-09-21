@@ -47,6 +47,23 @@ UNEXECUTED_OPS = Counter()
 DAMAGE_JUST_DEALT = [0]
 
 
+# Asleep, Confused and Paralyzed are MUTUALLY EXCLUSIVE: applying one
+# removes the other two. Burned and Poisoned stack with them and with each
+# other, so the real ceiling is three conditions at once. conditions.add()
+# let all five pile up, which matters the moment anything counts them --
+# Cradily's Miasma Wind and Team Rocket's Muk's Hazardous Venom are both
+# "100 damage for each Special Condition".
+_SLEEP_GROUP = ("asleep", "confused", "paralyzed")
+
+
+def apply_condition(spot, cond):
+    cond = str(cond).lower()
+    if cond in _SLEEP_GROUP:
+        for other in _SLEEP_GROUP:
+            spot.conditions.discard(other)
+    spot.conditions.add(cond)
+
+
 def _printed(pl, key):
     """The name as printed behind a POKEMON key. build_deck_model keys two
     different cards that share a name apart, and `evolves_from` always names
@@ -1665,7 +1682,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     continue
                 if c in EXCLUSIVE:
                     h.conditions -= EXCLUSIVE
-                h.conditions.add(c)
+                apply_condition(h, c)
                 applied.append(c)
             conds = applied
         if not conds:
