@@ -22,7 +22,6 @@ Trainer: 29
 2 Surfer ASC 200
 
 Energy: 11
-4 Basic Fighting Energy
-7 Basic Grass Energy
+11 Basic Grass Energy
 
 Total Cards: 60
