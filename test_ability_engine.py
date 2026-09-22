@@ -2102,9 +2102,40 @@ def test_the_reflip_tool_is_actually_put_on_a_pokemon():
               AE.query_reflip(pl, pl.active) == wanted)
 
 
+def test_a_search_respects_the_hp_cap_it_prints():
+    """Buddy-Buddy Poffin fetches Basics "with 70 HP or less".
+
+    _search_filter reads the qualifier BEFORE the noun -- stage, type,
+    name fragment -- and the HP cap comes after it, so the cap was simply
+    dropped. The card fetched any Basic in the deck, including a 230 HP
+    ex it cannot legally touch, and 36 of the 45 decks in this repo's
+    field run it. The cap is the whole reason the card is balanced.
+
+    The first case is the one that matters: a deck holding ONLY oversized
+    Basics must make the card unplayable, not merely pick something else.
+    """
+    import simulate_versus as V
+    POK = {"Small": {"hp": 60, "retreat": 1, "stage": "Basic", "types": ["Water"],
+                     "attacks": [], "weakness": None, "resistance": None,
+                     "abilities": [], "prize": 1, "base_name": "Small"},
+           "Huge ex": {"hp": 230, "retreat": 3, "stage": "Basic", "types": ["Water"],
+                       "attacks": [], "weakness": None, "resistance": None,
+                       "abilities": [], "prize": 2, "base_name": "Huge ex"}}
+    for holds, benched in ((["Huge ex"], []), (["Huge ex", "Small"], ["Small", "Small"])):
+        pl, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        pl.active = V.InPlay("Small", 0)
+        pl.deck = [("Pokemon", n) for n in holds * 4]
+        pl.hand = [("Item", "Buddy-Buddy Poffin")]
+        played = V.play_trainer_from_ir(pl, op, "Item", "Buddy-Buddy Poffin", [])
+        check(f"deck of {holds} -> benches {benched or 'nothing'}",
+              [b.name for b in pl.bench] == benched and bool(played) == bool(benched),
+              f"played={played} bench={[b.name for b in pl.bench]}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_reflip_tool_is_actually_put_on_a_pokemon,
+    for fn in [test_a_search_respects_the_hp_cap_it_prints,
+               test_the_reflip_tool_is_actually_put_on_a_pokemon,
                test_a_gate_on_the_target_is_a_gate_and_not_decoration,
                test_one_attach_sentence_attaches_exactly_what_it_prints,
                test_paralysis_and_sleep_pin_the_active_in_place,

@@ -894,8 +894,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             want = act.filter.get("name_contains")
             stage = act.filter.get("stage", "Basic")
             ptype = act.filter.get("type")
+            cap = act.filter.get("hp_at_most")
 
-            def pred(k, n, want=want, stage=stage, ptype=ptype):
+            def pred(k, n, want=want, stage=stage, ptype=ptype, cap=cap):
                 if k != "Pokemon":
                     return False
                 info = pl.POKEMON.get(n, {})
@@ -906,6 +907,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if stage not in (None, "Basic") and info.get("stage") != stage:
                     return False
                 if ptype and ptype not in (info.get("types") or []):
+                    return False
+                # "with 70 HP or less" is the whole reason Buddy-Buddy Poffin
+                # is balanced: it fetches small Basics, not a 230 HP ex.
+                if cap is not None and (info.get("hp") or 0) > cap:
                     return False
                 return not want or want.lower() in n.lower()
 
@@ -925,8 +930,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         for _ in range(act.amount or 1):
             want = act.filter.get("name_contains")
             kind = (act.filter.get("kind") or "").lower()
-            def pred(k, n, want=want, kind=kind):
+            cap = act.filter.get("hp_at_most")
+            def pred(k, n, want=want, kind=kind, cap=cap):
                 if kind.startswith("pok") and k != "Pokemon":
+                    return False
+                if cap is not None and (
+                        (pl.POKEMON.get(n, {}).get("hp") or 0) > cap
+                        or k != "Pokemon"):
                     return False
                 if kind == "energy" and k != "Energy":
                     return False

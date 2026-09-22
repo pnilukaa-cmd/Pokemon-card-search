@@ -2650,6 +2650,30 @@ def _collapse_duplicate_attachments(eff, spans):
             if a.op != Op.ATTACH_ENERGY or id(a) in keep]
 
 
+_HP_CAP_RE = re.compile(r"with (\d+) HP or less", re.I)
+_HP_CAPPED_OPS = (Op.SEARCH_TO_BENCH, Op.SEARCH_TO_HAND, Op.RECOVER_TO_BENCH)
+
+
+def _stamp_hp_cap(eff):
+    """"a Basic Pokemon WITH 70 HP OR LESS" is a restriction on the search.
+
+    _search_filter reads the qualifier that comes BEFORE the noun (stage,
+    type, name fragment) and the HP cap comes after it, so the cap was
+    dropped and Buddy-Buddy Poffin fetched any Basic at all -- a 230 HP
+    Regice ex or a 210 HP Fezandipiti ex off a card that cannot touch
+    either. 36 of the 45 decks in this repo's field run the card, so this
+    was not a corner case.
+    """
+    m = _HP_CAP_RE.search(eff.text or "")
+    if not m:
+        return
+    cap = int(m.group(1))
+    for a in eff.actions:
+        if a.op in _HP_CAPPED_OPS:
+            a.filter = dict(a.filter or {})
+            a.filter["hp_at_most"] = cap
+
+
 def compile_effect(source, name, text):
     eff = Effect(source, name, text)
     if not text.strip():
@@ -2692,6 +2716,7 @@ def compile_effect(source, name, text):
         unique.append(a)
     eff.actions = unique
     eff.actions = _collapse_duplicate_attachments(eff, spans)
+    _stamp_hp_cap(eff)
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:
