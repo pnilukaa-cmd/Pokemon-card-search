@@ -2739,9 +2739,22 @@ def attack_rider_value(pl, opp, atk, spot=None):
     # copied Trifrost for 330 across three Pokemon and still scored zero,
     # so it was passed over for a 120-damage Super Psy Bolt every time.
     if _USE_AS_THIS_RE.search(text):
+        # `borrowed is not atk` only stops a DIRECT self-copy. Two copy
+        # attacks pointed at each other (Zoroark's Foul Play into an
+        # opposing copier) recurse forever, and copied_attack's own depth
+        # guard cannot see it: that guard is released in a `finally` before
+        # this function recurses, so the counter is back to zero every time.
+        # Hold the depth across the recursive call, exactly as attack_damage
+        # already does. This crashed a 192-job shard with RecursionError.
+        if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
+            return 0
         borrowed = copied_attack(pl, opp, spot, text)
         if borrowed is not None and borrowed is not atk:
-            return attack_rider_value(pl, opp, borrowed, spot)
+            _COPY_DEPTH[0] += 1
+            try:
+                return attack_rider_value(pl, opp, borrowed, spot)
+            finally:
+                _COPY_DEPTH[0] -= 1
     eff = _attack_ir(atk)
     if eff.unsupported:
         return 0
