@@ -630,6 +630,23 @@ def _find_in_deck(pl, pred):
 KO_THRESHOLD = 60
 
 
+def leaving_active(spot, log=None):
+    """Special Conditions come off a Pokemon that leaves the Active Spot.
+
+    simulate_versus cleared them on retreat and on evolution, but the three
+    executors below move a Pokemon from the Active Spot to the Bench
+    directly, so a Switch, a gust or a force-switch carried the condition
+    to the Bench with it -- where nothing ever clears it, because the
+    Checkup only ever looks at the Active. A Pokemon gusted while Paralyzed
+    came back Paralyzed forever.
+    """
+    if spot is not None and getattr(spot, "conditions", None):
+        if log is not None:
+            log.append(f"    {spot.name} clears "
+                       f"{', '.join(sorted(spot.conditions))} (left the Active Spot)")
+        spot.conditions = set()
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
@@ -1005,6 +1022,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if opp.bench and opp.active:
                 tgt = min(opp.bench, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
                 opp.bench.remove(tgt)
+                leaving_active(opp.active, log)
                 opp.bench.append(opp.active)
                 opp.active = tgt
                 log.append(f"    gust up {tgt.name}")
@@ -1012,6 +1030,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         if pl.bench and pl.active:
             tgt = pl.bench.pop(0)
+            leaving_active(pl.active, log)
             pl.bench.append(pl.active)
             pl.active = tgt
             return True
@@ -1142,6 +1161,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                    key=lambda p: (opp.POKEMON.get(p.name) or {}).get("hp", 0)
                    - p.damage)
         opp.bench.remove(pick)
+        leaving_active(opp.active, log)
         opp.bench.append(opp.active)
         opp.active = pick
         log.append(f"    opponent switches in {pick.name}")

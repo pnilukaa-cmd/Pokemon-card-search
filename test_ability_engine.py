@@ -1876,9 +1876,97 @@ def test_recall_puts_cards_in_the_right_zone():
               pl.active is not None and not pl.bench, str(pl.active))
 
 
+def test_paralysis_and_sleep_pin_the_active_in_place():
+    """A Paralyzed or Asleep Pokemon cannot retreat -- that is half the card.
+
+    The engine read CANNOT_ATTACK in condition_blocks_attack and nowhere
+    else, so a Paralyzed Active simply walked away to the Bench and the
+    opponent lost nothing but one attack. Paralysis is supposed to PIN the
+    Active for a turn, which is the entire reason to play it. Confused is
+    deliberately not in the set: a Confused Pokemon retreats normally.
+    """
+    import simulate_versus as V
+    by_name, _ = M.build_card_index(M.load_cards())
+    V._CARDS_BY_NAME.update(by_name)
+    POK = {n: M.build_pokemon_info((by_name.get(n) or [None])[0])
+           for n in ("Dunsparce", "Mega Heracross ex")}
+
+    def board(cond):
+        me, op = V.Player("A", POK, []), V.Player("B", POK, [])
+        a = V.InPlay("Dunsparce", 0)          # Gnaw, 10 damage, retreat 0
+        a.energy, a.energy_names = [["Colorless"]], ["X Energy"]
+        a.conditions = set(cond)
+        big = V.InPlay("Mega Heracross ex", 0)   # Mountain Ramming, 170
+        big.energy = [["Grass"]] * 3
+        big.energy_names = ["Grass Energy"] * 3
+        me.active, me.bench = a, [big]
+        op.active = V.InPlay("Dunsparce", 0)
+        return me, op
+
+    # Control: with no condition the AI really does want this swap, so a
+    # "stayed" result below means the condition stopped it and not that
+    # the AI never wanted to move in the first place.
+    me, op = board(())
+    V.try_retreat(me, op, [])
+    check("the AI wants this swap: 10 damage Active, 170 on the Bench",
+          me.active.name == "Mega Heracross ex", me.active.name)
+
+    for cond, pinned in (("paralyzed", True), ("asleep", True),
+                         ("confused", False)):
+        me, op = board((cond,))
+        log = []
+        V.try_retreat(me, op, log)
+        stayed = me.active.name == "Dunsparce"
+        check(f"{cond}: {'pinned in the Active Spot' if pinned else 'retreats normally'}",
+              stayed == pinned, f"active is {me.active.name}")
+
+
+def test_conditions_come_off_when_a_switch_moves_you_to_the_bench():
+    """"Leaves the Active Spot" is not the same rule as "retreats".
+
+    Conditions were cleared on retreat and on evolution only. The three
+    executors that move a Pokemon to the Bench directly -- a self Switch,
+    a gust, and a force-switch -- carried the condition to the Bench with
+    it, where NOTHING clears it: the Checkup only ever looks at the
+    Active. Combined with the retreat fix above that is a permanent lock,
+    so a Pokemon gusted while Paralyzed could never attack or retreat
+    again for the rest of the game.
+    """
+    import simulate_versus as V
+    POK = {n: {"hp": 100, "retreat": 1, "stage": "Basic", "types": ["Colorless"],
+               "attacks": [], "weakness": None, "resistance": None,
+               "abilities": [], "prize": 1, "base_name": n} for n in "AB"}
+
+    def board():
+        me, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        me.active, me.bench = V.InPlay("A", 0), [V.InPlay("B", 0)]
+        op.active, op.bench = V.InPlay("A", 0), [V.InPlay("B", 0)]
+        return me, op
+
+    cases = (
+        ("a self Switch", IR.Op.SWITCH, IR.Target.YOUR_ACTIVE, {"gust": False},
+         lambda me, op: me.active),
+        ("a gust", IR.Op.SWITCH, IR.Target.OPP_ACTIVE, {"gust": True},
+         lambda me, op: op.active),
+        ("a force-switch", IR.Op.FORCE_SWITCH_OPPONENT, IR.Target.OPP_ACTIVE, {},
+         lambda me, op: op.active),
+    )
+    for label, op_, target, filt, pick in cases:
+        me, opp = board()
+        moved = pick(me, opp)
+        moved.conditions = {"paralyzed", "poisoned"}
+        AE.apply_action(IR.Action(op_, 1, target, filt), me, opp, None, [])
+        check(f"{label} clears the conditions it leaves with",
+              moved.conditions == set(), f"kept {moved.conditions}")
+        check(f"{label} actually moved it to the Bench",
+              moved in (me.bench + opp.bench), "still Active")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_recall_puts_cards_in_the_right_zone,
+    for fn in [test_paralysis_and_sleep_pin_the_active_in_place,
+               test_conditions_come_off_when_a_switch_moves_you_to_the_bench,
+               test_recall_puts_cards_in_the_right_zone,
                test_rider_shapes_that_no_deck_here_carries,
                test_resistance_can_be_ignored_and_all_or_nothing_flips_flip,
                test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,

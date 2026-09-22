@@ -1413,6 +1413,7 @@ def play_supporter(pl, opp, turn, log):
                 continue          # nothing on the Bench beats the Active
             use(name)
             opp.bench.remove(target)
+            clear_conditions(opp.active, "left the Active Spot", log, opp.name)
             opp.bench.append(opp.active)
             opp.active = target
             log.append(f"  {pl.name}: {name} -> drags up {target.name}")
@@ -3354,6 +3355,18 @@ def try_retreat(pl, opp, log):
     if pl.active.retreat_locked:
         pl.active.retreat_locked = False
         log.append(f"  {pl.name}: {pl.active.name} can't retreat this turn")
+        return
+    # A Paralyzed or Asleep Pokemon CANNOT RETREAT. The engine enforced the
+    # "can't attack" half (CANNOT_ATTACK, read in condition_blocks_attack)
+    # and let the same Pokemon walk away, which is half the point of
+    # Paralysis: it pins the Active in place for a turn. Confused is NOT in
+    # this set -- a Confused Pokemon may retreat normally. This is checked
+    # AFTER retreat_locked so that a one-turn lock is still consumed here
+    # and does not carry over past the Paralysis.
+    stuck = pl.active.conditions & CANNOT_ATTACK
+    if stuck:
+        log.append(f"  {pl.name}: {pl.active.name} can't retreat "
+                   f"({', '.join(sorted(stuck))})")
         return
     cost = retreat_of(pl, pl.active, opp)
     if pl.active.energy_count() < cost:
