@@ -531,6 +531,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
             before = getattr(source, "prev_damage", None)
             if (before if before is not None else source.damage) > 0:
                 return False
+        if k == "active_energy_at_least":
+            if not pl.active or pl.active.energy_count() < c["count"]:
+                return False
         if k == "active_is_type":
             if not pl.active:
                 return False

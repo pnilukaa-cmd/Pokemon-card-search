@@ -348,6 +348,13 @@ def parse_conditions(text):
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
+    # "your Active Pokemon THAT HAS 3 or more Energy attached" is a gate on
+    # the target, not decoration. Dropped, it made Jumbo Ice Cream an
+    # unconditional Heal 80 for one Item -- strictly better than the card,
+    # and exactly the kind of free upgrade a deck gets built around.
+    m = re.search(r"(\d+) or more energy (?:cards? )?attached", t, re.I)
+    if m:
+        out.append({"kind": "active_energy_at_least", "count": int(m.group(1))})
     m = re.search(r"if your opponent has any cards? in their discard pile"
                   r" that have \"([^\"]+)\" in the name", t, re.I)
     if m:

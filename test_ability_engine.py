@@ -2035,9 +2035,38 @@ def test_one_attach_sentence_attaches_exactly_what_it_prints():
               f"attached {got}")
 
 
+def test_a_gate_on_the_target_is_a_gate_and_not_decoration():
+    """Jumbo Ice Cream heals "your Active Pokemon THAT HAS 3 or more Energy".
+
+    parse_conditions had no shape for that clause, so it was dropped --
+    and a dropped condition does not make the card weaker, it makes it
+    UNCONDITIONAL. The card became Heal 80 off any Active for one Item,
+    which is strictly better than what is printed and exactly the sort of
+    free upgrade a deck gets built around. Checked through the real play
+    path rather than by reading eff.conditions, because a condition that
+    compiles and is never consulted looks identical from the IR.
+    """
+    import simulate_versus as V
+    POK = {"X": {"hp": 250, "retreat": 1, "stage": "Basic", "types": ["Water"],
+                 "attacks": [], "weakness": None, "resistance": None,
+                 "abilities": [], "prize": 1, "base_name": "X"}}
+    for n, heals in ((2, False), (3, True)):
+        me, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        me.active, op.active = V.InPlay("X", 0), V.InPlay("X", 0)
+        me.active.damage = 150
+        me.active.energy = [["Water"]] * n
+        me.active.energy_names = ["Water Energy"] * n
+        me.hand = [("Item", "Jumbo Ice Cream")]
+        played = V.play_trainer_from_ir(me, op, "Item", "Jumbo Ice Cream", [])
+        check(f"{n} Energy attached: {'heals' if heals else 'cannot be played'}",
+              bool(played) == heals and (me.active.damage == 70) == heals,
+              f"played={played} damage={me.active.damage}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_one_attach_sentence_attaches_exactly_what_it_prints,
+    for fn in [test_a_gate_on_the_target_is_a_gate_and_not_decoration,
+               test_one_attach_sentence_attaches_exactly_what_it_prints,
                test_paralysis_and_sleep_pin_the_active_in_place,
                test_conditions_come_off_when_a_switch_moves_you_to_the_bench,
                test_recall_puts_cards_in_the_right_zone,
