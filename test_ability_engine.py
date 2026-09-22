@@ -2166,9 +2166,46 @@ def test_a_search_respects_the_hp_cap_it_prints():
               f"played={played} bench={[b.name for b in pl.bench]}")
 
 
+def test_a_wall_respects_the_attacker_restriction_it_prints():
+    """Bastiodon's Ancient Bulwark stops attackers with "2 or less Energy".
+
+    Same dropped-restriction shape as Poke Pad and Buddy-Buddy Poffin,
+    and the most expensive instance of it: a passive that reads as
+    unconditional is not a slightly better card, it is total immunity for
+    the whole board for the rest of the game. The rule already trims
+    Safeguard and Cornerstone Stance by attacker; it had no shape for a
+    restriction on the attacker's ENERGY.
+
+    Driven off the real deck models rather than a hand-built board. Three
+    attempts at this test with hand-rolled POKEMON dicts each reported a
+    wrong answer -- one read damage after a Knock Out had already promoted
+    a fresh Pokemon, and one passed an empty card map to
+    compile_effects_for, which compiles no Abilities at all and made the
+    card look inert. The models carry their own Abilities and Energy, so
+    they cannot be silently incomplete in either of those ways.
+    """
+    import simulate_versus as V
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    D = V.load_model("decks/study_centiskorch_bastiodon_mill.ptcgl.txt", "wall")[0]
+    dEFF = V.compile_effects_for(D[1], D[3])
+    for n, prevented in ((1, True), (2, True), (3, False), (4, False)):
+        me = V.Player("wall", D[1], D[2], dEFF)
+        op = V.Player("atk", D[1], D[2], dEFF)
+        me.active, me.bench = V.InPlay("Centiskorch", 0), [V.InPlay("Bastiodon", 0)]
+        op.active = V.InPlay("Centiskorch", 0)
+        op.active.energy = [["Fire"]] * n
+        op.active.energy_names = ["Fire Energy"] * n
+        check(f"attacker holding {n} Energy: "
+              f"{'blocked' if prevented else 'gets through'}",
+              AE.query_prevented(me, me.active, op, op.active) == prevented)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_search_respects_the_rule_box_clause_it_prints,
+    for fn in [test_a_wall_respects_the_attacker_restriction_it_prints,
+               test_a_search_respects_the_rule_box_clause_it_prints,
                test_a_search_respects_the_hp_cap_it_prints,
                test_the_reflip_tool_is_actually_put_on_a_pokemon,
                test_a_gate_on_the_target_is_a_gate_and_not_decoration,

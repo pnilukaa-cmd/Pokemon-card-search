@@ -1121,6 +1121,14 @@ def _r(m, text):
     # alongside, which is the exact opposite of how the card plays.
     if re.search(r"don'?t have a rule box", seg, re.I):
         filt["no_rule_box"] = True
+    # Bastiodon's Ancient Bulwark stops only attackers holding 2 or less
+    # Energy -- a wall against early aggression, not a wall. Dropped, it
+    # read as total immunity for the whole board for the rest of the game,
+    # which is the single largest over-count a passive can produce.
+    mm = re.search(r"that ha(?:ve|s) (\d+) or (?:less|fewer) energy attached",
+                   seg, re.I)
+    if mm:
+        filt["attacker_energy_at_most"] = int(mm.group(1))
     return [Action(Op.PREVENT_DAMAGE, None, tgt, filt)]
 
 

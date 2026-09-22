@@ -1973,6 +1973,13 @@ def query_prevented(pl, spot, opp=None, attacker=None):
             continue
         if act.filter.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
             continue
+        cap = act.filter.get("attacker_energy_at_most")
+        if cap is not None:
+            # Without the attacker in hand the restriction cannot be
+            # checked, and guessing "prevented" would be the unconditional
+            # reading this filter exists to stop.
+            if attacker is None or attacker.energy_count() > cap:
+                continue
         if act.filter.get("attacker_is_ex") or act.filter.get("attacker_has_ability"):
             # An attacker-restricted wall cannot be evaluated without one.
             if attacker is None or opp is None:

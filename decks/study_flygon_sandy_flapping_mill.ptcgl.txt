@@ -1,0 +1,39 @@
+Pokémon: 12
+2 Dudunsparce PRE 80
+1 Ethan's Sudowoodo DRI 93
+2 Vibrava SSP 206
+1 Comfey SCR 63
+2 Dunsparce JTG 120
+3 Flygon PFL 101
+1 Trapinch SSP 104
+3 Trapinch PFL 51
+1 Dedenne SSP 87
+1 Psyduck ASC 226
+1 Shaymin DRI 185
+1 Elgyem BLK 120
+
+Trainer: 18
+4 Lillie's Determination MEG 169
+1 Air Balloon MEG 166
+3 Buddy-Buddy Poffin MEG 167
+1 Dawn PFL 129
+1 Eri PRE 136
+1 Lana's Aid TWM 219
+4 Boss's Orders PAL 265
+2 Night Stretcher MEG 173
+2 Rare Candy MEG 175
+2 Hilda WHT 171
+1 Redeemable Ticket JTG 156
+4 Poké Pad POR 113
+1 Colress's Tenacity SFA 87
+1 Xerosic's Machinations SFA 89
+1 Sacred Ash POR 115
+2 Gravity Gemstone SCR 137
+1 Neutralization Zone SFA 60
+2 Battle Cage PFL 116
+
+Energy: 2
+4 Prism Energy ASC 216
+3 Basic {F} Energy MEE 6
+
+Total Cards: 60

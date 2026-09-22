@@ -1,0 +1,32 @@
+Pokémon: 9
+1 Maushold 30C 125
+2 Ethan's Sudowoodo DRI 93
+2 Latias ex SSP 76
+1 Rotom SSP 61
+3 Maushold 30C 146
+2 Fan Rotom SCR 118
+4 Tandemaus SSP 157
+2 Elgyem BLK 40
+2 Comfey SCR 63
+
+Trainer: 12
+4 Buddy-Buddy Poffin ASC 184
+4 Boss's Orders ASC 183
+2 Xerosic's Machinations SFA 64
+4 Poké Pad ASC 198
+2 Night Stretcher ASC 196
+4 Lillie's Determination MEG 119
+2 Gravity Gemstone SCR 137
+2 Handheld Fan TWM 150
+1 Lana's Aid TWM 155
+2 Battle Cage PFL 85
+1 Miracle Headset SSP 183
+2 Hilda WHT 84
+
+Energy: 4
+1 Basic {F} Energy MEE 14
+4 Telepathic {P} Energy POR 88
+4 Prism Energy ASC 216
+2 Basic {P} Energy MEE 13
+
+Total Cards: 60
