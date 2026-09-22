@@ -2063,9 +2063,49 @@ def test_a_gate_on_the_target_is_a_gate_and_not_decoration():
               f"played={played} damage={me.active.damage}")
 
 
+def test_the_reflip_tool_is_actually_put_on_a_pokemon():
+    """query_reflip was written, wired and unreachable.
+
+    attach_tools only ever attached Tools listed in one of four
+    registries -- HP, retreat, retaliation, damage -- and Backtrack Badge
+    is in none of them, so the Tool sat in hand for the whole game and
+    every coin flip in the format was a flat 50%. _expected_heads and the
+    two query_reflip call sites in simulate_versus were all dead code.
+    Two decklists in this repo were already running the card.
+
+    The type filter is half the card: it re-flips for a COLORLESS
+    Pokemon, so the check that it refuses a Water Active is as much the
+    test as the one that says it attaches.
+    """
+    import simulate_versus as V
+    V.RETALIATE_CARDS = V.build_retaliate_index(M.load_cards())
+    POK = {
+        "Maushold": {"hp": 110, "retreat": 1, "stage": "Stage 1",
+                     "types": ["Colorless"], "attacks": [], "weakness": None,
+                     "resistance": None, "abilities": [], "prize": 1,
+                     "base_name": "Maushold"},
+        "Wiglett": {"hp": 60, "retreat": 1, "stage": "Basic",
+                    "types": ["Water"], "attacks": [], "weakness": None,
+                    "resistance": None, "abilities": [], "prize": 1,
+                    "base_name": "Wiglett"},
+    }
+    for who, wanted in (("Maushold", True), ("Wiglett", False)):
+        pl = V.Player("me", POK, [])
+        pl.active = V.InPlay(who, 0)
+        pl.hand = [("Tool", "Backtrack Badge")]
+        V.attach_tools(pl, [])
+        got = pl.active.tool == "Backtrack Badge"
+        check(f"Backtrack Badge {'goes on' if wanted else 'stays off'} the "
+              f"{POK[who]['types'][0]} Active", got == wanted,
+              f"tool={pl.active.tool}")
+        check(f"  ...and query_reflip agrees",
+              AE.query_reflip(pl, pl.active) == wanted)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_gate_on_the_target_is_a_gate_and_not_decoration,
+    for fn in [test_the_reflip_tool_is_actually_put_on_a_pokemon,
+               test_a_gate_on_the_target_is_a_gate_and_not_decoration,
                test_one_attach_sentence_attaches_exactly_what_it_prints,
                test_paralysis_and_sleep_pin_the_active_in_place,
                test_conditions_come_off_when_a_switch_moves_you_to_the_bench,

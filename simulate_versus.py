@@ -3251,6 +3251,22 @@ def effective_hp(pl, spot):
             + AE.query_hp_modifier(pl, spot))
 
 
+def _is_reflip_tool(pl, name):
+    """Backtrack Badge, and only when the Active is the type it names."""
+    eff = trainer_effect_ir(name)
+    if eff is None or eff.unsupported or not pl.active:
+        return False
+    for act in eff.actions:
+        if act.op is not IR.Op.REFLIP_COINS:
+            continue
+        want = (act.filter or {}).get("type")
+        if want and want not in ((pl.POKEMON.get(pl.active.name) or {})
+                                 .get("types") or []):
+            return False
+        return True
+    return False
+
+
 def attach_tools(pl, log):
     # Farfetch'd's Impromptu Carrier pulls a Tool out of the DECK, so the
     # hand loop below would never see it.
@@ -3282,7 +3298,20 @@ def attach_tools(pl, log):
             pl.active.tool = name
             log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
             continue
+        # A Tool whose only modelled effect is a coin re-flip. query_reflip
+        # and _expected_heads were both written and wired, but nothing ever
+        # put Backtrack Badge on a Pokemon, so the whole re-flip path was
+        # unreachable: the Tool sat in hand for the entire game. It is the
+        # one card in the pool with this shape, and it was already in two
+        # decklists in this repo doing nothing at all.
         if name not in RETALIATE_CARDS and name not in DAMAGE_TOOLS:
+            if _is_reflip_tool(pl, name):
+                if not pl.active or (pl.active.tool
+                                     and not AE.query_extra_tool_slots(pl, pl.active)):
+                    continue
+                pl.remove_from_hand(kind, name)
+                pl.active.tool = name
+                log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
             continue
         if name in DAMAGE_TOOLS:
             if not pl.active or pl.active.tool:
