@@ -974,14 +974,14 @@ def _r(m, text):
 # ---- energy --------------------------------------------------------------
 
 @rule("attach_energy_from_discard",
-      r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:card )?from your discard pile to ([^.]{0,50})")
+      r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your discard pile to ([^.]{0,50})")
 def _r(m, text):
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
                    {"type": (m.group(2) or "").capitalize() or None, "from": "discard"})]
 
 
 @rule("attach_energy_from_hand",
-      r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:card )?from your hand to ([^.]{0,50})")
+      r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your hand to ([^.]{0,50})")
 def _r(m, text):
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
                    {"type": (m.group(2) or "").capitalize() or None, "from": "hand"})]
@@ -1296,7 +1296,7 @@ def _r(m, text):
 
 
 @rule("self_damage_recoil",
-      r"this pok[eé]mon (?:also )?does (\d+) damage to itself")
+      r"this pok[eé]mon (?:also )?do(?:es)? (\d+) damage to itself")
 def _r(m, text):
     """Recoil. 75 attacks in the pool say this and not one of them
     compiled, so every recoil attacker in the format was swinging for
@@ -2608,6 +2608,41 @@ _KNOWN_UNSUPPORTED = [
 ]
 
 
+def _collapse_duplicate_attachments(eff, spans):
+    """One "attach Energy" sentence must produce exactly ONE attach.
+
+    Several rules deliberately overlap to catch different phrasings, and
+    the generic ones (attach_multi_type_energy, search_energy_attach_loose,
+    attach_named_energy_from_discard) match the same sentence as the
+    destination-aware ones. The existing dedupe keys on the whole Action,
+    so two attaches that differ only in target or filter both survived --
+    and both EXECUTE. Measured: Teal Dance attached 2 Energy off a card
+    that says one, Dynamotor 2 off a card that says one, and 55 effects in
+    the Standard pool accelerated at double their printed rate. That is
+    the largest single distortion the simulator had: every accelerator in
+    the format was twice as fast as its card said.
+
+    Collapse is per SOURCE ("from": hand / deck / discard), because one
+    card really can attach from two different places. Within a source the
+    survivor is the action whose rule matched the WIDEST span of text --
+    the rule that read the destination clause understood the sentence
+    better than the one that stopped at "from your discard pile". Ties
+    keep the first, which is rule order.
+    """
+    attaches = [a for a in eff.actions if a.op == Op.ATTACH_ENERGY]
+    if len(attaches) < 2:
+        return eff.actions
+    best = {}
+    for a in attaches:
+        src = (a.filter or {}).get("from")
+        width, _rname = spans.get(id(a), (0, ""))
+        if src not in best or width > best[src][0]:
+            best[src] = (width, a)
+    keep = {id(a) for _w, a in best.values()}
+    return [a for a in eff.actions
+            if a.op != Op.ATTACH_ENERGY or id(a) in keep]
+
+
 def compile_effect(source, name, text):
     eff = Effect(source, name, text)
     if not text.strip():
@@ -2619,6 +2654,7 @@ def compile_effect(source, name, text):
     eff.costs = parse_costs(text)
     eff.chance = parse_chance(text)
 
+    spans = {}                    # action id -> how much text its rule read
     for rname, rx, builder in RULES:
         m = rx.search(text)
         if not m:
@@ -2629,6 +2665,8 @@ def compile_effect(source, name, text):
             eff.unsupported = f"rule {rname} raised {exc!r}"
             return eff
         if acts:
+            for a in acts:
+                spans[id(a)] = (m.end() - m.start(), rname)
             eff.actions.extend(acts)
             eff.rules_hit.append(rname)
 
@@ -2646,6 +2684,7 @@ def compile_effect(source, name, text):
         seen.add(key)
         unique.append(a)
     eff.actions = unique
+    eff.actions = _collapse_duplicate_attachments(eff, spans)
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:

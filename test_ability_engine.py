@@ -1962,9 +1962,83 @@ def test_conditions_come_off_when_a_switch_moves_you_to_the_bench():
               moved in (me.bench + opp.bench), "still Active")
 
 
+def test_one_attach_sentence_attaches_exactly_what_it_prints():
+    """Every accelerator in the format was running at double speed.
+
+    Overlapping rules are deliberate -- they catch different phrasings --
+    but the dedupe in compile_effect keys on the whole Action, so two
+    attaches that differed only in target or filter both survived, and
+    both EXECUTE. 55 effects in the Standard pool compiled to two
+    attaches off one sentence. This is measured by EXECUTION, not by
+    counting Actions, because a compiled-but-inert second attach would
+    have been harmless and the point is that it was not inert.
+    """
+    import simulate_versus as V
+    POK = {"X": {"hp": 200, "retreat": 1, "stage": "Basic", "types": ["Grass"],
+                 "attacks": [], "weakness": None, "resistance": None,
+                 "abilities": [], "prize": 1, "base_name": "X"}}
+
+    def board(etype, where, n=6):
+        me, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        me.active, me.bench = V.InPlay("X", 0), [V.InPlay("X", 0)]
+        op.active = V.InPlay("X", 0)
+        card = f"Basic {etype} Energy"
+        if where == "hand":
+            me.hand = [("Energy", card)] * n
+        elif where == "discard":
+            me.discard = [card] * n
+        else:
+            me.deck = [("Energy", card)] * n
+        return me, op
+
+    # (label, text, source, printed number of Energy it may attach)
+    cases = [
+        ("Teal Dance",
+         "Once during your turn, you may attach a Basic Grass Energy card "
+         "from your hand to this Pokemon. If you attached Energy to a "
+         "Pokemon in this way, draw a card.", "Grass", "hand", 1),
+        ("Dynamotor",
+         "Once during your turn, you may attach a Basic Lightning Energy "
+         "card from your discard pile to 1 of your Benched Pokemon.",
+         "Lightning", "discard", 1),
+        ("Regi Charge",
+         "Attach up to 2 Basic Water Energy cards from your discard pile "
+         "to this Pokemon.", "Water", "discard", 2),
+        ("Assemble Alloy",
+         "When you play this Pokemon from your hand to evolve 1 of your "
+         "Pokemon during your turn, you may attach up to 2 Basic Metal "
+         "Energy cards from your discard pile to this Pokemon.",
+         "Metal", "discard", 2),
+        # The other half of the same bug: act.amount was read nowhere, so
+        # the big accelerators put down one Energy each. The two errors
+        # cancelled on "attach 1" cards, which is why neither was visible.
+        ("Punk Up",
+         "When you play this Pokemon from your hand to evolve 1 of your "
+         "Pokemon during your turn, you may search your deck for up to 5 "
+         "Basic Darkness Energy cards and attach them to your Pokemon in "
+         "any way you like. Then, shuffle your deck.",
+         "Darkness", "deck", 5),
+        ("Misty's Vitality",
+         "Search your deck for up to 4 Basic Water Energy cards and attach "
+         "them to 1 of your Pokemon. Then, shuffle your deck. Your turn ends.",
+         "Water", "deck", 4),
+    ]
+    for label, txt, etype, where, printed in cases:
+        eff = IR.compile_effect("ability", label, txt)
+        me, op = board(etype, where)
+        before = me.active.energy_count() + sum(b.energy_count() for b in me.bench)
+        for act in eff.actions:
+            AE.apply_action(act, me, op, me.active, [], attacker=me.active)
+        got = (me.active.energy_count()
+               + sum(b.energy_count() for b in me.bench) - before)
+        check(f"{label} attaches the {printed} its card prints", got == printed,
+              f"attached {got}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_paralysis_and_sleep_pin_the_active_in_place,
+    for fn in [test_one_attach_sentence_attaches_exactly_what_it_prints,
+               test_paralysis_and_sleep_pin_the_active_in_place,
                test_conditions_come_off_when_a_switch_moves_you_to_the_bench,
                test_recall_puts_cards_in_the_right_zone,
                test_rider_shapes_that_no_deck_here_carries,

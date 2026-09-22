@@ -829,33 +829,46 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return False
 
     if op == O.ATTACH_ENERGY:
+        # act.amount was read nowhere, so EVERY accelerator attached
+        # exactly one Energy no matter what its card said: Punk Up put
+        # down 1 of its 5, Misty's Vitality 1 of its 4, Regi Charge 1 of
+        # its 2. It went unnoticed because two overlapping rules used to
+        # emit the same attach twice, and 1 + 1 happened to be the right
+        # answer for the single-Energy cards -- two bugs whose errors
+        # cancelled on the commonest case and compounded on the rest.
         src = act.filter.get("from")
         want_type = act.filter.get("type")
-        card = None
-        if src == "hand":
-            i = next((i for i, (k, n) in enumerate(pl.hand)
-                      if k == "Energy" and (not want_type or want_type in n)), None)
-            if i is not None:
-                card = pl.hand.pop(i)
-        elif src == "discard":
-            nm = next((n for n in pl.discard
-                       if n.endswith("Energy") and (not want_type or want_type in n)), None)
-            if nm:
+
+        def _take():
+            if src == "hand":
+                i = next((i for i, (k, n) in enumerate(pl.hand)
+                          if k == "Energy" and (not want_type or want_type in n)), None)
+                return pl.hand.pop(i) if i is not None else None
+            if src == "discard":
+                nm = next((n for n in pl.discard
+                           if n.endswith("Energy") and (not want_type or want_type in n)), None)
+                if nm is None:
+                    return None
                 pl.discard.remove(nm)
-                card = ("Energy", nm)
-        else:  # deck
-            card = _find_in_deck(pl, lambda k, n: k == "Energy" and (not want_type or want_type in n))
-        if not card:
-            return False
+                return ("Energy", nm)
+            return _find_in_deck(pl, lambda k, n: k == "Energy"
+                                 and (not want_type or want_type in n))
+
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
         tgt = hits[0] if hits else source
         if tgt is None:
             return False
-        tgt.energy.append([want_type] if want_type else list(IR.TYPES.split("|")))
-        if getattr(tgt, "energy_names", None) is not None:
-            tgt.energy_names.append(card[1])
-        log.append(f"    attach {card[1]} to {tgt.name}")
-        return True
+        got = 0
+        for _ in range(max(act.amount or 1, 1)):
+            card = _take()
+            if not card:
+                break
+            tgt.energy.append([want_type] if want_type else list(IR.TYPES.split("|")))
+            if getattr(tgt, "energy_names", None) is not None:
+                tgt.energy_names.append(card[1])
+            log.append(f"    attach {card[1]} to {tgt.name}")
+            got += 1
+        return got > 0
 
     if op == O.MOVE_ENERGY:
         srcs = [q for q in pl.in_play() if q.energy and q is not pl.active]
