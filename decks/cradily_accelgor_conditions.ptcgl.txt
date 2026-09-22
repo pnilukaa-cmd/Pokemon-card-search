@@ -1,0 +1,26 @@
+Pokémon: 24
+2 Dunsparce JTG 120
+2 Dudunsparce TEF 129
+2 Lileep SCR 5
+4 Cradily SCR 6
+4 Foongus BLK 10
+4 Amoonguss BLK 11
+3 Shelmet JTG 12
+3 Accelgor JTG 13
+
+Trainer: 25
+4 Buddy-Buddy Poffin ASC 184
+4 Poké Pad ASC 198
+2 Rare Candy MEG 125
+1 Night Stretcher ASC 196
+4 Antique Root Fossil SCR 130
+4 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Fossil Quarry PBL 76
+1 Dangerous Laser SFA 58
+1 Surfer ASC 200
+
+Energy: 11
+11 Basic Grass Energy
+
+Total Cards: 60
