@@ -2102,6 +2102,40 @@ def test_the_reflip_tool_is_actually_put_on_a_pokemon():
               AE.query_reflip(pl, pl.active) == wanted)
 
 
+def test_a_search_respects_the_rule_box_clause_it_prints():
+    """Poke Pad searches for "a Pokemon that doesn't have a Rule Box".
+
+    Same failure as the HP cap and found the same way: the clause sits
+    after the noun, _search_filter reads only what comes before it, and
+    the restriction was dropped. Poke Pad tutored a Pokemon ex, which is
+    the one thing the card exists not to do, and 23 of the 45 field decks
+    run it -- including, when this was found, the deck being built in
+    this session, which was the beneficiary.
+
+    The Rule Box flag is already on every POKEMON entry and already read
+    by Brave Bangle and Flower Curtain; only the searches never asked.
+    """
+    import simulate_versus as V
+    POK = {"Plain": {"hp": 60, "retreat": 1, "stage": "Basic", "types": ["Water"],
+                     "attacks": [], "weakness": None, "resistance": None,
+                     "abilities": [], "prize": 1, "prize_value": 1,
+                     "rule_box": False, "base_name": "Plain"},
+           "Big ex": {"hp": 250, "retreat": 1, "stage": "Stage 1", "types": ["Water"],
+                      "attacks": [], "weakness": None, "resistance": None,
+                      "abilities": [], "prize": 2, "prize_value": 2,
+                      "rule_box": True, "base_name": "Big ex"}}
+    for holds, wanted in ((["Big ex"], None), (["Big ex", "Plain"], "Plain")):
+        pl, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        pl.active = V.InPlay("Plain", 0)
+        pl.deck = [("Pokemon", n) for n in holds * 4]
+        pl.hand = [("Item", "Poké Pad")]
+        played = V.play_trainer_from_ir(pl, op, "Item", "Poké Pad", [])
+        got = [n for k, n in pl.hand if k == "Pokemon"]
+        check(f"deck of {holds} -> tutors {wanted or 'nothing'}",
+              got == ([wanted] if wanted else []) and bool(played) == bool(wanted),
+              f"played={played} hand={got}")
+
+
 def test_a_search_respects_the_hp_cap_it_prints():
     """Buddy-Buddy Poffin fetches Basics "with 70 HP or less".
 
@@ -2134,7 +2168,8 @@ def test_a_search_respects_the_hp_cap_it_prints():
 
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_search_respects_the_hp_cap_it_prints,
+    for fn in [test_a_search_respects_the_rule_box_clause_it_prints,
+               test_a_search_respects_the_hp_cap_it_prints,
                test_the_reflip_tool_is_actually_put_on_a_pokemon,
                test_a_gate_on_the_target_is_a_gate_and_not_decoration,
                test_one_attach_sentence_attaches_exactly_what_it_prints,

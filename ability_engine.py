@@ -895,8 +895,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             stage = act.filter.get("stage", "Basic")
             ptype = act.filter.get("type")
             cap = act.filter.get("hp_at_most")
+            nobox = act.filter.get("no_rule_box")
 
-            def pred(k, n, want=want, stage=stage, ptype=ptype, cap=cap):
+            def pred(k, n, want=want, stage=stage, ptype=ptype, cap=cap,
+                     nobox=nobox):
                 if k != "Pokemon":
                     return False
                 info = pl.POKEMON.get(n, {})
@@ -911,6 +913,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 # "with 70 HP or less" is the whole reason Buddy-Buddy Poffin
                 # is balanced: it fetches small Basics, not a 230 HP ex.
                 if cap is not None and (info.get("hp") or 0) > cap:
+                    return False
+                if nobox and info.get("rule_box"):
                     return False
                 return not want or want.lower() in n.lower()
 
@@ -931,12 +935,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             want = act.filter.get("name_contains")
             kind = (act.filter.get("kind") or "").lower()
             cap = act.filter.get("hp_at_most")
-            def pred(k, n, want=want, kind=kind, cap=cap):
+            nobox = act.filter.get("no_rule_box")
+            def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox):
                 if kind.startswith("pok") and k != "Pokemon":
                     return False
                 if cap is not None and (
                         (pl.POKEMON.get(n, {}).get("hp") or 0) > cap
                         or k != "Pokemon"):
+                    return False
+                if nobox and (k != "Pokemon"
+                              or pl.POKEMON.get(n, {}).get("rule_box")):
                     return False
                 if kind == "energy" and k != "Energy":
                     return False
@@ -1011,8 +1019,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.FROM_DISCARD_TO_HAND:
         got = []
+        nobox = act.filter.get("no_rule_box")
         for _ in range(act.amount or 1):
-            nm = next((n for n in pl.discard if n in pl.POKEMON), None)
+            nm = next((n for n in pl.discard if n in pl.POKEMON
+                       and not (nobox and pl.POKEMON[n].get("rule_box"))), None)
             if not nm:
                 break
             pl.discard.remove(nm)

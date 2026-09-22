@@ -2651,27 +2651,39 @@ def _collapse_duplicate_attachments(eff, spans):
 
 
 _HP_CAP_RE = re.compile(r"with (\d+) HP or less", re.I)
-_HP_CAPPED_OPS = (Op.SEARCH_TO_BENCH, Op.SEARCH_TO_HAND, Op.RECOVER_TO_BENCH)
+_NO_RULE_BOX_RE = re.compile(
+    r"(?:that )?(?:doesn'?t|don'?t) have a rule box|without a rule box", re.I)
+_RESTRICTED_OPS = (Op.SEARCH_TO_BENCH, Op.SEARCH_TO_HAND, Op.RECOVER_TO_BENCH,
+                   Op.FROM_DISCARD_TO_HAND)
 
 
-def _stamp_hp_cap(eff):
-    """"a Basic Pokemon WITH 70 HP OR LESS" is a restriction on the search.
+def _stamp_target_restrictions(eff):
+    """"a Basic Pokemon WITH 70 HP OR LESS", "a Pokemon THAT DOESN'T HAVE A
+    RULE BOX" -- both are restrictions on what the search may take, and
+    both sit AFTER the noun.
 
-    _search_filter reads the qualifier that comes BEFORE the noun (stage,
-    type, name fragment) and the HP cap comes after it, so the cap was
-    dropped and Buddy-Buddy Poffin fetched any Basic at all -- a 230 HP
-    Regice ex or a 210 HP Fezandipiti ex off a card that cannot touch
-    either. 36 of the 45 decks in this repo's field run the card, so this
-    was not a corner case.
+    _search_filter only reads the qualifier that comes BEFORE it (stage,
+    type, name fragment), so both were dropped. Buddy-Buddy Poffin fetched
+    any Basic at all, a 230 HP Regice ex included; Poke Pad tutored a
+    Pokemon ex, which is the one thing the card exists not to do. 36 and
+    23 of the 45 decks in this repo's field run those two cards.
+
+    A dropped restriction never weakens a card. It makes it unconditional,
+    which is how both of these went unnoticed while looking like working
+    search.
     """
-    m = _HP_CAP_RE.search(eff.text or "")
-    if not m:
+    cap = _HP_CAP_RE.search(eff.text or "")
+    no_box = _NO_RULE_BOX_RE.search(eff.text or "")
+    if not cap and not no_box:
         return
-    cap = int(m.group(1))
     for a in eff.actions:
-        if a.op in _HP_CAPPED_OPS:
-            a.filter = dict(a.filter or {})
-            a.filter["hp_at_most"] = cap
+        if a.op not in _RESTRICTED_OPS:
+            continue
+        a.filter = dict(a.filter or {})
+        if cap:
+            a.filter["hp_at_most"] = int(cap.group(1))
+        if no_box:
+            a.filter["no_rule_box"] = True
 
 
 def compile_effect(source, name, text):
@@ -2716,7 +2728,7 @@ def compile_effect(source, name, text):
         unique.append(a)
     eff.actions = unique
     eff.actions = _collapse_duplicate_attachments(eff, spans)
-    _stamp_hp_cap(eff)
+    _stamp_target_restrictions(eff)
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:
