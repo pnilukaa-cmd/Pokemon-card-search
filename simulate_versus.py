@@ -1740,11 +1740,35 @@ RETREAT_TOOLS = {"Air Balloon": -2, "Rescue Board": -1, "Gravity Gemstone": 1}
 
 # Tools whose whole effect is extra damage. min_prize 2 means "only
 # against a Pokemon ex", which is true of nearly every booster in the pool.
+# Hand-maintained, and it was missing two of the three Tools in the pool
+# whose text grants flat bonus damage. Both carry a restriction, and both
+# are entered WITH it -- an ungated entry would be the same dropped-clause
+# bug as Poffin's HP cap and Poke Pad's Rule Box.
 DAMAGE_TOOLS = {
     "Brave Bangle": {"amount": 30, "min_prize": 2, "holder_no_rule_box": True},
     "Maximum Belt": {"amount": 50, "min_prize": 2},
     "Light Ball": {"amount": 50, "min_prize": 2},
+    # +40 only while the Pokemon holding it is Poisoned.
+    "Binding Mochi": {"amount": 40, "min_prize": 0, "holder_condition": "poisoned"},
+    # +30 only on a Hop's Pokemon. Its other half -- "attacks cost
+    # Colorless less" -- is NOT modelled, so this is the conservative
+    # half of the card.
+    "Hop's Choice Band": {"amount": 30, "min_prize": 0, "holder_family": "Hop's"},
 }
+
+
+def damage_tool_applies(pl, tool, holder):
+    """Does this Tool's bonus actually apply to `holder` right now?"""
+    if tool.get("holder_no_rule_box") and \
+            pl.POKEMON[holder.name]["prize_value"] != 1:
+        return False
+    fam = tool.get("holder_family")
+    if fam and fam.lower() not in holder.name.lower():
+        return False
+    cond = tool.get("holder_condition")
+    if cond and cond not in getattr(holder, "conditions", set()):
+        return False
+    return True
 
 # Stadiums are otherwise unmodeled here. These are the ones whose whole
 # effect is Retreat Cost, which the lock/pivot decks live or die on, so
@@ -3317,9 +3341,14 @@ def attach_tools(pl, log):
             if not pl.active or pl.active.tool:
                 continue
             # Brave Bangle pays out only on an attacker WITHOUT a Rule
-            # Box, so putting it on the deck's lone ex is a dead card.
-            if DAMAGE_TOOLS[name].get("holder_no_rule_box") and \
+            # Box, so putting it on the deck's lone ex is a dead card. The
+            # same goes for a family-restricted band on the wrong Pokemon.
+            t = DAMAGE_TOOLS[name]
+            if t.get("holder_no_rule_box") and \
                     pl.POKEMON[pl.active.name]["prize_value"] != 1:
+                continue
+            fam = t.get("holder_family")
+            if fam and fam.lower() not in pl.active.name.lower():
                 continue
             pl.remove_from_hand(kind, name)
             pl.active.tool = name
@@ -3546,8 +3575,7 @@ def do_attack(pl, opp, log):
     tool = (None if AE.query_tools_disabled(pl, opp)
             else DAMAGE_TOOLS.get(getattr(pl.active, "tool", None)))
     if tool and opp.POKEMON[opp.active.name]["prize_value"] >= tool["min_prize"]:
-        if not tool.get("holder_no_rule_box") or \
-                pl.POKEMON[pl.active.name]["prize_value"] == 1:
+        if damage_tool_applies(pl, tool, pl.active):
             dmg += tool["amount"]
     # Outright prevention (Sylveon's Safeguard, Cornerstone Stance,
     # Rabsca's Spherical Shield). The engine has had query_prevented since

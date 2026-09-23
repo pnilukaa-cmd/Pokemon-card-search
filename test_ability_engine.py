@@ -2363,9 +2363,78 @@ def test_the_last_three_loose_searches_are_closed():
               f"got {got}")
 
 
+def test_every_bonus_damage_tool_is_registered_and_gated():
+    """DAMAGE_TOOLS is hand-maintained and was missing two of three.
+
+    Three Pokemon Tools in the pool grant flat bonus damage. Only
+    Maximum Belt was listed, so Binding Mochi (+40) and Hop's Choice Band
+    (+30) did nothing at all -- five copies across two decks in this
+    repo. A hand-kept registry beside a 2000-card database is exactly the
+    shape that silently falls behind, so this test re-derives the list
+    from card text and fails when the two drift apart.
+
+    Both new entries carry a RESTRICTION, and both go in with it. An
+    ungated entry would be the same dropped-clause bug as Buddy-Buddy
+    Poffin's HP cap and Poke Pad's Rule Box, just pointed the other way.
+    """
+    import re
+    import simulate_versus as V
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+
+    pat = re.compile(r"attacks used by the ([\w'\u2019 ]*?)pok[e\u00e9]mon this card "
+                     r"is attached to[^.]{0,60}?do (\d+) more damage", re.I)
+    found = {}
+    for c in cards:
+        if "Pokémon Tool" not in (c.get("subtypes") or []):
+            continue
+        m = pat.search(" ".join(c.get("rules") or []))
+        if m:
+            found[c["name"]] = int(m.group(2))
+    check("the pool still has exactly the three bonus-damage Tools",
+          len(found) == 3, str(sorted(found)))
+    for nm, amt in sorted(found.items()):
+        check(f"{nm} is registered", nm in V.DAMAGE_TOOLS)
+        if nm in V.DAMAGE_TOOLS:
+            check(f"  ...for the {amt} its card prints",
+                  V.DAMAGE_TOOLS[nm]["amount"] == amt,
+                  str(V.DAMAGE_TOOLS[nm]["amount"]))
+
+    # and the two restricted ones are actually gated, by execution
+    POK = {
+        "Hop's Snorlax": {"hp": 150, "retreat": 3, "stage": "Basic",
+                          "types": ["Colorless"], "attacks": [], "weakness": None,
+                          "resistance": None, "abilities": [], "prize": 1,
+                          "prize_value": 1, "rule_box": False,
+                          "base_name": "Hop's Snorlax"},
+        "Plain": {"hp": 100, "retreat": 1, "stage": "Basic", "types": ["Colorless"],
+                  "attacks": [], "weakness": None, "resistance": None,
+                  "abilities": [], "prize": 1, "prize_value": 1,
+                  "rule_box": False, "base_name": "Plain"},
+    }
+    band = V.DAMAGE_TOOLS["Hop's Choice Band"]
+    for who, wanted in (("Hop's Snorlax", True), ("Plain", False)):
+        pl = V.Player("me", POK, [])
+        pl.active = V.InPlay(who, 0)
+        pl.active.tool = "Hop's Choice Band"
+        check(f"Hop's Choice Band on {who}: {'pays' if wanted else 'does not pay'}",
+              V.damage_tool_applies(pl, band, pl.active) == wanted)
+    mochi = V.DAMAGE_TOOLS["Binding Mochi"]
+    for conds, wanted in ((set(), False), ({"poisoned"}, True)):
+        pl = V.Player("me", POK, [])
+        pl.active = V.InPlay("Plain", 0)
+        pl.active.tool = "Binding Mochi"
+        pl.active.conditions = set(conds)
+        check(f"Binding Mochi on a {'Poisoned' if wanted else 'healthy'} holder: "
+              f"{'pays' if wanted else 'does not pay'}",
+              V.damage_tool_applies(pl, mochi, pl.active) == wanted)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_last_three_loose_searches_are_closed,
+    for fn in [test_every_bonus_damage_tool_is_registered_and_gated,
+               test_the_last_three_loose_searches_are_closed,
                test_a_copy_attack_chain_cannot_run_away,
                test_a_wall_respects_the_attacker_restriction_it_prints,
                test_a_search_respects_the_rule_box_clause_it_prints,
