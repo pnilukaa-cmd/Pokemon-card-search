@@ -913,7 +913,13 @@ def _r(m, text):
     # search_to_bench above already handles it -- matching here as well
     # emitted the same action two and three times over.
     low = species.lower()
-    if low.endswith("pokémon") or low.endswith("pokemon") or low in STAGE_WORDS:
+    # endswith() was too narrow: Buddy-Buddy Poffin captures "Basic Pokemon
+    # WITH 70 HP OR LESS", which ends in "less", so the category slipped
+    # through and the card compiled to two Bench searches. It benched the
+    # right number only by luck -- the junk name_contains filter matched no
+    # card name, so the second action silently no-opped. A species name
+    # never contains the word "Pokemon" anywhere, so test the whole phrase.
+    if "pokémon" in low or "pokemon" in low or low in STAGE_WORDS:
         return []
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
                    {"name_contains": species})]

@@ -45,9 +45,44 @@ REAL_TYPES = ["Grass", "Fire", "Water", "Lightning", "Psychic", "Fighting",
 BASIC_ENERGY_RE = re.compile(r"^(" + "|".join(REAL_TYPES) + r") Energy$")
 
 
+_CARD_CACHE = {}
+_INDEX_CACHE = {}
+
+
 def load_cards(path=CARDS_PATH):
-    with open(path) as f:
-        return json.load(f)
+    """The card database, parsed once per process.
+
+    run_game called this on EVERY game, so a round robin re-read and
+    re-parsed the whole 2000-card JSON 198,000 times. Profiling 60 games
+    put load_cards at 3.02s of 4.61s total -- 65% of the simulator's
+    runtime was json.loads on a file that never changes.
+
+    The list is returned by reference and callers only ever read it, so a
+    shared copy is safe; anything that wants to mutate should copy first.
+    """
+    cached = _CARD_CACHE.get(path)
+    if cached is None:
+        with open(path) as f:
+            cached = json.load(f)
+        _CARD_CACHE[path] = cached
+    return cached
+
+
+def build_card_index(cards):
+    """Name and (name, set, number) indexes over the card list.
+
+    Memoised on the identity of the list it was handed, for the same
+    reason as load_cards: it was rebuilt once per game at 0.47s per 60
+    games, plus another 0.37s of dict.update copying the result into
+    simulate_versus._CARDS_BY_NAME.
+    """
+    key = id(cards)
+    hit = _INDEX_CACHE.get(key)
+    if hit is not None and hit[0] is cards:
+        return hit[1], hit[2]
+    by_name, by_setnum = _build_card_index_uncached(cards)
+    _INDEX_CACHE[key] = (cards, by_name, by_setnum)
+    return by_name, by_setnum
 
 
 # --------------------------------------------------------------------------
@@ -104,7 +139,7 @@ def parse_decklist_entries(text):
     return out
 
 
-def build_card_index(cards):
+def _build_card_index_uncached(cards):
     by_name = defaultdict(list)
     by_setnum = {}
     for c in cards:
