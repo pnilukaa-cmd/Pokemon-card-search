@@ -1,0 +1,26 @@
+Pokémon: 17
+4 N's Zorua ASC 136
+4 N's Zoroark ex ASC 137
+4 N's Reshiram ASC 154
+2 N's Zekrom ASC 155
+2 N's Purrloin JTG 96
+1 N's Darmanitan ASC 33
+
+Trainer: 29
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+3 Cyrano SSP 170
+2 Poké Pad ASC 198
+3 Boss's Orders MEG 114
+3 Lillie's Determination MEG 119
+2 Xerosic's Machinations SFA 64
+2 N's Castle JTG 152
+2 N's PP Up ASC 195
+2 Night Stretcher MEG 173
+1 Energy Search POR 72
+1 Master Ball TEF 153
+
+Energy: 14
+14 Basic Darkness Energy
+
+Total Cards: 60

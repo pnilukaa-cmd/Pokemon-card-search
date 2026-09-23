@@ -1,0 +1,27 @@
+Pokémon: 19
+4 Mega Kangaskhan ex MEG 104
+3 Antique Jaw Fossil POR 68
+3 Tyrunt POR 44
+3 Greavard SCR 70
+2 Tyrantrum POR 45
+2 Houndstone MEG 145
+2 Team Rocket's Diglett ASC 100
+Trainer: 27
+4 Ultra Ball MEG 131
+4 Night Stretcher MEG 173
+3 Poké Pad ASC 198
+3 Fossil Quarry PBL 76
+3 Lillie's Determination ASC 192
+2 Judge POR 76
+2 Boss's Orders ASC 183
+2 Switch MEG 130
+2 Air Balloon ASC 181
+2 Eri PRE 136
+Energy: 14
+4 Rocky Fighting Energy POR 87
+2 Telepathic Psychic Energy POR 88
+1 Enriching Energy SSP 191
+3 Basic Fighting Energy
+4 Mist Energy TEF 161
+Total Cards: 60
+

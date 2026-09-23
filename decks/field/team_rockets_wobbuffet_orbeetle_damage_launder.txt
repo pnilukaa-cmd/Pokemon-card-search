@@ -1,0 +1,25 @@
+Pokémon: 18
+3 Team Rocket's Blipbug DRI 15
+2 Team Rocket's Dottler DRI 88
+2 Team Rocket's Orbeetle DRI 198
+3 Team Rocket's Wobbuffet DRI 82
+3 Team Rocket's Exeggcute ASC 77
+2 Team Rocket's Exeggutor ASC 78
+3 Team Rocket's Chingling DRI 85
+
+Trainer: 30
+4 Team Rocket's Petrel ASC 207
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+1 Precious Trolley SSP 185
+4 Lillie's Determination MEG 119
+3 Boss's Orders MEG 114
+4 Night Stretcher MEG 173
+2 Air Balloon BLK 79
+2 Rescue Board TEF 159
+2 Switch MEG 130
+
+Energy: 12
+12 Basic Psychic Energy
+
+Total Cards: 60

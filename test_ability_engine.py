@@ -2431,9 +2431,169 @@ def test_every_bonus_damage_tool_is_registered_and_gated():
               V.damage_tool_applies(pl, mochi, pl.active) == wanted)
 
 
+def test_no_card_in_any_decklist_is_silently_inert():
+    """The durable guard: a card in a deck must do SOMETHING.
+
+    Five of the bugs found in this branch were a card that compiled to
+    nothing and sat in a decklist doing nothing -- Backtrack Badge for
+    every coin flip in the format, Binding Mochi, Hop's Choice Band, and
+    the searches that fell through to a generic rule. Each was found by
+    hand, one at a time, long after the decks were measured.
+
+    This checks every Trainer in every decklist in decks/ against all the
+    paths that could handle it -- the named registries, the Tool tables,
+    the reflip path, the Stadium turn effect, and the compiled IR -- and
+    fails on anything that matches none of them. KNOWN is the set that is
+    deliberately unmodelled, each with a reason; anything NEW that goes
+    inert fails here instead of quietly skewing a 1.5-million-game run.
+    """
+    import glob
+    import simulate_versus as V
+    cards = M.load_cards()
+    by_name, by_setnum = M.build_card_index(cards)
+    V._CARDS_BY_NAME.update(by_name)
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    src = open("simulate_versus.py").read()
+
+    KNOWN = {
+        # symmetric, both players get it, and there is no sensible
+        # heuristic for WHICH card to put back on top
+        "Academy at Night",
+    }
+
+    def live(c):
+        """Live means the ENGINE READS it, not that the IR compiled it.
+
+        The first version of this guard accepted any card whose IR had
+        actions, and so it passed against the very engine that ignored
+        Binding Mochi and Hop's Choice Band -- a Tool's compiled IR is
+        read by nothing. A guard that cannot fail on the bug it was
+        written for is the same trap as the rest of this file: compiled
+        is not executed. Each card type is checked against the path that
+        actually consumes it.
+        """
+        nm = c["name"]
+        subs = c.get("subtypes") or []
+        if f'"{nm}"' in src:
+            return True                      # named path in play_trainers
+        if "Pokémon Tool" in subs:
+            # Tools are consumed ONLY by these tables and the reflip path.
+            if (nm in V.hp_tools() or nm in V.RETREAT_TOOLS
+                    or nm in V.RETALIATE_CARDS or nm in V.DAMAGE_TOOLS):
+                return True
+            pl = V.Player("x", {"P": {"hp": 60, "retreat": 1, "stage": "Basic",
+                                      "types": ["Colorless"], "attacks": [],
+                                      "weakness": None, "resistance": None,
+                                      "abilities": [], "prize": 1,
+                                      "prize_value": 1, "rule_box": False,
+                                      "base_name": "P"}}, [])
+            pl.active = V.InPlay("P", 0)
+            return bool(V._is_reflip_tool(pl, nm)
+                        or nm in V.on_damaged_tools())
+        if "Stadium" in subs:
+            e = V.stadium_turn_effect_ir(nm)
+            if e is not None and e.actions:
+                return True
+            if nm in V.EFFECT_STADIUMS or nm in V.RETREAT_STADIUMS:
+                return True
+            ir = V.trainer_effect_ir(nm)
+            return bool(ir is not None and any(
+                a.op in AE.PASSIVE_OPS if hasattr(AE, "PASSIVE_OPS") else True
+                for a in ir.actions))
+        # Items and Supporters go through play_trainer_from_ir, which only
+        # resolves ops in TRAINER_IR_OPS.
+        eff = V.trainer_effect_ir(nm)
+        return bool(eff is not None
+                    and any(a.op in V.TRAINER_IR_OPS for a in eff.actions))
+
+    inert = {}
+    lists = sorted(glob.glob("decks/*.ptcgl.txt")) + sorted(glob.glob("decks/field/*.txt"))
+    for f in lists:
+        for e in M.parse_decklist_entries(open(f).read()):
+            c, _ = M.resolve_card(e, by_name, by_setnum)
+            if not c or c.get("supertype") != "Trainer":
+                continue
+            if c["name"] in KNOWN or live(c):
+                continue
+            inert.setdefault(c["name"], set()).add(f.split("/")[-1])
+    check(f"no NEW inert Trainer across {len(lists)} decklists",
+          not inert,
+          "; ".join(f"{k} in {sorted(v)}" for k, v in sorted(inert.items())))
+
+
+def test_when_damaged_tools_fire_and_are_attached(): 
+    """Lucky Helmet, Handheld Fan and Team Rocket's Hypnotizer.
+
+    All three trigger when their holder is damaged and do something other
+    than put damage counters back, which is the only on-damaged shape the
+    engine knew. They were never attached and never fired. The registry
+    is DERIVED from card text rather than hand-listed, because the
+    hand-kept DAMAGE_TOOLS dict beside it had already fallen two cards
+    behind the pool.
+
+    Each is measured against a no-tool control on the same board, so a
+    PASS cannot come from the attack simply doing that anyway.
+    """
+    import simulate_versus as V
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    reg = V.on_damaged_tools()
+    for nm, shape in (("Lucky Helmet", ("draw", 2)),
+                      ("Handheld Fan", ("move_energy", 1)),
+                      ("Team Rocket's Hypnotizer", ("condition", "asleep"))):
+        check(f"{nm} is derived from its text as {shape}", reg.get(nm) == shape,
+              str(reg.get(nm)))
+
+    POK = {n: {"hp": 300, "retreat": 1, "stage": "Basic", "types": ["Colorless"],
+               "attacks": [{"name": "Hit", "cost": ["Colorless"],
+                            "damage": 50, "text": ""}],
+               "weakness": None, "resistance": None, "abilities": [],
+               "prize": 1, "prize_value": 1, "rule_box": False,
+               "base_name": n} for n in ("A", "B")}
+
+    def swing(tool):
+        me = V.Player("atk", POK, [("Item", "x")] * 20)
+        op = V.Player("def", POK, [("Item", "y")] * 20)
+        me.active = V.InPlay("A", 0)
+        me.active.energy = [["Colorless"]] * 3
+        me.active.energy_names = ["E"] * 3
+        me.bench = [V.InPlay("B", 0)]
+        op.active, op.bench = V.InPlay("B", 0), [V.InPlay("A", 0)]
+        if tool:
+            op.active.tool = tool
+        h0, e0 = len(op.hand), me.active.energy_count()
+        V.do_attack(me, op, [])
+        return (len(op.hand) - h0, me.active.energy_count() - e0,
+                set(me.active.conditions))
+
+    base = swing(None)
+    check("control: an unequipped hit draws nothing, strips nothing, "
+          "applies nothing", base == (0, 0, set()), str(base))
+    check("Lucky Helmet draws 2 for its holder", swing("Lucky Helmet")[0] == 2)
+    check("Handheld Fan strips an Energy off the attacker",
+          swing("Handheld Fan")[1] == -1)
+    check("Team Rocket's Hypnotizer puts the attacker to Sleep",
+          swing("Team Rocket's Hypnotizer")[2] == {"asleep"})
+
+    # and they must actually get attached, or none of the above can happen
+    P = {"P": {"hp": 100, "retreat": 1, "stage": "Basic", "types": ["Colorless"],
+               "attacks": [], "weakness": None, "resistance": None,
+               "abilities": [], "prize": 1, "prize_value": 1,
+               "rule_box": False, "base_name": "P"}}
+    for nm in ("Lucky Helmet", "Handheld Fan"):
+        pl = V.Player("me", P, [])
+        pl.active = V.InPlay("P", 0)
+        pl.hand = [("Tool", nm)]
+        V.attach_tools(pl, [])
+        check(f"{nm} is actually attached", pl.active.tool == nm, str(pl.active.tool))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_every_bonus_damage_tool_is_registered_and_gated,
+    for fn in [test_when_damaged_tools_fire_and_are_attached,
+               test_no_card_in_any_decklist_is_silently_inert,
+               test_every_bonus_damage_tool_is_registered_and_gated,
                test_the_last_three_loose_searches_are_closed,
                test_a_copy_attack_chain_cannot_run_away,
                test_a_wall_respects_the_attacker_restriction_it_prints,

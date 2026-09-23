@@ -1,0 +1,23 @@
+Pokémon: 17
+4 Ekans TEF 100
+2 Arbok TEF 101
+4 Venipede TWM 115
+2 Whirlipede TWM 116
+3 Team Rocket's Grimer DRI 123
+2 Team Rocket's Muk DRI 124
+
+Trainer: 30
+4 Buddy-Buddy Poffin MEG 167
+3 Ultra Ball MEG 131
+1 Precious Trolley SSP 185
+4 Lillie's Determination MEG 119
+2 Janine's Secret Art SFA 59
+4 Team Rocket's Petrel ASC 207
+4 Night Stretcher MEG 173
+4 Air Balloon BLK 79
+4 Rescue Board TEF 159
+
+Energy: 13
+13 Basic Darkness Energy
+
+Total Cards: 60

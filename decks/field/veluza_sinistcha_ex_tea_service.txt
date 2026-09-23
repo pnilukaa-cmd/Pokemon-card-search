@@ -1,0 +1,28 @@
+Pokémon: 18
+4 Veluza SCR 45
+3 Poltchageist TWM 171
+3 Sinistcha ex TWM 189
+3 Dunsparce JTG 120
+3 Dudunsparce PRE 80
+1 Fezandipiti ex ASC 142
+1 Shaymin DRI 10
+
+Trainer: 34
+4 Kofu SCR 138
+4 Team Rocket's Petrel ASC 207
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Poké Pad ASC 198
+3 Team Rocket's Factory ASC 203
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Switch MEG 130
+2 Brave Bangle WHT 80
+1 Brilliant Blender SSP 164
+1 Night Stretcher MEG 173
+1 Redeemable Ticket JTG 156
+
+Energy: 8
+8 Basic Grass Energy
+
+Total Cards: 60

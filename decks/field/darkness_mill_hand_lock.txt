@@ -1,0 +1,30 @@
+Pokémon: 14
+2 Sandile BLK 57
+1 Krokorok BLK 58
+2 Krookodile BLK 59
+2 Deino SSP 117
+1 Zweilous SSP 118
+2 Hydreigon ex SSP 119
+2 Scraggy ASC 134
+2 Mega Scrafty ex ASC 135
+
+Trainer: 34
+4 Boss's Orders MEG 114
+2 Waitress ASC 215
+2 Energy Search POR 72
+2 Xerosic's Machinations SFA 64
+2 Lacey SCR 139
+1 Eri TEF 146
+4 Ultra Ball MEG 131
+4 Rare Candy MEG 125
+3 Buddy-Buddy Poffin TEF 144
+3 Night Stretcher SFA 61
+2 Hand Trimmer TEF 150
+2 Air Balloon BLK 79
+2 Rescue Board TEF 159
+1 Max Rod PRE 116
+
+Energy: 12
+12 Basic Darkness Energy
+
+Total Cards: 60

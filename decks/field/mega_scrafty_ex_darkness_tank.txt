@@ -1,0 +1,31 @@
+Pokémon: 20
+3 Dunsparce TEF 128
+2 Dudunsparce TEF 129
+2 Spiritomb MEG 148
+4 Scraggy ASC 134
+3 Mega Scrafty ex ASC 135
+2 Absol SFA 30
+2 Brute Bonnet TWM 118
+2 Munkidori ASC 99
+
+Trainer: 26
+3 Punk Helmet PFL 121
+2 Xerosic's Machinations SFA 64
+2 AZ's Tranquility CRI 106
+1 Poké Pad ASC 198
+1 Night Stretcher MEG 173
+2 Janine's Secret Art SFA 59
+4 Lillie's Determination MEG 119
+1 Team Rocket's Petrel ASC 207
+3 Ultra Ball MEG 131
+1 Boss's Orders MEG 114
+4 Switch MEG 130
+1 Maximum Belt TEF 154
+1 Eri TEF 146
+
+Energy: 14
+2 Spiky Energy JTG 159
+2 Shadowy Darkness Energy PBL 83
+10 Basic Darkness Energy
+
+Total Cards: 60

@@ -1,0 +1,26 @@
+Pokémon: 15
+4 Salandit POR 15
+2 Salazzle ASC 224
+3 Salazzle ex POR 101
+4 Team Rocket's Grimer DRI 123
+2 Team Rocket's Muk DRI 124
+
+Trainer: 31
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Boss's Orders MEG 114
+4 Lillie's Determination MEG 119
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+3 Team Rocket's Petrel ASC 207
+1 Air Balloon BLK 79
+2 Rescue Board TEF 159
+2 Energy Search POR 72
+2 Pokégear 3.0 BLK 84
+1 Precious Trolley SSP 185
+
+Energy: 14
+7 Basic Fire Energy
+7 Basic Darkness Energy
+
+Total Cards: 60

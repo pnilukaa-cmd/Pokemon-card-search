@@ -1,0 +1,27 @@
+Pokémon: 19
+4 Steven's Beldum DRI 143
+3 Steven's Metang DRI 144
+2 Steven's Metagross ex ASC 289
+2 Steven's Skarmory DRI 142
+3 Steven's Baltoy DRI 83
+2 Steven's Claydol DRI 84
+3 Steven's Carbink DRI 86
+
+Trainer: 27
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+1 Precious Trolley SSP 185
+4 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Rare Candy MEG 125
+2 Air Balloon BLK 79
+2 Rescue Board TEF 159
+2 Switch MEG 130
+2 Poké Pad ASC 198
+
+Energy: 14
+7 Basic Metal Energy
+7 Basic Psychic Energy
+
+Total Cards: 60

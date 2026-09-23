@@ -1,0 +1,27 @@
+Pokémon: 24
+4 Team Rocket's Tarountula ASC 18
+2 Team Rocket's Spidops ASC 19
+2 Team Rocket's Kangaskhan ex ASC 162
+3 Team Rocket's Murkrow ASC 126
+2 Team Rocket's Honchkrow ASC 127
+2 Team Rocket's Porygon DRI 153
+2 Team Rocket's Porygon2 DRI 154
+2 Team Rocket's Porygon-Z DRI 155
+3 Team Rocket's Chingling DRI 85
+2 Team Rocket's Meowth ASC 161
+
+Trainer: 25
+4 Team Rocket's Petrel ASC 207
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+1 Precious Trolley SSP 185
+4 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Air Balloon BLK 79
+2 Rescue Board TEF 159
+
+Energy: 11
+11 Basic Grass Energy
+
+Total Cards: 60

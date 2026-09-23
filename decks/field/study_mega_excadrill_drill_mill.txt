@@ -1,0 +1,33 @@
+Pokémon: 7
+1 Dunsparce TEF 128
+3 Dudunsparce TEF 129
+3 Dunsparce JTG 120
+3 Drilbur SSP 108
+3 Mega Excadrill ex PBL 65
+1 Shaymin DRI 185
+2 Relicanth TEF 84
+
+Trainer: 17
+4 Lillie's Determination MEG 184
+2 Wally's Compassion MEG 186
+4 Buddy-Buddy Poffin MEG 167
+1 Hero's Cape TEF 152
+2 Repel MEG 126
+1 Air Balloon BLK 79
+3 Boss's Orders PAL 265
+2 Night Stretcher MEG 173
+2 Wally's Compassion MEG 176
+2 Hilda WHT 171
+3 Iron Defender PBL 110
+4 Poké Pad POR 113
+1 Xerosic's Machinations SFA 89
+1 Iron Defender MEG 118
+1 Team Rocket's Petrel DRI 226
+4 Full Metal Lab TEF 148
+1 Ultra Ball ASC 264
+
+Energy: 2
+4 Magnetic {M} Energy CRI 85
+2 Basic {M} Energy SVE 24
+
+Total Cards: 60

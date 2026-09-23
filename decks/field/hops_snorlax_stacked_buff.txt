@@ -1,0 +1,27 @@
+Pokémon: 15
+3 Hop's Snorlax JTG 117
+3 Hop's Phantump ASC 95
+2 Hop's Trevenant ASC 237
+3 Hop's Wooloo JTG 135
+2 Hop's Dubwool JTG 136
+2 Lillie's Clefairy ex ASC 280
+
+Trainer: 31
+2 Postwick JTG 154
+3 Hop's Choice Band JTG 148
+4 Hop's Bag JTG 147
+2 Hassel TWM 151
+4 Buddy-Buddy Poffin MEG 167
+3 Ultra Ball MEG 131
+4 Boss's Orders MEG 114
+3 Lillie's Determination MEG 119
+2 Night Stretcher MEG 173
+1 Air Balloon BLK 79
+1 Rescue Board TEF 159
+2 Switch MEG 130
+
+Energy: 14
+12 Basic Psychic Energy
+2 Telepathic Psychic Energy POR 88
+
+Total Cards: 60

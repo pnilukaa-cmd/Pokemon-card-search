@@ -1,0 +1,36 @@
+Pokémon: 8
+2 Dreepy ASC 247
+4 Centiskorch PBL 10
+2 Bastiodon PBL 93
+4 Sizzlipede PBL 9
+2 Shieldon PBL 61
+1 Psyduck ASC 226
+1 Shaymin DRI 185
+2 Drakloak ASC 248
+
+Trainer: 19
+2 Fossil Quarry PBL 76
+4 Lillie's Determination MEG 169
+3 Antique Armor Fossil PBL 72
+2 Air Balloon MEG 166
+1 Buddy-Buddy Poffin MEG 167
+1 Switch PFL 123
+1 Lana's Aid TWM 219
+2 Handheld Fan TWM 150
+2 Boss's Orders PAL 265
+1 Night Stretcher MEG 173
+3 Hilda WHT 171
+1 Redeemable Ticket JTG 156
+4 Poké Pad POR 113
+2 Brock's Scouting JTG 179
+1 Xerosic's Machinations SFA 89
+1 Sacred Ash POR 115
+1 Gravity Gemstone SCR 137
+1 Neutralization Zone SFA 60
+1 Battle Cage PFL 116
+
+Energy: 2
+1 Magnetic {M} Energy CRI 85
+7 Basic {R} Energy OBF 230
+
+Total Cards: 60

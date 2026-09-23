@@ -1,0 +1,24 @@
+Pokémon: 14
+4 Totodile TEF 39
+2 Croconaw TEF 40
+4 Feraligatr TEF 41
+4 Munkidori TWM 95
+
+Trainer: 31
+4 Rare Candy MEG 125
+4 Buddy-Buddy Poffin TEF 144
+4 Ultra Ball MEG 131
+3 Switch MEG 130
+2 Night Stretcher SFA 61
+3 Boss's Orders MEG 114
+2 Rosa's Encouragement POR 84
+2 Drayton SSP 174
+2 Brock's Scouting JTG 146
+3 Lillie's Determination MEG 119
+2 Colress's Tenacity SFA 57
+
+Energy: 15
+13 Basic Water Energy
+2 Basic Darkness Energy
+
+Total Cards: 60

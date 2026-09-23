@@ -1,0 +1,32 @@
+Pokémon: 20
+4 Dreepy TWM 128
+4 Drakloak TWM 129
+3 Dragapult ex PRE 73
+2 Duskull SFA 18
+2 Dusclops PRE 36
+1 Dusknoir SFA 20
+1 Munkidori TWM 95
+1 Meowth ex POR 62
+1 Fezandipiti ex ASC 142
+1 Budew PRE 4
+
+Trainer: 32
+4 Buddy-Buddy Poffin ASC 184
+4 Poké Pad ASC 198
+4 Crushing Hammer POR 71
+4 Lillie's Determination ASC 192
+4 Ultra Ball ASC 213
+3 Boss's Orders MEG 114
+2 Night Stretcher ASC 196
+2 Risky Ruins MEG 127
+2 Crispin PRE 105
+1 Rosa's Encouragement POR 84
+1 Judge POR 76
+1 Unfair Stamp TWM 165
+
+Energy: 8
+3 Basic Psychic Energy
+3 Basic Fire Energy
+2 Basic Darkness Energy
+
+Total Cards: 60

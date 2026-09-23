@@ -1,0 +1,20 @@
+Pokémon: 16
+4 Team Rocket's Koffing DRI 125
+4 Team Rocket's Weezing DRI 126
+4 Koffing JTG 91
+4 Weezing JTG 92
+
+Trainer: 31
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Boss's Orders MEG 114
+4 Lillie's Determination MEG 119
+4 Switch MEG 130
+4 Air Balloon BLK 79
+3 Rescue Board TEF 159
+4 Night Stretcher MEG 173
+
+Energy: 13
+13 Basic Darkness Energy
+
+Total Cards: 60

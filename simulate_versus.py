@@ -202,6 +202,14 @@ class Player:
         # Unrestricted version of the same thing (Gladion's Final Battle),
         # which applies to any Active rather than only a Pokemon ex.
         self.turn_buff_any = 0
+        # "During your opponent's next turn, all of your <type> Pokemon
+        # take N less damage" (Iron Defender). Set when the Item is
+        # played and read while the OPPONENT attacks, so unlike the
+        # turn_buff_* fields above it is cleared at the start of this
+        # player's NEXT turn rather than the one it was played on.
+        self.turn_shield = 0
+        self.turn_shield_type = None
+        self._shield_armed = False
         self.stadium = None
         # The Stadium the OTHER player put down. A Stadium is shared, so
         # both sides read whichever one is on the table.
@@ -969,6 +977,23 @@ def play_items(pl, opp, turn, log, first_turn):
         pl.item_locked = False
         log.append(f"  {pl.name}: can't play Item cards this turn (locked)")
         return
+    # Iron Defender: "during your opponent's next turn, all of your Metal
+    # Pokemon take 30 less damage". Its compiled op is REDUCE_DAMAGE,
+    # which play_trainer_from_ir does not resolve because it is a passive
+    # op, so the card did nothing at all when played. It is an ITEM, so it
+    # belongs here and not in the Supporter chain -- putting it there
+    # would also have burned the one Supporter play of the turn.
+    # Only worth it while there is actually a Metal Pokemon to shield.
+    while ("Item", "Iron Defender") in pl.hand and not pl.turn_shield:
+        if not any("Metal" in (pl.POKEMON.get(sp.name, {}).get("types") or [])
+                   for sp in pl.in_play()):
+            break
+        pl.remove_from_hand("Item", "Iron Defender")
+        pl.discard.append("Iron Defender")
+        pl.turn_shield, pl.turn_shield_type = 30, "Metal"
+        pl._shield_armed = True
+        log.append(f"  {pl.name}: Iron Defender (Metal takes 30 less next turn)")
+
     while ("Item", "Rare Candy") in pl.hand:
         if not effect_rare_candy(pl, opp, turn, log, first_turn):
             break
@@ -1281,6 +1306,7 @@ def play_supporter(pl, opp, turn, log):
         log.append(f"  {pl.name}: Gladion's Final Battle (+80 this turn)")
         return
 
+
     # Turn-scoped damage boost, only worth the Supporter slot on a turn the
     # Active can actually attack an ex with it.
     if "Black Belt's Training" in hand_names and pl.active and opp.active:
@@ -1575,6 +1601,11 @@ TRAINER_IR_OPS = {
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
     IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
+    # Repel and its family. The executor for this op has existed since
+    # Abilities were wired in and the attack path already resolves it --
+    # it was simply never in the set that playing a TRAINER resolves, so
+    # Repel was an Item that did nothing when played.
+    IR.Op.FORCE_SWITCH_OPPONENT,
 }
 
 
@@ -3329,6 +3360,17 @@ def attach_tools(pl, log):
         # one card in the pool with this shape, and it was already in two
         # decklists in this repo doing nothing at all.
         if name not in RETALIATE_CARDS and name not in DAMAGE_TOOLS:
+            # Tools that fire when their holder is damaged and do something
+            # other than put counters back. Without this they were never
+            # attached, so the effect wired above could never fire.
+            if name in on_damaged_tools():
+                if not pl.active or (pl.active.tool
+                                     and not AE.query_extra_tool_slots(pl, pl.active)):
+                    continue
+                pl.remove_from_hand(kind, name)
+                pl.active.tool = name
+                log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+                continue
             if _is_reflip_tool(pl, name):
                 if not pl.active or (pl.active.tool
                                      and not AE.query_extra_tool_slots(pl, pl.active)):
@@ -3362,6 +3404,72 @@ def attach_tools(pl, log):
         pl.remove_from_hand(kind, name)
         pl.active.tool = name
         log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+
+
+_ON_DAMAGED_TOOLS = None
+_WHEN_DAMAGED_RE = _re.compile(
+    r"is in the active spot and is damaged by an attack", _re.I)
+
+
+def on_damaged_tools():
+    """Tool name -> what it does when its holder is hit, read off the card.
+
+    Derived from text rather than hand-listed, because the hand-kept
+    DAMAGE_TOOLS dict beside this one had silently fallen two cards
+    behind the pool. Damage-counter versions (Punk Helmet, Deluxe Bomb)
+    are left to the existing retaliate path, which already handles them.
+    """
+    global _ON_DAMAGED_TOOLS
+    if _ON_DAMAGED_TOOLS is None:
+        if not _CARDS_BY_NAME:
+            _CARDS_BY_NAME.update(M.build_card_index(M.load_cards())[0])
+        _ON_DAMAGED_TOOLS = {}
+        for name, card in _CARDS_BY_NAME.items():
+            card = card[0] if isinstance(card, list) and card else card
+            if not isinstance(card, dict):
+                continue
+            if "Pokémon Tool" not in (card.get("subtypes") or []):
+                continue
+            text = " ".join(card.get("rules") or [])
+            if not _WHEN_DAMAGED_RE.search(text):
+                continue
+            m = _re.search(r"\bdraw (\d+) cards?", text, _re.I)
+            if m:
+                _ON_DAMAGED_TOOLS[name] = ("draw", int(m.group(1)))
+                continue
+            m = _re.search(r"the attacking pok[eé]mon is now (\w+)", text, _re.I)
+            if m:
+                _ON_DAMAGED_TOOLS[name] = ("condition", m.group(1).lower())
+                continue
+            if _re.search(r"move an energy from the attacking pok[eé]mon", text, _re.I):
+                _ON_DAMAGED_TOOLS[name] = ("move_energy", 1)
+    return _ON_DAMAGED_TOOLS
+
+
+def fire_on_damaged_tool(pl, opp, dmg, log):
+    """`opp` holds the Tool and has just been hit by `pl` for `dmg`."""
+    if dmg <= 0 or not opp.active or AE.query_tools_disabled(opp, pl):
+        return
+    entry = on_damaged_tools().get(getattr(opp.active, "tool", None))
+    if not entry:
+        return
+    kind, amount = entry
+    if kind == "draw":
+        opp.draw(amount)
+        log.append(f"  {opp.name}: {opp.active.tool} -- draws {amount}")
+    elif kind == "condition" and pl.active is not None:
+        AE.apply_condition(pl.active, amount)
+        log.append(f"  {opp.name}: {opp.active.tool} -- {pl.active.name} is now {amount}")
+    elif kind == "move_energy" and pl.active is not None and pl.active.energy:
+        # "to 1 of your opponent's Benched Pokemon" -- the attacker's own
+        # Bench, from the point of view of the Pokemon wearing the Tool.
+        if pl.bench:
+            pl.bench[0].energy.append(pl.active.energy.pop())
+            if getattr(pl.active, "energy_names", None):
+                pl.bench[0].energy_names.append(pl.active.energy_names.pop())
+            log.append(f"  {opp.name}: {opp.active.tool} -- moves an Energy off "
+                       f"{pl.active.name}")
+
 
 
 def use_counter_movers(pl, opp, log):
@@ -3595,6 +3703,10 @@ def do_attack(pl, opp, log):
                    f"all damage to {opp.active.name} prevented")
         return True
     reduction = 0 if ignores else damage_reduction_for(opp, opp.active, pl)
+    if not ignores and opp.turn_shield:
+        types = opp.POKEMON[opp.active.name].get("types") or []
+        if not opp.turn_shield_type or opp.turn_shield_type in types:
+            reduction += opp.turn_shield
     if reduction:
         dmg = max(0, dmg - reduction)
     opp.active.prev_damage = opp.active.damage
@@ -3608,6 +3720,10 @@ def do_attack(pl, opp, log):
         pl.active.damage += back_counters
         log.append(f"  {opp.name}: {opp.active.name} puts {back_counters} "
                    f"back on {pl.active.name}")
+    # Tools that fire when their holder is damaged and do something other
+    # than put counters back: Lucky Helmet draws, Handheld Fan strips an
+    # Energy, Team Rocket's Hypnotizer puts the attacker to Sleep.
+    fire_on_damaged_tool(pl, opp, dmg, log)
     log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} for {dmg}"
                f"{f' (-{reduction} reduced)' if reduction else ''}"
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
@@ -3928,6 +4044,13 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl.supporter_played = False
     pl.turn_buff_vs_ex = 0
     pl.turn_buff_any = 0
+    # The shield covers exactly the opponent turn that follows the one it
+    # was played on. It is armed on play and spent here, one turn later.
+    if pl._shield_armed:
+        pl._shield_armed = False
+    else:
+        pl.turn_shield = 0
+        pl.turn_shield_type = None
     pl.abilities_used = set()
     pl.played_supporters_this_turn = set()
     for spot in pl.in_play():

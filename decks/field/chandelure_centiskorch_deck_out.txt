@@ -1,0 +1,27 @@
+Pokémon: 21
+4 Litwick PBL 36
+4 Lampent PBL 37
+4 Chandelure TWM 38
+3 Sizzlipede PBL 9
+3 Centiskorch PBL 10
+3 Team Rocket's Chingling DRI 85
+
+Trainer: 30
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+4 Rare Candy MEG 125
+4 Boss's Orders MEG 114
+3 Lillie's Determination MEG 119
+3 Crushing Hammer POR 71
+2 Poké Pad ASC 198
+2 Xerosic's Machinations SFA 64
+2 Jamming Tower ASC 261
+1 Sacred Ash POR 115
+1 Grand Tree SCR 136
+
+Energy: 9
+2 Telepathic Psychic Energy POR 88
+4 Basic Psychic Energy
+3 Basic Fire Energy
+
+Total Cards: 60

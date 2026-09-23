@@ -1,0 +1,33 @@
+Pokémon: 18
+4 N's Zorua JTG 97
+4 N's Zoroark ex JTG 98
+2 N's Zekrom ASC 155
+2 Munkidori PRE 44
+1 N's Darumaka ASC 32
+1 N's Darmanitan ASC 33
+1 Pecharunt ex SFA 39
+1 Meowth ex POR 62
+1 Fezandipiti ex SFA 38
+1 Yveltal MEG 88
+
+Trainer: 34
+4 Buddy-Buddy Poffin ASC 184
+4 Lillie's Determination ASC 192
+4 Transformation Tome CRI 83
+3 Boss's Orders MEG 114
+3 N's PP Up JTG 153
+3 Ultra Ball ASC 213
+2 Night Stretcher ASC 196
+2 Binding Mochi PRE 95
+2 Cyrano SSP 170
+2 N's Castle JTG 152
+1 Poké Pad ASC 198
+1 Team Rocket's Venture Bomb DRI 179
+1 Black Belt's Training ASC 255
+1 Special Red Card CRI 82
+1 Secret Box TWM 163
+
+Energy: 8
+8 Basic Darkness Energy
+
+Total Cards: 60
