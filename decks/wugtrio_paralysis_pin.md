@@ -2,7 +2,9 @@
 
 Built for the brief: *a deck focused around paralyze to prevent retreating.*
 
-**70.04% (±1.03) across all 45 field decks, 200 games each, winning 40 of 45.**
+**69.86% (±0.46) across all 45 field decks, 1000 games each, winning 41 of 45.**
+Rank 3 in the field, behind lurantis_heal_punish (73.00) and
+team_rockets_persian_ex_attack_theft (71.97).
 
 ```
 Pokémon: 14
@@ -69,11 +71,20 @@ nothing else changed:
 
 | | mean over 45 decks | winning |
 |---|---|---|
-| this list | **70.04 ± 1.03** | 40/45 |
-| Paralysis deleted | 65.32 ± 1.03 | 35/45 |
+| this list | **69.86 ± 0.46** | 41/45 |
+| Paralysis deleted | 65.28 ± 0.46 | 37/45 |
 
-**+4.72 points, and five more winning matchups.** At 200 games over 45 fixed
-opponents the standard error on each mean is ~0.48, so the gap is ~7σ.
+**+4.58 points, and four more winning matchups.** At 1000 games over 45
+fixed opponents the standard error on the difference is 0.33, so the gap
+is about 14 sigma.
+
+This number took four wrong answers to reach, which is worth recording:
++9 and +14.8 and +2.1 all came from an 8-deck sample, and two of them
+used a "control" that still ran 3 Misty's Staryu -- whose Bubble Beam is
+also a Paralysis flip. Only 3 of the 6 Paralysis cards had been swapped.
+Once the control was properly matched and the sample was all 45
+opponents, the answer stopped moving: 70.04/65.32 at 200 games and
+69.86/65.28 at 1000 agree to within 0.18.
 
 The control swaps six cards for their closest legal twins:
 
