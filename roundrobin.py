@@ -6,7 +6,7 @@ deterministic seed (common random numbers), so a re-run with the same
 field reproduces exactly and two fields are comparable.
 """
 import sys, os, glob, json, random, hashlib, itertools
-sys.path.insert(0, '/home/user/Pokemon-card-search')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import simulate_versus as SV
 import tcg_model as M
 

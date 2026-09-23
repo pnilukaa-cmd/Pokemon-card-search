@@ -1,16 +1,18 @@
 """Aggregate round-robin shards into a field table and patch every deck file."""
 import glob, json, os, re, statistics, sys, datetime
 
-SP = "/tmp/claude-0/-home-user-Pokemon-card-search/e648d066-66e0-5170-a656-2af4bb2d2aa0/scratchpad"
-REPO = "/home/user/Pokemon-card-search"
+REPO = os.path.dirname(os.path.abspath(__file__))
+# Run output lives in the repo, not a session scratchpad: the scratchpad
+# is deleted with the container, and the 2026-09-15 shards went with it.
+SP = os.environ.get("RUNS_DIR", os.path.join(REPO, "runs"))
 
 games = None
 wins = {}
 unplayable = set()
 # base run first, then the re-run of the two decks that were fixed
 # mid-flight -- same per-pair seeds, so the override is exact.
-# Run directory: pass it on the command line, e.g. `run2`. The default is
-# the scratchpad root, which is where the 2026-09-15 field landed.
+# Run directory: pass it on the command line, e.g. `run2`, resolved under
+# SP. The default is SP itself.
 RUN = os.path.join(SP, sys.argv[1]) if len(sys.argv) > 1 else SP
 
 for f in (sorted(glob.glob(os.path.join(RUN, "rr_[0-9]*.json")))

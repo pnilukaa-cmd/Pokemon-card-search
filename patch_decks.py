@@ -1,8 +1,10 @@
 """Put the new field numbers at the top of every deck file, once."""
 import json, os, re, glob
 
-SP = "/tmp/claude-0/-home-user-Pokemon-card-search/e648d066-66e0-5170-a656-2af4bb2d2aa0/scratchpad"
-REPO = "/home/user/Pokemon-card-search"
+REPO = os.path.dirname(os.path.abspath(__file__))
+# Run output lives in the repo, not a session scratchpad: the scratchpad
+# is deleted with the container, and the 2026-09-15 shards went with it.
+SP = os.environ.get("RUNS_DIR", os.path.join(REPO, "runs"))
 d = json.load(open(os.path.join(SP, "field_summary.json")))
 stamp, games, summary = d["stamp"], d["games"], d["summary"]
 order = sorted(summary, key=lambda n: -summary[n]["mean"])
