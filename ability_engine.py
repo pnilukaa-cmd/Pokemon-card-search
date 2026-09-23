@@ -842,6 +842,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         src = act.filter.get("from")
         want_type = act.filter.get("type")
 
+        differ = act.filter.get("different_type")
+        blocked = getattr(pl, "last_searched_energy", None) if differ else None
+
         def _take():
             if src == "hand":
                 i = next((i for i, (k, n) in enumerate(pl.hand)
@@ -855,7 +858,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 pl.discard.remove(nm)
                 return ("Energy", nm)
             return _find_in_deck(pl, lambda k, n: k == "Energy"
-                                 and (not want_type or want_type in n))
+                                 and (not want_type or want_type in n)
+                                 and (blocked is None or n != blocked))
 
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
         tgt = hits[0] if hits else source
@@ -936,7 +940,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             kind = (act.filter.get("kind") or "").lower()
             cap = act.filter.get("hp_at_most")
             nobox = act.filter.get("no_rule_box")
-            def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox):
+            exonly = act.filter.get("ex_only")
+            def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
+                     exonly=exonly):
                 if kind.startswith("pok") and k != "Pokemon":
                     return False
                 if cap is not None and (
@@ -945,6 +951,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     return False
                 if nobox and (k != "Pokemon"
                               or pl.POKEMON.get(n, {}).get("rule_box")):
+                    return False
+                if exonly and (k != "Pokemon"
+                               or pl.POKEMON.get(n, {}).get("prize_value", 1) < 2):
                     return False
                 if kind == "energy" and k != "Energy":
                     return False
@@ -961,6 +970,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 break
             pl.hand.append(card)
             got.append(card[1])
+            if act.filter.get("records_type"):
+                # Crispin's two halves must name DIFFERENT Energy types, so
+                # the attach half has to know what this one took.
+                pl.last_searched_energy = card[1]
         if got:
             log.append(f"    search {', '.join(got)}")
         return bool(got)

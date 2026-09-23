@@ -1288,9 +1288,14 @@ def _r(m, text):
     """Crispin. Only the search half compiled, so the card fetched Energy
     and never accelerated any -- and acceleration is the entire reason the
     current Dragapult lists play it, to pay Phantom Dive's two colours."""
+    # "of DIFFERENT types" is a real restriction: in a mono-Energy deck the
+    # card can only ever find one, so it yields one Energy and not two.
+    # Unflagged, water_aggro (12 Basic Water and nothing else) got both
+    # halves off a card that cannot pay for them.
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF,
-                   {"stage": "Basic", "kind": "energy"}),
-            Action(Op.ATTACH_ENERGY, 1, Target.YOUR_ANY, {"from": "deck"})]
+                   {"stage": "Basic", "kind": "energy", "records_type": True}),
+            Action(Op.ATTACH_ENERGY, 1, Target.YOUR_ANY,
+                   {"from": "deck", "different_type": True})]
 
 
 @rule("discard_own_energy_cost",
@@ -1676,8 +1681,32 @@ def _r(m, text):
                     "from": parse_target(m.group(2)), "any_amount": True})]
 
 
+@rule("evolve_from_deck_ascension",
+      r"search your deck for a card that evolves from (?:this|that|1 of your)"
+      r" [^.]{0,30}?pok[eé]mon and put it onto (?:this|that) pok[eé]mon to evolve it")
+def _r(m, text):
+    """Ascension, Cellular Evolution, Evo-Powder and the rest of that family.
+
+    These used to fall through to search_any_card and compile to "search
+    your deck for a card, any card, into your hand" -- verified by
+    execution to pull an Ultra Ball out of a deck holding no Pokemon at
+    all. That is a universal tutor AND it skipped the evolution the card
+    is entirely about. EVOLVE_FROM_DECK already exists with an executor
+    that matches on evolves_from and respects evolved_this_turn.
+
+    "For each of your Benched Pokemon" (Reuniclus, Vivillon) evolves the
+    whole Bench, so the amount is the Bench cap rather than one.
+    """
+    each = bool(re.search(r"for each of your benched pok[eé]mon", text, re.I))
+    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1, Target.YOUR_ANY)]
+
+
 @rule("search_any_card", r"search your deck for a card\b")
 def _r(m, text):
+    # "a card that evolves from ..." is handled above as an evolution; if
+    # this fired too the card would ALSO tutor something unrelated.
+    if re.search(r"a card that evolves from", text, re.I):
+        return []
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "card"})]
 
 
@@ -2671,6 +2700,9 @@ _RESTRICTED_OPS = (Op.SEARCH_TO_BENCH, Op.SEARCH_TO_HAND, Op.RECOVER_TO_BENCH,
                    Op.FROM_DISCARD_TO_HAND)
 
 
+_EX_ONLY_RE = re.compile(r"search your deck for[^.]{0,40}?pok[eé]mon ex\b", re.I)
+
+
 def _stamp_target_restrictions(eff):
     """"a Basic Pokemon WITH 70 HP OR LESS", "a Pokemon THAT DOESN'T HAVE A
     RULE BOX" -- both are restrictions on what the search may take, and
@@ -2688,7 +2720,11 @@ def _stamp_target_restrictions(eff):
     """
     cap = _HP_CAP_RE.search(eff.text or "")
     no_box = _NO_RULE_BOX_RE.search(eff.text or "")
-    if not cap and not no_box:
+    # Cyrano searches for "up to 3 Pokemon ex". Unrestricted it took three
+    # one-Prize support Pokemon instead, which is a different and better
+    # card -- verified by execution against a deck holding no ex at all.
+    ex_only = _EX_ONLY_RE.search(eff.text or "")
+    if not cap and not no_box and not ex_only:
         return
     for a in eff.actions:
         if a.op not in _RESTRICTED_OPS:
@@ -2698,6 +2734,8 @@ def _stamp_target_restrictions(eff):
             a.filter["hp_at_most"] = int(cap.group(1))
         if no_box:
             a.filter["no_rule_box"] = True
+        if ex_only:
+            a.filter["ex_only"] = True
 
 
 def compile_effect(source, name, text):

@@ -2278,9 +2278,95 @@ def test_a_copy_attack_chain_cannot_run_away():
           str(V._COPY_DEPTH[0]))
 
 
+def test_the_last_three_loose_searches_are_closed():
+    """Cyrano, the Ascension family, and Crispin -- all measured, not read.
+
+    These three were knowingly left open for a while because they made
+    FIELD decks stronger than printed, which biases a candidate's number
+    conservatively. Closing them before a full re-measure removes the
+    excuse. Every case below was first confirmed broken by execution.
+
+      * Cyrano searches for "up to 3 Pokemon ex". Unrestricted it took
+        three one-Prize support Pokemon out of a deck holding no ex at
+        all -- a different and better card.
+      * "a card that evolves from this Pokemon and put it onto this
+        Pokemon to evolve it" fell through to search_any_card and pulled
+        an Ultra Ball out of a deck with no Pokemon in it: a universal
+        tutor that also skipped the evolution the card is about. It now
+        routes to the EVOLVE_FROM_DECK executor that already existed.
+      * Crispin's two halves must name Energy "of different types", so in
+        a mono-Energy deck the card yields one Energy, not two.
+    """
+    import simulate_versus as V
+    import ability_ir as I
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    POK = {
+        "Plain": {"hp": 60, "retreat": 1, "stage": "Basic", "types": ["Water"],
+                  "attacks": [], "weakness": None, "resistance": None,
+                  "abilities": [], "prize": 1, "prize_value": 1,
+                  "rule_box": False, "base_name": "Plain", "evolves_from": None},
+        "Big ex": {"hp": 250, "retreat": 1, "stage": "Basic", "types": ["Water"],
+                   "attacks": [], "weakness": None, "resistance": None,
+                   "abilities": [], "prize": 2, "prize_value": 2,
+                   "rule_box": True, "base_name": "Big ex", "evolves_from": None},
+        "Grown": {"hp": 120, "retreat": 1, "stage": "Stage 1", "types": ["Water"],
+                  "attacks": [], "weakness": None, "resistance": None,
+                  "abilities": [], "prize": 1, "prize_value": 1,
+                  "rule_box": False, "base_name": "Grown", "evolves_from": "Plain"},
+    }
+
+    def board(deck):
+        pl, op = V.Player("me", POK, []), V.Player("op", POK, [])
+        pl.active = V.InPlay("Plain", 0)
+        pl.deck = list(deck)
+        return pl, op
+
+    # -- Cyrano ---------------------------------------------------------
+    for holds, label, wanted in (([("Pokemon", "Plain")] * 8, "no ex at all", []),
+                                 ([("Pokemon", "Big ex")] * 8, "only ex",
+                                  ["Big ex"] * 3)):
+        pl, op = board(holds)
+        pl.hand = [("Supporter", "Cyrano")]
+        V.play_trainer_from_ir(pl, op, "Supporter", "Cyrano", [])
+        check(f"Cyrano in a deck with {label} takes {wanted or 'nothing'}",
+              [n for k, n in pl.hand if k == "Pokemon"] == wanted)
+
+    # -- Ascension ------------------------------------------------------
+    eff = I.compile_effect(
+        "attack", "Ascension",
+        "Search your deck for a card that evolves from this Pok\u00e9mon and put "
+        "it onto this Pok\u00e9mon to evolve it. Then, shuffle your deck.")
+    check("Ascension compiles to an EVOLUTION, not a tutor",
+          [a.op for a in eff.actions] == [I.Op.EVOLVE_FROM_DECK],
+          str([str(a.op) for a in eff.actions]))
+    for holds, label, active in (([("Item", "Ultra Ball")] * 6, "no Pokemon", "Plain"),
+                                 ([("Pokemon", "Grown")] * 3, "the evolution", "Grown")):
+        pl, op = board(holds)
+        for act in eff.actions:
+            AE.apply_action(act, pl, op, pl.active, [], attacker=pl.active)
+        check(f"Ascension over a deck of {label}: Active is {active}, hand untouched",
+              pl.active.name == active and not pl.hand,
+              f"active={pl.active.name} hand={pl.hand}")
+
+    # -- Crispin --------------------------------------------------------
+    for deck, label, total in (
+            ([("Energy", "Water Energy")] * 8, "mono-Energy", 1),
+            ([("Energy", "Water Energy")] * 4 + [("Energy", "Fire Energy")] * 4,
+             "two types", 2)):
+        pl, op = board(deck)
+        pl.hand = [("Supporter", "Crispin")]
+        V.play_trainer_from_ir(pl, op, "Supporter", "Crispin", [])
+        got = pl.active.energy_count() + len([n for k, n in pl.hand if k == "Energy"])
+        check(f"Crispin in a {label} deck yields {total} Energy", got == total,
+              f"got {got}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_copy_attack_chain_cannot_run_away,
+    for fn in [test_the_last_three_loose_searches_are_closed,
+               test_a_copy_attack_chain_cannot_run_away,
                test_a_wall_respects_the_attacker_restriction_it_prints,
                test_a_search_respects_the_rule_box_clause_it_prints,
                test_a_search_respects_the_hp_cap_it_prints,
