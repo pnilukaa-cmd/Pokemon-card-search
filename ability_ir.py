@@ -128,6 +128,9 @@ class Op:
     IGNORE_OPPONENT_EFFECTS = "ignore_opponent_effects"
     DISCARD_ENERGY_FROM_OPPONENT = "discard_energy_from_opponent"
     SWAP_HAND_WITH_DECK = "swap_hand_with_deck"
+    # "Shuffle your hand into your deck. Then, draw N" -- the first half of
+    # Lillie's Determination and Lacey, dropped until 2026-09-23.
+    SHUFFLE_HAND_INTO_DECK = "shuffle_hand_into_deck"
     SET_OPPONENT_HAND = "set_opponent_hand"
     # Discard down to a hand size -- the symmetric half of
     # DISCARD_FROM_OPPONENT, for Hand Trimmer.
@@ -696,7 +699,28 @@ def _r(m, text):
         return []
     if re.search(r"each player draw|your opponent .{0,20}draw|they draw", text, re.I):
         return [Action(Op.DRAW, int(m.group(1)), Target.BOTH_ALL)]
-    return [Action(Op.DRAW, int(m.group(1)), Target.SELF)]
+    # What happens to the hand FIRST. Both halves of "Shuffle your hand into
+    # your deck. Then, draw 6" / "Discard your hand and draw 5" were read as
+    # a bare "draw 6": Lillie's Determination, in 46 of 54 field decks, was
+    # a free six cards on top of the hand, burning six off the deck a time.
+    pre = []
+    if re.search(r"shuffle your hand into your deck\. then,? draw \d", text, re.I):
+        pre = [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF)]
+    elif re.search(r"discard your hand and draw \d", text, re.I):
+        pre = [Action(Op.DISCARD_FROM_SELF, 99, Target.SELF)]
+    flt = {}
+    # "..., draw 8 cards instead" -- a larger draw under a Prize condition.
+    # It is not a gate on the card: Lacey without it still draws 4.
+    inst = re.search(r"if (you|your opponent) ha(?:ve|s) (exactly )?(\d+)"
+                     r"(?: or (fewer))? prize cards? remaining, draw (\d+) cards? instead",
+                     text, re.I)
+    if inst:
+        flt["instead"] = int(inst.group(5))
+        flt["instead_if"] = {
+            "who": "self" if inst.group(1).lower() == "you" else "opponent",
+            "cmp": "<=" if inst.group(4) else "==",
+            "count": int(inst.group(3))}
+    return pre + [Action(Op.DRAW, int(m.group(1)), Target.SELF, flt)]
 
 
 @rule("opponent_hand_reset",
@@ -2779,6 +2803,19 @@ def compile_effect(source, name, text):
         seen.add(key)
         unique.append(a)
     eff.actions = unique
+    # A Prize clause that only picks the larger draw ("draw 8 cards
+    # instead") was ALSO parsed as a condition on the whole card, so Lacey
+    # could not be played at all until the opponent was down to 3 Prizes.
+    for a in eff.actions:
+        ii = (a.filter or {}).get("instead_if")
+        if ii and ii["who"] == "opponent":
+            eff.conditions = [c for c in eff.conditions
+                              if not (c.get("kind") == "opponent_prizes_at_most"
+                                      and c.get("count") == ii["count"])]
+        if ii and ii["who"] == "self":
+            eff.conditions = [c for c in eff.conditions
+                              if not (c.get("kind") == "own_prizes_equal"
+                                      and c.get("count") == ii["count"])]
     eff.actions = _collapse_duplicate_attachments(eff, spans)
     _stamp_target_restrictions(eff)
 

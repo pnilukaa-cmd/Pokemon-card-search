@@ -650,18 +650,50 @@ def leaving_active(spot, log=None):
         spot.conditions = set()
 
 
+_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
+
+
+def tick_attack_locks(spot):
+    """End of the owner's turn: every "during your next turn" lock counts down."""
+    for k in _LOCKS:
+        if getattr(spot, k, 0):
+            setattr(spot, k, getattr(spot, k) - 1)
+
+
+def clear_attack_locks(spot):
+    """Evolving ends the effects of attacks on a Pokemon, locks included."""
+    for k in _LOCKS:
+        setattr(spot, k, 0)
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
 
+    if op == O.SHUFFLE_HAND_INTO_DECK:
+        n = len(pl.hand)
+        pl.deck.extend(pl.hand)
+        pl.hand = []
+        random.shuffle(pl.deck)
+        log.append(f"    shuffle {n} from hand into deck")
+        return True
+
     if op == O.DRAW:
         target_size = act.filter.get("up_to_hand_size")
         before = len(pl.hand)
+        amount = act.amount or 1
+        ii = act.filter.get("instead_if")
+        if ii:
+            who = pl if ii["who"] == "self" else opp
+            have = getattr(who, "prizes", None)
+            if have is not None and (have == ii["count"] if ii["cmp"] == "=="
+                                     else have <= ii["count"]):
+                amount = act.filter["instead"]
         if target_size is not None:
             while len(pl.hand) < target_size and pl.deck:
                 pl.draw(1)
         else:
-            pl.draw(act.amount or 1)
+            pl.draw(amount)
             if act.target == IR.Target.BOTH_ALL:
                 opp.draw(act.amount or 1)
         log.append(f"    draw {len(pl.hand) - before}")
@@ -1560,6 +1592,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pl.discard.append(spot.name)
             spot.name = nxt
             spot.evolved_this_turn = True
+            clear_attack_locks(spot)
             placed.append(nxt)
         if placed:
             random.shuffle(pl.deck)
@@ -1821,16 +1854,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if victim is None:
                 return False
             if what == "retreat":
-                victim.retreat_locked = True
+                victim.retreat_locked = 1
             else:
-                victim.attack_locked_by_opponent = True
+                victim.attack_locked_by_opponent = 1
             log.append(f"    {victim.name} can't {what} during their next turn")
             return True
         if act.target == IR.Target.SELF and source is not None:
             if what == "retreat":
-                source.retreat_locked = True
+                source.retreat_locked = 2
             elif what == "attack":
-                source.attack_locked = True
+                source.attack_locked = 2
             else:
                 return False
             log.append(f"    {source.name} can't {what} during your next turn")

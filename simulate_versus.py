@@ -132,14 +132,21 @@ class InPlay:
         # turn (N's Zekrom's Rampaging Thunder, Iono's Bellibolt ex's
         # Thunderous Bolt). Without it the AI re-used a 250-damage
         # once-every-other-turn attack every single turn.
-        self.attack_locked = False
+        #
+        # All three locks are turn COUNTERS, decremented at the end of the
+        # owner's every turn (see tick_attack_locks): 2 for a lock on your
+        # own next turn, 1 for one the opponent put on "your next turn".
+        # They used to be booleans cleared only when read in the Active
+        # Spot, so a locked Pokemon that went to the Bench kept its lock
+        # and lost a turn whenever it came back, however much later.
+        self.attack_locked = 0
         # Set ON THE DEFENDER by "During your opponent's next turn, the
         # Defending Pokemon can't retreat / can't attack". These are the
         # two most common lock effects in the pool (44 card effects between
         # them) and were compiled and then thrown away, so every retreat
         # -lock control deck measured as if its main line did nothing.
-        self.retreat_locked = False
-        self.attack_locked_by_opponent = False
+        self.retreat_locked = 0
+        self.attack_locked_by_opponent = 0
         # Damage on this Pokemon immediately BEFORE the current hit. An
         # "if this Pokemon has full HP" clause is about the state the
         # attack found it in, not the state it left behind, and reading
@@ -731,6 +738,58 @@ def use_stadium(pl, log):
             log.append(f"  {pl.name}: {name} (from card text)")
 
 
+# An optional draw is declined once it would leave the deck this thin.
+# Nothing held the pilot back before: a draw Ability fired every turn it
+# could, and N's Zoroark ex's Trade (draw 2, about nine uses a game) emptied
+# its own deck in 63% of that deck's games -- the loss was by deck-out, not
+# on the board.
+DRAW_FLOOR = 6
+
+
+def _draw_would_deck_out(pl, eff):
+    n = sum((a.amount or 1) for a in eff.actions if a.op == IR.Op.DRAW
+            and a.target != IR.Target.BOTH_ALL)
+    return n > 0 and len(pl.deck) - n < DRAW_FLOOR
+
+
+def _deck_left_after(pl, draw, returned=0):
+    return len(pl.deck) + returned - draw
+
+
+def _draw_trainer_worth_it(pl, opp, eff, n_cards):
+    """Is a drawing Trainer worth resolving now?
+
+    Two checks, both about the draw itself. A card that first shuffles or
+    discards the hand is a reset, worth it only while it hands back more
+    than it takes. And no draw may leave the deck under DRAW_FLOOR.
+    """
+    draws = [a for a in eff.actions if a.op == IR.Op.DRAW
+             and a.target != IR.Target.BOTH_ALL]
+    if not draws:
+        return True
+    rest = len(pl.hand) - n_cards          # hand once the card itself is played
+    amount = 0
+    for a in draws:
+        f = a.filter or {}
+        if f.get("up_to_hand_size") is not None:
+            amount += max(0, f["up_to_hand_size"] - rest)
+            continue
+        amt = a.amount or 1
+        ii = f.get("instead_if")
+        if ii:
+            who = pl if ii["who"] == "self" else opp
+            have = who.prizes
+            if have == ii["count"] if ii["cmp"] == "==" else have <= ii["count"]:
+                amt = f["instead"]
+        amount += amt
+    shuffles = any(a.op == IR.Op.SHUFFLE_HAND_INTO_DECK for a in eff.actions)
+    dumps = any(a.op == IR.Op.DISCARD_FROM_SELF and (a.amount or 0) >= 99
+                for a in eff.actions)
+    if (shuffles or dumps) and rest >= amount:
+        return False
+    return _deck_left_after(pl, amount, rest if shuffles else 0) >= DRAW_FLOOR
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -752,6 +811,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             key = (id(p), eff.name)
             if key in pl.abilities_used and eff.trigger != IR.Trigger.ANY_TIMES_PER_TURN:
+                continue
+            if _draw_would_deck_out(pl, eff):
                 continue
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
@@ -899,6 +960,7 @@ def try_evolve(pl, opp, turn, log, first_turn):
                 pl.remove_from_hand(kind, name)
                 spot.name = name
                 spot.evolved_this_turn = True
+                AE.clear_attack_locks(spot)
                 clear_conditions(spot, "evolved", log, pl.name)
                 log.append(f"  {pl.name}: {pre} -> {name}")
                 use_abilities(pl, opp, turn, log, just_evolved=spot)
@@ -945,6 +1007,7 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
                 pl.remove_from_hand("Pokemon", name)
                 spot.name = name
                 spot.evolved_this_turn = True
+                AE.clear_attack_locks(spot)
                 log.append(f"  {pl.name}: Rare Candy -> {name}")
                 use_abilities(pl, opp, turn, log, just_evolved=spot)
                 return True
@@ -1321,7 +1384,8 @@ def play_supporter(pl, opp, turn, log):
 
     # Draw/refresh Supporters, weakest hand first
     if len(pl.hand) <= 4:
-        if "Carmine" in hand_names and len(pl.hand) - 1 < 5:
+        if ("Carmine" in hand_names and len(pl.hand) - 1 < 5
+                and _deck_left_after(pl, 5) >= DRAW_FLOOR):
             use("Carmine")
             for c in list(pl.hand):
                 pl.remove_from_hand(*c)
@@ -1329,8 +1393,12 @@ def play_supporter(pl, opp, turn, log):
             pl.draw(5)
             log.append(f"  {pl.name}: Carmine")
             return
-        for name, amount in (("Lillie's Determination", 6), ("Professor's Research", 7)):
-            if name in hand_names:
+        # Lillie's Determination draws 8, not 6, while you still have all
+        # 6 Prize cards -- which is most of the turns it is played on.
+        lillie = 8 if pl.prizes == STARTING_PRIZES else 6
+        for name, amount in (("Lillie's Determination", lillie), ("Professor's Research", 7)):
+            back = len(pl.hand) - 1 if name == "Lillie's Determination" else 0
+            if name in hand_names and _deck_left_after(pl, amount, back) >= DRAW_FLOOR:
                 use(name)
                 if name == "Professor's Research":
                     for c in list(pl.hand):
@@ -1341,7 +1409,7 @@ def play_supporter(pl, opp, turn, log):
                     pl.deck.extend(pl.hand)
                     pl.hand = []
                     random.shuffle(pl.deck)
-                    pl.draw(6)
+                    pl.draw(amount)
                 log.append(f"  {pl.name}: {name}")
                 return
         if "Team Rocket's Ariana" in hand_names:
@@ -1597,7 +1665,7 @@ TRAINER_IR_OPS = {
     IR.Op.MILL_OPPONENT, IR.Op.LOOK_AT_DECK, IR.Op.SHUFFLE_SELF_INTO_DECK,
     IR.Op.REVEAL_OPPONENT_HAND, IR.Op.SET_OPPONENT_HAND, IR.Op.LOCK,
     IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
-    IR.Op.SWAP_HAND_WITH_DECK, IR.Op.FORCE_BENCH_OPPONENT,
+    IR.Op.SWAP_HAND_WITH_DECK, IR.Op.SHUFFLE_HAND_INTO_DECK, IR.Op.FORCE_BENCH_OPPONENT,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
     IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
@@ -1648,6 +1716,8 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         return False
     actions = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
     if not actions:
+        return False
+    if not _draw_trainer_worth_it(pl, opp, eff, 1 + extra):
         return False
     # A Trainer whose text is a coin flip has to actually flip. Crushing
     # Hammer is "Flip a coin. If heads, discard an Energy" and was resolving
@@ -3223,6 +3293,8 @@ def _ready_damage(pl, opp, spot):
     """
     if not AE.query_attack_gate(pl, spot):
         return 0        # it cannot attack, so it is not an upgrade
+    if spot.attack_locked or spot.attack_locked_by_opponent:
+        return 0        # locked out of attacking this turn
     atk = best_attack(pl, spot, opp=opp)
     if not atk:
         return 0
@@ -3519,7 +3591,6 @@ def try_retreat(pl, opp, log):
     if not pl.active or not pl.bench:
         return
     if pl.active.retreat_locked:
-        pl.active.retreat_locked = False
         log.append(f"  {pl.name}: {pl.active.name} can't retreat this turn")
         return
     # A Paralyzed or Asleep Pokemon CANNOT RETREAT. The engine enforced the
@@ -3583,11 +3654,9 @@ def do_attack(pl, opp, log):
     if condition_blocks_attack(pl, log):
         return False
     if pl.active.attack_locked:
-        pl.active.attack_locked = False
         log.append(f"  {pl.name}: {pl.active.name} can't attack this turn")
         return False
     if pl.active.attack_locked_by_opponent:
-        pl.active.attack_locked_by_opponent = False
         log.append(f"  {pl.name}: {pl.active.name} can't attack "
                    f"(locked by opponent)")
         return False
@@ -3734,7 +3803,7 @@ def do_attack(pl, opp, log):
     AE.DAMAGE_JUST_DEALT[0] = dmg
 
     if _SELF_ATTACK_LOCK_RE.search(_borrowed_text(pl, opp, pl.active, atk)):
-        pl.active.attack_locked = True
+        pl.active.attack_locked = 2
 
     attack_side_effects(pl, opp, atk, log)
 
@@ -4187,6 +4256,36 @@ def promote_from_bench(side, opp=None):
     return side.bench.pop(0)
 
 
+def end_of_turn(pl, log):
+    """Everything that ends with the turn of the player who just moved."""
+    pl.lost_pokemon_last_turn = False
+    pl.lost_pokemon_names = ""
+    # "At the end of your opponent's next turn, discard the
+    # Defending Pokemon" -- resolved at the end of the turn it was
+    # aimed at, which is this one.
+    for spot in list(pl.in_play()):
+        if getattr(spot, "delayed_discard", False):
+            pl.discard.append(spot.name)
+            if spot is pl.active:
+                pl.active = None
+            elif spot in pl.bench:
+                pl.bench.remove(spot)
+            log.append(f"  {pl.name}: {spot.name} is discarded")
+    if pl.active is None and pl.bench:
+        pl.active = pl.bench.pop(0)
+    for spot in pl.in_play():
+        AE.tick_attack_locks(spot)
+        spot.promoted_this_turn = False
+        # The debuff was for exactly this turn, and this turn is over.
+        spot.damage_penalty = 0
+        spot.takes_more = 0
+        spot.next_turn_attack_buff = None
+        spot.no_weakness = False
+        spot.extra_prize = 0
+        spot.damage_taken_last_turn = 0
+        spot.retaliate_counters = 0
+
+
 def run_game(modelA, modelB, verbose=False):
     nameA, POKA, DECKA = modelA[0], modelA[1], modelA[2]
     nameB, POKB, DECKB = modelB[0], modelB[1], modelB[2]
@@ -4227,31 +4326,7 @@ def run_game(modelA, modelB, verbose=False):
                 log.append(f"-- Turn {turn_no} ({pl.name}) --")
             pl.lost_pokemon_last_turn_snapshot = pl.lost_pokemon_last_turn
             result = take_turn(pl, opp, round_no, goes_first, cards_by_name, log)
-            pl.lost_pokemon_last_turn = False
-            pl.lost_pokemon_names = ""
-            # "At the end of your opponent's next turn, discard the
-            # Defending Pokemon" -- resolved at the end of the turn it was
-            # aimed at, which is this one.
-            for spot in list(pl.in_play()):
-                if getattr(spot, "delayed_discard", False):
-                    pl.discard.append(spot.name)
-                    if spot is pl.active:
-                        pl.active = None
-                    elif spot in pl.bench:
-                        pl.bench.remove(spot)
-                    log.append(f"  {pl.name}: {spot.name} is discarded")
-            if pl.active is None and pl.bench:
-                pl.active = pl.bench.pop(0)
-            for spot in pl.in_play():
-                spot.promoted_this_turn = False
-                # The debuff was for exactly this turn, and this turn is over.
-                spot.damage_penalty = 0
-                spot.takes_more = 0
-                spot.next_turn_attack_buff = None
-                spot.no_weakness = False
-                spot.extra_prize = 0
-                spot.damage_taken_last_turn = 0
-                spot.retaliate_counters = 0
+            end_of_turn(pl, log)
             if result == "win":
                 winner = pl
                 break

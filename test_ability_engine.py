@@ -14,6 +14,7 @@ tests could catch that, because nothing tested execution.
 
 Run:  python3 test_ability_engine.py
 """
+import random
 import sys
 
 sys.path.insert(0, ".")
@@ -2589,9 +2590,140 @@ def test_when_damaged_tools_fire_and_are_attached():
         check(f"{nm} is actually attached", pl.active.tool == nm, str(pl.active.tool))
 
 
+def _real(path, label):
+    import simulate_versus as V
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    D = V.load_model(path, label)[0]
+    return V, D, V.compile_effects_for(D[1], D[3])
+
+
+def test_hand_reset_draws_do_the_first_half_of_their_text():
+    """Lillie's Determination, Lacey and Carmine.
+
+    "Shuffle your hand into your deck. Then, draw 6 cards" compiled to a
+    bare "draw 6": the hand was kept and six more piled on, burning six
+    off the deck per play. Lillie's Determination is in 46 of the 54
+    field decks. Its "draw 8 while you have all 6 Prize cards" was lost
+    too. Lacey's "draw 8 instead" Prize clause was ALSO read as a gate on
+    the whole card, so it could not be played until the opponent was
+    down to 3 Prizes. Carmine kept the hand it says to discard.
+
+    Played through the real Trainer path off real deck models.
+    """
+    V, D, E = _real("decks/field/water_aggro.txt", "w")
+    # (Lacey from 5 kept cards would draw 4: shuffling away more than it
+    # gives back is declined, which is the pilot being right, so that case
+    # keeps 2.)
+    for name, prizes, kept, want_hand in (("Lillie's Determination", 6, 5, 8),
+                                          ("Lillie's Determination", 4, 5, 6),
+                                          ("Lacey", 6, 2, 4), ("Lacey", 3, 5, 8)):
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        random.seed(1)
+        random.shuffle(me.deck)
+        keep = me.deck[:kept]
+        me.hand = [("Supporter", name)] + keep
+        me.deck = me.deck[kept:]
+        me.prizes, op.prizes = prizes, prizes
+        deck0 = len(me.deck)
+        played = V.play_trainer_from_ir(me, op, "Supporter", name, [], 3)
+        check(f"{name} at {prizes} Prizes is played", played)
+        check(f"{name} at {prizes} Prizes ends on {want_hand} cards",
+              len(me.hand) == want_hand, str(len(me.hand)))
+        check(f"{name} at {prizes} Prizes shuffles the {kept} kept cards back",
+              len(me.deck) == deck0 + kept - want_hand, f"{deck0} -> {len(me.deck)}")
+    eff = V.trainer_effect_ir("Carmine")
+    ops = [a.op for a in eff.actions]
+    check("Carmine discards the hand before it draws",
+          ops[:2] == [IR.Op.DISCARD_FROM_SELF, IR.Op.DRAW]
+          and eff.actions[0].amount >= 99, str(ops))
+
+
+def test_an_optional_draw_never_empties_the_deck():
+    """N's Zoroark ex's Trade fired every turn it could.
+
+    Draw 2, about nine times a game with several Zoroark on the board:
+    meta_ns_zoroark lost 63% of its games by drawing its own deck out,
+    and ns_zoroark_night_joker_toolbox 40%. A real player stops. Real
+    deck model, real Ability path.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    floor = 6                      # DRAW_FLOOR; literal so this runs on the old engine
+    for left, fires in ((floor + 2, True), (floor + 1, False)):
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        me.active = V.InPlay("N's Zoroark ex", 0)
+        op.active = V.InPlay("N's Zorua", 0)
+        me.hand = [("Energy", "Basic Darkness Energy")] * 3
+        me.deck = me.deck[:left]
+        V.use_abilities(me, op, 5, [])
+        drew = len(me.deck) < left
+        check(f"Trade with {left} cards left {'fires' if fires else 'is held'}",
+              drew == fires, f"deck {left} -> {len(me.deck)}")
+
+
+def test_a_self_attack_lock_ends_with_the_next_turn():
+    """"During your next turn, this Pokemon can't use attacks."
+
+    The lock was a flag cleared only when read in the Active Spot. A
+    Zoroark ex that borrowed Rampaging Thunder and then went to the Bench
+    (N's Castle makes that free) kept it, and lost a turn whenever it
+    came back -- however many turns later. It was also invisible to the
+    retreat logic, so the pilot never swapped in a fresh Zoroark.
+
+    Real games reach this too rarely to test on (6-8 lock turns in 90
+    games), so the turns are scripted, on the real deck model, through the
+    real attack and end-of-turn paths. Proven to fail on the unfixed
+    engine, which has no end_of_turn and falls back to doing nothing.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    end = getattr(V, "end_of_turn", lambda pl, log: None)
+
+    def board():
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        a, b = V.InPlay("N's Zoroark ex", 0), V.InPlay("N's Zoroark ex", 0)
+        for z in (a, b):
+            z.energy = [["Darkness"], ["Darkness"]]
+            z.energy_names = ["Basic Darkness Energy"] * 2
+        me.active, me.bench = a, [b, V.InPlay("N's Zekrom", 0)]
+        op.active = V.InPlay("N's Zoroark ex", 0)       # 280 HP: no KO
+        op.bench = [V.InPlay("N's Zorua", 0)]
+        return me, op, a, b
+
+    def attacks(me, op):
+        log = []
+        V.do_attack(me, op, log)
+        return not any("can't attack" in l for l in log)
+
+    me, op, a, b = board()
+    check("Night Joker borrows the locking attack", attacks(me, op)
+          and a.attack_locked, str(a.attack_locked))
+    end(me, []); end(op, [])
+    check("the same Zoroark cannot attack on its very next turn",
+          not attacks(me, op))
+
+    me, op, a, b = board()
+    attacks(me, op)
+    end(me, []); end(op, [])
+    me.active, me.bench = b, [a, me.bench[1]]           # it goes to the Bench
+    end(me, []); end(op, [])
+    me.active, me.bench = a, [b, me.bench[1]]           # and comes back
+    check("a turn later the lock is gone", attacks(me, op))
+
+    spot = V.InPlay("N's Zoroark ex", 0)
+    spot.attack_locked = spot.retreat_locked = spot.attack_locked_by_opponent = 1
+    getattr(AE, "clear_attack_locks", lambda s: None)(spot)
+    check("evolving clears every lock",
+          not (spot.attack_locked or spot.retreat_locked
+               or spot.attack_locked_by_opponent))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_when_damaged_tools_fire_and_are_attached,
+    for fn in [test_hand_reset_draws_do_the_first_half_of_their_text,
+               test_an_optional_draw_never_empties_the_deck,
+               test_a_self_attack_lock_ends_with_the_next_turn,
+               test_when_damaged_tools_fire_and_are_attached,
                test_no_card_in_any_decklist_is_silently_inert,
                test_every_bonus_damage_tool_is_registered_and_gated,
                test_the_last_three_loose_searches_are_closed,
