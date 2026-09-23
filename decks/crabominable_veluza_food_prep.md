@@ -1,13 +1,15 @@
 # Crabominable / Veluza — Food Prep
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **44.6% mean · 41.2% median · 9 of 44 winning matchups · rank 36 of 45**
+> ### Field results — 2026-09-23
+> **43.3% mean · 39.9% median · 12 of 53 winning matchups · rank 42 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `team_rockets_persian_ex_attack_theft` 21%.
+> Best `meta_ns_zoroark` 94% · worst `team_rockets_persian_ex_attack_theft` 22%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

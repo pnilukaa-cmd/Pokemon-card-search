@@ -1,13 +1,15 @@
 # raging_bolt — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **62.5% mean · 61.5% median · 37 of 44 winning matchups · rank 6 of 45**
+> ### Field results — 2026-09-23
+> **61.2% mean · 61.8% median · 43 of 53 winning matchups · rank 10 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `arbok_muk_laser_darkbell` 38%.
+> Best `meta_ns_zoroark` 90% · worst `maushold_gnaw_together_mill` 30%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

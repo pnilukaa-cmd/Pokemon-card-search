@@ -1,13 +1,15 @@
 # Dhelmise / Veluza — Hide 'n' Sneak fuel + Food Prep
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **54.4% mean · 51.2% median · 25 of 44 winning matchups · rank 19 of 45**
+> ### Field results — 2026-09-23
+> **54.0% mean · 50.0% median · 25 of 53 winning matchups · rank 23 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `lurantis_heal_punish` 22%.
+> Best `meta_ns_zoroark` 94% · worst `lurantis_heal_punish` 23%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

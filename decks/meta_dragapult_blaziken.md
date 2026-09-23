@@ -1,13 +1,15 @@
 # dragapult_blaziken — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **52.2% mean · 50.5% median · 24 of 44 winning matchups · rank 25 of 45**
+> ### Field results — 2026-09-23
+> **50.8% mean · 48.6% median · 24 of 53 winning matchups · rank 32 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `scovillain_salazzle_spicy_rage` 34%.
+> Best `meta_ns_zoroark` 83% · worst `team_rockets_persian_ex_attack_theft` 34%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

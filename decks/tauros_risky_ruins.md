@@ -1,5 +1,15 @@
 # Tauros / Risky Ruins — Raging Charge
 
+<!-- field-results -->
+> ### Field results — 2026-09-23
+> **61.6% mean · 58.5% median · 37 of 53 winning matchups · rank 9 of 54**
+>
+> Best `study_centiskorch_bastiodon_mill` 94% · worst `meta_raging_bolt` 31%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+<!-- field-results -->
+
+
 A user list, reviewed 2026-09-20. Four Tauros CRI 69 and four Paldean
 Tauros PFL 48 both scale off how many "Tauros" you have in play; Risky
 Ruins damages every Basic as it is benched, which is what arms Paldean
