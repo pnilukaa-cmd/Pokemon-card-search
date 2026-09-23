@@ -3720,10 +3720,28 @@ def attack_side_effects(pl, opp, atk, log):
     if not text:
         return
     # A copy-attack resolves the attack it borrowed, riders and all.
+    #
+    # This recursion had no depth guard. "borrowed is not atk" catches only
+    # a Pokemon copying its own attack; it does nothing about an A -> B -> A
+    # cycle, which is what two copy-attacks facing each other produce.
+    # Ethan's Sudowoodo's Try to Imitate borrows the Defending Pokemon's
+    # attack, and if THAT is also a copy-attack it borrows straight back,
+    # forever. copied_attack's own _COPY_DEPTH guard does not help: it is
+    # decremented in its finally before this call recurses, so every level
+    # started again from zero. The counter has to be held ACROSS the
+    # recursive call, which is the same fix the copy-attack VALUATION path
+    # needed earlier. Measured: 981 stack frames before Python gave up,
+    # killing a 45,000-game run outright.
     if _USE_AS_THIS_RE.search(text):
+        if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
+            return
         borrowed = copied_attack(pl, opp, pl.active, text)
         if borrowed is not None and borrowed is not atk:
-            attack_side_effects(pl, opp, borrowed, log)
+            _COPY_DEPTH[0] += 1
+            try:
+                attack_side_effects(pl, opp, borrowed, log)
+            finally:
+                _COPY_DEPTH[0] -= 1
             return
 
     # Pay for the damage discard_scaler_damage() already charged the

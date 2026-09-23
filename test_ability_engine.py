@@ -2202,9 +2202,86 @@ def test_a_wall_respects_the_attacker_restriction_it_prints():
               AE.query_prevented(me, me.active, op, op.active) == prevented)
 
 
+def test_a_copy_attack_chain_cannot_run_away():
+    """Slowking's Seek Inspiration can borrow itself, forever.
+
+    "Discard the top card of your deck, and if that card is a Pokemon
+    that doesn't have a Rule Box, choose 1 of its attacks and use it as
+    this attack." Discard a Slowking and it borrows Seek Inspiration,
+    which discards another card, which can be another Slowking.
+
+    attack_side_effects recursed into itself with the borrowed attack and
+    had no depth guard at all. Its "borrowed is not atk" check catches a
+    Pokemon copying its own attack OBJECT and does nothing about a chain
+    of fresh ones. copied_attack's _COPY_DEPTH guard did not help either:
+    it is decremented in its finally before this call recurses, so every
+    level started again from zero. Measured at 981 stack frames before
+    Python gave up, which killed a 45,000-game run outright -- and the
+    same deck sat in the field for every round robin before that.
+
+    Driven off the REAL deck model and real games. Three wrong guesses
+    preceded this, all about Ethan's Sudowoodo and an opponent copying
+    back, and a fourth version of this test built the board by hand and
+    PASSED against the unfixed engine -- a regression test that cannot
+    fail on the bug it names is worse than none. The culprit was found by
+    instrumenting actual nesting depth per opponent over real games, and
+    that is what this reproduces.
+    """
+    import simulate_versus as V
+    import random, hashlib, os
+    fixture = "decks/meta_slowking.ptcgl.txt"
+    if not os.path.exists(fixture):
+        check("Slowking fixture present (skipped)", True)
+        return
+    other = "decks/study_maushold_gnaw_latias.ptcgl.txt"
+    if not os.path.exists(other):
+        check("Maushold fixture present (skipped)", True)
+        return
+    # This exact pairing and seed is the one that reproduces. It was found
+    # by instrumenting nesting depth over every field opponent, not by
+    # reasoning about which cards look like they ought to loop -- an
+    # earlier hand-built board terminated the chain early and PASSED
+    # against the unfixed engine. Verified to reach depth 201 without the
+    # guard and depth 3 with it.
+    A = V.load_model(other, "maus")[0]
+    B = V.load_model(fixture, "meta_slowking")[0]
+
+    depth = [0, 0]
+    real = V.attack_side_effects
+
+    def traced(a, b, c, d):
+        depth[0] += 1
+        depth[1] = max(depth[1], depth[0])
+        if depth[0] > 200:
+            raise RecursionError("copy chain runaway")
+        try:
+            return real(a, b, c, d)
+        finally:
+            depth[0] -= 1
+
+    V.attack_side_effects = traced
+    ran = True
+    try:
+        random.seed(int(hashlib.sha256(
+            b"cand|maushold2|meta_slowking").hexdigest()[:12], 16))
+        for _ in range(400):
+            V.run_game(("maus",) + A[1:], ("meta_slowking",) + B[1:])
+    except RecursionError:
+        ran = False
+    finally:
+        V.attack_side_effects = real
+    check("400 real games run without a runaway copy chain", ran,
+          f"reached depth {depth[1]}")
+    check(f"and nesting stays near _MAX_COPY_DEPTH ({V._MAX_COPY_DEPTH})",
+          depth[1] <= V._MAX_COPY_DEPTH + 2, f"max depth {depth[1]}")
+    check("the depth counter is left clean", V._COPY_DEPTH[0] == 0,
+          str(V._COPY_DEPTH[0]))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_a_wall_respects_the_attacker_restriction_it_prints,
+    for fn in [test_a_copy_attack_chain_cannot_run_away,
+               test_a_wall_respects_the_attacker_restriction_it_prints,
                test_a_search_respects_the_rule_box_clause_it_prints,
                test_a_search_respects_the_hp_cap_it_prints,
                test_the_reflip_tool_is_actually_put_on_a_pokemon,
