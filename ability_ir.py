@@ -1238,6 +1238,22 @@ def _r(m, text):
     return [Action(Op.SWITCH, 1, Target.OPP_ACTIVE, {"gust": True})]
 
 
+@rule("switch_benched_type_in",
+      r"switch 1 of your benched (\w+) pok[eé]mon(?:, except any ([^,]+),)? with your"
+      r" active pok[eé]mon\.(?: if you do, the new active pok[eé]mon is now (\w+))?")
+def _r(m, text):
+    """Pecharunt ex's Subjugating Chains. Read as "the opponent's Active is
+    now Poisoned" with no switch at all: a free Poison on the opponent every
+    turn, and none of the card's real job -- bringing up a paid-up Benched
+    attacker, whose own Poison is what switches Binding Mochi on."""
+    f = {"gust": False, "choose": True, "type": m.group(1).capitalize()}
+    if m.group(2):
+        f["exclude"] = m.group(2).strip()
+    if m.group(3):
+        f["then_condition"] = m.group(3).lower()
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
+
+
 @rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched")
 def _r(m, text):
     return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False})]
@@ -1245,6 +1261,13 @@ def _r(m, text):
 
 @rule("apply_condition", r"is now (asleep|burned|confused|paralyzed|poisoned)")
 def _r(m, text):
+    # "the NEW Active Pokemon is now Poisoned" is your own, after a switch;
+    # switch_benched_type_in owns it.
+    # (Florges and Lisia's Appeal say the same about the OPPONENT's new
+    # Active after a gust, and keep it.)
+    if re.search(r"switch 1 of your benched .{0,80}the new active pok[eé]mon is now",
+                 text, re.I | re.S):
+        return []
     conds = re.findall(r"(asleep|burned|confused|paralyzed|poisoned)", text, re.I)
     tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
     return [Action(Op.APPLY_CONDITION, None, tgt,

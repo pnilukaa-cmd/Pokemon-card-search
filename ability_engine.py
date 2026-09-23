@@ -650,6 +650,10 @@ def leaving_active(spot, log=None):
         spot.conditions = set()
 
 
+# How much a Pokemon is worth in the Active Spot right now. Set by
+# simulate_versus (its _ready_damage), which this module cannot import.
+SWITCH_RANK = lambda pl, opp, spot: 0
+
 _LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
 
 
@@ -1109,6 +1113,29 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append(f"    gust up {tgt.name}")
                 return True
             return False
+        if pl.bench and pl.active and act.filter.get("choose"):
+            # "Switch 1 of your Benched <type> Pokemon" is a choice, and is
+            # only worth making when the Pokemon coming up is better than
+            # the one going down.
+            f = act.filter
+            cands = [p for p in pl.bench
+                     if (not f.get("type") or f["type"] in
+                         (pl.POKEMON.get(p.name, {}).get("types") or []))
+                     and p.name != f.get("exclude")]
+            if not cands:
+                return False
+            tgt = max(cands, key=lambda p: SWITCH_RANK(pl, opp, p))
+            if SWITCH_RANK(pl, opp, tgt) <= SWITCH_RANK(pl, opp, pl.active):
+                return False
+            pl.bench.remove(tgt)
+            leaving_active(pl.active, log)
+            pl.bench.append(pl.active)
+            pl.active = tgt
+            log.append(f"    switch in {tgt.name}")
+            if f.get("then_condition"):
+                tgt.conditions.add(f["then_condition"])
+                log.append(f"    {tgt.name} is now {f['then_condition']}")
+            return True
         if pl.bench and pl.active:
             tgt = pl.bench.pop(0)
             leaving_active(pl.active, log)

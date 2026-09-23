@@ -870,6 +870,84 @@ def _is_discard_fuel(pl, name):
     return False
 
 
+# A copy attack (N's Zoroark ex's Night Joker) is only as good as the
+# Benched Pokemon it borrows from, and the Bench was filled with whatever
+# Basic came to hand first: N's Zekrom sat in hand behind a full Bench of
+# Meowth ex, Fezandipiti ex and Yveltal on 105 of 623 turns, and a donor
+# was in play on only 62% of them. The deck's whole plan is to keep that
+# space open.
+_DONOR_MIN_DAMAGE = 90
+
+
+def _copy_plan(pl):
+    """(copy attackers, their Basic line, donors) for this deck, from text."""
+    cached = getattr(pl, "_copy_plan_cache", None)
+    if cached is not None:
+        return cached
+    attackers, fams = set(), set()
+    for name, info in pl.POKEMON.items():
+        for a in info["attacks"]:
+            m = _COPY_OWN_BENCH_RE.search(a.get("text") or "")
+            if m:
+                attackers.add(name)
+                fams.add((m.group(1) or "").strip().lower())
+    donors = set()
+    for name, info in pl.POKEMON.items():
+        if name in attackers:
+            continue
+        if not any(f in name.lower() for f in fams):
+            continue
+        if any((b["damage"] or 0) >= _DONOR_MIN_DAMAGE
+               and not _USE_AS_THIS_RE.search(b.get("text") or "")
+               for b in info["attacks"]):
+            donors.add(name)
+    def with_line(names):
+        out = set()
+        for name in names:
+            cur = name
+            while cur:
+                out.add(cur)
+                prev = pl.POKEMON.get(cur, {}).get("evolves_from")
+                cur = next((n for n in pl.POKEMON
+                            if M.base_of(pl.POKEMON, n) == prev), None) if prev else None
+        return out
+
+    # Both lines include the Basics they evolve from: a Benched N's
+    # Darumaka is how N's Darmanitan gets to be a donor at all.
+    pl._copy_plan_cache = (attackers, with_line(attackers), with_line(donors))
+    return pl._copy_plan_cache
+
+
+def _missing_pieces(pl):
+    """Copy-plan Pokemon to fetch first, Basics before what evolves from them."""
+    attackers, line, donors = _copy_plan(pl)
+    if not attackers or not donors:
+        return {}
+    here = [p.name for p in pl.in_play()] + [n for k, n in pl.hand if k == "Pokemon"]
+    want = {}
+    if sum(n in line for n in here) < 2:
+        want.update({n: 1 for n in line if pl.POKEMON[n]["stage"] == "Basic"})
+    # The donor ranks first: an attacker line without one has nothing to copy.
+    if not any(n in donors for n in here):
+        want.update({n: 0 for n in donors if pl.POKEMON[n]["stage"] == "Basic"})
+    return want
+
+
+def _bench_plan(pl):
+    """(key Pokemon names, Bench slots to hold open for them)."""
+    attackers, line, donors = _copy_plan(pl)
+    if not attackers or not donors:
+        return set(), 0
+    here = [p.name for p in pl.in_play()]
+    still = {n for _, n in pl.deck} | {n for _, n in pl.hand}
+    reserve = 0
+    if not any(n in donors for n in here) and donors & still:
+        reserve += 1
+    if sum(n in line for n in here) < 2 and line & still:
+        reserve += 1
+    return line | donors, reserve
+
+
 def play_basics(pl, turn, log):
     if pl.active is None:
         bs = basics_in_hand(pl)
@@ -878,8 +956,14 @@ def play_basics(pl, turn, log):
             pl.remove_from_hand("Pokemon", best)
             pl.active = InPlay(best, turn)
             log.append(f"  {pl.name}: {best} to Active")
-    for kind, name in list(pl.hand):
+    core, reserve = _bench_plan(pl)
+    hand = sorted(pl.hand, key=lambda c: c[1] not in core)   # key pieces first
+    for kind, name in hand:
         if kind == "Pokemon" and pl.POKEMON[name]["stage"] == "Basic" and len(pl.bench) < bench_cap(pl):
+            # Keep room for the pieces the deck is built around (see
+            # _bench_plan): a support Basic does not take the last slots.
+            if name not in core and bench_cap(pl) - len(pl.bench) - 1 < reserve:
+                continue
             # Hold back a Pokemon whose job is to be DISCARDED. A deck
             # whose payoff counts its own Pokemon in the discard pile
             # (Dhelmise's Vengeful Anchor, Sinistcha's Matcha Spin) has to
@@ -1015,7 +1099,13 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
 
 
 def search_pokemon_from_deck(pl, pred):
-    for i, (k, n) in enumerate(pl.deck):
+    # A search takes the first match in a shuffled deck -- i.e. anything.
+    # While a copy-attack deck is missing a piece of its plan, that piece
+    # comes first (see _bench_plan); otherwise the order is unchanged.
+    first = _missing_pieces(pl)
+    order = sorted(range(len(pl.deck)), key=lambda i: first.get(pl.deck[i][1], 9))
+    for i in order:
+        k, n = pl.deck[i]
         if k == "Pokemon" and pred(n):
             pl.deck.pop(i)
             random.shuffle(pl.deck)
@@ -1159,7 +1249,17 @@ def play_items(pl, opp, turn, log, first_turn):
         break
 
     while ("Item", "N's PP Up") in pl.hand:
-        target = next((p for p in pl.bench if "N's" in p.name), None)
+        # To the N's Pokemon that is short of Energy, the deck's copy
+        # attacker first. It went to the first N's Pokemon on the Bench --
+        # a Zorua, or a Zoroark ex already paid up -- while the Active
+        # Zoroark sat one Darkness short on 175 of 400 idle turns.
+        attackers = _copy_plan(pl)[0]
+        short = [p for p in pl.bench
+                 if "N's" in p.name and energy_shortfall(pl, p) > 0]
+        target = max(short, key=lambda p: (p.name in attackers,
+                                           -energy_shortfall(pl, p),
+                                           _potential_damage(pl, p)),
+                     default=None)
         e = next((n for n in pl.discard if n.endswith("Energy")), None)
         if target is None or e is None:
             break
@@ -1209,7 +1309,9 @@ def play_items(pl, opp, turn, log, first_turn):
         log.append(f"  {pl.name}: Energy Search -> {card[1]}")
 
     while ("Item", "Night Stretcher") in pl.hand:
-        pick = next((n for n in pl.discard if n in pl.POKEMON), None)
+        first = _missing_pieces(pl)
+        pick = min((n for n in pl.discard if n in first), key=first.get, default=None) or \
+            next((n for n in pl.discard if n in pl.POKEMON), None)
         kind = "Pokemon"
         if pick is None:
             pick = next((n for n in pl.discard if M.BASIC_ENERGY_RE.match(n)), None)
@@ -1650,6 +1752,7 @@ def cards_to_pitch(pl, n, exclude=None):
 
 
 AE.PITCH_RANK = pitch_rank
+AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
 # A lambda, not the function object: the hooks are wired well above
@@ -3272,6 +3375,18 @@ def attach_energy(pl, cards_by_name, log):
         needy = [p for p in pool if energy_shortfall(pl, p) > 0]
         if needy:
             target = max(needy, key=lambda p: _potential_damage(pl, p))
+    # A copy-attack deck has one attacker and a Bench of donors that never
+    # attack. With 8 Energy, 38% of attachments went elsewhere -- mostly to
+    # whatever a Knock Out had promoted (N's Zekrom, Yveltal, Fezandipiti
+    # ex) -- while the Benched Zoroark ex stayed one short. Feed the copy
+    # attacker first, the Active one, else the one closest to paid up.
+    attackers = _copy_plan(pl)[0]
+    if attackers and (target is None or target.name not in attackers):
+        short = [p for p in pl.in_play()
+                 if p.name in attackers and energy_shortfall(pl, p) > 0]
+        if short:
+            target = min(short, key=lambda p: (p is not pl.active,
+                                               energy_shortfall(pl, p)))
     if target is None:
         return
     kind, name = pl.hand.pop(idx)

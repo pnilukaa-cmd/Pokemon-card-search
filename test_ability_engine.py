@@ -2718,9 +2718,65 @@ def test_a_self_attack_lock_ends_with_the_next_turn():
                or spot.attack_locked_by_opponent))
 
 
+def test_subjugating_chains_switches_in_your_own_attacker():
+    """Pecharunt ex: "switch 1 of your Benched Darkness Pokemon, except any
+    Pecharunt ex, with your Active Pokemon. If you do, the new Active
+    Pokemon is now Poisoned."
+
+    Compiled as "the OPPONENT's Active is now Poisoned" with no switch:
+    a free Poison every turn, and never the card's actual job of bringing
+    up a paid-up Zoroark ex whose own Poison switches Binding Mochi on.
+    Real deck model, real Ability path.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+    me.active = V.InPlay("N's Zorua", 0)
+    ready = V.InPlay("N's Zoroark ex", 0)
+    ready.energy = [["Darkness"], ["Darkness"]]
+    ready.energy_names = ["Basic Darkness Energy"] * 2
+    me.bench = [V.InPlay("Pecharunt ex", 0), V.InPlay("N's Zekrom", 0), ready]
+    op.active = V.InPlay("N's Zoroark ex", 0)
+    V.use_abilities(me, op, 5, [])
+    check("the paid-up Zoroark ex is switched in", me.active is ready,
+          me.active.name)
+    check("and it is the one Poisoned", "poisoned" in ready.conditions,
+          str(ready.conditions))
+    check("the opponent is not", "poisoned" not in op.active.conditions)
+
+
+def test_a_copy_attack_deck_keeps_room_for_its_donor():
+    """N's Zoroark ex copies a Benched N's Pokemon's attack, and N's Zekrom
+    sat in hand behind a full Bench of support Basics on 105 of 623 turns.
+    With no donor in play, a support Basic must not take the last slot,
+    and a Pokemon search fetches the donor first. Real deck model.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    me = V.Player("me", D[1], D[2], E)
+    me.active = V.InPlay("N's Zoroark ex", 0)
+    me.bench = [V.InPlay(n, 0) for n in ("N's Zorua", "Munkidori", "Pecharunt ex")]
+    me.hand = [("Pokemon", "Meowth ex"), ("Pokemon", "Fezandipiti ex")]
+    V.play_basics(me, 3, [])
+    check("a support Basic is held back from the last Bench slot",
+          len(me.bench) == 4, str([p.name for p in me.bench]))
+    me.hand.append(("Pokemon", "N's Zekrom"))
+    V.play_basics(me, 3, [])
+    check("the donor gets the slot", any(p.name == "N's Zekrom" for p in me.bench),
+          str([p.name for p in me.bench]))
+    me2 = V.Player("me", D[1], D[2], E)
+    me2.active = V.InPlay("N's Zoroark ex", 0)
+    me2.bench = [V.InPlay("N's Zorua", 0)]
+    me2.hand = []
+    random.seed(2)
+    got = {V.search_pokemon_from_deck(me2, lambda n: True) for _ in range(1)}
+    check("a Pokemon search fetches the missing donor first",
+          got == {"N's Zekrom"}, str(got))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_hand_reset_draws_do_the_first_half_of_their_text,
+    for fn in [test_subjugating_chains_switches_in_your_own_attacker,
+               test_a_copy_attack_deck_keeps_room_for_its_donor,
+               test_hand_reset_draws_do_the_first_half_of_their_text,
                test_an_optional_draw_never_empties_the_deck,
                test_a_self_attack_lock_ends_with_the_next_turn,
                test_when_damaged_tools_fire_and_are_attached,
