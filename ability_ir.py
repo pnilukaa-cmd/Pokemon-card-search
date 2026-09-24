@@ -334,6 +334,19 @@ def parse_trigger(text):
 def parse_conditions(text):
     t = text
     out = []
+    # "You can use this card only if you have X in play" (Glass Trumpet:
+    # any Tera Pokemon; Anthea & Concordia: six named N's Pokemon). It
+    # compiled to a no-op, so the requirement was simply dropped.
+    m = re.search(r"you can use this card only if you have ([\w'’ ,]+?"
+                  r"(?:, and [\w'’ ]+?)?) in play", t, re.I)
+    if m:
+        req = m.group(1).strip()
+        st = re.match(r"any (\w+) pok[eé]mon$", req, re.I)
+        if st:
+            out.append({"kind": "have_in_play", "subtype": st.group(1).capitalize()})
+        else:
+            names = [x.strip() for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", req) if x.strip()]
+            out.append({"kind": "have_in_play", "names": names})
     if re.search(r"once during your first turn", t, re.I):
         out.append({"kind": "own_first_turn"})
     if re.search(r"if this pok[eé]mon is in the active spot|as long as this pok[eé]mon is in the active spot", t, re.I):
@@ -584,6 +597,9 @@ def parse_chance(text):
     calculations, not ability gates, so they are left at 1.0 here.
     """
     t = text.lower()
+    # Drasna: the coin picks how many to draw, and both sides draw.
+    if re.search(r"if heads, draw \d+ cards?\. if tails, draw \d+", t):
+        return 1.0
     # The printed phrasing puts a FULL STOP between the clauses -- "Flip a
     # coin. If heads, ..." -- and [^.] cannot cross one. Every card in this
     # pool written that way (158 of them) parsed as chance 1.0, so EVERY
@@ -711,8 +727,9 @@ def _r(m, text):
     # your deck. Then, draw 6" / "Discard your hand and draw 5" were read as
     # a bare "draw 6": Lillie's Determination, in 46 of 54 field decks, was
     # a free six cards on top of the hand, burning six off the deck a time.
+    coin = re.search(r"if heads, draw (\d+) cards?\. if tails, draw (\d+)", text, re.I)
     pre = []
-    if re.search(r"shuffle your hand into your deck\. then,? draw \d", text, re.I):
+    if re.search(r"shuffle your hand into your deck\. then,? (?:draw \d|flip a coin)", text, re.I):
         pre = [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF)]
     elif re.search(r"discard your hand and draw \d", text, re.I):
         pre = [Action(Op.DISCARD_FROM_SELF, 99, Target.SELF)]
@@ -728,7 +745,20 @@ def _r(m, text):
             "who": "self" if inst.group(1).lower() == "you" else "opponent",
             "cmp": "<=" if inst.group(4) else "==",
             "count": int(inst.group(3))}
+    if coin:
+        # Drasna: heads 8, tails 3. Read as a flat 8, gated on the coin.
+        flt["coin"] = [int(coin.group(1)), int(coin.group(2))]
     return pre + [Action(Op.DRAW, int(m.group(1)), Target.SELF, flt)]
+
+
+@rule("draw_per_opponent_hand",
+      r"draw a card for each card in your opponent'?s hand")
+def _r(m, text):
+    """Mr. Mime: read as "draw a card" -- one, whatever their hand held."""
+    pre = []
+    if re.search(r"shuffle your hand into your deck", text, re.I):
+        pre = [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF)]
+    return pre + [Action(Op.DRAW, 1, Target.SELF, {"per_opp_hand": True})]
 
 
 @rule("opponent_hand_reset",
@@ -860,6 +890,8 @@ def _r(m, text):
 
 @rule("draw_one", r"\bdraw a card")
 def _r(m, text):
+    if re.search(r"draw a card for each card in your opponent", text, re.I):
+        return []          # draw_per_opponent_hand owns it
     # "each player draws a card" belongs to each_player_draws below. Both
     # rules used to fire on Chandelure's Alluring Light, emitting the draw
     # twice -- which doubled the rate of the one engine a deck-out deck
@@ -1036,9 +1068,23 @@ def _r(m, text):
 
 # ---- energy --------------------------------------------------------------
 
+@rule("attach_to_each_benched_type",
+      r"choose up to (\d+) of your benched (" + TYPES + r") pok[eé]mon and attach a basic"
+      r" energy card from your discard pile to each of them")
+def _r(m, text):
+    """Glass Trumpet: one Basic Energy from the discard to EACH of up to 2
+    Benched Pokemon of a type. The generic rule read "to each of them" as a
+    target and attached a single Energy to "self"."""
+    return [Action(Op.ATTACH_ENERGY, 1, Target.YOUR_BENCHED,
+                   {"from": "discard", "type": None, "each_of": int(m.group(1)),
+                    "recipient_type": m.group(2).capitalize()})]
+
+
 @rule("attach_energy_from_discard",
       r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your discard pile to ([^.]{0,50})")
 def _r(m, text):
+    if m.group(3).strip().lower().startswith("each of them"):
+        return []          # attach_to_each_benched_type owns it
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
                    {"type": (m.group(2) or "").capitalize() or None, "from": "discard"})]
 
@@ -1273,9 +1319,14 @@ def _r(m, text):
     return [Action(Op.FILL_OPPONENT_BENCH, int(m.group(1)), Target.OPPONENT)]
 
 
-@rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched pok[eé]mon")
+@rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched (basic )?pok[eé]mon")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.OPP_ACTIVE, {"gust": True})]
+    # Lisia's Appeal gusts only a BASIC Pokemon, and "Benched Basic
+    # Pokemon" did not match at all, so the card only Confused.
+    f = {"gust": True}
+    if m.group(1):
+        f["basic_only"] = True
+    return [Action(Op.SWITCH, 1, Target.OPP_ACTIVE, f)]
 
 
 @rule("switch_benched_type_in",
@@ -2526,6 +2577,16 @@ def _r(m, text):
 @rule("reveal_opponent_hand", r"your opponent reveals their hand")
 def _r(m, text):
     return [Action(Op.REVEAL_OPPONENT_HAND, None, Target.OPPONENT)]
+
+
+@rule("discard_kind_from_revealed_hand",
+      r"you discard up to (\d+) (item|supporter|pok[eé]mon tool|trainer) cards? you find there")
+def _r(m, text):
+    """Eri: the discard was dropped; only "reveals their hand" compiled."""
+    kind = {"pokémon tool": "Tool", "pokemon tool": "Tool"}.get(
+        m.group(2).lower(), m.group(2).capitalize())
+    return [Action(Op.DISCARD_FROM_OPPONENT, int(m.group(1)), Target.OPPONENT,
+                   {"kind": kind})]
 
 
 @rule("attach_tool_from_deck", r"search your deck for a pok[eé]mon tool card and attach")

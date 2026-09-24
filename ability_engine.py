@@ -85,6 +85,12 @@ def TRAINER_IR(name):
     return None
 
 
+# What an Energy card provides when attached to `spot` (one type-list).
+# Set by simulate_versus.
+def ENERGY_PROVIDES(pl, name, spot):
+    return None
+
+
 # A discard-pile card's kind ("Pokemon", "Supporter", "Item", "Tool",
 # "Stadium", "Energy"); the pile holds names only. Set by simulate_versus.
 def CARD_KIND(pl, name):
@@ -400,6 +406,14 @@ def conditions_met(effect, pl, opp, source, atk=None):
         k = c["kind"]
         if k == "own_first_turn" and getattr(pl, "round_no", None) != 1:
             return False
+        if k == "have_in_play":
+            here = [p.name for p in pl.in_play()]
+            if c.get("subtype") and not any(
+                    c["subtype"] in (pl.POKEMON.get(n, {}).get("subtypes") or [])
+                    for n in here):
+                return False
+            if c.get("names") and not all(n in here for n in c["names"]):
+                return False
         if k == "self_is_active" and source is not pl.active:
             return False
         if k == "self_is_benched" and source not in pl.bench:
@@ -713,6 +727,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         target_size = act.filter.get("up_to_hand_size")
         before = len(pl.hand)
         amount = act.amount or 1
+        if act.filter.get("coin"):
+            heads, tails = act.filter["coin"]
+            amount = heads if random.random() < 0.5 else tails
+        if act.filter.get("per_opp_hand"):
+            amount = len(opp.hand)
         ii = act.filter.get("instead_if")
         if ii:
             who = pl if ii["who"] == "self" else opp
@@ -936,6 +955,34 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                                  and (not want_type or want_type in n)
                                  and (blocked is None or n != blocked))
 
+        def _put(tgt, card):
+            # What the attached card actually provides. With no type in the
+            # card's text this used to be EVERY type, so a Basic Fire Energy
+            # pulled off the discard could pay a Water cost.
+            if want_type:
+                prov = [want_type]
+            else:
+                prov = ENERGY_PROVIDES(pl, card[1], tgt) or list(IR.TYPES.split("|"))
+            tgt.energy.append(prov)
+            if getattr(tgt, "energy_names", None) is not None:
+                tgt.energy_names.append(card[1])
+            log.append(f"    attach {card[1]} to {tgt.name}")
+
+        each = act.filter.get("each_of")
+        if each:
+            # Glass Trumpet: one each to up to N Benched Pokemon of a type,
+            # the emptiest first.
+            rt = act.filter.get("recipient_type")
+            pool = [p for p in pl.bench
+                    if not rt or rt in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            got = 0
+            for tgt in sorted(pool, key=lambda p: p.energy_count())[:each]:
+                card = _take()
+                if not card:
+                    break
+                _put(tgt, card)
+                got += 1
+            return got > 0
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
         tgt = hits[0] if hits else source
         if tgt is None:
@@ -945,10 +992,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             card = _take()
             if not card:
                 break
-            tgt.energy.append([want_type] if want_type else list(IR.TYPES.split("|")))
-            if getattr(tgt, "energy_names", None) is not None:
-                tgt.energy_names.append(card[1])
-            log.append(f"    attach {card[1]} to {tgt.name}")
+            _put(tgt, card)
             got += 1
         return got > 0
 
@@ -1167,7 +1211,18 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.SWITCH:
         if act.filter.get("gust"):
             if opp.bench and opp.active:
-                tgt = min(opp.bench, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
+                forced = getattr(opp, "_forced_gust", None)
+                opp._forced_gust = None
+                pool = opp.bench
+                if act.filter.get("basic_only"):
+                    pool = [p for p in opp.bench
+                            if opp.POKEMON.get(p.name, {}).get("stage") == "Basic"]
+                    if not pool:
+                        return False
+                if forced is not None and forced < len(opp.bench) and opp.bench[forced] in pool:
+                    tgt = opp.bench[forced]      # the lookahead pilot's pick
+                else:
+                    tgt = min(pool, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
                 opp.bench.remove(tgt)
                 leaving_active(opp.active, log)
                 opp.bench.append(opp.active)
@@ -1259,6 +1314,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # a count to remove -- and a hand already at or below it discards
         # nothing at all, so the card must not be spent.
         down_to = (act.filter or {}).get("down_to")
+        kind = (act.filter or {}).get("kind")
+        if kind:
+            # Eri: the cards are CHOSEN from a revealed hand, not random.
+            picks = [c for c in opp.hand if c[0] == kind][:act.amount or 1]
+            for c in picks:
+                opp.hand.remove(c)
+                opp.discard.append(c[1])
+            if picks:
+                log.append(f"    discard {len(picks)} {kind} card(s) from opponent's hand")
+            return bool(picks)
         if down_to is not None:
             n = max(0, len(opp.hand) - down_to)
         else:

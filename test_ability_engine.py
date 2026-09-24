@@ -3019,9 +3019,69 @@ def test_the_lookahead_pilot_sees_a_lock():
     check("greedy is still the default pilot", V.POL.knob(V.Player("x", {}, []), "lookahead_samples") == 0)
 
 
+def test_requirements_and_attached_energy_types_are_real():
+    """Found by the engine-coverage audit (2026-09-24):
+
+      * "You can use this card only if you have X in play" compiled to a
+        no-op: Glass Trumpet (3 in tauros_risky_ruins) was played without
+        a Tera Pokemon, and attached ONE Energy to "self" instead of one to
+        each of up to 2 Benched Colorless Pokemon.
+      * An attached Energy whose card text named no type provided EVERY
+        type -- a Basic Fire Energy off the discard paid Water costs.
+      * Eri compiled only "your opponent reveals their hand"; the discard
+        of up to 2 Items, the whole card, was dropped.
+    """
+    V, D, E = _real("decks/field/tauros_risky_ruins.txt", "t")
+    tera = next(n for n, i in D[1].items() if "Tera" in (i.get("subtypes") or []))
+    col = [n for n, i in D[1].items() if "Colorless" in i["types"]
+           and "Tera" not in (i.get("subtypes") or [])][0]
+    me, op = V.Player("t", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    trumpet = V.trainer_effect_ir("Glass Trumpet")
+
+    me.active, me.bench = V.InPlay(col, 0), [V.InPlay(col, 0), V.InPlay(col, 0)]
+    me.discard = ["Fire Energy", "Fire Energy"]      # as the deck model spells it
+    me.hand = [("Item", "Glass Trumpet")]
+    check("Glass Trumpet is refused without a Tera Pokemon",
+          not V.play_trainer_from_ir(me, op, "Item", "Glass Trumpet", [], 3))
+    me.active = V.InPlay(tera, 0)
+    check("and played with one",
+          V.play_trainer_from_ir(me, op, "Item", "Glass Trumpet", [], 3))
+    check("one Energy to each of two Benched Colorless Pokemon",
+          [p.energy_count() for p in me.bench] == [1, 1],
+          str([p.energy_count() for p in me.bench]))
+    check("and a Fire Energy provides Fire, not every type",
+          me.bench[0].energy[0] == ["Fire"], str(me.bench[0].energy[0]))
+
+    op.hand = [("Item", "Poké Pad"), ("Supporter", "Judge"), ("Item", "Ultra Ball"),
+               ("Item", "Switch")]
+    for a in V.trainer_effect_ir("Eri").actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("Eri discards two Items and nothing else",
+          sorted(k for k, _ in op.hand) == ["Item", "Supporter"], str(op.hand))
+
+    # Lisia's Appeal gusts a Benched BASIC; Drasna draws 8 or 3 after
+    # shuffling the hand in; Mr. Mime draws one per card in their hand.
+    lisia = IR.compile_effect("t", "Lisia's Appeal", "Switch in 1 of your opponent's "
+                              "Benched Basic Pokémon to the Active Spot. If you do, "
+                              "the new Active Pokémon is now Confused.")
+    check("Lisia's Appeal gusts, Basic only", any(
+        a.op == IR.Op.SWITCH and a.filter.get("basic_only") for a in lisia.actions))
+    drasna = IR.compile_effect("t", "Drasna", "Shuffle your hand into your deck. Then, "
+                               "flip a coin. If heads, draw 8 cards. If tails, draw 3 cards.")
+    check("Drasna always resolves, shuffling first, drawing 8 or 3",
+          drasna.chance == 1.0 and drasna.actions[0].op == IR.Op.SHUFFLE_HAND_INTO_DECK
+          and drasna.actions[1].filter.get("coin") == [8, 3])
+    mime = IR.compile_effect("t", "Mr. Mime", "Shuffle your hand into your deck. Then, "
+                             "draw a card for each card in your opponent's hand.")
+    draws = [a for a in mime.actions if a.op == IR.Op.DRAW]
+    check("Mr. Mime draws one per card in the opponent's hand, once",
+          len(draws) == 1 and draws[0].filter.get("per_opp_hand"))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_lookahead_pilot_sees_a_lock,
+    for fn in [test_requirements_and_attached_energy_types_are_real,
+               test_the_lookahead_pilot_sees_a_lock,
                test_the_mew_lock_trainers_do_what_they_say,
                test_the_mill_wall_pieces_work,
                test_subjugating_chains_switches_in_your_own_attacker,

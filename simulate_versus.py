@@ -253,6 +253,12 @@ class Player:
         # with the phase of the game -- `setup` is "always setup" rather
         # than "setup until the board is built".
         self.policy = PILOT_BY_NAME.get(name, DEFAULT_POLICY)
+        # Turn context, refreshed by take_turn; defaults for boards built
+        # outside a game (tests, the lookahead's copies).
+        self.round_no = 1
+        self._first_turn = False
+        self._goes_first = True
+        self._cards_by_name = _CARDS_BY_NAME
         # Re-entry guard for Festival Lead's second attack.
         self._attacking_twice = False
         # Energy types this deck can actually put on a Pokemon. Attacks
@@ -877,6 +883,10 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
             amount += max(0, f["up_to_hand_size"] - rest)
             continue
         amt = a.amount or 1
+        if f.get("coin"):
+            amt = sum(f["coin"]) / 2          # expected: plan on the average
+        if f.get("per_opp_hand"):
+            amt = len(opp.hand)
         ii = f.get("instead_if")
         if ii:
             who = pl if ii["who"] == "self" else opp
@@ -1475,6 +1485,19 @@ def judge_unlocks_attack(pl, opp):
         opp.hand = saved
 
 
+def _gust_supporter(pl, opp, name, target, log):
+    """Boss's Orders / Giovanni, resolved on `target`."""
+    pl.remove_from_hand("Supporter", name)
+    pl.discard.append(name)
+    pl.supporter_played = True
+    pl.played_supporters_this_turn.add(name)
+    opp.bench.remove(target)
+    clear_conditions(opp.active, "left the Active Spot", log, opp.name)
+    opp.bench.append(opp.active)
+    opp.active = target
+    log.append(f"  {pl.name}: {name} -> drags up {target.name}")
+
+
 def play_supporter(pl, opp, turn, log):
     if pl.supporter_played:
         return
@@ -1622,13 +1645,16 @@ def play_supporter(pl, opp, turn, log):
                     pl.draw(amount)
                 log.append(f"  {pl.name}: {name}")
                 return
-        if "Team Rocket's Ariana" in hand_names:
+        if "Team Rocket's Ariana" in hand_names and _deck_left_after(
+                pl, max(0, (8 if all(n.startswith("Team Rocket's") for n in pl.in_play_names())
+                            else 5) - (len(pl.hand) - 1))) >= DRAW_FLOOR:
             all_tr = bool(pl.in_play_names()) and all(
                 n.startswith("Team Rocket's") for n in pl.in_play_names())
             use("Team Rocket's Ariana")
             supporter_draw_to(pl, 8 if all_tr else 5, log, "Team Rocket's Ariana")
             return
-        if "Iono" in hand_names:
+        if "Iono" in hand_names and _deck_left_after(
+                pl, max(1, opp.prizes), len(pl.hand) - 1) >= DRAW_FLOOR:
             use("Iono")
             pl.deck.extend(pl.hand)
             pl.hand = []
@@ -1715,12 +1741,13 @@ def play_supporter(pl, opp, turn, log):
             target = choose_gust_target(pl, opp)
             if target is None:
                 continue          # nothing on the Bench beats the Active
-            use(name)
-            opp.bench.remove(target)
-            clear_conditions(opp.active, "left the Active Spot", log, opp.name)
-            opp.bench.append(opp.active)
-            opp.active = target
-            log.append(f"  {pl.name}: {name} -> drags up {target.name}")
+            if POL.knob(pl, "lookahead_samples"):
+                def apply(me, them, i, name=name):
+                    _gust_supporter(me, them, name, them.bench[i], [])
+                i = lookahead_pick(pl, opp, list(range(len(opp.bench))), apply,
+                                   0, opp.bench.index(target))
+                target = opp.bench[i]
+            _gust_supporter(pl, opp, name, target, log)
             return
 
     # Anything the registry above does not know, straight off the card
@@ -1880,6 +1907,17 @@ def _card_kind(pl, name):
 
 
 AE.CARD_KIND = _card_kind
+
+
+def _energy_provides(pl, name, spot):
+    # Deck models spell Basic Energy "Fire Energy"; accept "Basic Fire Energy" too.
+    name = _re.sub(r"^basic\s+", "", str(name), flags=_re.I)
+    got = energy_provisions(name, _CARDS_BY_NAME,
+                            (pl.POKEMON.get(spot.name) or {}).get("stage"))
+    return got[0] if got else None
+
+
+AE.ENERGY_PROVIDES = _energy_provides
 AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
@@ -3876,12 +3914,28 @@ def try_retreat(pl, opp, log):
     # Basic throws the investment away. Free-swaps-only and a reduced
     # margin were also tried; neither beat this rule. Do not re-derive it.
     ready = [p for p in pl.bench if _ready_damage(pl, opp, p) > max(here, 0) + margin]
-    if not ready:
-        return
-    target = max(ready, key=lambda p: _ready_damage(pl, opp, p))
+    target = max(ready, key=lambda p: _ready_damage(pl, opp, p)) if ready else None
     # Only pay the retreat cost if the upgrade is worth it.
-    if _ready_damage(pl, opp, target) <= here:
+    if target is not None and _ready_damage(pl, opp, target) <= here:
+        target = None
+    # The lookahead weighs staying against every retreat it can pay for,
+    # through the opponent's reply -- the one decision greedy prices by
+    # this turn's damage alone.
+    if POL.knob(pl, "lookahead_samples") and pl.bench:
+        options = [None] + list(range(len(pl.bench)))
+        default = None if target is None else pl.bench.index(target)
+
+        def apply(me, them, i):
+            if i is not None:
+                _do_retreat(me, me.bench[i], retreat_of(me, me.active, them), [])
+        i = lookahead_pick(pl, opp, options, apply, PHASES.index("attack"), default)
+        target = None if i is None else pl.bench[i]
+    if target is None:
         return
+    _do_retreat(pl, target, cost, log)
+
+
+def _do_retreat(pl, target, cost, log):
     for _ in range(cost):
         pl.discard.append(AE.pop_energy(pl.active))
     pl.bench.remove(target)
@@ -4395,22 +4449,44 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     play_basics(pl, turn, log)
     if pl.active is None:
         return "no_pokemon"
+    pl._first_turn = first_turn
+    pl._cards_by_name = cards_by_name
     try_evolve(pl, opp, turn, log, first_turn)
     play_items(pl, opp, turn, log, first_turn)
     play_supporter(pl, opp, turn, log)
-    use_abilities(pl, opp, turn, log)
-    use_stadium(pl, log)
-    sweep_knocked_out(pl, opp, log)
-    attach_energy(pl, cards_by_name, log)
-    attach_tools(pl, log)
-    try_evolve(pl, opp, turn, log, first_turn)
-    try_retreat(pl, opp, log)
+    return run_phases(pl, opp, log, 0)
 
-    # Meloetta ex's Debut Performance is the one card that may attack on the
-    # very first turn.
-    if not first_turn or AE.query_can_attack_first_turn(pl):
-        if do_attack(pl, opp, log):
-            return "win"
+
+# The rest of a turn after the Supporter, as named steps, so a lookahead can
+# make a choice in a copy of the game and RESUME the turn from the step
+# after it (a gust resumes at "abilities", a retreat at "attack").
+PHASES = ("abilities", "stadium", "sweep", "attach", "tools", "evolve",
+          "retreat", "attack")
+
+
+def run_phases(pl, opp, log, start):
+    turn, first_turn = pl.round_no, pl._first_turn
+    for ph in PHASES[start:]:
+        if ph == "abilities":
+            use_abilities(pl, opp, turn, log)
+        elif ph == "stadium":
+            use_stadium(pl, log)
+        elif ph == "sweep":
+            sweep_knocked_out(pl, opp, log)
+        elif ph == "attach":
+            attach_energy(pl, pl._cards_by_name, log)
+        elif ph == "tools":
+            attach_tools(pl, log)
+        elif ph == "evolve":
+            try_evolve(pl, opp, turn, log, first_turn)
+        elif ph == "retreat":
+            try_retreat(pl, opp, log)
+        elif ph == "attack":
+            # Meloetta ex's Debut Performance is the one card that may
+            # attack on the very first turn.
+            if not first_turn or AE.query_can_attack_first_turn(pl):
+                if do_attack(pl, opp, log):
+                    return "win"
     return finish_turn(pl, opp, log)
 
 
@@ -4456,60 +4532,64 @@ def _position_value(pl, opp, ended):
     return v
 
 
-def lookahead_attack(pl, opp, greedy_pick):
-    """The attack whose position after the opponent's reply is best."""
-    spot = pl.active
-    cands = [a for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot)
-             if can_pay(effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy)]
-    seen, uniq = set(), []
-    for a in cands:
-        if a["name"] not in seen:
-            seen.add(a["name"])
-            uniq.append(a)
-    if len(uniq) < 2:
-        return greedy_pick
+def lookahead_pick(pl, opp, options, apply, resume, default):
+    """The option whose position after the opponent's reply is best.
+
+    `apply(me, them, option)` makes the choice in a copy of the game and
+    returns "win" if that alone ends it. The turn then resumes at PHASES
+    index `resume` (None: straight to the end of the turn), the opponent
+    plays their whole reply with their own pilot, and the position is
+    scored. Every option sees the same N seeds; the real game's random
+    state is restored afterwards. Stays with `default` (greedy's choice)
+    unless another option is better by more than lookahead_margin.
+    """
+    if len(options) < 2 or _LOOKAHEAD[0]:
+        return default
     n = POL.knob(pl, "lookahead_samples")
     _LOOKAHEAD_SEQ[0] += 1
     base = _LOOKAHEAD_SEQ[0] * 7919
     state = random.getstate()
     _LOOKAHEAD[0] = True
-    scores = {}
+    scores = []
     try:
-        for a in uniq:
+        for opt in options:
             total = 0.0
             for s in range(n):
                 random.seed(base + s)
-                total += _simulate_reply(pl, opp, a)
-            scores[a["name"]] = total / n
+                total += _simulate_from(pl, opp, opt, apply, resume)
+            scores.append(total / n)
     finally:
         _LOOKAHEAD[0] = False
         random.setstate(state)
-    best = max(uniq, key=lambda a: scores[a["name"]])
-    # Stay with greedy unless the difference is real: ties and noise keep
-    # the historical choice.
-    if scores[best["name"]] <= scores[greedy_pick["name"]] + POL.knob(pl, "lookahead_margin"):
-        return greedy_pick
-    return best
+    i = max(range(len(options)), key=lambda k: scores[k])
+    d = options.index(default) if default in options else None
+    if d is not None and scores[i] <= scores[d] + POL.knob(pl, "lookahead_margin"):
+        return default
+    return options[i]
 
 
-def _simulate_reply(pl, opp, atk):
+def _simulate_from(pl, opp, opt, apply, resume):
     import copy
     memo = {}
     for side in (pl, opp):
         memo[id(side.POKEMON)] = side.POKEMON
         memo[id(side.EFFECTS)] = side.EFFECTS
+        memo[id(side._cards_by_name)] = side._cards_by_name
     me, them = copy.deepcopy((pl, opp), memo)
     log = []
-    me._forced_attack = atk
-    if do_attack(me, them, log):
+    if apply(me, them, opt) == "win":
         return _position_value(me, them, "win")
-    r = finish_turn(me, them, log)
-    if r in ("win", "loss", "no_pokemon"):
-        return _position_value(me, them, "win" if r == "win" else "loss")
+    r = run_phases(me, them, log, resume) if resume is not None \
+        else finish_turn(me, them, log)
+    if r == "win":
+        return _position_value(me, them, "win")
+    if r in ("loss", "no_pokemon"):
+        return _position_value(me, them, "loss")
     end_of_turn(me, log)
     rnd = me.round_no if getattr(me, "_goes_first", True) else me.round_no + 1
     them.lost_pokemon_last_turn_snapshot = them.lost_pokemon_last_turn
-    r = take_turn(them, me, rnd, not getattr(me, "_goes_first", True), _CARDS_BY_NAME, log)
+    r = take_turn(them, me, rnd, not getattr(me, "_goes_first", True),
+                  me._cards_by_name, log)
     if r == "win":
         return _position_value(me, them, "loss")
     if r in ("loss", "no_pokemon", "deck_out"):
@@ -4518,8 +4598,44 @@ def _simulate_reply(pl, opp, atk):
     return _position_value(me, them, None)
 
 
+def _gust_attack(atk):
+    return any(a.op == IR.Op.SWITCH and (a.filter or {}).get("gust")
+               for a in _attack_ir(atk).actions)
+
+
+def lookahead_attack(pl, opp, greedy_pick):
+    """Which attack -- and, for a gust attack, which target."""
+    spot = pl.active
+    cands, seen = [], set()
+    for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot):
+        if a["name"] in seen or not can_pay(
+                effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy):
+            continue
+        seen.add(a["name"])
+        cands.append(a)
+    options = []
+    for a in cands:
+        if _gust_attack(a) and opp.bench:
+            options += [(a["name"], i) for i in range(len(opp.bench))]
+        else:
+            options.append((a["name"], None))
+    by_name = {a["name"]: a for a in cands}
+    default = next((o for o in options if o[0] == greedy_pick["name"]), None)
+
+    def apply(me, them, opt):
+        me._forced_attack = by_name[opt[0]]
+        them._forced_gust = opt[1]
+        return "win" if do_attack(me, them, []) else None
+    pick = lookahead_pick(pl, opp, options, apply, None, default)
+    if pick is None:
+        return greedy_pick
+    opp._forced_gust = pick[1]
+    return by_name[pick[0]]
+
+
 def finish_turn(pl, opp, log):
     """Pokemon Checkup and the Knock Outs it causes -- the end of a turn."""
+    opp._forced_gust = None
     pokemon_checkup(pl, opp, log)
     # Either Active can now die at checkup, since both resolve their
     # conditions there.

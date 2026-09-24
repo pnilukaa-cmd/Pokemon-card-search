@@ -1,5 +1,56 @@
 # Session context — Pokémon TCG Standard simulator
 
+## Session 2 (2026-09-23 / 24), branch `claude/code-restructuring-yo2673`
+
+Read this section first; section 1 onward is the previous session.
+
+**Standing instructions added this session**
+- Treat 30th Celebration (`30C`) as legal.
+- When handed a real decklist: study it, teach the AI to play it, and keep
+  learning and improving (method: `.claude/skills/tcg-theorycraft/SKILL.md`
+  section 11e).
+- **Always extend or enhance the programming. Pause only when nothing is
+  left to fix or improve other than the deck rerun.**
+- Still in force: check every deck-building rule, always print the PTCGL
+  import, exact `SET NUM` on every line (Basic Energy excepted), 1000-trial
+  baseline on every finished list, real measurements, pause before a new
+  full run.
+
+**Field.** 54 decks in `decks/field/` (`paralysis_ctl` and
+`selective_bloom_cradily` dropped). The 2026-09-23 round robin
+(`runs/2026-09-23/`, `decks/FIELD_RESULTS.md`) is **superseded** by every
+engine fix since; a full rerun is the one open item.
+
+**New decks studied:** `decks/dudunsparce_maushold_mill_wall.*` (a
+tournament winner) and `decks/mew_ex_baby_lock.*`.
+
+**Engine bugs fixed this session** (each has a regression test proven to
+fail on the commit before it): hand-reset draws (Lillie's Determination in
+46 decks, Lacey, Carmine) dropped their first half; optional draws had no
+deck floor; "next turn" locks never expired; Pecharunt ex's Subjugating
+Chains poisoned the opponent instead of switching; Neutralization Zone /
+Battle Cage never played; Bench damage never checked against prevention
+(Shaymin); Fan Call never fired; search type filters ignored; Nighttime
+Mine never played; the inert-card guard passed dead Stadiums; energy /
+energy_names drifted (crashed every run with Enhanced Hammer); discard
+recovery returned Pokemon whatever the card said; Tool Scrapper, Accompanying
+Flute; "can't use attacks" locks (16 cards) did nothing; "only if you have
+X in play" requirements dropped (Glass Trumpet); attached Energy with no
+named type provided every type; Eri's discard dropped; Lisia's Appeal,
+Drasna, Mr. Mime miscompiled.
+
+**Pilot.** `policies.LOOKAHEAD` (`PILOT=lookahead` in `vs_field.py`): each
+attack (and gust-attack target), Boss's Orders target and retreat choice is
+played out through the opponent's reply. Greedy stays the default and is
+bit-identical. Measured attack-only lookahead vs greedy: Mew ex +4.54,
+Wugtrio +1.92, Dudunsparce +0.65, N's Zoroark -0.09.
+
+**Tools.** `vs_field.py` (in repo), `run_phases` / `finish_turn` /
+`lookahead_pick` in `simulate_versus.py`, `test_ability_engine.py` runs
+under pytest honestly (`conftest.py`).
+
+---
+
 Branch `claude/pokemon-standard-cards-fetcher-mucwsu`, from `be14f9d` to `17c6142`.
 Written as a handoff: what was asked, what was fixed, what was measured, what
 is still open, and the methodology mistakes worth not repeating.
