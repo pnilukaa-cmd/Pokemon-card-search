@@ -2865,9 +2865,109 @@ def test_the_mill_wall_pieces_work():
           ("Item", "Dark Bell") in me.hand and not me.active.conditions)
 
 
+def test_the_mew_lock_trainers_do_what_they_say():
+    """A Mew ex "baby attacks" lock list (2026-09-24) carried five Trainers
+    the engine got wrong, and crashed every field run it was in:
+
+      * Tool Scrapper's op was not in TRAINER_IR_OPS (never played), and its
+        executor took your own Tools whenever the opponent had fewer than 2.
+      * Accompanying Flute compiled to nothing.
+      * FROM_DISCARD_TO_HAND returned POKEMON whatever the card said:
+        Miracle Headset's two Supporters, Lana's Aid's Basic Energy.
+      * Retreat, attack discard costs and Energy-discard effects popped
+        `energy` without `energy_names`; Enhanced Hammer then indexed one by
+        the other and raised IndexError. They also discarded a placeholder
+        "Energy" that nothing could recover.
+    """
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    me, op = V.Player("w", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    for nm in ("Tool Scrapper", "Accompanying Flute"):
+        eff = V.trainer_effect_ir(nm)
+        check(f"{nm} is playable", eff is not None
+              and any(a.op in V.TRAINER_IR_OPS for a in eff.actions))
+
+    me.active, op.active = V.InPlay("Mew ex", 0), V.InPlay("Cubchoo", 0)
+    me.active.tool, op.active.tool = "Gravity Gemstone", "Air Balloon"
+    eff = V.trainer_effect_ir("Tool Scrapper")
+    if eff is not None:
+        AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Tool Scrapper takes the opponent's Tool", op.active.tool is None)
+    check("and leaves my own", me.active.tool == "Gravity Gemstone")
+
+    op.bench = []
+    op.deck = [("Pokemon", "Cubchoo"), ("Item", "Poké Pad"), ("Pokemon", "Totodile"),
+               ("Pokemon", "Dudunsparce"), ("Energy", "Basic Water Energy")] * 3
+    eff = V.trainer_effect_ir("Accompanying Flute")
+    if eff is not None:
+        AE.apply_action(eff.actions[0], me, op, me.active, [],
+                        make_inplay=lambda n: V.InPlay(n, 0))
+    check("Accompanying Flute benches only the opponent's Basics from the top 5",
+          op.bench and all(D[1][p.name]["stage"] == "Basic" for p in op.bench)
+          and len(op.deck) + len(op.bench) == 15, str([p.name for p in op.bench]))
+
+    me.discard = ["Tandemaus", "Boss's Orders", "Basic Water Energy", "Judge", "Dunsparce"]
+    me.hand = []
+    AE.apply_action(V.trainer_effect_ir("Miracle Headset").actions[0], me, op, me.active, [])
+    check("Miracle Headset returns Supporters",
+          sorted(n for _, n in me.hand) == ["Boss's Orders", "Judge"], str(me.hand))
+    me.hand = []
+    me.discard = ["Basic Water Energy", "Mew ex"]
+    AE.apply_action(V.trainer_effect_ir("Lana's Aid").actions[0], me, op, me.active, [])
+    check("Lana's Aid returns Basic Energy and no Rule Box Pokemon",
+          me.hand == [("Energy", "Basic Water Energy")], str(me.hand))
+
+    pop = getattr(AE, "pop_energy", None)
+    spot = V.InPlay("Mew ex", 0)
+    spot.energy = [["Water"], ["Psychic", "Water"]]
+    spot.energy_names = ["Basic Water Energy", "Prism Energy"]
+    name = pop(spot) if pop else None
+    check("pop_energy keeps the two lists in step",
+          len(spot.energy) == len(spot.energy_names) == 1 and name == "Prism Energy")
+    # A retreat that certainly happens and costs Energy: Stage 1 Dudunsparce
+    # (Retreat 3; Latias ex's Skyliner frees only Basics) into a paid-up
+    # Latias ex.
+    me.active = V.InPlay("Dudunsparce", 0)
+    me.active.energy = [["Water"]] * 3
+    me.active.energy_names = ["Basic Water Energy"] * 3
+    latias = V.InPlay("Latias ex", 0)
+    latias.energy = [["Psychic"], ["Psychic"], ["Water"]]
+    latias.energy_names = ["Basic Psychic Energy"] * 2 + ["Basic Water Energy"]
+    me.bench, me.discard = [latias], []
+    op.active = V.InPlay("Mew ex", 0)      # 160: Eon Blade takes 2 Prizes, Land Crush does not
+    V.try_retreat(me, op, [])
+    gone = next(p for p in me.bench if p.name == "Dudunsparce") if me.active is latias else None
+    check("the retreat happened", gone is not None)
+    check("retreat keeps the lists in step and discards the real card",
+          gone is not None and len(gone.energy) == len(gone.energy_names) == 0
+          and "Basic Water Energy" in me.discard, str(me.discard))
+
+    # The crash: names longer than energy, with the Special one past the end.
+    victim = V.InPlay("Mew ex", 0)
+    victim.energy = [["Psychic"]]
+    victim.energy_names = ["Basic Psychic Energy", "Prism Energy"]
+    op.active, op.bench = victim, [V.InPlay("Cubchoo", 0)]
+    hammer = V.trainer_effect_ir("Enhanced Hammer").actions[0]
+    try:
+        AE.apply_action(hammer, me, op, me.active, [])
+        ok = True
+    except IndexError:
+        ok = False
+    check("Enhanced Hammer survives a drifted board", ok)
+
+    plain = V.InPlay("Mew ex", 0)
+    plain.energy, plain.energy_names = [["Psychic"], ["Psychic"]], ["Basic Psychic Energy"] * 2
+    other = V.InPlay("Cubchoo", 0)
+    other.energy, other.energy_names = [["Water"]], ["Prism Energy"]
+    op.active, op.bench = plain, [other]
+    AE.apply_action(hammer, me, op, me.active, [])
+    check("and hits the Pokemon that has Special Energy", not other.energy,
+          str(other.energy_names))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_mill_wall_pieces_work,
+    for fn in [test_the_mew_lock_trainers_do_what_they_say,
+               test_the_mill_wall_pieces_work,
                test_subjugating_chains_switches_in_your_own_attacker,
                test_a_copy_attack_deck_keeps_room_for_its_donor,
                test_hand_reset_draws_do_the_first_half_of_their_text,

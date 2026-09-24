@@ -1,0 +1,41 @@
+Pokémon: 19
+1 Cubchoo BLK 25
+1 Latias ex SSP 76
+3 Dudunsparce TEF 129
+1 Totodile TEF 39
+1 Comfey SCR 63
+1 Exeggcute 30C 1
+3 Dunsparce JTG 120
+1 Dedenne SSP 87
+1 Elgyem BLK 40
+1 Clefairy POR 30
+1 Shaymin DRI 10
+1 Psyduck ASC 39
+3 Mew ex 30C 66
+
+Trainer: 32
+2 Accompanying Flute TWM 142
+1 Enhanced Hammer TWM 148
+1 Miracle Headset SSP 183
+1 Xerosic's Machinations SFA 64
+2 Battle Cage PFL 85
+1 Tool Scrapper ASC 212
+4 Poké Pad ASC 198
+3 Night Stretcher ASC 196
+1 Air Balloon BLK 79
+1 Judge POR 76
+1 Lana's Aid TWM 155
+1 Hilda WHT 84
+1 Redeemable Ticket JTG 156
+2 Gravity Gemstone SCR 137
+2 Buddy-Buddy Poffin ASC 184
+4 Lillie's Determination MEG 119
+2 Ultra Ball MEG 131
+3 Boss's Orders MEG 114
+
+Energy: 8
+2 Basic Psychic Energy
+4 Prism Energy BLK 86
+2 Basic Water Energy
+
+Total Cards: 60

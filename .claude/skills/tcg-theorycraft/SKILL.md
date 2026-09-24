@@ -775,7 +775,25 @@ switch, the OPPONENT's after a gust), `Once during your first turn`,
 from being placed` (counters, not damage), anything protecting the
 **Bench** (check it is asked about Benched targets), and any Stadium
 (check `_stadium_has_effect` says to play it: the inert-card guard now
-tests exactly that).
+tests exactly that), `Put N <kind> cards from your discard pile into your
+hand` (the kind: the executor returned Pokemon for Supporters and Trainers
+until 2026-09-24), `Choose up to N ... (yours or your opponent's)` (up to
+means never forced onto your own side), and any new op (is it in
+`TRAINER_IR_OPS`?).
+
+**Run the new list through the field before anything else.** A Mew ex
+list crashed every run it joined (Enhanced Hammer indexing `energy_names`
+by an `energy` index after retreat had popped only one of the two). A new
+deck exercises code paths the field never reached; a crash there is a bug
+that was already waiting for any deck with that card.
+
+**Some decks the greedy pilot cannot play, and saying so is the result.**
+The Mew ex "baby attacks" lock wants a different borrowed attack each turn
+(Snotted Up, Big Bite, Hypnosis, Follow Me) chosen against what the
+opponent will do NEXT turn. Pricing the lock riders and feeding Mew first
+both measured at zero (-0.27, +0.31) and were reverted. A one-turn greedy
+pilot scores such a deck near the floor; report that as a pilot limit, not
+a verdict on the list.
 
 Pilot lessons that measured positive and are now in the engine, all keyed
 off card text rather than deck names: keep Bench room for a copy

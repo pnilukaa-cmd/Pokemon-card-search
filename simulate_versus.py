@@ -835,6 +835,23 @@ def _self_condition_ok(pl, opp, eff, turn):
     return True
 
 
+def _flute_worth_it(pl, opp):
+    """Accompanying Flute hands the opponent free Basics. That is only a
+    plan if you can then drag one up: a gust in hand, or a gust attack on
+    something in play that can use it."""
+    if len(opp.bench) >= 5:
+        return False
+    if any(n in ("Boss's Orders", "Team Rocket's Giovanni", "Prime Catcher")
+           for _, n in pl.hand):
+        return True
+    for p in pl.in_play():
+        for atk in pl.POKEMON[p.name]["attacks"]:
+            if any(a.op == IR.Op.SWITCH and (a.filter or {}).get("gust")
+                   for a in _attack_ir(atk).actions):
+                return True
+    return False
+
+
 def _deck_left_after(pl, draw, returned=0):
     return len(pl.deck) + returned - draw
 
@@ -974,6 +991,7 @@ def _copy_plan(pl):
             if m:
                 attackers.add(name)
                 fams.add((m.group(1) or "").strip().lower())
+
     donors = set()
     for name, info in pl.POKEMON.items():
         if name in attackers:
@@ -1840,6 +1858,26 @@ def cards_to_pitch(pl, n, exclude=None):
 
 
 AE.PITCH_RANK = pitch_rank
+
+
+def _card_kind(pl, name):
+    if name in pl.POKEMON:
+        return "Pokemon"
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else card
+    if not isinstance(card, dict):
+        return "Energy" if str(name).lower().endswith("energy") else None
+    if card.get("supertype") == "Energy":
+        return "Energy"
+    subs = card.get("subtypes") or []
+    for k, sub in (("Supporter", "Supporter"), ("Stadium", "Stadium"),
+                   ("Tool", "Pokémon Tool"), ("Item", "Item")):
+        if sub in subs:
+            return k
+    return None
+
+
+AE.CARD_KIND = _card_kind
 AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
@@ -1857,6 +1895,7 @@ TRAINER_IR_OPS = {
     IR.Op.REVEAL_OPPONENT_HAND, IR.Op.SET_OPPONENT_HAND, IR.Op.LOCK,
     IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.SHUFFLE_HAND_INTO_DECK, IR.Op.FORCE_BENCH_OPPONENT,
+    IR.Op.FILL_OPPONENT_BENCH, IR.Op.DISCARD_TOOL_ANY,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
     IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
@@ -1911,6 +1950,9 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     if not _draw_trainer_worth_it(pl, opp, eff, 1 + extra):
         return False
     if not _self_condition_ok(pl, opp, eff, turn):
+        return False
+    if any(a.op == IR.Op.FILL_OPPONENT_BENCH for a in eff.actions) \
+            and not _flute_worth_it(pl, opp):
         return False
     # A Trainer whose text is a coin flip has to actually flip. Crushing
     # Hammer is "Flip a coin. If heads, discard an Energy" and was resolving
@@ -2699,8 +2741,7 @@ def pay_discard_scaler(pl, spot, atk, log):
             by_spot.setdefault(id(sp), (sp, []))[1].append(i)
     for sp, idxs in by_spot.values():
         for i in sorted(idxs, reverse=True):
-            sp.energy.pop(i)
-            pl.discard.append("Energy")
+            pl.discard.append(AE.pop_energy(sp, i))
     log.append(f"  {pl.name}: discards {len(picks)} for {atk['name']}")
 
 
@@ -3840,8 +3881,7 @@ def try_retreat(pl, opp, log):
     if _ready_damage(pl, opp, target) <= here:
         return
     for _ in range(cost):
-        pl.discard.append("Energy")
-        pl.active.energy.pop()
+        pl.discard.append(AE.pop_energy(pl.active))
     pl.bench.remove(target)
     clear_conditions(pl.active, "retreated", log, pl.name)
     pl.bench.append(pl.active)

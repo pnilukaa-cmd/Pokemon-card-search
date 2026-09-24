@@ -85,6 +85,12 @@ def TRAINER_IR(name):
     return None
 
 
+# A discard-pile card's kind ("Pokemon", "Supporter", "Item", "Tool",
+# "Stadium", "Energy"); the pile holds names only. Set by simulate_versus.
+def CARD_KIND(pl, name):
+    return "Pokemon" if name in pl.POKEMON else None
+
+
 # Fires when a Pokemon is PUT ONTO THE BENCH from hand or deck. Injected by
 # the simulator, which owns the card index and the Stadium text. Defaults to
 # a no-op, which is what every caller saw before Risky Ruins needed it.
@@ -656,6 +662,25 @@ def leaving_active(spot, log=None):
 # simulate_versus (its _ready_damage), which this module cannot import.
 SWITCH_RANK = lambda pl, opp, spot: 0
 
+def pop_energy(spot, i=-1):
+    """Take one Energy off `spot`, keeping energy and energy_names in step.
+
+    Three sites popped `energy` alone (retreat, an attack's discard cost, an
+    Energy-discard effect), so the two lists drifted apart; Enhanced Hammer
+    then indexed one by the other and crashed a whole field run. They also
+    discarded a placeholder "Energy", so a Basic Energy spent that way could
+    never be recovered by Lana's Aid or Night Stretcher. Returns the card
+    name for the discard pile.
+    """
+    if i < 0:
+        i += len(spot.energy)
+    spot.energy.pop(i)
+    names = getattr(spot, "energy_names", None)
+    if names and i < len(names):
+        return names.pop(i)
+    return "Energy"
+
+
 _LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
 
 
@@ -869,8 +894,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if act.amount is not None:
             idxs = idxs[:act.amount]
         for i in sorted(idxs, reverse=True):
-            source.energy.pop(i)
-            pl.discard.append("Energy")
+            pl.discard.append(pop_energy(source, i))
         if idxs:
             log.append(f"    {source.name} discards {len(idxs)} Energy")
         return bool(idxs)
@@ -1091,14 +1115,30 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.FROM_DISCARD_TO_HAND:
         got = []
         nobox = act.filter.get("no_rule_box")
+        kinds = act.filter.get("kinds") or ["Pokemon"]
+        etype = act.filter.get("energy_type")
+
+        def fits(n):
+            k = CARD_KIND(pl, n)
+            if k not in kinds:
+                return False
+            if k == "Pokemon":
+                return not (nobox and pl.POKEMON[n].get("rule_box"))
+            if k == "Energy":
+                return bool(re.match(r"(?:basic )?(\w+) energy$", n.strip(), re.I)) and (
+                    not etype or etype.lower() in n.lower())
+            return True
         for _ in range(act.amount or 1):
-            nm = next((n for n in pl.discard if n in pl.POKEMON
-                       and not (nobox and pl.POKEMON[n].get("rule_box"))), None)
+            # Latest first: the card most recently spent is usually the
+            # one the turn wants back (the Boss's Orders just played).
+            nm = next((n for n in reversed(pl.discard) if fits(n)), None)
             if not nm:
                 break
             pl.discard.remove(nm)
-            pl.hand.append(("Pokemon", nm))
+            pl.hand.append((CARD_KIND(pl, nm), nm))
             got.append(nm)
+        if got:
+            log.append(f"    from discard to hand: {', '.join(got)}")
         return bool(got)
 
     if op == O.MILL_OPPONENT:
@@ -1190,6 +1230,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # reaches the whole board when the card says all of them.
         special = (act.filter or {}).get("special")
         board = special and act.target == IR.Target.OPP_ALL
+        if special and not board:
+            # Enhanced Hammer: aim at a Pokemon that HAS Special Energy, not
+            # the one with the most Energy, or the card fizzles.
+            hits = sorted(hits, key=lambda h: not any(
+                _is_special_energy(nm) for nm in getattr(h, "energy_names", None) or []))
         n = 0
         for h in (hits if board else hits[:1]):
             for _ in range(act.amount or 1):
@@ -1197,16 +1242,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if special:
                     i = next((j for j, nm in enumerate(names)
                               if _is_special_energy(nm)), None)
-                    if i is None:
+                    if i is None or i >= len(h.energy):
                         break
-                    h.energy.pop(i)
-                    opp.discard.append(names.pop(i))
+                    opp.discard.append(pop_energy(h, i))
                     n += 1
                     continue
                 if h.energy:
-                    h.energy.pop()
-                    if names:
-                        opp.discard.append(names.pop())
+                    opp.discard.append(pop_energy(h))
                     n += 1
         if n:
             log.append(f"    discard {n} Energy from opponent")
@@ -1586,11 +1628,30 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             log.append(f"    opponent gets {moved} Energy back")
         return moved > 0
 
+    if op == O.FILL_OPPONENT_BENCH:
+        top = opp.deck[-(act.amount or 5):]
+        opp.deck = opp.deck[:-(act.amount or 5)]
+        placed = []
+        for card in top:
+            k, n = card
+            if (k == "Pokemon" and opp.POKEMON.get(n, {}).get("stage") == "Basic"
+                    and len(opp.bench) < 5 and make_inplay is not None):
+                opp.bench.append(make_inplay(n))
+                placed.append(n)
+            else:
+                opp.deck.append(card)
+        random.shuffle(opp.deck)
+        if placed:
+            log.append(f"    onto the opponent's Bench: {', '.join(placed)}")
+        return True
+
     if op == O.DISCARD_TOOL_ANY:
-        # Tool Scrapper reaches EITHER side. Take the opponent's first --
-        # discarding your own Tool is only right when theirs is already gone.
+        # Tool Scrapper reaches EITHER side, "up to 2": it never has to take
+        # your own. The old loop fell through to your side whenever the
+        # opponent had fewer than two, scrapping Gravity Gemstone and Air
+        # Balloon for nothing.
         hit = 0
-        for owner in (opp, pl):
+        for owner in (opp,):
             for spot in owner.in_play():
                 if hit >= (act.amount or 1):
                     break

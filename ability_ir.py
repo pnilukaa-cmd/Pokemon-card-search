@@ -131,6 +131,9 @@ class Op:
     # "Shuffle your hand into your deck. Then, draw N" -- the first half of
     # Lillie's Determination and Lacey, dropped until 2026-09-23.
     SHUFFLE_HAND_INTO_DECK = "shuffle_hand_into_deck"
+    # Accompanying Flute: the opponent's Basics from their top 5 onto their
+    # Bench -- fresh bodies with no Energy for a gust-and-lock deck.
+    FILL_OPPONENT_BENCH = "fill_opponent_bench"
     SET_OPPONENT_HAND = "set_opponent_hand"
     # Discard down to a hand size -- the symmetric half of
     # DISCARD_FROM_OPPONENT, for Hand Trimmer.
@@ -1005,7 +1008,25 @@ def _r(m, text):
 
 @rule("discard_to_hand", r"put (?:up to )?(\d+|a|an) ([\w'’ -]*?)(?:card|pok[eé]mon|energy)[^.]{0,40}from your discard pile into your hand")
 def _r(m, text):
-    return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF)]
+    # WHICH cards. The executor used to return Pokemon whatever the card
+    # said: Miracle Headset ("2 Supporter cards") handed back two Pokemon,
+    # Dedenne's Electromagnetic Sonar ("a Trainer card") a Pokemon, and
+    # Lana's Aid never returned the Basic Energy it names.
+    seg = m.group(0).lower()
+    kinds = []
+    if "supporter" in seg:
+        kinds.append("Supporter")
+    if "trainer" in seg:
+        kinds += ["Supporter", "Item", "Tool", "Stadium"]
+    if re.search(r"pok[eé]mon(?! ex| v\b)", seg.split("from your discard")[0]):
+        kinds.append("Pokemon")
+    et = re.search(r"basic (\w+ )?energy", seg)
+    if et:
+        kinds.append("Energy")
+    f = {"kinds": kinds} if kinds else {}
+    if et and et.group(1) and et.group(1).strip() not in ("energy",):
+        f["energy_type"] = et.group(1).strip().capitalize()
+    return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF, f)]
 
 
 @rule("look_at_deck", r"look at the top (\d+) cards? of your deck")
@@ -1243,6 +1264,14 @@ def _r(m, text):
 
 
 # ---- board control -------------------------------------------------------
+
+@rule("fill_opponent_bench",
+      r"reveal the top (\d+) cards of your opponent'?s deck\. you may choose any"
+      r" number of basic pok[eé]mon you find there and put those pok[eé]mon onto"
+      r" their bench")
+def _r(m, text):
+    return [Action(Op.FILL_OPPONENT_BENCH, int(m.group(1)), Target.OPPONENT)]
+
 
 @rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched pok[eé]mon")
 def _r(m, text):
