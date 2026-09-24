@@ -1345,9 +1345,15 @@ def _r(m, text):
     return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
-@rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched")
+@rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched"
+      r"(?: (" + TYPES + r"))?")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False})]
+    f = {"gust": False}
+    if re.search(r"you may switch (?:this pok[eé]mon|your active pok[eé]mon) with", text, re.I):
+        f["optional"] = True
+    if m.group(1):
+        f["type"] = m.group(1).capitalize()
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
 @rule("apply_condition", r"is now (asleep|burned|confused|paralyzed|poisoned)")

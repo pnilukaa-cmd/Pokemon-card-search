@@ -672,6 +672,10 @@ def leaving_active(spot, log=None):
         spot.conditions = set()
 
 
+# Which Benched Pokemon a "switch this Pokemon with 1 of your Benched"
+# effect goes to (None: decline an optional one). Set by simulate_versus.
+SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else None)
+
 # How much a Pokemon is worth in the Active Spot right now. Set by
 # simulate_versus (its _ready_damage), which this module cannot import.
 SWITCH_RANK = lambda pl, opp, spot: 0
@@ -1254,10 +1258,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append(f"    {tgt.name} is now {f['then_condition']}")
             return True
         if pl.bench and pl.active:
-            tgt = pl.bench.pop(0)
+            f = act.filter or {}
+            cands = [p for p in pl.bench if not f.get("type")
+                     or f["type"] in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            forced = getattr(pl, "_forced_self_switch", "unset")
+            pl._forced_self_switch = "unset"
+            if forced != "unset":
+                tgt = None if forced is None or forced >= len(pl.bench) else pl.bench[forced]
+                if tgt is not None and tgt not in cands:
+                    tgt = None
+            else:
+                tgt = SELF_SWITCH_TARGET(pl, opp, cands, f.get("optional"))
+            if tgt is None:
+                return False
+            pl.bench.remove(tgt)
             leaving_active(pl.active, log)
             pl.bench.append(pl.active)
             pl.active = tgt
+            log.append(f"    switch into {tgt.name}")
             return True
         return False
 

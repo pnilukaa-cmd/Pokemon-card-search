@@ -4015,6 +4015,14 @@ def do_attack(pl, opp, log):
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
                    f"{victim.name} Knocked Out outright")
 
+    # A gust attack switches FIRST and its damage goes to the new Active
+    # ("Switch in 1 of your opponent's Benched Pokemon ... This attack does
+    # 40 damage to the new Active Pokemon"). SWITCH was not a rider op at
+    # all, so all 35 switching attacks -- Follow Me, Drag Off, Trading
+    # Places, Teleportation Burst -- did nothing.
+    for a in _attack_ir(atk).actions:
+        if a.op == IR.Op.SWITCH and (a.filter or {}).get("gust") and opp.bench:
+            AE.apply_action(a, pl, opp, pl.active, log)
     dmg = attack_damage(pl, opp, pl.active, atk)
     # A 0-damage attack is still worth using when it carries a rider --
     # Arbok's Panic Poison applies three Special Conditions and deals
@@ -4181,6 +4189,9 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
+    # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
+    # the gust half is resolved before the damage (see do_attack).
+    IR.Op.SWITCH,
     # Recoil. 75 attacks in the pool say "this Pokemon also does N
     # damage to itself" and none of them compiled, so every recoil
     # attacker in the format was swinging for free.
@@ -4301,6 +4312,8 @@ def attack_side_effects(pl, opp, atk, log):
     for act in eff.actions:
         if act.op not in ATTACK_RIDER_OPS:
             continue
+        if act.op == IR.Op.SWITCH and (act.filter or {}).get("gust"):
+            continue          # resolved before the damage, in do_attack
         AE.apply_action(act, pl, opp, pl.active, log)
 
 
@@ -4568,6 +4581,34 @@ def lookahead_pick(pl, opp, options, apply, resume, default):
     return options[i]
 
 
+def _self_switch_target(pl, opp, cands, optional):
+    """Where "switch this Pokemon with 1 of your Benched Pokemon" goes.
+
+    Mandatory: the healthiest body that can take the next hit. Optional
+    ("you may"): only when the Active would be Knocked Out next turn and
+    something worth no more Prizes can stand in for it.
+    """
+    if not cands:
+        return None
+    left = lambda p: effective_hp(pl, p) - p.damage
+    prize = lambda p: pl.POKEMON.get(p.name, {}).get("prize_value", 1)
+    best = max(cands, key=lambda p: (left(p), -prize(p)))
+    if not optional:
+        return best
+    me = pl.active
+    if me is None or opp.active is None:
+        return None
+    threat = _ready_damage(opp, pl, opp.active)
+    if threat < left(me):
+        return None
+    if prize(best) > prize(me):
+        return None
+    return best
+
+
+AE.SELF_SWITCH_TARGET = _self_switch_target
+
+
 # Read-only per-deck tables the lookahead's copies share with the real game.
 _SHARED_ATTRS = {"POKEMON", "EFFECTS", "_cards_by_name", "_copy_plan_cache"}
 
@@ -4666,29 +4707,44 @@ def lookahead_attack(pl, opp, greedy_pick):
             continue
         seen.add(a["name"])
         cands.append(a)
+    # An option is (attack, gust target, self-switch target). "unset"
+    # leaves a choice to the greedy rule; None declines an optional switch.
     options = []
     for a in cands:
-        if _gust_attack(a) and opp.bench:
-            options += [(a["name"], i) for i in range(len(opp.bench))]
+        gusts = list(range(len(opp.bench))) if _gust_attack(a) and opp.bench else [None]
+        sw = _self_switch_of(a)
+        if sw is not None and pl.bench:
+            switches = list(range(len(pl.bench))) + ([None] if sw.get("optional") else [])
         else:
-            options.append((a["name"], None))
+            switches = ["unset"]
+        options += [(a["name"], g, s) for g in gusts for s in switches]
     by_name = {a["name"]: a for a in cands}
     default = next((o for o in options if o[0] == greedy_pick["name"]), None)
 
     def apply(me, them, opt):
         me._forced_attack = by_name[opt[0]]
         them._forced_gust = opt[1]
+        me._forced_self_switch = opt[2]
         return "win" if do_attack(me, them, []) else None
     pick = lookahead_pick(pl, opp, options, apply, None, default)
-    if pick is None:
+    if pick is None or pick == default:
         return greedy_pick
     opp._forced_gust = pick[1]
+    pl._forced_self_switch = pick[2]
     return by_name[pick[0]]
+
+
+def _self_switch_of(atk):
+    for a in _attack_ir(atk).actions:
+        if a.op == IR.Op.SWITCH and not (a.filter or {}).get("gust"):
+            return a.filter or {}
+    return None
 
 
 def finish_turn(pl, opp, log):
     """Pokemon Checkup and the Knock Outs it causes -- the end of a turn."""
     opp._forced_gust = None
+    pl._forced_self_switch = "unset"
     pokemon_checkup(pl, opp, log)
     # Either Active can now die at checkup, since both resolve their
     # conditions there.

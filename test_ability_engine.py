@@ -3078,9 +3078,67 @@ def test_requirements_and_attached_energy_types_are_real():
           len(draws) == 1 and draws[0].filter.get("per_opp_hand"))
 
 
+def test_switching_attacks_switch():
+    """SWITCH was not a rider op: all 35 switching attacks did nothing --
+    10 gusts (Follow Me, Drag Off) and 25 self-switches (Trading Places,
+    Teleportation Burst). A gust attack also has to switch BEFORE its damage,
+    which goes to the new Active. Real deck models.
+    """
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+
+    def board(who, opp_active="Dudunsparce", bench=("Cubchoo",)):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active = V.InPlay(who, 0)
+        me.active.energy = [["Psychic", "Water", "Colorless"]] * 3
+        me.active.energy_names = ["Prism Energy"] * 3
+        me.bench = [V.InPlay(n, 0) for n in bench]
+        op.active, op.bench = V.InPlay(opp_active, 0), [V.InPlay("Totodile", 0)]
+        return me, op
+
+    def swing(me, op, who, name, extra=None):
+        a = extra or next(x for x in D[1][who]["attacks"] if x["name"] == name)
+        me._forced_attack = a
+        V.do_attack(me, op, [])
+
+    me, op = board("Clefairy")
+    swing(me, op, "Clefairy", "Follow Me")
+    check("Follow Me gusts", op.active.name == "Totodile", op.active.name)
+
+    drag = {"name": "Drag Off", "cost": ["Colorless"], "damage": 0,
+            "text": "Switch in 1 of your opponent's Benched Pokémon to the Active "
+                    "Spot. This attack does 40 damage to the new Active Pokémon."}
+    me, op = board("Clefairy")
+    swing(me, op, "Clefairy", None, drag)
+    check("a gust attack's damage lands on the NEW Active",
+          op.active.name == "Totodile" and op.active.damage == 40
+          and op.bench[-1].damage == 0, f"{op.active.name} {op.active.damage}")
+
+    me, op = board("Dunsparce")
+    swing(me, op, "Dunsparce", "Trading Places")
+    check("Trading Places switches", me.active.name == "Cubchoo", me.active.name)
+
+    me, op = board("Mew ex")
+    swing(me, op, "Mew ex", "Teleportation Burst")
+    check("Teleportation Burst keeps a safe Mew ex in (the switch is optional)",
+          me.active.name == "Mew ex", me.active.name)
+    me, op = board("Mew ex", opp_active="Latias ex")
+    op.active.energy = [["Psychic"], ["Psychic"], ["Water"]]
+    op.active.energy_names = ["Psychic Energy"] * 3
+    me.active.damage = 120
+    swing(me, op, "Mew ex", "Teleportation Burst")
+    check("and takes it when Mew ex would be Knocked Out next turn",
+          me.active.name == "Cubchoo", me.active.name)
+
+    volt = IR.compile_effect("attack", "Volt Switch", "Switch this Pokémon with 1 "
+                             "of your Benched Lightning Pokémon.").actions[0]
+    check("a typed self-switch keeps its type",
+          volt.filter.get("type") == "Lightning" and not volt.filter.get("optional"))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_requirements_and_attached_energy_types_are_real,
+    for fn in [test_switching_attacks_switch,
+               test_requirements_and_attached_energy_types_are_real,
                test_the_lookahead_pilot_sees_a_lock,
                test_the_mew_lock_trainers_do_what_they_say,
                test_the_mill_wall_pieces_work,
