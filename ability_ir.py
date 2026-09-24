@@ -1105,9 +1105,14 @@ def _r(m, text):
 
 @rule("move_energy", r"move (?:a|an|(\d+)) ?(" + TYPES + r")? ?energy from ([^.]{0,40}?) to ([^.]{0,40})")
 def _r(m, text):
-    return [Action(Op.MOVE_ENERGY, _num(m.group(1)), parse_target(m.group(4)),
-                   {"type": (m.group(2) or "").capitalize() or None,
-                    "from": parse_target(m.group(3))})]
+    f = {"type": (m.group(2) or "").capitalize() or None,
+         "from": parse_target(m.group(3))}
+    # Elgyem's Slight Shift moves an Energy between the OPPONENT's own
+    # Pokemon ("to another of their Pokemon"). It compiled as a move onto
+    # your own Active -- and the executor ignored `from` anyway.
+    if re.search(r"your opponent'?s pok[eé]mon to another of their", text, re.I):
+        f["opp_internal"] = True
+    return [Action(Op.MOVE_ENERGY, _num(m.group(1)), parse_target(m.group(4)), f)]
 
 
 # ---- damage / health -----------------------------------------------------
@@ -1223,6 +1228,13 @@ def _r(m, text):
     # alongside, which is the exact opposite of how the card plays.
     if re.search(r"don'?t have a rule box", seg, re.I):
         filt["no_rule_box"] = True
+    # Terapagos ex's Crown Opal: "by attacks from Basic non-Colorless
+    # Pokemon". Dropped, it read as total immunity.
+    mm = re.search(r"by attacks from (basic )?(?:non-(\w+) )?pok[eé]mon", seg, re.I)
+    if mm and mm.group(1):
+        filt["attacker_stage"] = "Basic"
+    if mm and mm.group(2):
+        filt["attacker_type_not"] = mm.group(2).capitalize()
     # Bastiodon's Ancient Bulwark stops only attackers holding 2 or less
     # Energy -- a wall against early aggression, not a wall. Dropped, it
     # read as total immunity for the whole board for the rest of the game,

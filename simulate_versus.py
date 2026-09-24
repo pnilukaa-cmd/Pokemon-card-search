@@ -113,6 +113,7 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
+                 "shield",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
                  "retreat_locked", "attack_locked_by_opponent", "prev_damage",
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
@@ -149,6 +150,10 @@ class InPlay:
         # -lock control deck measured as if its main line did nothing.
         self.retreat_locked = 0
         self.attack_locked_by_opponent = 0
+        # "During your opponent's next turn, prevent all damage done to
+        # this Pokemon" / "this Pokemon takes N less damage": set by the
+        # attack, read by do_attack, gone after the owner's next turn.
+        self.shield = None
         # Damage on this Pokemon immediately BEFORE the current hit. An
         # "if this Pokemon has full HP" clause is about the state the
         # attack found it in, not the state it left behind, and reading
@@ -4083,11 +4088,19 @@ def do_attack(pl, opp, log):
     # asked -- the passive query only ever sees the Ability half.
     ignores = (AE.query_ignores_opponent_effects(pl, pl.active, opp)
                or attack_ignores_effects(atk))
-    if not ignores and AE.query_prevented(opp, opp.active, pl, pl.active):
+    # A prevented hit deals nothing and the attack goes on (its other
+    # effects still happen). This used to `return True` -- which is
+    # do_attack's "the game ended" -- so every fully prevented attack WON
+    # THE GAME for the attacker: every wall that worked lost on the spot.
+    shield = None if ignores else AE.query_attack_shield(opp, opp.active, pl, pl.active)
+    if not ignores and (AE.query_prevented(opp, opp.active, pl, pl.active)
+                        or (shield and shield[0] == "prevent")):
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
                    f"all damage to {opp.active.name} prevented")
-        return True
+        dmg = 0
     reduction = 0 if ignores else damage_reduction_for(opp, opp.active, pl)
+    if shield and shield[0] == "reduce":
+        reduction += shield[1]
     if not ignores and opp.turn_shield:
         types = opp.POKEMON[opp.active.name].get("types") or []
         if not opp.turn_shield_type or opp.turn_shield_type in types:
@@ -4192,6 +4205,15 @@ ATTACK_RIDER_OPS = {
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,
+    # Found by listing every op that compiles on an attack and is neither
+    # a rider nor read by the damage code (2026-09-24): 70 draw attacks
+    # (Raging Bolt ex's Burst Roar -- discard the hand, draw 6 -- was a
+    # 0-damage attack that did nothing), 42 "prevent all damage done to
+    # this Pokemon during your opponent's next turn", 29 "takes N less",
+    # 9 evolve-from-deck attacks.
+    IR.Op.DRAW, IR.Op.DISCARD_FROM_SELF, IR.Op.SHUFFLE_HAND_INTO_DECK,
+    IR.Op.EVOLVE_FROM_DECK, IR.Op.SHUFFLE_SELF_INTO_DECK,
+    IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.PREVENT_DAMAGE, IR.Op.REDUCE_DAMAGE,
     # Recoil. 75 attacks in the pool say "this Pokemon also does N
     # damage to itself" and none of them compiled, so every recoil
     # attacker in the format was swinging for free.

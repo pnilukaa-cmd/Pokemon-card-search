@@ -3135,9 +3135,85 @@ def test_switching_attacks_switch():
           volt.filter.get("type") == "Lightning" and not volt.filter.get("optional"))
 
 
+def test_prevention_never_wins_and_attack_effects_run():
+    """Four holes found by listing every op that compiles on an attack and
+    is neither executed as a rider nor read by the damage code:
+
+      * A fully PREVENTED attack returned True from do_attack -- "the game
+        ended" -- so the attacker WON on the spot. Every wall that worked
+        (Neutralization Zone, Shaymin, Bastiodon) lost the game instead.
+      * Draw attacks did nothing (70): Raging Bolt ex's Burst Roar is
+        "discard your hand and draw 6".
+      * "During your opponent's next turn, prevent all damage done to /
+        this Pokemon takes N less" (71 attacks) did nothing.
+      * Elgyem's Slight Shift moved your own Energy, not the opponent's.
+    """
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active, me.bench = V.InPlay("Maushold", 0), [V.InPlay("Tandemaus", 0)]
+    me.stadium, op._opp_stadium = "Neutralization Zone", "Neutralization Zone"
+    op.active = V.InPlay("Dragapult ex", 0)
+    op.active.energy = [["Fire"], ["Psychic"]]
+    op.active.energy_names = ["Fire Energy", "Psychic Energy"]
+    ended = V.do_attack(op, me, [])
+    check("a prevented attack does not end the game", ended is False, str(ended))
+    check("and deals nothing", me.active.damage == 0, str(me.active.damage))
+
+    def one(text, name="Test", cost=("Colorless",), dmg=0):
+        return {"name": name, "cost": list(cost), "damage": dmg, "text": text}
+
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Dunsparce", 0)
+    me.active.energy, me.active.energy_names = [["Colorless"]] * 3, ["Mist Energy"] * 3
+    op.active = V.InPlay("Dreepy", 0)
+    me.hand = [("Item", "Poké Pad")] * 3
+    me._forced_attack = one("Discard your hand and draw 6 cards.", "Burst Roar")
+    V.do_attack(me, op, [])
+    check("Burst Roar discards the hand and draws 6",
+          len(me.hand) == 6 and me.discard.count("Poké Pad") == 3, str(len(me.hand)))
+
+    me._forced_attack = one("During your opponent's next turn, this Pokémon takes "
+                            "50 less damage from attacks.", "Steel Wing", dmg=70)
+    V.do_attack(me, op, [])
+    check("Steel Wing shields its user", AE.query_attack_shield(me, me.active, op, op.active)
+          == ("reduce", 50), str(me.active.shield))
+    V.end_of_turn(me, [])
+    check("through the opponent's next turn", me.active.shield is not None)
+    V.end_of_turn(me, [])
+    check("and no longer", me.active.shield is None)
+
+    op.active = V.InPlay("Dreepy", 0)       # Steel Wing's 70 Knocked the last one Out
+    me._forced_attack = one("During your opponent's next turn, prevent all damage done "
+                            "to this Pokémon by attacks from Basic non-Colorless Pokémon.",
+                            "Crown Opal")
+    V.do_attack(me, op, [])
+    check("a restricted shield stops a Basic non-Colorless attacker",
+          AE.query_attack_shield(me, me.active, op, op.active) == ("prevent", 0))
+    op.active = V.InPlay("Dragapult ex", 0)
+    check("and not a Stage 2", AE.query_attack_shield(me, me.active, op, op.active) is None)
+
+    W, WD, WE = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    me, op = W.Player("w", WD[1], WD[2], WE), W.Player("o", WD[1], WD[2], WE)
+    me.active = W.InPlay("Elgyem", 0)
+    me.active.energy, me.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    me.bench = [W.InPlay("Cubchoo", 0)]
+    op.active = W.InPlay("Latias ex", 0)
+    op.active.energy = [["Psychic"], ["Psychic"]]
+    op.active.energy_names = ["Psychic Energy"] * 2
+    op.bench = [W.InPlay("Totodile", 0)]
+    me._forced_attack = next(x for x in WD[1]["Elgyem"]["attacks"] if x["name"] == "Slight Shift")
+    W.do_attack(me, op, [])
+    check("Slight Shift moves the opponent's Energy onto their Bench",
+          op.active.energy_count() == 1 and op.bench[0].energy_count() == 1
+          and me.active.energy_count() == 1)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_switching_attacks_switch,
+    for fn in [test_prevention_never_wins_and_attack_effects_run,
+               test_switching_attacks_switch,
                test_requirements_and_attached_energy_types_are_real,
                test_the_lookahead_pilot_sees_a_lock,
                test_the_mew_lock_trainers_do_what_they_say,

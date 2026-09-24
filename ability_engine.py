@@ -707,6 +707,30 @@ def tick_attack_locks(spot):
     for k in _LOCKS:
         if getattr(spot, k, 0):
             setattr(spot, k, getattr(spot, k) - 1)
+    sh = getattr(spot, "shield", None)
+    if sh:
+        sh["left"] -= 1
+        if sh["left"] <= 0:
+            spot.shield = None
+
+
+def query_attack_shield(pl, spot, opp=None, attacker=None):
+    """A shield `spot` put up with its own attack: ("prevent", 0),
+    ("reduce", N) or None, checked against who is attacking."""
+    sh = getattr(spot, "shield", None) if spot is not None else None
+    if not sh:
+        return None
+    f = sh.get("filter") or {}
+    card = (opp.POKEMON.get(attacker.name, {}) if (opp and attacker) else {})
+    if f.get("attacker_is_ex") and card.get("prize_value", 1) < 2:
+        return None
+    if f.get("attacker_has_ability") and not (opp and attacker and opp.EFFECTS.get(attacker.name)):
+        return None
+    if f.get("attacker_stage") and card.get("stage") != f["attacker_stage"]:
+        return None
+    if f.get("attacker_type_not") and f["attacker_type_not"] in (card.get("types") or []):
+        return None
+    return (sh["kind"], sh.get("amount", 0))
 
 
 def clear_attack_locks(spot):
@@ -718,6 +742,22 @@ def clear_attack_locks(spot):
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
+
+    # Reached only as an attack rider: passive Abilities are queried, never
+    # applied, and Trainers do not carry these ops.
+    if op in (O.PREVENT_DAMAGE, O.REDUCE_DAMAGE):
+        if act.filter.get("effects_only") or act.filter.get("bench_counters"):
+            return False
+        holders = pl.in_play() if act.target == IR.Target.YOUR_ALL else [source]
+        for h in holders:
+            if h is None:
+                continue
+            h.shield = {"kind": "prevent" if op == O.PREVENT_DAMAGE else "reduce",
+                        "amount": act.amount or 0, "filter": dict(act.filter or {}),
+                        "left": 2}
+        log.append(f"    {source.name if source else 'it'} is shielded during the "
+                   f"opponent's next turn")
+        return True
 
     if op == O.SHUFFLE_HAND_INTO_DECK:
         n = len(pl.hand)
@@ -999,6 +1039,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             _put(tgt, card)
             got += 1
         return got > 0
+
+    if op == O.MOVE_ENERGY and act.filter.get("opp_internal"):
+        # Off the opponent's Active, onto one of their Benched Pokemon:
+        # the attacker loses what it needs to swing next turn.
+        a = opp.active
+        if a is None or not a.energy or not opp.bench:
+            return False
+        dst = min(opp.bench, key=lambda p: p.energy_count())
+        nm = pop_energy(a)
+        dst.energy.append(list(IR.TYPES.split("|")) if nm == "Energy"
+                          else (ENERGY_PROVIDES(opp, nm, dst) or list(IR.TYPES.split("|"))))
+        dst.energy_names.append(nm)
+        log.append(f"    move {nm} {a.name} -> {dst.name}")
+        return True
 
     if op == O.MOVE_ENERGY:
         srcs = [q for q in pl.in_play() if q.energy and q is not pl.active]
