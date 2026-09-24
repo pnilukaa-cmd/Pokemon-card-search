@@ -3472,7 +3472,12 @@ def attack_damage(pl, opp, spot, atk, record=True):
 
     if not base and text and record:
         UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
+    # For audits: this text reached the end without any damage rule reading it.
+    DAMAGE_FALLTHROUGH[0] = True
     return base
+
+
+DAMAGE_FALLTHROUGH = [False]
 
 
 def damage_reduction_for(pl, spot, opp=None):
