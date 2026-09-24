@@ -781,6 +781,30 @@ until 2026-09-24), `Choose up to N ... (yours or your opponent's)` (up to
 means never forced onto your own side), and any new op (is it in
 `TRAINER_IR_OPS`?).
 
+**Check the trigger, not just the op.** An Ability can compile perfectly
+and still never run because nothing calls its TRIGGER: `on_play` ("when you
+play this Pokemon from your hand onto your Bench": Meowth ex in six field
+decks, Iron Leaves ex, Chien-Pao) had no caller at all, and `on_damaged`
+only ever ran damage counters (Incandescent Body's Burn, Smog Signals'
+Bench search never happened). Sweep `Effect.trigger` per op across the
+field's decks and grep for a caller of each trigger/op pair.
+
+**Run `audit_conservation.py`** after any engine change that moves cards.
+It checks every step of every turn for cards created or destroyed; its
+first run found Knock Outs discarding only the top card (no Energy, Tool
+or Evolution stack), a played Stadium discarded while in play, attack
+Bench searches losing the Pokemon, and Run Away Draw duplicating
+Dudunsparce. `test_conservation_audit_is_clean` keeps it at zero.
+
+**The deck list's END is the top.** `Player.draw` pops the end, so
+`deck[-1]` is the next card. Seek Inspiration, a self-mill scaler and a
+reveal-top chooser read `deck[0]` (the bottom) until 2026-09-24.
+
+**Rules the engine now enforces** (each was missing): no Supporter on
+the first turn going first (unless the card says so), no evolving on
+EITHER player's first turn (Rare Candy and Grand Tree too), no Stadium
+over one of the same name, and the mulligan extra draws.
+
 **Run the new list through the field before anything else.** A Mew ex
 list crashed every run it joined (Enhanced Hammer indexing `energy_names`
 by an `energy` index after retreat had popped only one of the two). A new
@@ -792,7 +816,11 @@ python3 vs_field.py <deck> decks/field 200 <tag>` runs the candidate with a
 one-turn lookahead on its attack choice (the field stays greedy). It is
 ~18x slower. Measured paired against greedy: Mew ex lock +4.54, Wugtrio
 paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09. The gap between
-the two pilots is how much of a deck's placement is sequencing.
+the two pilots is how much of a deck's placement is sequencing. The
+lookahead now also chooses the Supporter, the Energy target, the retreat,
+the gust target and the promotion after a Knock Out
+(`lookahead_pick(..., resume="promote")` plays the rest of the opponent's
+turn, your turn, and their reply).
 
 **Some decks the greedy pilot cannot play, and saying so is the result.**
 The Mew ex "baby attacks" lock wants a different borrowed attack each turn

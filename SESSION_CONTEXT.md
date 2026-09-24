@@ -39,6 +39,34 @@ X in play" requirements dropped (Glass Trumpet); attached Energy with no
 named type provided every type; Eri's discard dropped; Lisia's Appeal,
 Drasna, Mr. Mime miscompiled.
 
+**Later in session 2 (2026-09-24).** Each with a regression test that
+fails on the commit before it:
+- *Triggers.* `on_play` Abilities fire when a Pokemon is benched from hand
+  (Meowth ex's Last-Ditch Catch, which had also compiled as a self-lock;
+  Iron Leaves ex's Rapid Vernier, taken only when the moved Energy pays for
+  a better attack; Chien-Pao's Snow Sink, opponent's Stadium only).
+  `on_damaged` runs more than counters (Incandescent Body, Smog Signals).
+  Prize modifiers read their own wording (Mega Gengar ex's Shadowy
+  Concealment cut every Prize). "that have X in their name" Bench searches
+  keep the name (Roto Call, Smog Signals). Tri Kinesis compiles.
+- *Deck orientation.* `deck[-1]` is the top. Seek Inspiration read the
+  bottom and never discarded the card; it now reads and discards the top.
+  Academy at Night (was never played) and Ciphermaniac's Codebreaking set
+  up the copy target. The pilot heuristics for this were measured at
+  -0.92 +/- 0.82 and reworked (Academy used just before the attack); the
+  rework is under measurement.
+- *Card conservation* (`audit_conservation.py`, standing test): Knock Outs
+  now discard Energy, Tool and the Evolution stack (`InPlay.under`);
+  Stadium replacement; attack Bench searches; Run Away Draw no longer
+  duplicates Dudunsparce (**the Dudunsparce wall's earlier numbers were
+  inflated by this**); refunds; double-provision Energy.
+- *Rules.* No Supporter on the first turn going first; no evolving on
+  either player's first turn (Rare Candy, Grand Tree); Grand Tree chains to
+  Stage 2; same-name Stadium; mulligan extra draws.
+- *Pilot, measured.* Basics that reach the hand after the Supporter are
+  benched that turn: +0.97 +/- 0.27 over 6 meta decks, now the default.
+  The lookahead also chooses the promotion after a Knock Out (measuring).
+
 **Pilot.** `policies.LOOKAHEAD` (`PILOT=lookahead` in `vs_field.py`): each
 attack (and gust-attack target), Boss's Orders target and retreat choice is
 played out through the opponent's reply. Greedy stays the default and is
