@@ -1594,7 +1594,8 @@ def play_items(pl, opp, turn, log, first_turn):
         if (name not in RETREAT_STADIUMS and name not in EFFECT_STADIUMS
                 and not _stadium_has_effect(name, pl)):
             continue
-        if pl.stadium == name:
+        # "A Stadium with the same name can't be played" -- whoever's it is.
+        if name in (pl.stadium, opp.stadium):
             continue
         # My own Stadium stays unless this one is worth more right now. A
         # deck with two (Neutralization Zone and Battle Cage) otherwise

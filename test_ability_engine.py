@@ -3715,6 +3715,14 @@ def test_cards_are_conserved():
           "Jamming Tower" in op.discard and _cards_held(op) == b_op)
     check("and the new one is not also discarded",
           "Postwick" not in me.discard and _cards_held(me) == b_me)
+    me2, op2 = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me2.active, op2.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+    me2._opp_ref, op2._opp_ref = op2, me2
+    op2.stadium, me2._opp_stadium = "Postwick", "Postwick"
+    me2.hand = [("Stadium", "Postwick")]
+    V.play_items(me2, op2, 3, [], False)
+    check("a Stadium with the same name in play can't be played",
+          op2.stadium == "Postwick" and ("Stadium", "Postwick") in me2.hand)
 
     V, D, E = _real("decks/field/tr_arbok_yveltal_snow_coating.txt", "t")
     me, op = V.Player("t", D[1], D[2], E), V.Player("o", D[1], D[2], E)
