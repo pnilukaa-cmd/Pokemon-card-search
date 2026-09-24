@@ -453,8 +453,10 @@ def _tool_cost_cut(pl, spot):
         return None
     card = _CARDS_BY_NAME.get(tool)
     card = card[0] if isinstance(card, list) and card else card
-    m = _TOOL_COST_CUT_RE.search(" ".join((card or {}).get("rules") or []))
-    if not m:
+    text = " ".join((card or {}).get("rules") or [])
+    m = _TOOL_COST_CUT_RE.search(text)
+    # Counter Gain's discount is conditional; tool_cost_changes owns it.
+    if not m or _re.search(r"if you have more prize cards remaining", text, _re.I):
         return None
     fam = m.group(1).strip()
     info = pl.POKEMON.get(spot.name) or {}
@@ -464,6 +466,178 @@ def _tool_cost_cut(pl, spot):
     elif fam and fam.lower() not in spot.name.lower():
         return None
     return m.group(3).capitalize(), int(m.group(2) or 1)
+
+
+# --------------------------------------------------------------------------
+# Pokemon Tools read off their text
+# --------------------------------------------------------------------------
+# Nineteen Tools compiled to an op nothing read from a Tool (the Berries,
+# Sacred Charm, Thick Scale, Counter Gain, Sparkling Crystal, Future Booster
+# Energy Capsule, Lillie's Pearl, Survival Brace, Amulet of Hope, Adversity
+# Policy, Powerglass, Tremendous Bomb, Technical Machine: Fluorite, Core
+# Memory), or compiled without the condition that makes them what they are.
+
+_TOOL_HOLDER_RE = _re.compile(r"the ([\w'’ -]+?) pok[eé]mon this card is attached to", _re.I)
+
+
+def _tool_text(pl, spot, opp=None):
+    tool = getattr(spot, "tool", None)
+    if not tool or AE.query_tools_disabled(pl, opp):
+        return ""
+    return _card_text(tool)
+
+
+def _qualifies(pl, spot, q):
+    """Does `spot` match a qualifier like "Dragon", "Future", "Tera",
+    "Lillie's", "Mega Zygarde ex", "non-Rule Box"?"""
+    q = (q or "").strip()
+    if not q:
+        return True
+    info = pl.POKEMON.get(spot.name) or {}
+    if q.capitalize() in M.REAL_TYPES:
+        return q.capitalize() in _types_of(pl, spot)
+    if q.capitalize() in (info.get("subtypes") or []):
+        return True
+    if q.lower().endswith(" ex") or q.lower() == spot.name.lower():
+        return spot.name.lower() == q.lower()
+    return spot.name.lower().startswith(q.lower())
+
+
+def _tool_holder_ok(pl, spot, text):
+    m = _TOOL_HOLDER_RE.search(text)
+    return True if not m else _qualifies(pl, spot, m.group(1))
+
+
+def tool_damage_reduction(owner, spot, attacker_owner, attacker):
+    """(amount, discard_tool) a Tool takes off an incoming attack."""
+    text = _tool_text(owner, spot, attacker_owner)
+    if not text or attacker is None or not _tool_holder_ok(owner, spot, text):
+        return 0, False
+    ainfo = attacker_owner.POKEMON.get(attacker.name) or {}
+    atypes = _types_of(attacker_owner, attacker)
+    m = _re.search(r"damaged by an attack from your opponent's (\w+) pok[eé]mon, it takes (\d+) less damage", text, _re.I)
+    if m:   # the Berries: one type, once
+        return (int(m.group(2)), True) if m.group(1).capitalize() in atypes else (0, False)
+    m = _re.search(r"takes (\d+) less damage from attacks from your opponent's ([^.(]+?) ?\(", text, _re.I)
+    if m:
+        who = m.group(2).lower()
+        if "that have an ability" in who:
+            ok = bool(attacker_owner.EFFECTS.get(attacker.name))
+        else:
+            want = [t.capitalize() for t in _re.findall("|".join(M.REAL_TYPES), who, _re.I)]
+            ok = not want or bool(set(want) & atypes)
+        return (int(m.group(1)), False) if ok else (0, False)
+    return 0, False
+
+
+def tool_damage_bonus(pl, spot, opp):
+    """Future Booster Energy Capsule: +N for its holder's attacks."""
+    text = _tool_text(pl, spot, opp)
+    m = _re.search(r"the attacks it uses do (\d+) more damage", text, _re.I)
+    if m and _tool_holder_ok(pl, spot, text):
+        return int(m.group(1))
+    return 0
+
+
+def tool_no_retreat(pl, spot, opp):
+    text = _tool_text(pl, spot, opp)
+    return bool(_re.search(r"this card is attached to has no retreat cost", text, _re.I)) \
+        and _tool_holder_ok(pl, spot, text)
+
+
+def tool_prize_change(owner, spot, by_attack):
+    """Lillie's Pearl: its holder's Knock Out is worth 1 fewer."""
+    text = _tool_text(owner, spot, getattr(owner, "_opp_ref", None))
+    if by_attack and _re.search(r"is knocked out by damage from an attack from your opponent's"
+                                r" pok[eé]mon, that player takes (\d+) fewer prize", text, _re.I) \
+            and _tool_holder_ok(owner, spot, text):
+        return -int(_re.search(r"takes (\d+) fewer", text).group(1))
+    return 0
+
+
+def tool_endures(owner, spot, opp):
+    """Survival Brace: from full HP, a lethal hit leaves it on 10, once."""
+    text = _tool_text(owner, spot, opp)
+    if _re.search(r"has full hp and would be knocked out by damage from an attack", text, _re.I) \
+            and getattr(spot, "prev_damage", 1) == 0:
+        owner.discard.append(spot.tool)
+        spot.tool = None
+        return True
+    return False
+
+
+def tool_on_ko(owner, spot, log):
+    """Amulet of Hope: its holder's Knock Out by an attack searches 3."""
+    text = _tool_text(owner, spot, getattr(owner, "_opp_ref", None))
+    m = _re.search(r"is knocked out by damage from an attack from your opponent's pok[eé]mon,"
+                   r" search your deck for up to (\d+) cards", text, _re.I)
+    if not m:
+        return
+    rank = {"Supporter": 0, "Pokemon": 1, "Energy": 2, "Item": 3, "Tool": 4, "Stadium": 5}
+    picks = sorted(owner.deck, key=lambda c: rank.get(c[0], 6))[:int(m.group(1))]
+    for c in picks:
+        owner.deck.remove(c)
+        owner.hand.append(c)
+    random.shuffle(owner.deck)
+    log.append(f"  {owner.name}: {spot.tool} -- searches {len(picks)} cards")
+
+
+def tool_cost_changes(pl, spot, cost, opp):
+    """Counter Gain (Colorless less while behind on Prizes) and Sparkling
+    Crystal (a Tera holder's attacks cost 1 Energy less, any type)."""
+    text = _tool_text(pl, spot, opp)
+    if not text or not _tool_holder_ok(pl, spot, text):
+        return cost
+    if _re.search(r"if you have more prize cards remaining than your opponent, attacks used by"
+                  r" the pok[eé]mon this card is attached to cost colorless less", text, _re.I):
+        if opp is not None and pl.prizes > opp.prizes and "Colorless" in cost:
+            cost = list(cost)
+            cost.remove("Colorless")
+    if _re.search(r"that attack costs 1 energy less", text, _re.I) and cost:
+        cost = list(cost)
+        cost.remove("Colorless" if "Colorless" in cost else cost[-1])
+    return cost
+
+
+def tool_attacks(pl, spot):
+    """Technical Machine: Fluorite / Core Memory: the attack printed on the
+    Tool, for a holder that qualifies."""
+    tool = getattr(spot, "tool", None)
+    if not tool:
+        return []
+    card = _CARDS_BY_NAME.get(tool)
+    card = card[0] if isinstance(card, list) and card else (card or {})
+    text = " ".join(card.get("rules") or [])
+    if not _re.search(r"can use the attack on this card", text, _re.I) or \
+            not _tool_holder_ok(pl, spot, text):
+        return []
+    return [{"name": a["name"], "cost": list(a.get("cost") or []),
+             "damage": int("".join(ch for ch in (a.get("damage") or "0") if ch.isdigit()) or 0),
+             "text": a.get("text") or ""} for a in card.get("attacks") or []]
+
+
+AE.TOOL_ATTACKS = tool_attacks
+
+
+def tool_end_of_turn(pl, log):
+    """Powerglass (a Basic Energy from the discard onto the Active) and the
+    Technical Machines that are discarded at the end of the turn."""
+    for spot in pl.in_play():
+        text = _tool_text(pl, spot, getattr(pl, "_opp_ref", None))
+        if not text:
+            continue
+        if spot is pl.active and _re.search(r"at the end of your turn \(after your attack\), if the"
+                                            r" pok[eé]mon this card is attached to is in the active spot,"
+                                            r" you may attach a basic energy card from your discard pile", text, _re.I):
+            nm = next((n for n in pl.discard if AE._is_basic_energy_name(n)), None)
+            if nm:
+                pl.discard.remove(nm)
+                spot.energy.append(energy_provisions(nm, _CARDS_BY_NAME)[0])
+                spot.energy_names.append(nm)
+                log.append(f"  {pl.name}: {spot.tool} -- attaches {nm} to {spot.name}")
+        if _re.search(r"discard it at the end of your turn", text, _re.I):
+            pl.discard.append(spot.tool)
+            spot.tool = None
 
 
 def effective_cost(pl, spot, cost, opp=None, atk_name=None):
@@ -501,6 +675,7 @@ def effective_cost(pl, spot, cost, opp=None, atk_name=None):
         for _ in range(n):
             if typ in cost:
                 cost.remove(typ)
+    cost = tool_cost_changes(pl, spot, cost, opp)
 
     reduce = AE.query_cost_reduction(pl, spot, opp)
     for typ, n in reduce.items():
@@ -559,7 +734,7 @@ def sweep_knocked_out(pl, opp, log):
                 continue
             # Resolute Heart and friends: a lethal hit leaves it on 10 HP
             # instead of Knocking it Out.
-            if AE.query_endures(owner, spot, taker):
+            if AE.query_endures(owner, spot, taker) or tool_endures(owner, spot, taker):
                 spot.damage = hp - 10
                 log.append(f"  {owner.name}: {spot.name} endures the hit "
                            f"(left on 10 HP)")
@@ -2394,6 +2569,8 @@ TRAINER_IR_OPS = {
     IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.SHUFFLE_HAND_INTO_DECK, IR.Op.FORCE_BENCH_OPPONENT,
     IR.Op.FILL_OPPONENT_BENCH, IR.Op.DISCARD_TOOL_ANY, IR.Op.OPP_ENERGY_TO_HAND,
+    # Ruffian and Megaton Blower's Tool half.
+    IR.Op.DISCARD_TOOL_FROM_ALL_OPPONENT,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
     IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
@@ -2555,6 +2732,29 @@ def _situational_trainer(pl, opp, kind, name, eff, log):
         pl.turn_prize_bonus = (int(m.group(2)), who)
         return _spend(pl, kind, name, log, f" (+{m.group(2)} Prize on this Knock Out)")
     ops = {a.op for a in eff.actions}
+    if _re.search(r"choose 1:", text, _re.I) and ops == {IR.Op.BUFF_DAMAGE, IR.Op.SWITCH}:
+        # Kieran: the +30 against an ex / V when it turns the hit into a
+        # Knock Out; otherwise the switch, if the switch is worth making.
+        a, oa = pl.active, opp.active
+        if a is not None and oa is not None and (oa.name.endswith(" ex") or oa.name.endswith(" V")):
+            atk = best_attack(pl, a, opp=opp)
+            if atk:
+                d = attack_damage(pl, opp, a, atk, record=False)
+                left = effective_hp(opp, oa) - oa.damage
+                if d < left <= d + 30:
+                    pl.turn_buff_vs_ex += 30
+                    return _spend(pl, kind, name, log, " (+30 to the ex this turn)")
+        sw = next(x for x in eff.actions if x.op == IR.Op.SWITCH)
+        before = pl.active
+        pl.remove_from_hand(kind, name)
+        if AE.apply_action(sw, pl, opp, pl.active, log) and pl.active is not before:
+            pl.discard.append(name)
+            pl.supporter_played = True
+            pl.played_supporters_this_turn.add(name)
+            log.append(f"  {pl.name}: {name} (switch)")
+            return True
+        pl.hand.append((kind, name))
+        return False
     if ops == {IR.Op.REDUCE_DAMAGE} and eff.actions[0].target == IR.Target.YOUR_ALL:
         # Jasmine's Gaze: worth the Supporter only with a hand that does not
         # need a draw and an attacker across the table.
@@ -2747,6 +2947,8 @@ def retreat_of(pl, spot, opp=None):
     tool = getattr(spot, "tool", None)
     if tool and AE.query_tools_disabled(pl, opp):
         tool = None                     # Jamming Tower
+    if tool and tool_no_retreat(pl, spot, opp):
+        return 0
     tool_mod = RETREAT_TOOLS.get(tool, 0)
     tool_mod += sum(a.amount or 0 for _, a in energy_passives(pl, spot, IR.Op.MODIFY_RETREAT))
     if st and st["amount"] > -99:
@@ -4657,6 +4859,7 @@ def _ko_prizes(owner, spot, taker, by_attack=True):
                                        by_attack))
     # Briar / Anthea & Concordia: this turn's Knock Out by the named
     # attacker of the Active Spot is worth more.
+    taken += tool_prize_change(owner, spot, by_attack)
     bonus = getattr(taker, "turn_prize_bonus", None)
     if by_attack and bonus and spot is owner.active and taker.active is not None:
         n, who = bonus
@@ -4825,6 +5028,27 @@ def on_damaged_tools():
 def fire_on_damaged_tool(pl, opp, dmg, log):
     """`opp` holds the Tool and has just been hit by `pl` for `dmg`."""
     if dmg <= 0 or not opp.active or AE.query_tools_disabled(opp, pl):
+        return
+    text = _card_text(getattr(opp.active, "tool", None) or "") if getattr(opp.active, "tool", None) else ""
+    # Adversity Policy: hit by a type it is weak to -> draw 3.
+    m = _re.search(r"has weakness to your opponent's active pok[eé]mon's type, is in the active"
+                   r" spot, and is damaged by an attack[^.]*draw (\d+) cards", text, _re.I)
+    if m and pl.active is not None:
+        weak = (opp.POKEMON.get(opp.active.name) or {}).get("weakness")
+        if weak and weak in _types_of(pl, pl.active):
+            opp.draw(int(m.group(1)))
+            log.append(f"  {opp.name}: {opp.active.tool} -- draws {m.group(1)}")
+        return
+    # Tremendous Bomb: 240+ from a Mega Evolution Pokemon ex -> 12 counters back.
+    m = _re.search(r"takes (\d+) or more damage from an attack from your opponent's mega evolution"
+                   r" pok[eé]mon ex[^.]*place (\d+) damage counters on the attacking pok[eé]mon", text, _re.I)
+    if m and pl.active is not None:
+        mega = lambda side, sp: sp.name.lower().startswith("mega ") and sp.name.lower().endswith(" ex")
+        if dmg >= int(m.group(1)) and mega(pl, pl.active) and not mega(opp, opp.active):
+            pl.active.damage += 10 * int(m.group(2))
+            log.append(f"  {opp.name}: {opp.active.tool} -- {m.group(2)} counters on {pl.active.name}")
+            opp.discard.append(opp.active.tool)
+            opp.active.tool = None
         return
     entry = on_damaged_tools().get(getattr(opp.active, "tool", None))
     if not entry:
@@ -5094,6 +5318,7 @@ def do_attack(pl, opp, log):
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
     dmg += pl.turn_buff_any
+    dmg += tool_damage_bonus(pl, pl.active, opp)
     for t, n in (getattr(pl, "turn_buff_typed", None) or {}).items():
         if t in atk_types:
             dmg += n
@@ -5130,6 +5355,13 @@ def do_attack(pl, opp, log):
                    f"all damage to {opp.active.name} prevented")
         dmg = 0
     reduction = 0 if ignores else damage_reduction_for(opp, opp.active, pl)
+    if not ignores:
+        tr, spent = tool_damage_reduction(opp, opp.active, pl, pl.active)
+        reduction += tr
+        if spent and tr and dmg > 0:
+            log.append(f"  {opp.name}: {opp.active.tool} -- {tr} less, then discarded")
+            opp.discard.append(opp.active.tool)
+            opp.active.tool = None
     if shield and shield[0] == "reduce":
         reduction += shield[1]
     if not ignores and opp.turn_shield:
@@ -5197,6 +5429,7 @@ def do_attack(pl, opp, log):
             return True
 
     if opp.active.damage >= effective_hp(opp, opp.active):
+        tool_on_ko(opp, opp.active, log)
         # Gengar ex's Fainting Spell: the Knock Out may take the attacker
         # with it (resolved by the checkup's Knock Out at the turn's end).
         if AE.query_ko_attacker_on_ko(opp, opp.active, pl) and pl.active is not None:
@@ -6191,6 +6424,7 @@ def promote_from_bench(side, opp=None):
 
 def end_of_turn(pl, log):
     """Everything that ends with the turn of the player who just moved."""
+    tool_end_of_turn(pl, log)
     # A next-turn play lock lasted exactly this turn.
     pl.item_locked = False
     pl.turn_play_lock = set()

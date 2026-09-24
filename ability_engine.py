@@ -700,6 +700,8 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
+# The simulator sets this: attacks printed on an attached Tool.
+TOOL_ATTACKS = lambda pl, spot: []
 # The simulator sets this: what Ditto's Surprisingly Transform becomes.
 TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
@@ -3141,6 +3143,11 @@ def query_extra_attacks(pl, spot):
     """
     extra, seen = [], {a["name"] for a in
                        (pl.POKEMON.get(spot.name) or {}).get("attacks") or []}
+    # An attack printed on an attached Tool (Technical Machines).
+    for a in TOOL_ATTACKS(pl, spot):
+        if a["name"] not in seen:
+            seen.add(a["name"])
+            extra.append(a)
     granted = False
     for holder, eff, act in _passive_actions(pl, IR.Op.GRANT_ATTACK_ACCESS):
         if (act.filter or {}).get("attack"):

@@ -4170,6 +4170,60 @@ def test_ability_locks():
           and not AE.ability_disabled(me, og, "Teal Dance"))
 
 
+def test_tools_read_from_their_text():
+    """Nineteen Tools compiled to ops nothing read from a Tool, or lost the
+    condition that defines them."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    bolt, leaves = V.InPlay("Raging Bolt ex", 0), V.InPlay("Iron Leaves ex", 0)
+    kang = V.InPlay("Mega Kangaskhan ex", 0)
+    bolt.tool = "Thick Scale"
+    check("Thick Scale: a Dragon takes 50 less from a Grass attacker",
+          V.tool_damage_reduction(me, bolt, op, leaves) == (50, False))
+    check("and nothing from a Colorless one", V.tool_damage_reduction(me, bolt, op, kang) == (0, False))
+    bolt.tool = "Sacred Charm"
+    check("Sacred Charm: 30 less from an attacker with an Ability",
+          V.tool_damage_reduction(me, bolt, op, kang)[0] == 30
+          and V.tool_damage_reduction(me, bolt, op, V.InPlay("Raging Bolt ex", 0))[0] == 0)
+    leaves.tool = "Future Booster Energy Capsule"
+    check("Future Booster: a Future Pokemon retreats free and hits 20 harder",
+          V.retreat_of(me, leaves, op) == 0 and V.tool_damage_bonus(me, leaves, op) == 20)
+    bolt.tool = "Future Booster Energy Capsule"
+    check("but not on a non-Future Pokemon", V.tool_damage_bonus(me, bolt, op) == 0)
+    og = V.InPlay("Teal Mask Ogerpon ex", 0)
+    og.tool = "Sparkling Crystal"
+    check("Sparkling Crystal: a Tera attack costs 1 less",
+          len(V.effective_cost(me, og, ["Grass", "Grass", "Colorless"], op)) == 2)
+    kang.tool = "Counter Gain"
+    me.prizes, op.prizes = 5, 3
+    check("Counter Gain: Colorless less while behind",
+          len(V.effective_cost(me, kang, ["Colorless"] * 3, op)) == 2)
+    me.prizes = 2
+    check("and not while ahead", len(V.effective_cost(me, kang, ["Colorless"] * 3, op)) == 3)
+    cl = V.InPlay("Lillie's Clefairy ex", 0)
+    cl.tool = "Lillie's Pearl"
+    check("Lillie's Pearl: its Knock Out is worth 1 fewer",
+          V._ko_prizes(me, cl, op) == me.POKEMON["Lillie's Clefairy ex"]["prize_value"] - 1)
+    bolt.tool, bolt.prev_damage = "Survival Brace", 0
+    check("Survival Brace endures from full HP, once", V.tool_endures(me, bolt, op) and bolt.tool is None)
+    bolt.tool = "Technical Machine: Fluorite"
+    check("Technical Machine: its attack is usable",
+          any(a["name"] == "Fluorite" for a in AE.query_extra_attacks(me, bolt)))
+    me.active, me.bench = bolt, []
+    V.tool_end_of_turn(me, [])
+    check("and it is discarded at the end of the turn", bolt.tool is None)
+    bolt.tool = "Powerglass"
+    me.discard = ["Lightning Energy"]
+    n = bolt.energy_count()
+    V.tool_end_of_turn(me, [])
+    check("Powerglass attaches a Basic Energy from the discard", bolt.energy_count() == n + 1)
+    op.active, me.active = V.InPlay("Passimian", 0), kang
+    op.active.tool = "Tremendous Bomb"
+    V.fire_on_damaged_tool(me, op, 250, [])
+    check("Tremendous Bomb: 240+ from a Mega ex puts 12 counters back", kang.damage == 120)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -4235,6 +4289,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_tools_read_from_their_text,
                test_trainers_that_compiled_and_did_nothing,
                test_ability_locks,
                test_every_card_effect_is_read,
