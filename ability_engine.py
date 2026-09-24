@@ -814,6 +814,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         else:
             hits = [h for h in hits
                     if not query_bench_counters_blocked(opp, h, pl)]
+            hits = _shield_effects(opp, hits)
         per = act.filter.get("per_discard_card")
         if per:
             # "2 damage counters for each Basic Grass Energy card in your
@@ -928,6 +929,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             ([opp.active] if opp.active else [])
         hits = [h for h in hits
                 if not query_bench_counters_blocked(opp, h, pl)]
+        hits = _shield_effects(opp, hits)
         if not donors or not hits:
             return False
         donor = max(donors, key=lambda q: q.damage)
@@ -1052,7 +1054,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Off the opponent's Active, onto one of their Benched Pokemon:
         # the attacker loses what it needs to swing next turn.
         a = opp.active
-        if a is None or not a.energy or not opp.bench:
+        if a is None or not a.energy or not opp.bench or not _shield_effects(opp, [a]):
             return False
         dst = min(opp.bench, key=lambda p: p.energy_count())
         nm = pop_energy(a)
@@ -1279,7 +1281,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if opp.bench and opp.active:
                 forced = getattr(opp, "_forced_gust", None)
                 opp._forced_gust = None
-                pool = opp.bench
+                pool = _shield_effects(opp, list(opp.bench))
+                if not pool:
+                    return False
                 if act.filter.get("basic_only"):
                     pool = [p for p in opp.bench
                             if opp.POKEMON.get(p.name, {}).get("stage") == "Basic"]
@@ -1353,7 +1357,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.DISCARD_ENERGY_FROM_OPPONENT:
-        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        hits = _shield_effects(opp, resolve_targets(act.target, pl, opp, source, attacker))
         # "Discard an Energy from 1 of your opponent's Pokemon" lets you
         # CHOOSE which. Taking hits[:1] took whatever happened to be first
         # -- usually an Active with nothing attached -- so the card fizzled
@@ -2026,6 +2030,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.APPLY_CONDITION:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        # an attack's condition cannot land on an effect-immune opponent
+        hits = [h for h in hits if h is None or h not in opp.in_play()
+                or _shield_effects(opp, [h])]
         if not hits:
             return False
         conds = act.filter.get("conditions") or []
@@ -2106,7 +2113,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append("    opponent can't play Item cards next turn")
                 return True
             victim = opp.active
-            if victim is None:
+            if victim is None or not _shield_effects(opp, [victim]):
                 return False
             if what == "retreat":
                 victim.retreat_locked = 1
@@ -2264,6 +2271,53 @@ def _stadium_prevents(pl, opp=None):
     if eff is None:
         return []
     return [a for a in eff.actions if a.op == IR.Op.PREVENT_DAMAGE]
+
+
+# The player whose ATTACK is resolving right now, or None. Effect immunity
+# ("prevent all effects of attacks done to this Pokemon") applies to attack
+# effects only; set by simulate_versus around an attack's effects.
+ATTACK_EFFECTS_BY = [None]
+
+
+def query_effect_immune(owner, spot, attacker_owner=None):
+    """Is `spot` shielded from the EFFECTS of the opponent's attacks?
+
+    Poltchageist / Misty's Magikarp / Pikachu on the Bench, Rabsca for the
+    whole Bench, Skeledirge and Empoleon ex for themselves, and Mist Energy /
+    Rocky Fighting Energy for whatever holds them. Nothing asked before.
+    """
+    if spot is None:
+        return False
+    for holder, eff, act in _passive_actions(owner, IR.Op.PREVENT_DAMAGE):
+        f = act.filter or {}
+        if not (f.get("effects_only") or f.get("and_effects")):
+            continue
+        if holder is None:
+            continue
+        if not conditions_met(eff, owner, attacker_owner or owner, holder):
+            continue
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if act.target == IR.Target.YOUR_BENCHED and spot not in owner.bench:
+            continue
+        return True
+    for nm in list(getattr(spot, "energy_names", None) or []) + [getattr(spot, "tool", None)]:
+        if not nm:
+            continue
+        eff = TRAINER_IR(nm)
+        for act in (eff.actions if eff else []):
+            f = act.filter or {}
+            if act.op == IR.Op.PREVENT_DAMAGE and (f.get("effects_only") or f.get("and_effects")):
+                return True
+    return False
+
+
+def _shield_effects(owner, spots):
+    """Drop the Pokemon an attack's effects cannot touch."""
+    by = ATTACK_EFFECTS_BY[0]
+    if by is None:
+        return spots
+    return [s for s in spots if s is None or not query_effect_immune(owner, s, by)]
 
 
 def query_bench_counters_blocked(owner, spot, placer=None):

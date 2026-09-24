@@ -1243,6 +1243,13 @@ def _r(m, text):
                    seg, re.I)
     if mm:
         filt["attacker_energy_at_most"] = int(mm.group(1))
+    # "Prevent all EFFECTS of attacks ... (Damage is not an effect.)" is
+    # not a damage wall: Skeledirge and Empoleon ex compiled as immune to
+    # all damage. "Damage from AND effects of attacks" is both.
+    if re.search(r"prevent all effects of attacks", seg, re.I):
+        filt["effects_only"] = True
+    elif re.search(r"prevent all damage from and effects of attacks", seg, re.I):
+        filt["and_effects"] = True
     # Battle Cage: not damage at all -- damage COUNTERS put on a Benched
     # Pokemon by the opponent's attack or Ability effects. It compiled to a
     # bare "prevent all damage", which nothing that plays Stadiums reads.

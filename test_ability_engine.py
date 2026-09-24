@@ -3235,9 +3235,55 @@ def test_torrential_heart_buffs_the_attacker_and_spares_the_bench():
     check("which ends with the turn", me.active.turn_buff == 0)
 
 
+def test_effect_immunity_blocks_attack_effects_only():
+    """"Prevent all effects of attacks ... done to this Pokemon (Damage is
+    not an effect)" compiled as a DAMAGE wall -- Skeledirge and Empoleon ex
+    took no damage at all -- and nothing ever applied the effects half:
+    Poltchageist PBL 5 on the Bench took Phantom Dive's counters,
+    and Mist Energy's holder could be Paralyzed by an attack. A Trainer
+    (Dark Bell) is not an attack and still gets through.
+    """
+    # dhelmise_veluza_hide_n_sneak runs Poltchageist PBL 5, the printing
+    # with the Bench shield (TWM 21 / 171 have none).
+    V, D, E = _real("decks/field/dhelmise_veluza_hide_n_sneak.txt", "h")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("h", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    active = next(n for n in D[1] if n != "Poltchageist" and D[1][n]["stage"] == "Basic")
+    me.active, me.bench = V.InPlay(active, 0), [V.InPlay("Poltchageist", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    dive = next(a for a in O[1]["Dragapult ex"]["attacks"] if a["name"] == "Phantom Dive")
+    V.attack_side_effects(op, me, dive, [])
+    check("Poltchageist on the Bench takes no Phantom Dive counters",
+          me.bench[0].damage == 0, str(me.bench[0].damage))
+
+    skel = IR.compile_effect("x", "Skeledirge", "Prevent all effects of attacks used by "
+                             "your opponent's Pokémon done to this Pokémon. (Damage is "
+                             "not an effect.)").actions[0]
+    check("an effects-only wall is not a damage wall", skel.filter.get("effects_only"))
+
+    M2, MD, ME = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    me, op = M2.Player("m", MD[1], MD[2], ME), M2.Player("o", O[1], O[2], OE)
+    me.active = M2.InPlay("Dunsparce", 0)
+    me.active.energy, me.active.energy_names = [["Colorless"]], ["Mist Energy"]
+    op.active = M2.InPlay("Dreepy", 0)
+    para = {"name": "Zap", "cost": ["Colorless"], "damage": 10,
+            "text": "Your opponent's Active Pokémon is now Paralyzed."}
+    op._forced_attack = para
+    M2.do_attack(op, me, [])
+    check("Mist Energy's holder is not Paralyzed by an attack",
+          "paralyzed" not in me.active.conditions, str(me.active.conditions))
+    check("but still takes the damage", me.active.damage == 10, str(me.active.damage))
+    for a in M2.trainer_effect_ir("Dark Bell").actions:
+        AE.apply_action(a, op, me, op.active, [])
+    check("and a Trainer (Dark Bell) still Confuses it",
+          "confused" in me.active.conditions, str(me.active.conditions))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
+    for fn in [test_effect_immunity_blocks_attack_effects_only,
+               test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
                test_prevention_never_wins_and_attack_effects_run,
                test_switching_attacks_switch,
                test_requirements_and_attached_energy_types_are_real,

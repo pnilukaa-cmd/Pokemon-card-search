@@ -4063,7 +4063,11 @@ def do_attack(pl, opp, log):
     # Places, Teleportation Burst -- did nothing.
     for a in _attack_ir(atk).actions:
         if a.op == IR.Op.SWITCH and (a.filter or {}).get("gust") and opp.bench:
-            AE.apply_action(a, pl, opp, pl.active, log)
+            AE.ATTACK_EFFECTS_BY[0] = pl
+            try:
+                AE.apply_action(a, pl, opp, pl.active, log)
+            finally:
+                AE.ATTACK_EFFECTS_BY[0] = None
     dmg = attack_damage(pl, opp, pl.active, atk)
     # A 0-damage attack is still worth using when it carries a rider --
     # Arbok's Panic Poison applies three Special Conditions and deals
@@ -4368,12 +4372,16 @@ def attack_side_effects(pl, opp, atk, log):
         return
     if getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
         return
-    for act in eff.actions:
-        if act.op not in ATTACK_RIDER_OPS:
-            continue
-        if act.op == IR.Op.SWITCH and (act.filter or {}).get("gust"):
-            continue          # resolved before the damage, in do_attack
-        AE.apply_action(act, pl, opp, pl.active, log)
+    AE.ATTACK_EFFECTS_BY[0] = pl
+    try:
+        for act in eff.actions:
+            if act.op not in ATTACK_RIDER_OPS:
+                continue
+            if act.op == IR.Op.SWITCH and (act.filter or {}).get("gust"):
+                continue          # resolved before the damage, in do_attack
+            AE.apply_action(act, pl, opp, pl.active, log)
+    finally:
+        AE.ATTACK_EFFECTS_BY[0] = None
 
 
 # --------------------------------------------------------------------------
