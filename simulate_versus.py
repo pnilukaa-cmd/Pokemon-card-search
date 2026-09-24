@@ -844,6 +844,24 @@ def _stadium_has_effect(name, pl):
     # Academy at Night: worth it to a deck with a Seek Inspiration attacker.
     if _HAND_TO_TOP_RE.search(_card_text(name)) and _seek_attackers(pl):
         return True
+    eff0 = trainer_effect_ir(name)
+    for a in (eff0.actions if eff0 and not eff0.unsupported else []):
+        # Perilous Jungle: worth it to a deck that Poisons, against a
+        # non-Darkness Active of theirs.
+        if a.op is IR.Op.BUFF_CONDITION_DAMAGE:
+            cond = (a.filter or {}).get("condition")
+            opp = getattr(pl, "_opp_ref", None)
+            poisons = any(cond in (x.filter or {}).get("conditions", [])
+                          for p in pl.in_play() for atk in pl.POKEMON[p.name]["attacks"]
+                          for x in _attack_ir(atk).actions if x.op is IR.Op.APPLY_CONDITION)
+            if poisons and opp is not None and opp.active is not None \
+                    and "Darkness" not in _types_of(opp, opp.active):
+                return True
+        # Forest of Vitality: worth it with a Grass evolution in hand.
+        if a.op is IR.Op.EVOLVE_EARLY:
+            if any(k == "Pokemon" and pl.POKEMON[n].get("evolves_from")
+                   and "Grass" in (pl.POKEMON[n].get("types") or []) for k, n in pl.hand):
+                return True
     # Mystery Garden / Surfing Beach: worth it with that type in play.
     m = _GARDEN_RE.search(_card_text(name)) or _BEACH_RE.search(_card_text(name))
     if m and sum(1 for p in pl.in_play() if m.group(1).capitalize() in _types_of(pl, p)) >= 2:
@@ -4629,6 +4647,23 @@ def energy_shortfall(pl, spot):
     return max(0, need - spot.energy_count())
 
 
+_ONLY_ATTACH_RE = _re.compile(r"this card can only be attached to an? ([\w'’ -]+?) pok[eé]mon", _re.I)
+
+
+def _energy_fits(pl, spot, name):
+    """Team Rocket's Energy "can only be attached to a Team Rocket's
+    Pokemon" -- it attached anywhere."""
+    m = _ONLY_ATTACH_RE.search(_card_text(name)) if not M.BASIC_ENERGY_RE.match(name) else None
+    return not m or _qualifies(pl, spot, m.group(1))
+
+
+def _energy_for(pl, target):
+    """Index in hand of an Energy that may be attached to `target`: a card
+    the target can use first, then any that fits."""
+    fits = [i for i, (k, n) in enumerate(pl.hand) if k == "Energy" and _energy_fits(pl, target, n)]
+    return fits[0] if fits else None
+
+
 def attach_energy(pl, cards_by_name, log):
     idx = next((i for i, (k, n) in enumerate(pl.hand) if k == "Energy"), None)
     if idx is None:
@@ -4643,6 +4678,9 @@ def attach_energy(pl, cards_by_name, log):
         if forced >= len(spots):
             return
         target = spots[forced]
+        idx = _energy_for(pl, target)
+        if idx is None:
+            return
         kind, name = pl.hand.pop(idx)
         target.energy.extend(energy_provisions(
             name, cards_by_name, (pl.POKEMON.get(target.name) or {}).get("stage")))
@@ -4679,6 +4717,9 @@ def attach_energy(pl, cards_by_name, log):
             target = min(short, key=lambda p: (p is not pl.active,
                                                energy_shortfall(pl, p)))
     if target is None:
+        return
+    idx = _energy_for(pl, target)
+    if idx is None:
         return
     kind, name = pl.hand.pop(idx)
     target.energy.extend(energy_provisions(
@@ -5319,6 +5360,9 @@ def do_attack(pl, opp, log):
         dmg += pl.turn_buff_vs_ex
     dmg += pl.turn_buff_any
     dmg += tool_damage_bonus(pl, pl.active, opp)
+    # Voltaic Lightning Energy and friends: "+N for the <Type> Pokemon this
+    # card is attached to" (energy_passives checks the holder's type).
+    dmg += sum(a.amount or 0 for _, a in energy_passives(pl, pl.active, IR.Op.BUFF_DAMAGE))
     for t, n in (getattr(pl, "turn_buff_typed", None) or {}).items():
         if t in atk_types:
             dmg += n

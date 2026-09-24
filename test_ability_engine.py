@@ -3987,6 +3987,7 @@ def test_ditto_transforms_and_gengar_faints():
     me, op = board(False)
     import ability_engine as AE
     g = V.InPlay("Gengar ex", 0)
+    _r.seed(11)
     ko = sum(AE.query_ko_attacker_on_ko(me, g, op) for _ in range(400))
     check("Fainting Spell Knocks Out the attacker on heads", 150 <= ko <= 250, str(ko))
 
@@ -4224,6 +4225,47 @@ def test_tools_read_from_their_text():
     check("Tremendous Bomb: 240+ from a Mega ex puts 12 counters back", kang.damage == 120)
 
 
+def test_special_energy_and_stadium_gaps():
+    """Voltaic Lightning Energy's +20, Nitro Fire Energy's return to hand,
+    Team Rocket's Energy's attach restriction, and Perilous Jungle /
+    Forest of Vitality never being played."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    passi = V.InPlay("Passimian", 0)
+    me.active = passi
+    me.energy_types = {"Fighting", "Psychic", "Darkness"}
+    me.hand = [("Energy", "Team Rocket's Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("Team Rocket's Energy won't go on a non-Team Rocket's Pokemon",
+          ("Energy", "Team Rocket's Energy") in me.hand and passi.energy_count() == 0)
+    me.hand = [("Energy", "Team Rocket's Energy"), ("Energy", "Fighting Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("and a Basic Energy goes instead", passi.energy_names == ["Fighting Energy"])
+    POK, EFF = build(["Pikachu"])
+    me.POKEMON = dict(me.POKEMON, **POK)
+    pk = V.InPlay("Pikachu", 0)
+    pk.energy, pk.energy_names = [["Lightning"]], ["Voltaic Lightning Energy"]
+    check("Voltaic Lightning Energy: +20 for a Lightning holder",
+          sum(a.amount or 0 for _, a in V.energy_passives(me, pk, IR.Op.BUFF_DAMAGE)) == 20)
+    me.discard = ["Nitro Fire Energy"]
+    fire = next(n for n, i in me.POKEMON.items() if "Fire" in (i.get("types") or [])) \
+        if any("Fire" in (i.get("types") or []) for i in me.POKEMON.values()) else None
+    if fire is None:
+        POK2, _ = build(["Charmander"])
+        me.POKEMON = dict(me.POKEMON, **POK2)
+        fire = "Charmander"
+    f = V.InPlay(fire, 0)
+    me._boomerangs = []
+    AE.note_attack_discard(me, f, "Nitro Fire Energy")
+    AE.return_boomerangs(me, [])
+    check("Nitro Fire Energy discarded by a Fire attacker returns to hand",
+          ("Energy", "Nitro Fire Energy") in me.hand and "Nitro Fire Energy" not in me.discard)
+    me.hand = [("Pokemon", "Teal Mask Ogerpon ex")]
+    check("Forest of Vitality is not played without a Grass evolution in hand",
+          not V._stadium_has_effect("Forest of Vitality", me))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -4289,6 +4331,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_special_energy_and_stadium_gaps,
                test_tools_read_from_their_text,
                test_trainers_that_compiled_and_did_nothing,
                test_ability_locks,

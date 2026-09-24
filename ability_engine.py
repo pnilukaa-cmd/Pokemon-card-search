@@ -723,10 +723,31 @@ def note_attack_discard(pl, spot, name):
         if not hasattr(pl, "_boomerangs") or pl._boomerangs is None:
             pl._boomerangs = []
         pl._boomerangs.append((spot, name))
+        return
+    # Nitro Fire Energy: "discarded by an effect of an attack used by the
+    # Fire Pokemon this card is attached to, put this card into your hand".
+    m = _TO_HAND_AFTER_RE.search(text)
+    if m:
+        t = m.group(1).capitalize()
+        if t in (pl.POKEMON.get(spot.name) or {}).get("types", []):
+            if not hasattr(pl, "_boomerangs") or pl._boomerangs is None:
+                pl._boomerangs = []
+            pl._boomerangs.append((spot, name, "hand"))
+
+
+_TO_HAND_AFTER_RE = re.compile(r"if this card is discarded by an effect of an attack used by the"
+                               r" (\w+) pok[eé]mon this card is attached to, put this card into your hand", re.I)
 
 
 def return_boomerangs(pl, log):
-    for spot, name in (getattr(pl, "_boomerangs", None) or []):
+    for entry in (getattr(pl, "_boomerangs", None) or []):
+        spot, name = entry[0], entry[1]
+        if len(entry) > 2 and entry[2] == "hand":
+            if name in pl.discard:
+                pl.discard.remove(name)
+                pl.hand.append(("Energy", name))
+                log.append(f"    {name} returns to hand")
+            continue
         if name in pl.discard and spot in pl.in_play():
             pl.discard.remove(name)
             spot.energy.append(ENERGY_PROVIDES(pl, name, spot) or ["Colorless"])
