@@ -3455,9 +3455,41 @@ def test_the_lookahead_chooses_the_supporter():
           str(me.played_supporters_this_turn))
 
 
+def test_the_lookahead_chooses_the_energy_target():
+    """The lookahead pilot's attach choice: a forced target gets the Energy,
+    a forced None attaches nothing, and with nothing to separate the options
+    it keeps greedy's target."""
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy, me.energy_types = pilot, {"Water"}
+        me.active, me.bench = V.InPlay("Wugtrio ex", 0), [V.InPlay("Wiglett", 0)]
+        me.hand = [("Energy", "Water Energy")]
+        op.active = V.InPlay("Dragapult ex", 0)
+        me.round_no = op.round_no = 5
+        return me, op
+    me, op = board("greedy")
+    me._forced_attach = 1
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("a forced target gets the Energy", me.bench[0].energy_count() == 1
+          and me.active.energy_count() == 0)
+    me, op = board("greedy")
+    me._forced_attach = None
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("a forced None attaches nothing", ("Energy", "Water Energy") in me.hand)
+    me, op = board("lookahead")
+    V.choose_attach(me, op, [])
+    check("the lookahead attaches exactly one Energy",
+          sum(s.energy_count() for s in me.in_play()) == 1)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_lookahead_chooses_the_supporter,
+    for fn in [test_the_lookahead_chooses_the_energy_target,
+               test_the_lookahead_chooses_the_supporter,
                test_choice_band_discount_and_boomerang_energy,
                test_tera_pokemon_on_the_bench_take_no_attack_damage,
                test_three_count_shapes_scale,

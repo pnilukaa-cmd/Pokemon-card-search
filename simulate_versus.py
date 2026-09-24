@@ -3643,6 +3643,23 @@ def attach_energy(pl, cards_by_name, log):
     idx = next((i for i, (k, n) in enumerate(pl.hand) if k == "Energy"), None)
     if idx is None:
         return
+    forced = getattr(pl, "_forced_attach", "unset")
+    if forced != "unset":
+        # The lookahead pilot's pick: an index into in_play(), or None.
+        pl._forced_attach = "unset"
+        if forced is None:
+            return
+        spots = pl.in_play()
+        if forced >= len(spots):
+            return
+        target = spots[forced]
+        kind, name = pl.hand.pop(idx)
+        target.energy.extend(energy_provisions(
+            name, cards_by_name, (pl.POKEMON.get(target.name) or {}).get("stage")))
+        target.energy_names.append(name)
+        log.append(f"  {pl.name}: attaches {name} to {target.name}")
+        energy_on_attach(pl, target, name, log)
+        return
     target = None
     if (POL.knob(pl, "energy_to_active")
             and pl.active and energy_shortfall(pl, pl.active) > 0):
@@ -4702,6 +4719,32 @@ def _play_only(pl, opp, turn, log, name):
         pl.hand.extend(hidden)
 
 
+def choose_attach(pl, opp, log):
+    """The lookahead pilot's Energy attachment: onto each Pokemon in play,
+    or none, played out through the opponent's reply. The attach decision
+    was the bottleneck for both the N's Zoroark and the Mew ex lists."""
+    if not any(k == "Energy" for k, _ in pl.hand):
+        return
+    spots = pl.in_play()
+    me, them = clone_state(pl, opp)
+    _LOOKAHEAD[0] = True
+    try:
+        attach_energy(me, me._cards_by_name, [])
+    finally:
+        _LOOKAHEAD[0] = False
+    before = [s.energy_count() for s in spots]
+    after = [s.energy_count() for s in me.in_play()]
+    greedy = next((i for i, (b, a) in enumerate(zip(before, after)) if a > b), None)
+    options = list(range(len(spots))) + [None]
+
+    def apply(m, th, i):
+        m._forced_attach = i
+        attach_energy(m, m._cards_by_name, [])
+    pick = lookahead_pick(pl, opp, options, apply, PHASES.index("tools"), greedy)
+    pl._forced_attach = pick
+    attach_energy(pl, pl._cards_by_name, log)
+
+
 def choose_supporter(pl, opp, turn, log):
     """The lookahead pilot's Supporter: each distinct Supporter in hand (and
     none) played out through the opponent's reply. Greedy's own pick --
@@ -4743,7 +4786,10 @@ def run_phases(pl, opp, log, start):
         elif ph == "sweep":
             sweep_knocked_out(pl, opp, log)
         elif ph == "attach":
-            attach_energy(pl, pl._cards_by_name, log)
+            if POL.knob(pl, "lookahead_samples") and not _LOOKAHEAD[0]:
+                choose_attach(pl, opp, log)
+            else:
+                attach_energy(pl, pl._cards_by_name, log)
         elif ph == "tools":
             attach_tools(pl, log)
         elif ph == "evolve":
