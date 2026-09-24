@@ -4865,14 +4865,23 @@ def lookahead_pick(pl, opp, options, apply, resume, default):
     base = _LOOKAHEAD_SEQ[0] * 7919
     state = random.getstate()
     _LOOKAHEAD[0] = True
-    scores = []
+    margin = POL.knob(pl, "lookahead_margin")
+    totals = [0.0] * len(options)
+    done = 0
     try:
-        for opt in options:
-            total = 0.0
-            for s in range(n):
+        # Two samples first; the rest only if the options actually differ.
+        # Most decisions are ties (every option plays out the same), and
+        # paying the full N for those was most of the pilot's cost.
+        for s in range(n):
+            for k, opt in enumerate(options):
                 random.seed(base + s)
-                total += _simulate_from(pl, opp, opt, apply, resume)
-            scores.append(total / n)
+                totals[k] += _simulate_from(pl, opp, opt, apply, resume)
+            done = s + 1
+            if done == min(2, n):
+                avg = [x / done for x in totals]
+                if max(avg) - min(avg) <= margin:
+                    break
+        scores = [x / done for x in totals]
     finally:
         _LOOKAHEAD[0] = False
         random.setstate(state)
