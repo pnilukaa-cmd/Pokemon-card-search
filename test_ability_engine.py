@@ -3372,9 +3372,30 @@ def test_three_count_shapes_scale():
           V.attack_damage(me, op, me.active, a, record=False) == 160)
 
 
+def test_tera_pokemon_on_the_bench_take_no_attack_damage():
+    """The Tera rule-box line was never read: a Benched Tera Pokemon took
+    Bench spread and snipe damage like any other."""
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Wiglett", 0)
+    me.bench = [V.InPlay("Wugtrio ex", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    snipe = IR.compile_effect("attack", "t", "This attack also does 30 damage to "
+                              "1 of your opponent's Benched Pokémon.").actions[0]
+    AE.apply_action(snipe, op, me, op.active, [], attacker=op.active)
+    check("a Benched Tera Pokemon takes no attack damage", me.bench[0].damage == 0,
+          str(me.bench[0].damage))
+    me.active, me.bench = me.bench[0], []
+    check("in the Active Spot it does",
+          not AE.query_prevented(me, me.active, op, op.active))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_three_count_shapes_scale,
+    for fn in [test_tera_pokemon_on_the_bench_take_no_attack_damage,
+               test_three_count_shapes_scale,
                test_special_energy_does_what_it_prints,
                test_effect_immunity_blocks_attack_effects_only,
                test_torrential_heart_buffs_the_attacker_and_spares_the_bench,

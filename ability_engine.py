@@ -2372,6 +2372,11 @@ def query_prevented(pl, spot, opp=None, attacker=None):
                     not opp.EFFECTS.get(attacker.name):
                 continue
         return True
+    # The Tera rule: "As long as this Pokemon is on your Bench, prevent all
+    # damage done to this Pokemon by attacks (both yours and your
+    # opponent's)." A rule-box line, not an Ability, so nothing read it.
+    if spot in pl.bench and "Tera" in ((pl.POKEMON.get(spot.name) or {}).get("subtypes") or []):
+        return True
     # Shadowy Darkness Energy: a damage wall printed on an attached Energy.
     for _nm, act in ENERGY_PASSIVES(pl, spot, IR.Op.PREVENT_DAMAGE):
         f = act.filter or {}
