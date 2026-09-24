@@ -119,7 +119,8 @@ class InPlay:
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
                  "damage_penalty", "takes_more", "next_turn_attack_buff",
                  "delayed_discard", "extra_prize", "no_weakness",
-                 "damage_taken_last_turn", "retaliate_counters", "under")
+                 "damage_taken_last_turn", "retaliate_counters", "under",
+                 "last_attack_round", "weakness_set")
 
     def __init__(self, name, turn):
         self.name = name
@@ -173,6 +174,8 @@ class InPlay:
         # Weezing's Crazy Blast is 50 that becomes 170 "if this Pokemon
         # used Pervasive Gas during your last turn".
         self.last_attack_used = None
+        self.last_attack_round = None
+        self.weakness_set = None
         # "During your opponent's next turn, attacks used by the Defending
         # Pokemon do N less damage." Ten attacks in the pool say this and
         # none of them did anything. Cleared when the penalised player's
@@ -664,6 +667,10 @@ def _stadium_has_effect(name, pl):
     # Academy at Night: worth it to a deck with a Seek Inspiration attacker.
     if _HAND_TO_TOP_RE.search(_card_text(name)) and _seek_attackers(pl):
         return True
+    # Mystery Garden / Surfing Beach: worth it with that type in play.
+    m = _GARDEN_RE.search(_card_text(name)) or _BEACH_RE.search(_card_text(name))
+    if m and sum(1 for p in pl.in_play() if m.group(1).capitalize() in _types_of(pl, p)) >= 2:
+        return True
 
     eff = trainer_effect_ir(name)
     if eff is None or eff.unsupported:
@@ -935,6 +942,54 @@ def _stadium_hand_to_top(pl, log):
     pl.deck.append(("Pokemon", want))
     _note_known_top(pl, 1)
     log.append(f"  {pl.name}: {name} puts {want} on top of the deck")
+
+
+_GARDEN_RE = _re.compile(r"discard an energy card from their hand in order to draw cards until"
+                         r" they have as many cards in their hand as they have (\w+) pok[eé]mon in play", _re.I)
+_BEACH_RE = _re.compile(r"switch their active (\w+) pok[eé]mon with 1 of their benched (\w+) pok[eé]mon", _re.I)
+
+
+def _stadium_text_effects(pl, log):
+    """The once-per-turn Stadiums whose effect is a player choice, by their
+    wording: Mystery Garden (discard an Energy, draw up to your Psychic
+    count) and Surfing Beach (a free Active/Bench switch between Water
+    Pokemon). Both were never used."""
+    name = pl.stadium or getattr(pl, "_opp_stadium", None)
+    if not name or (name, "stadium_text") in pl.abilities_used:
+        return
+    text = _card_text(name)
+    opp = getattr(pl, "_opp_ref", None)
+    m = _GARDEN_RE.search(text)
+    if m:
+        t = m.group(1).capitalize()
+        target = sum(1 for p in pl.in_play() if t in _types_of(pl, p))
+        energy = next((c for c in pl.hand if c[0] == "Energy"), None)
+        if energy and target > len(pl.hand) - 1 and _deck_left_after(pl, target - (len(pl.hand) - 1)) >= DRAW_FLOOR:
+            pl.hand.remove(energy)
+            pl.discard.append(energy[1])
+            while len(pl.hand) < target and pl.deck:
+                pl.draw(1)
+            pl.abilities_used.add((name, "stadium_text"))
+            log.append(f"  {pl.name}: {name} (discard {energy[1]}, draw to {len(pl.hand)})")
+        return
+    m = _BEACH_RE.search(text)
+    if m and pl.active is not None and opp is not None:
+        t = m.group(1).capitalize()
+        if t not in _types_of(pl, pl.active):
+            return
+        cands = [p for p in pl.bench if t in _types_of(pl, p)]
+        if not cands:
+            return
+        here = _ready_damage(pl, opp, pl.active)
+        best = max(cands, key=lambda p: _ready_damage(pl, opp, p))
+        stuck = bool(pl.active.conditions & CANNOT_ATTACK)
+        if _ready_damage(pl, opp, best) > here or (stuck and _ready_damage(pl, opp, best) > 0):
+            pl.bench.remove(best)
+            clear_conditions(pl.active, "switched", log, pl.name)
+            pl.bench.append(pl.active)
+            pl.active = best
+            pl.abilities_used.add((name, "stadium_text"))
+            log.append(f"  {pl.name}: {name} -- switches in {best.name}")
 
 
 def use_stadium(pl, log):
@@ -1578,6 +1633,15 @@ def want_pokemon(pl, name):
 
 def _locked_in_hand(pl, opp):
     """The cards in hand a play lock forbids right now (AE.play_locks)."""
+    # Seismitoad's Quaking Fist: each Trainer they try to use takes a coin
+    # flip, and tails discards it instead. Flipped once, at the first step
+    # of the locked turn that plays from hand.
+    if getattr(pl, "trainer_flip_lock", False):
+        pl.trainer_flip_lock = False
+        for c in [c for c in pl.hand if c[0] in ("Item", "Supporter", "Stadium", "Tool")]:
+            if random.random() < 0.5:
+                pl.hand.remove(c)
+                pl.discard.append(c[1])
     kinds, except_family = AE.play_locks(pl, opp)
     if not kinds:
         return []
@@ -3470,6 +3534,13 @@ def attack_damage(pl, opp, spot, atk, record=True):
             return 0
         return int(m.group(1))
 
+    # The attack texts no rule above reads: a "does nothing" gate, a
+    # hand-discard cost, a coin tier, or "If <condition>, this attack does
+    # N more damage" -- 60-odd cards whose condition was simply ignored.
+    if opp is not None and spot is not None:
+        r = _generic_attack_damage(pl, opp, spot, atk, text, base)
+        if r is not None:
+            return r
     if not base and text and record:
         UNSCORED_ATTACKS.add(f"{getattr(spot, 'name', '?')}/{atk['name']}")
     # For audits: this text reached the end without any damage rule reading it.
@@ -3478,6 +3549,238 @@ def attack_damage(pl, opp, spot, atk, record=True):
 
 
 DAMAGE_FALLTHROUGH = [False]
+
+_NOTHING_IF_RE = _re.compile(r"if ([^.]+?), this attack does nothing", _re.I)
+_BONUS_IF_RE = _re.compile(r"if ([^.]+?), this attack does (\d+) more damage", _re.I)
+_HAND_ENERGY_COST_RE = _re.compile(
+    r"discard (\d+|a) basic (\w+) energy cards? from your hand", _re.I)
+_BOTH_HEADS_RE = _re.compile(
+    r"flip (\d+) coins\. if (?:both|all) of them are heads, this attack does (\d+) more damage", _re.I)
+_COIN_TIERS_RE = _re.compile(r"if (1|2|all) of them (?:is|are) heads, this attack does (\d+) more damage", _re.I)
+_UNTIL_HP_RE = _re.compile(r"place damage counters on your opponent's active pok[eé]mon until its remaining hp is (\d+)", _re.I)
+
+
+def _types_of(side, spot):
+    return set(AE.query_types(side, spot, None) or [])
+
+
+def _attack_condition(cond, pl, opp, spot):
+    """Truth of an attack's printed condition on this board: True, False,
+    or None when the wording is not one this reads."""
+    c = cond.lower().replace("\u00e9", "e").strip()
+    info = pl.POKEMON.get(spot.name) or {}
+    oa = opp.active
+    oinfo = (opp.POKEMON.get(oa.name) or {}) if oa else {}
+    m = _re.fullmatch(r"this pokemon has (\d+) or more (\w+) energy attached", c)
+    if m:
+        t = m.group(2).capitalize()
+        return sum(1 for e in spot.energy if t in e) >= int(m.group(1))
+    m = _re.fullmatch(r"this pokemon has any (\w+) energy attach(?:ed|es)", c)
+    if m:
+        return any(m.group(1).capitalize() in e for e in spot.energy)
+    m = _re.fullmatch(r"this pokemon has no ([\w' ]+?) energy attached", c)
+    if m:
+        want = m.group(1).lower()
+        return not any(want in (n or "").lower() for n in (spot.energy_names or []))
+    m = _re.fullmatch(r"this pokemon has (\d+) or more damage counters on it", c)
+    if m:
+        return spot.damage >= 10 * int(m.group(1))
+    m = _re.fullmatch(r"this pokemon is (\w+)(?: or (\w+))?", c)
+    if m and m.group(1) in ("burned", "poisoned", "asleep", "confused", "paralyzed"):
+        return bool(spot.conditions & {m.group(1), m.group(2) or m.group(1)})
+    if c == "this pokemon has more energy attached than your opponent's active pokemon":
+        return oa is not None and spot.energy_count() > oa.energy_count()
+    m = _re.fullmatch(r"this pokemon evolved from ([\w' ]+?) during this turn", c)
+    if m:
+        under = getattr(spot, "under", []) or []
+        return bool(spot.evolved_this_turn and under and under[-1].lower() == m.group(1).lower())
+    m = _re.fullmatch(r"your opponent's active pokemon has (\w+) resistance", c)
+    if m:
+        res = oinfo.get("resistance") or []
+        return bool(res) and res[0].lower() == m.group(1).lower()
+    if c == "your opponent's active pokemon has no damage counters on it before this attack does damage":
+        return oa is not None and oa.damage == 0
+    if c == "your opponent's active pokemon isn't a pokemon ex":
+        return oa is not None and not oa.name.endswith(" ex")
+    if c == "your opponent's active pokemon is a tera pokemon":
+        return "Tera" in (oinfo.get("subtypes") or [])
+    m = _re.fullmatch(r"the retreat cost of your opponent's active pokemon is ((?:colorless)+) or more", c)
+    if m and oa is not None:
+        return retreat_of(opp, oa, pl) >= m.group(1).count("colorless")
+    m = _re.fullmatch(r"you have (\d+) or more basic (\w+) energy cards in your discard pile", c)
+    if m:
+        t = m.group(2).capitalize()
+        return sum(1 for n in pl.discard if _re.fullmatch(rf"(basic )?{t} energy", str(n), _re.I)) >= int(m.group(1))
+    if c == "you have a stadium in play":
+        return bool(pl.stadium)
+    if c == "all of your benched pokemon have at least 1 damage counter on them":
+        return bool(pl.bench) and all(p.damage > 0 for p in pl.bench)
+    if c == "any of your pokemon in play are the same type as any of your opponent's pokemon in play":
+        mine = set().union(*[_types_of(pl, p) for p in pl.in_play()]) if pl.in_play() else set()
+        theirs = set().union(*[_types_of(opp, p) for p in opp.in_play()]) if opp.in_play() else set()
+        return bool(mine & theirs)
+    m = _re.fullmatch(r"you played ([\w' ]+?) from your hand during this turn", c)
+    if m:
+        want = m.group(1).lower()
+        played = getattr(pl, "played_supporters_this_turn", set())
+        if want == "a future supporter card":
+            return any("Future" in ((_CARDS_BY_NAME.get(n) or [{}])[0].get("subtypes") or [])
+                       for n in played)
+        return any(n.lower() == want for n in played)
+    if c in ("you have the same number of cards in your hand as your opponent",):
+        return len(pl.hand) == len(opp.hand)
+    if c == "you don't have the same number of cards in your hand as your opponent":
+        return len(pl.hand) != len(opp.hand)
+    if c == "you have no cards in your hand":
+        return not pl.hand
+    if c == "you have any tera pokemon on your bench":
+        return any("Tera" in ((pl.POKEMON.get(p.name) or {}).get("subtypes") or []) for p in pl.bench)
+    m = _re.fullmatch(r"you have any stage (\d) (\w+) pokemon on your bench", c)
+    if m:
+        return any((pl.POKEMON.get(p.name) or {}).get("stage") == f"Stage {m.group(1)}"
+                   and m.group(2).capitalize() in _types_of(pl, p) for p in pl.bench)
+    m = _re.fullmatch(r"your opponent has (\d+) or more benched pokemon", c)
+    if m:
+        return len(opp.bench) >= int(m.group(1))
+    m = _re.fullmatch(r"your opponent has exactly (\d+) prize cards? remaining", c)
+    if m:
+        return opp.prizes == int(m.group(1))
+    m = _re.fullmatch(r"you have exactly (\d+) prize cards? remaining", c)
+    if m:
+        return pl.prizes == int(m.group(1))
+    m = _re.fullmatch(r"there are (\d+) or fewer cards in your deck", c)
+    if m:
+        return len(pl.deck) <= int(m.group(1))
+    m = _re.fullmatch(r"any of your benched ([\w' ]+?) have any damage counters on them", c)
+    if m:
+        return any(p.name.lower() == m.group(1).lower() and p.damage > 0 for p in pl.bench)
+    m = _re.fullmatch(r"([\w' ]+?) and ([\w' ]+?) are on your bench", c)
+    if m:
+        names = [p.name.lower() for p in pl.bench]
+        return m.group(1).lower() in names and m.group(2).lower() in names
+    m = _re.fullmatch(r"([\w' ]+?) is in your discard pile", c)
+    if m:
+        return any(str(n).lower() == m.group(1).lower() for n in pl.discard)
+    m = _re.fullmatch(r"your benched pokemon have any ([\w' ]+?) attached", c)
+    if m:
+        want = m.group(1).lower()
+        return any(want in (n or "").lower() for p in pl.bench for n in (p.energy_names or []))
+    if c == "1 of your other ancient pokemon used an attack during your last turn":
+        prev = (getattr(pl, "round_no", 0) or 0) - 1
+        return any(p is not spot and getattr(p, "last_attack_round", None) == prev
+                   and "Ancient" in ((pl.POKEMON.get(p.name) or {}).get("subtypes") or [])
+                   for p in pl.in_play())
+    return None
+
+
+def _hand_energy_cost(pl, text):
+    """(count, type) of a "Discard N Basic <Type> Energy from your hand"
+    attack cost, or None."""
+    m = _HAND_ENERGY_COST_RE.search(text)
+    if not m:
+        return None
+    n = 1 if m.group(1).lower() == "a" else int(m.group(1))
+    return n, m.group(2).capitalize()
+
+
+def _hand_energy_count(pl, etype):
+    return sum(1 for k, n in pl.hand if k == "Energy"
+               and _re.fullmatch(rf"(basic )?{etype} energy", n, _re.I))
+
+
+def _generic_attack_damage(pl, opp, spot, atk, text, base):
+    base = base or 0
+    gated = False
+    for m in _NOTHING_IF_RE.finditer(text):
+        ok = _attack_condition(m.group(1), pl, opp, spot)
+        if ok:
+            return 0
+        gated = gated or ok is not None
+    hc = _hand_energy_cost(pl, text)
+    if hc and "this attack does nothing" in text.lower():
+        if _hand_energy_count(pl, hc[1]) < hc[0]:
+            return 0
+        if _re.search(r"knock out your opponent's active pok[eé]mon", text, _re.I):
+            return 10 ** 6 if opp.active else 0
+        return base
+    if _re.search(r"discard all pok[eé]mon tools from this pok[eé]mon\. if you can't discard any, "
+                  r"this attack does nothing", text, _re.I):
+        return base if spot.tool else 0
+    m = _UNTIL_HP_RE.search(text)
+    if m and opp.active is not None:
+        left = effective_hp(opp, opp.active) - opp.active.damage
+        return max(0, left - int(m.group(1)))
+    m = _BOTH_HEADS_RE.search(text)
+    if m:
+        n = int(m.group(1))
+        if _RESOLVING[0]:
+            return base + (int(m.group(2)) if all(random.random() < 0.5 for _ in range(n)) else 0)
+        return base + int(int(m.group(2)) * 0.5 ** n)
+    tiers = _COIN_TIERS_RE.findall(text)
+    if tiers and _re.search(r"flip (\d+) coins", text, _re.I):
+        n = int(_re.search(r"flip (\d+) coins", text, _re.I).group(1))
+        bonus = {({"1": 1, "2": 2}.get(k, n)): int(v) for k, v in tiers}
+        if _RESOLVING[0]:
+            return base + bonus.get(sum(random.random() < 0.5 for _ in range(n)), 0)
+        from math import comb
+        return base + int(sum(comb(n, h) * 0.5 ** n * bonus.get(h, 0) for h in range(n + 1)))
+    if _re.search(r"you may turn 1 of your face-down prize cards face up\. if you do, "
+                  r"this attack does (\d+) more damage", text, _re.I):
+        return base + int(_re.search(r"does (\d+) more damage", text).group(1))
+    if _re.search(r"you may discard your hand\. if you discarded any cards in this way, "
+                  r"this attack does (\d+) more damage", text, _re.I):
+        # Purging Strike: worth it when the bonus is the Knock Out, or
+        # the hand is nearly spent anyway (see attack_side_effects).
+        bonus = int(_re.search(r"does (\d+) more damage", text).group(1))
+        return base + (bonus if _purge_hand_worth_it(pl, opp, spot, base, bonus) else 0)
+    hit = None
+    for m in _BONUS_IF_RE.finditer(text):
+        ok = _attack_condition(m.group(1), pl, opp, spot)
+        if ok is None:
+            continue
+        hit = (hit or 0) + (int(m.group(2)) if ok else 0)
+    if hit is not None:
+        return base + hit
+    return base if gated else None
+
+
+def _pay_attack_text_costs(pl, opp, atk, text, log):
+    """The costs attack_damage priced but nothing paid: Energy discarded
+    from hand (Power Shot, Infernal Slash, Hydra Breath), Reforged Axe's
+    Tools, Purging Strike's optional hand discard."""
+    hc = _hand_energy_cost(pl, text)
+    if hc and "this attack does nothing" in text.lower():
+        n, etype = hc
+        paid = 0
+        for c in [c for c in pl.hand if c[0] == "Energy"
+                  and _re.fullmatch(rf"(basic )?{etype} energy", c[1], _re.I)][:n]:
+            pl.hand.remove(c)
+            pl.discard.append(c[1])
+            paid += 1
+        log.append(f"  {pl.name}: discards {paid} {etype} Energy from hand for {atk['name']}")
+    if (_re.search(r"discard all pok[eé]mon tools from this pok[eé]mon", text, _re.I)
+            and pl.active is not None and pl.active.tool):
+        pl.discard.append(pl.active.tool)
+        pl.active.tool = None
+    if _re.search(r"you may discard your hand\. if you discarded any cards in this way", text, _re.I) \
+            and pl.active is not None and opp.active is not None:
+        m = _re.search(r"does (\d+) more damage", text)
+        if m and _purge_hand_worth_it(pl, opp, pl.active, atk.get("damage") or 0, int(m.group(1))):
+            pl.discard.extend(n for _, n in pl.hand)
+            pl.hand = []
+            log.append(f"  {pl.name}: discards their hand for {atk['name']}")
+
+
+def _purge_hand_worth_it(pl, opp, spot, base, bonus):
+    if not pl.hand:
+        return False
+    if len(pl.hand) <= 2:
+        return True
+    oa = opp.active
+    if oa is None:
+        return False
+    left = effective_hp(opp, oa) - oa.damage
+    return base < left <= base + bonus
 
 
 def damage_reduction_for(pl, spot, opp=None):
@@ -4065,6 +4368,18 @@ _ON_ATTACH_RE = _re.compile(r"when you attach this card from your hand to (?:a |
                             r"(?:(\w+) )?pok[eé]mon", _re.I)
 
 
+def _luminous_check(spot):
+    """Luminous Energy provides every type -- unless the Pokemon has any
+    other Special Energy attached, when it provides Colorless."""
+    names = list(getattr(spot, "energy_names", None) or [])
+    if "Luminous Energy" not in names:
+        return
+    other = any(n != "Luminous Energy" and AE._is_special_energy(n) for n in names)
+    for i, n in enumerate(names):
+        if n == "Luminous Energy" and i < len(spot.energy):
+            spot.energy[i] = ["Colorless"] if other else list(M.REAL_TYPES)
+
+
 def energy_on_attach(pl, target, name, log):
     """"When you attach this card from your hand to a <Type> Pokemon, ..."
 
@@ -4072,6 +4387,7 @@ def energy_on_attach(pl, target, name, log):
     9 decklists) and Enriching Energy (draw 4) attached and did nothing
     else: nothing ran an Energy's on-attach effect.
     """
+    _luminous_check(target)
     if M.BASIC_ENERGY_RE.match(name):
         return
     eff = trainer_effect_ir(name)
@@ -4617,6 +4933,11 @@ def do_attack(pl, opp, log):
     # ex's Fairy Zone makes every opposing Dragon weak to Psychic, which is
     # the whole reason it is teched into a Dragapult mirror.
     weak = AE.query_weakness_override(pl, opp, opp.active) or defender["weakness"]
+    # Pikachu's Overwriting Bolt: "the Defending Pokemon's Weakness is now
+    # Lightning until the end of your next turn".
+    ws = getattr(opp.active, "weakness_set", None)
+    if ws and (getattr(pl, "round_no", 0) or 0) <= ws[1]:
+        weak = ws[0]
     if (weak and weak in atk_types
             and not getattr(opp.active, "no_weakness", False)
             and not _IGNORES_WEAKNESS_RE.search(
@@ -4704,6 +5025,7 @@ def do_attack(pl, opp, log):
                f" -> {opp.active.name} at {opp.active.damage}/{opp.POKEMON[opp.active.name]['hp']}")
 
     pl.active.last_attack_used = atk["name"]
+    pl.active.last_attack_round = getattr(pl, "round_no", None)
     # "Heal from this Pokemon the same amount of damage you did" is resolved
     # on the rider path, which is handed the attack but not its result.
     AE.DAMAGE_JUST_DEALT[0] = dmg
@@ -4712,7 +5034,9 @@ def do_attack(pl, opp, log):
         pl.active.attack_locked = 2
 
     attack_side_effects(pl, opp, atk, log)
-
+    # Gholdengo's Celebration takes Prize cards without a Knock Out.
+    if pl.prizes <= 0:
+        return True
 
     # Retaliation resolves even if the defender is Knocked Out by this hit.
     back = retaliation_from(opp, pl.active, pl) if dmg > 0 else 0
@@ -4779,7 +5103,9 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
-    IR.Op.SWAP_FROM_DECK,
+    IR.Op.SWAP_FROM_DECK, IR.Op.MILL_SELF, IR.Op.TRAINER_FLIP_LOCK,
+    IR.Op.COPY_TOP_SUPPORTER, IR.Op.PRIZES_IF_HAND_SIZE, IR.Op.DISCARD_TO_DECK,
+    IR.Op.SET_OPPONENT_HAND,
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,
@@ -4851,6 +5177,7 @@ def attack_side_effects(pl, opp, atk, log):
     text = atk.get("text") or ""
     if not text:
         return
+    _pay_attack_text_costs(pl, opp, atk, text, log)
     # A copy-attack resolves the attack it borrowed, riders and all.
     #
     # This recursion had no depth guard. "borrowed is not atk" catches only
@@ -5208,6 +5535,7 @@ def run_phases(pl, opp, log, start):
             use_abilities(pl, opp, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
+            _stadium_text_effects(pl, log)
         elif ph == "sweep":
             sweep_knocked_out(pl, opp, log)
         elif ph == "attach":

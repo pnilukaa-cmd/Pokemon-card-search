@@ -110,6 +110,10 @@ class Op:
     # stay on the new Pokemon. Transformation Tome and Ogre's Mask.
     SWAP_IN_PLACE = "swap_in_place"
     SWAP_FROM_DECK = "swap_from_deck"    # Ditto's Surprisingly Transform
+    MILL_SELF = "mill_self"              # "discard the top N cards of your deck"
+    TRAINER_FLIP_LOCK = "trainer_flip_lock"  # Seismitoad's Quaking Fist
+    COPY_TOP_SUPPORTER = "copy_top_supporter"  # Ninetales' Supernatural Shapeshifter
+    PRIZES_IF_HAND_SIZE = "prizes_if_hand_size"  # Gholdengo's Celebration
     KO_ATTACKER_ON_KO = "ko_attacker_on_ko"  # Gengar ex's Fainting Spell
     ATTACK_FIRST_TURN = "attack_first_turn"
     # Mew ex's Memory Helix: every Benched Pokemon's attacks, not just
@@ -1641,6 +1645,19 @@ def _r(m, text):
     return [Action(Op.LOCK, None, tgt, dict(filt, what="abilities"))]
 
 
+# Zoroark's Nighttime Byway: "As long as this Pokemon is on your Bench,
+# your Active Pokemon's Retreat Cost is 2 less."
+@rule("active_retreat_less", r"your active pok[eé]mon's retreat cost is (\d+) less")
+def _r(m, text):
+    return [Action(Op.MODIFY_RETREAT, -int(m.group(1)), Target.YOUR_ACTIVE)]
+
+
+# Yveltal's Life-Locked: "Your opponent's Active Pokemon can't be healed."
+@rule("heal_lock", r"your opponent's active pok[eé]mon can'?t be healed")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.OPP_ACTIVE, {"what": "heal"})]
+
+
 @rule("modify_retreat", r"retreat cost[^.]{0,40}?is (" + TYPES + r") (more|less)")
 def _r(m, text):
     sign = 1 if m.group(2).lower() == "more" else -1
@@ -2135,6 +2152,120 @@ def _r(m, text):
     if re.match(r"\s+that ", text[m.end():]):
         return []
     return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ANY, {"choose": True})]
+
+
+# ---- attack texts found by audit_unmodeled.py ----
+
+@rule("mill_self", r"discard the top (card|\d+ cards) of your deck"
+                   r"(?! and if)(?:\s+and put (\d+) of them into your hand)?")
+def _r(m, text):
+    # Not the self-mill scalers ("... for each <card> discarded in this way")
+    # or Seek Inspiration / Supernatural Shapeshifter, which read the card.
+    if re.search(r"(in|this) way|and if that card", text, re.I):
+        return []
+    n = 1 if m.group(1) == "card" else int(m.group(1).split()[0])
+    f = {"keep": int(m.group(2))} if m.group(2) else {}
+    return [Action(Op.MILL_SELF, n, Target.SELF, f)]
+
+
+@rule("trainer_flip_lock",
+      r"during your opponent's next turn, whenever they try to use a trainer card"
+      r" from their hand, they flip a coin")
+def _r(m, text):
+    return [Action(Op.TRAINER_FLIP_LOCK, 1, Target.OPPONENT)]
+
+
+@rule("copy_top_supporter",
+      r"discard the top card of your deck, and if that card is a supporter card,"
+      r" use the effect of that card as the effect of this attack")
+def _r(m, text):
+    return [Action(Op.COPY_TOP_SUPPORTER, 1, Target.SELF)]
+
+
+@rule("prizes_if_hand_size",
+      r"if you have exactly (\d+) cards in your hand, take (\d+) prize cards")
+def _r(m, text):
+    return [Action(Op.PRIZES_IF_HAND_SIZE, int(m.group(2)), Target.SELF,
+                   {"hand": int(m.group(1))})]
+
+
+@rule("discard_pile_to_deck_mixed",
+      r"shuffle up to (\d+) (?:in any combination of pok[eé]mon and basic energy cards|"
+      r"basic (\w+) energy cards) from your discard pile into your deck")
+def _r(m, text):
+    f = {"kind": "Energy", "energy_type": m.group(2).capitalize()} if m.group(2) else {"kind": "any"}
+    return [Action(Op.DISCARD_TO_DECK, int(m.group(1)), Target.SELF, f)]
+
+
+@rule("discard_typed_energy_from_opp_active",
+      r"discard an? (\w+) energy from your opponent's active pok[eé]mon")
+def _r(m, text):
+    t = m.group(1).capitalize()
+    if t.lower() in ("special",):
+        return []
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ACTIVE, {"type": t})]
+
+
+@rule("self_typed_energy_to_hand",
+      r"put (\d+) (\w+) energy attached to this pok[eé]mon into your hand")
+def _r(m, text):
+    return [Action(Op.SELF_ENERGY_TO_HAND, int(m.group(1)), Target.SELF,
+                   {"type": m.group(2).capitalize()})]
+
+
+@rule("discard_listed_energies_from_self",
+      r"discard an? (\w+) energy, an? (\w+) energy, and an? (\w+) energy from this pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_SELF_ENERGY, 1, Target.SELF, {"type": m.group(i).capitalize()})
+            for i in (1, 2, 3)]
+
+
+@rule("opponent_hand_reset",
+      r"your opponent shuffles their hand into their deck and draws (\d+) cards")
+def _r(m, text):
+    return [Action(Op.SET_OPPONENT_HAND, int(m.group(1)), Target.OPPONENT, {"shuffle": True})]
+
+
+@rule("shuffle_opponent_pokemon_into_deck",
+      r"choose 1 of your opponent's (benched )?pok[eé]mon\. shuffle that pok[eé]mon"
+      r" and all attached cards into their deck")
+def _r(m, text):
+    return [Action(Op.OPP_BENCH_TO_DECK, 1, Target.OPPONENT,
+                   {} if m.group(1) else {"include_active": True})]
+
+
+@rule("attach_from_discard_per_heads",
+      r"flip (\d+) coins\. attach (?:a number|an amount) of basic (\w+ )?energy(?: cards)?"
+      r" up to the number of heads from your discard pile to your benched pok[eé]mon")
+def _r(m, text):
+    f = {"from": "discard", "per_heads": int(m.group(1)), "bench_only": True}
+    if m.group(2):
+        f["type"] = m.group(2).strip().capitalize()
+    return [Action(Op.ATTACH_ENERGY, int(m.group(1)), Target.YOUR_BENCHED, f)]
+
+
+@rule("attach_from_discard_per_opp_energy",
+      r"choose basic (\w+) energy cards from your discard pile up to the amount of energy"
+      r" attached to all of your opponent's pok[eé]mon and attach them to your (\w+) pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.ATTACH_ENERGY, None, Target.YOUR_ANY,
+                   {"from": "discard", "type": m.group(1).capitalize(),
+                    "per_opp_energy": True, "holder_type": m.group(2).capitalize()})]
+
+
+@rule("choose_any_condition",
+      r"choose a special condition\. your opponent's active pok[eé]mon is now affected by that")
+def _r(m, text):
+    return [Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE,
+                   {"conditions": ["paralyzed", "asleep", "poisoned", "burned", "confused"],
+                    "choose_best": True})]
+
+
+@rule("defender_weakness_becomes",
+      r"the defending pok[eé]mon's weakness is now (\w+) until the end of your next turn")
+def _r(m, text):
+    return [Action(Op.SET_WEAKNESS, 1, Target.OPP_ACTIVE,
+                   {"type": m.group(1).capitalize(), "until_next_turn": True})]
 
 
 # Ditto's Surprisingly Transform: "search your deck for a Pokemon and

@@ -58,8 +58,9 @@ GREEDY = {
     # Rare Candy before evolving Basics into their Stage 1. Paired, 6 Rare
     # Candy decks x 53 opponents x 200 games: +0.52 +/- 0.24.
     "candy_first": 1,
-    # A second Item step after the Supporter. Measuring.
-    "items_after_supporter": 0,
+    # A second Item step after the Supporter (Petrel's search, a draw).
+    # Paired, 7 decks x 54 opponents x 200 games: +0.90 +/- 0.24.
+    "items_after_supporter": 1,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

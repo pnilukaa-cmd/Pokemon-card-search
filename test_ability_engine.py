@@ -3991,6 +3991,98 @@ def test_ditto_transforms_and_gengar_faints():
     check("Fainting Spell Knocks Out the attacker on heads", 150 <= ko <= 250, str(ko))
 
 
+def test_every_card_effect_is_read():
+    """audit_unmodeled.py: every Ability, Trainer, Special Energy and attack
+    text in the pool compiles, has a handler, or is read by a damage rule.
+    It started at 72 (66 attack texts)."""
+    import audit_unmodeled as AU
+    res = AU.audit()
+    left = {k: v for k, v in res.items() if v}
+    check("nothing in the pool is unmodelled", not left, str({k: v[:3] for k, v in left.items()}))
+
+
+def test_attack_texts_that_were_ignored():
+    """A sample of the 66 attack texts no rule read: conditional bonuses,
+    "does nothing" gates, hand-Energy costs, coin tiers and riders."""
+    import random as _r
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    op.active = V.InPlay("Mega Kangaskhan ex", 0)
+    me._opp_ref, me.round_no, op.round_no = op, 4, 4
+    dmg = lambda text, base: V.attack_damage(me, op, me.active, {"name": "t", "cost": [], "damage": base, "text": text}, record=False)
+    t = "If your opponent has 3 or more Benched Pokémon, this attack does 80 more damage."
+    op.bench = [V.InPlay("Passimian", 0)] * 3
+    check("Deleting Slash: +80 with 3 Benched", dmg(t, 40) == 120)
+    op.bench = []
+    check("and not without", dmg(t, 40) == 40)
+    t = "If your opponent's Active Pokémon isn't a Pokémon ex, this attack does nothing."
+    check("Rising Chop hits an ex", dmg(t, 90) == 90)
+    op.active = V.InPlay("Passimian", 0)
+    check("and does nothing to a non-ex", dmg(t, 90) == 0)
+    t = "Discard 4 Basic Fire Energy cards from your hand. If you can't discard 4 cards in this way, this attack does nothing."
+    me.hand = [("Energy", "Fire Energy")] * 3
+    check("Infernal Slash needs the 4 Fire Energy in hand", dmg(t, 220) == 0)
+    me.hand.append(("Energy", "Fire Energy"))
+    check("and hits with them", dmg(t, 220) == 220)
+    V._pay_attack_text_costs(me, op, {"name": "Infernal Slash"}, t, [])
+    check("and the cost is paid", not me.hand and me.discard.count("Fire Energy") == 4)
+    t = "Flip 3 coins. If 1 of them is heads, this attack does 20 more damage. If 2 of them are heads, this attack does 50 more damage. If all of them are heads, this attack does 80 more damage."
+    check("Fury Cutter's tiers average out", dmg(t, 10) == 10 + int(3 / 8 * 20 + 3 / 8 * 50 + 1 / 8 * 80))
+
+    eff = IR.compile_effect("Haxorus", "Dragon Pulse", "Discard the top 3 cards of your deck.")
+    me.deck = [("Item", "Ultra Ball")] * 5
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Dragon Pulse mills its own deck", len(me.deck) == 2)
+    eff = IR.compile_effect("Scraggy", "Nitpick", "Your opponent shuffles their hand into their deck and draws 4 cards.")
+    op.hand, op.deck = [("Item", "Ultra Ball")] * 7, [("Item", "Ultra Ball")] * 10
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Nitpick resets their hand to 4", len(op.hand) == 4 and len(op.deck) == 13)
+    eff = IR.compile_effect("Pikachu", "Overwriting Bolt", "The Defending Pokémon's Weakness is now Lightning until the end of your next turn. (Apply Weakness as x2.)")
+    op.active = V.InPlay("Mega Kangaskhan ex", 0)
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Overwriting Bolt sets the Weakness", op.active.weakness_set == ("Lightning", 5))
+    eff = IR.compile_effect("Shiftry", "Reversing Gust", "Flip a coin. If heads, choose 1 of your opponent's Pokémon. Shuffle that Pokémon and all attached cards into their deck.")
+    op.bench = [V.InPlay("Passimian", 0)]
+    op.active.energy, op.active.energy_names = [["Colorless"]], ["Psychic Energy"]
+    op.deck = []
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Reversing Gust takes the ex, attachments and all",
+          ("Pokemon", "Mega Kangaskhan ex") in op.deck and ("Energy", "Psychic Energy") in op.deck
+          and op.active.name == "Passimian")
+
+
+def test_abilities_and_stadiums_that_were_ignored():
+    """Yveltal's Life-Locked, Zoroark's Nighttime Byway, Mystery Garden,
+    Surfing Beach and Luminous Energy's Colorless clause."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    POK, EFF = build(["Yveltal", "Zoroark"], {"Yveltal": ("30C", "100"), "Zoroark": ("30C", "96")})
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", dict(D[1], **POK), [], EFF)
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    me.active.damage = 100
+    op.active = V.InPlay("Yveltal", 0)
+    heal = IR.Action(IR.Op.HEAL, 50, IR.Target.YOUR_ACTIVE)
+    AE.apply_action(heal, me, op, None, [])
+    check("Life-Locked: the Active can't be healed", me.active.damage == 100)
+    op.active = V.InPlay("Passimian", 0)
+    AE.apply_action(heal, me, op, None, [])
+    check("and can once Yveltal is gone", me.active.damage == 50)
+    op.active, op.bench = V.InPlay("Passimian", 0), [V.InPlay("Zoroark", 0)]
+    base = op.POKEMON["Passimian"]["retreat"]
+    check("Nighttime Byway: the Active retreats for 2 less",
+          AE.effective_retreat(op, op.active, me) == max(0, base - 2))
+    spot = V.InPlay("Raging Bolt ex", 0)
+    spot.energy, spot.energy_names = [list(M.REAL_TYPES)], ["Luminous Energy"]
+    V._luminous_check(spot)
+    check("Luminous Energy alone provides every type", spot.energy[0] == list(M.REAL_TYPES))
+    spot.energy.append(["Colorless"])
+    spot.energy_names.append("Mist Energy")
+    V._luminous_check(spot)
+    check("with another Special Energy it provides Colorless", spot.energy[0] == ["Colorless"])
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -4056,6 +4148,9 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_every_card_effect_is_read,
+               test_attack_texts_that_were_ignored,
+               test_abilities_and_stadiums_that_were_ignored,
                test_ditto_transforms_and_gengar_faints,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
