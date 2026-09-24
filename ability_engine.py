@@ -743,6 +743,14 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
 
+    # An ACTIVATED Ability's damage buff for this turn (Torrential Heart);
+    # the only one in the pool with no executor.
+    if op == O.BUFF_DAMAGE and act.target == IR.Target.SELF and source is not None \
+            and hasattr(source, "turn_buff"):
+        source.turn_buff = (source.turn_buff or 0) + (act.amount or 0)
+        log.append(f"    {source.name}'s attacks do {act.amount} more this turn")
+        return True
+
     # Reached only as an attack rider: passive Abilities are queried, never
     # applied, and Trainers do not carry these ops.
     if op in (O.PREVENT_DAMAGE, O.REDUCE_DAMAGE):

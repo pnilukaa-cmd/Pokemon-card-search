@@ -113,7 +113,7 @@ MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
-                 "shield",
+                 "shield", "turn_buff",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
                  "retreat_locked", "attack_locked_by_opponent", "prev_damage",
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
@@ -154,6 +154,9 @@ class InPlay:
         # this Pokemon" / "this Pokemon takes N less damage": set by the
         # attack, read by do_attack, gone after the owner's next turn.
         self.shield = None
+        # "+N damage from this Pokemon's attacks during this turn", from its
+        # own Ability (Feraligatr's Torrential Heart). Cleared at end of turn.
+        self.turn_buff = 0
         # Damage on this Pokemon immediately BEFORE the current hit. An
         # "if this Pokemon has full HP" clause is about the state the
         # attack found it in, not the state it left behind, and reading
@@ -803,6 +806,37 @@ def use_stadium(pl, log):
 DRAW_FLOOR = 6
 
 
+def _self_damage_buff_ok(pl, opp, p, eff):
+    """Feraligatr's Torrential Heart: 5 counters on itself for +120 this
+    turn. It fired every turn on every Feraligatr in play -- Benched ones
+    too -- and the +120 was never applied, so the deck hurt itself for
+    nothing. Worth it only on the Active that is about to attack, when it
+    survives the cost, and when the extra damage takes a Knock Out or it
+    survives the reply anyway.
+    """
+    ops = [a.op for a in eff.actions]
+    if IR.Op.BUFF_DAMAGE not in ops or IR.Op.PLACE_COUNTERS not in ops:
+        return True
+    if p is not pl.active or opp.active is None:
+        return False
+    cost = sum((a.amount or 0) * 10 for a in eff.actions
+               if a.op == IR.Op.PLACE_COUNTERS and a.target == IR.Target.SELF)
+    buff = sum(a.amount or 0 for a in eff.actions if a.op == IR.Op.BUFF_DAMAGE)
+    left = effective_hp(pl, p) - p.damage
+    if left <= cost:
+        return False
+    spare = 1 if any(k == "Energy" for k, _ in pl.hand) else 0
+    atks = [a for a in pl.POKEMON[p.name]["attacks"]
+            if len(a["cost"]) <= p.energy_count() + spare]
+    if not atks:
+        return False
+    hit = max(attack_damage(pl, opp, p, a, record=False) for a in atks)
+    their = effective_hp(opp, opp.active) - opp.active.damage
+    ko_now, ko_buffed = hit >= their, hit + buff >= their
+    survives = left - cost > _ready_damage(opp, pl, opp.active)
+    return (ko_buffed and not ko_now) or (survives and not ko_now)
+
+
 def _draw_would_deck_out(pl, eff):
     n = sum((a.amount or 1) for a in eff.actions if a.op == IR.Op.DRAW
             and a.target != IR.Target.BOTH_ALL)
@@ -930,6 +964,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
             if key in pl.abilities_used and eff.trigger != IR.Trigger.ANY_TIMES_PER_TURN:
                 continue
             if _draw_would_deck_out(pl, eff):
+                continue
+            if not _self_damage_buff_ok(pl, opp, p, eff):
                 continue
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
@@ -4067,6 +4103,7 @@ def do_attack(pl, opp, log):
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
     dmg += pl.turn_buff_any
+    dmg += getattr(pl.active, "turn_buff", 0) or 0
     # Tools that add damage. Brave Bangle only pays out for an attacker
     # WITHOUT a Rule Box, which is the whole reason it fits a deck of
     # single-Prize attackers.
@@ -4930,6 +4967,7 @@ def end_of_turn(pl, log):
         pl.active = pl.bench.pop(0)
     for spot in pl.in_play():
         AE.tick_attack_locks(spot)
+        spot.turn_buff = 0
         spot.promoted_this_turn = False
         # The debuff was for exactly this turn, and this turn is over.
         spot.damage_penalty = 0

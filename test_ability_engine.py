@@ -3210,9 +3210,35 @@ def test_prevention_never_wins_and_attack_effects_run():
           and me.active.energy_count() == 1)
 
 
+def test_torrential_heart_buffs_the_attacker_and_spares_the_bench():
+    """Feraligatr's Torrential Heart: "put 5 damage counters on this
+    Pokemon. If you do, during this turn, attacks used by this Pokemon do
+    120 more damage." BUFF_DAMAGE had no executor, and the Ability fired
+    every turn on every Feraligatr in play, Benched ones included: 50 damage
+    each for nothing. Fixed, the deck measured +31.45 points. Real model.
+    """
+    V, D, E = _real("decks/field/feraligatr_munkidori_damage_transfer.txt", "f")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("f", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Feraligatr", 0)
+    me.active.energy = [["Water"]] * 3
+    me.active.energy_names = ["Water Energy"] * 3
+    me.bench = [V.InPlay("Feraligatr", 0)]
+    op.active = V.InPlay("Raging Bolt ex", 0)
+    V.use_abilities(me, op, 5, [])
+    check("the Benched Feraligatr is not hurt", me.bench[0].damage == 0,
+          str(me.bench[0].damage))
+    check("the Active one pays 5 counters", me.active.damage == 50, str(me.active.damage))
+    check("and gets +120 this turn", me.active.turn_buff == 120, str(me.active.turn_buff))
+    V.end_of_turn(me, [])
+    check("which ends with the turn", me.active.turn_buff == 0)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_prevention_never_wins_and_attack_effects_run,
+    for fn in [test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
+               test_prevention_never_wins_and_attack_effects_run,
                test_switching_attacks_switch,
                test_requirements_and_attached_energy_types_are_real,
                test_the_lookahead_pilot_sees_a_lock,
