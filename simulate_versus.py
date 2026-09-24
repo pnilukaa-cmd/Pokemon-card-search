@@ -786,6 +786,56 @@ def stadium_turn_effect_ir(name):
     return eff
 
 
+_RESOLVING = [False]
+
+
+def _visible_top(pl):
+    """The top card of `pl`'s deck if the player may use it: always while
+    an attack resolves, otherwise only if they put it there themselves."""
+    if not pl.deck:
+        return None
+    if _RESOLVING[0]:
+        return pl.deck[-1]
+    k = getattr(pl, "_known_top", None)
+    if not k:
+        return None
+    n_at, cards = k
+    gone = n_at - len(pl.deck)
+    if 0 <= gone < len(cards) and pl.deck[-1] == cards[-1 - gone]:
+        return pl.deck[-1]
+    return None
+
+
+def _note_known_top(pl, n):
+    """The player just put the top `n` cards of their deck there."""
+    pl._known_top = (len(pl.deck), list(pl.deck[-n:]))
+
+
+def _unseen_own(pl):
+    return list(pl.deck) + list(getattr(pl, "prize_cards", []) or [])
+
+
+def _expected_over(pool, f):
+    """Mean of f over the cards, evaluated once per distinct card."""
+    if not pool:
+        return 0
+    from collections import Counter
+    return sum(n * f(c) for c, n in Counter(pool).items()) / len(pool)
+
+
+def _expected_max(pool, f, k):
+    """E[max f] over k cards drawn from `pool` (with replacement)."""
+    vals = sorted(f(c) for c in pool)
+    if not vals:
+        return 0
+    n, e, prev = len(vals), 0.0, 0.0
+    for i, v in enumerate(vals):
+        cdf = ((i + 1) / n) ** k
+        e += v * (cdf - prev)
+        prev = cdf
+    return e
+
+
 def _seek_attackers(pl):
     """Pokemon in play with a "discard the top card of your deck ... use it
     as this attack" attack (Slowking's Seek Inspiration), Active first."""
@@ -858,12 +908,15 @@ def _stadium_hand_to_top(pl, log):
     want = _top_copy_want(pl, pool=pl.hand)
     if want is None:
         return
-    top = pl.deck[-1] if pl.deck else ("", "")
-    if _top_copy_value(pl, opp, pl.active, ("Pokemon", want)) <= \
-            _top_copy_value(pl, opp, pl.active, top):
+    top = _visible_top(pl)
+    here = (_top_copy_value(pl, opp, pl.active, top) if top is not None else
+            _expected_over(_unseen_own(pl),
+                           lambda c: _top_copy_value(pl, opp, pl.active, c)))
+    if _top_copy_value(pl, opp, pl.active, ("Pokemon", want)) <= here:
         return
     pl.remove_from_hand("Pokemon", want)
     pl.deck.append(("Pokemon", want))
+    _note_known_top(pl, 1)
     log.append(f"  {pl.name}: {name} puts {want} on top of the deck")
 
 
@@ -2838,9 +2891,10 @@ def _copied_attack_inner(pl, opp, spot, text):
                 best, val = a, v
         return best
     if _SELF_TOP_COPY_RE.search(text):
-        if not pl.deck:
-            return None
-        kind, name = pl.deck[-1]          # the top: draw() pops the end
+        top = _visible_top(pl)
+        if top is None:
+            return None                   # unknown until it is discarded
+        kind, name = top
         if kind != "Pokemon":
             return None
         info = pl.POKEMON.get(name) or {}
@@ -2855,6 +2909,8 @@ def _copied_attack_inner(pl, opp, spot, text):
     m = _REVEAL_TOP_RE.search(text)
     if m and _USE_AS_THIS_RE.search(text):
         depth = int(m.group(1))
+        if not _RESOLVING[0]:
+            return None                   # their deck is hidden until revealed
         top = opp.deck[-depth:]           # the top: draw() pops the end
         best, val = None, -1
         for kind, name in top:
@@ -2900,32 +2956,38 @@ def _copied_attack_damage(pl, opp, spot, text):
     # check_energy_support flags Trifrost as uncastable there and is right
     # to but harmless.
     if _SELF_TOP_COPY_RE.search(text):
-        if not pl.deck:
-            return 0
-        kind, name = pl.deck[-1]          # the top: draw() pops the end
-        if kind != "Pokemon":
-            return 0
-        info = pl.POKEMON.get(name) or {}
-        if info.get("rule_box"):
-            return 0
-        best = 0
-        for a in info.get("attacks") or []:
-            best = max(best, attack_damage(pl, opp, spot, a, record=False))
-        return best
+        def copy_dmg(card):
+            kind, name = card
+            info = pl.POKEMON.get(name) or {}
+            if kind != "Pokemon" or info.get("rule_box"):
+                return 0
+            return max((attack_damage(pl, opp, spot, a, record=False)
+                        for a in info.get("attacks") or []), default=0)
+        top = _visible_top(pl)
+        if top is not None:
+            return copy_dmg(top)
+        # Unseen: what the top card is worth on average. Reading the real
+        # top let the pilot pick Seek Inspiration only when it would hit.
+        return _expected_over(_unseen_own(pl), copy_dmg)
 
     m = _REVEAL_TOP_RE.search(text)
     if m and _USE_AS_THIS_RE.search(text):
         depth = int(m.group(1))
-        top = opp.deck[-depth:] if depth <= len(opp.deck) else list(opp.deck)
-        best = 0
-        for kind, name in top:
+
+        def borrow_dmg(card):
+            kind, name = card
             if kind != "Pokemon":
-                continue
-            for a in opp.POKEMON[name]["attacks"]:
-                # Evaluate the borrowed attack from our own board's point of
-                # view -- a scaling clause reads our state, not theirs.
-                best = max(best, attack_damage(pl, opp, spot, a, record=False))
-        return best
+                return 0
+            # Evaluate the borrowed attack from our own board's point of
+            # view -- a scaling clause reads our state, not theirs.
+            return max((attack_damage(pl, opp, spot, a, record=False)
+                        for a in opp.POKEMON[name]["attacks"]), default=0)
+        if _RESOLVING[0]:
+            top = opp.deck[-depth:] if depth <= len(opp.deck) else list(opp.deck)
+            return max((borrow_dmg(c) for c in top), default=0)
+        # Unseen: the expected best of `depth` cards from what we can't see.
+        pool = list(opp.deck) + list(opp.hand) + list(getattr(opp, "prize_cards", []) or [])
+        return _expected_max(pool, borrow_dmg, depth)
     return None
 
 
@@ -3011,14 +3073,16 @@ def mill_scaler_damage(pl, atk):
         return None
     n = int(mm.group(1)) if mm.group(1) else 1   # "the top card" = 1
     want = (dm.group(4) or "").lower()
-    hits = 0
-    for kind, name in pl.deck[-n:]:      # the top N: draw() pops the end
-        low = str(name).lower()
+    def hit(card):
+        kind, name = card
         if want and want not in ("card", "cards"):
-            if want in low:
-                hits += 1
-        elif kind == "Energy":
-            hits += 1
+            return 1 if want in str(name).lower() else 0
+        return 1 if kind == "Energy" else 0
+    if _RESOLVING[0]:
+        hits = sum(hit(c) for c in pl.deck[-n:])      # the real top N
+    else:
+        # The pilot can't see its own top N: the expected count.
+        hits = round(n * _expected_over(_unseen_own(pl), hit))
     per = int(dm.group(1))
     base = atk["damage"] or 0
     return (base + per * hits) if dm.group(2) else (per * hits)
@@ -3490,6 +3554,22 @@ def attack_rider_value(pl, opp, atk, spot=None):
         # already does. This crashed a 192-job shard with RecursionError.
         if _COPY_DEPTH[0] >= _MAX_COPY_DEPTH:
             return 0
+        if _SELF_TOP_COPY_RE.search(text) and _visible_top(pl) is None:
+            # Seek Inspiration with the top unseen: the average rider over
+            # what the top card could be.
+            def rv(card):
+                kind, name = card
+                info = pl.POKEMON.get(name) or {}
+                if kind != "Pokemon" or info.get("rule_box"):
+                    return 0
+                b = max(info.get("attacks") or [],
+                        key=lambda a: attack_value(pl, opp, spot, a), default=None)
+                return attack_rider_value(pl, opp, b, spot) if b else 0
+            _COPY_DEPTH[0] += 1
+            try:
+                return _expected_over(_unseen_own(pl), rv)
+            finally:
+                _COPY_DEPTH[0] -= 1
         borrowed = copied_attack(pl, opp, spot, text)
         if borrowed is not None and borrowed is not atk:
             _COPY_DEPTH[0] += 1
@@ -4461,6 +4541,9 @@ def do_attack(pl, opp, log):
             return do_attack(pl, opp, log)
         finally:
             pl._attacking_twice = False
+    # From here the attack RESOLVES: it may read the real top of a deck.
+    # Before this point (choosing it) only what the player can see counts.
+    _RESOLVING[0] = True
     # The alternate win condition resolves before damage and ends the game.
     if attack_wins_game(pl, opp, pl.active, atk):
         pl.prizes = 0
@@ -5805,6 +5888,21 @@ try_evolve = _under_play_lock(try_evolve)
 play_items = _under_play_lock(play_items)
 attach_tools = _under_play_lock(attach_tools)
 
+
+
+def _attack_scope(fn):
+    """do_attack sets _RESOLVING once the attack is chosen; this puts it
+    back however the attack ends."""
+    def run(*a, **k):
+        try:
+            return fn(*a, **k)
+        finally:
+            _RESOLVING[0] = False
+    run.__wrapped__ = fn
+    return run
+
+
+do_attack = _attack_scope(do_attack)
 
 if __name__ == "__main__":
     main()

@@ -1603,13 +1603,27 @@ def test_copied_attacks_carry_their_riders():
     check("and picks it over its own 120-damage attack",
           SV.best_attack(me, sk, True, op)["name"] == "Seek Inspiration")
     before = sum(s.damage for s in [op.active] + op.bench)
-    SV.attack_side_effects(me, op, seek, [])
+    SV._RESOLVING[0] = True               # as inside do_attack
+    try:
+        SV.attack_side_effects(me, op, seek, [])
+    finally:
+        SV._RESOLVING[0] = False
     check("and the borrowed rider actually resolves",
           sum(s.damage for s in [op.active] + op.bench) - before == 330)
 
     me.deck = [("Energy", "Psychic Energy")]
     check("a non-Pokemon on top copies nothing",
           SV.attack_damage(me, op, sk, seek, record=False) == 0)
+
+    # The pilot may not read its own unseen top card: three Energy and a
+    # Kyurem on top is worth a quarter of the Kyurem, until it put it there.
+    me.deck = [("Energy", "Psychic Energy")] * 3 + [("Pokemon", "Kyurem")]
+    check("an unseen top card is valued by expectation",
+          abs(SV.attack_value(me, op, sk, seek) - 330 / 4) < 1,
+          SV.attack_value(me, op, sk, seek))
+    SV._note_known_top(me, 1)
+    check("a top card the player placed is known",
+          SV.attack_value(me, op, sk, seek) == 330)
 
 
 
@@ -3602,6 +3616,7 @@ def test_seek_inspiration_reads_and_discards_the_top_card():
     me._opp_ref, me.round_no, op.round_no = op, 5, 5
     seek = next(a for a in D[1]["Slowking"]["attacks"] if a["name"] == "Seek Inspiration")
     me.deck = [("Pokemon", "Kyurem"), ("Item", "Ultra Ball"), ("Pokemon", "Annihilape")]
+    V._note_known_top(me, 1)              # as if Academy at Night put it there
     check("Seek copies the TOP card", (V.copied_attack(me, op, me.active, seek["text"])
                                        or {}).get("name") in ("Tantrum", "Destined Fight"))
     me._forced_attack = seek

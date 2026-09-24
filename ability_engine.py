@@ -1570,6 +1570,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if not picked:
             return False
         pl.deck.extend(picked)          # last appended is drawn first
+        pl._known_top = (len(pl.deck), list(picked))   # the player chose them
         log.append(f"    to top of deck: {', '.join(c[1] for c in picked)}")
         return True
 
