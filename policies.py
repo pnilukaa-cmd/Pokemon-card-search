@@ -55,8 +55,9 @@ GREEDY = {
     # draw), not a turn later. Paired, 6 meta decks x 53 opponents x 200
     # games: +0.97 +/- 0.27 (every deck positive).
     "bench_after_supporter": 1,
-    # Rare Candy before evolving Basics into their Stage 1. Measuring.
-    "candy_first": 0,
+    # Rare Candy before evolving Basics into their Stage 1. Paired, 6 Rare
+    # Candy decks x 53 opponents x 200 games: +0.52 +/- 0.24.
+    "candy_first": 1,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
