@@ -3588,6 +3588,45 @@ def test_prize_changes_read_their_own_conditions():
           AE.query_prize_modifier(op, me, me.bench[2], ex, True) == 0)
 
 
+def test_seek_inspiration_reads_and_discards_the_top_card():
+    """The deck draws off the END of the list, but Seek Inspiration read
+    deck[0] -- the bottom -- and never discarded it, so the same card was
+    copied every turn and Academy at Night / Ciphermaniac's Codebreaking,
+    which set the top, could never reach it."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_slowking.txt", "s")
+    me, op = V.Player("s", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Slowking", 0), V.InPlay("Mega Kangaskhan ex", 0)
+    me.active.energy = [["Psychic"], ["Psychic"]]
+    me.active.energy_names = ["Psychic Energy"] * 2
+    me._opp_ref, me.round_no, op.round_no = op, 5, 5
+    seek = next(a for a in D[1]["Slowking"]["attacks"] if a["name"] == "Seek Inspiration")
+    me.deck = [("Pokemon", "Kyurem"), ("Item", "Ultra Ball"), ("Pokemon", "Annihilape")]
+    check("Seek copies the TOP card", (V.copied_attack(me, op, me.active, seek["text"])
+                                       or {}).get("name") in ("Tantrum", "Destined Fight"))
+    me._forced_attack = seek
+    V.do_attack(me, op, [])
+    check("and discards it", "Annihilape" in me.discard and len(me.deck) == 2,
+          str(me.deck))
+
+    me.deck = [("Pokemon", "Annihilape"), ("Item", "Ultra Ball")]
+    me.hand = [("Pokemon", "Kyurem"), ("Item", "Poké Pad")]
+    me.stadium = "Academy at Night"
+    V._stadium_hand_to_top(me, [])
+    check("Academy at Night puts the copy target on top",
+          me.deck[-1] == ("Pokemon", "Kyurem"), str(me.deck))
+    check("Academy at Night is worth playing to a Seek deck",
+          V._stadium_has_effect("Academy at Night", me))
+
+    me.deck = [("Pokemon", "Annihilape"), ("Supporter", "Lillie's Determination"),
+               ("Item", "Ultra Ball"), ("Pokemon", "Slowpoke")]
+    me.hand = []
+    act = IR.Action(IR.Op.SEARCH_TO_TOP_OF_DECK, 2, IR.Target.SELF, {})
+    AE.apply_action(act, me, op, me.active, [])
+    check("Ciphermaniac stacks the copy target under the draw",
+          me.deck[-2] == ("Pokemon", "Annihilape"), str(me.deck[-2:]))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3653,6 +3692,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_seek_inspiration_reads_and_discards_the_top_card,
                test_played_from_hand_abilities_fire,
                test_when_damaged_abilities_beyond_counters,
                test_prize_changes_read_their_own_conditions,

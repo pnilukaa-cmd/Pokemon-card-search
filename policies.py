@@ -51,6 +51,9 @@ GREEDY = {
     # One-turn lookahead on the attack choice: 0 is off (greedy).
     "lookahead_samples": 0,
     "lookahead_margin": 0.0,
+    # Bench the Basics that reach the hand after the Supporter (Ultra Ball,
+    # draw), not a turn later.
+    "bench_after_supporter": 0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

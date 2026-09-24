@@ -685,6 +685,9 @@ SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else No
 # How much a Pokemon is worth in the Active Spot right now. Set by
 # simulate_versus (its _ready_damage), which this module cannot import.
 SWITCH_RANK = lambda pl, opp, spot: 0
+# The simulator sets this: the Pokemon a "discard the top card and use its
+# attack" attacker wants on top of the deck (None: no such attacker).
+TOP_COPY_WANT = lambda pl: None
 
 _BOOMERANG_RE = re.compile(r"if this card is discarded by an effect of an attack used by "
                            r"the pok[eé]mon this card is attached to, attach this card", re.I)
@@ -1474,6 +1477,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # (pl.deck[-1] is the next draw), so this is next turn's draw
         # being chosen rather than this turn's hand.
         def wants():
+            # Two or more cards: the one UNDER the draw is what Slowking's
+            # Seek Inspiration discards and copies next turn, so it is the
+            # best attack to borrow when the board has a Seek attacker.
+            t = TOP_COPY_WANT(pl) if (act.amount or 1) >= 2 else None
+            if t:
+                yield lambda k, n: k == "Pokemon" and n == t
             if len(pl.in_play()) < 3:
                 yield lambda k, n: (k == "Pokemon"
                                     and pl.POKEMON.get(n, {}).get("stage")

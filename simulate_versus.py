@@ -664,6 +664,9 @@ def _stadium_has_effect(name, pl):
     # same shape as Festival Grounds, one layer further in.
     if stadium_turn_effect_ir(name) is not None:
         return True
+    # Academy at Night: worth it to a deck with a Seek Inspiration attacker.
+    if _HAND_TO_TOP_RE.search(_card_text(name)) and _seek_attackers(pl):
+        return True
 
     eff = trainer_effect_ir(name)
     if eff is None or eff.unsupported:
@@ -784,6 +787,68 @@ def stadium_turn_effect_ir(name):
                 eff = compiled
     _STADIUM_TURN_CACHE[name] = eff
     return eff
+
+
+def _seek_attackers(pl):
+    """Pokemon in play with a "discard the top card of your deck ... use it
+    as this attack" attack (Slowking's Seek Inspiration), Active first."""
+    return [p for p in pl.in_play()
+            if any(_SELF_TOP_COPY_RE.search(a.get("text") or "")
+                   for a in pl.POKEMON[p.name]["attacks"])]
+
+
+def _top_copy_value(pl, opp, spot, card):
+    kind, name = card
+    info = (pl.POKEMON.get(name) or {}) if kind == "Pokemon" else {}
+    if not info or info.get("rule_box"):
+        return 0
+    return max((attack_value(pl, opp, spot, a) for a in info.get("attacks") or []),
+               default=0)
+
+
+def _top_copy_want(pl, pool=None):
+    """The Pokemon a Seek attacker would most like to find on top of the
+    deck, from `pool` (default: the deck). None without a Seek attacker."""
+    opp = getattr(pl, "_opp_ref", None)
+    seekers = _seek_attackers(pl)
+    if opp is None or opp.active is None or not seekers:
+        return None
+    cands = [c for c in (pl.deck if pool is None else pool) if c[0] == "Pokemon"]
+    best = max(cands, key=lambda c: _top_copy_value(pl, opp, seekers[0], c),
+               default=None)
+    if best is None or _top_copy_value(pl, opp, seekers[0], best) <= 0:
+        return None
+    return best[1]
+
+
+AE.TOP_COPY_WANT = _top_copy_want
+
+# Academy at Night: "Once during each player's turn, that player may put a
+# card from their hand on top of their deck." Inert until now, and it is
+# the combo half of meta_slowking: it sets the card Seek Inspiration
+# discards and copies.
+_HAND_TO_TOP_RE = _re.compile(
+    r"may put a card from their hand on top of their deck", _re.I)
+
+
+def _stadium_hand_to_top(pl, log):
+    name = pl.stadium or getattr(pl, "_opp_stadium", None)
+    if not name or not _HAND_TO_TOP_RE.search(_card_text(name)):
+        return
+    opp = getattr(pl, "_opp_ref", None)
+    seekers = _seek_attackers(pl)
+    if opp is None or not seekers:
+        return
+    want = _top_copy_want(pl, pool=pl.hand)
+    if want is None:
+        return
+    top = pl.deck[-1] if pl.deck else ("", "")
+    if _top_copy_value(pl, opp, seekers[0], ("Pokemon", want)) <= \
+            _top_copy_value(pl, opp, seekers[0], top):
+        return
+    pl.remove_from_hand("Pokemon", want)
+    pl.deck.append(("Pokemon", want))
+    log.append(f"  {pl.name}: {name} puts {want} on top of the deck")
 
 
 def use_stadium(pl, log):
@@ -2713,7 +2778,7 @@ def _copied_attack_inner(pl, opp, spot, text):
     if _SELF_TOP_COPY_RE.search(text):
         if not pl.deck:
             return None
-        kind, name = pl.deck[0]
+        kind, name = pl.deck[-1]          # the top: draw() pops the end
         if kind != "Pokemon":
             return None
         info = pl.POKEMON.get(name) or {}
@@ -2728,7 +2793,7 @@ def _copied_attack_inner(pl, opp, spot, text):
     m = _REVEAL_TOP_RE.search(text)
     if m and _USE_AS_THIS_RE.search(text):
         depth = int(m.group(1))
-        top = opp.deck[:depth]
+        top = opp.deck[-depth:]           # the top: draw() pops the end
         best, val = None, -1
         for kind, name in top:
             if kind != "Pokemon":
@@ -2775,7 +2840,7 @@ def _copied_attack_damage(pl, opp, spot, text):
     if _SELF_TOP_COPY_RE.search(text):
         if not pl.deck:
             return 0
-        kind, name = pl.deck[0]
+        kind, name = pl.deck[-1]          # the top: draw() pops the end
         if kind != "Pokemon":
             return 0
         info = pl.POKEMON.get(name) or {}
@@ -2885,7 +2950,7 @@ def mill_scaler_damage(pl, atk):
     n = int(mm.group(1)) if mm.group(1) else 1   # "the top card" = 1
     want = (dm.group(4) or "").lower()
     hits = 0
-    for kind, name in pl.deck[:n]:
+    for kind, name in pl.deck[-n:]:      # the top N: draw() pops the end
         low = str(name).lower()
         if want and want not in ("card", "cards"):
             if want in low:
@@ -3866,6 +3931,22 @@ def _potential_damage(pl, spot):
         # is worth whatever it can borrow. Ranking it at 0 sent every
         # Energy to the Bench toolbox and starved the actual attacker.
         m = _COPY_OWN_BENCH_RE.search(a.get("text") or "")
+        if not m and _SELF_TOP_COPY_RE.search(a.get("text") or ""):
+            # Seek Inspiration borrows whatever non-rule-box Pokemon the
+            # deck can put on top (Academy at Night, Ciphermaniac's
+            # Codebreaking). Printed 0, so Slowking never got Energy.
+            opp = getattr(pl, "_opp_ref", None)
+            best = 0
+            for name, info in pl.POKEMON.items():
+                if info.get("rule_box"):
+                    continue
+                for b in info.get("attacks") or []:
+                    if _USE_AS_THIS_RE.search(b.get("text") or ""):
+                        continue
+                    v = (min(attack_value(pl, opp, spot, b), 10 ** 4)
+                         if opp is not None and opp.active else b["damage"] or 0)
+                    best = max(best, v)
+            return best
         if not m:
             return a["damage"] or 0
         fam = (m.group(1) or "").strip().lower()
@@ -4608,6 +4689,13 @@ def attack_side_effects(pl, opp, atk, log):
                 attack_side_effects(pl, opp, borrowed, log)
             finally:
                 _COPY_DEPTH[0] -= 1
+        # Seek Inspiration DISCARDS the card it copies -- whatever it was.
+        # It never did, so one Kyurem left on top was copied every turn.
+        if _SELF_TOP_COPY_RE.search(text) and pl.deck:
+            gone = pl.deck.pop()
+            pl.discard.append(gone[1])
+            log.append(f"  {pl.name}: {atk['name']} discards {gone[1]} from the top")
+        if borrowed is not None and borrowed is not atk:
             return
 
     # Pay for the damage discard_scaler_damage() already charged the
@@ -4617,7 +4705,7 @@ def attack_side_effects(pl, opp, atk, log):
     if mm and _DISCARDED_THIS_WAY_RE.search(text):
         n = int(mm.group(1)) if mm.group(1) else 1
         for _ in range(min(n, len(pl.deck))):
-            pl.discard.append(pl.deck.pop(0)[1])
+            pl.discard.append(pl.deck.pop()[1])       # off the top
         log.append(f"  {pl.name}: mills {n} for {atk['name']}")
     hm = _HAND_NAME_SCALER_RE.search(text)
     if hm and _DISCARDED_THIS_WAY_RE.search(text):
@@ -4878,17 +4966,24 @@ def choose_supporter(pl, opp, turn, log):
 # The rest of a turn after the Supporter, as named steps, so a lookahead can
 # make a choice in a copy of the game and RESUME the turn from the step
 # after it (a gust resumes at "abilities", a retreat at "attack").
-PHASES = ("abilities", "stadium", "sweep", "attach", "tools", "evolve",
-          "retreat", "attack")
+PHASES = ("bench", "abilities", "stadium", "sweep", "attach", "tools",
+          "evolve", "retreat", "attack")
 
 
 def run_phases(pl, opp, log, start):
     turn, first_turn = pl.round_no, pl._first_turn
     for ph in PHASES[start:]:
-        if ph == "abilities":
+        if ph == "bench":
+            # Basics that reached the hand this turn -- an Ultra Ball, a
+            # draw Supporter -- sat there until the NEXT turn, because
+            # play_basics only ran before the Items and the Supporter.
+            if POL.knob(pl, "bench_after_supporter"):
+                play_basics(pl, turn, log)
+        elif ph == "abilities":
             use_abilities(pl, opp, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
+            _stadium_hand_to_top(pl, log)
         elif ph == "sweep":
             sweep_knocked_out(pl, opp, log)
         elif ph == "attach":
