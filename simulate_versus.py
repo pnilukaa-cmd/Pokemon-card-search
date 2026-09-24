@@ -1491,6 +1491,15 @@ def _evolves_from_in_pool(name):
     return None
 
 
+def _candy_first(pl, opp, turn, log, first_turn):
+    hidden = _locked_in_hand(pl, opp)
+    if ("Item", "Rare Candy") in hidden:
+        return
+    while ("Item", "Rare Candy") in pl.hand:
+        if not effect_rare_candy(pl, opp, turn, log, first_turn):
+            break
+
+
 def effect_rare_candy(pl, opp, turn, log, first_turn):
     # "You can't use this card during your first turn" -- either player's.
     if first_turn or turn <= 1:
@@ -5031,6 +5040,10 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
         return "no_pokemon"
     pl._first_turn = first_turn
     pl._cards_by_name = cards_by_name
+    # Rare Candy before the ordinary evolutions: evolving the Basic into
+    # its Stage 1 first leaves nothing for the Candy to skip.
+    if POL.knob(pl, "candy_first"):
+        _candy_first(pl, opp, turn, log, first_turn)
     try_evolve(pl, opp, turn, log, first_turn)
     play_items(pl, opp, turn, log, first_turn)
     # The player going first may not play a Supporter on their first turn,

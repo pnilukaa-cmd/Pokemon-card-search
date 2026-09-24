@@ -59,6 +59,8 @@ GREEDY = {
     # moved damage counters aimed at a Knock Out. Under measurement.
     "abilities_late": 0,
     "counter_ko_target": 0,
+    # Rare Candy before evolving Basics into their Stage 1. Measuring.
+    "candy_first": 0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
