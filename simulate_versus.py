@@ -4568,14 +4568,67 @@ def lookahead_pick(pl, opp, options, apply, resume, default):
     return options[i]
 
 
-def _simulate_from(pl, opp, opt, apply, resume):
-    import copy
-    memo = {}
+# Read-only per-deck tables the lookahead's copies share with the real game.
+_SHARED_ATTRS = {"POKEMON", "EFFECTS", "_cards_by_name", "_copy_plan_cache"}
+
+
+def _clone_spot(s):
+    c = InPlay.__new__(InPlay)
+    for k in InPlay.__slots__:
+        if not hasattr(s, k):
+            continue
+        v = getattr(s, k)
+        if isinstance(v, list):
+            v = list(v)
+        elif isinstance(v, set):
+            v = set(v)
+        elif isinstance(v, dict):
+            v = dict(v)
+        setattr(c, k, v)
+    return c
+
+
+def clone_state(pl, opp):
+    """Copy both players for a lookahead. deepcopy was 55% of the pilot's
+    time; this copies every container and re-clones every Pokemon in play,
+    and shares only the static per-deck tables."""
+    spots = {}
+
+    def spot(s):
+        if s is None:
+            return None
+        if id(s) not in spots:
+            spots[id(s)] = _clone_spot(s)
+        return spots[id(s)]
+
+    out = []
     for side in (pl, opp):
-        memo[id(side.POKEMON)] = side.POKEMON
-        memo[id(side.EFFECTS)] = side.EFFECTS
-        memo[id(side._cards_by_name)] = side._cards_by_name
-    me, them = copy.deepcopy((pl, opp), memo)
+        c = Player.__new__(Player)
+        for k, v in side.__dict__.items():
+            if k in _SHARED_ATTRS or k == "_opp_ref":
+                pass
+            elif k == "active":
+                v = spot(v)
+            elif k == "bench":
+                v = [spot(s) for s in v]
+            elif isinstance(v, list):
+                v = list(v)
+            elif isinstance(v, set):
+                v = set(v)
+            elif isinstance(v, dict):
+                v = dict(v)
+            c.__dict__[k] = v
+        out.append(c)
+    a, b = out
+    if "_opp_ref" in pl.__dict__:
+        a._opp_ref = b
+    if "_opp_ref" in opp.__dict__:
+        b._opp_ref = a
+    return a, b
+
+
+def _simulate_from(pl, opp, opt, apply, resume):
+    me, them = clone_state(pl, opp)
     log = []
     if apply(me, them, opt) == "win":
         return _position_value(me, them, "win")
