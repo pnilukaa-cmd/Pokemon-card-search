@@ -871,10 +871,16 @@ def _top_copy_want(pl, pool=None):
 AE.TOP_COPY_WANT = _top_copy_want
 
 
-def _transform_pick(pl, opp, spot, cands):
+def _transform_pick(pl, opp, spot, cands, use_forced=False):
     """What Ditto's Surprisingly Transform should become: the Pokemon
     that hits hardest next turn with the Energy already attached plus one
-    more from hand, then the one that survives best."""
+    more from hand, then the one that survives best. The lookahead pilot's
+    own choice (_forced_transform) wins when it is still in the deck."""
+    if use_forced:
+        forced = getattr(pl, "_forced_transform", "unset")
+        pl._forced_transform = "unset"
+        if forced != "unset" and forced in cands:
+            return forced
     if opp is None or opp.active is None:
         return cands[0]
     extra = {n for k, n in pl.hand if k == "Energy"}
@@ -892,7 +898,7 @@ def _transform_pick(pl, opp, spot, cands):
     return max(cands, key=score)
 
 
-AE.TRANSFORM_PICK = _transform_pick
+AE.TRANSFORM_PICK = lambda pl, opp, spot, cands: _transform_pick(pl, opp, spot, cands, True)
 
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
 
@@ -5493,8 +5499,9 @@ def lookahead_attack(pl, opp, greedy_pick):
             continue
         seen.add(a["name"])
         cands.append(a)
-    # An option is (attack, gust target, self-switch target). "unset"
-    # leaves a choice to the greedy rule; None declines an optional switch.
+    # An option is (attack, gust target, self-switch target, transform
+    # target). "unset" leaves a choice to the greedy rule; None declines an
+    # optional switch.
     options = []
     for a in cands:
         gusts = list(range(len(opp.bench))) if _gust_attack(a) and opp.bench else [None]
@@ -5503,20 +5510,33 @@ def lookahead_attack(pl, opp, greedy_pick):
             switches = list(range(len(pl.bench))) + ([None] if sw.get("optional") else [])
         else:
             switches = ["unset"]
-        options += [(a["name"], g, s) for g in gusts for s in switches]
+        # Surprisingly Transform: which Pokemon from the deck it becomes.
+        if any(x.op == IR.Op.SWAP_FROM_DECK for x in _attack_ir(a).actions):
+            forms = sorted({n for k, n in pl.deck if k == "Pokemon" and n != spot.name}) or ["unset"]
+        else:
+            forms = ["unset"]
+        options += [(a["name"], g, s, f) for g in gusts for s in switches for f in forms]
     by_name = {a["name"]: a for a in cands}
-    default = next((o for o in options if o[0] == greedy_pick["name"]), None)
+    greedy_form = "unset"
+    if any(x.op == IR.Op.SWAP_FROM_DECK for x in _attack_ir(greedy_pick).actions):
+        fc = sorted({n for k, n in pl.deck if k == "Pokemon" and n != spot.name})
+        greedy_form = _transform_pick(pl, opp, spot, fc) if fc else "unset"
+    default = next((o for o in options if o[0] == greedy_pick["name"]
+                    and o[3] == greedy_form), None) or \
+        next((o for o in options if o[0] == greedy_pick["name"]), None)
 
     def apply(me, them, opt):
         me._forced_attack = by_name[opt[0]]
         them._forced_gust = opt[1]
         me._forced_self_switch = opt[2]
+        me._forced_transform = opt[3]
         return "win" if do_attack(me, them, []) else None
     pick = lookahead_pick(pl, opp, options, apply, None, default)
     if pick is None or pick == default:
         return greedy_pick
     opp._forced_gust = pick[1]
     pl._forced_self_switch = pick[2]
+    pl._forced_transform = pick[3]
     return by_name[pick[0]]
 
 
@@ -5532,6 +5552,7 @@ def finish_turn(pl, opp, log):
     AE.return_boomerangs(pl, log)
     opp._forced_gust = None
     pl._forced_self_switch = "unset"
+    pl._forced_transform = "unset"
     pokemon_checkup(pl, opp, log)
     # Either Active can now die at checkup, since both resolve their
     # conditions there.

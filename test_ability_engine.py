@@ -3973,6 +3973,17 @@ def test_ditto_transforms_and_gengar_faints():
         plain += me.active.name != "Ditto"
     check("without it about 1 in 2", 80 <= plain <= 120, str(plain))
 
+    for want in ("Tyranitar", "Gengar ex"):
+        me, op = board(True)
+        me._forced_transform = want            # the lookahead pilot's choice
+        _r.seed(4)
+        for _ in range(10):
+            V.do_attack(me, op, [])
+            if me.active.name != "Ditto":
+                break
+        check(f"a forced transform target is honoured ({want})",
+              me.active.name == want, me.active.name)
+
     me, op = board(False)
     import ability_engine as AE
     g = V.InPlay("Gengar ex", 0)
