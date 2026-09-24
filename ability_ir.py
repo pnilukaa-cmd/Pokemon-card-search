@@ -1898,7 +1898,13 @@ def _r(m, text):
     whole Bench, so the amount is the Bench cap rather than one.
     """
     each = bool(re.search(r"for each of your benched pok[eé]mon", text, re.I))
-    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1, Target.YOUR_ANY)]
+    f = {}
+    if each:
+        f["bench_only"] = True
+    elif re.search(r"evolves from this pok[eé]mon", text, re.I):
+        f["self"] = True                  # Ascension: this Pokemon only
+    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1,
+                   Target.SELF if f.get("self") else Target.YOUR_ANY, f)]
 
 
 @rule("search_any_card", r"search your deck for a card\b")
@@ -2595,7 +2601,8 @@ def _r(m, text):
     # just evolved, so this is up to two stages in one activation.
     chain = bool(re.search(r"search your deck for a stage 2 pok[eé]mon", text,
                            re.I))
-    return [Action(Op.EVOLVE_FROM_DECK, 2 if chain else 1, Target.YOUR_ANY)]
+    return [Action(Op.EVOLVE_FROM_DECK, 2 if chain else 1, Target.YOUR_ANY,
+                   {"chain": True, "basic_first": True} if chain else {"basic_first": True})]
 
 
 @rule("discard_to_bench",

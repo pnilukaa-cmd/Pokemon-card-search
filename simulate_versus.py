@@ -1392,7 +1392,10 @@ def try_evolve(pl, opp, turn, log, first_turn):
             # (The second half was missing, so any Basic could run all the
             # way to Stage 2 in a single turn and every Stage 2 line
             # simulated a full turn faster than it really is.)
-            normal = (not first_turn and turn > spot.entered_turn
+            # "Your first turn" is round 1 for BOTH players: the player
+            # going second could evolve on theirs (first_turn is only the
+            # going-first player's, which is the attack/Supporter rule).
+            normal = (turn > 1 and turn > spot.entered_turn
                       and not spot.evolved_this_turn)
             # Luxio's Fighting Roar is the printed exception to both halves.
             if normal or AE.query_evolves_early(pl, spot, opp):
@@ -1422,7 +1425,8 @@ def _evolves_from_in_pool(name):
 
 
 def effect_rare_candy(pl, opp, turn, log, first_turn):
-    if first_turn:
+    # "You can't use this card during your first turn" -- either player's.
+    if first_turn or turn <= 1:
         return False
     s2 = [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Stage 2"]
     for spot in pl.in_play():

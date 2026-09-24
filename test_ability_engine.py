@@ -3768,6 +3768,51 @@ def test_no_supporter_on_the_first_turn_going_first():
               ("Crispin" in me.played_supporters_this_turn) == played)
 
 
+def test_evolution_timing_for_both_players():
+    """Neither player may evolve on their own first turn -- the player
+    going second could. Grand Tree obeys the same rule (its reminder text
+    says so), chains the Stage 2 onto the Pokemon it just evolved, and
+    Vivillon's Evo-Powder evolves the Bench only."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/decidueye_ex_judge_sniper_lock.txt", "d")
+    for rnd, want in ((1, "Rowlet"), (2, "Dartrix")):
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Rowlet", 0), V.InPlay("Rowlet", 0)
+        me.hand = [("Pokemon", "Dartrix")]
+        me.deck = [("Item", "Ultra Ball")] * 10
+        V.take_turn(me, op, rnd, False, V._CARDS_BY_NAME, [])
+        check(f"going second, round {rnd}: Active is {want}", me.active.name == want,
+              me.active.name)
+
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.round_no = 3
+    me.active, me.bench = V.InPlay("Rowlet", 1), [V.InPlay("Rowlet", 3)]
+    me.deck = [("Pokemon", "Dartrix"), ("Pokemon", "Decidueye ex"), ("Pokemon", "Dartrix")]
+    act = V.stadium_turn_effect_ir("Grand Tree").actions[0]
+    AE.apply_action(act, me, me, None, [])
+    check("Grand Tree chains Rowlet to Decidueye ex",
+          me.active.name == "Decidueye ex" and me.active.under == ["Rowlet", "Dartrix"],
+          me.active.name)
+    check("and leaves the Rowlet benched this turn alone", me.bench[0].name == "Rowlet")
+    me.round_no = 1
+    me.active = V.InPlay("Rowlet", 0)
+    me.deck = [("Pokemon", "Dartrix")]
+    check("Grand Tree does nothing on your first turn",
+          not AE.apply_action(act, me, me, None, []))
+
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.round_no = 3
+    me.active = V.InPlay("Scatterbug", 1)
+    me.bench = [V.InPlay("Scatterbug", 1)]
+    me.deck = [("Pokemon", "Spewpa"), ("Pokemon", "Spewpa")]
+    eff = IR.compile_effect("Vivillon", "Evo-Powder", "For each of your Benched Pokémon, "
+                            "search your deck for a card that evolves from that Pokémon "
+                            "and put it onto that Pokémon to evolve it. Then, shuffle your deck.")
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Evo-Powder evolves the Bench, not the Active",
+          me.bench[0].name == "Spewpa" and me.active.name == "Scatterbug")
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3833,6 +3878,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_evolution_timing_for_both_players,
                test_no_supporter_on_the_first_turn_going_first,
                test_conservation_audit_is_clean,
                test_cards_are_conserved,

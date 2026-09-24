@@ -1943,15 +1943,40 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Evolve a Basic straight out of the deck, and chain a Stage 2 onto
         # it if the card says so. The turn-in-play restriction is the
         # ordinary evolution rule and is enforced by the caller.
-        placed = []
+        # The ordinary evolution rule was said to be "enforced by the
+        # caller"; no caller did. Not on your first turn, not a Pokemon put
+        # into play this turn -- and once this effect has evolved a Pokemon
+        # it may chain the next stage onto that same one (Grand Tree), which
+        # the evolved-this-turn check used to block.
+        f = act.filter or {}
+        rnd = getattr(pl, "round_no", 2)
+        # The rule binds a Trainer's evolution (Grand Tree prints it); an
+        # attack's own "evolve this Pokemon" is left to the attack's timing.
+        if source is None and rnd <= 1:
+            return False
+        placed, chained = [], None
         for _ in range(act.amount or 1):
             base = None
-            for spot in pl.in_play():
+            if f.get("chain") and chained is not None:
+                spots = [chained]
+            elif f.get("self"):
+                spots = [source] if source is not None else []
+            elif f.get("bench_only"):
+                spots = list(pl.bench)
+            else:
+                spots = pl.in_play()
+            if f.get("basic_first") and chained is None:
+                spots = [p for p in spots
+                         if (pl.POKEMON.get(p.name) or {}).get("stage") == "Basic"]
+            for spot in spots:
                 nxt = next((n for n, i in pl.POKEMON.items()
                             if i.get("evolves_from") == _printed(pl, spot.name)
                             and any(k == "Pokemon" and x == n for k, x in pl.deck)),
                            None)
-                if nxt and not getattr(spot, "evolved_this_turn", False):
+                ok = spot is chained or (
+                    not getattr(spot, "evolved_this_turn", False)
+                    and (source is not None or getattr(spot, "entered_turn", 0) < rnd))
+                if nxt and ok:
                     base = (spot, nxt)
                     break
             if not base:
@@ -1962,6 +1987,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             # put a card in the discard pile that was still in play.
             _stack(spot).append(spot.name)
             spot.name = nxt
+            chained = spot if f.get("chain") else None
             spot.evolved_this_turn = True
             clear_attack_locks(spot)
             placed.append(nxt)
