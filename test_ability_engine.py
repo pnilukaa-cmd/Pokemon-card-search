@@ -3745,6 +3745,14 @@ def test_cards_are_conserved():
           and me.deck.count(("Pokemon", "Dudunsparce")) == 1, str(_cards_held(me) - before))
 
 
+def test_conservation_audit_is_clean():
+    """The standing guard for test_cards_are_conserved: one game per field
+    deck, every step checked (audit_conservation.py runs the long form)."""
+    import audit_conservation as AC
+    bad = AC.audit(1, 11)
+    check("no step creates or destroys a card", not bad, str(bad.most_common(5)))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3810,6 +3818,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_conservation_audit_is_clean,
                test_cards_are_conserved,
                test_the_lookahead_chooses_the_promotion,
                test_tri_kinesis_knocks_out_the_best_prize,
