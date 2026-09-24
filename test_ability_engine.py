@@ -3344,9 +3344,38 @@ def test_special_energy_does_what_it_prints():
           f"{first} {second}")
 
 
+def test_three_count_shapes_scale():
+    """Three "for each" shapes returned None and scored the printed base:
+    R Command (Team Rocket Supporters in the discard), Explode Together Now
+    (Koffing or Weezing in play, both sides), United Wings (Pokemon in the
+    discard with that attack)."""
+    import glob as _g
+    def find(card, atk):
+        for f in sorted(_g.glob("decks/field/*.txt")):
+            V, D, E = _real(f, "x")
+            if card in D[1]:
+                a = next((x for x in D[1][card]["attacks"] if x["name"] == atk), None)
+                if a:
+                    return V, D, E, a
+    V, D, E, a = find("Team Rocket's Porygon2", "R Command")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = op.active = V.InPlay("Team Rocket's Porygon2", 0)
+    me.discard = ["Team Rocket's Petrel", "Team Rocket's Ariana", "Team Rocket's Proton"]
+    check("R Command: 20 per Team Rocket Supporter in the discard",
+          V.attack_damage(me, op, me.active, a, record=False) == 60)
+    V, D, E, a = find("Team Rocket's Weezing", "Explode Together Now")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Team Rocket's Weezing", 0)
+    op.active = V.InPlay("Team Rocket's Weezing", 0)
+    me.bench = [V.InPlay("Team Rocket's Koffing", 0)] * 2
+    check("Explode Together Now: 40 per Koffing / Weezing on both sides",
+          V.attack_damage(me, op, me.active, a, record=False) == 160)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_special_energy_does_what_it_prints,
+    for fn in [test_three_count_shapes_scale,
+               test_special_energy_does_what_it_prints,
                test_effect_immunity_blocks_attack_effects_only,
                test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
                test_prevention_never_wins_and_attack_effects_run,

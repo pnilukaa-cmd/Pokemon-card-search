@@ -2414,6 +2414,32 @@ def _clause_count(clause, pl, opp, spot):
         if m.group("dmg"):
             hits = [sp for sp in hits if sp.damage > 0]
         return len(hits)
+    # Three shapes that returned None, so the attack scored its printed
+    # base: Team Rocket's Porygon2 / Porygon-Z's R Command (Supporters with
+    # "Team Rocket" in the discard), Team Rocket's Weezing's Explode Together
+    # Now (Koffing or Weezing in play, BOTH sides), Dartrix's United Wings
+    # (Pokemon in the discard that have the United Wings attack).
+    m = _re.search(r"(supporter|item|trainer|pok[eé]mon) cards? that ha(?:s|ve) "
+                   r"[\"“']([^\"”']+)[\"”'] in (?:its|their) name in your discard pile", c)
+    if m:
+        kind, frag = m.group(1), m.group(2).lower()
+        kinds = {"supporter": ("Supporter",), "item": ("Item",),
+                 "trainer": ("Supporter", "Item", "Tool", "Stadium")}.get(kind, ("Pokemon",))
+        return sum(1 for x in pl.discard
+                   if frag in str(x).lower() and _card_kind(pl, x) in kinds)
+    m = _re.search(r"pok[eé]mon in play that ha(?:s|ve) [\"“']([^\"”']+)[\"”']"
+                   r"(?: or [\"“']([^\"”']+)[\"”'])? in (?:its|their) name", c)
+    if m:
+        frags = [x.lower() for x in (m.group(1), m.group(2)) if x]
+        names = list(pl.in_play_names())
+        if "both yours and your opponent" in c and opp is not None:
+            names += list(opp.in_play_names())
+        return sum(1 for n in names if any(fr in n.lower() for fr in frags))
+    m = _re.search(r"pok[eé]mon in your discard pile that ha(?:s|ve) the ([\w'’ -]+?) attack", c)
+    if m:
+        want = m.group(1).strip().lower()
+        return sum(1 for x in pl.discard if any(
+            a["name"].lower() == want for a in (pl.POKEMON.get(x) or {}).get("attacks", [])))
     # "flip a coin for each MAUSHOLD YOU HAVE IN PLAY" -- a bare card name
     # with no "Pokemon" in the phrase, which none of the rules above reach.
     m = _re.search(r"^([\w'’ -]+?) you have in play$", clause.strip(), _re.I)
