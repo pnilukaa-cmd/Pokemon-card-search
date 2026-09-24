@@ -4837,6 +4837,15 @@ def _checkup_side(pl, opp, log, clear_paralysis):
 # Turn / game loop
 # --------------------------------------------------------------------------
 
+def extra_draws(a, b, mullA, mullB):
+    """Mulligan compensation: the difference, drawn by the player who
+    mulliganed less."""
+    if mullB > mullA:
+        a.draw(mullB - mullA)
+    elif mullA > mullB:
+        b.draw(mullA - mullB)
+
+
 def opening_hand(pl):
     """Draw 7 (mulliganing to a Basic), then set the 6 Prizes aside.
 
@@ -5539,6 +5548,9 @@ def run_game(modelA, modelB, verbose=False):
     mullA = opening_hand(a)
     mullB = opening_hand(b)
     log = []
+    # A player may draw 1 card for each extra mulligan the OPPONENT took
+    # (only the difference when both did). It was never drawn.
+    extra_draws(a, b, mullA, mullB)
 
     first = random.choice([a, b])
     second = b if first is a else a

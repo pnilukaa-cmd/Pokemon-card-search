@@ -3821,6 +3821,19 @@ def test_evolution_timing_for_both_players():
           me.bench[0].name == "Spewpa" and me.active.name == "Scatterbug")
 
 
+def test_mulligans_give_the_opponent_extra_cards():
+    """The opponent draws 1 card per extra mulligan: never drawn before."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    a, b = V.Player("a", D[1], D[2], E), V.Player("b", D[1], D[2], E)
+    a.hand, b.hand = [], []
+    V.extra_draws(a, b, 0, 2)
+    check("two mulligans: two extra cards for the other player",
+          len(a.hand) == 2 and len(b.hand) == 0)
+    a.hand, b.hand = [], []
+    V.extra_draws(a, b, 3, 1)
+    check("both mulliganed: only the difference", len(b.hand) == 2 and len(a.hand) == 0)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3886,6 +3899,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_mulligans_give_the_opponent_extra_cards,
                test_evolution_timing_for_both_players,
                test_no_supporter_on_the_first_turn_going_first,
                test_conservation_audit_is_clean,
