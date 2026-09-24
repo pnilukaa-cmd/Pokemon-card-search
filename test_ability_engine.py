@@ -4083,6 +4083,93 @@ def test_abilities_and_stadiums_that_were_ignored():
     check("with another Special Energy it provides Colorless", spot.energy[0] == ["Colorless"])
 
 
+def test_trainers_that_compiled_and_did_nothing():
+    """Briar, Jasmine's Gaze, Acerola's Mischief, Premium Power Pro, Scoop
+    Up Cyclone, Call Bell / Chill Teaser Toy's timing, Salvatore."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    me.round_no = op.round_no = 5
+    # Call Bell: only going second, only on the first turn.
+    eff = V.trainer_effect_ir("Call Bell")
+    me._goes_first = False
+    check("Call Bell is not playable on turn 5", not AE.conditions_met(eff, me, op, None))
+    me.round_no, me._goes_first = 1, False
+    check("but is on the second player's first turn", AE.conditions_met(eff, me, op, None))
+    me.round_no = 5
+    # Jasmine's Gaze: -30 for all of mine next turn, with a full hand.
+    me.active, op.active = V.InPlay("Raging Bolt ex", 0), V.InPlay("Mega Kangaskhan ex", 0)
+    op.active.energy = [["Colorless"]] * 4
+    me.hand = [("Supporter", "Jasmine's Gaze")] + [("Item", "Ultra Ball")] * 4
+    check("Jasmine's Gaze is played", V.play_trainer_from_ir(me, op, "Supporter", "Jasmine's Gaze", [], 5)
+          and me.turn_shield == 30)
+    # Premium Power Pro: +30 for a Fighting attacker this turn.
+    me.active = V.InPlay("Passimian", 0)
+    me.active.energy = [["Fighting"]] * 3
+    me.hand = [("Item", "Premium Power Pro")]
+    ok = V.play_trainer_from_ir(me, op, "Item", "Premium Power Pro", [], 5)
+    check("Premium Power Pro buffs a Fighting attacker",
+          ok and me.turn_buff_typed.get("Fighting") == 30, str(me.turn_buff_typed))
+    # Acerola's Mischief: shield the Active from an ex that would KO it.
+    me.active.damage = 100
+    op.prizes = 2
+    me.hand = [("Supporter", "Acerola's Mischief")]
+    me.supporter_played = False
+    V.play_trainer_from_ir(me, op, "Supporter", "Acerola's Mischief", [], 5)
+    check("Acerola's Mischief shields the Active",
+          me.active.shield and me.active.shield["filter"].get("attacker_is_ex"))
+    check("from the ex's attack effects too", AE.query_effect_immune(me, me.active, op))
+    # Scoop Up Cyclone picks up the damaged ex about to be Knocked Out.
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    me.active.damage = 200
+    me.active.energy, me.active.energy_names = [["Lightning"]], ["Lightning Energy"]
+    me.bench = [V.InPlay("Passimian", 0)]
+    me.hand = [("Item", "Scoop Up Cyclone")]
+    V.play_trainer_from_ir(me, op, "Item", "Scoop Up Cyclone", [], 5)
+    check("Scoop Up Cyclone picks up the ex and its Energy",
+          ("Pokemon", "Raging Bolt ex") in me.hand and ("Energy", "Lightning Energy") in me.hand
+          and me.active.name == "Passimian")
+    # Briar: +1 Prize on this turn's Knock Out by a Tera attacker.
+    me.active = V.InPlay("Teal Mask Ogerpon ex", 0)
+    me.active.energy = [["Grass"]] * 3
+    op.active = V.InPlay("Passimian", 0)
+    op.active.damage = 100
+    op.prizes = 2
+    me.hand = [("Supporter", "Briar")]
+    me.supporter_played = False
+    played = V.play_trainer_from_ir(me, op, "Supporter", "Briar", [], 5)
+    check("Briar is played into a Knock Out", played and me.turn_prize_bonus == (1, "Tera"), str(me.turn_prize_bonus))
+    check("and the Knock Out is worth one more",
+          V._ko_prizes(op, op.active, me) == op.POKEMON["Passimian"]["prize_value"] + 1)
+
+
+def test_ability_locks():
+    """"Has no Abilities" (Watchtower, Flutter Mane, Iron Thorns ex,
+    Gastrodon) compiled and was never read."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    POK, EFF = build(["Flutter Mane", "Iron Thorns ex", "Gastrodon"],
+                     {"Flutter Mane": ("TEF", "78")})
+    me = V.Player("b", D[1], D[2], E)
+    op = V.Player("o", dict(D[1], **POK), [], dict(E, **EFF))
+    me._opp_ref, op._opp_ref = op, me
+    og = V.InPlay("Teal Mask Ogerpon ex", 0)
+    fz = V.InPlay("Fezandipiti ex", 0)
+    me.active, me.bench = og, [fz]
+    op.active = V.InPlay("Passimian", 0)
+    check("no lock: Teal Dance works", not AE.ability_disabled(me, og, "Teal Dance"))
+    op.active = V.InPlay("Flutter Mane", 0)
+    check("Flutter Mane: the opposing Active has none", AE.ability_disabled(me, og, "Teal Dance"))
+    check("but the Bench keeps them", not AE.ability_disabled(me, fz, "Flip the Script"))
+    op.active = V.InPlay("Iron Thorns ex", 0)
+    check("Iron Thorns ex: every Rule Box Pokemon", AE.ability_disabled(me, fz, "Flip the Script"))
+    op.active, op.bench = V.InPlay("Passimian", 0), []
+    me.stadium = "Team Rocket's Watchtower"
+    kang = V.InPlay("Mega Kangaskhan ex", 0)
+    me.bench = [kang]
+    check("Watchtower: Colorless Pokemon", AE.ability_disabled(me, kang, "Run Errand")
+          and not AE.ability_disabled(me, og, "Teal Dance"))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -4148,6 +4235,8 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_trainers_that_compiled_and_did_nothing,
+               test_ability_locks,
                test_every_card_effect_is_read,
                test_attack_texts_that_were_ignored,
                test_abilities_and_stadiums_that_were_ignored,

@@ -225,6 +225,8 @@ class Player:
         # Unrestricted version of the same thing (Gladion's Final Battle),
         # which applies to any Active rather than only a Pokemon ex.
         self.turn_buff_any = 0
+        self.turn_buff_typed = {}    # Premium Power Pro: {type: +N} this turn
+        self.turn_prize_bonus = None  # Briar: (+N Prizes, attacker family)
         # "During your opponent's next turn, all of your <type> Pokemon
         # take N less damage" (Iron Defender). Set when the Item is
         # played and read while the OPPONENT attacks, so unlike the
@@ -1193,7 +1195,7 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
 
     for p in list(pl.in_play()):
         for eff in pl.EFFECTS.get(p.name, []):
-            if eff.unsupported:
+            if eff.unsupported or AE.ability_disabled(pl, p, eff.name):
                 continue
             if just_evolved is not None:
                 if eff.trigger != IR.Trigger.ON_EVOLVE or p is not just_evolved:
@@ -1384,7 +1386,8 @@ def on_play_from_hand(pl, spot, turn, log):
     if opp is None or spot not in pl.bench:
         return
     for eff in pl.EFFECTS.get(spot.name, []):
-        if eff.unsupported or eff.trigger != IR.Trigger.ON_PLAY:
+        if eff.unsupported or eff.trigger != IR.Trigger.ON_PLAY \
+                or AE.ability_disabled(pl, spot, eff.name):
             continue
         # By name: "You can't use more than 1 Last-Ditch Catch Ability
         # each turn" limits the name, not the copy.
@@ -2390,7 +2393,7 @@ TRAINER_IR_OPS = {
     IR.Op.REVEAL_OPPONENT_HAND, IR.Op.SET_OPPONENT_HAND, IR.Op.LOCK,
     IR.Op.APPLY_CONDITION, IR.Op.DISCARD_STADIUM, IR.Op.SEARCH_TO_DISCARD,
     IR.Op.SWAP_HAND_WITH_DECK, IR.Op.SHUFFLE_HAND_INTO_DECK, IR.Op.FORCE_BENCH_OPPONENT,
-    IR.Op.FILL_OPPONENT_BENCH, IR.Op.DISCARD_TOOL_ANY,
+    IR.Op.FILL_OPPONENT_BENCH, IR.Op.DISCARD_TOOL_ANY, IR.Op.OPP_ENERGY_TO_HAND,
     IR.Op.SWAP_IN_PLACE, IR.Op.DISCARD_FROM_SELF, IR.Op.DEVOLVE,
     IR.Op.DISCARD_TO_DECK, IR.Op.CLEAR_CONDITIONS,
     IR.Op.SEARCH_TO_TOP_OF_DECK, IR.Op.REROLL_PRIZES, IR.Op.EVOLVE_FROM_DECK,
@@ -2414,6 +2417,10 @@ def _ir_supporter_rank(name):
     eff = trainer_effect_ir(name)
     if eff is None:
         return -1
+    # A Prize bonus is played only when it lands (see _situational_trainer),
+    # and then it outranks any draw.
+    if _PRIZE_BONUS_RE.search(eff.text or ""):
+        return 99
     return max((_IR_SUPPORTER_VALUE.get(a.op, 1) for a in eff.actions), default=0)
 
 
@@ -2439,6 +2446,9 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         return False
     if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return False
+    sit = _situational_trainer(pl, opp, kind, name, eff, log)
+    if sit is not None:
+        return sit
     actions = [a for a in eff.actions if a.op in TRAINER_IR_OPS]
     if not actions:
         return False
@@ -2493,6 +2503,118 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         pl.played_supporters_this_turn.add(name)
     log.append(f"  {pl.name}: {name} (from card text)")
     return True
+
+
+_PRIZE_BONUS_RE = _re.compile(
+    r"if your opponent's active pok[eé]mon is knocked out by damage from an attack used by"
+    r" your ([\w'’ ]+?) pok[eé]mon, take (\d+) more prize cards?", _re.I)
+
+
+def _spend(pl, kind, name, log, note=""):
+    pl.remove_from_hand(kind, name)
+    pl.discard.append(name)
+    if kind == "Supporter":
+        pl.supporter_played = True
+        pl.played_supporters_this_turn.add(name)
+    log.append(f"  {pl.name}: {name}{note}")
+    return True
+
+
+def _likely_ko(pl, opp):
+    """Can the Active Knock Out the opponent's Active this turn?"""
+    if pl.active is None or opp.active is None:
+        return False
+    atk = best_attack(pl, pl.active, opp=opp)
+    if not atk:
+        return False
+    return attack_damage(pl, opp, pl.active, atk, record=False) >= \
+        effective_hp(opp, opp.active) - opp.active.damage
+
+
+def _situational_trainer(pl, opp, kind, name, eff, log):
+    """Trainers whose effect is a decision, not an action: when they are
+    worth playing is the whole card. None: not one of these shapes.
+
+    Each compiled to an op nothing plays from a Trainer, so all six sat in
+    hand: Briar / Anthea & Concordia (+Prizes this turn), Jasmine's Gaze
+    (-30 next turn), Acerola's Mischief (shield from ex), Premium Power Pro
+    (+30 to a type this turn), Scoop Up Cyclone (pick a Pokemon up).
+    """
+    text = eff.text or ""
+    m = _PRIZE_BONUS_RE.search(text)
+    if m:
+        who = m.group(1).strip()
+        a = pl.active
+        if a is None:
+            return False
+        info = pl.POKEMON.get(a.name) or {}
+        fits = (who.capitalize() in (info.get("subtypes") or [])
+                or a.name.lower().startswith(who.lower()))
+        if not fits or not _likely_ko(pl, opp):
+            return False
+        pl.turn_prize_bonus = (int(m.group(2)), who)
+        return _spend(pl, kind, name, log, f" (+{m.group(2)} Prize on this Knock Out)")
+    ops = {a.op for a in eff.actions}
+    if ops == {IR.Op.REDUCE_DAMAGE} and eff.actions[0].target == IR.Target.YOUR_ALL:
+        # Jasmine's Gaze: worth the Supporter only with a hand that does not
+        # need a draw and an attacker across the table.
+        if len(pl.hand) < 4 or opp.active is None or \
+                not best_attack(opp, opp.active, only_payable=False, opp=pl):
+            return False
+        pl.turn_shield, pl.turn_shield_type = eff.actions[0].amount or 0, None
+        pl._shield_armed = True
+        return _spend(pl, kind, name, log, f" (-{pl.turn_shield} damage next turn)")
+    if ops == {IR.Op.PREVENT_DAMAGE} and (eff.actions[0].filter or {}).get("attacker_is_ex"):
+        # Acerola's Mischief: the Active, when an ex across the table can
+        # Knock it Out next turn.
+        a, oa = pl.active, opp.active
+        if a is None or oa is None or not oa.name.endswith(" ex"):
+            return False
+        if _ready_damage(opp, pl, oa) < effective_hp(pl, a) - a.damage:
+            return False
+        a.shield = {"kind": "prevent", "amount": 0,
+                    "filter": {"attacker_is_ex": True, "and_effects": True}, "left": 2}
+        return _spend(pl, kind, name, log, f" (shields {a.name} from ex)")
+    if ops == {IR.Op.BUFF_DAMAGE}:
+        # Premium Power Pro: this turn's attackers of the type named.
+        t = (eff.actions[0].filter or {}).get("family") or ""
+        a = pl.active
+        if a is None or t.capitalize() not in (_types_of(pl, a) or ()) \
+                or not best_attack(pl, a, opp=opp):
+            return False
+        pl.turn_buff_typed = dict(getattr(pl, "turn_buff_typed", {}) or {})
+        pl.turn_buff_typed[t.capitalize()] = pl.turn_buff_typed.get(t.capitalize(), 0) + (eff.actions[0].amount or 0)
+        return _spend(pl, kind, name, log, f" (+{eff.actions[0].amount} this turn)")
+    if ops == {IR.Op.SELF_TO_HAND} and eff.actions[0].target == IR.Target.YOUR_ANY:
+        # Scoop Up Cyclone: take back the damaged ex the opponent is about
+        # to Knock Out, when something else can stand in.
+        if len(pl.in_play()) < 2 or opp.active is None:
+            return False
+        threat = _ready_damage(opp, pl, opp.active)
+        cands = [p for p in pl.in_play()
+                 if (pl.POKEMON.get(p.name) or {}).get("prize_value", 1) >= 2
+                 and p.damage > 0 and (p is not pl.active or threat >= effective_hp(pl, p) - p.damage)]
+        if not cands:
+            return False
+        tgt = max(cands, key=lambda p: (pl.POKEMON[p.name].get("prize_value", 1), p.damage))
+        was_active = tgt is pl.active
+        pl.remove_from_hand(kind, name)
+        for nm in list(getattr(tgt, "energy_names", None) or []):
+            pl.hand.append(("Energy", nm))
+        if tgt.tool:
+            pl.hand.append(("Tool", tgt.tool))
+        for nm in AE._stack(tgt):
+            pl.hand.append(("Pokemon", nm))
+        pl.hand.append(("Pokemon", tgt.name))
+        if was_active:
+            pl.active = None
+            pl.active = promote_from_bench(pl, opp)
+        else:
+            pl.bench.remove(tgt)
+        pl.discard.append(name)
+        log.append(f"  {pl.name}: {name} -- picks up {tgt.name}")
+        return True
+    return None
 
 
 KNOWN_TRAINERS = {
@@ -4533,6 +4655,14 @@ def _ko_prizes(owner, spot, taker, by_attack=True):
              + AE.query_prize_modifier(taker, owner, spot,
                                        taker.active if by_attack else None,
                                        by_attack))
+    # Briar / Anthea & Concordia: this turn's Knock Out by the named
+    # attacker of the Active Spot is worth more.
+    bonus = getattr(taker, "turn_prize_bonus", None)
+    if by_attack and bonus and spot is owner.active and taker.active is not None:
+        n, who = bonus
+        info = taker.POKEMON.get(taker.active.name) or {}
+        if who.capitalize() in (info.get("subtypes") or []) or taker.active.name.lower().startswith(who.lower()):
+            taken += n
     if by_attack and not getattr(owner, "_legacy_used", False):
         for nm, a in energy_passives(owner, spot, IR.Op.MODIFY_PRIZE):
             if a.target == IR.Target.OPPONENT and (a.amount or 0) < 0:
@@ -4964,6 +5094,9 @@ def do_attack(pl, opp, log):
     if pl.turn_buff_vs_ex and opp.POKEMON[opp.active.name]["prize_value"] >= 2:
         dmg += pl.turn_buff_vs_ex
     dmg += pl.turn_buff_any
+    for t, n in (getattr(pl, "turn_buff_typed", None) or {}).items():
+        if t in atk_types:
+            dmg += n
     dmg += getattr(pl.active, "turn_buff", 0) or 0
     # Tools that add damage. Brave Bangle only pays out for an attacker
     # WITHOUT a Rule Box, which is the whole reason it fits a deck of
@@ -5390,6 +5523,8 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl.supporter_played = False
     pl.turn_buff_vs_ex = 0
     pl.turn_buff_any = 0
+    pl.turn_buff_typed = {}
+    pl.turn_prize_bonus = None
     # The shield covers exactly the opponent turn that follows the one it
     # was played on. It is armed on play and spent here, one turn later.
     if pl._shield_armed:

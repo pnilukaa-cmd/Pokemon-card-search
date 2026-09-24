@@ -355,6 +355,15 @@ def parse_conditions(text):
             out.append({"kind": "have_in_play", "names": names})
     if re.search(r"once during your first turn", t, re.I):
         out.append({"kind": "own_first_turn"})
+    # Call Bell, Chill Teaser Toy: "You can use this card only if you go
+    # second, and only during your first turn." Dropped, so Call Bell was a
+    # Supporter tutor for the whole game.
+    if re.search(r"only if you go second, and only during your first turn", t, re.I):
+        out.append({"kind": "going_second_first_turn"})
+    # Briar: "only if your opponent has exactly 2 Prize cards remaining".
+    m = re.search(r"only if your opponent has exactly (\d+) prize cards? remaining", t, re.I)
+    if m:
+        out.append({"kind": "opponent_prizes_exactly", "counts": [int(m.group(1))]})
     if re.search(r"if this pok[eé]mon is in the active spot|as long as this pok[eé]mon is in the active spot", t, re.I):
         out.append({"kind": "self_is_active"})
     if re.search(r"as long as this pok[eé]mon is on your bench|is on your bench", t, re.I):
@@ -1630,6 +1639,9 @@ def _r(m, text):
 
 @rule("ability_lock", r"(?:has|have) no abilities")
 def _r(m, text):
+    # Salvatore: "a card that has no Abilities" is what it SEARCHES for.
+    if re.search(r"a card that has no abilities", text, re.I):
+        return []
     tgt = Target.OPP_ALL
     seg = text.lower()
     if "your opponent's active" in seg:
@@ -1642,7 +1654,24 @@ def _r(m, text):
         filt["type"] = mm.group(1).capitalize()
     if "rule box" in seg:
         filt["rule_box_only"] = True
+    # Gastrodon's Sticky Bind: "Benched Stage 2 Pokemon".
+    if re.search(r"benched stage 2 pok[eé]mon", seg):
+        filt["bench_only"], filt["stage"] = True, "Stage 2"
+    # "..., except for Future Pokemon" / "except for Midnight Fluttering".
+    ex = re.search(r"except for ([\w' -]+?)(?: pok[eé]mon)?[.)]", text, re.I)
+    if ex:
+        filt["except"] = ex.group(1).strip()
     return [Action(Op.LOCK, None, tgt, dict(filt, what="abilities"))]
+
+
+# Salvatore: "Search your deck for a card that has no Abilities and evolves
+# from 1 of your Pokemon, and put it onto that Pokemon to evolve it ...
+# You can use this card on a Pokemon ... put into play this turn."
+@rule("evolve_no_ability_from_deck",
+      r"search your deck for a card that has no abilities and evolves from 1 of your pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.EVOLVE_FROM_DECK, 1, Target.YOUR_ANY,
+                   {"no_ability": True, "any_timing": True})]
 
 
 # Zoroark's Nighttime Byway: "As long as this Pokemon is on your Bench,
@@ -1957,7 +1986,7 @@ def _r(m, text):
 def _r(m, text):
     # "a card that evolves from ..." is handled above as an evolution; if
     # this fired too the card would ALSO tutor something unrelated.
-    if re.search(r"a card that evolves from", text, re.I):
+    if re.search(r"a card that (?:has no abilities and )?evolves from", text, re.I):
         return []
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "card"})]
 

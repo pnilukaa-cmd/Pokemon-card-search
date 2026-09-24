@@ -421,6 +421,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
         k = c["kind"]
         if k == "own_first_turn" and getattr(pl, "round_no", None) != 1:
             return False
+        if k == "going_second_first_turn" and (getattr(pl, "round_no", None) != 1
+                                                or getattr(pl, "_goes_first", True)):
+            return False
         if k == "have_in_play":
             here = [p.name for p in pl.in_play()]
             if c.get("subtype") and not any(
@@ -2111,9 +2114,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # the evolved-this-turn check used to block.
         f = act.filter or {}
         rnd = getattr(pl, "round_no", 2)
+        # Salvatore says it may evolve a Pokemon put into play this turn;
+        # its first-turn use is still the ordinary rule's.
+        anytime = bool(f.get("any_timing"))
         # The rule binds a Trainer's evolution (Grand Tree prints it); an
         # attack's own "evolve this Pokemon" is left to the attack's timing.
-        if source is None and rnd <= 1:
+        if source is None and rnd <= 1 and not anytime:
             return False
         placed, chained = [], None
         for _ in range(act.amount or 1):
@@ -2132,11 +2138,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             for spot in spots:
                 nxt = next((n for n, i in pl.POKEMON.items()
                             if i.get("evolves_from") == _printed(pl, spot.name)
+                            and not (f.get("no_ability") and pl.EFFECTS.get(n))
                             and any(k == "Pokemon" and x == n for k, x in pl.deck)),
                            None)
                 ok = spot is chained or (
                     not getattr(spot, "evolved_this_turn", False)
-                    and (source is not None or getattr(spot, "entered_turn", 0) < rnd))
+                    and (source is not None or anytime or getattr(spot, "entered_turn", 0) < rnd))
                 if nxt and ok:
                     base = (spot, nxt)
                     break
@@ -2556,6 +2563,8 @@ def _passive_actions(pl, op):
         for eff in pl.EFFECTS.get(holder.name, []):
             if eff.unsupported:
                 continue
+            if op is not IR.Op.LOCK and ability_disabled(pl, holder, eff.name):
+                continue
             for act in eff.actions:
                 if act.op == op:
                     yield holder, eff, act
@@ -2624,6 +2633,13 @@ def query_effect_immune(owner, spot, attacker_owner=None):
     """
     if spot is None:
         return False
+    # Acerola's Mischief: a shield from a Trainer that also stops the
+    # effects of an ex's attacks.
+    sh = getattr(spot, "shield", None)
+    if sh and (sh.get("filter") or {}).get("and_effects"):
+        att = getattr(attacker_owner, "active", None) if attacker_owner is not None else None
+        if query_attack_shield(owner, spot, attacker_owner, att) is not None:
+            return True
     for holder, eff, act in _passive_actions(owner, IR.Op.PREVENT_DAMAGE):
         f = act.filter or {}
         if not (f.get("effects_only") or f.get("and_effects")):
@@ -2850,7 +2866,7 @@ def query_ko_attacker_on_ko(owner, spot, attacker_player):
     """Gengar ex's Fainting Spell: does this Knock Out (by an attack's
     damage) Knock Out the attacker? Flips the coin."""
     for eff in owner.EFFECTS.get(spot.name, []):
-        if eff.unsupported:
+        if eff.unsupported or ability_disabled(owner, spot, eff.name):
             continue
         if any(a.op == IR.Op.KO_ATTACKER_ON_KO for a in eff.actions):
             return random.random() < getattr(eff, "chance", 1.0)
@@ -2862,7 +2878,8 @@ def query_retaliation(defender, attacker_spot, attacker_player=None):
     total = 0
     for holder in defender.in_play():
         for eff in defender.EFFECTS.get(holder.name, []):
-            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED:
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED \
+                    or ability_disabled(defender, holder, eff.name):
                 continue
             if not conditions_met(eff, defender, attacker_player or defender, holder):
                 continue
@@ -2886,7 +2903,8 @@ def on_damaged_riders(defender, attacker_player, attacker_spot, log,
     """
     for holder in list(defender.in_play()):
         for eff in defender.EFFECTS.get(holder.name, []):
-            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED:
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED \
+                    or ability_disabled(defender, holder, eff.name):
                 continue
             if not conditions_met(eff, defender, attacker_player, holder):
                 continue
@@ -2895,6 +2913,93 @@ def on_damaged_riders(defender, attacker_player, attacker_spot, log,
                     continue            # query_retaliation's
                 apply_action(act, defender, attacker_player, holder, log,
                              attacker_spot, make_inplay)
+
+
+_LOCK_SOURCES = {}
+
+
+def _ability_lock_effects(side):
+    """(holder, effect, action) for every Ability-lock Ability on `side`'s
+    board. Cached per deck: most decks have none, and this is asked for
+    every passive query."""
+    key = id(side.EFFECTS)
+    names = _LOCK_SOURCES.get(key)
+    if names is None:
+        names = {n for n, effs in side.EFFECTS.items() for e in effs
+                 if not e.unsupported and any(a.op == IR.Op.LOCK and
+                                              (a.filter or {}).get("what") == "abilities"
+                                              for a in e.actions)}
+        _LOCK_SOURCES[key] = names
+    if not names:
+        return
+    for holder in side.in_play():
+        if holder.name not in names:
+            continue
+        for eff in side.EFFECTS.get(holder.name, []):
+            for act in eff.actions:
+                if act.op == IR.Op.LOCK and (act.filter or {}).get("what") == "abilities":
+                    yield holder, eff, act
+
+
+_STADIUM_LOCKS = {}
+
+
+def _stadium_locks(stadium):
+    if not stadium:
+        return ()
+    if stadium not in _STADIUM_LOCKS:
+        eff = TRAINER_IR(stadium)
+        _STADIUM_LOCKS[stadium] = tuple(
+            a for a in (eff.actions if eff and not eff.unsupported else [])
+            if a.op == IR.Op.LOCK and (a.filter or {}).get("what") == "abilities")
+    return _STADIUM_LOCKS[stadium]
+
+
+def ability_disabled(owner, spot, ability_name=None):
+    """Is this Pokemon's Ability switched off right now?
+
+    "Has no Abilities" compiled on five cards -- Team Rocket's Watchtower
+    (Colorless Pokemon), Flutter Mane (the opposing Active), Iron Thorns ex
+    (Rule Box Pokemon), Gastrodon (Benched Stage 2) -- and nothing read it.
+    """
+    if spot is None:
+        return False
+    opp = getattr(owner, "_opp_ref", None)
+    stadium = getattr(owner, "stadium", None) or getattr(owner, "_opp_stadium", None)
+    # Fast path: no lock anywhere on either board or in the Stadium.
+    if not _stadium_locks(stadium) and not any(
+            _LOCK_SOURCES.get(id(side.EFFECTS), True) for side in (owner, opp) if side is not None):
+        return False
+    info = owner.POKEMON.get(spot.name) or {}
+    sources = []
+    for side in (owner, opp):
+        if side is None:
+            continue
+        for holder, eff, act in _ability_lock_effects(side):
+            if conditions_met(eff, side, owner if side is not owner else (opp or owner), holder):
+                sources.append((side, act))
+    for act in _stadium_locks(stadium):
+        sources.append((None, act))
+    for side, act in sources:
+        f = act.filter or {}
+        t = act.target
+        if t == IR.Target.OPP_ACTIVE and not (side is not owner and spot is owner.active):
+            continue
+        if t in (IR.Target.OPP_ALL,) and side is owner:
+            continue
+        if f.get("type") and f["type"] not in (info.get("types") or []):
+            continue
+        if f.get("rule_box_only") and not info.get("rule_box"):
+            continue
+        if f.get("bench_only") and spot not in owner.bench:
+            continue
+        if f.get("stage") and info.get("stage") != f["stage"]:
+            continue
+        ex = f.get("except")
+        if ex and (ex == ability_name or ex in (info.get("subtypes") or [])):
+            continue
+        return True
+    return False
 
 
 def heal_blocked(owner, spot, other):
