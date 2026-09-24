@@ -817,7 +817,11 @@ one-turn lookahead on its attack choice (the field stays greedy). It is
 ~18x slower. Measured paired against greedy: Mew ex lock +4.54, Wugtrio
 paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09 -- **all measured
 before 2026-09-24's `_hide_information` fix, when the lookahead could see
-both decks' order and the opponent's hand; treat them as optimistic.** The gap between
+both decks' order and the opponent's hand; treat them as optimistic.** After the fix, full lookahead (attack, gust,
+Supporter, Energy target, retreat, promotion) on Mew ex: 18.06 -> 39.71,
++21.66 +/- 1.68. Any new pilot code must value hidden cards (deck order,
+Prizes, the opponent's hand) by expectation, never by reading them; only
+resolution (`_RESOLVING`) reads the real card. The gap between
 the two pilots is how much of a deck's placement is sequencing. The
 lookahead now also chooses the Supporter, the Energy target, the retreat,
 the gust target and the promotion after a Knock Out

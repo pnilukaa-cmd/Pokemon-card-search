@@ -65,11 +65,29 @@ fails on the commit before it:
   Stage 2; same-name Stadium; mulligan extra draws.
 - *Pilot, measured.* Basics that reach the hand after the Supporter are
   benched that turn: +0.97 +/- 0.27 over 6 meta decks, now the default.
-  The lookahead also chooses the promotion after a Knock Out (measuring).
+  Rare Candy is played before Stage 1 evolutions: +0.52 +/- 0.24 over 6
+  Rare Candy decks, now the default. Reverted as unmeasured: a second
+  Ability pass after attach/evolve (-0.28 +/- 0.23), counter moves aimed
+  at a Knock Out (-0.13 +/- 0.12), Seek-by-copy-target Energy pricing
+  (-1.00 +/- 0.66). Kept: Academy at Night / Ciphermaniac stacking the
+  Seek target (+1.31 +/- 0.66, then +0.48 +/- 0.65 after the no-peek fix).
+- *Lookahead promotion.* The lookahead chooses the new Active after a
+  Knock Out: +2.33 +/- 0.63 on Mew ex (paired, lookahead with vs without).
 - *Lookahead information leak.* The lookahead's copies kept the real
   deck order and the opponent's real hand, so it played against the actual
   future. Fixed (`_hide_information`); every earlier lookahead number is
-  optimistic (Mew ex read 17.29 -> 43.91 with the leak).
+  optimistic (Mew ex read 17.29 -> 43.91 with the leak). **After the fix,
+  Mew ex greedy -> lookahead: 18.06 -> 39.71 (+21.66 +/- 1.68), 200 games
+  x 54 opponents.**
+- *No peeking in greedy either.* Choosing an attack no longer reads the
+  real top card (Seek Inspiration, Haughty Order, self-mill scalers) or a
+  not-yet-revealed opponent hand; those are valued by expectation until the
+  attack resolves (`_RESOLVING`), except a top card the player placed.
+- *Also fixed:* static play locks (Daunting Gaze, Potent Glare, ...) and
+  play-lock kinds; Archaludon's Metal Bridge condition.
+- **Stale:** `decks/FIELD_RESULTS.md`, `runs/2026-09-23/`, and the 1000-game
+  baselines of `dudunsparce_maushold_mill_wall` (inflated by the Run Away
+  Draw duplication) and `mew_ex_baby_lock`. The full rerun is the open item.
 
 **Pilot.** `policies.LOOKAHEAD` (`PILOT=lookahead` in `vs_field.py`): each
 attack (and gust-attack target), Boss's Orders target and retreat choice is
