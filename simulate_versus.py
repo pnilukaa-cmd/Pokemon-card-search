@@ -830,15 +830,19 @@ def _stadium_hand_to_top(pl, log):
     if not name or not _HAND_TO_TOP_RE.search(_card_text(name)):
         return
     opp = getattr(pl, "_opp_ref", None)
-    seekers = _seek_attackers(pl)
-    if opp is None or not seekers:
+    if opp is None or pl.active is None or pl.active not in _seek_attackers(pl):
+        return
+    seek = next(a for a in pl.POKEMON[pl.active.name]["attacks"]
+                if _SELF_TOP_COPY_RE.search(a.get("text") or ""))
+    if not can_pay(effective_cost(pl, pl.active, seek["cost"], opp, seek.get("name")),
+                   pl.active.energy):
         return
     want = _top_copy_want(pl, pool=pl.hand)
     if want is None:
         return
     top = pl.deck[-1] if pl.deck else ("", "")
-    if _top_copy_value(pl, opp, seekers[0], ("Pokemon", want)) <= \
-            _top_copy_value(pl, opp, seekers[0], top):
+    if _top_copy_value(pl, opp, pl.active, ("Pokemon", want)) <= \
+            _top_copy_value(pl, opp, pl.active, top):
         return
     pl.remove_from_hand("Pokemon", want)
     pl.deck.append(("Pokemon", want))
@@ -4968,7 +4972,6 @@ def run_phases(pl, opp, log, start):
             use_abilities(pl, opp, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
-            _stadium_hand_to_top(pl, log)
         elif ph == "sweep":
             sweep_knocked_out(pl, opp, log)
         elif ph == "attach":
@@ -4986,6 +4989,10 @@ def run_phases(pl, opp, log, start):
             # Meloetta ex's Debut Performance is the one card that may
             # attack on the very first turn.
             if not first_turn or AE.query_can_attack_first_turn(pl):
+                # Academy at Night is "once during each player's turn" --
+                # used last, when the Seek attacker is already Active,
+                # rather than stacking a card nobody attacks with.
+                _stadium_hand_to_top(pl, log)
                 if do_attack(pl, opp, log):
                     return "win"
     return finish_turn(pl, opp, log)
