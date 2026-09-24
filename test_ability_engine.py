@@ -1625,6 +1625,18 @@ def test_copied_attacks_carry_their_riders():
     check("a top card the player placed is known",
           SV.attack_value(me, op, sk, seek) == 330)
 
+    # "reveals their hand ... for each Item card you find there": the real
+    # hand only once the attack resolves.
+    op.hand, op.deck = [("Item", "Ultra Ball")] * 4, [("Energy", "Psychic Energy")] * 12
+    clause = "for each item card you find there"
+    check("before the reveal, the hand is an expectation",
+          SV._clause_count(clause, me, op, sk) == 1)
+    SV._RESOLVING[0] = True
+    try:
+        check("once revealed, the real count", SV._clause_count(clause, me, op, sk) == 4)
+    finally:
+        SV._RESOLVING[0] = False
+
 
 
 def test_copy_attacks_cannot_recurse_forever():

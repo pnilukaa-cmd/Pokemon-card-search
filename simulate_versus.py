@@ -2632,7 +2632,14 @@ def _clause_count(clause, pl, opp, spot):
                  "pok": ("Pokemon",), "energy": ("Energy",)}
         for word, want in kinds.items():
             if word in c:
-                return sum(1 for k, _ in opp.hand if k in want)
+                if _RESOLVING[0]:
+                    return sum(1 for k, _ in opp.hand if k in want)
+                # Before the reveal: the hand's size times the share of
+                # such cards among everything of theirs we can't see.
+                pool = (list(opp.deck) + list(opp.hand)
+                        + list(getattr(opp, "prize_cards", []) or []))
+                return round(len(opp.hand) *
+                             _expected_over(pool, lambda x: x[0] in want))
         return len(opp.hand)
     if "benched pok" in c and "both yours and your opponent" in c:
         return _bench_matching(c, list(pl.bench) + list(opp.bench))
