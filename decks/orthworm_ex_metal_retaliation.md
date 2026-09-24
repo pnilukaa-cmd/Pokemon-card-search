@@ -1,13 +1,15 @@
 # Orthworm ex Metal Retaliation
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **52.4% mean · 49.5% median · 19 of 44 winning matchups · rank 24 of 45**
+> ### Field results — 2026-09-23
+> **52.4% mean · 48.4% median · 25 of 53 winning matchups · rank 27 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `scovillain_salazzle_spicy_rage` 12%.
+> Best `study_centiskorch_bastiodon_mill` 93% · worst `scovillain_salazzle_spicy_rage` 14%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

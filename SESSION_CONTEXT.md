@@ -1,5 +1,123 @@
 # Session context — Pokémon TCG Standard simulator
 
+## Session 2 (2026-09-23 / 24), branch `claude/code-restructuring-yo2673`
+
+Read this section first; section 1 onward is the previous session.
+
+**Standing instructions added this session**
+- Treat 30th Celebration (`30C`) as legal.
+- When handed a real decklist: study it, teach the AI to play it, and keep
+  learning and improving (method: `.claude/skills/tcg-theorycraft/SKILL.md`
+  section 11e).
+- **Always extend or enhance the programming. Pause only when nothing is
+  left to fix or improve other than the deck rerun.**
+- Still in force: check every deck-building rule, always print the PTCGL
+  import, exact `SET NUM` on every line (Basic Energy excepted), 1000-trial
+  baseline on every finished list, real measurements, pause before a new
+  full run.
+
+**Field.** 54 decks in `decks/field/` (`paralysis_ctl` and
+`selective_bloom_cradily` dropped). The 2026-09-23 round robin
+(`runs/2026-09-23/`, `decks/FIELD_RESULTS.md`) is **superseded** by every
+engine fix since; a full rerun is the one open item.
+
+**New decks studied:** `decks/dudunsparce_maushold_mill_wall.*` (a
+tournament winner) and `decks/mew_ex_baby_lock.*`.
+
+**Engine bugs fixed this session** (each has a regression test proven to
+fail on the commit before it): hand-reset draws (Lillie's Determination in
+46 decks, Lacey, Carmine) dropped their first half; optional draws had no
+deck floor; "next turn" locks never expired; Pecharunt ex's Subjugating
+Chains poisoned the opponent instead of switching; Neutralization Zone /
+Battle Cage never played; Bench damage never checked against prevention
+(Shaymin); Fan Call never fired; search type filters ignored; Nighttime
+Mine never played; the inert-card guard passed dead Stadiums; energy /
+energy_names drifted (crashed every run with Enhanced Hammer); discard
+recovery returned Pokemon whatever the card said; Tool Scrapper, Accompanying
+Flute; "can't use attacks" locks (16 cards) did nothing; "only if you have
+X in play" requirements dropped (Glass Trumpet); attached Energy with no
+named type provided every type; Eri's discard dropped; Lisia's Appeal,
+Drasna, Mr. Mime miscompiled.
+
+**Later in session 2 (2026-09-24).** Each with a regression test that
+fails on the commit before it:
+- *Triggers.* `on_play` Abilities fire when a Pokemon is benched from hand
+  (Meowth ex's Last-Ditch Catch, which had also compiled as a self-lock;
+  Iron Leaves ex's Rapid Vernier, taken only when the moved Energy pays for
+  a better attack; Chien-Pao's Snow Sink, opponent's Stadium only).
+  `on_damaged` runs more than counters (Incandescent Body, Smog Signals).
+  Prize modifiers read their own wording (Mega Gengar ex's Shadowy
+  Concealment cut every Prize). "that have X in their name" Bench searches
+  keep the name (Roto Call, Smog Signals). Tri Kinesis compiles.
+- *Deck orientation.* `deck[-1]` is the top. Seek Inspiration read the
+  bottom and never discarded the card; it now reads and discards the top.
+  Academy at Night (was never played) and Ciphermaniac's Codebreaking set
+  up the copy target. The pilot heuristics for this were measured at
+  -0.92 +/- 0.82 and reworked (Academy used just before the attack); the
+  rework is under measurement.
+- *Card conservation* (`audit_conservation.py`, standing test): Knock Outs
+  now discard Energy, Tool and the Evolution stack (`InPlay.under`);
+  Stadium replacement; attack Bench searches; Run Away Draw no longer
+  duplicates Dudunsparce (**the Dudunsparce wall's earlier numbers were
+  inflated by this**); refunds; double-provision Energy.
+- *Rules.* No Supporter on the first turn going first; no evolving on
+  either player's first turn (Rare Candy, Grand Tree); Grand Tree chains to
+  Stage 2; same-name Stadium; mulligan extra draws.
+- *Pilot, measured.* Basics that reach the hand after the Supporter are
+  benched that turn: +0.97 +/- 0.27 over 6 meta decks, now the default.
+  Rare Candy is played before Stage 1 evolutions: +0.52 +/- 0.24 over 6
+  Rare Candy decks, now the default. Reverted as unmeasured: a second
+  Ability pass after attach/evolve (-0.28 +/- 0.23), counter moves aimed
+  at a Knock Out (-0.13 +/- 0.12), Seek-by-copy-target Energy pricing
+  (-1.00 +/- 0.66). Kept: Academy at Night / Ciphermaniac stacking the
+  Seek target (+1.31 +/- 0.66, then +0.48 +/- 0.65 after the no-peek fix).
+- *Lookahead promotion.* The lookahead chooses the new Active after a
+  Knock Out: +2.33 +/- 0.63 on Mew ex (paired, lookahead with vs without).
+- *Lookahead information leak.* The lookahead's copies kept the real
+  deck order and the opponent's real hand, so it played against the actual
+  future. Fixed (`_hide_information`); every earlier lookahead number is
+  optimistic (Mew ex read 17.29 -> 43.91 with the leak). **After the fix,
+  Mew ex greedy -> lookahead: 18.06 -> 39.71 (+21.66 +/- 1.68), 200 games
+  x 54 opponents.**
+- *No peeking in greedy either.* Choosing an attack no longer reads the
+  real top card (Seek Inspiration, Haughty Order, self-mill scalers) or a
+  not-yet-revealed opponent hand; those are valued by expectation until the
+  attack resolves (`_RESOLVING`), except a top card the player placed.
+- *Also fixed:* static play locks (Daunting Gaze, Potent Glare, ...) and
+  play-lock kinds; Archaludon's Metal Bridge condition.
+- *Ditto / Tyranitar / Gengar ex / Hydreigon ex* (user list, in
+  `decks/` and the field): Surprisingly Transform, Backtrack Badge's
+  effect re-flip, Fainting Spell. 66.01% greedy, lookahead +6.09.
+- *Items after the Supporter* are played the same turn: +0.90 +/- 0.24
+  over 7 decks, now the default.
+- **Every card effect is modelled** (`audit_unmodeled.py` reports 0; it
+  started at 72, 66 of them attack texts): a generic condition evaluator
+  for "If ..., this attack does N more damage / does nothing", hand-Energy
+  costs, coin tiers, a dozen riders, Life-Locked, Nighttime Byway, Mystery
+  Garden, Surfing Beach, Luminous Energy. Cards that compiled and did
+  nothing: Briar, Anthea & Concordia, Jasmine's Gaze, Acerola's Mischief,
+  Premium Power Pro, Scoop Up Cyclone, Kieran's choice, Call Bell / Chill
+  Teaser Toy timing, the Ability locks (Watchtower, Flutter Mane, Iron
+  Thorns ex, Gastrodon), Salvatore, 19 Tools read off their text, Voltaic
+  Lightning / Nitro Fire / Team Rocket's Energy, Perilous Jungle, Forest
+  of Vitality. Remaining sweep partials are benign (Fossils' immunity is
+  read in play; Glass Trumpet / Bother-Bot carry no-op markers).
+- **Stale:** `decks/FIELD_RESULTS.md`, `runs/2026-09-23/`, and the 1000-game
+  baselines of `dudunsparce_maushold_mill_wall` (inflated by the Run Away
+  Draw duplication) and `mew_ex_baby_lock`. The full rerun is the open item.
+
+**Pilot.** `policies.LOOKAHEAD` (`PILOT=lookahead` in `vs_field.py`): each
+attack (and gust-attack target), Boss's Orders target and retreat choice is
+played out through the opponent's reply. Greedy stays the default and is
+bit-identical. Measured attack-only lookahead vs greedy: Mew ex +4.54,
+Wugtrio +1.92, Dudunsparce +0.65, N's Zoroark -0.09.
+
+**Tools.** `vs_field.py` (in repo), `run_phases` / `finish_turn` /
+`lookahead_pick` in `simulate_versus.py`, `test_ability_engine.py` runs
+under pytest honestly (`conftest.py`).
+
+---
+
 Branch `claude/pokemon-standard-cards-fetcher-mucwsu`, from `be14f9d` to `17c6142`.
 Written as a handoff: what was asked, what was fixed, what was measured, what
 is still open, and the methodology mistakes worth not repeating.

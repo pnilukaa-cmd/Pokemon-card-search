@@ -1,13 +1,15 @@
 # Arbok / Team Rocket's Muk — Dangerous Laser + Dark Bell variant
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **60.3% mean · 60.0% median · 35 of 44 winning matchups · rank 9 of 45**
+> ### Field results — 2026-09-23
+> **58.1% mean · 58.9% median · 36 of 53 winning matchups · rank 15 of 54**
 >
-> Best `selective_bloom_cradily` 100% · worst `lurantis_heal_punish` 26%.
+> Best `study_centiskorch_bastiodon_mill` 93% · worst `lurantis_heal_punish` 26%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

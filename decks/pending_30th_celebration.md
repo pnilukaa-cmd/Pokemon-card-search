@@ -1,5 +1,11 @@
 # Pending — Maushold mill (30th Celebration)
 
+> **Status 2026-09-24: superseded.** 30th Celebration landed in the pool on
+> 2026-09-17 (see `pending_new_sets.md`) and is treated as legal. The
+> Maushold mill lists that use it are in the field as
+> `maushold_gnaw_together_mill` and `study_maushold_gnaw_latias`. The text
+> below is kept as the record of why it was held back.
+
 **This is a research note, not a deck file.** It has no fenced decklist on
 purpose: two of its cards do not exist in this repo's pool, so
 `check_decks.py` would be right to reject it and the field runner would be

@@ -1,5 +1,15 @@
 # Paralysis retreat-lock — "You Are Not Going Anywhere"
 
+<!-- field-results -->
+> ### Field results — 2026-09-23
+> **69.5% mean · 72.3% median · 48 of 53 winning matchups · rank 3 of 54**
+>
+> Best `study_centiskorch_bastiodon_mill` 97% · worst `study_mega_excadrill_drill_mill` 38%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+<!-- field-results -->
+
+
 Built for the brief: *a deck focused around paralyze to prevent retreating.*
 
 **69.86% (±0.46) across all 45 field decks, 1000 games each, winning 41 of 45.**

@@ -85,6 +85,24 @@ def TRAINER_IR(name):
     return None
 
 
+# (energy name, action) for the Special Energy attached to `spot`, with its
+# holder-type and on-the-Bench conditions applied. Set by simulate_versus.
+def ENERGY_PASSIVES(pl, spot, op=None):
+    return []
+
+
+# What an Energy card provides when attached to `spot` (one type-list).
+# Set by simulate_versus.
+def ENERGY_PROVIDES(pl, name, spot):
+    return None
+
+
+# A discard-pile card's kind ("Pokemon", "Supporter", "Item", "Tool",
+# "Stadium", "Energy"); the pile holds names only. Set by simulate_versus.
+def CARD_KIND(pl, name):
+    return "Pokemon" if name in pl.POKEMON else None
+
+
 # Fires when a Pokemon is PUT ONTO THE BENCH from hand or deck. Injected by
 # the simulator, which owns the card index and the Stadium text. Defaults to
 # a no-op, which is what every caller saw before Risky Ruins needed it.
@@ -151,6 +169,10 @@ def matches_filter(pl, spot, filt):
     if filt.get("stage") and info.get("stage") != filt["stage"]:
         return False
     if filt.get("stage_not") and info.get("stage") == filt["stage_not"]:
+        return False
+    # "Pokemon that have Metal Energy attached" (Archaludon's Metal Bridge)
+    et = filt.get("has_energy_type")
+    if et and not any(et in e for e in getattr(spot, "energy", []) or []):
         return False
     return True
 
@@ -376,6 +398,11 @@ def query_attack_gate(pl, spot):
                 return False
     return True
 
+def _is_basic_energy_name(name):
+    """A Basic Energy card's name: "Fire Energy" / "Basic Fire Energy"."""
+    return bool(re.fullmatch(r"(basic )?(" + IR.TYPES + r") energy", str(name), re.I))
+
+
 def _is_special_energy(name):
     """Special Energy, as opposed to a Basic one.
 
@@ -392,6 +419,19 @@ def _is_special_energy(name):
 def conditions_met(effect, pl, opp, source, atk=None):
     for c in effect.conditions:
         k = c["kind"]
+        if k == "own_first_turn" and getattr(pl, "round_no", None) != 1:
+            return False
+        if k == "going_second_first_turn" and (getattr(pl, "round_no", None) != 1
+                                                or getattr(pl, "_goes_first", True)):
+            return False
+        if k == "have_in_play":
+            here = [p.name for p in pl.in_play()]
+            if c.get("subtype") and not any(
+                    c["subtype"] in (pl.POKEMON.get(n, {}).get("subtypes") or [])
+                    for n in here):
+                return False
+            if c.get("names") and not all(n in here for n in c["names"]):
+                return False
         if k == "self_is_active" and source is not pl.active:
             return False
         if k == "self_is_benched" and source not in pl.bench:
@@ -609,9 +649,9 @@ def pay_costs(effect, pl, source, log):
             pl.discard.append(pl.hand.pop(i)[1])
         elif k == "discard_energy_from_self":
             i = next(i for i, e in enumerate(source.energy) if c["type"] in e)
-            source.energy.pop(i)
-            if getattr(source, "energy_names", None):
-                source.energy_names.pop(i)
+            nm = pop_energy(source, i)
+            if nm:
+                pl.discard.append(nm)
     return True
 
 
@@ -650,18 +690,238 @@ def leaving_active(spot, log=None):
         spot.conditions = set()
 
 
+# Which Benched Pokemon a "switch this Pokemon with 1 of your Benched"
+# effect goes to (None: decline an optional one). Set by simulate_versus.
+SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else None)
+
+# How much a Pokemon is worth in the Active Spot right now. Set by
+# simulate_versus (its _ready_damage), which this module cannot import.
+SWITCH_RANK = lambda pl, opp, spot: 0
+# The simulator sets this: the Pokemon a "discard the top card and use its
+# attack" attacker wants on top of the deck (None: no such attacker).
+TOP_COPY_WANT = lambda pl: None
+# The simulator sets this: attacks printed on an attached Tool.
+TOOL_ATTACKS = lambda pl, spot: []
+# The simulator sets this: what Ditto's Surprisingly Transform becomes.
+TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
+# The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
+BENCH_LIMIT = lambda pl: 5
+
+_BOOMERANG_RE = re.compile(r"if this card is discarded by an effect of an attack used by "
+                           r"the pok[eé]mon this card is attached to, attach this card", re.I)
+
+
+def note_attack_discard(pl, spot, name):
+    """Boomerang Energy: discarded by its holder's own attack, it comes back
+    after attacking. Recorded here; return_boomerangs puts it back."""
+    card = TRAINER_IR(name)
+    text = (card.text if card else "") or ""
+    if not text:
+        kind_rules = CARD_TEXT(name)
+        text = kind_rules or ""
+    if _BOOMERANG_RE.search(text):
+        if not hasattr(pl, "_boomerangs") or pl._boomerangs is None:
+            pl._boomerangs = []
+        pl._boomerangs.append((spot, name))
+        return
+    # Nitro Fire Energy: "discarded by an effect of an attack used by the
+    # Fire Pokemon this card is attached to, put this card into your hand".
+    m = _TO_HAND_AFTER_RE.search(text)
+    if m:
+        t = m.group(1).capitalize()
+        if t in (pl.POKEMON.get(spot.name) or {}).get("types", []):
+            if not hasattr(pl, "_boomerangs") or pl._boomerangs is None:
+                pl._boomerangs = []
+            pl._boomerangs.append((spot, name, "hand"))
+
+
+_TO_HAND_AFTER_RE = re.compile(r"if this card is discarded by an effect of an attack used by the"
+                               r" (\w+) pok[eé]mon this card is attached to, put this card into your hand", re.I)
+
+
+def return_boomerangs(pl, log):
+    for entry in (getattr(pl, "_boomerangs", None) or []):
+        spot, name = entry[0], entry[1]
+        if len(entry) > 2 and entry[2] == "hand":
+            if name in pl.discard:
+                pl.discard.remove(name)
+                pl.hand.append(("Energy", name))
+                log.append(f"    {name} returns to hand")
+            continue
+        if name in pl.discard and spot in pl.in_play():
+            pl.discard.remove(name)
+            spot.energy.append(ENERGY_PROVIDES(pl, name, spot) or ["Colorless"])
+            spot.energy_names.append(name)
+            log.append(f"    {name} returns to {spot.name}")
+    pl._boomerangs = []
+
+
+def CARD_TEXT(name):
+    """A card's rules text by name (set by simulate_versus)."""
+    return ""
+
+
+def _stack(spot):
+    st = getattr(spot, "under", None)
+    if st is None:
+        st = []
+        try:
+            spot.under = st
+        except AttributeError:
+            pass
+    return st
+
+
+def discard_pokemon(owner, spot, keep_top=False):
+    """A Pokemon leaves play for the discard pile, with everything on it.
+
+    Every Knock Out appended the top card's NAME and nothing else: the
+    Pokemon it evolved from, its Energy and its Tool vanished from the
+    game. Energy recovery (Night Stretcher, Energy Retrieval) came up
+    empty, and every "for each Pokemon in your discard pile" count was
+    short by every Stage 1 underneath a Stage 2. `keep_top` leaves the
+    Pokemon card itself to the caller (it is going back to hand).
+    """
+    owner.discard.extend(_stack(spot))
+    if not keep_top:
+        owner.discard.append(spot.name)
+    names = list(getattr(spot, "energy_names", None) or [])
+    owner.discard.extend(names)
+    if getattr(spot, "tool", None):
+        owner.discard.append(spot.tool)
+
+
+def _shuffle_into_deck(pl, spot):
+    """"Shuffle this Pokemon and all attached cards into your deck": the
+    attached cards and the Evolution stack went nowhere before."""
+    for nm in _stack(spot):
+        pl.deck.append(("Pokemon", nm))
+    pl.deck.append(("Pokemon", spot.name))
+    for nm in list(getattr(spot, "energy_names", None) or []):
+        pl.deck.append(("Energy", nm))
+    if getattr(spot, "tool", None):
+        pl.deck.append(("Tool", spot.tool))
+
+
+def pop_energy(spot, i=-1):
+    """Take one Energy off `spot`, keeping energy and energy_names in step.
+
+    Three sites popped `energy` alone (retreat, an attack's discard cost, an
+    Energy-discard effect), so the two lists drifted apart; Enhanced Hammer
+    then indexed one by the other and crashed a whole field run. They also
+    discarded a placeholder "Energy", so a Basic Energy spent that way could
+    never be recovered by Lana's Aid or Night Stretcher. Returns the card
+    name for the discard pile.
+    """
+    if i < 0:
+        i += len(spot.energy)
+    spot.energy.pop(i)
+    names = getattr(spot, "energy_names", None)
+    if names and i < len(names):
+        return names.pop(i)
+    # No card left to name: the second Energy a double-provider (Team
+    # Rocket's Energy) gives. Returning a placeholder put a phantom
+    # "Energy" card into the discard pile or the hand.
+    return None
+
+
+_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
+
+
+def tick_attack_locks(spot):
+    """End of the owner's turn: every "during your next turn" lock counts down."""
+    for k in _LOCKS:
+        if getattr(spot, k, 0):
+            setattr(spot, k, getattr(spot, k) - 1)
+    sh = getattr(spot, "shield", None)
+    if sh:
+        sh["left"] -= 1
+        if sh["left"] <= 0:
+            spot.shield = None
+
+
+def query_attack_shield(pl, spot, opp=None, attacker=None):
+    """A shield `spot` put up with its own attack: ("prevent", 0),
+    ("reduce", N) or None, checked against who is attacking."""
+    sh = getattr(spot, "shield", None) if spot is not None else None
+    if not sh:
+        return None
+    f = sh.get("filter") or {}
+    card = (opp.POKEMON.get(attacker.name, {}) if (opp and attacker) else {})
+    if f.get("attacker_is_ex") and card.get("prize_value", 1) < 2:
+        return None
+    if f.get("attacker_has_ability") and not (opp and attacker and opp.EFFECTS.get(attacker.name)):
+        return None
+    if f.get("attacker_stage") and card.get("stage") != f["attacker_stage"]:
+        return None
+    if f.get("attacker_type_not") and f["attacker_type_not"] in (card.get("types") or []):
+        return None
+    return (sh["kind"], sh.get("amount", 0))
+
+
+def clear_attack_locks(spot):
+    """Evolving ends the effects of attacks on a Pokemon, locks included."""
+    for k in _LOCKS:
+        setattr(spot, k, 0)
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
 
+    # An ACTIVATED Ability's damage buff for this turn (Torrential Heart);
+    # the only one in the pool with no executor.
+    if op == O.BUFF_DAMAGE and act.target == IR.Target.SELF and source is not None \
+            and hasattr(source, "turn_buff"):
+        source.turn_buff = (source.turn_buff or 0) + (act.amount or 0)
+        log.append(f"    {source.name}'s attacks do {act.amount} more this turn")
+        return True
+
+    # Reached only as an attack rider: passive Abilities are queried, never
+    # applied, and Trainers do not carry these ops.
+    if op in (O.PREVENT_DAMAGE, O.REDUCE_DAMAGE):
+        if act.filter.get("effects_only") or act.filter.get("bench_counters"):
+            return False
+        holders = pl.in_play() if act.target == IR.Target.YOUR_ALL else [source]
+        for h in holders:
+            if h is None:
+                continue
+            h.shield = {"kind": "prevent" if op == O.PREVENT_DAMAGE else "reduce",
+                        "amount": act.amount or 0, "filter": dict(act.filter or {}),
+                        "left": 2}
+        log.append(f"    {source.name if source else 'it'} is shielded during the "
+                   f"opponent's next turn")
+        return True
+
+    if op == O.SHUFFLE_HAND_INTO_DECK:
+        n = len(pl.hand)
+        pl.deck.extend(pl.hand)
+        pl.hand = []
+        random.shuffle(pl.deck)
+        log.append(f"    shuffle {n} from hand into deck")
+        return True
+
     if op == O.DRAW:
         target_size = act.filter.get("up_to_hand_size")
         before = len(pl.hand)
+        amount = act.amount or 1
+        if act.filter.get("coin"):
+            heads, tails = act.filter["coin"]
+            amount = heads if random.random() < 0.5 else tails
+        if act.filter.get("per_opp_hand"):
+            amount = len(opp.hand)
+        ii = act.filter.get("instead_if")
+        if ii:
+            who = pl if ii["who"] == "self" else opp
+            have = getattr(who, "prizes", None)
+            if have is not None and (have == ii["count"] if ii["cmp"] == "=="
+                                     else have <= ii["count"]):
+                amount = act.filter["instead"]
         if target_size is not None:
             while len(pl.hand) < target_size and pl.deck:
                 pl.draw(1)
         else:
-            pl.draw(act.amount or 1)
+            pl.draw(amount)
             if act.target == IR.Target.BOTH_ALL:
                 opp.draw(act.amount or 1)
         log.append(f"    draw {len(pl.hand) - before}")
@@ -669,6 +929,18 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        # Attack DAMAGE that the IR models as counters (Bench spread,
+        # snipes) is stopped by damage prevention -- Shaymin's Flower
+        # Curtain and Neutralization Zone had never been asked, because the
+        # only caller of query_prevented was the Active hit. Real counters
+        # from effects are stopped on the Bench by Battle Cage instead.
+        if act.filter.get("attack_damage"):
+            hits = [h for h in hits if h is None
+                    or not query_prevented(opp, h, pl, attacker or source)]
+        else:
+            hits = [h for h in hits
+                    if not query_bench_counters_blocked(opp, h, pl)]
+            hits = _shield_effects(opp, hits)
         per = act.filter.get("per_discard_card")
         if per:
             # "2 damage counters for each Basic Grass Energy card in your
@@ -781,6 +1053,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         donors = [q for q in pool if q.damage >= 10]
         hits = resolve_targets(act.target, pl, opp, source, attacker) or \
             ([opp.active] if opp.active else [])
+        hits = [h for h in hits
+                if not query_bench_counters_blocked(opp, h, pl)]
+        hits = _shield_effects(opp, hits)
         if not donors or not hits:
             return False
         donor = max(donors, key=lambda q: q.damage)
@@ -788,13 +1063,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             amount = donor.damage        # "any number" -- take it all
         else:
             amount = min((act.amount or 0) * 10, donor.damage)
+        tgt = hits[0]
         donor.damage -= amount
-        hits[0].damage += amount
-        log.append(f"    move {amount} damage {donor.name} -> {hits[0].name}")
+        tgt.damage += amount
+        log.append(f"    move {amount} damage {donor.name} -> {tgt.name}")
         return True
 
     if op == O.HEAL:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        hits = [h for h in hits if not heal_blocked(pl if h in pl.in_play() else opp, h,
+                                                    opp if h in pl.in_play() else pl)]
         healed = 0
         for h in hits:
             amt = h.damage if act.filter.get("all") else min(h.damage, (act.amount or 0))
@@ -818,8 +1096,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if act.amount is not None:
             idxs = idxs[:act.amount]
         for i in sorted(idxs, reverse=True):
-            source.energy.pop(i)
-            pl.discard.append("Energy")
+            nm = pop_energy(source, i)
+            if nm:
+                pl.discard.append(nm)
+                note_attack_discard(pl, source, nm)
         if idxs:
             log.append(f"    {source.name} discards {len(idxs)} Energy")
         return bool(idxs)
@@ -861,6 +1141,57 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                                  and (not want_type or want_type in n)
                                  and (blocked is None or n != blocked))
 
+        def _put(tgt, card):
+            # What the attached card actually provides. With no type in the
+            # card's text this used to be EVERY type, so a Basic Fire Energy
+            # pulled off the discard could pay a Water cost.
+            if want_type:
+                prov = [want_type]
+            else:
+                prov = ENERGY_PROVIDES(pl, card[1], tgt) or list(IR.TYPES.split("|"))
+            tgt.energy.append(prov)
+            if getattr(tgt, "energy_names", None) is not None:
+                tgt.energy_names.append(card[1])
+            log.append(f"    attach {card[1]} to {tgt.name}")
+
+        each = act.filter.get("each_of")
+        if each:
+            # Glass Trumpet: one each to up to N Benched Pokemon of a type,
+            # the emptiest first.
+            rt = act.filter.get("recipient_type")
+            pool = [p for p in pl.bench
+                    if not rt or rt in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            got = 0
+            for tgt in sorted(pool, key=lambda p: p.energy_count())[:each]:
+                card = _take()
+                if not card:
+                    break
+                _put(tgt, card)
+                got += 1
+            return got > 0
+        if act.filter.get("per_heads") or act.filter.get("per_opp_energy"):
+            # Crackling Charge / Energizing Sketch (one per heads) and Tail
+            # Generator (one per Energy on the opponent's board): Basic
+            # Energy from the discard pile, spread to the emptiest first.
+            if act.filter.get("per_heads"):
+                n = sum(1 for _ in range(act.filter["per_heads"]) if random.random() < 0.5)
+            else:
+                n = sum(p.energy_count() for p in opp.in_play())
+            ht = act.filter.get("holder_type")
+            pool = pl.bench if act.filter.get("bench_only") else pl.in_play()
+            pool = [p for p in pool if not ht or ht in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            got = 0
+            for _ in range(n):
+                if not pool:
+                    break
+                nm = next((x for x in pl.discard if _is_basic_energy_name(x)
+                           and (not want_type or want_type in x)), None)
+                if nm is None:
+                    break
+                pl.discard.remove(nm)
+                _put(min(pool, key=lambda p: p.energy_count()), ("Energy", nm))
+                got += 1
+            return got > 0
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
         tgt = hits[0] if hits else source
         if tgt is None:
@@ -870,12 +1201,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             card = _take()
             if not card:
                 break
-            tgt.energy.append([want_type] if want_type else list(IR.TYPES.split("|")))
-            if getattr(tgt, "energy_names", None) is not None:
-                tgt.energy_names.append(card[1])
-            log.append(f"    attach {card[1]} to {tgt.name}")
+            _put(tgt, card)
             got += 1
         return got > 0
+
+    if op == O.MOVE_ENERGY and act.filter.get("opp_internal"):
+        # Off the opponent's Active, onto one of their Benched Pokemon:
+        # the attacker loses what it needs to swing next turn.
+        a = opp.active
+        if a is None or not a.energy or not opp.bench or not _shield_effects(opp, [a]):
+            return False
+        dst = min(opp.bench, key=lambda p: p.energy_count())
+        nm = pop_energy(a)
+        dst.energy.append(list(IR.TYPES.split("|")) if nm is None
+                          else (ENERGY_PROVIDES(opp, nm, dst) or list(IR.TYPES.split("|"))))
+        if nm:
+            dst.energy_names.append(nm)
+        log.append(f"    move {nm} {a.name} -> {dst.name}")
+        return True
 
     if op == O.MOVE_ENERGY:
         srcs = [q for q in pl.in_play() if q.energy and q is not pl.active]
@@ -891,9 +1234,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.SEARCH_TO_BENCH:
+        if make_inplay is None:
+            return False                 # nowhere to put it: leave the deck be
         placed = []
         for _ in range(act.amount or 1):
-            if len(pl.bench) >= 5:
+            if len(pl.bench) >= BENCH_LIMIT(pl):
                 break
             want = act.filter.get("name_contains")
             stage = act.filter.get("stage", "Basic")
@@ -941,9 +1286,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             cap = act.filter.get("hp_at_most")
             nobox = act.filter.get("no_rule_box")
             exonly = act.filter.get("ex_only")
+            ptype = act.filter.get("type")
             def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
-                     exonly=exonly):
+                     exonly=exonly, ptype=ptype):
                 if kind.startswith("pok") and k != "Pokemon":
+                    return False
+                # "search your deck for up to 3 Colorless Pokemon" -- the
+                # type was compiled and never checked, so Fan Call fetched
+                # Grass and Psychic Pokemon too.
+                if ptype and k == "Pokemon" and ptype not in (
+                        pl.POKEMON.get(n, {}).get("types") or []):
                     return False
                 if cap is not None and (
                         (pl.POKEMON.get(n, {}).get("hp") or 0) > cap
@@ -977,6 +1329,88 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if got:
             log.append(f"    search {', '.join(got)}")
         return bool(got)
+
+    if op == O.MILL_SELF:
+        # "Discard the top N cards of your deck" (Dragon Pulse and friends;
+        # Morpeko keeps one of them).
+        n = min(act.amount or 1, len(pl.deck))
+        if n <= 0:
+            return False
+        top = [pl.deck.pop() for _ in range(n)]
+        keep = (act.filter or {}).get("keep")
+        if keep:
+            rank = {"Supporter": 0, "Pokemon": 1, "Item": 2, "Tool": 2, "Stadium": 3, "Energy": 4}
+            for card in sorted(top, key=lambda c: rank.get(c[0], 5))[:keep]:
+                top.remove(card)
+                pl.hand.append(card)
+        pl.discard.extend(c[1] for c in top)
+        log.append(f"    discard the top {n} of own deck")
+        return True
+
+    if op == O.TRAINER_FLIP_LOCK:
+        opp.trainer_flip_lock = True
+        log.append("    opponent must flip for each Trainer next turn")
+        return True
+
+    if op == O.COPY_TOP_SUPPORTER:
+        if not pl.deck:
+            return False
+        kind, name = pl.deck.pop()
+        pl.discard.append(name)
+        log.append(f"    discard {name} from the top")
+        if kind != "Supporter":
+            return True
+        eff = TRAINER_IR(name)
+        if eff is None or eff.unsupported:
+            return True
+        for a in eff.actions:
+            apply_action(a, pl, opp, source, log, attacker, make_inplay)
+        log.append(f"    uses {name}'s effect")
+        return True
+
+    if op == O.PRIZES_IF_HAND_SIZE:
+        want = (act.filter or {}).get("hand")
+        if len(pl.hand) != want:
+            return False
+        n = min(act.amount or 1, pl.prizes)
+        for _ in range(n):
+            if getattr(pl, "prize_cards", None):
+                pl.hand.append(pl.prize_cards.pop())
+        pl.prizes -= n
+        pl.deck.extend(pl.hand)
+        pl.hand = []
+        random.shuffle(pl.deck)
+        log.append(f"    takes {n} Prize cards (Celebration)")
+        return True
+
+    if op == O.SET_WEAKNESS and (act.filter or {}).get("until_next_turn"):
+        tgt = opp.active
+        if tgt is None or not _shield_effects(opp, [tgt]):
+            return False
+        tgt.weakness_set = (act.filter["type"], (getattr(pl, "round_no", 0) or 0) + 1)
+        log.append(f"    {tgt.name}'s Weakness is now {act.filter['type']}")
+        return True
+
+    if op == O.SWAP_FROM_DECK:
+        # Surprisingly Transform: the Pokemon found in the deck takes this
+        # one's place with everything on it; this card goes into the deck.
+        if source is None or source not in pl.in_play():
+            return False
+        cands = sorted({n for k, n in pl.deck if k == "Pokemon" and n != source.name})
+        if not cands:
+            return False
+        pick = TRANSFORM_PICK(pl, opp, source, cands)
+        if pick is None:
+            return False
+        pl.deck.remove(("Pokemon", pick))
+        for nm in _stack(source):
+            pl.deck.append(("Pokemon", nm))
+        pl.deck.append(("Pokemon", source.name))
+        source.under = []
+        log.append(f"    {source.name} transforms into {pick}")
+        source.name = pick
+        random.shuffle(pl.deck)
+        return True
 
     if op == O.SWAP_IN_PLACE:
         # The discarded Pokemon takes over a board position outright: the
@@ -1033,14 +1467,30 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.FROM_DISCARD_TO_HAND:
         got = []
         nobox = act.filter.get("no_rule_box")
+        kinds = act.filter.get("kinds") or ["Pokemon"]
+        etype = act.filter.get("energy_type")
+
+        def fits(n):
+            k = CARD_KIND(pl, n)
+            if k not in kinds:
+                return False
+            if k == "Pokemon":
+                return not (nobox and pl.POKEMON[n].get("rule_box"))
+            if k == "Energy":
+                return bool(re.match(r"(?:basic )?(\w+) energy$", n.strip(), re.I)) and (
+                    not etype or etype.lower() in n.lower())
+            return True
         for _ in range(act.amount or 1):
-            nm = next((n for n in pl.discard if n in pl.POKEMON
-                       and not (nobox and pl.POKEMON[n].get("rule_box"))), None)
+            # Latest first: the card most recently spent is usually the
+            # one the turn wants back (the Boss's Orders just played).
+            nm = next((n for n in reversed(pl.discard) if fits(n)), None)
             if not nm:
                 break
             pl.discard.remove(nm)
-            pl.hand.append(("Pokemon", nm))
+            pl.hand.append((CARD_KIND(pl, nm), nm))
             got.append(nm)
+        if got:
+            log.append(f"    from discard to hand: {', '.join(got)}")
         return bool(got)
 
     if op == O.MILL_OPPONENT:
@@ -1069,7 +1519,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.SWITCH:
         if act.filter.get("gust"):
             if opp.bench and opp.active:
-                tgt = min(opp.bench, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
+                forced = getattr(opp, "_forced_gust", None)
+                opp._forced_gust = None
+                pool = _shield_effects(opp, list(opp.bench))
+                if not pool:
+                    return False
+                if act.filter.get("basic_only"):
+                    pool = [p for p in opp.bench
+                            if opp.POKEMON.get(p.name, {}).get("stage") == "Basic"]
+                    if not pool:
+                        return False
+                if forced is not None and forced < len(opp.bench) and opp.bench[forced] in pool:
+                    tgt = opp.bench[forced]      # the lookahead pilot's pick
+                else:
+                    tgt = min(pool, key=lambda p: opp.POKEMON[p.name]["hp"] - p.damage)
                 opp.bench.remove(tgt)
                 leaving_active(opp.active, log)
                 opp.bench.append(opp.active)
@@ -1077,18 +1540,55 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append(f"    gust up {tgt.name}")
                 return True
             return False
-        if pl.bench and pl.active:
-            tgt = pl.bench.pop(0)
+        if pl.bench and pl.active and act.filter.get("choose"):
+            # "Switch 1 of your Benched <type> Pokemon" is a choice, and is
+            # only worth making when the Pokemon coming up is better than
+            # the one going down.
+            f = act.filter
+            cands = [p for p in pl.bench
+                     if (not f.get("type") or f["type"] in
+                         (pl.POKEMON.get(p.name, {}).get("types") or []))
+                     and p.name != f.get("exclude")]
+            if not cands:
+                return False
+            tgt = max(cands, key=lambda p: SWITCH_RANK(pl, opp, p))
+            if SWITCH_RANK(pl, opp, tgt) <= SWITCH_RANK(pl, opp, pl.active):
+                return False
+            pl.bench.remove(tgt)
             leaving_active(pl.active, log)
             pl.bench.append(pl.active)
             pl.active = tgt
+            log.append(f"    switch in {tgt.name}")
+            if f.get("then_condition"):
+                tgt.conditions.add(f["then_condition"])
+                log.append(f"    {tgt.name} is now {f['then_condition']}")
+            return True
+        if pl.bench and pl.active:
+            f = act.filter or {}
+            cands = [p for p in pl.bench if not f.get("type")
+                     or f["type"] in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            forced = getattr(pl, "_forced_self_switch", "unset")
+            pl._forced_self_switch = "unset"
+            if forced != "unset":
+                tgt = None if forced is None or forced >= len(pl.bench) else pl.bench[forced]
+                if tgt is not None and tgt not in cands:
+                    tgt = None
+            else:
+                tgt = SELF_SWITCH_TARGET(pl, opp, cands, f.get("optional"))
+            if tgt is None:
+                return False
+            pl.bench.remove(tgt)
+            leaving_active(pl.active, log)
+            pl.bench.append(pl.active)
+            pl.active = tgt
+            log.append(f"    switch into {tgt.name}")
             return True
         return False
 
     if op == O.SHUFFLE_SELF_INTO_DECK:
         if source is None:
             return False
-        pl.deck.append(("Pokemon", source.name))
+        _shuffle_into_deck(pl, source)
         if source is pl.active:
             pl.active = pl.bench.pop(0) if pl.bench else None
         elif source in pl.bench:
@@ -1097,7 +1597,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.DISCARD_ENERGY_FROM_OPPONENT:
-        hits = resolve_targets(act.target, pl, opp, source, attacker)
+        hits = _shield_effects(opp, resolve_targets(act.target, pl, opp, source, attacker))
         # "Discard an Energy from 1 of your opponent's Pokemon" lets you
         # CHOOSE which. Taking hits[:1] took whatever happened to be first
         # -- usually an Active with nothing attached -- so the card fizzled
@@ -1109,6 +1609,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # reaches the whole board when the card says all of them.
         special = (act.filter or {}).get("special")
         board = special and act.target == IR.Target.OPP_ALL
+        if special and not board:
+            # Enhanced Hammer: aim at a Pokemon that HAS Special Energy, not
+            # the one with the most Energy, or the card fizzles.
+            hits = sorted(hits, key=lambda h: not any(
+                _is_special_energy(nm) for nm in getattr(h, "energy_names", None) or []))
         n = 0
         for h in (hits if board else hits[:1]):
             for _ in range(act.amount or 1):
@@ -1116,16 +1621,28 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if special:
                     i = next((j for j, nm in enumerate(names)
                               if _is_special_energy(nm)), None)
+                    if i is None or i >= len(h.energy):
+                        break
+                    nm = pop_energy(h, i)
+                    if nm:
+                        opp.discard.append(nm)
+                    n += 1
+                    continue
+                want = (act.filter or {}).get("type")
+                if want:
+                    # "Discard a Fire Energy from ..." -- an Energy of that type.
+                    i = next((j for j, e in enumerate(h.energy) if want in e and len(e) == 1), None)
                     if i is None:
                         break
-                    h.energy.pop(i)
-                    opp.discard.append(names.pop(i))
+                    nm = pop_energy(h, i)
+                    if nm:
+                        opp.discard.append(nm)
                     n += 1
                     continue
                 if h.energy:
-                    h.energy.pop()
-                    if names:
-                        opp.discard.append(names.pop())
+                    nm = pop_energy(h)
+                    if nm:
+                        opp.discard.append(nm)
                     n += 1
         if n:
             log.append(f"    discard {n} Energy from opponent")
@@ -1136,6 +1653,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # a count to remove -- and a hand already at or below it discards
         # nothing at all, so the card must not be spent.
         down_to = (act.filter or {}).get("down_to")
+        kind = (act.filter or {}).get("kind")
+        if kind:
+            # Eri: the cards are CHOSEN from a revealed hand, not random.
+            picks = [c for c in opp.hand if c[0] == kind][:act.amount or 1]
+            for c in picks:
+                opp.hand.remove(c)
+                opp.discard.append(c[1])
+            if picks:
+                log.append(f"    discard {len(picks)} {kind} card(s) from opponent's hand")
+            return bool(picks)
         if down_to is not None:
             n = max(0, len(opp.hand) - down_to)
         else:
@@ -1161,6 +1688,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # (pl.deck[-1] is the next draw), so this is next turn's draw
         # being chosen rather than this turn's hand.
         def wants():
+            # Two or more cards: the one UNDER the draw is what Slowking's
+            # Seek Inspiration discards and copies next turn, so it is the
+            # best attack to borrow when the board has a Seek attacker.
+            t = TOP_COPY_WANT(pl) if (act.amount or 1) >= 2 else None
+            if t:
+                yield lambda k, n: k == "Pokemon" and n == t
             if len(pl.in_play()) < 3:
                 yield lambda k, n: (k == "Pokemon"
                                     and pl.POKEMON.get(n, {}).get("stage")
@@ -1186,6 +1719,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if not picked:
             return False
         pl.deck.extend(picked)          # last appended is drawn first
+        pl._known_top = (len(pl.deck), list(picked))   # the player chose them
         log.append(f"    to top of deck: {', '.join(c[1] for c in picked)}")
         return True
 
@@ -1238,12 +1772,19 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.SELF_ENERGY_TO_HAND:
         if not source or not source.energy:
             return False
-        source.energy.pop()
-        name = (source.energy_names.pop()
-                if getattr(source, "energy_names", None) else "Energy")
-        pl.hand.append(("Energy", name))
-        log.append(f"    {name} back to hand")
-        return True
+        want = (act.filter or {}).get("type")
+        moved = 0
+        for _ in range(act.amount or 1):
+            i = (next((j for j, e in enumerate(source.energy) if want in e), None)
+                 if want else (len(source.energy) - 1 if source.energy else None))
+            if i is None:
+                break
+            name = pop_energy(source, i)
+            if name:
+                pl.hand.append(("Energy", name))
+            moved += 1
+        log.append(f"    {moved} Energy back to hand")
+        return moved > 0
 
     if op == O.WEAKEN_DEFENDER:
         if not opp.active:
@@ -1257,6 +1798,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.HEAL_AS_DEALT:
         dealt = DAMAGE_JUST_DEALT[0]
         if not source or dealt <= 0 or source.damage <= 0:
+            return False
+        if heal_blocked(pl, source, opp):
             return False
         healed = min(dealt, source.damage)
         source.damage -= healed
@@ -1280,6 +1823,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             put("Energy", nm)
         if getattr(spot, "tool", None):
             put("Tool", spot.tool)
+        for nm in _stack(spot):          # the Pokemon it evolved from, too
+            put("Pokemon", nm)
         put("Pokemon", spot.name)
         if spot is owner.active:
             owner.active = None
@@ -1320,6 +1865,26 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.OPP_BENCH_TO_DECK:
+        f = act.filter or {}
+        if f.get("keep") is None and opp.bench is not None:
+            # "Choose 1 of your opponent's (Benched) Pokemon. Shuffle it and
+            # all attached cards into their deck": the most expensive one.
+            pool = list(opp.bench) + ([opp.active] if f.get("include_active") and opp.active else [])
+            pool = _shield_effects(opp, pool)
+            if not pool:
+                return False
+            tgt = max(pool, key=lambda p: ((opp.POKEMON.get(p.name) or {}).get("prize_value", 1),
+                                           p.energy_count(), len(_stack(p))))
+            was_active = tgt is opp.active
+            _strip(opp, tgt, opp.deck)
+            if was_active and opp.bench:
+                # They choose the new Active: their healthiest.
+                new = max(opp.bench, key=lambda p: (opp.POKEMON.get(p.name) or {}).get("hp", 0) - p.damage)
+                opp.bench.remove(new)
+                opp.active = new
+            random.shuffle(opp.deck)
+            log.append(f"    {tgt.name} shuffled into the opponent's deck")
+            return True
         ranked = sorted(opp.bench,
                         key=lambda p: (opp.POKEMON.get(p.name) or {}).get("hp", 0),
                         reverse=True)
@@ -1339,10 +1904,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         n = min(act.amount or 1, len(opp.active.energy))
         for _ in range(n):
-            opp.active.energy.pop()
-            nm = (opp.active.energy_names.pop()
-                  if getattr(opp.active, "energy_names", None) else "Energy")
-            opp.hand.append(("Energy", nm))
+            nm = pop_energy(opp.active)
+            if nm:
+                opp.hand.append(("Energy", nm))
         log.append(f"    {n} Energy off {opp.active.name} back to their hand")
         return True
 
@@ -1363,7 +1927,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         f = act.filter or {}
         placed = []
         for _ in range(act.amount or 1):
-            if len(pl.bench) >= 5:
+            if len(pl.bench) >= BENCH_LIMIT(pl):
                 break
             nm = next((n for n in pl.discard
                        if n in pl.POKEMON
@@ -1372,12 +1936,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                             or f["type"] in (pl.POKEMON[n].get("types") or []))
                        and (not f.get("name_contains")
                             or f["name_contains"].lower() in n.lower())), None)
-            if not nm:
+            if not nm or make_inplay is None:
                 break
             pl.discard.remove(nm)
-            if make_inplay:
-                pl.bench.append(make_inplay(nm))
-                ON_BENCH_ENTRY(pl, pl.bench[-1], log)
+            pl.bench.append(make_inplay(nm))
+            ON_BENCH_ENTRY(pl, pl.bench[-1], log)
             placed.append(nm)
         if placed:
             log.append(f"    recover {', '.join(placed)} to the Bench")
@@ -1386,7 +1949,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.KO_OUTRIGHT:
         f = act.filter or {}
         victim = None
-        if f.get("lowest_hp"):
+        if f.get("choose"):
+            pool = _shield_effects(opp, list(opp.in_play()))
+            if pool:
+                victim = max(pool, key=lambda p: (
+                    (opp.POKEMON.get(p.name) or {}).get("prize_value", 1),
+                    p.energy_count(), p.damage))
+        elif f.get("lowest_hp"):
             pool = [(pl, p) for p in pl.in_play() if p is not source] + \
                    [(opp, p) for p in opp.in_play()]
             if pool:
@@ -1505,11 +2074,30 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             log.append(f"    opponent gets {moved} Energy back")
         return moved > 0
 
+    if op == O.FILL_OPPONENT_BENCH:
+        top = opp.deck[-(act.amount or 5):]
+        opp.deck = opp.deck[:-(act.amount or 5)]
+        placed = []
+        for card in top:
+            k, n = card
+            if (k == "Pokemon" and opp.POKEMON.get(n, {}).get("stage") == "Basic"
+                    and len(opp.bench) < BENCH_LIMIT(opp) and make_inplay is not None):
+                opp.bench.append(make_inplay(n))
+                placed.append(n)
+            else:
+                opp.deck.append(card)
+        random.shuffle(opp.deck)
+        if placed:
+            log.append(f"    onto the opponent's Bench: {', '.join(placed)}")
+        return True
+
     if op == O.DISCARD_TOOL_ANY:
-        # Tool Scrapper reaches EITHER side. Take the opponent's first --
-        # discarding your own Tool is only right when theirs is already gone.
+        # Tool Scrapper reaches EITHER side, "up to 2": it never has to take
+        # your own. The old loop fell through to your side whenever the
+        # opponent had fewer than two, scrapping Gravity Gemstone and Air
+        # Balloon for nothing.
         hit = 0
-        for owner in (opp, pl):
+        for owner in (opp,):
             for spot in owner.in_play():
                 if hit >= (act.amount or 1):
                     break
@@ -1542,24 +2130,57 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Evolve a Basic straight out of the deck, and chain a Stage 2 onto
         # it if the card says so. The turn-in-play restriction is the
         # ordinary evolution rule and is enforced by the caller.
-        placed = []
+        # The ordinary evolution rule was said to be "enforced by the
+        # caller"; no caller did. Not on your first turn, not a Pokemon put
+        # into play this turn -- and once this effect has evolved a Pokemon
+        # it may chain the next stage onto that same one (Grand Tree), which
+        # the evolved-this-turn check used to block.
+        f = act.filter or {}
+        rnd = getattr(pl, "round_no", 2)
+        # Salvatore says it may evolve a Pokemon put into play this turn;
+        # its first-turn use is still the ordinary rule's.
+        anytime = bool(f.get("any_timing"))
+        # The rule binds a Trainer's evolution (Grand Tree prints it); an
+        # attack's own "evolve this Pokemon" is left to the attack's timing.
+        if source is None and rnd <= 1 and not anytime:
+            return False
+        placed, chained = [], None
         for _ in range(act.amount or 1):
             base = None
-            for spot in pl.in_play():
+            if f.get("chain") and chained is not None:
+                spots = [chained]
+            elif f.get("self"):
+                spots = [source] if source is not None else []
+            elif f.get("bench_only"):
+                spots = list(pl.bench)
+            else:
+                spots = pl.in_play()
+            if f.get("basic_first") and chained is None:
+                spots = [p for p in spots
+                         if (pl.POKEMON.get(p.name) or {}).get("stage") == "Basic"]
+            for spot in spots:
                 nxt = next((n for n, i in pl.POKEMON.items()
                             if i.get("evolves_from") == _printed(pl, spot.name)
+                            and not (f.get("no_ability") and pl.EFFECTS.get(n))
                             and any(k == "Pokemon" and x == n for k, x in pl.deck)),
                            None)
-                if nxt and not getattr(spot, "evolved_this_turn", False):
+                ok = spot is chained or (
+                    not getattr(spot, "evolved_this_turn", False)
+                    and (source is not None or anytime or getattr(spot, "entered_turn", 0) < rnd))
+                if nxt and ok:
                     base = (spot, nxt)
                     break
             if not base:
                 break
             spot, nxt = base
             pl.deck.remove(("Pokemon", nxt))
-            pl.discard.append(spot.name)
+            # The Pokemon it evolves from stays UNDER it -- discarding it
+            # put a card in the discard pile that was still in play.
+            _stack(spot).append(spot.name)
             spot.name = nxt
+            chained = spot if f.get("chain") else None
             spot.evolved_this_turn = True
+            clear_attack_locks(spot)
             placed.append(nxt)
         if placed:
             random.shuffle(pl.deck)
@@ -1570,19 +2191,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         f = act.filter or {}
         want, typ = f.get("kind"), f.get("type")
 
+        etyp = f.get("energy_type")
+
         def ok(name):
-            if want == "Pokemon":
-                if name not in pl.POKEMON:
-                    return False
+            if want in ("Pokemon", "any") and name in pl.POKEMON:
                 return not typ or typ in (pl.POKEMON[name].get("types") or [])
+            if want == "Pokemon":
+                return False
+            if not _is_basic_energy_name(name) and (etyp or want == "any"):
+                return False
             if not name.endswith("Energy"):
                 return False
-            return not typ or typ in name
+            t = etyp or typ
+            return not t or t in name
 
         moved = 0
         for name in [n for n in list(pl.discard) if ok(n)][:act.amount or 1]:
             pl.discard.remove(name)
-            pl.deck.append(("Pokemon" if want == "Pokemon" else "Energy", name))
+            pl.deck.append(("Pokemon" if name in pl.POKEMON else "Energy", name))
             moved += 1
         if moved:
             random.shuffle(pl.deck)
@@ -1628,6 +2254,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 random.shuffle(owner.deck)
             else:
                 owner.hand.append(("Pokemon", spot.name))
+            st = _stack(spot)
+            if st and st[-1] == prev:
+                st.pop()
             spot.name = prev
             # Devolving clears damage above the lower stage's HP the same
             # way any HP change does, and Special Conditions stay.
@@ -1694,6 +2323,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         gone = getattr(pl, "stadium", None) or getattr(opp, "stadium", None)
         if gone:
             log.append(f"    discards Stadium {gone}")
+            owner = pl if getattr(pl, "stadium", None) else opp
+            owner.discard.append(gone)
             pl.stadium = opp.stadium = None
             # Both sides' view of it has to go too, or the Stadium keeps
             # working for whoever did not own it.
@@ -1707,7 +2338,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # cards to put down, so an empty hand stays empty.
         if not opp.hand:
             return False
-        opp.deck[:0] = opp.hand          # bottom of deck (deck draws off the end)
+        if (act.filter or {}).get("shuffle"):
+            opp.deck.extend(opp.hand)    # "shuffles their hand into their deck"
+            random.shuffle(opp.deck)
+        else:
+            opp.deck[:0] = opp.hand      # bottom of deck (deck draws off the end)
         opp.hand = []
         for _ in range(act.amount or 0):
             if opp.deck:
@@ -1725,24 +2360,36 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.FORCE_BENCH_OPPONENT:
         placed = 0
         for kind, name in list(opp.hand):
-            if len(opp.bench) >= 5:
+            if len(opp.bench) >= BENCH_LIMIT(opp):
                 break
-            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic":
+            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic" \
+                    and make_inplay is not None:
                 opp.hand.remove((kind, name))
-                if make_inplay:
-                    opp.bench.append(make_inplay(name))
-                    placed += 1
+                opp.bench.append(make_inplay(name))
+                placed += 1
         if placed:
             log.append(f"    force {placed} Basic(s) onto opponent's Bench")
         return placed > 0
 
     if op == O.APPLY_CONDITION:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        # an attack's condition cannot land on an effect-immune opponent
+        hits = [h for h in hits if h is None or h not in opp.in_play()
+                or _shield_effects(opp, [h])]
         if not hits:
             return False
         conds = act.filter.get("conditions") or []
         if act.filter.get("choose_one") and conds:
             conds = [conds[0]]
+        if act.filter.get("choose_best") and conds:
+            # "Choose a Special Condition": the first one that lands, in
+            # order of what it denies (Paralysis stops the attack and the
+            # retreat).
+            own = pl if hits and hits[0] in pl.in_play() else opp
+            other = opp if own is pl else pl
+            conds = [next((c for c in conds if hits and not query_condition_immunity(own, hits[0], c, other)
+                           and c not in (getattr(hits[0], "conditions", set()) or set())),
+                          conds[0])]
         # Dark Bell hits BOTH Active Pokemon, and only those -- a board-wide
         # target with an "active_only" restriction, since there is no
         # Target for "both Active Spots".
@@ -1814,23 +2461,26 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         what = act.filter["what"]
         if act.target in (IR.Target.OPPONENT, IR.Target.OPP_ACTIVE):
             if what == "play":
-                opp.item_locked = True
-                log.append("    opponent can't play Item cards next turn")
+                kinds = set(act.filter.get("kinds") or ["Item"])
+                if "Item" in kinds:
+                    opp.item_locked = True
+                opp.turn_play_lock = set(getattr(opp, "turn_play_lock", set()) or set()) | kinds
+                log.append(f"    opponent can't play {', '.join(sorted(kinds))} next turn")
                 return True
             victim = opp.active
-            if victim is None:
+            if victim is None or not _shield_effects(opp, [victim]):
                 return False
             if what == "retreat":
-                victim.retreat_locked = True
+                victim.retreat_locked = 1
             else:
-                victim.attack_locked_by_opponent = True
+                victim.attack_locked_by_opponent = 1
             log.append(f"    {victim.name} can't {what} during their next turn")
             return True
         if act.target == IR.Target.SELF and source is not None:
             if what == "retreat":
-                source.retreat_locked = True
+                source.retreat_locked = 2
             elif what == "attack":
-                source.attack_locked = True
+                source.attack_locked = 2
             else:
                 return False
             log.append(f"    {source.name} can't {what} during your next turn")
@@ -1870,7 +2520,12 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
     # treating a flip-gated Ability as always-on or always-off.
     if getattr(effect, "chance", 1.0) < 1.0 and random.random() >= effect.chance:
         return False
-    snapshot_hand = list(pl.hand)
+    # Refund an activation that did nothing: the hand AND the discard pile
+    # (restoring only the hand left the paid cards in the discard as well,
+    # a copy of each) and any Energy paid off the source.
+    snapshot = (list(pl.hand), list(pl.discard),
+                (list(source.energy), list(getattr(source, "energy_names", []) or []))
+                if source is not None else None)
     if not pay_costs(effect, pl, source, log):
         return False
     did = False
@@ -1878,7 +2533,9 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
         if apply_action(act, pl, opp, source, log, attacker, make_inplay):
             did = True
     if not did:
-        pl.hand[:] = snapshot_hand      # refund an unpayable activation
+        pl.hand[:], pl.discard[:] = snapshot[0], snapshot[1]
+        if snapshot[2] is not None:
+            source.energy, source.energy_names = snapshot[2]
         return False
     # Costs that resolve only after the effect succeeded.
     for c in effect.costs:
@@ -1889,8 +2546,12 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
             # the Prize cost IS the balancing drawback on the card.
             source.damage = 10 ** 6
             log.append(f"    {source.name} Knocks itself Out")
-        if c["kind"] == "shuffle_self" and source is not None:
-            pl.deck.append(("Pokemon", source.name))
+        # Only if it is still in play: the Ability's own action may have
+        # shuffled it in already, and doing it again put a second copy of
+        # the Pokemon into the deck on every Run Away Draw.
+        if c["kind"] == "shuffle_self" and source is not None \
+                and source in pl.in_play():
+            _shuffle_into_deck(pl, source)
             if source is pl.active:
                 pl.active = pl.bench.pop(0) if pl.bench else None
             elif source in pl.bench:
@@ -1924,6 +2585,8 @@ def _passive_actions(pl, op):
     for holder in pl.in_play():
         for eff in pl.EFFECTS.get(holder.name, []):
             if eff.unsupported:
+                continue
+            if op is not IR.Op.LOCK and ability_disabled(pl, holder, eff.name):
                 continue
             for act in eff.actions:
                 if act.op == op:
@@ -1966,6 +2629,80 @@ def query_damage_buff(pl, spot, opp=None):
     return total
 
 
+def _stadium_prevents(pl, opp=None):
+    """PREVENT_DAMAGE actions on the Stadium in play (shared by both sides)."""
+    name = getattr(pl, "stadium", None) or getattr(pl, "_opp_stadium", None) or (
+        getattr(opp, "stadium", None) if opp is not None else None)
+    if not name:
+        return []
+    eff = TRAINER_IR(name)
+    if eff is None:
+        return []
+    return [a for a in eff.actions if a.op == IR.Op.PREVENT_DAMAGE]
+
+
+# The player whose ATTACK is resolving right now, or None. Effect immunity
+# ("prevent all effects of attacks done to this Pokemon") applies to attack
+# effects only; set by simulate_versus around an attack's effects.
+ATTACK_EFFECTS_BY = [None]
+
+
+def query_effect_immune(owner, spot, attacker_owner=None):
+    """Is `spot` shielded from the EFFECTS of the opponent's attacks?
+
+    Poltchageist / Misty's Magikarp / Pikachu on the Bench, Rabsca for the
+    whole Bench, Skeledirge and Empoleon ex for themselves, and Mist Energy /
+    Rocky Fighting Energy for whatever holds them. Nothing asked before.
+    """
+    if spot is None:
+        return False
+    # Acerola's Mischief: a shield from a Trainer that also stops the
+    # effects of an ex's attacks.
+    sh = getattr(spot, "shield", None)
+    if sh and (sh.get("filter") or {}).get("and_effects"):
+        att = getattr(attacker_owner, "active", None) if attacker_owner is not None else None
+        if query_attack_shield(owner, spot, attacker_owner, att) is not None:
+            return True
+    for holder, eff, act in _passive_actions(owner, IR.Op.PREVENT_DAMAGE):
+        f = act.filter or {}
+        if not (f.get("effects_only") or f.get("and_effects")):
+            continue
+        if holder is None:
+            continue
+        if not conditions_met(eff, owner, attacker_owner or owner, holder):
+            continue
+        if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if act.target == IR.Target.YOUR_BENCHED and spot not in owner.bench:
+            continue
+        return True
+    for nm in list(getattr(spot, "energy_names", None) or []) + [getattr(spot, "tool", None)]:
+        if not nm:
+            continue
+        eff = TRAINER_IR(nm)
+        for act in (eff.actions if eff else []):
+            f = act.filter or {}
+            if act.op == IR.Op.PREVENT_DAMAGE and (f.get("effects_only") or f.get("and_effects")):
+                return True
+    return False
+
+
+def _shield_effects(owner, spots):
+    """Drop the Pokemon an attack's effects cannot touch."""
+    by = ATTACK_EFFECTS_BY[0]
+    if by is None:
+        return spots
+    return [s for s in spots if s is None or not query_effect_immune(owner, s, by)]
+
+
+def query_bench_counters_blocked(owner, spot, placer=None):
+    """Battle Cage: no damage counters on a Benched Pokemon from the
+    opponent's attack or Ability effects. `owner` holds `spot`."""
+    if spot is None or spot not in owner.bench:
+        return False
+    return any(a.filter.get("bench_counters") for a in _stadium_prevents(owner, placer))
+
+
 def query_prevented(pl, spot, opp=None, attacker=None):
     """Is all damage to `spot` prevented outright?
 
@@ -1976,7 +2713,7 @@ def query_prevented(pl, spot, opp=None, attacker=None):
     were silently ignored and the walls read as total immunity.
     """
     for holder, eff, act in _passive_actions(pl, IR.Op.PREVENT_DAMAGE):
-        if act.filter.get("effects_only"):
+        if act.filter.get("effects_only") or act.filter.get("bench_counters"):
             continue          # prevents EFFECTS, not damage
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
@@ -2004,6 +2741,29 @@ def query_prevented(pl, spot, opp=None, attacker=None):
                     not opp.EFFECTS.get(attacker.name):
                 continue
         return True
+    # The Tera rule: "As long as this Pokemon is on your Bench, prevent all
+    # damage done to this Pokemon by attacks (both yours and your
+    # opponent's)." A rule-box line, not an Ability, so nothing read it.
+    if spot in pl.bench and "Tera" in ((pl.POKEMON.get(spot.name) or {}).get("subtypes") or []):
+        return True
+    # Shadowy Darkness Energy: a damage wall printed on an attached Energy.
+    for _nm, act in ENERGY_PASSIVES(pl, spot, IR.Op.PREVENT_DAMAGE):
+        f = act.filter or {}
+        if not (f.get("effects_only") or f.get("bench_counters")):
+            return True
+    # Neutralization Zone: a Stadium, so it shelters BOTH players and never
+    # reached this function, which only read Pokemon Abilities.
+    if attacker is not None and opp is not None:
+        for act in _stadium_prevents(pl, opp):
+            f = act.filter
+            if f.get("bench_counters") or f.get("effects_only"):
+                continue
+            if f.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
+                continue
+            if f.get("attacker_is_ex") and \
+                    opp.POKEMON.get(attacker.name, {}).get("prize_value", 1) < 2:
+                continue
+            return True
     return False
 
 
@@ -2056,14 +2816,65 @@ def query_endures(pl, spot, opp=None):
     return False
 
 
-def query_prize_modifier(taker, loser):
+def _prize_clause_ok(eff, side, holder, taker, loser, spot, attacker,
+                     by_attack):
+    """Does this Prize-changing text cover THIS Knock Out?
+
+    The effects compiled with no conditions, so every one of them applied
+    to every Knock Out while its holder was in play: Mega Gengar ex's
+    Shadowy Concealment cut the Prize for any Pokemon KO'd by anything,
+    Hydreigon ex's Greedy Eater added one to every Knock Out, and a
+    Shedinja on the Bench would have made the whole board prize-free.
+    Unknown facts (spot / attacker / by_attack None) are not held against
+    the effect.
+    """
+    t = (eff.text or "").lower().replace("é", "e")
+    if spot is not None:
+        if "if this pokemon is knocked out" in t and holder is not spot:
+            return False
+        m = re.search(r"1 of your (\w+) pokemon is knocked out", t)
+        if m and m.group(1).capitalize() in _REAL_TYPES and \
+                m.group(1).capitalize() not in query_types(loser, spot):
+            return False
+        if "opponent's active pokemon is knocked out" in t and spot is not loser.active:
+            return False
+        if "opponent's basic pokemon is knocked out" in t and \
+                loser.POKEMON.get(spot.name, {}).get("stage") != "Basic":
+            return False
+    if by_attack is False and "by damage from an attack" in t:
+        return False
+    if attacker is not None:
+        if "from your opponent's pokemon ex" in t and \
+                not attacker.name.endswith(" ex"):
+            return False
+        if "attack used by this pokemon" in t and holder is not attacker:
+            return False
+    m = re.search(r"if you have any ([^.,]+?) in play", eff.text or "", re.I)
+    if m and not any(p.name == m.group(1).strip() for p in side.in_play()):
+        return False
+    return True
+
+
+_REAL_TYPES = {"Grass", "Fire", "Water", "Lightning", "Psychic", "Fighting",
+               "Darkness", "Metal", "Dragon", "Colorless"}
+
+
+def query_prize_modifier(taker, loser, spot=None, attacker=None, by_attack=None):
     """Extra (or fewer) Prizes for a Knock Out, from either side's Abilities."""
     total = 0
+    once = set()
     for side, sign in ((taker, 1), (loser, 1)):
         for holder, eff, act in _passive_actions(side, IR.Op.MODIFY_PRIZE):
             if not conditions_met(eff, side, taker if side is loser else loser,
                                   holder):
                 continue
+            if not _prize_clause_ok(eff, side, holder, taker, loser, spot,
+                                    attacker, by_attack):
+                continue
+            if "doesn't stack" in (eff.text or "").lower():
+                if (id(side), eff.name) in once:
+                    continue
+                once.add((id(side), eff.name))
             amount = act.amount or 0
             if act.filter.get("fewer") or side is loser:
                 amount = -abs(amount)
@@ -2074,12 +2885,24 @@ def query_prize_modifier(taker, loser):
     return total
 
 
+def query_ko_attacker_on_ko(owner, spot, attacker_player):
+    """Gengar ex's Fainting Spell: does this Knock Out (by an attack's
+    damage) Knock Out the attacker? Flips the coin."""
+    for eff in owner.EFFECTS.get(spot.name, []):
+        if eff.unsupported or ability_disabled(owner, spot, eff.name):
+            continue
+        if any(a.op == IR.Op.KO_ATTACKER_ON_KO for a in eff.actions):
+            return random.random() < getattr(eff, "chance", 1.0)
+    return False
+
+
 def query_retaliation(defender, attacker_spot, attacker_player=None):
     """Damage counters the defender puts back onto the attacking Pokemon."""
     total = 0
     for holder in defender.in_play():
         for eff in defender.EFFECTS.get(holder.name, []):
-            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED:
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED \
+                    or ability_disabled(defender, holder, eff.name):
                 continue
             if not conditions_met(eff, defender, attacker_player or defender, holder):
                 continue
@@ -2090,6 +2913,153 @@ def query_retaliation(defender, attacker_spot, attacker_player=None):
                     continue
                 total += (act.amount or 0) * 10
     return total
+
+
+def on_damaged_riders(defender, attacker_player, attacker_spot, log,
+                      make_inplay=None):
+    """The non-counter half of "if this Pokemon is damaged by an attack".
+
+    query_retaliation reads only PLACE_COUNTERS, so every other when-damaged
+    Ability -- Numel's and Heatran's Incandescent Body (Burn the attacker),
+    Team Rocket's Koffing's Smog Signals (bench 2 Koffing) -- compiled and
+    never ran.
+    """
+    for holder in list(defender.in_play()):
+        for eff in defender.EFFECTS.get(holder.name, []):
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED \
+                    or ability_disabled(defender, holder, eff.name):
+                continue
+            if not conditions_met(eff, defender, attacker_player, holder):
+                continue
+            for act in eff.actions:
+                if act.op == IR.Op.PLACE_COUNTERS:
+                    continue            # query_retaliation's
+                apply_action(act, defender, attacker_player, holder, log,
+                             attacker_spot, make_inplay)
+
+
+_LOCK_SOURCES = {}
+
+
+def _ability_lock_effects(side):
+    """(holder, effect, action) for every Ability-lock Ability on `side`'s
+    board. Cached per deck: most decks have none, and this is asked for
+    every passive query."""
+    key = id(side.EFFECTS)
+    names = _LOCK_SOURCES.get(key)
+    if names is None:
+        names = {n for n, effs in side.EFFECTS.items() for e in effs
+                 if not e.unsupported and any(a.op == IR.Op.LOCK and
+                                              (a.filter or {}).get("what") == "abilities"
+                                              for a in e.actions)}
+        _LOCK_SOURCES[key] = names
+    if not names:
+        return
+    for holder in side.in_play():
+        if holder.name not in names:
+            continue
+        for eff in side.EFFECTS.get(holder.name, []):
+            for act in eff.actions:
+                if act.op == IR.Op.LOCK and (act.filter or {}).get("what") == "abilities":
+                    yield holder, eff, act
+
+
+_STADIUM_LOCKS = {}
+
+
+def _stadium_locks(stadium):
+    if not stadium:
+        return ()
+    if stadium not in _STADIUM_LOCKS:
+        eff = TRAINER_IR(stadium)
+        _STADIUM_LOCKS[stadium] = tuple(
+            a for a in (eff.actions if eff and not eff.unsupported else [])
+            if a.op == IR.Op.LOCK and (a.filter or {}).get("what") == "abilities")
+    return _STADIUM_LOCKS[stadium]
+
+
+def ability_disabled(owner, spot, ability_name=None):
+    """Is this Pokemon's Ability switched off right now?
+
+    "Has no Abilities" compiled on five cards -- Team Rocket's Watchtower
+    (Colorless Pokemon), Flutter Mane (the opposing Active), Iron Thorns ex
+    (Rule Box Pokemon), Gastrodon (Benched Stage 2) -- and nothing read it.
+    """
+    if spot is None:
+        return False
+    opp = getattr(owner, "_opp_ref", None)
+    stadium = getattr(owner, "stadium", None) or getattr(owner, "_opp_stadium", None)
+    # Fast path: no lock anywhere on either board or in the Stadium.
+    if not _stadium_locks(stadium) and not any(
+            _LOCK_SOURCES.get(id(side.EFFECTS), True) for side in (owner, opp) if side is not None):
+        return False
+    info = owner.POKEMON.get(spot.name) or {}
+    sources = []
+    for side in (owner, opp):
+        if side is None:
+            continue
+        for holder, eff, act in _ability_lock_effects(side):
+            if conditions_met(eff, side, owner if side is not owner else (opp or owner), holder):
+                sources.append((side, act))
+    for act in _stadium_locks(stadium):
+        sources.append((None, act))
+    for side, act in sources:
+        f = act.filter or {}
+        t = act.target
+        if t == IR.Target.OPP_ACTIVE and not (side is not owner and spot is owner.active):
+            continue
+        if t in (IR.Target.OPP_ALL,) and side is owner:
+            continue
+        if f.get("type") and f["type"] not in (info.get("types") or []):
+            continue
+        if f.get("rule_box_only") and not info.get("rule_box"):
+            continue
+        if f.get("bench_only") and spot not in owner.bench:
+            continue
+        if f.get("stage") and info.get("stage") != f["stage"]:
+            continue
+        ex = f.get("except")
+        if ex and (ex == ability_name or ex in (info.get("subtypes") or [])):
+            continue
+        return True
+    return False
+
+
+def heal_blocked(owner, spot, other):
+    """Yveltal's Life-Locked: the other side's Ability stops `owner`'s
+    Active from being healed."""
+    if other is None or other is owner or spot is not getattr(owner, "active", None):
+        return False
+    for holder, eff, act in _passive_actions(other, IR.Op.LOCK):
+        if (act.filter or {}).get("what") != "heal" or act.target != IR.Target.OPP_ACTIVE:
+            continue
+        if conditions_met(eff, other, owner, holder):
+            return True
+    return False
+
+
+def play_locks(pl, opp):
+    """What `pl` can't play from hand right now: ({kinds}, except_family).
+
+    Kinds are "Item", "Tool", "Stadium", "ace_spec", "ability_pokemon".
+    The static locks on the opponent's board ("as long as this Pokemon is
+    in the Active Spot, your opponent can't play ...") were compiled and
+    never read; the next-turn locks an attack leaves are on `pl` itself.
+    """
+    kinds = set(getattr(pl, "turn_play_lock", set()) or set())
+    if getattr(pl, "item_locked", False):
+        kinds.add("Item")
+    except_family = None
+    if opp is not None and opp is not pl:
+        for holder, eff, act in _passive_actions(opp, IR.Op.LOCK):
+            f = act.filter or {}
+            if f.get("what") != "play" or act.target != IR.Target.OPPONENT:
+                continue
+            if not conditions_met(eff, opp, pl, holder):
+                continue
+            kinds |= set(f.get("kinds") or [])
+            except_family = f.get("except_family") or except_family
+    return kinds, except_family
 
 
 def query_retreat_modifier(pl, spot, opp=None):
@@ -2110,6 +3080,8 @@ def query_retreat_modifier(pl, spot, opp=None):
         if act.target == IR.Target.OPP_ACTIVE:
             continue          # aimed across the table, not at our own side
         if act.target == IR.Target.SELF and holder is not spot:
+            continue
+        if act.target == IR.Target.YOUR_ACTIVE and spot is not pl.active:
             continue
         if act.target in (IR.Target.YOUR_ALL, IR.Target.YOUR_ANY):
             if not matches_filter(pl, spot, act.filter):
@@ -2192,6 +3164,11 @@ def query_extra_attacks(pl, spot):
     """
     extra, seen = [], {a["name"] for a in
                        (pl.POKEMON.get(spot.name) or {}).get("attacks") or []}
+    # An attack printed on an attached Tool (Technical Machines).
+    for a in TOOL_ATTACKS(pl, spot):
+        if a["name"] not in seen:
+            seen.add(a["name"])
+            extra.append(a)
     granted = False
     for holder, eff, act in _passive_actions(pl, IR.Op.GRANT_ATTACK_ACCESS):
         if (act.filter or {}).get("attack"):

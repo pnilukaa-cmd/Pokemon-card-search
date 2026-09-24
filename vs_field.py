@@ -1,0 +1,100 @@
+"""One candidate deck against every playable deck in a field directory.
+
+Same seeding scheme as roundrobin.py (one deterministic seed per pairing,
+common random numbers), so two candidates run with the same tag face the
+same dice and their difference is paired -- the Paralysis-vs-control
+measurement depends on that. The candidate's own file is skipped if it
+also sits in the field.
+
+Usage:  python3 vs_field.py <deck.txt> <field_dir> <games> [tag] [out.json]
+
+PILOT=<name> in the environment runs the candidate under that pilot from
+policies.py (e.g. PILOT=lookahead); the field always plays greedy.
+JOBS=<n> plays the opponents on n processes; every opponent has its own
+seed, so the result is identical to a single process.
+"""
+import glob
+import hashlib
+import json
+import math
+import os
+import random
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import simulate_versus as SV
+import tcg_model as M
+
+deck, field, games = sys.argv[1], sys.argv[2], int(sys.argv[3])
+tag = sys.argv[4] if len(sys.argv) > 4 else "vf1"
+out_path = sys.argv[5] if len(sys.argv) > 5 else None
+
+_cards = M.load_cards()
+by_name, by_setnum = M.build_card_index(_cards)
+
+
+def basics_in(path):
+    n = 0
+    for e in M.parse_decklist_entries(open(path).read()):
+        c, _ = M.resolve_card(e, by_name, by_setnum)
+        if c and (c.get("supertype") == "Pokémon" or M.fossil_stats(c)) \
+                and M.stage_of(c) == "Basic":
+            n += e["count"]
+    return n
+
+
+me = os.path.splitext(os.path.basename(deck))[0]
+A = SV.load_model(deck, me)[0]
+if os.environ.get("PILOT"):
+    SV.PILOT_BY_NAME[me] = os.environ["PILOT"]
+# FIELD_DECLINES_MULLIGAN_DRAWS=1: the field refuses the optional extra
+# cards when the candidate mulligans.
+if os.environ.get("FIELD_DECLINES_MULLIGAN_DRAWS"):
+    SV.MULLIGAN_DECLINE_EXCEPT = me
+res, unplayable = {}, []
+todo = []
+for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
+    opp = os.path.splitext(os.path.basename(f))[0]
+    if os.path.abspath(f) == os.path.abspath(deck):
+        continue
+    if basics_in(f) == 0:
+        unplayable.append(opp)
+        continue
+    todo.append((opp, f))
+
+
+def play(job):
+    opp, f = job
+    B = SV.load_model(f, opp)[0]
+    if opp == me:                      # same slug, different file: keep names distinct
+        B = (opp + "_opp",) + B[1:]
+    seed = int(hashlib.sha256(f"{tag}|{opp}".encode()).hexdigest()[:12], 16)
+    random.seed(seed)
+    SV._LOOKAHEAD_SEQ[0] = 0        # the lookahead's own seeds, per opponent
+    return opp, sum(SV.run_game(A, B)["winner"] == A[0] for _ in range(games))
+
+
+jobs = int(os.environ.get("JOBS", "1"))
+if jobs > 1:
+    import multiprocessing as mp
+    with mp.get_context("fork").Pool(jobs) as pool:
+        for opp, wins in pool.imap(play, todo):
+            res[opp] = wins
+            print(f"  {opp:<50} {100.0 * wins / games:6.2f}", flush=True)
+else:
+    for job in todo:
+        opp, wins = play(job)
+        res[opp] = wins
+        print(f"  {opp:<50} {100.0 * wins / games:6.2f}", flush=True)
+
+rates = [100.0 * w / games for w in res.values()]
+mean = sum(rates) / len(rates)
+# binomial SE of the mean over independent pairings
+se = math.sqrt(sum(r * (100 - r) / games for r in rates)) / len(rates)
+print(f"{me}: {mean:.2f}% (±{se:.2f}) over {len(rates)} decks at {games} games, "
+      f"winning {sum(r > 50 for r in rates)}")
+if unplayable:
+    print("unplayable, skipped:", ", ".join(unplayable))
+if out_path:
+    json.dump({"deck": me, "games": games, "tag": tag, "results": res,
+               "unplayable": unplayable}, open(out_path, "w"))

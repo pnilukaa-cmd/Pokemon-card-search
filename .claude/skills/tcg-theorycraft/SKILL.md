@@ -723,6 +723,135 @@ Known open gap as of this writing: **`lock` fires on 0 of 154 card
 effects** — "can't retreat", "can't attack next turn" and friends are
 compiled and ignored, which undervalues every control deck in the folder.
 
+### 11e. Studying a deck someone else built: find what the engine is NOT doing
+
+Standing user instruction (2026-09-24): when handed a real decklist, study
+it, then teach the AI to play it, and keep learning and improving. A real
+tournament result is ground truth that the simulator is wrong somewhere;
+the job is to find where, fix it, and prove the fix. Two lists handled
+this way (N's Zoroark ex, a Dudunsparce / Maushold mill wall) turned up
+twelve bugs between them, and every one had the same shape: **a card
+compiled, and nothing used it.**
+
+Do these in order, and measure after each change, not at the end:
+
+1. **Read every card's full text** from the JSON and write down the deck's
+   plan in one paragraph: what wins, what protects it, what it recycles.
+   The plan tells you what to count in step 3.
+2. **Tally what the deck actually does** over ~60 logged games against
+   4-6 varied opponents: every `<name>: ...` log line, per game. Any key
+   card at or near 0/game is inert until proven otherwise. Found this way:
+   Neutralization Zone and Battle Cage (never played), Fan Call (never
+   fired), Familial March (almost never chosen).
+3. **Classify the idle turns.** Instrument `do_attack` and record, for
+   every turn the deck did not attack: the Active, its Energy, Energy in
+   hand and discard, what is on the Bench. This is how both "not enough
+   bench space" and "the Energy goes to the wrong Pokemon" were found, and
+   it is also how a guess was proved WRONG (bench space was worth +2, the
+   Energy target +4.6).
+4. **Check each suspicious card at the compile AND consume layer.**
+   `compile_effect` output first (Pecharunt ex compiled as "Poison the
+   opponent", Lillie's Determination as a bare "draw 6", Fan Call as
+   passive), then the consumer: is the op in the set the caller checks
+   (`TRAINER_IR_OPS`, `_STADIUM_OPS_WORTH_PLAYING`), is the query called
+   for this case at all (`query_prevented` was only asked about the
+   Active, so every Bench shield was dead), is every compiled filter read
+   (`type` on a search was not).
+5. **Measure each fix paired**: `vs_field.py <deck> decks/field 200 <tag>`
+   before and after with the same tag, and report the paired mean and SE.
+   **Revert what does not measure.** Two plausible pilot rules this
+   session measured at -0.18 and -0.93 and were removed.
+6. **Write a regression test on the real deck model that fails on the
+   previous commit** (check out the old commit in a scratch worktree and
+   run the new test there). A test that passes on the unfixed engine has
+   proved nothing.
+
+Wording patterns that have been dropped or misread, worth a grep on any
+new card: `Shuffle your hand into your deck. Then, draw` / `Discard your
+hand and draw` (the first half), `draw N cards instead` (a larger draw, not
+a gate), `the new Active Pokemon is now X` (YOUR Pokemon after a self
+switch, the OPPONENT's after a gust), `Once during your first turn`,
+`search ... for N <Type> Pokemon` (the type), `Prevent all damage counters
+from being placed` (counters, not damage), anything protecting the
+**Bench** (check it is asked about Benched targets), and any Stadium
+(check `_stadium_has_effect` says to play it: the inert-card guard now
+tests exactly that), `Put N <kind> cards from your discard pile into your
+hand` (the kind: the executor returned Pokemon for Supporters and Trainers
+until 2026-09-24), `Choose up to N ... (yours or your opponent's)` (up to
+means never forced onto your own side), and any new op (is it in
+`TRAINER_IR_OPS`?).
+
+**Check the trigger, not just the op.** An Ability can compile perfectly
+and still never run because nothing calls its TRIGGER: `on_play` ("when you
+play this Pokemon from your hand onto your Bench": Meowth ex in six field
+decks, Iron Leaves ex, Chien-Pao) had no caller at all, and `on_damaged`
+only ever ran damage counters (Incandescent Body's Burn, Smog Signals'
+Bench search never happened). Sweep `Effect.trigger` per op across the
+field's decks and grep for a caller of each trigger/op pair.
+
+**Run `audit_conservation.py`** after any engine change that moves cards.
+It checks every step of every turn for cards created or destroyed; its
+first run found Knock Outs discarding only the top card (no Energy, Tool
+or Evolution stack), a played Stadium discarded while in play, attack
+Bench searches losing the Pokemon, and Run Away Draw duplicating
+Dudunsparce. `test_conservation_audit_is_clean` keeps it at zero.
+
+**The deck list's END is the top.** `Player.draw` pops the end, so
+`deck[-1]` is the next card. Seek Inspiration, a self-mill scaler and a
+reveal-top chooser read `deck[0]` (the bottom) until 2026-09-24.
+
+**Rules the engine now enforces** (each was missing): no Supporter on
+the first turn going first (unless the card says so), no evolving on
+EITHER player's first turn (Rare Candy and Grand Tree too), no Stadium
+over one of the same name, and the mulligan extra draws.
+
+**Run `audit_unmodeled.py`** (it must report 0; `test_every_card_effect_is_read`
+enforces it) after adding cards or changing a compile rule. It lists every
+Ability, Trainer, Special Energy and attack text that neither compiles,
+has a handler, nor is read by a damage rule. It does NOT see a card that
+compiles to an op nothing reads for that card's KIND -- sweep those by
+kind (Items/Supporters against TRAINER_IR_OPS, Tools against the
+tool readers, Stadiums against `_stadium_has_effect`) as done 2026-09-24.
+
+**Run the new list through the field before anything else.** A Mew ex
+list crashed every run it joined (Enhanced Hammer indexing `energy_names`
+by an `energy` index after retreat had popped only one of the two). A new
+deck exercises code paths the field never reached; a crash there is a bug
+that was already waiting for any deck with that card.
+
+**Try the `lookahead` pilot before calling a deck weak.** `PILOT=lookahead
+python3 vs_field.py <deck> decks/field 200 <tag>` runs the candidate with a
+one-turn lookahead on its attack choice (the field stays greedy). It is
+~18x slower. Measured paired against greedy: Mew ex lock +4.54, Wugtrio
+paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09 -- **all measured
+before 2026-09-24's `_hide_information` fix, when the lookahead could see
+both decks' order and the opponent's hand; treat them as optimistic.** After the fix, full lookahead (attack, gust,
+Supporter, Energy target, retreat, promotion) on Mew ex: 18.06 -> 39.71,
++21.66 +/- 1.68. Any new pilot code must value hidden cards (deck order,
+Prizes, the opponent's hand) by expectation, never by reading them; only
+resolution (`_RESOLVING`) reads the real card. The gap between
+the two pilots is how much of a deck's placement is sequencing. The
+lookahead now also chooses the Supporter, the Energy target, the retreat,
+the gust target and the promotion after a Knock Out
+(`lookahead_pick(..., resume="promote")` plays the rest of the opponent's
+turn, your turn, and their reply).
+
+**Some decks the greedy pilot cannot play, and saying so is the result.**
+The Mew ex "baby attacks" lock wants a different borrowed attack each turn
+(Snotted Up, Big Bite, Hypnosis, Follow Me) chosen against what the
+opponent will do NEXT turn. Pricing the lock riders and feeding Mew first
+both measured at zero (-0.27, +0.31) and were reverted. A one-turn greedy
+pilot scores such a deck near the floor; report that as a pilot limit, not
+a verdict on the list.
+
+Pilot lessons that measured positive and are now in the engine, all keyed
+off card text rather than deck names: keep Bench room for a copy
+attacker's donors; feed Energy to the copy attacker first; a mill deck
+gusts up a Pokemon that can neither attack nor retreat and holds the gust
+while the Active is already stuck; never play a symmetric Special
+Condition Item (Dark Bell) that would stop your own attacker this turn;
+decline an optional draw that would leave fewer than 6 cards in the deck.
+
 ### 12. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and

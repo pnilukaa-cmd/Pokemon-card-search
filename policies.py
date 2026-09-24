@@ -48,6 +48,22 @@ GREEDY = {
     "gust": "prize",
     "energy_to_active": True,
     "pitch_energy_guard": 1.0,
+    # One-turn lookahead on the attack choice: 0 is off (greedy).
+    "lookahead_samples": 0,
+    "lookahead_margin": 0.0,
+    # Bench the Basics that reach the hand after the Supporter (Ultra Ball,
+    # draw), not a turn later. Paired, 6 meta decks x 53 opponents x 200
+    # games: +0.97 +/- 0.27 (every deck positive).
+    "bench_after_supporter": 1,
+    # Rare Candy before evolving Basics into their Stage 1. Paired, 6 Rare
+    # Candy decks x 53 opponents x 200 games: +0.52 +/- 0.24.
+    "candy_first": 1,
+    # A second Item step after the Supporter (Petrel's search, a draw).
+    # Paired, 7 decks x 54 opponents x 200 games: +0.90 +/- 0.24.
+    "items_after_supporter": 1,
+    # Play a "discard down to N" Supporter first when it strips at least
+    # this many cards (0: off). Measuring.
+    "hand_trim_first": 0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
@@ -107,7 +123,18 @@ PRIZEWISE = dict(GREEDY, **{
     "gust": "prize",
 })
 
-POLICIES = {p["name"]: p for p in (GREEDY, AGGRO, CONTROL, SETUP, PRIZEWISE)}
+# Greedy in everything but the attack: each payable attack is played out
+# through the opponent's whole reply turn, N times, and the best position
+# wins. Built for decks whose attacks pay off on the OPPONENT's turn (locks,
+# Sleep, "can't retreat") -- which greedy can only guess at.
+LOOKAHEAD = dict(GREEDY, **{
+    "name": "lookahead",
+    "blurb": "greedy, but each attack is played out through the opponent's reply.",
+    "lookahead_samples": 4,
+    "lookahead_margin": 10.0,
+})
+
+POLICIES = {p["name"]: p for p in (GREEDY, AGGRO, CONTROL, SETUP, PRIZEWISE, LOOKAHEAD)}
 # The engine's historical pilot answers to its old name too, so existing
 # callers and recorded measurements keep working.
 POLICIES["v2"] = GREEDY

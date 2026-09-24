@@ -14,6 +14,7 @@ tests could catch that, because nothing tested execution.
 
 Run:  python3 test_ability_engine.py
 """
+import random
 import sys
 
 sys.path.insert(0, ".")
@@ -1602,13 +1603,39 @@ def test_copied_attacks_carry_their_riders():
     check("and picks it over its own 120-damage attack",
           SV.best_attack(me, sk, True, op)["name"] == "Seek Inspiration")
     before = sum(s.damage for s in [op.active] + op.bench)
-    SV.attack_side_effects(me, op, seek, [])
+    SV._RESOLVING[0] = True               # as inside do_attack
+    try:
+        SV.attack_side_effects(me, op, seek, [])
+    finally:
+        SV._RESOLVING[0] = False
     check("and the borrowed rider actually resolves",
           sum(s.damage for s in [op.active] + op.bench) - before == 330)
 
     me.deck = [("Energy", "Psychic Energy")]
     check("a non-Pokemon on top copies nothing",
           SV.attack_damage(me, op, sk, seek, record=False) == 0)
+
+    # The pilot may not read its own unseen top card: three Energy and a
+    # Kyurem on top is worth a quarter of the Kyurem, until it put it there.
+    me.deck = [("Energy", "Psychic Energy")] * 3 + [("Pokemon", "Kyurem")]
+    check("an unseen top card is valued by expectation",
+          abs(SV.attack_value(me, op, sk, seek) - 330 / 4) < 1,
+          SV.attack_value(me, op, sk, seek))
+    SV._note_known_top(me, 1)
+    check("a top card the player placed is known",
+          SV.attack_value(me, op, sk, seek) == 330)
+
+    # "reveals their hand ... for each Item card you find there": the real
+    # hand only once the attack resolves.
+    op.hand, op.deck = [("Item", "Ultra Ball")] * 4, [("Energy", "Psychic Energy")] * 12
+    clause = "for each item card you find there"
+    check("before the reveal, the hand is an expectation",
+          SV._clause_count(clause, me, op, sk) == 1)
+    SV._RESOLVING[0] = True
+    try:
+        check("once revealed, the real count", SV._clause_count(clause, me, op, sk) == 4)
+    finally:
+        SV._RESOLVING[0] = False
 
 
 
@@ -2491,14 +2518,22 @@ def test_no_card_in_any_decklist_is_silently_inert():
             return bool(V._is_reflip_tool(pl, nm)
                         or nm in V.on_damaged_tools())
         if "Stadium" in subs:
-            e = V.stadium_turn_effect_ir(nm)
-            if e is not None and e.actions:
-                return True
+            # A Stadium is live only if the pilot will actually PUT IT DOWN,
+            # which is _stadium_has_effect's call. The old check fell back
+            # to "any compiled action" (AE.PASSIVE_OPS does not exist), and
+            # passed Neutralization Zone and Battle Cage while both sat in
+            # hand for the whole game.
             if nm in V.EFFECT_STADIUMS or nm in V.RETREAT_STADIUMS:
                 return True
+            probe = V.Player("x", {}, [])
+            if V._stadium_has_effect(nm, probe):
+                return True
+            # Conditional on a Pokemon subtype in play (Tera): played when
+            # the condition holds, so live -- the probe board has none.
             ir = V.trainer_effect_ir(nm)
             return bool(ir is not None and any(
-                a.op in AE.PASSIVE_OPS if hasattr(AE, "PASSIVE_OPS") else True
+                (a.filter or {}).get("requires_subtype")
+                and a.op in (IR.Op.BENCH_CAP, IR.Op.MODIFY_ATTACK_COST)
                 for a in ir.actions))
         # Items and Supporters go through play_trainer_from_ir, which only
         # resolves ops in TRAINER_IR_OPS.
@@ -2589,9 +2624,1788 @@ def test_when_damaged_tools_fire_and_are_attached():
         check(f"{nm} is actually attached", pl.active.tool == nm, str(pl.active.tool))
 
 
+def _real(path, label):
+    import simulate_versus as V
+    cards = M.load_cards()
+    V._CARDS_BY_NAME.update(M.build_card_index(cards)[0])
+    V.RETALIATE_CARDS = V.build_retaliate_index(cards)
+    D = V.load_model(path, label)[0]
+    return V, D, V.compile_effects_for(D[1], D[3])
+
+
+def test_hand_reset_draws_do_the_first_half_of_their_text():
+    """Lillie's Determination, Lacey and Carmine.
+
+    "Shuffle your hand into your deck. Then, draw 6 cards" compiled to a
+    bare "draw 6": the hand was kept and six more piled on, burning six
+    off the deck per play. Lillie's Determination is in 46 of the 54
+    field decks. Its "draw 8 while you have all 6 Prize cards" was lost
+    too. Lacey's "draw 8 instead" Prize clause was ALSO read as a gate on
+    the whole card, so it could not be played until the opponent was
+    down to 3 Prizes. Carmine kept the hand it says to discard.
+
+    Played through the real Trainer path off real deck models.
+    """
+    V, D, E = _real("decks/field/water_aggro.txt", "w")
+    # (Lacey from 5 kept cards would draw 4: shuffling away more than it
+    # gives back is declined, which is the pilot being right, so that case
+    # keeps 2.)
+    for name, prizes, kept, want_hand in (("Lillie's Determination", 6, 5, 8),
+                                          ("Lillie's Determination", 4, 5, 6),
+                                          ("Lacey", 6, 2, 4), ("Lacey", 3, 5, 8)):
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        random.seed(1)
+        random.shuffle(me.deck)
+        keep = me.deck[:kept]
+        me.hand = [("Supporter", name)] + keep
+        me.deck = me.deck[kept:]
+        me.prizes, op.prizes = prizes, prizes
+        deck0 = len(me.deck)
+        played = V.play_trainer_from_ir(me, op, "Supporter", name, [], 3)
+        check(f"{name} at {prizes} Prizes is played", played)
+        check(f"{name} at {prizes} Prizes ends on {want_hand} cards",
+              len(me.hand) == want_hand, str(len(me.hand)))
+        check(f"{name} at {prizes} Prizes shuffles the {kept} kept cards back",
+              len(me.deck) == deck0 + kept - want_hand, f"{deck0} -> {len(me.deck)}")
+    eff = V.trainer_effect_ir("Carmine")
+    ops = [a.op for a in eff.actions]
+    check("Carmine discards the hand before it draws",
+          ops[:2] == [IR.Op.DISCARD_FROM_SELF, IR.Op.DRAW]
+          and eff.actions[0].amount >= 99, str(ops))
+
+
+def test_an_optional_draw_never_empties_the_deck():
+    """N's Zoroark ex's Trade fired every turn it could.
+
+    Draw 2, about nine times a game with several Zoroark on the board:
+    meta_ns_zoroark lost 63% of its games by drawing its own deck out,
+    and ns_zoroark_night_joker_toolbox 40%. A real player stops. Real
+    deck model, real Ability path.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    floor = 6                      # DRAW_FLOOR; literal so this runs on the old engine
+    for left, fires in ((floor + 2, True), (floor + 1, False)):
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        me.active = V.InPlay("N's Zoroark ex", 0)
+        op.active = V.InPlay("N's Zorua", 0)
+        me.hand = [("Energy", "Basic Darkness Energy")] * 3
+        me.deck = me.deck[:left]
+        V.use_abilities(me, op, 5, [])
+        drew = len(me.deck) < left
+        check(f"Trade with {left} cards left {'fires' if fires else 'is held'}",
+              drew == fires, f"deck {left} -> {len(me.deck)}")
+
+
+def test_a_self_attack_lock_ends_with_the_next_turn():
+    """"During your next turn, this Pokemon can't use attacks."
+
+    The lock was a flag cleared only when read in the Active Spot. A
+    Zoroark ex that borrowed Rampaging Thunder and then went to the Bench
+    (N's Castle makes that free) kept it, and lost a turn whenever it
+    came back -- however many turns later. It was also invisible to the
+    retreat logic, so the pilot never swapped in a fresh Zoroark.
+
+    Real games reach this too rarely to test on (6-8 lock turns in 90
+    games), so the turns are scripted, on the real deck model, through the
+    real attack and end-of-turn paths. Proven to fail on the unfixed
+    engine, which has no end_of_turn and falls back to doing nothing.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    end = getattr(V, "end_of_turn", lambda pl, log: None)
+
+    def board():
+        me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+        a, b = V.InPlay("N's Zoroark ex", 0), V.InPlay("N's Zoroark ex", 0)
+        for z in (a, b):
+            z.energy = [["Darkness"], ["Darkness"]]
+            z.energy_names = ["Basic Darkness Energy"] * 2
+        me.active, me.bench = a, [b, V.InPlay("N's Zekrom", 0)]
+        op.active = V.InPlay("N's Zoroark ex", 0)       # 280 HP: no KO
+        op.bench = [V.InPlay("N's Zorua", 0)]
+        return me, op, a, b
+
+    def attacks(me, op):
+        log = []
+        V.do_attack(me, op, log)
+        # the failure line, not the "can't attack during your next turn"
+        # the lock itself now logs when it is applied
+        return not any("can't attack this turn" in l or "can't attack (" in l
+                       for l in log)
+
+    me, op, a, b = board()
+    check("Night Joker borrows the locking attack", attacks(me, op)
+          and a.attack_locked, str(a.attack_locked))
+    end(me, []); end(op, [])
+    check("the same Zoroark cannot attack on its very next turn",
+          not attacks(me, op))
+
+    me, op, a, b = board()
+    attacks(me, op)
+    end(me, []); end(op, [])
+    me.active, me.bench = b, [a, me.bench[1]]           # it goes to the Bench
+    end(me, []); end(op, [])
+    me.active, me.bench = a, [b, me.bench[1]]           # and comes back
+    check("a turn later the lock is gone", attacks(me, op))
+
+    spot = V.InPlay("N's Zoroark ex", 0)
+    spot.attack_locked = spot.retreat_locked = spot.attack_locked_by_opponent = 1
+    getattr(AE, "clear_attack_locks", lambda s: None)(spot)
+    check("evolving clears every lock",
+          not (spot.attack_locked or spot.retreat_locked
+               or spot.attack_locked_by_opponent))
+
+
+def test_subjugating_chains_switches_in_your_own_attacker():
+    """Pecharunt ex: "switch 1 of your Benched Darkness Pokemon, except any
+    Pecharunt ex, with your Active Pokemon. If you do, the new Active
+    Pokemon is now Poisoned."
+
+    Compiled as "the OPPONENT's Active is now Poisoned" with no switch:
+    a free Poison every turn, and never the card's actual job of bringing
+    up a paid-up Zoroark ex whose own Poison switches Binding Mochi on.
+    Real deck model, real Ability path.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    me, op = V.Player("me", D[1], D[2], E), V.Player("op", D[1], D[2], E)
+    me.active = V.InPlay("N's Zorua", 0)
+    ready = V.InPlay("N's Zoroark ex", 0)
+    ready.energy = [["Darkness"], ["Darkness"]]
+    ready.energy_names = ["Basic Darkness Energy"] * 2
+    me.bench = [V.InPlay("Pecharunt ex", 0), V.InPlay("N's Zekrom", 0), ready]
+    op.active = V.InPlay("N's Zoroark ex", 0)
+    V.use_abilities(me, op, 5, [])
+    check("the paid-up Zoroark ex is switched in", me.active is ready,
+          me.active.name)
+    check("and it is the one Poisoned", "poisoned" in ready.conditions,
+          str(ready.conditions))
+    check("the opponent is not", "poisoned" not in op.active.conditions)
+
+
+def test_a_copy_attack_deck_keeps_room_for_its_donor():
+    """N's Zoroark ex copies a Benched N's Pokemon's attack, and N's Zekrom
+    sat in hand behind a full Bench of support Basics on 105 of 623 turns.
+    With no donor in play, a support Basic must not take the last slot,
+    and a Pokemon search fetches the donor first. Real deck model.
+    """
+    V, D, E = _real("decks/field/meta_ns_zoroark.txt", "z")
+    me = V.Player("me", D[1], D[2], E)
+    me.active = V.InPlay("N's Zoroark ex", 0)
+    me.bench = [V.InPlay(n, 0) for n in ("N's Zorua", "Munkidori", "Pecharunt ex")]
+    me.hand = [("Pokemon", "Meowth ex"), ("Pokemon", "Fezandipiti ex")]
+    V.play_basics(me, 3, [])
+    check("a support Basic is held back from the last Bench slot",
+          len(me.bench) == 4, str([p.name for p in me.bench]))
+    me.hand.append(("Pokemon", "N's Zekrom"))
+    V.play_basics(me, 3, [])
+    check("the donor gets the slot", any(p.name == "N's Zekrom" for p in me.bench),
+          str([p.name for p in me.bench]))
+    me2 = V.Player("me", D[1], D[2], E)
+    me2.active = V.InPlay("N's Zoroark ex", 0)
+    me2.bench = [V.InPlay("N's Zorua", 0)]
+    me2.hand = []
+    random.seed(2)
+    got = {V.search_pokemon_from_deck(me2, lambda n: True) for _ in range(1)}
+    check("a Pokemon search fetches the missing donor first",
+          got == {"N's Zekrom"}, str(got))
+
+
+def test_the_mill_wall_pieces_work():
+    """A tournament-winning Dudunsparce / Maushold list (2026-09-24) leans on
+    six cards the engine had compiled and never used:
+
+      * Neutralization Zone and Battle Cage compiled to PREVENT_DAMAGE, an
+        op the Stadium gate did not list, so neither was ever played.
+      * Nothing asked about damage prevention for a BENCHED Pokemon, so
+        Shaymin's Flower Curtain and the Zone's Bench half never applied.
+      * Battle Cage was read as plain damage prevention; it stops damage
+        COUNTERS from effects, and attack damage still lands.
+      * Fan Call's "once during your first turn" was read as passive, and
+        its "Colorless" type was compiled and never checked.
+      * Dark Bell Confused its own attacker whenever it was in hand.
+
+    Real deck models, real executors.
+    """
+    import copy
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    for nm in ("Neutralization Zone", "Battle Cage"):
+        check(f"{nm} is worth putting down", V._stadium_has_effect(nm, me))
+
+    me.active = V.InPlay("Maushold", 0)
+    me.bench = [V.InPlay("Tandemaus", 0), V.InPlay("Dudunsparce ex", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    me.stadium, op._opp_stadium = "Neutralization Zone", "Neutralization Zone"
+    check("Zone: an ex attack on a no-Rule-Box Active is prevented",
+          AE.query_prevented(me, me.active, op, op.active))
+    check("Zone: an ex attack on a Rule-Box Pokemon is not",
+          not AE.query_prevented(me, me.bench[1], op, op.active))
+    op.active = V.InPlay("Dreepy", 0)
+    check("Zone: a non-ex attacker is not stopped",
+          not AE.query_prevented(me, me.active, op, op.active))
+
+    spread = IR.compile_effect("attack", "t", "This attack also does 30 damage "
+                               "to 1 of your opponent's Benched Pokemon.").actions[0]
+    counters = IR.compile_effect("attack", "t", "Put 3 damage counters on 1 of "
+                                 "your opponent's Benched Pokemon.").actions[0]
+    me.stadium, op._opp_stadium = "Battle Cage", "Battle Cage"
+    op.active = V.InPlay("Dreepy", 0)
+    tb = me.bench[0]
+    tb.damage = 0
+    AE.apply_action(counters, op, me, op.active, [], attacker=op.active)
+    check("Battle Cage: effect counters on the Bench are stopped", tb.damage == 0,
+          str(tb.damage))
+    AE.apply_action(spread, op, me, op.active, [], attacker=op.active)
+    check("Battle Cage: attack damage to the Bench still lands",
+          me.bench[0].damage + me.bench[1].damage == 30,
+          str([p.damage for p in me.bench]))
+
+    me.stadium = op._opp_stadium = None
+    me.bench = [V.InPlay("Tandemaus", 0), V.InPlay("Shaymin", 0)]
+    AE.apply_action(spread, op, me, op.active, [], attacker=op.active)
+    check("Shaymin: attack damage to a no-Rule-Box Bench is prevented",
+          all(p.damage == 0 for p in me.bench), str([p.damage for p in me.bench]))
+
+    fan = [e for e in E["Fan Rotom"] if e.name == "Fan Call"][0]
+    check("Fan Call is an activated Ability", fan.trigger == IR.Trigger.ONCE_PER_TURN,
+          str(fan.trigger))
+    me = V.Player("m", D[1], D[2], E)
+    me.active, me.bench, me.hand = V.InPlay("Fan Rotom", 0), [], []
+    me.round_no = 1
+    V.use_abilities(me, op, 1, [])
+    got = [n for k, n in me.hand if k == "Pokemon"]
+    check("Fan Call fires on the first turn", len(got) == 3, str(got))
+    check("and fetches only Colorless Pokemon",
+          all("Colorless" in D[1][n]["types"] for n in got), str(got))
+    me2 = V.Player("m", D[1], D[2], E)
+    me2.active, me2.bench, me2.hand, me2.round_no = V.InPlay("Fan Rotom", 0), [], [], 2
+    V.use_abilities(me2, op, 2, [])
+    check("and not on a later turn", not me2.hand, str(me2.hand))
+
+    me = V.Player("m", D[1], D[2], E)
+    me.active = V.InPlay("Maushold", 0)
+    me.active.energy, me.active.energy_names = [["Psychic"]], ["Basic Psychic Energy"]
+    me.bench = [V.InPlay("Dunsparce", 0)]
+    me.hand = [("Item", "Dark Bell")]
+    op.active = V.InPlay("Dragapult ex", 0)
+    V.play_trainer_from_ir(me, op, "Item", "Dark Bell", [], 5)
+    check("Dark Bell is held while it would Confuse my own attacker",
+          ("Item", "Dark Bell") in me.hand and not me.active.conditions)
+
+
+def test_the_mew_lock_trainers_do_what_they_say():
+    """A Mew ex "baby attacks" lock list (2026-09-24) carried five Trainers
+    the engine got wrong, and crashed every field run it was in:
+
+      * Tool Scrapper's op was not in TRAINER_IR_OPS (never played), and its
+        executor took your own Tools whenever the opponent had fewer than 2.
+      * Accompanying Flute compiled to nothing.
+      * FROM_DISCARD_TO_HAND returned POKEMON whatever the card said:
+        Miracle Headset's two Supporters, Lana's Aid's Basic Energy.
+      * Retreat, attack discard costs and Energy-discard effects popped
+        `energy` without `energy_names`; Enhanced Hammer then indexed one by
+        the other and raised IndexError. They also discarded a placeholder
+        "Energy" that nothing could recover.
+    """
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    me, op = V.Player("w", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    for nm in ("Tool Scrapper", "Accompanying Flute"):
+        eff = V.trainer_effect_ir(nm)
+        check(f"{nm} is playable", eff is not None
+              and any(a.op in V.TRAINER_IR_OPS for a in eff.actions))
+
+    me.active, op.active = V.InPlay("Mew ex", 0), V.InPlay("Cubchoo", 0)
+    me.active.tool, op.active.tool = "Gravity Gemstone", "Air Balloon"
+    eff = V.trainer_effect_ir("Tool Scrapper")
+    if eff is not None:
+        AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Tool Scrapper takes the opponent's Tool", op.active.tool is None)
+    check("and leaves my own", me.active.tool == "Gravity Gemstone")
+
+    op.bench = []
+    op.deck = [("Pokemon", "Cubchoo"), ("Item", "Poké Pad"), ("Pokemon", "Totodile"),
+               ("Pokemon", "Dudunsparce"), ("Energy", "Basic Water Energy")] * 3
+    eff = V.trainer_effect_ir("Accompanying Flute")
+    if eff is not None:
+        AE.apply_action(eff.actions[0], me, op, me.active, [],
+                        make_inplay=lambda n: V.InPlay(n, 0))
+    check("Accompanying Flute benches only the opponent's Basics from the top 5",
+          op.bench and all(D[1][p.name]["stage"] == "Basic" for p in op.bench)
+          and len(op.deck) + len(op.bench) == 15, str([p.name for p in op.bench]))
+
+    me.discard = ["Tandemaus", "Boss's Orders", "Basic Water Energy", "Judge", "Dunsparce"]
+    me.hand = []
+    AE.apply_action(V.trainer_effect_ir("Miracle Headset").actions[0], me, op, me.active, [])
+    check("Miracle Headset returns Supporters",
+          sorted(n for _, n in me.hand) == ["Boss's Orders", "Judge"], str(me.hand))
+    me.hand = []
+    me.discard = ["Basic Water Energy", "Mew ex"]
+    AE.apply_action(V.trainer_effect_ir("Lana's Aid").actions[0], me, op, me.active, [])
+    check("Lana's Aid returns Basic Energy and no Rule Box Pokemon",
+          me.hand == [("Energy", "Basic Water Energy")], str(me.hand))
+
+    pop = getattr(AE, "pop_energy", None)
+    spot = V.InPlay("Mew ex", 0)
+    spot.energy = [["Water"], ["Psychic", "Water"]]
+    spot.energy_names = ["Basic Water Energy", "Prism Energy"]
+    name = pop(spot) if pop else None
+    check("pop_energy keeps the two lists in step",
+          len(spot.energy) == len(spot.energy_names) == 1 and name == "Prism Energy")
+    # A retreat that certainly happens and costs Energy: Stage 1 Dudunsparce
+    # (Retreat 3; Latias ex's Skyliner frees only Basics) into a paid-up
+    # Latias ex.
+    me.active = V.InPlay("Dudunsparce", 0)
+    me.active.energy = [["Water"]] * 3
+    me.active.energy_names = ["Basic Water Energy"] * 3
+    latias = V.InPlay("Latias ex", 0)
+    latias.energy = [["Psychic"], ["Psychic"], ["Water"]]
+    latias.energy_names = ["Basic Psychic Energy"] * 2 + ["Basic Water Energy"]
+    me.bench, me.discard = [latias], []
+    op.active = V.InPlay("Mew ex", 0)      # 160: Eon Blade takes 2 Prizes, Land Crush does not
+    V.try_retreat(me, op, [])
+    gone = next(p for p in me.bench if p.name == "Dudunsparce") if me.active is latias else None
+    check("the retreat happened", gone is not None)
+    check("retreat keeps the lists in step and discards the real card",
+          gone is not None and len(gone.energy) == len(gone.energy_names) == 0
+          and "Basic Water Energy" in me.discard, str(me.discard))
+
+    # The crash: names longer than energy, with the Special one past the end.
+    victim = V.InPlay("Mew ex", 0)
+    victim.energy = [["Psychic"]]
+    victim.energy_names = ["Basic Psychic Energy", "Prism Energy"]
+    op.active, op.bench = victim, [V.InPlay("Cubchoo", 0)]
+    hammer = V.trainer_effect_ir("Enhanced Hammer").actions[0]
+    try:
+        AE.apply_action(hammer, me, op, me.active, [])
+        ok = True
+    except IndexError:
+        ok = False
+    check("Enhanced Hammer survives a drifted board", ok)
+
+    plain = V.InPlay("Mew ex", 0)
+    plain.energy, plain.energy_names = [["Psychic"], ["Psychic"]], ["Basic Psychic Energy"] * 2
+    other = V.InPlay("Cubchoo", 0)
+    other.energy, other.energy_names = [["Water"]], ["Prism Energy"]
+    op.active, op.bench = plain, [other]
+    AE.apply_action(hammer, me, op, me.active, [])
+    check("and hits the Pokemon that has Special Energy", not other.energy,
+          str(other.energy_names))
+
+
+def test_the_lookahead_pilot_sees_a_lock():
+    """"During your opponent's next turn, the Defending Pokemon can't use
+    attacks" compiled as what="use", which the lock executor ignores, so all
+    16 cards that say it did nothing -- Cubchoo's Snotted Up included.
+
+    And greedy cannot price such an attack: its value is the opponent's
+    next turn. The lookahead pilot plays each attack out through the
+    opponent's reply. Mew ex, one Knock Out from gone, facing a paid-up
+    Dragapult ex with no Bench and nothing to switch with: only borrowing
+    Snotted Up survives, and greedy takes Teleportation Burst's 30 instead.
+    The lookahead must not move the real game's random state.
+    """
+    import random as _r
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy, op.policy = pilot, "greedy"
+        me.active = V.InPlay("Mew ex", 0)
+        me.active.energy, me.active.energy_names = [["Water", "Psychic"]], ["Prism Energy"]
+        me.bench = [V.InPlay("Cubchoo", 0), V.InPlay("Comfey", 0)]
+        op.active = V.InPlay("Dragapult ex", 0)
+        op.active.energy = [["Fire"], ["Psychic"]]
+        op.active.energy_names = ["Basic Fire Energy", "Basic Psychic Energy"]
+        op.bench, op.hand = [], []
+        op.deck = [("Energy", "Basic Fire Energy")] * 20
+        me.round_no = op.round_no = 5
+        me._goes_first = True
+        return me, op
+
+    me, op = board("greedy")
+    snot = next(a for a in V.AE.query_extra_attacks(me, me.active)
+                if a["name"] == "Snotted Up")
+    me._forced_attack = snot
+    V.do_attack(me, op, [])
+    check("Snotted Up locks the Defending Pokemon",
+          bool(op.active.attack_locked_by_opponent))
+
+    me, op = board("greedy")
+    g = V.best_attack(me, me.active, opp=op)
+    check("greedy does not take the lock", g["name"] != "Snotted Up", g["name"])
+    me, op = board("lookahead")
+    _r.seed(3)
+    s0 = _r.getstate()
+    pick = V.lookahead_attack(me, op, g)
+    check("the lookahead takes the lock", pick["name"] == "Snotted Up", pick["name"])
+    check("and leaves the game's random state alone", _r.getstate() == s0)
+    check("greedy is still the default pilot", V.POL.knob(V.Player("x", {}, []), "lookahead_samples") == 0)
+
+
+def test_requirements_and_attached_energy_types_are_real():
+    """Found by the engine-coverage audit (2026-09-24):
+
+      * "You can use this card only if you have X in play" compiled to a
+        no-op: Glass Trumpet (3 in tauros_risky_ruins) was played without
+        a Tera Pokemon, and attached ONE Energy to "self" instead of one to
+        each of up to 2 Benched Colorless Pokemon.
+      * An attached Energy whose card text named no type provided EVERY
+        type -- a Basic Fire Energy off the discard paid Water costs.
+      * Eri compiled only "your opponent reveals their hand"; the discard
+        of up to 2 Items, the whole card, was dropped.
+    """
+    V, D, E = _real("decks/field/tauros_risky_ruins.txt", "t")
+    tera = next(n for n, i in D[1].items() if "Tera" in (i.get("subtypes") or []))
+    col = [n for n, i in D[1].items() if "Colorless" in i["types"]
+           and "Tera" not in (i.get("subtypes") or [])][0]
+    me, op = V.Player("t", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    trumpet = V.trainer_effect_ir("Glass Trumpet")
+
+    me.active, me.bench = V.InPlay(col, 0), [V.InPlay(col, 0), V.InPlay(col, 0)]
+    me.discard = ["Fire Energy", "Fire Energy"]      # as the deck model spells it
+    me.hand = [("Item", "Glass Trumpet")]
+    check("Glass Trumpet is refused without a Tera Pokemon",
+          not V.play_trainer_from_ir(me, op, "Item", "Glass Trumpet", [], 3))
+    me.active = V.InPlay(tera, 0)
+    check("and played with one",
+          V.play_trainer_from_ir(me, op, "Item", "Glass Trumpet", [], 3))
+    check("one Energy to each of two Benched Colorless Pokemon",
+          [p.energy_count() for p in me.bench] == [1, 1],
+          str([p.energy_count() for p in me.bench]))
+    check("and a Fire Energy provides Fire, not every type",
+          me.bench[0].energy[0] == ["Fire"], str(me.bench[0].energy[0]))
+
+    op.hand = [("Item", "Poké Pad"), ("Supporter", "Judge"), ("Item", "Ultra Ball"),
+               ("Item", "Switch")]
+    for a in V.trainer_effect_ir("Eri").actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("Eri discards two Items and nothing else",
+          sorted(k for k, _ in op.hand) == ["Item", "Supporter"], str(op.hand))
+
+    # Lisia's Appeal gusts a Benched BASIC; Drasna draws 8 or 3 after
+    # shuffling the hand in; Mr. Mime draws one per card in their hand.
+    lisia = IR.compile_effect("t", "Lisia's Appeal", "Switch in 1 of your opponent's "
+                              "Benched Basic Pokémon to the Active Spot. If you do, "
+                              "the new Active Pokémon is now Confused.")
+    check("Lisia's Appeal gusts, Basic only", any(
+        a.op == IR.Op.SWITCH and a.filter.get("basic_only") for a in lisia.actions))
+    drasna = IR.compile_effect("t", "Drasna", "Shuffle your hand into your deck. Then, "
+                               "flip a coin. If heads, draw 8 cards. If tails, draw 3 cards.")
+    check("Drasna always resolves, shuffling first, drawing 8 or 3",
+          drasna.chance == 1.0 and drasna.actions[0].op == IR.Op.SHUFFLE_HAND_INTO_DECK
+          and drasna.actions[1].filter.get("coin") == [8, 3])
+    mime = IR.compile_effect("t", "Mr. Mime", "Shuffle your hand into your deck. Then, "
+                             "draw a card for each card in your opponent's hand.")
+    draws = [a for a in mime.actions if a.op == IR.Op.DRAW]
+    check("Mr. Mime draws one per card in the opponent's hand, once",
+          len(draws) == 1 and draws[0].filter.get("per_opp_hand"))
+
+
+def test_switching_attacks_switch():
+    """SWITCH was not a rider op: all 35 switching attacks did nothing --
+    10 gusts (Follow Me, Drag Off) and 25 self-switches (Trading Places,
+    Teleportation Burst). A gust attack also has to switch BEFORE its damage,
+    which goes to the new Active. Real deck models.
+    """
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+
+    def board(who, opp_active="Dudunsparce", bench=("Cubchoo",)):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active = V.InPlay(who, 0)
+        me.active.energy = [["Psychic", "Water", "Colorless"]] * 3
+        me.active.energy_names = ["Prism Energy"] * 3
+        me.bench = [V.InPlay(n, 0) for n in bench]
+        op.active, op.bench = V.InPlay(opp_active, 0), [V.InPlay("Totodile", 0)]
+        return me, op
+
+    def swing(me, op, who, name, extra=None):
+        a = extra or next(x for x in D[1][who]["attacks"] if x["name"] == name)
+        me._forced_attack = a
+        V.do_attack(me, op, [])
+
+    me, op = board("Clefairy")
+    swing(me, op, "Clefairy", "Follow Me")
+    check("Follow Me gusts", op.active.name == "Totodile", op.active.name)
+
+    drag = {"name": "Drag Off", "cost": ["Colorless"], "damage": 0,
+            "text": "Switch in 1 of your opponent's Benched Pokémon to the Active "
+                    "Spot. This attack does 40 damage to the new Active Pokémon."}
+    me, op = board("Clefairy")
+    swing(me, op, "Clefairy", None, drag)
+    check("a gust attack's damage lands on the NEW Active",
+          op.active.name == "Totodile" and op.active.damage == 40
+          and op.bench[-1].damage == 0, f"{op.active.name} {op.active.damage}")
+
+    me, op = board("Dunsparce")
+    swing(me, op, "Dunsparce", "Trading Places")
+    check("Trading Places switches", me.active.name == "Cubchoo", me.active.name)
+
+    me, op = board("Mew ex")
+    swing(me, op, "Mew ex", "Teleportation Burst")
+    check("Teleportation Burst keeps a safe Mew ex in (the switch is optional)",
+          me.active.name == "Mew ex", me.active.name)
+    me, op = board("Mew ex", opp_active="Latias ex")
+    op.active.energy = [["Psychic"], ["Psychic"], ["Water"]]
+    op.active.energy_names = ["Psychic Energy"] * 3
+    me.active.damage = 120
+    swing(me, op, "Mew ex", "Teleportation Burst")
+    check("and takes it when Mew ex would be Knocked Out next turn",
+          me.active.name == "Cubchoo", me.active.name)
+
+    volt = IR.compile_effect("attack", "Volt Switch", "Switch this Pokémon with 1 "
+                             "of your Benched Lightning Pokémon.").actions[0]
+    check("a typed self-switch keeps its type",
+          volt.filter.get("type") == "Lightning" and not volt.filter.get("optional"))
+
+
+def test_prevention_never_wins_and_attack_effects_run():
+    """Four holes found by listing every op that compiles on an attack and
+    is neither executed as a rider nor read by the damage code:
+
+      * A fully PREVENTED attack returned True from do_attack -- "the game
+        ended" -- so the attacker WON on the spot. Every wall that worked
+        (Neutralization Zone, Shaymin, Bastiodon) lost the game instead.
+      * Draw attacks did nothing (70): Raging Bolt ex's Burst Roar is
+        "discard your hand and draw 6".
+      * "During your opponent's next turn, prevent all damage done to /
+        this Pokemon takes N less" (71 attacks) did nothing.
+      * Elgyem's Slight Shift moved your own Energy, not the opponent's.
+    """
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active, me.bench = V.InPlay("Maushold", 0), [V.InPlay("Tandemaus", 0)]
+    me.stadium, op._opp_stadium = "Neutralization Zone", "Neutralization Zone"
+    op.active = V.InPlay("Dragapult ex", 0)
+    op.active.energy = [["Fire"], ["Psychic"]]
+    op.active.energy_names = ["Fire Energy", "Psychic Energy"]
+    ended = V.do_attack(op, me, [])
+    check("a prevented attack does not end the game", ended is False, str(ended))
+    check("and deals nothing", me.active.damage == 0, str(me.active.damage))
+
+    def one(text, name="Test", cost=("Colorless",), dmg=0):
+        return {"name": name, "cost": list(cost), "damage": dmg, "text": text}
+
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Dunsparce", 0)
+    me.active.energy, me.active.energy_names = [["Colorless"]] * 3, ["Mist Energy"] * 3
+    op.active = V.InPlay("Dreepy", 0)
+    me.hand = [("Item", "Poké Pad")] * 3
+    me._forced_attack = one("Discard your hand and draw 6 cards.", "Burst Roar")
+    V.do_attack(me, op, [])
+    check("Burst Roar discards the hand and draws 6",
+          len(me.hand) == 6 and me.discard.count("Poké Pad") == 3, str(len(me.hand)))
+
+    me._forced_attack = one("During your opponent's next turn, this Pokémon takes "
+                            "50 less damage from attacks.", "Steel Wing", dmg=70)
+    V.do_attack(me, op, [])
+    check("Steel Wing shields its user", AE.query_attack_shield(me, me.active, op, op.active)
+          == ("reduce", 50), str(me.active.shield))
+    V.end_of_turn(me, [])
+    check("through the opponent's next turn", me.active.shield is not None)
+    V.end_of_turn(me, [])
+    check("and no longer", me.active.shield is None)
+
+    op.active = V.InPlay("Dreepy", 0)       # Steel Wing's 70 Knocked the last one Out
+    me._forced_attack = one("During your opponent's next turn, prevent all damage done "
+                            "to this Pokémon by attacks from Basic non-Colorless Pokémon.",
+                            "Crown Opal")
+    V.do_attack(me, op, [])
+    check("a restricted shield stops a Basic non-Colorless attacker",
+          AE.query_attack_shield(me, me.active, op, op.active) == ("prevent", 0))
+    op.active = V.InPlay("Dragapult ex", 0)
+    check("and not a Stage 2", AE.query_attack_shield(me, me.active, op, op.active) is None)
+
+    W, WD, WE = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    me, op = W.Player("w", WD[1], WD[2], WE), W.Player("o", WD[1], WD[2], WE)
+    me.active = W.InPlay("Elgyem", 0)
+    me.active.energy, me.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    me.bench = [W.InPlay("Cubchoo", 0)]
+    op.active = W.InPlay("Latias ex", 0)
+    op.active.energy = [["Psychic"], ["Psychic"]]
+    op.active.energy_names = ["Psychic Energy"] * 2
+    op.bench = [W.InPlay("Totodile", 0)]
+    me._forced_attack = next(x for x in WD[1]["Elgyem"]["attacks"] if x["name"] == "Slight Shift")
+    W.do_attack(me, op, [])
+    check("Slight Shift moves the opponent's Energy onto their Bench",
+          op.active.energy_count() == 1 and op.bench[0].energy_count() == 1
+          and me.active.energy_count() == 1)
+
+
+def test_torrential_heart_buffs_the_attacker_and_spares_the_bench():
+    """Feraligatr's Torrential Heart: "put 5 damage counters on this
+    Pokemon. If you do, during this turn, attacks used by this Pokemon do
+    120 more damage." BUFF_DAMAGE had no executor, and the Ability fired
+    every turn on every Feraligatr in play, Benched ones included: 50 damage
+    each for nothing. Fixed, the deck measured +31.45 points. Real model.
+    """
+    V, D, E = _real("decks/field/feraligatr_munkidori_damage_transfer.txt", "f")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("f", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Feraligatr", 0)
+    me.active.energy = [["Water"]] * 3
+    me.active.energy_names = ["Water Energy"] * 3
+    me.bench = [V.InPlay("Feraligatr", 0)]
+    op.active = V.InPlay("Raging Bolt ex", 0)
+    V.use_abilities(me, op, 5, [])
+    check("the Benched Feraligatr is not hurt", me.bench[0].damage == 0,
+          str(me.bench[0].damage))
+    check("the Active one pays 5 counters", me.active.damage == 50, str(me.active.damage))
+    check("and gets +120 this turn", me.active.turn_buff == 120, str(me.active.turn_buff))
+    V.end_of_turn(me, [])
+    check("which ends with the turn", me.active.turn_buff == 0)
+
+
+def test_effect_immunity_blocks_attack_effects_only():
+    """"Prevent all effects of attacks ... done to this Pokemon (Damage is
+    not an effect)" compiled as a DAMAGE wall -- Skeledirge and Empoleon ex
+    took no damage at all -- and nothing ever applied the effects half:
+    Poltchageist PBL 5 on the Bench took Phantom Dive's counters,
+    and Mist Energy's holder could be Paralyzed by an attack. A Trainer
+    (Dark Bell) is not an attack and still gets through.
+    """
+    # dhelmise_veluza_hide_n_sneak runs Poltchageist PBL 5, the printing
+    # with the Bench shield (TWM 21 / 171 have none).
+    V, D, E = _real("decks/field/dhelmise_veluza_hide_n_sneak.txt", "h")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("h", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    active = next(n for n in D[1] if n != "Poltchageist" and D[1][n]["stage"] == "Basic")
+    me.active, me.bench = V.InPlay(active, 0), [V.InPlay("Poltchageist", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    dive = next(a for a in O[1]["Dragapult ex"]["attacks"] if a["name"] == "Phantom Dive")
+    V.attack_side_effects(op, me, dive, [])
+    check("Poltchageist on the Bench takes no Phantom Dive counters",
+          me.bench[0].damage == 0, str(me.bench[0].damage))
+
+    skel = IR.compile_effect("x", "Skeledirge", "Prevent all effects of attacks used by "
+                             "your opponent's Pokémon done to this Pokémon. (Damage is "
+                             "not an effect.)").actions[0]
+    check("an effects-only wall is not a damage wall", skel.filter.get("effects_only"))
+
+    M2, MD, ME = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    me, op = M2.Player("m", MD[1], MD[2], ME), M2.Player("o", O[1], O[2], OE)
+    me.active = M2.InPlay("Dunsparce", 0)
+    me.active.energy, me.active.energy_names = [["Colorless"]], ["Mist Energy"]
+    op.active = M2.InPlay("Dreepy", 0)
+    para = {"name": "Zap", "cost": ["Colorless"], "damage": 10,
+            "text": "Your opponent's Active Pokémon is now Paralyzed."}
+    op._forced_attack = para
+    M2.do_attack(op, me, [])
+    check("Mist Energy's holder is not Paralyzed by an attack",
+          "paralyzed" not in me.active.conditions, str(me.active.conditions))
+    check("but still takes the damage", me.active.damage == 10, str(me.active.damage))
+    for a in M2.trainer_effect_ir("Dark Bell").actions:
+        AE.apply_action(a, op, me, op.active, [])
+    check("and a Trainer (Dark Bell) still Confuses it",
+          "confused" in me.active.conditions, str(me.active.conditions))
+
+
+def test_special_energy_does_what_it_prints():
+    """Attached Special Energy was read for its type and nothing else.
+    Telepathic Psychic Energy (9 decklists) never benched its two Basic
+    Psychic Pokemon, Enriching Energy never drew 4, Growing Grass Energy
+    never gave +20 HP, Shadowy Darkness Energy never shielded the Bench,
+    and Legacy Energy never cost the opponent a Prize. The main attack
+    Knock Out also never asked the Prize-changing Abilities.
+    """
+    import glob as _g
+    def deck(card):
+        f = next(x for x in sorted(_g.glob("decks/field/*.txt")) if card in open(x).read())
+        return _real(f, "x")
+    V, D, E = deck("Telepathic Psychic Energy")
+    me = V.Player("x", D[1], D[2], E)
+    psy = next(n for n, i in D[1].items() if "Psychic" in i["types"]
+               and any(len(a["cost"]) >= 1 for a in i["attacks"]))
+    me.active, me.bench, me._opp_ref = V.InPlay(psy, 0), [], None
+    me._opp_ref = me
+    me.hand = [("Energy", "Telepathic Psychic Energy")]
+    me.energy_types = {"Psychic"}                        # as run_game sets it
+    V.attach_energy(me, V._CARDS_BY_NAME, [])            # the real path
+    check("Telepathic Psychic Energy benches Basic Psychic Pokemon",
+          len(me.bench) == 2 and all("Psychic" in D[1][p.name]["types"] for p in me.bench),
+          str([p.name for p in me.bench]))
+
+    V, D, E = deck("Enriching Energy")
+    me = V.Player("x", D[1], D[2], E)
+    first = next(n for n, i in D[1].items() if i["attacks"])
+    me.active, me.hand = V.InPlay(first, 0), [("Energy", "Enriching Energy")]
+    me._opp_ref = me
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("Enriching Energy draws 4", len(me.hand) == 4, str(len(me.hand)))
+
+    V, D, E = deck("Growing Grass Energy")
+    me = V.Player("x", D[1], D[2], E)
+    g = next(n for n, i in D[1].items() if "Grass" in i["types"])
+    s = V.InPlay(g, 0)
+    s.energy, s.energy_names = [["Grass"]], ["Growing Grass Energy"]
+    check("Growing Grass Energy: +20 HP", V.effective_hp(me, s) == D[1][g]["hp"] + 20)
+
+    V, D, E = deck("Shadowy Darkness Energy")
+    me, op = V.Player("x", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    dk = next(n for n, i in D[1].items() if "Darkness" in i["types"])
+    s = V.InPlay(dk, 0)
+    s.energy, s.energy_names = [["Darkness"]], ["Shadowy Darkness Energy"]
+    me.active, me.bench, op.active = V.InPlay(dk, 0), [s], V.InPlay(dk, 0)
+    check("Shadowy Darkness Energy shields its Benched holder",
+          AE.query_prevented(me, s, op, op.active))
+    me.active, me.bench = s, []
+    check("but not in the Active Spot", not AE.query_prevented(me, s, op, op.active))
+
+    V, D, E = deck("Legacy Energy")
+    me, op = V.Player("x", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    ex = next(n for n, i in D[1].items() if i["prize_value"] >= 2)
+    s = V.InPlay(ex, 0)
+    s.energy, s.energy_names = [["Colorless"]], ["Legacy Energy"]
+    ko = getattr(V, "_ko_prizes", lambda o, sp, tk: o.POKEMON[sp.name]["prize_value"])
+    first = ko(me, s, op)
+    second = ko(me, s, op)
+    check("Legacy Energy: one Prize fewer, once a game",
+          first == D[1][ex]["prize_value"] - 1 and second == D[1][ex]["prize_value"],
+          f"{first} {second}")
+
+
+def test_three_count_shapes_scale():
+    """Three "for each" shapes returned None and scored the printed base:
+    R Command (Team Rocket Supporters in the discard), Explode Together Now
+    (Koffing or Weezing in play, both sides), United Wings (Pokemon in the
+    discard with that attack)."""
+    import glob as _g
+    def find(card, atk):
+        for f in sorted(_g.glob("decks/field/*.txt")):
+            V, D, E = _real(f, "x")
+            if card in D[1]:
+                a = next((x for x in D[1][card]["attacks"] if x["name"] == atk), None)
+                if a:
+                    return V, D, E, a
+    V, D, E, a = find("Team Rocket's Porygon2", "R Command")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = op.active = V.InPlay("Team Rocket's Porygon2", 0)
+    me.discard = ["Team Rocket's Petrel", "Team Rocket's Ariana", "Team Rocket's Proton"]
+    check("R Command: 20 per Team Rocket Supporter in the discard",
+          V.attack_damage(me, op, me.active, a, record=False) == 60)
+    V, D, E, a = find("Team Rocket's Weezing", "Explode Together Now")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Team Rocket's Weezing", 0)
+    op.active = V.InPlay("Team Rocket's Weezing", 0)
+    me.bench = [V.InPlay("Team Rocket's Koffing", 0)] * 2
+    check("Explode Together Now: 40 per Koffing / Weezing on both sides",
+          V.attack_damage(me, op, me.active, a, record=False) == 160)
+
+
+def test_tera_pokemon_on_the_bench_take_no_attack_damage():
+    """The Tera rule-box line was never read: a Benched Tera Pokemon took
+    Bench spread and snipe damage like any other."""
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Wiglett", 0)
+    me.bench = [V.InPlay("Wugtrio ex", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    snipe = IR.compile_effect("attack", "t", "This attack also does 30 damage to "
+                              "1 of your opponent's Benched Pokémon.").actions[0]
+    AE.apply_action(snipe, op, me, op.active, [], attacker=op.active)
+    check("a Benched Tera Pokemon takes no attack damage", me.bench[0].damage == 0,
+          str(me.bench[0].damage))
+    me.active, me.bench = me.bench[0], []
+    check("in the Active Spot it does",
+          not AE.query_prevented(me, me.active, op, op.active))
+
+
+def test_choice_band_discount_and_boomerang_energy():
+    """Hop's Choice Band's 'cost Colorless less' half was never modelled,
+    and Boomerang Energy never came back after its holder's own attack
+    discarded it (Kyurem's Trifrost in meta_slowking discards all of it)."""
+    V, D, E = _real("decks/field/hops_snorlax_stacked_buff.txt", "h")
+    me = V.Player("h", D[1], D[2], E)
+    s = V.InPlay("Hop's Snorlax", 0)
+    press = next(a for a in D[1]["Hop's Snorlax"]["attacks"] if a["name"] == "Dynamic Press")
+    s.tool = "Hop's Choice Band"
+    check("Hop's Choice Band: one Colorless less",
+          len(V.effective_cost(me, s, press["cost"])) == len(press["cost"]) - 1)
+    other = next(n for n in D[1] if not n.startswith("Hop's") and D[1][n]["attacks"])
+    o = V.InPlay(other, 0)
+    o.tool = "Hop's Choice Band"
+    oc = D[1][other]["attacks"][0]["cost"]
+    check("but only on a Hop's Pokemon", V.effective_cost(me, o, oc) == list(oc))
+
+    V, D, E = _real("decks/field/meta_slowking.txt", "s")
+    me, op = V.Player("s", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Kyurem", 0), V.InPlay("Kyurem", 0)
+    me.active.energy = [["Colorless"]] * 4
+    me.active.energy_names = ["Boomerang Energy"] * 4
+    me._forced_attack = next(a for a in D[1]["Kyurem"]["attacks"] if a["name"] == "Trifrost")
+    V.do_attack(me, op, [])
+    V.finish_turn(me, op, [])
+    check("Boomerang Energy returns after its holder's attack discards it",
+          me.active.energy_names.count("Boomerang Energy") == 4
+          and "Boomerang Energy" not in me.discard, str(me.active.energy_names))
+
+
+def test_the_lookahead_chooses_the_supporter():
+    """Greedy plays Supporters in a fixed priority -- a draw Supporter from a
+    small hand before Boss's Orders. The lookahead plays each Supporter in
+    hand out through the opponent's reply: here Boss's Orders drags up a
+    Drakloak that Numbing Hold Knocks Out, and Lillie's Determination does
+    not take a Prize."""
+    import random as _r
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy = pilot
+        me.active = V.InPlay("Wugtrio ex", 0)
+        me.active.energy, me.active.energy_names = [["Water"], ["Water"]], ["Water Energy"] * 2
+        me.bench = [V.InPlay("Wiglett", 0)]
+        me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Boss's Orders")]
+        op.active, op.bench = V.InPlay("Dragapult ex", 0), [V.InPlay("Drakloak", 0)]
+        me.round_no = op.round_no = 5
+        return me, op
+    me, op = board("greedy")
+    _r.seed(1)
+    V.play_supporter(me, op, 5, [])
+    check("greedy plays the draw Supporter", "Lillie's Determination" in me.played_supporters_this_turn)
+    me, op = board("lookahead")
+    _r.seed(1)
+    V.choose_supporter(me, op, 5, [])
+    check("the lookahead plays Boss's Orders into the Knock Out",
+          "Boss's Orders" in me.played_supporters_this_turn and op.active.name == "Drakloak",
+          str(me.played_supporters_this_turn))
+
+
+def test_the_lookahead_chooses_the_energy_target():
+    """The lookahead pilot's attach choice: a forced target gets the Energy,
+    a forced None attaches nothing, and with nothing to separate the options
+    it keeps greedy's target."""
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy, me.energy_types = pilot, {"Water"}
+        me.active, me.bench = V.InPlay("Wugtrio ex", 0), [V.InPlay("Wiglett", 0)]
+        me.hand = [("Energy", "Water Energy")]
+        op.active = V.InPlay("Dragapult ex", 0)
+        me.round_no = op.round_no = 5
+        return me, op
+    me, op = board("greedy")
+    me._forced_attach = 1
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("a forced target gets the Energy", me.bench[0].energy_count() == 1
+          and me.active.energy_count() == 0)
+    me, op = board("greedy")
+    me._forced_attach = None
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("a forced None attaches nothing", ("Energy", "Water Energy") in me.hand)
+    me, op = board("lookahead")
+    V.choose_attach(me, op, [])
+    check("the lookahead attaches exactly one Energy",
+          sum(s.energy_count() for s in me.in_play()) == 1)
+
+
+def test_played_from_hand_abilities_fire():
+    """ON_PLAY ("when you play this Pokemon from your hand onto your Bench")
+    had no caller at all, and Meowth ex -- in six field decks -- had its
+    Supporter search compiled as a self-lock. Rapid Vernier switches Iron
+    Leaves ex in only when the moved Energy pays for Prism Edge; Snow Sink
+    discards only the opponent's Stadium."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+
+    def board():
+        me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Mega Kangaskhan ex", 0), V.InPlay("Raging Bolt ex", 0)
+        me._opp_ref, me.round_no = op, 3
+        return me, op
+    me, op = board()
+    me.hand = [("Pokemon", "Meowth ex")]
+    me.deck = [("Item", "Ultra Ball"), ("Supporter", "Crispin"), ("Item", "Ultra Ball")]
+    V.play_basics(me, 3, [])
+    check("Last-Ditch Catch puts a Supporter into hand",
+          ("Supporter", "Crispin") in me.hand, str(me.hand))
+
+    me, op = board()
+    donor = V.InPlay("Raging Bolt ex", 0)
+    donor.energy, donor.energy_names = [["Grass"], ["Grass"], ["Fighting"]], \
+        ["Grass Energy", "Grass Energy", "Fighting Energy"]
+    me.bench = [donor]
+    me.hand = [("Pokemon", "Iron Leaves ex")]
+    V.play_basics(me, 3, [])
+    check("Rapid Vernier switches Iron Leaves ex in with its Energy",
+          me.active.name == "Iron Leaves ex" and me.active.energy_count() == 3
+          and len(me.active.energy_names) == 3, me.active.name)
+    me, op = board()
+    donor = V.InPlay("Raging Bolt ex", 0)
+    donor.energy, donor.energy_names = [["Lightning"]], ["Lightning Energy"]
+    me.bench = [donor]
+    me.hand = [("Pokemon", "Iron Leaves ex")]
+    V.play_basics(me, 3, [])
+    check("and stays on the Bench when it cannot pay for an attack",
+          me.active.name == "Mega Kangaskhan ex" and donor.energy_count() == 1)
+
+    me, op = board()
+    me.stadium = "Area Zero Underdepths"
+    me.hand = [("Pokemon", "Chien-Pao")]
+    V.play_basics(me, 3, [])
+    check("Snow Sink keeps your own Stadium", me.stadium == "Area Zero Underdepths")
+    me, op = board()
+    op.stadium = me._opp_stadium = "Area Zero Underdepths"
+    me.hand = [("Pokemon", "Chien-Pao")]
+    V.play_basics(me, 3, [])
+    check("Snow Sink discards the opponent's Stadium", op.stadium is None)
+
+
+def test_when_damaged_abilities_beyond_counters():
+    """ON_DAMAGED only ever placed counters: Numel's Incandescent Body never
+    Burned the attacker and Team Rocket's Koffing's Smog Signals never
+    benched anything (and its "Koffing" name filter was dropped)."""
+    V, D, E = _real("decks/field/eerie_inferno_ninetales_burn.txt", "n")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("n", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Magmortar", 0), V.InPlay("Numel", 0)
+    me.active.energy = [["Fire"]] * 4
+    me.active.energy_names = ["Fire Energy"] * 4
+    me._forced_attack = max(D[1]["Magmortar"]["attacks"], key=lambda a: len(a["cost"]))
+    me.round_no = op.round_no = 4
+    V.do_attack(me, op, [])
+    check("Incandescent Body Burns the attacker", "burned" in me.active.conditions,
+          str(me.active.conditions))
+
+    V, D, E = _real("decks/field/team_rockets_koffing_weezing_bench_swarm.txt", "k")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("k", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Team Rocket's Weezing", 0), V.InPlay("Team Rocket's Koffing", 0)
+    me.active.energy = [["Darkness"]] * 4
+    me.active.energy_names = ["Darkness Energy"] * 4
+    me._forced_attack = next(a for a in D[1]["Team Rocket's Weezing"]["attacks"]
+                             if a.get("damage"))
+    op.deck = [("Item", "Ultra Ball"), ("Pokemon", "Koffing"),
+               ("Pokemon", "Team Rocket's Koffing"), ("Pokemon", "Koffing")]
+    me.round_no = op.round_no = 4
+    V.do_attack(me, op, [])
+    # The Knock Out then promotes one of them, so count what left the deck.
+    check("Smog Signals benches 2 Koffing",
+          len(op.deck) == 2 and ("Item", "Ultra Ball") in op.deck
+          and all("Koffing" in p.name for p in op.in_play()), str(op.deck))
+
+
+def test_prize_changes_read_their_own_conditions():
+    """Every MODIFY_PRIZE applied to every Knock Out while its holder was in
+    play. Mega Gengar ex's Shadowy Concealment is only for a Darkness
+    Pokemon Knocked Out by a Pokemon ex, and does not stack."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/study_hydreigon_zweilous_mill.txt", "g")
+    me, op = V.Player("g", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Deino", 0)
+    me.bench = [V.InPlay("Mega Gengar ex", 0), V.InPlay("Mega Gengar ex", 0),
+                V.InPlay("Relicanth", 0)]
+    ex, plain = V.InPlay("N's Zoroark ex", 0), V.InPlay("Zweilous", 0)
+    check("Darkness Pokemon KO'd by an ex: 1 fewer, once",
+          AE.query_prize_modifier(op, me, me.active, ex, True) == -1)
+    check("not when the attacker is not an ex",
+          AE.query_prize_modifier(op, me, me.active, plain, True) == 0)
+    check("not for a non-Darkness Pokemon",
+          AE.query_prize_modifier(op, me, me.bench[2], ex, True) == 0)
+
+
+def test_seek_inspiration_reads_and_discards_the_top_card():
+    """The deck draws off the END of the list, but Seek Inspiration read
+    deck[0] -- the bottom -- and never discarded it, so the same card was
+    copied every turn and Academy at Night / Ciphermaniac's Codebreaking,
+    which set the top, could never reach it."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_slowking.txt", "s")
+    me, op = V.Player("s", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Slowking", 0), V.InPlay("Mega Kangaskhan ex", 0)
+    me.active.energy = [["Psychic"], ["Psychic"]]
+    me.active.energy_names = ["Psychic Energy"] * 2
+    me._opp_ref, me.round_no, op.round_no = op, 5, 5
+    seek = next(a for a in D[1]["Slowking"]["attacks"] if a["name"] == "Seek Inspiration")
+    me.deck = [("Pokemon", "Kyurem"), ("Item", "Ultra Ball"), ("Pokemon", "Annihilape")]
+    V._note_known_top(me, 1)              # as if Academy at Night put it there
+    check("Seek copies the TOP card", (V.copied_attack(me, op, me.active, seek["text"])
+                                       or {}).get("name") in ("Tantrum", "Destined Fight"))
+    me._forced_attack = seek
+    V.do_attack(me, op, [])
+    check("and discards it", "Annihilape" in me.discard and len(me.deck) == 2,
+          str(me.deck))
+
+    me.deck = [("Pokemon", "Annihilape"), ("Item", "Ultra Ball")]
+    me.hand = [("Pokemon", "Kyurem"), ("Item", "Poké Pad")]
+    me.stadium = "Academy at Night"
+    V._stadium_hand_to_top(me, [])
+    check("Academy at Night puts the copy target on top",
+          me.deck[-1] == ("Pokemon", "Kyurem"), str(me.deck))
+    check("Academy at Night is worth playing to a Seek deck",
+          V._stadium_has_effect("Academy at Night", me))
+
+    me.deck = [("Pokemon", "Annihilape"), ("Supporter", "Lillie's Determination"),
+               ("Item", "Ultra Ball"), ("Pokemon", "Slowpoke")]
+    me.hand = []
+    act = IR.Action(IR.Op.SEARCH_TO_TOP_OF_DECK, 2, IR.Target.SELF, {})
+    AE.apply_action(act, me, op, me.active, [])
+    check("Ciphermaniac stacks the copy target under the draw",
+          me.deck[-2] == ("Pokemon", "Annihilape"), str(me.deck[-2:]))
+
+
+def test_tri_kinesis_knocks_out_the_best_prize():
+    """Tri Kinesis compiled to nothing. All three heads (1 in 8) Knocks Out
+    any one of the opponent's Pokemon -- the one worth the most Prizes."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    eff = IR.compile_effect("Team Rocket's Exeggutor", "Tri Kinesis",
+                            "Flip 3 coins. If all of them are heads, Knock Out 1 "
+                            "of your opponent's Pokémon.")
+    check("Tri Kinesis compiles, at 1 in 8", not eff.unsupported
+          and abs(eff.chance - 0.125) < 1e-9, repr(eff))
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Passimian", 0)
+    op.active, op.bench = V.InPlay("Passimian", 0), [V.InPlay("Raging Bolt ex", 0)]
+    if not eff.unsupported:
+        AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("it takes the ex on the Bench", op.bench[0].damage >= 10 ** 6
+          and op.active.damage == 0)
+
+
+def test_the_lookahead_chooses_the_promotion():
+    """After a Knock Out the lookahead pilot plays each Benched Pokemon out
+    as the new Active; greedy takes the first after its sort. Either way a
+    Pokemon is promoted, and the real game's dice are untouched."""
+    import random as _r
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    for pilot in ("greedy", "lookahead"):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy = pilot
+        me.bench = [V.InPlay("Wiglett", 0), V.InPlay("Wugtrio ex", 0)]
+        me.bench[1].energy, me.bench[1].energy_names = [["Water"]] * 2, ["Water Energy"] * 2
+        op.active = V.InPlay("Dragapult ex", 0)
+        me.round_no = op.round_no = 5
+        op._goes_first, op._cards_by_name, op._first_turn = True, V._CARDS_BY_NAME, False
+        _r.seed(7)
+        before = _r.random()
+        _r.seed(7)
+        log = []
+        V._promote_after_ko(me, op, log)
+        check(f"{pilot}: a Pokemon is promoted", me.active is not None
+              and len(me.bench) == 1, str(log))
+        check(f"{pilot}: the real dice are untouched", _r.random() == before)
+
+
+def _cards_held(p):
+    n = len(p.hand) + len(p.deck) + len(p.discard) + len(getattr(p, "prize_cards", []) or [])
+    for s in p.in_play():
+        n += 1 + len(getattr(s, "under", []) or []) + len(s.energy_names or []) + (1 if s.tool else 0)
+    return n + (1 if p.stadium else 0)
+
+
+def test_cards_are_conserved():
+    """A card-conservation audit (every card is somewhere, once) found:
+    a Knock Out discarded only the top card's name -- its Energy, Tool and
+    Evolution stack left the game; playing a Stadium discarded the NEW one
+    and lost the replaced one; attack Bench searches (Call for Family) took
+    the Pokemon out of the deck and put it nowhere; Run Away Draw shuffled
+    Dudunsparce into the deck twice; a refunded Ability kept its paid cards
+    in the discard as well as the hand."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    ko = V.InPlay("Raging Bolt ex", 0)
+    ko.under = ["Teal Mask Ogerpon ex"]          # a stand-in Evolution stack
+    ko.energy, ko.energy_names = [["Grass"], ["Fighting"]], ["Grass Energy", "Fighting Energy"]
+    ko.tool = "Hero's Cape"
+    ko.damage = 10 ** 6
+    me.active, me.bench = ko, [V.InPlay("Passimian", 0)]
+    op.active = V.InPlay("Passimian", 0)
+    before = _cards_held(me)
+    V.sweep_knocked_out(me, op, [])
+    check("a Knock Out discards the whole pile",
+          _cards_held(me) == before and sorted(me.discard) == sorted(
+              ["Teal Mask Ogerpon ex", "Raging Bolt ex", "Grass Energy",
+               "Fighting Energy", "Hero's Cape"]), str(me.discard))
+
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+    me._opp_ref, op._opp_ref = op, me
+    op.stadium, me._opp_stadium = "Jamming Tower", "Jamming Tower"
+    me.hand = [("Stadium", "Postwick")]
+    b_me, b_op = _cards_held(me), _cards_held(op)
+    V.play_items(me, op, 3, [], False)
+    check("the Stadium is played", me.stadium == "Postwick")
+    check("a replaced Stadium goes to its owner's discard",
+          "Jamming Tower" in op.discard and _cards_held(op) == b_op)
+    check("and the new one is not also discarded",
+          "Postwick" not in me.discard and _cards_held(me) == b_me)
+    me2, op2 = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me2.active, op2.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+    me2._opp_ref, op2._opp_ref = op2, me2
+    op2.stadium, me2._opp_stadium = "Postwick", "Postwick"
+    me2.hand = [("Stadium", "Postwick")]
+    V.play_items(me2, op2, 3, [], False)
+    check("a Stadium with the same name in play can't be played",
+          op2.stadium == "Postwick" and ("Stadium", "Postwick") in me2.hand)
+
+    V, D, E = _real("decks/field/tr_arbok_yveltal_snow_coating.txt", "t")
+    me, op = V.Player("t", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("N's Vanillite", 0), V.InPlay("Yveltal", 0)
+    me.active.energy, me.active.energy_names = [["Water"]], ["Water Energy"]
+    me.deck = [("Pokemon", "Team Rocket's Ekans"), ("Pokemon", "Yveltal"), ("Item", "Ultra Ball")]
+    me._forced_attack = next(a for a in D[1]["N's Vanillite"]["attacks"]
+                             if a["name"] == "Call for Family")
+    me.round_no = op.round_no = 3
+    before = _cards_held(me)
+    V.do_attack(me, op, [])
+    check("Call for Family benches what it takes from the deck",
+          len(me.bench) == 2 and _cards_held(me) == before, str(me.deck))
+
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "d")
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Dunsparce", 0), V.InPlay("Dunsparce", 0)
+    dd = V.InPlay("Dudunsparce", 0)
+    dd.under = ["Dunsparce"]
+    dd.energy, dd.energy_names = [["Colorless"]], ["Psychic Energy"]
+    me.bench = [dd]
+    me.deck = [("Item", "Ultra Ball")] * 10
+    me._opp_ref = op
+    before = _cards_held(me)
+    V.use_abilities(me, op, 3, [])
+    check("Run Away Draw shuffles Dudunsparce in once, with its cards",
+          dd not in me.bench and _cards_held(me) == before
+          and me.deck.count(("Pokemon", "Dudunsparce")) == 1, str(_cards_held(me) - before))
+
+
+def test_conservation_audit_is_clean():
+    """The standing guard for test_cards_are_conserved: one game per field
+    deck, every step checked (audit_conservation.py runs the long form)."""
+    import audit_conservation as AC
+    bad = AC.audit(1, 11)
+    check("no step creates or destroys a card", not bad, str(bad.most_common(5)))
+
+
+def test_no_supporter_on_the_first_turn_going_first():
+    """The player going first may not play a Supporter on their first turn
+    unless the card says so. Nothing enforced it."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    for first, played in ((True, False), (False, True)):
+        me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+        me.hand = [("Supporter", "Crispin")]
+        me.deck = [("Energy", "Grass Energy"), ("Energy", "Lightning Energy")] * 10
+        V.take_turn(me, op, 1, first, V._CARDS_BY_NAME, [])
+        check(f"going {'first' if first else 'second'}: Crispin "
+              f"{'played' if played else 'held'}",
+              ("Crispin" in me.played_supporters_this_turn) == played)
+
+
+def test_evolution_timing_for_both_players():
+    """Neither player may evolve on their own first turn -- the player
+    going second could. Grand Tree obeys the same rule (its reminder text
+    says so), chains the Stage 2 onto the Pokemon it just evolved, and
+    Vivillon's Evo-Powder evolves the Bench only."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/decidueye_ex_judge_sniper_lock.txt", "d")
+    for rnd, want in ((1, "Rowlet"), (2, "Dartrix")):
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Rowlet", 0), V.InPlay("Rowlet", 0)
+        me.hand = [("Pokemon", "Dartrix")]
+        me.deck = [("Item", "Ultra Ball")] * 10
+        V.take_turn(me, op, rnd, False, V._CARDS_BY_NAME, [])
+        check(f"going second, round {rnd}: Active is {want}", me.active.name == want,
+              me.active.name)
+
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.round_no = 3
+    me.active, me.bench = V.InPlay("Rowlet", 1), [V.InPlay("Rowlet", 3)]
+    me.deck = [("Pokemon", "Dartrix"), ("Pokemon", "Decidueye ex"), ("Pokemon", "Dartrix")]
+    act = V.stadium_turn_effect_ir("Grand Tree").actions[0]
+    AE.apply_action(act, me, me, None, [])
+    check("Grand Tree chains Rowlet to Decidueye ex",
+          me.active.name == "Decidueye ex" and me.active.under == ["Rowlet", "Dartrix"],
+          me.active.name)
+    check("and leaves the Rowlet benched this turn alone", me.bench[0].name == "Rowlet")
+    me.round_no = 1
+    me.active = V.InPlay("Rowlet", 0)
+    me.deck = [("Pokemon", "Dartrix")]
+    check("Grand Tree does nothing on your first turn",
+          not AE.apply_action(act, me, me, None, []))
+
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.round_no = 3
+    me.active = V.InPlay("Scatterbug", 1)
+    me.bench = [V.InPlay("Scatterbug", 1)]
+    me.deck = [("Pokemon", "Spewpa"), ("Pokemon", "Spewpa")]
+    eff = IR.compile_effect("Vivillon", "Evo-Powder", "For each of your Benched Pokémon, "
+                            "search your deck for a card that evolves from that Pokémon "
+                            "and put it onto that Pokémon to evolve it. Then, shuffle your deck.")
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Evo-Powder evolves the Bench, not the Active",
+          me.bench[0].name == "Spewpa" and me.active.name == "Scatterbug")
+
+
+def test_mulligans_give_the_opponent_extra_cards():
+    """The opponent draws 1 card per extra mulligan: never drawn before."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    a, b = V.Player("a", D[1], D[2], E), V.Player("b", D[1], D[2], E)
+    a.hand, b.hand = [], []
+    V.extra_draws(a, b, 0, 2)
+    check("two mulligans: two extra cards for the other player",
+          len(a.hand) == 2 and len(b.hand) == 0)
+    a.hand, b.hand = [], []
+    V.extra_draws(a, b, 3, 1)
+    check("both mulliganed: only the difference", len(b.hand) == 2 and len(a.hand) == 0)
+
+
+def test_static_play_locks_and_metal_bridge():
+    """Every "as long as this Pokemon is in the Active Spot, your opponent
+    can't play ..." Ability compiled to a bare lock nothing read, an
+    attack's Stadium lock locked Items instead, and Archaludon's Metal
+    Bridge freed every Pokemon's retreat, Metal Energy or not."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    O = V.load_model("decks/field/tr_arbok_yveltal_snow_coating.txt", "t")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("b", D[1], D[2], E), V.Player("t", O[1], O[2], OE)
+    me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Team Rocket's Arbok", 0)
+    me._opp_ref, op._opp_ref = op, me
+    me.hand = [("Pokemon", "Teal Mask Ogerpon ex"), ("Pokemon", "Passimian")]
+    V.play_basics(me, 3, [])
+    names = [p.name for p in me.bench]
+    check("Potent Glare: no Pokemon with an Ability from hand",
+          "Teal Mask Ogerpon ex" not in names and "Passimian" in names, str(names))
+    check("and the locked card stays in hand", ("Pokemon", "Teal Mask Ogerpon ex") in me.hand)
+
+    me2 = V.Player("b", D[1], D[2], E)
+    act = IR.Action(IR.Op.LOCK, None, IR.Target.OPPONENT, {"what": "play", "kinds": ["Stadium"]})
+    AE.apply_action(act, op, me2, op.active, [])
+    kinds, _ = AE.play_locks(me2, None)
+    check("an attack's Stadium lock is a Stadium lock", kinds == {"Stadium"}
+          and not me2.item_locked, str(kinds))
+    V.end_of_turn(me2, [])
+    check("and it ends with the locked player's turn", not AE.play_locks(me2, None)[0])
+
+    V, D, E = _real("decks/field/orthworm_ex_metal_retaliation.txt", "m")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    pk = next(n for n in D[1] if D[1][n]["retreat"] and n != "Archaludon"
+              and D[1][n]["stage"] == "Basic")
+    me.active, me.bench = V.InPlay(pk, 0), [V.InPlay("Archaludon", 0)]
+    check("Metal Bridge: no Metal Energy, the Retreat Cost stays",
+          AE.effective_retreat(me, me.active, op) == D[1][pk]["retreat"])
+    me.active.energy, me.active.energy_names = [["Metal"]], ["Metal Energy"]
+    check("with Metal Energy attached it is free", AE.effective_retreat(me, me.active, op) == 0)
+
+
+def test_the_lookahead_does_not_see_hidden_cards():
+    """The lookahead's copy kept the real deck order and the opponent's
+    real hand: it played against the actual future. The copy now redeals
+    what the pilot cannot know, keeping every zone's size and contents."""
+    import random as _r
+    from collections import Counter
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    for p in (me, op):
+        _r.seed(3)
+        V.opening_hand(p)
+    real = (list(me.deck), list(op.deck), list(op.hand), list(me.hand))
+    a, b = V.clone_state(me, op)
+    _r.seed(5)
+    V._hide_information(a, b)
+    check("my hand is mine", a.hand == me.hand)
+    check("zone sizes kept", (len(a.deck), len(b.deck), len(b.hand), len(b.prize_cards))
+          == (len(me.deck), len(op.deck), len(op.hand), len(op.prize_cards)))
+    check("their hidden cards are redealt, not lost",
+          Counter(b.deck + b.hand + b.prize_cards) == Counter(op.deck + op.hand + op.prize_cards))
+    check("the future is not the real one", a.deck != me.deck and b.deck != op.deck)
+    check("and the real game is untouched",
+          (me.deck, op.deck, op.hand, me.hand) == real)
+
+
+def test_ditto_transforms_and_gengar_faints():
+    """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
+    the Ditto deck never attacked; Backtrack Badge re-flipped only damage
+    coins; Gengar ex's Fainting Spell did not compile."""
+    import random as _r
+    V, D, E = _real("decks/ditto_tyranitar_gengar_hydreigon.ptcgl.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(badge):
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.active = V.InPlay("Ditto", 0)
+        me.active.energy = [["Psychic"], ["Darkness"]]
+        me.active.energy_names = ["Psychic Energy", "Darkness Energy"]
+        me.active.damage = 20
+        me.active.tool = "Backtrack Badge" if badge else None
+        op.active = V.InPlay("Mega Kangaskhan ex", 0)
+        me.round_no = op.round_no = 3
+        me._opp_ref = op
+        me.deck = [("Pokemon", "Tyranitar"), ("Pokemon", "Hydreigon ex"),
+                   ("Pokemon", "Gengar ex"), ("Item", "Ultra Ball")]
+        return me, op
+    me, op = board(True)
+    atk = D[1]["Ditto"]["attacks"][0]
+    check("Surprisingly Transform is worth using",
+          V.attack_rider_value(me, op, atk, me.active) > 0)
+    hits = 0
+    for seed in range(200):
+        me, op = board(True)
+        _r.seed(seed)
+        V.do_attack(me, op, [])
+        if me.active.name != "Ditto":
+            hits += 1
+            ok = (me.active.energy_count() == 2 and me.active.damage == 20
+                  and ("Pokemon", "Ditto") in me.deck
+                  and me.deck.count(("Pokemon", me.active.name)) == 0)
+            if not ok:
+                break
+    check("it becomes a Pokemon from the deck, keeping Energy and damage", ok)
+    check("with Backtrack Badge the flip lands about 3 in 4", 130 <= hits <= 170, str(hits))
+    plain = 0
+    for seed in range(200):
+        me, op = board(False)
+        _r.seed(seed)
+        V.do_attack(me, op, [])
+        plain += me.active.name != "Ditto"
+    check("without it about 1 in 2", 80 <= plain <= 120, str(plain))
+
+    for want in ("Tyranitar", "Gengar ex"):
+        me, op = board(True)
+        me._forced_transform = want            # the lookahead pilot's choice
+        _r.seed(4)
+        for _ in range(10):
+            V.do_attack(me, op, [])
+            if me.active.name != "Ditto":
+                break
+        check(f"a forced transform target is honoured ({want})",
+              me.active.name == want, me.active.name)
+
+    me, op = board(False)
+    import ability_engine as AE
+    g = V.InPlay("Gengar ex", 0)
+    _r.seed(11)
+    ko = sum(AE.query_ko_attacker_on_ko(me, g, op) for _ in range(400))
+    check("Fainting Spell Knocks Out the attacker on heads", 150 <= ko <= 250, str(ko))
+
+
+def test_every_card_effect_is_read():
+    """audit_unmodeled.py: every Ability, Trainer, Special Energy and attack
+    text in the pool compiles, has a handler, or is read by a damage rule.
+    It started at 72 (66 attack texts)."""
+    import audit_unmodeled as AU
+    res = AU.audit()
+    left = {k: v for k, v in res.items() if v}
+    check("nothing in the pool is unmodelled", not left, str({k: v[:3] for k, v in left.items()}))
+
+
+def test_attack_texts_that_were_ignored():
+    """A sample of the 66 attack texts no rule read: conditional bonuses,
+    "does nothing" gates, hand-Energy costs, coin tiers and riders."""
+    import random as _r
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    op.active = V.InPlay("Mega Kangaskhan ex", 0)
+    me._opp_ref, me.round_no, op.round_no = op, 4, 4
+    dmg = lambda text, base: V.attack_damage(me, op, me.active, {"name": "t", "cost": [], "damage": base, "text": text}, record=False)
+    t = "If your opponent has 3 or more Benched Pokémon, this attack does 80 more damage."
+    op.bench = [V.InPlay("Passimian", 0)] * 3
+    check("Deleting Slash: +80 with 3 Benched", dmg(t, 40) == 120)
+    op.bench = []
+    check("and not without", dmg(t, 40) == 40)
+    t = "If your opponent's Active Pokémon isn't a Pokémon ex, this attack does nothing."
+    check("Rising Chop hits an ex", dmg(t, 90) == 90)
+    op.active = V.InPlay("Passimian", 0)
+    check("and does nothing to a non-ex", dmg(t, 90) == 0)
+    t = "Discard 4 Basic Fire Energy cards from your hand. If you can't discard 4 cards in this way, this attack does nothing."
+    me.hand = [("Energy", "Fire Energy")] * 3
+    check("Infernal Slash needs the 4 Fire Energy in hand", dmg(t, 220) == 0)
+    me.hand.append(("Energy", "Fire Energy"))
+    check("and hits with them", dmg(t, 220) == 220)
+    V._pay_attack_text_costs(me, op, {"name": "Infernal Slash"}, t, [])
+    check("and the cost is paid", not me.hand and me.discard.count("Fire Energy") == 4)
+    t = "Flip 3 coins. If 1 of them is heads, this attack does 20 more damage. If 2 of them are heads, this attack does 50 more damage. If all of them are heads, this attack does 80 more damage."
+    check("Fury Cutter's tiers average out", dmg(t, 10) == 10 + int(3 / 8 * 20 + 3 / 8 * 50 + 1 / 8 * 80))
+
+    eff = IR.compile_effect("Haxorus", "Dragon Pulse", "Discard the top 3 cards of your deck.")
+    me.deck = [("Item", "Ultra Ball")] * 5
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Dragon Pulse mills its own deck", len(me.deck) == 2)
+    eff = IR.compile_effect("Scraggy", "Nitpick", "Your opponent shuffles their hand into their deck and draws 4 cards.")
+    op.hand, op.deck = [("Item", "Ultra Ball")] * 7, [("Item", "Ultra Ball")] * 10
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Nitpick resets their hand to 4", len(op.hand) == 4 and len(op.deck) == 13)
+    eff = IR.compile_effect("Pikachu", "Overwriting Bolt", "The Defending Pokémon's Weakness is now Lightning until the end of your next turn. (Apply Weakness as x2.)")
+    op.active = V.InPlay("Mega Kangaskhan ex", 0)
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Overwriting Bolt sets the Weakness", op.active.weakness_set == ("Lightning", 5))
+    eff = IR.compile_effect("Shiftry", "Reversing Gust", "Flip a coin. If heads, choose 1 of your opponent's Pokémon. Shuffle that Pokémon and all attached cards into their deck.")
+    op.bench = [V.InPlay("Passimian", 0)]
+    op.active.energy, op.active.energy_names = [["Colorless"]], ["Psychic Energy"]
+    op.deck = []
+    AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("Reversing Gust takes the ex, attachments and all",
+          ("Pokemon", "Mega Kangaskhan ex") in op.deck and ("Energy", "Psychic Energy") in op.deck
+          and op.active.name == "Passimian")
+
+
+def test_abilities_and_stadiums_that_were_ignored():
+    """Yveltal's Life-Locked, Zoroark's Nighttime Byway, Mystery Garden,
+    Surfing Beach and Luminous Energy's Colorless clause."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    POK, EFF = build(["Yveltal", "Zoroark"], {"Yveltal": ("30C", "100"), "Zoroark": ("30C", "96")})
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", dict(D[1], **POK), [], EFF)
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    me.active.damage = 100
+    op.active = V.InPlay("Yveltal", 0)
+    heal = IR.Action(IR.Op.HEAL, 50, IR.Target.YOUR_ACTIVE)
+    AE.apply_action(heal, me, op, None, [])
+    check("Life-Locked: the Active can't be healed", me.active.damage == 100)
+    op.active = V.InPlay("Passimian", 0)
+    AE.apply_action(heal, me, op, None, [])
+    check("and can once Yveltal is gone", me.active.damage == 50)
+    op.active, op.bench = V.InPlay("Passimian", 0), [V.InPlay("Zoroark", 0)]
+    base = op.POKEMON["Passimian"]["retreat"]
+    check("Nighttime Byway: the Active retreats for 2 less",
+          AE.effective_retreat(op, op.active, me) == max(0, base - 2))
+    spot = V.InPlay("Raging Bolt ex", 0)
+    spot.energy, spot.energy_names = [list(M.REAL_TYPES)], ["Luminous Energy"]
+    V._luminous_check(spot)
+    check("Luminous Energy alone provides every type", spot.energy[0] == list(M.REAL_TYPES))
+    spot.energy.append(["Colorless"])
+    spot.energy_names.append("Mist Energy")
+    V._luminous_check(spot)
+    check("with another Special Energy it provides Colorless", spot.energy[0] == ["Colorless"])
+
+
+def test_trainers_that_compiled_and_did_nothing():
+    """Briar, Jasmine's Gaze, Acerola's Mischief, Premium Power Pro, Scoop
+    Up Cyclone, Call Bell / Chill Teaser Toy's timing, Salvatore."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    me.round_no = op.round_no = 5
+    # Call Bell: only going second, only on the first turn.
+    eff = V.trainer_effect_ir("Call Bell")
+    me._goes_first = False
+    check("Call Bell is not playable on turn 5", not AE.conditions_met(eff, me, op, None))
+    me.round_no, me._goes_first = 1, False
+    check("but is on the second player's first turn", AE.conditions_met(eff, me, op, None))
+    me.round_no = 5
+    # Jasmine's Gaze: -30 for all of mine next turn, with a full hand.
+    me.active, op.active = V.InPlay("Raging Bolt ex", 0), V.InPlay("Mega Kangaskhan ex", 0)
+    op.active.energy = [["Colorless"]] * 4
+    me.hand = [("Supporter", "Jasmine's Gaze")] + [("Item", "Ultra Ball")] * 4
+    check("Jasmine's Gaze is played", V.play_trainer_from_ir(me, op, "Supporter", "Jasmine's Gaze", [], 5)
+          and me.turn_shield == 30)
+    # Premium Power Pro: +30 for a Fighting attacker this turn.
+    me.active = V.InPlay("Passimian", 0)
+    me.active.energy = [["Fighting"]] * 3
+    me.hand = [("Item", "Premium Power Pro")]
+    ok = V.play_trainer_from_ir(me, op, "Item", "Premium Power Pro", [], 5)
+    check("Premium Power Pro buffs a Fighting attacker",
+          ok and me.turn_buff_typed.get("Fighting") == 30, str(me.turn_buff_typed))
+    # Acerola's Mischief: shield the Active from an ex that would KO it.
+    me.active.damage = 100
+    op.prizes = 2
+    me.hand = [("Supporter", "Acerola's Mischief")]
+    me.supporter_played = False
+    V.play_trainer_from_ir(me, op, "Supporter", "Acerola's Mischief", [], 5)
+    check("Acerola's Mischief shields the Active",
+          me.active.shield and me.active.shield["filter"].get("attacker_is_ex"))
+    check("from the ex's attack effects too", AE.query_effect_immune(me, me.active, op))
+    # Scoop Up Cyclone picks up the damaged ex about to be Knocked Out.
+    me.active = V.InPlay("Raging Bolt ex", 0)
+    me.active.damage = 200
+    me.active.energy, me.active.energy_names = [["Lightning"]], ["Lightning Energy"]
+    me.bench = [V.InPlay("Passimian", 0)]
+    me.hand = [("Item", "Scoop Up Cyclone")]
+    V.play_trainer_from_ir(me, op, "Item", "Scoop Up Cyclone", [], 5)
+    check("Scoop Up Cyclone picks up the ex and its Energy",
+          ("Pokemon", "Raging Bolt ex") in me.hand and ("Energy", "Lightning Energy") in me.hand
+          and me.active.name == "Passimian")
+    # Briar: +1 Prize on this turn's Knock Out by a Tera attacker.
+    me.active = V.InPlay("Teal Mask Ogerpon ex", 0)
+    me.active.energy = [["Grass"]] * 3
+    op.active = V.InPlay("Passimian", 0)
+    op.active.damage = 100
+    op.prizes = 2
+    me.hand = [("Supporter", "Briar")]
+    me.supporter_played = False
+    played = V.play_trainer_from_ir(me, op, "Supporter", "Briar", [], 5)
+    check("Briar is played into a Knock Out", played and me.turn_prize_bonus == (1, "Tera"), str(me.turn_prize_bonus))
+    check("and the Knock Out is worth one more",
+          V._ko_prizes(op, op.active, me) == op.POKEMON["Passimian"]["prize_value"] + 1)
+
+
+def test_ability_locks():
+    """"Has no Abilities" (Watchtower, Flutter Mane, Iron Thorns ex,
+    Gastrodon) compiled and was never read."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    POK, EFF = build(["Flutter Mane", "Iron Thorns ex", "Gastrodon"],
+                     {"Flutter Mane": ("TEF", "78")})
+    me = V.Player("b", D[1], D[2], E)
+    op = V.Player("o", dict(D[1], **POK), [], dict(E, **EFF))
+    me._opp_ref, op._opp_ref = op, me
+    og = V.InPlay("Teal Mask Ogerpon ex", 0)
+    fz = V.InPlay("Fezandipiti ex", 0)
+    me.active, me.bench = og, [fz]
+    op.active = V.InPlay("Passimian", 0)
+    check("no lock: Teal Dance works", not AE.ability_disabled(me, og, "Teal Dance"))
+    op.active = V.InPlay("Flutter Mane", 0)
+    check("Flutter Mane: the opposing Active has none", AE.ability_disabled(me, og, "Teal Dance"))
+    check("but the Bench keeps them", not AE.ability_disabled(me, fz, "Flip the Script"))
+    op.active = V.InPlay("Iron Thorns ex", 0)
+    check("Iron Thorns ex: every Rule Box Pokemon", AE.ability_disabled(me, fz, "Flip the Script"))
+    op.active, op.bench = V.InPlay("Passimian", 0), []
+    me.stadium = "Team Rocket's Watchtower"
+    kang = V.InPlay("Mega Kangaskhan ex", 0)
+    me.bench = [kang]
+    check("Watchtower: Colorless Pokemon", AE.ability_disabled(me, kang, "Run Errand")
+          and not AE.ability_disabled(me, og, "Teal Dance"))
+
+
+def test_tools_read_from_their_text():
+    """Nineteen Tools compiled to ops nothing read from a Tool, or lost the
+    condition that defines them."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    bolt, leaves = V.InPlay("Raging Bolt ex", 0), V.InPlay("Iron Leaves ex", 0)
+    kang = V.InPlay("Mega Kangaskhan ex", 0)
+    bolt.tool = "Thick Scale"
+    check("Thick Scale: a Dragon takes 50 less from a Grass attacker",
+          V.tool_damage_reduction(me, bolt, op, leaves) == (50, False))
+    check("and nothing from a Colorless one", V.tool_damage_reduction(me, bolt, op, kang) == (0, False))
+    bolt.tool = "Sacred Charm"
+    check("Sacred Charm: 30 less from an attacker with an Ability",
+          V.tool_damage_reduction(me, bolt, op, kang)[0] == 30
+          and V.tool_damage_reduction(me, bolt, op, V.InPlay("Raging Bolt ex", 0))[0] == 0)
+    leaves.tool = "Future Booster Energy Capsule"
+    check("Future Booster: a Future Pokemon retreats free and hits 20 harder",
+          V.retreat_of(me, leaves, op) == 0 and V.tool_damage_bonus(me, leaves, op) == 20)
+    bolt.tool = "Future Booster Energy Capsule"
+    check("but not on a non-Future Pokemon", V.tool_damage_bonus(me, bolt, op) == 0)
+    og = V.InPlay("Teal Mask Ogerpon ex", 0)
+    og.tool = "Sparkling Crystal"
+    check("Sparkling Crystal: a Tera attack costs 1 less",
+          len(V.effective_cost(me, og, ["Grass", "Grass", "Colorless"], op)) == 2)
+    kang.tool = "Counter Gain"
+    me.prizes, op.prizes = 5, 3
+    check("Counter Gain: Colorless less while behind",
+          len(V.effective_cost(me, kang, ["Colorless"] * 3, op)) == 2)
+    me.prizes = 2
+    check("and not while ahead", len(V.effective_cost(me, kang, ["Colorless"] * 3, op)) == 3)
+    cl = V.InPlay("Lillie's Clefairy ex", 0)
+    cl.tool = "Lillie's Pearl"
+    check("Lillie's Pearl: its Knock Out is worth 1 fewer",
+          V._ko_prizes(me, cl, op) == me.POKEMON["Lillie's Clefairy ex"]["prize_value"] - 1)
+    bolt.tool, bolt.prev_damage = "Survival Brace", 0
+    check("Survival Brace endures from full HP, once", V.tool_endures(me, bolt, op) and bolt.tool is None)
+    bolt.tool = "Technical Machine: Fluorite"
+    check("Technical Machine: its attack is usable",
+          any(a["name"] == "Fluorite" for a in AE.query_extra_attacks(me, bolt)))
+    me.active, me.bench = bolt, []
+    V.tool_end_of_turn(me, [])
+    check("and it is discarded at the end of the turn", bolt.tool is None)
+    bolt.tool = "Powerglass"
+    me.discard = ["Lightning Energy"]
+    n = bolt.energy_count()
+    V.tool_end_of_turn(me, [])
+    check("Powerglass attaches a Basic Energy from the discard", bolt.energy_count() == n + 1)
+    op.active, me.active = V.InPlay("Passimian", 0), kang
+    op.active.tool = "Tremendous Bomb"
+    V.fire_on_damaged_tool(me, op, 250, [])
+    check("Tremendous Bomb: 240+ from a Mega ex puts 12 counters back", kang.damage == 120)
+
+
+def test_special_energy_and_stadium_gaps():
+    """Voltaic Lightning Energy's +20, Nitro Fire Energy's return to hand,
+    Team Rocket's Energy's attach restriction, and Perilous Jungle /
+    Forest of Vitality never being played."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me._opp_ref, op._opp_ref = op, me
+    passi = V.InPlay("Passimian", 0)
+    me.active = passi
+    me.energy_types = {"Fighting", "Psychic", "Darkness"}
+    me.hand = [("Energy", "Team Rocket's Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("Team Rocket's Energy won't go on a non-Team Rocket's Pokemon",
+          ("Energy", "Team Rocket's Energy") in me.hand and passi.energy_count() == 0)
+    me.hand = [("Energy", "Team Rocket's Energy"), ("Energy", "Fighting Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("and a Basic Energy goes instead", passi.energy_names == ["Fighting Energy"])
+    POK, EFF = build(["Pikachu"])
+    me.POKEMON = dict(me.POKEMON, **POK)
+    pk = V.InPlay("Pikachu", 0)
+    pk.energy, pk.energy_names = [["Lightning"]], ["Voltaic Lightning Energy"]
+    check("Voltaic Lightning Energy: +20 for a Lightning holder",
+          sum(a.amount or 0 for _, a in V.energy_passives(me, pk, IR.Op.BUFF_DAMAGE)) == 20)
+    me.discard = ["Nitro Fire Energy"]
+    fire = next(n for n, i in me.POKEMON.items() if "Fire" in (i.get("types") or [])) \
+        if any("Fire" in (i.get("types") or []) for i in me.POKEMON.values()) else None
+    if fire is None:
+        POK2, _ = build(["Charmander"])
+        me.POKEMON = dict(me.POKEMON, **POK2)
+        fire = "Charmander"
+    f = V.InPlay(fire, 0)
+    me._boomerangs = []
+    AE.note_attack_discard(me, f, "Nitro Fire Energy")
+    AE.return_boomerangs(me, [])
+    check("Nitro Fire Energy discarded by a Fire attacker returns to hand",
+          ("Energy", "Nitro Fire Energy") in me.hand and "Nitro Fire Energy" not in me.discard)
+    me.hand = [("Pokemon", "Teal Mask Ogerpon ex")]
+    check("Forest of Vitality is not played without a Grass evolution in hand",
+          not V._stadium_has_effect("Forest of Vitality", me))
+
+
+def test_mulligan_draws_are_optional_and_xerosic_can_go_first():
+    """The extra mulligan draws are a choice (a field can decline them),
+    and the hand_trim_first pilot plays Xerosic's Machinations ahead of any
+    draw Supporter when it strips enough cards."""
+    V, D, E = _real("decks/ditto_tyranitar_gengar_hydreigon.ptcgl.txt", "d")
+    a, b = V.Player("a", D[1], D[2], E), V.Player("b", D[1], D[2], E)
+    a.hand = b.hand = []
+    V.MULLIGAN_DECLINE_EXCEPT = "b"
+    try:
+        V.extra_draws(a, b, 0, 3)
+        check("a declining player draws nothing", len(a.hand) == 0)
+        V.extra_draws(a, b, 3, 0)
+        check("the exempt player still takes them", len(b.hand) == 3)
+    finally:
+        V.MULLIGAN_DECLINE_EXCEPT = None
+    import policies as POL
+    POL.POLICIES["t_trim"] = dict(POL.GREEDY, name="t_trim", hand_trim_first=3)
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.policy = "t_trim"
+    me.active, op.active = V.InPlay("Ditto", 0), V.InPlay("Ditto", 0)
+    me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Xerosic's Machinations")]
+    me.deck = [("Item", "Ultra Ball")] * 20
+    op.hand = [("Item", "Ultra Ball")] * 8
+    V.play_supporter(me, op, 3, [])
+    check("Xerosic goes first into an 8-card hand",
+          "Xerosic's Machinations" in me.played_supporters_this_turn and len(op.hand) == 3)
+    me.supporter_played, me.played_supporters_this_turn = False, set()
+    me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Xerosic's Machinations")]
+    op.hand = [("Item", "Ultra Ball")] * 4
+    V.play_supporter(me, op, 3, [])
+    check("but not into a 4-card hand", "Xerosic's Machinations" not in me.played_supporters_this_turn)
+
+
+def test_no_compiled_op_is_orphaned_by_class():
+    """Class-level guards. The per-card inert guard could not see a whole
+    CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
+    were DRAW / PREVENT_DAMAGE / REDUCE_DAMAGE / EVOLVE_FROM_DECK (150+),
+    an activated Ability's BUFF_DAMAGE had no executor (Torrential Heart),
+    and no attached Special Energy effect was read at all. Each of these
+    fails the day a new card or op arrives unwired.
+    """
+    import json as _j, re as _re
+    V = __import__("simulate_versus")
+    src = open("ability_engine.py").read() + open("simulate_versus.py").read()
+    name_of = {v: k for k, v in vars(IR.Op).items() if isinstance(v, str) and not k.startswith("_")}
+    cards = _j.load(open("pokemon_standard_cards.json"))
+    # ops that the damage code or a query reads directly off an attack
+    READ_BY_DAMAGE = {IR.Op.REVEAL_OPPONENT_HAND, IR.Op.BUFF_DAMAGE,
+                      IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.NO_OP_INFORMATION,
+                      IR.Op.CONDITIONAL_KO, IR.Op.MODIFY_ATTACK_COST,
+                      IR.Op.MODIFY_RETREAT, IR.Op.SET_BASE_DAMAGE, IR.Op.WIN_GAME,
+                      IR.Op.MODIFY_PRIZE}
+    orphan = set()
+    for c in cards:
+        for a in c.get("attacks") or []:
+            for x in IR.compile_effect("attack", a["name"], a.get("text") or "").actions:
+                if x.op not in V.ATTACK_RIDER_OPS and x.op not in READ_BY_DAMAGE:
+                    orphan.add(f"{name_of.get(x.op)} ({c['name']}/{a['name']})")
+    check("every attack op is run as a rider or read by the damage code",
+          not orphan, "; ".join(sorted(orphan)[:8]))
+
+    executed = {n for n in name_of.values()
+                if _re.search(r"op == O\." + n + r"\b|op in \([^)]*O\." + n + r"\b", src)}
+    dead = set()
+    for c in cards:
+        for a in c.get("abilities") or []:
+            e = IR.compile_effect(c["name"], a["name"], a["text"])
+            if e.trigger in (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN) \
+                    and not e.unsupported:
+                for x in e.actions:
+                    if name_of.get(x.op) not in executed:
+                        dead.add(f"{name_of.get(x.op)} ({c['name']}/{a['name']})")
+    check("every activated-Ability op has an executor", not dead, "; ".join(sorted(dead)))
+
+    import glob as _g
+    CONSUMED = {IR.Op.MODIFY_HP, IR.Op.MODIFY_RETREAT, IR.Op.PREVENT_DAMAGE,
+                IR.Op.MODIFY_PRIZE, IR.Op.CONDITION_IMMUNITY, IR.Op.PLACE_COUNTERS}
+    bad = set()
+    for f in _g.glob("decks/field/*.txt") + _g.glob("decks/*.ptcgl.txt"):
+        D = V.load_model(f, "x")[0]
+        for k, n in D[2]:
+            if k != "Energy" or M.BASIC_ENERGY_RE.match(n):
+                continue
+            e = V.trainer_effect_ir(n)
+            for x in (e.actions if e else []):
+                on_attach = (hasattr(V, "energy_on_attach")
+                             and _re.search(r"when you attach this card from your hand",
+                                            e.text or "", _re.I)
+                             and x.op in V.TRAINER_IR_OPS)
+                if x.op not in CONSUMED and not on_attach:
+                    bad.add(f"{n}: {name_of.get(x.op)}")
+    check("every Special Energy effect in a decklist has a consumer",
+          not bad, "; ".join(sorted(bad)))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_when_damaged_tools_fire_and_are_attached,
+    for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_mulligan_draws_are_optional_and_xerosic_can_go_first,
+               test_special_energy_and_stadium_gaps,
+               test_tools_read_from_their_text,
+               test_trainers_that_compiled_and_did_nothing,
+               test_ability_locks,
+               test_every_card_effect_is_read,
+               test_attack_texts_that_were_ignored,
+               test_abilities_and_stadiums_that_were_ignored,
+               test_ditto_transforms_and_gengar_faints,
+               test_the_lookahead_does_not_see_hidden_cards,
+               test_static_play_locks_and_metal_bridge,
+               test_mulligans_give_the_opponent_extra_cards,
+               test_evolution_timing_for_both_players,
+               test_no_supporter_on_the_first_turn_going_first,
+               test_conservation_audit_is_clean,
+               test_cards_are_conserved,
+               test_the_lookahead_chooses_the_promotion,
+               test_tri_kinesis_knocks_out_the_best_prize,
+               test_seek_inspiration_reads_and_discards_the_top_card,
+               test_played_from_hand_abilities_fire,
+               test_when_damaged_abilities_beyond_counters,
+               test_prize_changes_read_their_own_conditions,
+               test_the_lookahead_chooses_the_energy_target,
+               test_the_lookahead_chooses_the_supporter,
+               test_choice_band_discount_and_boomerang_energy,
+               test_tera_pokemon_on_the_bench_take_no_attack_damage,
+               test_three_count_shapes_scale,
+               test_special_energy_does_what_it_prints,
+               test_effect_immunity_blocks_attack_effects_only,
+               test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
+               test_prevention_never_wins_and_attack_effects_run,
+               test_switching_attacks_switch,
+               test_requirements_and_attached_energy_types_are_real,
+               test_the_lookahead_pilot_sees_a_lock,
+               test_the_mew_lock_trainers_do_what_they_say,
+               test_the_mill_wall_pieces_work,
+               test_subjugating_chains_switches_in_your_own_attacker,
+               test_a_copy_attack_deck_keeps_room_for_its_donor,
+               test_hand_reset_draws_do_the_first_half_of_their_text,
+               test_an_optional_draw_never_empties_the_deck,
+               test_a_self_attack_lock_ends_with_the_next_turn,
+               test_when_damaged_tools_fire_and_are_attached,
                test_no_card_in_any_decklist_is_silently_inert,
                test_every_bonus_damage_tool_is_registered_and_gated,
                test_the_last_three_loose_searches_are_closed,

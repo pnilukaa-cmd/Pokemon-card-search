@@ -109,6 +109,12 @@ class Op:
     # attachments, damage, Special Conditions and turns in play all
     # stay on the new Pokemon. Transformation Tome and Ogre's Mask.
     SWAP_IN_PLACE = "swap_in_place"
+    SWAP_FROM_DECK = "swap_from_deck"    # Ditto's Surprisingly Transform
+    MILL_SELF = "mill_self"              # "discard the top N cards of your deck"
+    TRAINER_FLIP_LOCK = "trainer_flip_lock"  # Seismitoad's Quaking Fist
+    COPY_TOP_SUPPORTER = "copy_top_supporter"  # Ninetales' Supernatural Shapeshifter
+    PRIZES_IF_HAND_SIZE = "prizes_if_hand_size"  # Gholdengo's Celebration
+    KO_ATTACKER_ON_KO = "ko_attacker_on_ko"  # Gengar ex's Fainting Spell
     ATTACK_FIRST_TURN = "attack_first_turn"
     # Mew ex's Memory Helix: every Benched Pokemon's attacks, not just
     # the pre-evolution chain GRANT_ATTACK_ACCESS already walks.
@@ -128,6 +134,12 @@ class Op:
     IGNORE_OPPONENT_EFFECTS = "ignore_opponent_effects"
     DISCARD_ENERGY_FROM_OPPONENT = "discard_energy_from_opponent"
     SWAP_HAND_WITH_DECK = "swap_hand_with_deck"
+    # "Shuffle your hand into your deck. Then, draw N" -- the first half of
+    # Lillie's Determination and Lacey, dropped until 2026-09-23.
+    SHUFFLE_HAND_INTO_DECK = "shuffle_hand_into_deck"
+    # Accompanying Flute: the opponent's Basics from their top 5 onto their
+    # Bench -- fresh bodies with no Energy for a gust-and-lock deck.
+    FILL_OPPONENT_BENCH = "fill_opponent_bench"
     SET_OPPONENT_HAND = "set_opponent_hand"
     # Discard down to a hand size -- the symmetric half of
     # DISCARD_FROM_OPPONENT, for Hand Trimmer.
@@ -319,12 +331,39 @@ def parse_trigger(text):
         return Trigger.ON_OPPONENT_EVENT
     if "once during your turn" in t:
         return Trigger.ONCE_PER_TURN
+    # Fan Rotom's Fan Call. Read as PASSIVE, so it never fired at all.
+    if "once during your first turn" in t:
+        return Trigger.ONCE_PER_TURN
     return Trigger.PASSIVE
 
 
 def parse_conditions(text):
     t = text
     out = []
+    # "You can use this card only if you have X in play" (Glass Trumpet:
+    # any Tera Pokemon; Anthea & Concordia: six named N's Pokemon). It
+    # compiled to a no-op, so the requirement was simply dropped.
+    m = re.search(r"you can use this card only if you have ([\w'’ ,]+?"
+                  r"(?:, and [\w'’ ]+?)?) in play", t, re.I)
+    if m:
+        req = m.group(1).strip()
+        st = re.match(r"any (\w+) pok[eé]mon$", req, re.I)
+        if st:
+            out.append({"kind": "have_in_play", "subtype": st.group(1).capitalize()})
+        else:
+            names = [x.strip() for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", req) if x.strip()]
+            out.append({"kind": "have_in_play", "names": names})
+    if re.search(r"once during your first turn", t, re.I):
+        out.append({"kind": "own_first_turn"})
+    # Call Bell, Chill Teaser Toy: "You can use this card only if you go
+    # second, and only during your first turn." Dropped, so Call Bell was a
+    # Supporter tutor for the whole game.
+    if re.search(r"only if you go second, and only during your first turn", t, re.I):
+        out.append({"kind": "going_second_first_turn"})
+    # Briar: "only if your opponent has exactly 2 Prize cards remaining".
+    m = re.search(r"only if your opponent has exactly (\d+) prize cards? remaining", t, re.I)
+    if m:
+        out.append({"kind": "opponent_prizes_exactly", "counts": [int(m.group(1))]})
     if re.search(r"if this pok[eé]mon is in the active spot|as long as this pok[eé]mon is in the active spot", t, re.I):
         out.append({"kind": "self_is_active"})
     if re.search(r"as long as this pok[eé]mon is on your bench|is on your bench", t, re.I):
@@ -573,6 +612,9 @@ def parse_chance(text):
     calculations, not ability gates, so they are left at 1.0 here.
     """
     t = text.lower()
+    # Drasna: the coin picks how many to draw, and both sides draw.
+    if re.search(r"if heads, draw \d+ cards?\. if tails, draw \d+", t):
+        return 1.0
     # The printed phrasing puts a FULL STOP between the clauses -- "Flip a
     # coin. If heads, ..." -- and [^.] cannot cross one. Every card in this
     # pool written that way (158 of them) parsed as chance 1.0, so EVERY
@@ -696,7 +738,42 @@ def _r(m, text):
         return []
     if re.search(r"each player draw|your opponent .{0,20}draw|they draw", text, re.I):
         return [Action(Op.DRAW, int(m.group(1)), Target.BOTH_ALL)]
-    return [Action(Op.DRAW, int(m.group(1)), Target.SELF)]
+    # What happens to the hand FIRST. Both halves of "Shuffle your hand into
+    # your deck. Then, draw 6" / "Discard your hand and draw 5" were read as
+    # a bare "draw 6": Lillie's Determination, in 46 of 54 field decks, was
+    # a free six cards on top of the hand, burning six off the deck a time.
+    coin = re.search(r"if heads, draw (\d+) cards?\. if tails, draw (\d+)", text, re.I)
+    pre = []
+    if re.search(r"shuffle your hand into your deck\. then,? (?:draw \d|flip a coin)", text, re.I):
+        pre = [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF)]
+    elif re.search(r"discard your hand and draw \d", text, re.I):
+        pre = [Action(Op.DISCARD_FROM_SELF, 99, Target.SELF)]
+    flt = {}
+    # "..., draw 8 cards instead" -- a larger draw under a Prize condition.
+    # It is not a gate on the card: Lacey without it still draws 4.
+    inst = re.search(r"if (you|your opponent) ha(?:ve|s) (exactly )?(\d+)"
+                     r"(?: or (fewer))? prize cards? remaining, draw (\d+) cards? instead",
+                     text, re.I)
+    if inst:
+        flt["instead"] = int(inst.group(5))
+        flt["instead_if"] = {
+            "who": "self" if inst.group(1).lower() == "you" else "opponent",
+            "cmp": "<=" if inst.group(4) else "==",
+            "count": int(inst.group(3))}
+    if coin:
+        # Drasna: heads 8, tails 3. Read as a flat 8, gated on the coin.
+        flt["coin"] = [int(coin.group(1)), int(coin.group(2))]
+    return pre + [Action(Op.DRAW, int(m.group(1)), Target.SELF, flt)]
+
+
+@rule("draw_per_opponent_hand",
+      r"draw a card for each card in your opponent'?s hand")
+def _r(m, text):
+    """Mr. Mime: read as "draw a card" -- one, whatever their hand held."""
+    pre = []
+    if re.search(r"shuffle your hand into your deck", text, re.I):
+        pre = [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF)]
+    return pre + [Action(Op.DRAW, 1, Target.SELF, {"per_opp_hand": True})]
 
 
 @rule("opponent_hand_reset",
@@ -828,6 +905,8 @@ def _r(m, text):
 
 @rule("draw_one", r"\bdraw a card")
 def _r(m, text):
+    if re.search(r"draw a card for each card in your opponent", text, re.I):
+        return []          # draw_per_opponent_hand owns it
     # "each player draws a card" belongs to each_player_draws below. Both
     # rules used to fire on Chandelure's Alluring Light, emitting the draw
     # twice -- which doubled the rate of the one engine a deck-out deck
@@ -875,7 +954,22 @@ def _r(m, text):
     n = m.group(1).lower()
     amount = 5 if n == "any number of" else _num(n)
     return [Action(Op.SEARCH_TO_BENCH, amount, Target.YOUR_BENCHED,
-                   _search_filter(m.group(2)))]
+                   _bench_name_filter(m))]
+
+
+def _bench_name_filter(m):
+    """The qualifier before the noun, plus a name restriction after it.
+
+    "up to 2 Pokemon that have "Koffing" in their name": the restriction
+    sits after the noun and was dropped, so Smog Signals and Rotom's Roto
+    Call benched any Basic at all.
+    """
+    f = _search_filter(m.group(2))
+    nm = re.search(r"that have [\"“']([^\"”']+)[\"”'] in their names?",
+                   m.group(0))
+    if nm and not f.get("name_contains"):
+        f["name_contains"] = nm.group(1)
+    return f
 
 
 # Fossil Quarry: "search your deck for up to 2 Item cards that have
@@ -928,7 +1022,11 @@ def _r(m, text):
 @rule("search_to_hand",
       r"search your deck for (?:up to )?(\d+|a|an)? ?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
 def _r(m, text):
-    if "onto your bench" in text.lower():
+    # A search that puts onto the Bench is search_to_bench's. The trigger
+    # "when you play this Pokemon from your hand onto your Bench" is not:
+    # it blocked Meowth ex's Supporter search outright.
+    if "onto your bench" in re.sub(r"from your hand onto your bench", "",
+                                   text.lower()):
         return []
     # Crispin searches TWO and puts only ONE in hand, attaching the other.
     # search_energy_split owns that shape; matching here as well put both
@@ -976,7 +1074,25 @@ def _r(m, text):
 
 @rule("discard_to_hand", r"put (?:up to )?(\d+|a|an) ([\w'’ -]*?)(?:card|pok[eé]mon|energy)[^.]{0,40}from your discard pile into your hand")
 def _r(m, text):
-    return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF)]
+    # WHICH cards. The executor used to return Pokemon whatever the card
+    # said: Miracle Headset ("2 Supporter cards") handed back two Pokemon,
+    # Dedenne's Electromagnetic Sonar ("a Trainer card") a Pokemon, and
+    # Lana's Aid never returned the Basic Energy it names.
+    seg = m.group(0).lower()
+    kinds = []
+    if "supporter" in seg:
+        kinds.append("Supporter")
+    if "trainer" in seg:
+        kinds += ["Supporter", "Item", "Tool", "Stadium"]
+    if re.search(r"pok[eé]mon(?! ex| v\b)", seg.split("from your discard")[0]):
+        kinds.append("Pokemon")
+    et = re.search(r"basic (\w+ )?energy", seg)
+    if et:
+        kinds.append("Energy")
+    f = {"kinds": kinds} if kinds else {}
+    if et and et.group(1) and et.group(1).strip() not in ("energy",):
+        f["energy_type"] = et.group(1).strip().capitalize()
+    return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF, f)]
 
 
 @rule("look_at_deck", r"look at the top (\d+) cards? of your deck")
@@ -986,9 +1102,23 @@ def _r(m, text):
 
 # ---- energy --------------------------------------------------------------
 
+@rule("attach_to_each_benched_type",
+      r"choose up to (\d+) of your benched (" + TYPES + r") pok[eé]mon and attach a basic"
+      r" energy card from your discard pile to each of them")
+def _r(m, text):
+    """Glass Trumpet: one Basic Energy from the discard to EACH of up to 2
+    Benched Pokemon of a type. The generic rule read "to each of them" as a
+    target and attached a single Energy to "self"."""
+    return [Action(Op.ATTACH_ENERGY, 1, Target.YOUR_BENCHED,
+                   {"from": "discard", "type": None, "each_of": int(m.group(1)),
+                    "recipient_type": m.group(2).capitalize()})]
+
+
 @rule("attach_energy_from_discard",
       r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your discard pile to ([^.]{0,50})")
 def _r(m, text):
+    if m.group(3).strip().lower().startswith("each of them"):
+        return []          # attach_to_each_benched_type owns it
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
                    {"type": (m.group(2) or "").capitalize() or None, "from": "discard"})]
 
@@ -1009,9 +1139,14 @@ def _r(m, text):
 
 @rule("move_energy", r"move (?:a|an|(\d+)) ?(" + TYPES + r")? ?energy from ([^.]{0,40}?) to ([^.]{0,40})")
 def _r(m, text):
-    return [Action(Op.MOVE_ENERGY, _num(m.group(1)), parse_target(m.group(4)),
-                   {"type": (m.group(2) or "").capitalize() or None,
-                    "from": parse_target(m.group(3))})]
+    f = {"type": (m.group(2) or "").capitalize() or None,
+         "from": parse_target(m.group(3))}
+    # Elgyem's Slight Shift moves an Energy between the OPPONENT's own
+    # Pokemon ("to another of their Pokemon"). It compiled as a move onto
+    # your own Active -- and the executor ignored `from` anyway.
+    if re.search(r"your opponent'?s pok[eé]mon to another of their", text, re.I):
+        f["opp_internal"] = True
+    return [Action(Op.MOVE_ENERGY, _num(m.group(1)), parse_target(m.group(4)), f)]
 
 
 # ---- damage / health -----------------------------------------------------
@@ -1127,6 +1262,13 @@ def _r(m, text):
     # alongside, which is the exact opposite of how the card plays.
     if re.search(r"don'?t have a rule box", seg, re.I):
         filt["no_rule_box"] = True
+    # Terapagos ex's Crown Opal: "by attacks from Basic non-Colorless
+    # Pokemon". Dropped, it read as total immunity.
+    mm = re.search(r"by attacks from (basic )?(?:non-(\w+) )?pok[eé]mon", seg, re.I)
+    if mm and mm.group(1):
+        filt["attacker_stage"] = "Basic"
+    if mm and mm.group(2):
+        filt["attacker_type_not"] = mm.group(2).capitalize()
     # Bastiodon's Ancient Bulwark stops only attackers holding 2 or less
     # Energy -- a wall against early aggression, not a wall. Dropped, it
     # read as total immunity for the whole board for the rest of the game,
@@ -1135,6 +1277,19 @@ def _r(m, text):
                    seg, re.I)
     if mm:
         filt["attacker_energy_at_most"] = int(mm.group(1))
+    # "Prevent all EFFECTS of attacks ... (Damage is not an effect.)" is
+    # not a damage wall: Skeledirge and Empoleon ex compiled as immune to
+    # all damage. "Damage from AND effects of attacks" is both.
+    if re.search(r"prevent all effects of attacks", seg, re.I):
+        filt["effects_only"] = True
+    elif re.search(r"prevent all damage from and effects of attacks", seg, re.I):
+        filt["and_effects"] = True
+    # Battle Cage: not damage at all -- damage COUNTERS put on a Benched
+    # Pokemon by the opponent's attack or Ability effects. It compiled to a
+    # bare "prevent all damage", which nothing that plays Stadiums reads.
+    if re.search(r"prevent all damage counters from being placed on benched", seg, re.I):
+        return [Action(Op.PREVENT_DAMAGE, None, Target.YOUR_BENCHED,
+                       {"bench_counters": True})]
     return [Action(Op.PREVENT_DAMAGE, None, tgt, filt)]
 
 
@@ -1209,18 +1364,60 @@ def _r(m, text):
 
 # ---- board control -------------------------------------------------------
 
-@rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched pok[eé]mon")
+@rule("fill_opponent_bench",
+      r"reveal the top (\d+) cards of your opponent'?s deck\. you may choose any"
+      r" number of basic pok[eé]mon you find there and put those pok[eé]mon onto"
+      r" their bench")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.OPP_ACTIVE, {"gust": True})]
+    return [Action(Op.FILL_OPPONENT_BENCH, int(m.group(1)), Target.OPPONENT)]
 
 
-@rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched")
+@rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched (basic )?pok[eé]mon")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False})]
+    # Lisia's Appeal gusts only a BASIC Pokemon, and "Benched Basic
+    # Pokemon" did not match at all, so the card only Confused.
+    f = {"gust": True}
+    if m.group(1):
+        f["basic_only"] = True
+    return [Action(Op.SWITCH, 1, Target.OPP_ACTIVE, f)]
+
+
+@rule("switch_benched_type_in",
+      r"switch 1 of your benched (\w+) pok[eé]mon(?:, except any ([^,]+),)? with your"
+      r" active pok[eé]mon\.(?: if you do, the new active pok[eé]mon is now (\w+))?")
+def _r(m, text):
+    """Pecharunt ex's Subjugating Chains. Read as "the opponent's Active is
+    now Poisoned" with no switch at all: a free Poison on the opponent every
+    turn, and none of the card's real job -- bringing up a paid-up Benched
+    attacker, whose own Poison is what switches Binding Mochi on."""
+    f = {"gust": False, "choose": True, "type": m.group(1).capitalize()}
+    if m.group(2):
+        f["exclude"] = m.group(2).strip()
+    if m.group(3):
+        f["then_condition"] = m.group(3).lower()
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
+
+
+@rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched"
+      r"(?: (" + TYPES + r"))?")
+def _r(m, text):
+    f = {"gust": False}
+    if re.search(r"you may switch (?:this pok[eé]mon|your active pok[eé]mon) with", text, re.I):
+        f["optional"] = True
+    if m.group(1):
+        f["type"] = m.group(1).capitalize()
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
 @rule("apply_condition", r"is now (asleep|burned|confused|paralyzed|poisoned)")
 def _r(m, text):
+    # "the NEW Active Pokemon is now Poisoned" is your own, after a switch;
+    # switch_benched_type_in owns it.
+    # (Florges and Lisia's Appeal say the same about the OPPONENT's new
+    # Active after a gust, and keep it.)
+    if re.search(r"switch 1 of your benched .{0,80}the new active pok[eé]mon is now",
+                 text, re.I | re.S):
+        return []
     conds = re.findall(r"(asleep|burned|confused|paralyzed|poisoned)", text, re.I)
     tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
     return [Action(Op.APPLY_CONDITION, None, tgt,
@@ -1239,9 +1436,10 @@ def _r(m, text):
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
     if who == "each":
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED)]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
+                       {"attack_damage": True})]
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
-                   {"targets": int(who)})]
+                   {"targets": int(who), "attack_damage": True})]
 
 
 @rule("attack_snipe_any",
@@ -1255,9 +1453,10 @@ def _r(m, text):
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
     if who == "each":
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL)]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL,
+                       {"attack_damage": True})]
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY,
-                   {"targets": int(who)})]
+                   {"targets": int(who), "attack_damage": True})]
 
 
 @rule("asymmetric_hand_reset",
@@ -1370,9 +1569,42 @@ def _r(m, text):
     # attacking even with the requirement met.
     if re.search(r"can'?t attack unless", text, re.I):
         return []
+    # "You can't use more than 1 Last-Ditch Catch Ability each turn" is a
+    # once-per-turn limit on the card's own Ability, not a lock: it
+    # compiled Meowth ex as a self-lock and dropped its Supporter search.
+    if re.match(r"can'?t use more than", m.group(0) + text[m.end():m.end() + 12], re.I):
+        return []
     what = m.group(1).lower()
+    # "the Defending Pokemon can't USE ATTACKS" is an attack lock. It
+    # compiled as what="use", which the executor does not know, so every
+    # one of these (Cubchoo's Snotted Up, N's Vanillish, Cobalion ex; 16
+    # cards) did nothing at all.
+    if what == "use" and re.match(r"\s+attacks", text[m.end():], re.I):
+        what = "attack"
     tgt = Target.OPPONENT if "your opponent" in text.lower() else Target.SELF
-    return [Action(Op.LOCK, None, tgt, {"what": what})]
+    f = {"what": what}
+    if what == "play":
+        # WHAT can't be played. Every static play lock (Tyranitar's Daunting
+        # Gaze, Jellicent ex, Copperajah, Genesect's ACE Nullifier, Team
+        # Rocket's Arbok's Potent Glare) compiled to the same bare lock.
+        seg = text[m.end():m.end() + 120].lower()
+        kinds = []
+        if "item" in seg:
+            kinds.append("Item")
+        if "tool" in seg:
+            kinds.append("Tool")
+        if "stadium" in seg:
+            kinds.append("Stadium")
+        if "ace spec" in seg:
+            kinds.append("ace_spec")
+        if re.search(r"pok[eé]mon that has an ability", seg):
+            kinds.append("ability_pokemon")
+            ex = re.search(r"except for ([\w'’ ]+?) pok[eé]mon", seg)
+            if ex:
+                f["except_family"] = ex.group(1).strip()
+        if kinds:
+            f["kinds"] = kinds
+    return [Action(Op.LOCK, None, tgt, f)]
 
 
 @rule("discard_from_opponent", r"discard[^.]{0,40}from your opponent's hand")
@@ -1395,7 +1627,7 @@ def _r(m, text):
     # between the noun and "onto your Bench". Shares the qualifier parser
     # so it does not re-emit the same action with a junk name filter.
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
-                   _search_filter(m.group(2)))]
+                   _bench_name_filter(m))]
 
 
 @rule("move_energy_between_yours",
@@ -1407,6 +1639,9 @@ def _r(m, text):
 
 @rule("ability_lock", r"(?:has|have) no abilities")
 def _r(m, text):
+    # Salvatore: "a card that has no Abilities" is what it SEARCHES for.
+    if re.search(r"a card that has no abilities", text, re.I):
+        return []
     tgt = Target.OPP_ALL
     seg = text.lower()
     if "your opponent's active" in seg:
@@ -1419,7 +1654,37 @@ def _r(m, text):
         filt["type"] = mm.group(1).capitalize()
     if "rule box" in seg:
         filt["rule_box_only"] = True
+    # Gastrodon's Sticky Bind: "Benched Stage 2 Pokemon".
+    if re.search(r"benched stage 2 pok[eé]mon", seg):
+        filt["bench_only"], filt["stage"] = True, "Stage 2"
+    # "..., except for Future Pokemon" / "except for Midnight Fluttering".
+    ex = re.search(r"except for ([\w' -]+?)(?: pok[eé]mon)?[.)]", text, re.I)
+    if ex:
+        filt["except"] = ex.group(1).strip()
     return [Action(Op.LOCK, None, tgt, dict(filt, what="abilities"))]
+
+
+# Salvatore: "Search your deck for a card that has no Abilities and evolves
+# from 1 of your Pokemon, and put it onto that Pokemon to evolve it ...
+# You can use this card on a Pokemon ... put into play this turn."
+@rule("evolve_no_ability_from_deck",
+      r"search your deck for a card that has no abilities and evolves from 1 of your pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.EVOLVE_FROM_DECK, 1, Target.YOUR_ANY,
+                   {"no_ability": True, "any_timing": True})]
+
+
+# Zoroark's Nighttime Byway: "As long as this Pokemon is on your Bench,
+# your Active Pokemon's Retreat Cost is 2 less."
+@rule("active_retreat_less", r"your active pok[eé]mon's retreat cost is (\d+) less")
+def _r(m, text):
+    return [Action(Op.MODIFY_RETREAT, -int(m.group(1)), Target.YOUR_ACTIVE)]
+
+
+# Yveltal's Life-Locked: "Your opponent's Active Pokemon can't be healed."
+@rule("heal_lock", r"your opponent's active pok[eé]mon can'?t be healed")
+def _r(m, text):
+    return [Action(Op.LOCK, None, Target.OPP_ACTIVE, {"what": "heal"})]
 
 
 @rule("modify_retreat", r"retreat cost[^.]{0,40}?is (" + TYPES + r") (more|less)")
@@ -1442,6 +1707,11 @@ def _r(m, text):
     # Latias ex's Skyliner frees your BASIC Pokemon only.
     if re.search(r"your basic pok[eé]mon", text, re.I):
         filt["stage"] = "Basic"
+    # Archaludon's Metal Bridge: only those with Metal Energy attached. It
+    # compiled without the condition, so every Pokemon retreated for free.
+    et = re.search(r"that have (" + TYPES + r") energy attached", text, re.I)
+    if et:
+        filt["has_energy_type"] = et.group(1).capitalize()
     return [Action(Op.MODIFY_RETREAT, -99, tgt, filt)]
 
 
@@ -1470,7 +1740,12 @@ def _r(m, text):
 
 @rule("switch_self_in", r"switch it with your active pok[eé]mon")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False})]
+    f = {"gust": False}
+    # Iron Leaves ex's Rapid Vernier: "switch IT" is the Pokemon just
+    # played, not a Benched Pokemon of your choice.
+    if re.search(r"when you play this pok[eé]mon from your hand", text, re.I):
+        f["self_in"] = True
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
 @rule("prevent_card_effects",
@@ -1614,7 +1889,7 @@ def _r(m, text):
     """Arboliva ex's Oil Salvo: six separate 20s aimed anywhere. Worth 120
     spread across the board, and it compiled to nothing."""
     return [Action(Op.PLACE_COUNTERS, int(m.group(2)) // 10, Target.OPP_ANY,
-                   {"targets": int(m.group(1))})]
+                   {"targets": int(m.group(1)), "attack_damage": True})]
 
 
 @rule("flip_per_opponent_pokemon",
@@ -1625,7 +1900,7 @@ def _r(m, text):
     on each heads. Expected value across a full board is the biggest
     single attack in the pool, and it scored zero."""
     return [Action(Op.PLACE_COUNTERS, int(m.group(1)) // 10, Target.OPP_ALL,
-                   {"chance_each": 0.5})]
+                   {"chance_each": 0.5, "attack_damage": True})]
 
 
 @rule("each_player_draws", r"each player draws? (?:a card|(\d+) cards?)")
@@ -1698,14 +1973,20 @@ def _r(m, text):
     whole Bench, so the amount is the Bench cap rather than one.
     """
     each = bool(re.search(r"for each of your benched pok[eé]mon", text, re.I))
-    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1, Target.YOUR_ANY)]
+    f = {}
+    if each:
+        f["bench_only"] = True
+    elif re.search(r"evolves from this pok[eé]mon", text, re.I):
+        f["self"] = True                  # Ascension: this Pokemon only
+    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1,
+                   Target.SELF if f.get("self") else Target.YOUR_ANY, f)]
 
 
 @rule("search_any_card", r"search your deck for a card\b")
 def _r(m, text):
     # "a card that evolves from ..." is handled above as an evolution; if
     # this fired too the card would ALSO tutor something unrelated.
-    if re.search(r"a card that evolves from", text, re.I):
+    if re.search(r"a card that (?:has no abilities and )?evolves from", text, re.I):
         return []
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "card"})]
 
@@ -1888,6 +2169,152 @@ def _r(m, text):
     f = ({"requires_special_energy": True}
          if "special energy" in text.lower() else {"stage": "Basic"})
     return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE, f)]
+
+
+# Team Rocket's Exeggutor's Tri Kinesis: "Flip 3 coins. If all of them are
+# heads, Knock Out 1 of your opponent's Pokemon." The flip is the effect's
+# chance (parse_chance); the target is any of theirs, so the best Prize.
+@rule("ko_any_opponent", r"knock out 1 of your opponent'?s pok[eé]mon")
+def _r(m, text):
+    # "...1 of your opponent's Pokemon that has exactly 6 damage counters"
+    # is conditional_ko's (Glaceon ex's Euclase).
+    if re.match(r"\s+that ", text[m.end():]):
+        return []
+    return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ANY, {"choose": True})]
+
+
+# ---- attack texts found by audit_unmodeled.py ----
+
+@rule("mill_self", r"discard the top (card|\d+ cards) of your deck"
+                   r"(?! and if)(?:\s+and put (\d+) of them into your hand)?")
+def _r(m, text):
+    # Not the self-mill scalers ("... for each <card> discarded in this way")
+    # or Seek Inspiration / Supernatural Shapeshifter, which read the card.
+    if re.search(r"(in|this) way|and if that card", text, re.I):
+        return []
+    n = 1 if m.group(1) == "card" else int(m.group(1).split()[0])
+    f = {"keep": int(m.group(2))} if m.group(2) else {}
+    return [Action(Op.MILL_SELF, n, Target.SELF, f)]
+
+
+@rule("trainer_flip_lock",
+      r"during your opponent's next turn, whenever they try to use a trainer card"
+      r" from their hand, they flip a coin")
+def _r(m, text):
+    return [Action(Op.TRAINER_FLIP_LOCK, 1, Target.OPPONENT)]
+
+
+@rule("copy_top_supporter",
+      r"discard the top card of your deck, and if that card is a supporter card,"
+      r" use the effect of that card as the effect of this attack")
+def _r(m, text):
+    return [Action(Op.COPY_TOP_SUPPORTER, 1, Target.SELF)]
+
+
+@rule("prizes_if_hand_size",
+      r"if you have exactly (\d+) cards in your hand, take (\d+) prize cards")
+def _r(m, text):
+    return [Action(Op.PRIZES_IF_HAND_SIZE, int(m.group(2)), Target.SELF,
+                   {"hand": int(m.group(1))})]
+
+
+@rule("discard_pile_to_deck_mixed",
+      r"shuffle up to (\d+) (?:in any combination of pok[eé]mon and basic energy cards|"
+      r"basic (\w+) energy cards) from your discard pile into your deck")
+def _r(m, text):
+    f = {"kind": "Energy", "energy_type": m.group(2).capitalize()} if m.group(2) else {"kind": "any"}
+    return [Action(Op.DISCARD_TO_DECK, int(m.group(1)), Target.SELF, f)]
+
+
+@rule("discard_typed_energy_from_opp_active",
+      r"discard an? (\w+) energy from your opponent's active pok[eé]mon")
+def _r(m, text):
+    t = m.group(1).capitalize()
+    if t.lower() in ("special",):
+        return []
+    return [Action(Op.DISCARD_ENERGY_FROM_OPPONENT, 1, Target.OPP_ACTIVE, {"type": t})]
+
+
+@rule("self_typed_energy_to_hand",
+      r"put (\d+) (\w+) energy attached to this pok[eé]mon into your hand")
+def _r(m, text):
+    return [Action(Op.SELF_ENERGY_TO_HAND, int(m.group(1)), Target.SELF,
+                   {"type": m.group(2).capitalize()})]
+
+
+@rule("discard_listed_energies_from_self",
+      r"discard an? (\w+) energy, an? (\w+) energy, and an? (\w+) energy from this pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.DISCARD_SELF_ENERGY, 1, Target.SELF, {"type": m.group(i).capitalize()})
+            for i in (1, 2, 3)]
+
+
+@rule("opponent_hand_reset",
+      r"your opponent shuffles their hand into their deck and draws (\d+) cards")
+def _r(m, text):
+    return [Action(Op.SET_OPPONENT_HAND, int(m.group(1)), Target.OPPONENT, {"shuffle": True})]
+
+
+@rule("shuffle_opponent_pokemon_into_deck",
+      r"choose 1 of your opponent's (benched )?pok[eé]mon\. shuffle that pok[eé]mon"
+      r" and all attached cards into their deck")
+def _r(m, text):
+    return [Action(Op.OPP_BENCH_TO_DECK, 1, Target.OPPONENT,
+                   {} if m.group(1) else {"include_active": True})]
+
+
+@rule("attach_from_discard_per_heads",
+      r"flip (\d+) coins\. attach (?:a number|an amount) of basic (\w+ )?energy(?: cards)?"
+      r" up to the number of heads from your discard pile to your benched pok[eé]mon")
+def _r(m, text):
+    f = {"from": "discard", "per_heads": int(m.group(1)), "bench_only": True}
+    if m.group(2):
+        f["type"] = m.group(2).strip().capitalize()
+    return [Action(Op.ATTACH_ENERGY, int(m.group(1)), Target.YOUR_BENCHED, f)]
+
+
+@rule("attach_from_discard_per_opp_energy",
+      r"choose basic (\w+) energy cards from your discard pile up to the amount of energy"
+      r" attached to all of your opponent's pok[eé]mon and attach them to your (\w+) pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.ATTACH_ENERGY, None, Target.YOUR_ANY,
+                   {"from": "discard", "type": m.group(1).capitalize(),
+                    "per_opp_energy": True, "holder_type": m.group(2).capitalize()})]
+
+
+@rule("choose_any_condition",
+      r"choose a special condition\. your opponent's active pok[eé]mon is now affected by that")
+def _r(m, text):
+    return [Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE,
+                   {"conditions": ["paralyzed", "asleep", "poisoned", "burned", "confused"],
+                    "choose_best": True})]
+
+
+@rule("defender_weakness_becomes",
+      r"the defending pok[eé]mon's weakness is now (\w+) until the end of your next turn")
+def _r(m, text):
+    return [Action(Op.SET_WEAKNESS, 1, Target.OPP_ACTIVE,
+                   {"type": m.group(1).capitalize(), "until_next_turn": True})]
+
+
+# Ditto's Surprisingly Transform: "search your deck for a Pokemon and
+# switch it with this Pokemon. Any attached cards, damage counters,
+# Special Conditions, turns in play ... remain on the new Pokemon ... put
+# this card into your deck." A Basic becomes any Pokemon, Stage 2 included,
+# without evolving. The flip is the effect's chance (parse_chance).
+@rule("swap_from_deck",
+      r"search your deck for a pok[eé]mon and switch it with this pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.SWAP_FROM_DECK, 1, Target.SELF)]
+
+
+# Gengar ex's Fainting Spell: when it is Knocked Out by an attack's damage,
+# a coin flip Knocks Out the attacker.
+@rule("ko_attacker_on_ko",
+      r"if this pok[eé]mon is knock(?:ed|et) out by damage from an attack[^.]*?"
+      r"flip a coin\. if heads, the attacking pok[eé]mon is knock(?:ed|et) out")
+def _r(m, text):
+    return [Action(Op.KO_ATTACKER_ON_KO, 1, Target.ATTACKING_POKEMON)]
 
 
 @rule("ko_both_actives", r"both active pok[eé]mon are knocked out")
@@ -2383,7 +2810,8 @@ def _r(m, text):
     # just evolved, so this is up to two stages in one activation.
     chain = bool(re.search(r"search your deck for a stage 2 pok[eé]mon", text,
                            re.I))
-    return [Action(Op.EVOLVE_FROM_DECK, 2 if chain else 1, Target.YOUR_ANY)]
+    return [Action(Op.EVOLVE_FROM_DECK, 2 if chain else 1, Target.YOUR_ANY,
+                   {"chain": True, "basic_first": True} if chain else {"basic_first": True})]
 
 
 @rule("discard_to_bench",
@@ -2431,6 +2859,16 @@ def _r(m, text):
 @rule("reveal_opponent_hand", r"your opponent reveals their hand")
 def _r(m, text):
     return [Action(Op.REVEAL_OPPONENT_HAND, None, Target.OPPONENT)]
+
+
+@rule("discard_kind_from_revealed_hand",
+      r"you discard up to (\d+) (item|supporter|pok[eé]mon tool|trainer) cards? you find there")
+def _r(m, text):
+    """Eri: the discard was dropped; only "reveals their hand" compiled."""
+    kind = {"pokémon tool": "Tool", "pokemon tool": "Tool"}.get(
+        m.group(2).lower(), m.group(2).capitalize())
+    return [Action(Op.DISCARD_FROM_OPPONENT, int(m.group(1)), Target.OPPONENT,
+                   {"kind": kind})]
 
 
 @rule("attach_tool_from_deck", r"search your deck for a pok[eé]mon tool card and attach")
@@ -2779,6 +3217,19 @@ def compile_effect(source, name, text):
         seen.add(key)
         unique.append(a)
     eff.actions = unique
+    # A Prize clause that only picks the larger draw ("draw 8 cards
+    # instead") was ALSO parsed as a condition on the whole card, so Lacey
+    # could not be played at all until the opponent was down to 3 Prizes.
+    for a in eff.actions:
+        ii = (a.filter or {}).get("instead_if")
+        if ii and ii["who"] == "opponent":
+            eff.conditions = [c for c in eff.conditions
+                              if not (c.get("kind") == "opponent_prizes_at_most"
+                                      and c.get("count") == ii["count"])]
+        if ii and ii["who"] == "self":
+            eff.conditions = [c for c in eff.conditions
+                              if not (c.get("kind") == "own_prizes_equal"
+                                      and c.get("count") == ii["count"])]
     eff.actions = _collapse_duplicate_attachments(eff, spans)
     _stamp_target_restrictions(eff)
 

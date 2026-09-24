@@ -1,9 +1,13 @@
 """Put the new field numbers at the top of every deck file, once."""
 import json, os, re, glob
 
-SP = "/tmp/claude-0/-home-user-Pokemon-card-search/e648d066-66e0-5170-a656-2af4bb2d2aa0/scratchpad"
-REPO = "/home/user/Pokemon-card-search"
-d = json.load(open(os.path.join(SP, "field_summary.json")))
+REPO = os.path.dirname(os.path.abspath(__file__))
+# Run output lives in the repo, not a session scratchpad: the scratchpad
+# is deleted with the container, and the 2026-09-15 shards went with it.
+SP = os.environ.get("RUNS_DIR", os.path.join(REPO, "runs"))
+import sys
+RUN = os.path.join(SP, sys.argv[1]) if len(sys.argv) > 1 else SP
+d = json.load(open(os.path.join(RUN, "field_summary.json")))
 stamp, games, summary = d["stamp"], d["games"], d["summary"]
 order = sorted(summary, key=lambda n: -summary[n]["mean"])
 rank = {n: i + 1 for i, n in enumerate(order)}
@@ -34,9 +38,8 @@ for md in sorted(glob.glob(os.path.join(REPO, "decks", "*.md"))):
         f">\n"
         f"> Full round robin, {games} games per pairing, every deck against "
         f"every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win "
-        f"rate written in the body below this box predates the Fossil-setup "
-        f"fix**: a Fossil is an Item and cannot be your opening Pokemon, so "
-        f"it no longer counts as a Basic for the opening hand.\n"
+        f"rate written in the body below this box predates {stamp}** and "
+        f"was measured against a different field or engine.\n"
         f"{MARK}\n"
     )
     # strip any previous block, then insert after the H1

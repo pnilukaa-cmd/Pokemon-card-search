@@ -1,13 +1,15 @@
 # Chandelure / Centiskorch — trap-and-deck-out
 
 <!-- field-results -->
-> ### Field results — 2026-09-21
-> **45.1% mean · 45.0% median · 15 of 44 winning matchups · rank 33 of 45**
+> ### Field results — 2026-09-23
+> **46.2% mean · 44.4% median · 18 of 53 winning matchups · rank 39 of 54**
 >
-> Best `selective_bloom_cradily` 98% · worst `team_rockets_persian_ex_attack_theft` 14%.
+> Best `study_centiskorch_bastiodon_mill` 91% · worst `lurantis_heal_punish` 14%.
 >
-> Full round robin, 200 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates the Fossil-setup fix**: a Fossil is an Item and cannot be your opening Pokemon, so it no longer counts as a Basic for the opening hand.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 
