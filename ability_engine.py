@@ -637,9 +637,9 @@ def pay_costs(effect, pl, source, log):
             pl.discard.append(pl.hand.pop(i)[1])
         elif k == "discard_energy_from_self":
             i = next(i for i, e in enumerate(source.energy) if c["type"] in e)
-            source.energy.pop(i)
-            if getattr(source, "energy_names", None):
-                source.energy_names.pop(i)
+            nm = pop_energy(source, i)
+            if nm:
+                pl.discard.append(nm)
     return True
 
 
@@ -688,6 +688,8 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
+# The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
+BENCH_LIMIT = lambda pl: 5
 
 _BOOMERANG_RE = re.compile(r"if this card is discarded by an effect of an attack used by "
                            r"the pok[eé]mon this card is attached to, attach this card", re.I)
@@ -722,6 +724,48 @@ def CARD_TEXT(name):
     return ""
 
 
+def _stack(spot):
+    st = getattr(spot, "under", None)
+    if st is None:
+        st = []
+        try:
+            spot.under = st
+        except AttributeError:
+            pass
+    return st
+
+
+def discard_pokemon(owner, spot, keep_top=False):
+    """A Pokemon leaves play for the discard pile, with everything on it.
+
+    Every Knock Out appended the top card's NAME and nothing else: the
+    Pokemon it evolved from, its Energy and its Tool vanished from the
+    game. Energy recovery (Night Stretcher, Energy Retrieval) came up
+    empty, and every "for each Pokemon in your discard pile" count was
+    short by every Stage 1 underneath a Stage 2. `keep_top` leaves the
+    Pokemon card itself to the caller (it is going back to hand).
+    """
+    owner.discard.extend(_stack(spot))
+    if not keep_top:
+        owner.discard.append(spot.name)
+    names = list(getattr(spot, "energy_names", None) or [])
+    owner.discard.extend(names)
+    if getattr(spot, "tool", None):
+        owner.discard.append(spot.tool)
+
+
+def _shuffle_into_deck(pl, spot):
+    """"Shuffle this Pokemon and all attached cards into your deck": the
+    attached cards and the Evolution stack went nowhere before."""
+    for nm in _stack(spot):
+        pl.deck.append(("Pokemon", nm))
+    pl.deck.append(("Pokemon", spot.name))
+    for nm in list(getattr(spot, "energy_names", None) or []):
+        pl.deck.append(("Energy", nm))
+    if getattr(spot, "tool", None):
+        pl.deck.append(("Tool", spot.tool))
+
+
 def pop_energy(spot, i=-1):
     """Take one Energy off `spot`, keeping energy and energy_names in step.
 
@@ -738,7 +782,10 @@ def pop_energy(spot, i=-1):
     names = getattr(spot, "energy_names", None)
     if names and i < len(names):
         return names.pop(i)
-    return "Energy"
+    # No card left to name: the second Energy a double-provider (Team
+    # Rocket's Energy) gives. Returning a placeholder put a phantom
+    # "Energy" card into the discard pile or the hand.
+    return None
 
 
 _LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
@@ -1010,8 +1057,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             idxs = idxs[:act.amount]
         for i in sorted(idxs, reverse=True):
             nm = pop_energy(source, i)
-            pl.discard.append(nm)
-            note_attack_discard(pl, source, nm)
+            if nm:
+                pl.discard.append(nm)
+                note_attack_discard(pl, source, nm)
         if idxs:
             log.append(f"    {source.name} discards {len(idxs)} Energy")
         return bool(idxs)
@@ -1102,9 +1150,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         dst = min(opp.bench, key=lambda p: p.energy_count())
         nm = pop_energy(a)
-        dst.energy.append(list(IR.TYPES.split("|")) if nm == "Energy"
+        dst.energy.append(list(IR.TYPES.split("|")) if nm is None
                           else (ENERGY_PROVIDES(opp, nm, dst) or list(IR.TYPES.split("|"))))
-        dst.energy_names.append(nm)
+        if nm:
+            dst.energy_names.append(nm)
         log.append(f"    move {nm} {a.name} -> {dst.name}")
         return True
 
@@ -1122,9 +1171,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.SEARCH_TO_BENCH:
+        if make_inplay is None:
+            return False                 # nowhere to put it: leave the deck be
         placed = []
         for _ in range(act.amount or 1):
-            if len(pl.bench) >= 5:
+            if len(pl.bench) >= BENCH_LIMIT(pl):
                 break
             want = act.filter.get("name_contains")
             stage = act.filter.get("stage", "Basic")
@@ -1392,7 +1443,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.SHUFFLE_SELF_INTO_DECK:
         if source is None:
             return False
-        pl.deck.append(("Pokemon", source.name))
+        _shuffle_into_deck(pl, source)
         if source is pl.active:
             pl.active = pl.bench.pop(0) if pl.bench else None
         elif source in pl.bench:
@@ -1427,11 +1478,15 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                               if _is_special_energy(nm)), None)
                     if i is None or i >= len(h.energy):
                         break
-                    opp.discard.append(pop_energy(h, i))
+                    nm = pop_energy(h, i)
+                    if nm:
+                        opp.discard.append(nm)
                     n += 1
                     continue
                 if h.energy:
-                    opp.discard.append(pop_energy(h))
+                    nm = pop_energy(h)
+                    if nm:
+                        opp.discard.append(nm)
                     n += 1
         if n:
             log.append(f"    discard {n} Energy from opponent")
@@ -1560,11 +1615,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.SELF_ENERGY_TO_HAND:
         if not source or not source.energy:
             return False
-        source.energy.pop()
-        name = (source.energy_names.pop()
-                if getattr(source, "energy_names", None) else "Energy")
-        pl.hand.append(("Energy", name))
-        log.append(f"    {name} back to hand")
+        name = pop_energy(source)
+        if name:
+            pl.hand.append(("Energy", name))
+        log.append(f"    {name or 'Energy'} back to hand")
         return True
 
     if op == O.WEAKEN_DEFENDER:
@@ -1602,6 +1656,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             put("Energy", nm)
         if getattr(spot, "tool", None):
             put("Tool", spot.tool)
+        for nm in _stack(spot):          # the Pokemon it evolved from, too
+            put("Pokemon", nm)
         put("Pokemon", spot.name)
         if spot is owner.active:
             owner.active = None
@@ -1661,10 +1717,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         n = min(act.amount or 1, len(opp.active.energy))
         for _ in range(n):
-            opp.active.energy.pop()
-            nm = (opp.active.energy_names.pop()
-                  if getattr(opp.active, "energy_names", None) else "Energy")
-            opp.hand.append(("Energy", nm))
+            nm = pop_energy(opp.active)
+            if nm:
+                opp.hand.append(("Energy", nm))
         log.append(f"    {n} Energy off {opp.active.name} back to their hand")
         return True
 
@@ -1685,7 +1740,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         f = act.filter or {}
         placed = []
         for _ in range(act.amount or 1):
-            if len(pl.bench) >= 5:
+            if len(pl.bench) >= BENCH_LIMIT(pl):
                 break
             nm = next((n for n in pl.discard
                        if n in pl.POKEMON
@@ -1694,12 +1749,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                             or f["type"] in (pl.POKEMON[n].get("types") or []))
                        and (not f.get("name_contains")
                             or f["name_contains"].lower() in n.lower())), None)
-            if not nm:
+            if not nm or make_inplay is None:
                 break
             pl.discard.remove(nm)
-            if make_inplay:
-                pl.bench.append(make_inplay(nm))
-                ON_BENCH_ENTRY(pl, pl.bench[-1], log)
+            pl.bench.append(make_inplay(nm))
+            ON_BENCH_ENTRY(pl, pl.bench[-1], log)
             placed.append(nm)
         if placed:
             log.append(f"    recover {', '.join(placed)} to the Bench")
@@ -1840,7 +1894,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         for card in top:
             k, n = card
             if (k == "Pokemon" and opp.POKEMON.get(n, {}).get("stage") == "Basic"
-                    and len(opp.bench) < 5 and make_inplay is not None):
+                    and len(opp.bench) < BENCH_LIMIT(opp) and make_inplay is not None):
                 opp.bench.append(make_inplay(n))
                 placed.append(n)
             else:
@@ -1904,7 +1958,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 break
             spot, nxt = base
             pl.deck.remove(("Pokemon", nxt))
-            pl.discard.append(spot.name)
+            # The Pokemon it evolves from stays UNDER it -- discarding it
+            # put a card in the discard pile that was still in play.
+            _stack(spot).append(spot.name)
             spot.name = nxt
             spot.evolved_this_turn = True
             clear_attack_locks(spot)
@@ -1976,6 +2032,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 random.shuffle(owner.deck)
             else:
                 owner.hand.append(("Pokemon", spot.name))
+            st = _stack(spot)
+            if st and st[-1] == prev:
+                st.pop()
             spot.name = prev
             # Devolving clears damage above the lower stage's HP the same
             # way any HP change does, and Special Conditions stay.
@@ -2042,6 +2101,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         gone = getattr(pl, "stadium", None) or getattr(opp, "stadium", None)
         if gone:
             log.append(f"    discards Stadium {gone}")
+            owner = pl if getattr(pl, "stadium", None) else opp
+            owner.discard.append(gone)
             pl.stadium = opp.stadium = None
             # Both sides' view of it has to go too, or the Stadium keeps
             # working for whoever did not own it.
@@ -2073,13 +2134,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.FORCE_BENCH_OPPONENT:
         placed = 0
         for kind, name in list(opp.hand):
-            if len(opp.bench) >= 5:
+            if len(opp.bench) >= BENCH_LIMIT(opp):
                 break
-            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic":
+            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic" \
+                    and make_inplay is not None:
                 opp.hand.remove((kind, name))
-                if make_inplay:
-                    opp.bench.append(make_inplay(name))
-                    placed += 1
+                opp.bench.append(make_inplay(name))
+                placed += 1
         if placed:
             log.append(f"    force {placed} Basic(s) onto opponent's Bench")
         return placed > 0
@@ -2221,7 +2282,12 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
     # treating a flip-gated Ability as always-on or always-off.
     if getattr(effect, "chance", 1.0) < 1.0 and random.random() >= effect.chance:
         return False
-    snapshot_hand = list(pl.hand)
+    # Refund an activation that did nothing: the hand AND the discard pile
+    # (restoring only the hand left the paid cards in the discard as well,
+    # a copy of each) and any Energy paid off the source.
+    snapshot = (list(pl.hand), list(pl.discard),
+                (list(source.energy), list(getattr(source, "energy_names", []) or []))
+                if source is not None else None)
     if not pay_costs(effect, pl, source, log):
         return False
     did = False
@@ -2229,7 +2295,9 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
         if apply_action(act, pl, opp, source, log, attacker, make_inplay):
             did = True
     if not did:
-        pl.hand[:] = snapshot_hand      # refund an unpayable activation
+        pl.hand[:], pl.discard[:] = snapshot[0], snapshot[1]
+        if snapshot[2] is not None:
+            source.energy, source.energy_names = snapshot[2]
         return False
     # Costs that resolve only after the effect succeeded.
     for c in effect.costs:
@@ -2240,8 +2308,12 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
             # the Prize cost IS the balancing drawback on the card.
             source.damage = 10 ** 6
             log.append(f"    {source.name} Knocks itself Out")
-        if c["kind"] == "shuffle_self" and source is not None:
-            pl.deck.append(("Pokemon", source.name))
+        # Only if it is still in play: the Ability's own action may have
+        # shuffled it in already, and doing it again put a second copy of
+        # the Pokemon into the deck on every Run Away Draw.
+        if c["kind"] == "shuffle_self" and source is not None \
+                and source in pl.in_play():
+            _shuffle_into_deck(pl, source)
             if source is pl.active:
                 pl.active = pl.bench.pop(0) if pl.bench else None
             elif source in pl.bench:

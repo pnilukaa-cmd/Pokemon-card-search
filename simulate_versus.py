@@ -119,10 +119,13 @@ class InPlay:
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
                  "damage_penalty", "takes_more", "next_turn_attack_buff",
                  "delayed_discard", "extra_prize", "no_weakness",
-                 "damage_taken_last_turn", "retaliate_counters")
+                 "damage_taken_last_turn", "retaliate_counters", "under")
 
     def __init__(self, name, turn):
         self.name = name
+        # The Evolution stack beneath this card, bottom first. A Knock Out
+        # discards the whole pile; only the top card name used to go.
+        self.under = []
         self.damage = 0
         self.energy = []          # list of type-lists, one per attached Energy card
         self.energy_names = []    # parallel list of the Energy cards' names
@@ -562,7 +565,7 @@ def sweep_knocked_out(pl, opp, log):
             # itself -- the most consequential thing on the dead-op list.
             taken = max(0, taken + AE.query_prize_modifier(
                 taker, owner, spot, taker.active if spot is owner.active else None))
-            owner.discard.append(spot.name)
+            AE.discard_pokemon(owner, spot)
             owner.lost_pokemon_names += spot.name.lower() + "|"
             if spot is owner.active:
                 owner.active = None
@@ -816,6 +819,7 @@ def _top_copy_want(pl, pool=None):
 
 
 AE.TOP_COPY_WANT = _top_copy_want
+AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
 
 # Academy at Night: "Once during each player's turn, that player may put a
 # card from their hand on top of their deck." Inert until now, and it is
@@ -1312,7 +1316,7 @@ def _switch_in_on_play(pl, opp, spot, log):
         prov = d.energy[i]
         name = AE.pop_energy(d, i)
         spot.energy.append(prov)
-        if getattr(spot, "energy_names", None) is not None:
+        if name and getattr(spot, "energy_names", None) is not None:
             spot.energy_names.append(name)
     after = _ready_damage(pl, opp, spot)
     if after <= before:
@@ -1393,6 +1397,7 @@ def try_evolve(pl, opp, turn, log, first_turn):
             # Luxio's Fighting Roar is the printed exception to both halves.
             if normal or AE.query_evolves_early(pl, spot, opp):
                 pl.remove_from_hand(kind, name)
+                spot.under.append(spot.name)
                 spot.name = name
                 spot.evolved_this_turn = True
                 AE.clear_attack_locks(spot)
@@ -1440,6 +1445,7 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
                 pl.remove_from_hand("Item", "Rare Candy")
                 pl.discard.append("Rare Candy")
                 pl.remove_from_hand("Pokemon", name)
+                spot.under.append(spot.name)
                 spot.name = name
                 spot.evolved_this_turn = True
                 AE.clear_attack_locks(spot)
@@ -1592,7 +1598,13 @@ def play_items(pl, opp, turn, log, first_turn):
         if pl.stadium and _stadium_value(pl, opp, name) <= _stadium_value(pl, opp, pl.stadium):
             continue
         pl.remove_from_hand(kind, name)
-        pl.discard.append(name)
+        # The Stadium it replaces goes to ITS owner's discard pile. This
+        # discarded the new Stadium instead -- one copy in play and one in
+        # the discard -- and the replaced one left the game.
+        if pl.stadium:
+            pl.discard.append(pl.stadium)
+        if opp.stadium:
+            opp.discard.append(opp.stadium)
         pl.stadium = name
         opp.stadium = None
         # A Stadium is SHARED -- "both yours and your opponent's" is the
@@ -3057,8 +3069,9 @@ def pay_discard_scaler(pl, spot, atk, log):
     for sp, idxs in by_spot.values():
         for i in sorted(idxs, reverse=True):
             nm = AE.pop_energy(sp, i)
-            pl.discard.append(nm)
-            AE.note_attack_discard(pl, sp, nm)
+            if nm:
+                pl.discard.append(nm)
+                AE.note_attack_discard(pl, sp, nm)
     log.append(f"  {pl.name}: discards {len(picks)} for {atk['name']}")
 
 
@@ -4326,7 +4339,9 @@ def try_retreat(pl, opp, log):
 
 def _do_retreat(pl, target, cost, log):
     for _ in range(cost):
-        pl.discard.append(AE.pop_energy(pl.active))
+        nm = AE.pop_energy(pl.active)
+        if nm:
+            pl.discard.append(nm)
     pl.bench.remove(target)
     clear_conditions(pl.active, "retreated", log, pl.name)
     pl.bench.append(pl.active)
@@ -4537,7 +4552,7 @@ def do_attack(pl, opp, log):
     if pl.active and pl.active.damage >= effective_hp(pl, pl.active):
         taken = pl.POKEMON[pl.active.name]["prize_value"]
         log.append(f"  {pl.name}: {pl.active.name} KO'd by retaliation (+{taken} to {opp.name})")
-        pl.discard.append(pl.active.name)
+        AE.discard_pokemon(pl, pl.active)
         pl.lost_pokemon_names += pl.active.name.lower() + "|"
         pl.active = None
         pl.lost_pokemon_last_turn = True
@@ -4557,8 +4572,9 @@ def do_attack(pl, opp, log):
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
         if AE.query_returns_to_hand_on_ko(opp, opp.active):
             opp.hand.append(("Pokemon", opp.active.name))
+            AE.discard_pokemon(opp, opp.active, keep_top=True)
         else:
-            opp.discard.append(opp.active.name)
+            AE.discard_pokemon(opp, opp.active)
         opp.lost_pokemon_names += opp.active.name.lower() + "|"
         opp.active = None
         opp.lost_pokemon_last_turn = True
@@ -4727,7 +4743,8 @@ def attack_side_effects(pl, opp, atk, log):
                 continue
             if act.op == IR.Op.SWITCH and (act.filter or {}).get("gust"):
                 continue          # resolved before the damage, in do_attack
-            AE.apply_action(act, pl, opp, pl.active, log)
+            AE.apply_action(act, pl, opp, pl.active, log,
+                            make_inplay=lambda n: InPlay(n, pl.round_no))
     finally:
         AE.ATTACK_EFFECTS_BY[0] = None
 
@@ -5291,7 +5308,7 @@ def finish_turn(pl, opp, log):
         taken = side.POKEMON[side.active.name]["prize_value"]
         log.append(f"  {side.name}: {side.active.name} KO'd at checkup "
                    f"(+{taken} to {other.name})")
-        side.discard.append(side.active.name)
+        AE.discard_pokemon(side, side.active)
         side.lost_pokemon_names += side.active.name.lower() + "|"
         side.active = None
         side.lost_pokemon_last_turn = True
@@ -5459,7 +5476,7 @@ def end_of_turn(pl, log):
     # aimed at, which is this one.
     for spot in list(pl.in_play()):
         if getattr(spot, "delayed_discard", False):
-            pl.discard.append(spot.name)
+            AE.discard_pokemon(pl, spot)
             if spot is pl.active:
                 pl.active = None
             elif spot in pl.bench:

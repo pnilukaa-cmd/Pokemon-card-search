@@ -3672,6 +3672,79 @@ def test_the_lookahead_chooses_the_promotion():
         check(f"{pilot}: the real dice are untouched", _r.random() == before)
 
 
+def _cards_held(p):
+    n = len(p.hand) + len(p.deck) + len(p.discard) + len(getattr(p, "prize_cards", []) or [])
+    for s in p.in_play():
+        n += 1 + len(getattr(s, "under", []) or []) + len(s.energy_names or []) + (1 if s.tool else 0)
+    return n + (1 if p.stadium else 0)
+
+
+def test_cards_are_conserved():
+    """A card-conservation audit (every card is somewhere, once) found:
+    a Knock Out discarded only the top card's name -- its Energy, Tool and
+    Evolution stack left the game; playing a Stadium discarded the NEW one
+    and lost the replaced one; attack Bench searches (Call for Family) took
+    the Pokemon out of the deck and put it nowhere; Run Away Draw shuffled
+    Dudunsparce into the deck twice; a refunded Ability kept its paid cards
+    in the discard as well as the hand."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    ko = V.InPlay("Raging Bolt ex", 0)
+    ko.under = ["Teal Mask Ogerpon ex"]          # a stand-in Evolution stack
+    ko.energy, ko.energy_names = [["Grass"], ["Fighting"]], ["Grass Energy", "Fighting Energy"]
+    ko.tool = "Hero's Cape"
+    ko.damage = 10 ** 6
+    me.active, me.bench = ko, [V.InPlay("Passimian", 0)]
+    op.active = V.InPlay("Passimian", 0)
+    before = _cards_held(me)
+    V.sweep_knocked_out(me, op, [])
+    check("a Knock Out discards the whole pile",
+          _cards_held(me) == before and sorted(me.discard) == sorted(
+              ["Teal Mask Ogerpon ex", "Raging Bolt ex", "Grass Energy",
+               "Fighting Energy", "Hero's Cape"]), str(me.discard))
+
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+    me._opp_ref, op._opp_ref = op, me
+    op.stadium, me._opp_stadium = "Jamming Tower", "Jamming Tower"
+    me.hand = [("Stadium", "Postwick")]
+    b_me, b_op = _cards_held(me), _cards_held(op)
+    V.play_items(me, op, 3, [], False)
+    check("the Stadium is played", me.stadium == "Postwick")
+    check("a replaced Stadium goes to its owner's discard",
+          "Jamming Tower" in op.discard and _cards_held(op) == b_op)
+    check("and the new one is not also discarded",
+          "Postwick" not in me.discard and _cards_held(me) == b_me)
+
+    V, D, E = _real("decks/field/tr_arbok_yveltal_snow_coating.txt", "t")
+    me, op = V.Player("t", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("N's Vanillite", 0), V.InPlay("Yveltal", 0)
+    me.active.energy, me.active.energy_names = [["Water"]], ["Water Energy"]
+    me.deck = [("Pokemon", "Team Rocket's Ekans"), ("Pokemon", "Yveltal"), ("Item", "Ultra Ball")]
+    me._forced_attack = next(a for a in D[1]["N's Vanillite"]["attacks"]
+                             if a["name"] == "Call for Family")
+    me.round_no = op.round_no = 3
+    before = _cards_held(me)
+    V.do_attack(me, op, [])
+    check("Call for Family benches what it takes from the deck",
+          len(me.bench) == 2 and _cards_held(me) == before, str(me.deck))
+
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "d")
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Dunsparce", 0), V.InPlay("Dunsparce", 0)
+    dd = V.InPlay("Dudunsparce", 0)
+    dd.under = ["Dunsparce"]
+    dd.energy, dd.energy_names = [["Colorless"]], ["Psychic Energy"]
+    me.bench = [dd]
+    me.deck = [("Item", "Ultra Ball")] * 10
+    me._opp_ref = op
+    before = _cards_held(me)
+    V.use_abilities(me, op, 3, [])
+    check("Run Away Draw shuffles Dudunsparce in once, with its cards",
+          dd not in me.bench and _cards_held(me) == before
+          and me.deck.count(("Pokemon", "Dudunsparce")) == 1, str(_cards_held(me) - before))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3737,6 +3810,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_cards_are_conserved,
                test_the_lookahead_chooses_the_promotion,
                test_tri_kinesis_knocks_out_the_best_prize,
                test_seek_inspiration_reads_and_discards_the_top_card,
