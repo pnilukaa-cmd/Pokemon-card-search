@@ -8,8 +8,12 @@ Backtrack Badge re-flips the tails (a Tool for Colorless Pokemon; Ditto
 is Colorless), so the flip lands about 3 times in 4. Crispin loads the
 mixed Energy Hydreigon ex's Obsidian wants.
 
-**65.22% (±0.43) under `greedy` against all 54 field decks, 200 games each,
-winning 45 matchups** -- above every meta list measured on this engine.
+**66.01% (±0.43) under `greedy` against the 55-deck field (itself
+included), 200 games each, winning 46 matchups** -- above every meta list
+measured on this engine. Under the `lookahead` pilot, paired on the same
+engine snapshot: **71.31% vs 65.22%, +6.09 ± 0.64** (it also chooses what
+Ditto transforms into: mostly Hydreigon ex, sometimes Gengar ex or
+Tyranitar).
 Worst: Lurantis heal-punish 26.0, N's Zoroark toolbox 35.0, Heracross tea
 37.5, Raging Bolt 39.5. Best: Centiskorch/Bastiodon mill 93.0.
 

@@ -85,6 +85,23 @@ fails on the commit before it:
   attack resolves (`_RESOLVING`), except a top card the player placed.
 - *Also fixed:* static play locks (Daunting Gaze, Potent Glare, ...) and
   play-lock kinds; Archaludon's Metal Bridge condition.
+- *Ditto / Tyranitar / Gengar ex / Hydreigon ex* (user list, in
+  `decks/` and the field): Surprisingly Transform, Backtrack Badge's
+  effect re-flip, Fainting Spell. 66.01% greedy, lookahead +6.09.
+- *Items after the Supporter* are played the same turn: +0.90 +/- 0.24
+  over 7 decks, now the default.
+- **Every card effect is modelled** (`audit_unmodeled.py` reports 0; it
+  started at 72, 66 of them attack texts): a generic condition evaluator
+  for "If ..., this attack does N more damage / does nothing", hand-Energy
+  costs, coin tiers, a dozen riders, Life-Locked, Nighttime Byway, Mystery
+  Garden, Surfing Beach, Luminous Energy. Cards that compiled and did
+  nothing: Briar, Anthea & Concordia, Jasmine's Gaze, Acerola's Mischief,
+  Premium Power Pro, Scoop Up Cyclone, Kieran's choice, Call Bell / Chill
+  Teaser Toy timing, the Ability locks (Watchtower, Flutter Mane, Iron
+  Thorns ex, Gastrodon), Salvatore, 19 Tools read off their text, Voltaic
+  Lightning / Nitro Fire / Team Rocket's Energy, Perilous Jungle, Forest
+  of Vitality. Remaining sweep partials are benign (Fossils' immunity is
+  read in play; Glass Trumpet / Bother-Bot carry no-op markers).
 - **Stale:** `decks/FIELD_RESULTS.md`, `runs/2026-09-23/`, and the 1000-game
   baselines of `dudunsparce_maushold_mill_wall` (inflated by the Run Away
   Draw duplication) and `mew_ex_baby_lock`. The full rerun is the open item.

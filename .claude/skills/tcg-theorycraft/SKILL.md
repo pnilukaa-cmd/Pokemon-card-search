@@ -805,6 +805,14 @@ the first turn going first (unless the card says so), no evolving on
 EITHER player's first turn (Rare Candy and Grand Tree too), no Stadium
 over one of the same name, and the mulligan extra draws.
 
+**Run `audit_unmodeled.py`** (it must report 0; `test_every_card_effect_is_read`
+enforces it) after adding cards or changing a compile rule. It lists every
+Ability, Trainer, Special Energy and attack text that neither compiles,
+has a handler, nor is read by a damage rule. It does NOT see a card that
+compiles to an op nothing reads for that card's KIND -- sweep those by
+kind (Items/Supporters against TRAINER_IR_OPS, Tools against the
+tool readers, Stadiums against `_stadium_has_effect`) as done 2026-09-24.
+
 **Run the new list through the field before anything else.** A Mew ex
 list crashed every run it joined (Enhanced Hammer indexing `energy_names`
 by an `energy` index after retreat had popped only one of the two). A new
