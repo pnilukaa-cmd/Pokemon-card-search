@@ -3280,9 +3280,73 @@ def test_effect_immunity_blocks_attack_effects_only():
           "confused" in me.active.conditions, str(me.active.conditions))
 
 
+def test_special_energy_does_what_it_prints():
+    """Attached Special Energy was read for its type and nothing else.
+    Telepathic Psychic Energy (9 decklists) never benched its two Basic
+    Psychic Pokemon, Enriching Energy never drew 4, Growing Grass Energy
+    never gave +20 HP, Shadowy Darkness Energy never shielded the Bench,
+    and Legacy Energy never cost the opponent a Prize. The main attack
+    Knock Out also never asked the Prize-changing Abilities.
+    """
+    import glob as _g
+    def deck(card):
+        f = next(x for x in sorted(_g.glob("decks/field/*.txt")) if card in open(x).read())
+        return _real(f, "x")
+    V, D, E = deck("Telepathic Psychic Energy")
+    me = V.Player("x", D[1], D[2], E)
+    psy = next(n for n, i in D[1].items() if "Psychic" in i["types"]
+               and any(len(a["cost"]) >= 1 for a in i["attacks"]))
+    me.active, me.bench, me._opp_ref = V.InPlay(psy, 0), [], None
+    me._opp_ref = me
+    me.hand = [("Energy", "Telepathic Psychic Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])            # the real path
+    check("Telepathic Psychic Energy benches Basic Psychic Pokemon",
+          len(me.bench) == 2 and all("Psychic" in D[1][p.name]["types"] for p in me.bench),
+          str([p.name for p in me.bench]))
+
+    V, D, E = deck("Enriching Energy")
+    me = V.Player("x", D[1], D[2], E)
+    first = next(n for n, i in D[1].items() if i["attacks"])
+    me.active, me.hand = V.InPlay(first, 0), [("Energy", "Enriching Energy")]
+    me._opp_ref = me
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("Enriching Energy draws 4", len(me.hand) == 4, str(len(me.hand)))
+
+    V, D, E = deck("Growing Grass Energy")
+    me = V.Player("x", D[1], D[2], E)
+    g = next(n for n, i in D[1].items() if "Grass" in i["types"])
+    s = V.InPlay(g, 0)
+    s.energy, s.energy_names = [["Grass"]], ["Growing Grass Energy"]
+    check("Growing Grass Energy: +20 HP", V.effective_hp(me, s) == D[1][g]["hp"] + 20)
+
+    V, D, E = deck("Shadowy Darkness Energy")
+    me, op = V.Player("x", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    dk = next(n for n, i in D[1].items() if "Darkness" in i["types"])
+    s = V.InPlay(dk, 0)
+    s.energy, s.energy_names = [["Darkness"]], ["Shadowy Darkness Energy"]
+    me.active, me.bench, op.active = V.InPlay(dk, 0), [s], V.InPlay(dk, 0)
+    check("Shadowy Darkness Energy shields its Benched holder",
+          AE.query_prevented(me, s, op, op.active))
+    me.active, me.bench = s, []
+    check("but not in the Active Spot", not AE.query_prevented(me, s, op, op.active))
+
+    V, D, E = deck("Legacy Energy")
+    me, op = V.Player("x", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    ex = next(n for n, i in D[1].items() if i["prize_value"] >= 2)
+    s = V.InPlay(ex, 0)
+    s.energy, s.energy_names = [["Colorless"]], ["Legacy Energy"]
+    ko = getattr(V, "_ko_prizes", lambda o, sp, tk: o.POKEMON[sp.name]["prize_value"])
+    first = ko(me, s, op)
+    second = ko(me, s, op)
+    check("Legacy Energy: one Prize fewer, once a game",
+          first == D[1][ex]["prize_value"] - 1 and second == D[1][ex]["prize_value"],
+          f"{first} {second}")
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_effect_immunity_blocks_attack_effects_only,
+    for fn in [test_special_energy_does_what_it_prints,
+               test_effect_immunity_blocks_attack_effects_only,
                test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
                test_prevention_never_wins_and_attack_effects_run,
                test_switching_attacks_switch,

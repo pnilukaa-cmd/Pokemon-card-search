@@ -1948,6 +1948,7 @@ def _card_kind(pl, name):
 
 
 AE.CARD_KIND = _card_kind
+AE.ENERGY_PASSIVES = lambda pl, spot, op=None: energy_passives(pl, spot, op)
 
 
 def _energy_provides(pl, name, spot):
@@ -2212,6 +2213,7 @@ def retreat_of(pl, spot, opp=None):
     if tool and AE.query_tools_disabled(pl, opp):
         tool = None                     # Jamming Tower
     tool_mod = RETREAT_TOOLS.get(tool, 0)
+    tool_mod += sum(a.amount or 0 for _, a in energy_passives(pl, spot, IR.Op.MODIFY_RETREAT))
     if st and st["amount"] > -99:
         if not st["family"] or st["family"].lower() in spot.name.lower():
             tool_mod += st["amount"]
@@ -3606,6 +3608,36 @@ def attach_energy(pl, cards_by_name, log):
         name, cards_by_name, (pl.POKEMON.get(target.name) or {}).get("stage")))
     target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
+    energy_on_attach(pl, target, name, log)
+
+
+_ON_ATTACH_RE = _re.compile(r"when you attach this card from your hand to (?:a |an )?"
+                            r"(?:(\w+) )?pok[eé]mon", _re.I)
+
+
+def energy_on_attach(pl, target, name, log):
+    """"When you attach this card from your hand to a <Type> Pokemon, ..."
+
+    Telepathic Psychic Energy (two Basic Psychic Pokemon onto the Bench,
+    9 decklists) and Enriching Energy (draw 4) attached and did nothing
+    else: nothing ran an Energy's on-attach effect.
+    """
+    if M.BASIC_ENERGY_RE.match(name):
+        return
+    eff = trainer_effect_ir(name)
+    if eff is None:
+        return
+    m = _ON_ATTACH_RE.search(eff.text or "")
+    if not m:
+        return
+    want = (m.group(1) or "").capitalize()
+    if want in M.REAL_TYPES and want not in (pl.POKEMON.get(target.name) or {}).get("types", []):
+        return
+    opp = getattr(pl, "_opp_ref", None) or pl
+    for a in eff.actions:
+        if a.op in TRAINER_IR_OPS:
+            AE.apply_action(a, pl, opp, target, log,
+                            make_inplay=lambda n: InPlay(n, pl.round_no))
 
 
 def _ready_damage(pl, opp, spot):
@@ -3696,13 +3728,60 @@ def hp_tools():
     return _HP_TOOLS
 
 
+_HOLDER_TYPE_RE = _re.compile(r"the (\w+) pok[eé]mon this card is attached to", _re.I)
+
+
+def energy_passives(pl, spot, op=None):
+    """Compiled actions of the Special Energy attached to `spot`, honouring
+    "the <Type> Pokemon this card is attached to" and "on your Bench".
+
+    Attached Special Energy was read for its type and nothing else:
+    Growing Grass Energy's +20 HP, Magnetic Metal Energy's free retreat,
+    Shadowy Darkness Energy's Bench shield and Legacy Energy's one Prize
+    fewer all did nothing.
+    """
+    out = []
+    types = (pl.POKEMON.get(spot.name) or {}).get("types") or []
+    for nm in getattr(spot, "energy_names", None) or []:
+        if M.BASIC_ENERGY_RE.match(nm):
+            continue
+        eff = trainer_effect_ir(nm)
+        if eff is None:
+            continue
+        m = _HOLDER_TYPE_RE.search(eff.text or "")
+        if m and m.group(1).capitalize() in M.REAL_TYPES and m.group(1).capitalize() not in types:
+            continue
+        if _re.search(r"is on your bench", eff.text or "", _re.I) and spot not in pl.bench:
+            continue
+        for a in eff.actions:
+            if op is None or a.op == op:
+                out.append((nm, a))
+    return out
+
+
+def _ko_prizes(owner, spot, taker, by_attack=True):
+    """Prizes for Knocking Out `spot`: printed, +extra, the Prize-changing
+    Abilities on either side (only the counter-KO path asked before), and
+    Legacy Energy's one fewer -- once a game, for an attack's damage."""
+    taken = (owner.POKEMON[spot.name]["prize_value"] + getattr(spot, "extra_prize", 0)
+             + AE.query_prize_modifier(taker, owner))
+    if by_attack and not getattr(owner, "_legacy_used", False):
+        for nm, a in energy_passives(owner, spot, IR.Op.MODIFY_PRIZE):
+            if a.target == IR.Target.OPPONENT and (a.amount or 0) < 0:
+                owner._legacy_used = True
+                taken += a.amount
+                break
+    return max(0, taken)
+
+
 def effective_hp(pl, spot):
     """Printed HP plus whatever a Tool adds. Every Knock Out check goes
     through here -- reading printed HP directly meant an HP Tool was worth
     nothing, and the Tool was never even attached."""
     base = pl.POKEMON[spot.name]["hp"]
     return (base + hp_tools().get(getattr(spot, "tool", None), 0)
-            + AE.query_hp_modifier(pl, spot))
+            + AE.query_hp_modifier(pl, spot)
+            + sum(a.amount or 0 for _, a in energy_passives(pl, spot, IR.Op.MODIFY_HP)))
 
 
 def _is_reflip_tool(pl, name):
@@ -4202,8 +4281,7 @@ def do_attack(pl, opp, log):
 
     if opp.active.damage >= effective_hp(opp, opp.active):
         AE.salvage_energy_on_ko(opp, opp.active, log)
-        taken = (opp.POKEMON[opp.active.name]["prize_value"]
-                 + getattr(opp.active, "extra_prize", 0))
+        taken = _ko_prizes(opp, opp.active, pl)
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
         if AE.query_returns_to_hand_on_ko(opp, opp.active):
             opp.hand.append(("Pokemon", opp.active.name))

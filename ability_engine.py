@@ -85,6 +85,12 @@ def TRAINER_IR(name):
     return None
 
 
+# (energy name, action) for the Special Energy attached to `spot`, with its
+# holder-type and on-the-Bench conditions applied. Set by simulate_versus.
+def ENERGY_PASSIVES(pl, spot, op=None):
+    return []
+
+
 # What an Energy card provides when attached to `spot` (one type-list).
 # Set by simulate_versus.
 def ENERGY_PROVIDES(pl, name, spot):
@@ -2366,6 +2372,11 @@ def query_prevented(pl, spot, opp=None, attacker=None):
                     not opp.EFFECTS.get(attacker.name):
                 continue
         return True
+    # Shadowy Darkness Energy: a damage wall printed on an attached Energy.
+    for _nm, act in ENERGY_PASSIVES(pl, spot, IR.Op.PREVENT_DAMAGE):
+        f = act.filter or {}
+        if not (f.get("effects_only") or f.get("bench_counters")):
+            return True
     # Neutralization Zone: a Stadium, so it shelters BOTH players and never
     # reached this function, which only read Pokemon Abilities.
     if attacker is not None and opp is not None:
