@@ -3753,6 +3753,21 @@ def test_conservation_audit_is_clean():
     check("no step creates or destroys a card", not bad, str(bad.most_common(5)))
 
 
+def test_no_supporter_on_the_first_turn_going_first():
+    """The player going first may not play a Supporter on their first turn
+    unless the card says so. Nothing enforced it."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    for first, played in ((True, False), (False, True)):
+        me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Passimian", 0)
+        me.hand = [("Supporter", "Crispin")]
+        me.deck = [("Energy", "Grass Energy"), ("Energy", "Lightning Energy")] * 10
+        V.take_turn(me, op, 1, first, V._CARDS_BY_NAME, [])
+        check(f"going {'first' if first else 'second'}: Crispin "
+              f"{'played' if played else 'held'}",
+              ("Crispin" in me.played_supporters_this_turn) == played)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3818,6 +3833,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_no_supporter_on_the_first_turn_going_first,
                test_conservation_audit_is_clean,
                test_cards_are_conserved,
                test_the_lookahead_chooses_the_promotion,

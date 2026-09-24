@@ -4898,11 +4898,26 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl._cards_by_name = cards_by_name
     try_evolve(pl, opp, turn, log, first_turn)
     play_items(pl, opp, turn, log, first_turn)
-    if POL.knob(pl, "lookahead_samples") and not _LOOKAHEAD[0]:
-        choose_supporter(pl, opp, turn, log)
-    else:
-        play_supporter(pl, opp, turn, log)
+    # The player going first may not play a Supporter on their first turn,
+    # except one that says so (Carmine, Team Rocket's Proton). Nothing
+    # enforced it: whoever went first got a free Supporter every game.
+    hidden = [c for c in pl.hand if c[0] == "Supporter"
+              and not _FIRST_TURN_SUPPORTER_RE.search(_card_text(c[1]))] \
+        if first_turn else []
+    for c in hidden:
+        pl.hand.remove(c)
+    try:
+        if POL.knob(pl, "lookahead_samples") and not _LOOKAHEAD[0]:
+            choose_supporter(pl, opp, turn, log)
+        else:
+            play_supporter(pl, opp, turn, log)
+    finally:
+        pl.hand.extend(hidden)
     return run_phases(pl, opp, log, 0)
+
+
+_FIRST_TURN_SUPPORTER_RE = _re.compile(
+    r"if you go first, you may use this card during your first turn", _re.I)
 
 
 def _play_only(pl, opp, turn, log, name):
