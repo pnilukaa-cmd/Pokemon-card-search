@@ -52,8 +52,9 @@ GREEDY = {
     "lookahead_samples": 0,
     "lookahead_margin": 0.0,
     # Bench the Basics that reach the hand after the Supporter (Ultra Ball,
-    # draw), not a turn later.
-    "bench_after_supporter": 0,
+    # draw), not a turn later. Paired, 6 meta decks x 53 opponents x 200
+    # games: +0.97 +/- 0.27 (every deck positive).
+    "bench_after_supporter": 1,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
