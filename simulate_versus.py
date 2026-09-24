@@ -434,6 +434,30 @@ def energy_types_for(card_name, cards_by_name):
     return energy_provisions(card_name, cards_by_name)[0]
 
 
+_TOOL_COST_CUT_RE = _re.compile(
+    r"attacks used by the ([\w'’ -]*?) ?pok[eé]mon this card is attached to cost "
+    r"(\d+ )?(" + "|".join(M.REAL_TYPES) + r") less", _re.I)
+
+
+def _tool_cost_cut(pl, spot):
+    tool = getattr(spot, "tool", None)
+    if not tool:
+        return None
+    card = _CARDS_BY_NAME.get(tool)
+    card = card[0] if isinstance(card, list) and card else card
+    m = _TOOL_COST_CUT_RE.search(" ".join((card or {}).get("rules") or []))
+    if not m:
+        return None
+    fam = m.group(1).strip()
+    info = pl.POKEMON.get(spot.name) or {}
+    if fam and fam.capitalize() in M.REAL_TYPES:
+        if fam.capitalize() not in (info.get("types") or []):
+            return None
+    elif fam and fam.lower() not in spot.name.lower():
+        return None
+    return m.group(3).capitalize(), int(m.group(2) or 1)
+
+
 def effective_cost(pl, spot, cost, opp=None, atk_name=None):
     """The attack cost as it stands right now, after any Ability that
     ignores part of it. Decidueye ex's Sniper's Eye turns Crushing Arrow
@@ -460,6 +484,15 @@ def effective_cost(pl, spot, cost, opp=None, atk_name=None):
     tax = AE.query_cost_tax(pl, spot, opp)
     if tax:
         cost += ["Colorless"] * tax
+    # A Tool that discounts its holder's attacks: Hop's Choice Band ("Attacks
+    # used by the Hop's Pokemon this card is attached to cost Colorless
+    # less"). Only its +30 half was modelled.
+    tool_cut = _tool_cost_cut(pl, spot)
+    if tool_cut:
+        typ, n = tool_cut
+        for _ in range(n):
+            if typ in cost:
+                cost.remove(typ)
 
     reduce = AE.query_cost_reduction(pl, spot, opp)
     for typ, n in reduce.items():
@@ -1948,6 +1981,15 @@ def _card_kind(pl, name):
 
 
 AE.CARD_KIND = _card_kind
+
+
+def _card_text(name):
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else card
+    return " ".join((card or {}).get("rules") or [])
+
+
+AE.CARD_TEXT = _card_text
 AE.ENERGY_PASSIVES = lambda pl, spot, op=None: energy_passives(pl, spot, op)
 
 
@@ -2850,7 +2892,9 @@ def pay_discard_scaler(pl, spot, atk, log):
             by_spot.setdefault(id(sp), (sp, []))[1].append(i)
     for sp, idxs in by_spot.values():
         for i in sorted(idxs, reverse=True):
-            pl.discard.append(AE.pop_energy(sp, i))
+            nm = AE.pop_energy(sp, i)
+            pl.discard.append(nm)
+            AE.note_attack_discard(pl, sp, nm)
     log.append(f"  {pl.name}: discards {len(picks)} for {atk['name']}")
 
 
@@ -4914,6 +4958,7 @@ def _self_switch_of(atk):
 
 def finish_turn(pl, opp, log):
     """Pokemon Checkup and the Knock Outs it causes -- the end of a turn."""
+    AE.return_boomerangs(pl, log)
     opp._forced_gust = None
     pl._forced_self_switch = "unset"
     pokemon_checkup(pl, opp, log)

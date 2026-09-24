@@ -686,6 +686,39 @@ SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else No
 # simulate_versus (its _ready_damage), which this module cannot import.
 SWITCH_RANK = lambda pl, opp, spot: 0
 
+_BOOMERANG_RE = re.compile(r"if this card is discarded by an effect of an attack used by "
+                           r"the pok[eé]mon this card is attached to, attach this card", re.I)
+
+
+def note_attack_discard(pl, spot, name):
+    """Boomerang Energy: discarded by its holder's own attack, it comes back
+    after attacking. Recorded here; return_boomerangs puts it back."""
+    card = TRAINER_IR(name)
+    text = (card.text if card else "") or ""
+    if not text:
+        kind_rules = CARD_TEXT(name)
+        text = kind_rules or ""
+    if _BOOMERANG_RE.search(text):
+        if not hasattr(pl, "_boomerangs") or pl._boomerangs is None:
+            pl._boomerangs = []
+        pl._boomerangs.append((spot, name))
+
+
+def return_boomerangs(pl, log):
+    for spot, name in (getattr(pl, "_boomerangs", None) or []):
+        if name in pl.discard and spot in pl.in_play():
+            pl.discard.remove(name)
+            spot.energy.append(ENERGY_PROVIDES(pl, name, spot) or ["Colorless"])
+            spot.energy_names.append(name)
+            log.append(f"    {name} returns to {spot.name}")
+    pl._boomerangs = []
+
+
+def CARD_TEXT(name):
+    """A card's rules text by name (set by simulate_versus)."""
+    return ""
+
+
 def pop_energy(spot, i=-1):
     """Take one Energy off `spot`, keeping energy and energy_names in step.
 
@@ -973,7 +1006,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if act.amount is not None:
             idxs = idxs[:act.amount]
         for i in sorted(idxs, reverse=True):
-            pl.discard.append(pop_energy(source, i))
+            nm = pop_energy(source, i)
+            pl.discard.append(nm)
+            note_attack_discard(pl, source, nm)
         if idxs:
             log.append(f"    {source.name} discards {len(idxs)} Energy")
         return bool(idxs)

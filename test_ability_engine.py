@@ -3392,9 +3392,40 @@ def test_tera_pokemon_on_the_bench_take_no_attack_damage():
           not AE.query_prevented(me, me.active, op, op.active))
 
 
+def test_choice_band_discount_and_boomerang_energy():
+    """Hop's Choice Band's 'cost Colorless less' half was never modelled,
+    and Boomerang Energy never came back after its holder's own attack
+    discarded it (Kyurem's Trifrost in meta_slowking discards all of it)."""
+    V, D, E = _real("decks/field/hops_snorlax_stacked_buff.txt", "h")
+    me = V.Player("h", D[1], D[2], E)
+    s = V.InPlay("Hop's Snorlax", 0)
+    press = next(a for a in D[1]["Hop's Snorlax"]["attacks"] if a["name"] == "Dynamic Press")
+    s.tool = "Hop's Choice Band"
+    check("Hop's Choice Band: one Colorless less",
+          len(V.effective_cost(me, s, press["cost"])) == len(press["cost"]) - 1)
+    other = next(n for n in D[1] if not n.startswith("Hop's") and D[1][n]["attacks"])
+    o = V.InPlay(other, 0)
+    o.tool = "Hop's Choice Band"
+    oc = D[1][other]["attacks"][0]["cost"]
+    check("but only on a Hop's Pokemon", V.effective_cost(me, o, oc) == list(oc))
+
+    V, D, E = _real("decks/field/meta_slowking.txt", "s")
+    me, op = V.Player("s", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Kyurem", 0), V.InPlay("Kyurem", 0)
+    me.active.energy = [["Colorless"]] * 4
+    me.active.energy_names = ["Boomerang Energy"] * 4
+    me._forced_attack = next(a for a in D[1]["Kyurem"]["attacks"] if a["name"] == "Trifrost")
+    V.do_attack(me, op, [])
+    V.finish_turn(me, op, [])
+    check("Boomerang Energy returns after its holder's attack discards it",
+          me.active.energy_names.count("Boomerang Energy") == 4
+          and "Boomerang Energy" not in me.discard, str(me.active.energy_names))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_tera_pokemon_on_the_bench_take_no_attack_damage,
+    for fn in [test_choice_band_discount_and_boomerang_energy,
+               test_tera_pokemon_on_the_bench_take_no_attack_damage,
                test_three_count_shapes_scale,
                test_special_energy_does_what_it_prints,
                test_effect_immunity_blocks_attack_effects_only,
