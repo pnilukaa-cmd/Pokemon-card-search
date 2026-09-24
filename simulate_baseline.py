@@ -356,6 +356,7 @@ def attach_energy(state, POKEMON, pre_evolutions, log):
 
 
 def try_attack(state, POKEMON, turn, log):
+    state._turn = turn
     if not state.active or state.active_evolved_this_turn:
         return
     attacks = POKEMON.get(state.active, {}).get("attacks") or []
@@ -370,6 +371,36 @@ def try_attack(state, POKEMON, turn, log):
             state.first_attack_turn = turn
         log.append(f"Attack: {state.active} uses {name} for {dmg} "
                    f"({state.active_energy} energy, needed {needed})")
+        if _TRANSFORM_RE.search(atk.get("text") or ""):
+            _surprisingly_transform(state, POKEMON, log)
+
+
+# Ditto's Surprisingly Transform: flip a coin; on heads the Active becomes
+# a Pokemon from the deck, keeping its Energy. It is how a deck with no
+# Stage 1 gets a Stage 2 into play, so leaving it out reported every
+# Stage 2 in such a deck at 0%.
+_TRANSFORM_RE = __import__("re").compile(
+    r"search your deck for a pok[eé]mon and switch it with this pok[eé]mon", __import__("re").I)
+
+
+def _surprisingly_transform(state, POKEMON, log):
+    # Backtrack Badge (a Tool for Colorless Pokemon) re-flips a tails.
+    badge = any(c[1] == "Backtrack Badge" for c in state.hand)
+    heads = random.random() < 0.5 or (badge and random.random() < 0.5)
+    if not heads:
+        log.append("  Surprisingly Transform: tails")
+        return
+    cands = [c for c in state.deck if c[0] == "Pokemon" and c[1] != state.active]
+    if not cands:
+        return
+    # The biggest body: in these decks, the Stage 2 attackers.
+    pick = max(cands, key=lambda c: POKEMON.get(c[1], {}).get("hp") or 0)
+    state.deck.remove(pick)
+    state.deck.append(("Pokemon", state.active))
+    random.shuffle(state.deck)
+    log.append(f"  Surprisingly Transform: {state.active} -> {pick[1]}")
+    state.active = pick[1]
+    state.note_online(pick[1], getattr(state, "_turn", 0))
 
 
 _ABILITY_CACHE = {}
@@ -927,6 +958,30 @@ def effect_judge(state, POKEMON, log):
     return True
 
 
+def effect_crispin(state, POKEMON, log):
+    """Crispin: two Basic Energy of different types; one to hand, one
+    attached (to the Active, the attacker in these decks)."""
+    got, seen = [], set()
+    for c in list(state.deck):
+        if c[0] == "Energy" and BASIC_ENERGY_RE.match(c[1]) and c[1] not in seen:
+            got.append(c)
+            seen.add(c[1])
+            if len(got) == 2:
+                break
+    if not got:
+        return False
+    state.remove_from_hand("Supporter", "Crispin")
+    state.discard.append("Crispin")
+    for c in got:
+        state.deck.remove(c)
+    random.shuffle(state.deck)
+    state.hand.append(got[0])
+    if len(got) > 1 and state.active:
+        state.active_energy += 1
+    log.append(f"Play Crispin -> {', '.join(c[1] for c in got)}")
+    return True
+
+
 def effect_carmine(state, POKEMON, log):
     """Carmine: discard your hand and draw 5."""
     rest = [c for c in state.hand if c != ("Supporter", "Carmine")]
@@ -944,7 +999,7 @@ def effect_carmine(state, POKEMON, log):
 
 SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn", "Hilda",
                       "Lillie's Determination", "Carmine", "Judge",
-                      "Janine's Secret Art", "Team Rocket's Petrel"]
+                      "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Kofu": effect_kofu,
@@ -956,6 +1011,7 @@ SUPPORTER_EFFECTS = {
     "Hilda": effect_hilda,
     "Judge": effect_judge,
     "Carmine": effect_carmine,
+    "Crispin": effect_crispin,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
