@@ -170,6 +170,10 @@ def matches_filter(pl, spot, filt):
         return False
     if filt.get("stage_not") and info.get("stage") == filt["stage_not"]:
         return False
+    # "Pokemon that have Metal Energy attached" (Archaludon's Metal Bridge)
+    et = filt.get("has_energy_type")
+    if et and not any(et in e for e in getattr(spot, "energy", []) or []):
+        return False
     return True
 
 
@@ -688,6 +692,8 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
+# The simulator sets this: which of the legal targets moved counters go to.
+COUNTER_TARGET = lambda pl, opp, hits, amount: hits[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
 
@@ -1026,9 +1032,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             amount = donor.damage        # "any number" -- take it all
         else:
             amount = min((act.amount or 0) * 10, donor.damage)
+        tgt = COUNTER_TARGET(pl, opp, hits, amount)
         donor.damage -= amount
-        hits[0].damage += amount
-        log.append(f"    move {amount} damage {donor.name} -> {hits[0].name}")
+        tgt.damage += amount
+        log.append(f"    move {amount} damage {donor.name} -> {tgt.name}")
         return True
 
     if op == O.HEAL:
@@ -2252,8 +2259,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         what = act.filter["what"]
         if act.target in (IR.Target.OPPONENT, IR.Target.OPP_ACTIVE):
             if what == "play":
-                opp.item_locked = True
-                log.append("    opponent can't play Item cards next turn")
+                kinds = set(act.filter.get("kinds") or ["Item"])
+                if "Item" in kinds:
+                    opp.item_locked = True
+                opp.turn_play_lock = set(getattr(opp, "turn_play_lock", set()) or set()) | kinds
+                log.append(f"    opponent can't play {', '.join(sorted(kinds))} next turn")
                 return True
             victim = opp.active
             if victim is None or not _shield_effects(opp, [victim]):
@@ -2702,6 +2712,30 @@ def on_damaged_riders(defender, attacker_player, attacker_spot, log,
                     continue            # query_retaliation's
                 apply_action(act, defender, attacker_player, holder, log,
                              attacker_spot, make_inplay)
+
+
+def play_locks(pl, opp):
+    """What `pl` can't play from hand right now: ({kinds}, except_family).
+
+    Kinds are "Item", "Tool", "Stadium", "ace_spec", "ability_pokemon".
+    The static locks on the opponent's board ("as long as this Pokemon is
+    in the Active Spot, your opponent can't play ...") were compiled and
+    never read; the next-turn locks an attack leaves are on `pl` itself.
+    """
+    kinds = set(getattr(pl, "turn_play_lock", set()) or set())
+    if getattr(pl, "item_locked", False):
+        kinds.add("Item")
+    except_family = None
+    if opp is not None and opp is not pl:
+        for holder, eff, act in _passive_actions(opp, IR.Op.LOCK):
+            f = act.filter or {}
+            if f.get("what") != "play" or act.target != IR.Target.OPPONENT:
+                continue
+            if not conditions_met(eff, opp, pl, holder):
+                continue
+            kinds |= set(f.get("kinds") or [])
+            except_family = f.get("except_family") or except_family
+    return kinds, except_family
 
 
 def query_retreat_modifier(pl, spot, opp=None):

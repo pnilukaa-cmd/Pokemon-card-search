@@ -3834,6 +3834,45 @@ def test_mulligans_give_the_opponent_extra_cards():
     check("both mulliganed: only the difference", len(b.hand) == 2 and len(a.hand) == 0)
 
 
+def test_static_play_locks_and_metal_bridge():
+    """Every "as long as this Pokemon is in the Active Spot, your opponent
+    can't play ..." Ability compiled to a bare lock nothing read, an
+    attack's Stadium lock locked Items instead, and Archaludon's Metal
+    Bridge freed every Pokemon's retreat, Metal Energy or not."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    O = V.load_model("decks/field/tr_arbok_yveltal_snow_coating.txt", "t")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("b", D[1], D[2], E), V.Player("t", O[1], O[2], OE)
+    me.active, op.active = V.InPlay("Passimian", 0), V.InPlay("Team Rocket's Arbok", 0)
+    me._opp_ref, op._opp_ref = op, me
+    me.hand = [("Pokemon", "Teal Mask Ogerpon ex"), ("Pokemon", "Passimian")]
+    V.play_basics(me, 3, [])
+    names = [p.name for p in me.bench]
+    check("Potent Glare: no Pokemon with an Ability from hand",
+          "Teal Mask Ogerpon ex" not in names and "Passimian" in names, str(names))
+    check("and the locked card stays in hand", ("Pokemon", "Teal Mask Ogerpon ex") in me.hand)
+
+    me2 = V.Player("b", D[1], D[2], E)
+    act = IR.Action(IR.Op.LOCK, None, IR.Target.OPPONENT, {"what": "play", "kinds": ["Stadium"]})
+    AE.apply_action(act, op, me2, op.active, [])
+    kinds, _ = AE.play_locks(me2, None)
+    check("an attack's Stadium lock is a Stadium lock", kinds == {"Stadium"}
+          and not me2.item_locked, str(kinds))
+    V.end_of_turn(me2, [])
+    check("and it ends with the locked player's turn", not AE.play_locks(me2, None)[0])
+
+    V, D, E = _real("decks/field/orthworm_ex_metal_retaliation.txt", "m")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    pk = next(n for n in D[1] if D[1][n]["retreat"] and n != "Archaludon"
+              and D[1][n]["stage"] == "Basic")
+    me.active, me.bench = V.InPlay(pk, 0), [V.InPlay("Archaludon", 0)]
+    check("Metal Bridge: no Metal Energy, the Retreat Cost stays",
+          AE.effective_retreat(me, me.active, op) == D[1][pk]["retreat"])
+    me.active.energy, me.active.energy_names = [["Metal"]], ["Metal Energy"]
+    check("with Metal Energy attached it is free", AE.effective_retreat(me, me.active, op) == 0)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3899,6 +3938,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
                test_evolution_timing_for_both_players,
                test_no_supporter_on_the_first_turn_going_first,

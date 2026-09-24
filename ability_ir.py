@@ -1567,7 +1567,29 @@ def _r(m, text):
     if what == "use" and re.match(r"\s+attacks", text[m.end():], re.I):
         what = "attack"
     tgt = Target.OPPONENT if "your opponent" in text.lower() else Target.SELF
-    return [Action(Op.LOCK, None, tgt, {"what": what})]
+    f = {"what": what}
+    if what == "play":
+        # WHAT can't be played. Every static play lock (Tyranitar's Daunting
+        # Gaze, Jellicent ex, Copperajah, Genesect's ACE Nullifier, Team
+        # Rocket's Arbok's Potent Glare) compiled to the same bare lock.
+        seg = text[m.end():m.end() + 120].lower()
+        kinds = []
+        if "item" in seg:
+            kinds.append("Item")
+        if "tool" in seg:
+            kinds.append("Tool")
+        if "stadium" in seg:
+            kinds.append("Stadium")
+        if "ace spec" in seg:
+            kinds.append("ace_spec")
+        if re.search(r"pok[eé]mon that has an ability", seg):
+            kinds.append("ability_pokemon")
+            ex = re.search(r"except for ([\w'’ ]+?) pok[eé]mon", seg)
+            if ex:
+                f["except_family"] = ex.group(1).strip()
+        if kinds:
+            f["kinds"] = kinds
+    return [Action(Op.LOCK, None, tgt, f)]
 
 
 @rule("discard_from_opponent", r"discard[^.]{0,40}from your opponent's hand")
@@ -1637,6 +1659,11 @@ def _r(m, text):
     # Latias ex's Skyliner frees your BASIC Pokemon only.
     if re.search(r"your basic pok[eé]mon", text, re.I):
         filt["stage"] = "Basic"
+    # Archaludon's Metal Bridge: only those with Metal Energy attached. It
+    # compiled without the condition, so every Pokemon retreated for free.
+    et = re.search(r"that have (" + TYPES + r") energy attached", text, re.I)
+    if et:
+        filt["has_energy_type"] = et.group(1).capitalize()
     return [Action(Op.MODIFY_RETREAT, -99, tgt, filt)]
 
 

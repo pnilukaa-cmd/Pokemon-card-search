@@ -55,6 +55,10 @@ GREEDY = {
     # draw), not a turn later. Paired, 6 meta decks x 53 opponents x 200
     # games: +0.97 +/- 0.27 (every deck positive).
     "bench_after_supporter": 1,
+    # A second pass of once-per-turn Abilities after attach/evolve, and
+    # moved damage counters aimed at a Knock Out. Under measurement.
+    "abilities_late": 0,
+    "counter_ko_target": 0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

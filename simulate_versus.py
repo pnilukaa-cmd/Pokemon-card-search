@@ -819,6 +819,20 @@ def _top_copy_want(pl, pool=None):
 
 
 AE.TOP_COPY_WANT = _top_copy_want
+
+
+def _counter_target(pl, opp, hits, amount):
+    """Where moved damage counters go: a Pokemon they Knock Out, the most
+    Prizes first; otherwise the first legal target (the Active)."""
+    if POL.knob(pl, "counter_ko_target"):
+        ko = [h for h in hits if h in opp.in_play()
+              and h.damage + amount >= effective_hp(opp, h)]
+        if ko:
+            return max(ko, key=lambda h: opp.POKEMON[h.name].get("prize_value", 1))
+    return hits[0]
+
+
+AE.COUNTER_TARGET = _counter_target
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
 
 # Academy at Night: "Once during each player's turn, that player may put a
@@ -1483,14 +1497,47 @@ def want_pokemon(pl, name):
                                     for n in pl.in_play_names()]
 
 
+def _locked_in_hand(pl, opp):
+    """The cards in hand a play lock forbids right now (AE.play_locks)."""
+    kinds, except_family = AE.play_locks(pl, opp)
+    if not kinds:
+        return []
+    out = []
+    for c in pl.hand:
+        k, n = c
+        card = _CARDS_BY_NAME.get(n)
+        card = card[0] if isinstance(card, list) and card else (card or {})
+        if (k in kinds
+                or ("ace_spec" in kinds and "ACE SPEC" in (card.get("subtypes") or []))
+                or ("ability_pokemon" in kinds and k == "Pokemon"
+                    and (pl.POKEMON.get(n) or {}).get("abilities")
+                    and not (except_family and n.lower().startswith(except_family)))):
+            out.append(c)
+    return out
+
+
+def _under_play_lock(fn):
+    """Run a step that plays cards from hand with the locked cards set
+    aside, so every hand-playing path obeys the lock without its own check."""
+    def run(pl, *a, **k):
+        opp = getattr(pl, "_opp_ref", None)
+        hidden = _locked_in_hand(pl, opp) if opp is not None else []
+        for c in hidden:
+            pl.hand.remove(c)
+        try:
+            return fn(pl, *a, **k)
+        finally:
+            pl.hand.extend(hidden)
+    run.__wrapped__ = fn
+    return run
+
+
 def play_items(pl, opp, turn, log, first_turn):
     # Budew's Itchy Pollen and Bronzong's Evolution Jammer shut the Item
     # phase off for a turn. The flag is consumed here so it lasts exactly
     # the one turn the card says it does.
     if pl.item_locked:
-        pl.item_locked = False
         log.append(f"  {pl.name}: can't play Item cards this turn (locked)")
-        return
     # Iron Defender: "during your opponent's next turn, all of your Metal
     # Pokemon take 30 less damage". Its compiled op is REDUCE_DAMAGE,
     # which play_trainer_from_ir does not resolve because it is a passive
@@ -5002,7 +5049,7 @@ def choose_supporter(pl, opp, turn, log):
 # make a choice in a copy of the game and RESUME the turn from the step
 # after it (a gust resumes at "abilities", a retreat at "attack").
 PHASES = ("bench", "abilities", "stadium", "sweep", "attach", "tools",
-          "evolve", "retreat", "attack")
+          "evolve", "abilities2", "retreat", "attack")
 
 
 def run_phases(pl, opp, log, start):
@@ -5016,6 +5063,12 @@ def run_phases(pl, opp, log, start):
                 play_basics(pl, turn, log)
         elif ph == "abilities":
             use_abilities(pl, opp, turn, log)
+        elif ph == "abilities2":
+            # Once-per-turn Abilities not yet used, after the Energy and the
+            # evolutions: Adrena-Brain needs the Darkness Energy attached
+            # this turn, and a Pokemon evolved this turn has new Abilities.
+            if POL.knob(pl, "abilities_late"):
+                use_abilities(pl, opp, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
         elif ph == "sweep":
@@ -5498,6 +5551,9 @@ def promote_from_bench(side, opp=None):
 
 def end_of_turn(pl, log):
     """Everything that ends with the turn of the player who just moved."""
+    # A next-turn play lock lasted exactly this turn.
+    pl.item_locked = False
+    pl.turn_play_lock = set()
     pl.lost_pokemon_last_turn = False
     pl.lost_pokemon_names = ""
     # "At the end of your opponent's next turn, discard the
@@ -5715,6 +5771,14 @@ def main():
             print(f"  {a}")
     print("\nBoth sides use the same generic AI; attack side-effects are not executed."
           "\nSee this file's docstring for the full list of simplifications.")
+
+
+# Every step that plays cards from hand obeys the play locks
+# (Daunting Gaze, Potent Glare, an attack's "can't play Items next turn").
+play_basics = _under_play_lock(play_basics)
+try_evolve = _under_play_lock(try_evolve)
+play_items = _under_play_lock(play_items)
+attach_tools = _under_play_lock(attach_tools)
 
 
 if __name__ == "__main__":
