@@ -3299,6 +3299,7 @@ def test_special_energy_does_what_it_prints():
     me.active, me.bench, me._opp_ref = V.InPlay(psy, 0), [], None
     me._opp_ref = me
     me.hand = [("Energy", "Telepathic Psychic Energy")]
+    me.energy_types = {"Psychic"}                        # as run_game sets it
     V.attach_energy(me, V._CARDS_BY_NAME, [])            # the real path
     check("Telepathic Psychic Energy benches Basic Psychic Pokemon",
           len(me.bench) == 2 and all("Psychic" in D[1][p.name]["types"] for p in me.bench),
