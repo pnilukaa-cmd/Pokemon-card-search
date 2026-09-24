@@ -4081,22 +4081,6 @@ def _potential_damage(pl, spot):
         # is worth whatever it can borrow. Ranking it at 0 sent every
         # Energy to the Bench toolbox and starved the actual attacker.
         m = _COPY_OWN_BENCH_RE.search(a.get("text") or "")
-        if not m and _SELF_TOP_COPY_RE.search(a.get("text") or ""):
-            # Seek Inspiration borrows whatever non-rule-box Pokemon the
-            # deck can put on top (Academy at Night, Ciphermaniac's
-            # Codebreaking). Printed 0, so Slowking never got Energy.
-            opp = getattr(pl, "_opp_ref", None)
-            best = 0
-            for name, info in pl.POKEMON.items():
-                if info.get("rule_box"):
-                    continue
-                for b in info.get("attacks") or []:
-                    if _USE_AS_THIS_RE.search(b.get("text") or ""):
-                        continue
-                    v = (min(attack_value(pl, opp, spot, b), 10 ** 4)
-                         if opp is not None and opp.active else b["damage"] or 0)
-                    best = max(best, v)
-            return best
         if not m:
             return a["damage"] or 0
         fam = (m.group(1) or "").strip().lower()
