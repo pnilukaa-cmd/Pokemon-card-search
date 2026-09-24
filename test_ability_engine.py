@@ -4266,6 +4266,39 @@ def test_special_energy_and_stadium_gaps():
           not V._stadium_has_effect("Forest of Vitality", me))
 
 
+def test_mulligan_draws_are_optional_and_xerosic_can_go_first():
+    """The extra mulligan draws are a choice (a field can decline them),
+    and the hand_trim_first pilot plays Xerosic's Machinations ahead of any
+    draw Supporter when it strips enough cards."""
+    V, D, E = _real("decks/ditto_tyranitar_gengar_hydreigon.ptcgl.txt", "d")
+    a, b = V.Player("a", D[1], D[2], E), V.Player("b", D[1], D[2], E)
+    a.hand = b.hand = []
+    V.MULLIGAN_DECLINE_EXCEPT = "b"
+    try:
+        V.extra_draws(a, b, 0, 3)
+        check("a declining player draws nothing", len(a.hand) == 0)
+        V.extra_draws(a, b, 3, 0)
+        check("the exempt player still takes them", len(b.hand) == 3)
+    finally:
+        V.MULLIGAN_DECLINE_EXCEPT = None
+    import policies as POL
+    POL.POLICIES["t_trim"] = dict(POL.GREEDY, name="t_trim", hand_trim_first=3)
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.policy = "t_trim"
+    me.active, op.active = V.InPlay("Ditto", 0), V.InPlay("Ditto", 0)
+    me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Xerosic's Machinations")]
+    me.deck = [("Item", "Ultra Ball")] * 20
+    op.hand = [("Item", "Ultra Ball")] * 8
+    V.play_supporter(me, op, 3, [])
+    check("Xerosic goes first into an 8-card hand",
+          "Xerosic's Machinations" in me.played_supporters_this_turn and len(op.hand) == 3)
+    me.supporter_played, me.played_supporters_this_turn = False, set()
+    me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Xerosic's Machinations")]
+    op.hand = [("Item", "Ultra Ball")] * 4
+    V.play_supporter(me, op, 3, [])
+    check("but not into a 4-card hand", "Xerosic's Machinations" not in me.played_supporters_this_turn)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -4331,6 +4364,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_mulligan_draws_are_optional_and_xerosic_can_go_first,
                test_special_energy_and_stadium_gaps,
                test_tools_read_from_their_text,
                test_trainers_that_compiled_and_did_nothing,

@@ -61,6 +61,9 @@ GREEDY = {
     # A second Item step after the Supporter (Petrel's search, a draw).
     # Paired, 7 decks x 54 opponents x 200 games: +0.90 +/- 0.24.
     "items_after_supporter": 1,
+    # Play a "discard down to N" Supporter first when it strips at least
+    # this many cards (0: off). Measuring.
+    "hand_trim_first": 0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

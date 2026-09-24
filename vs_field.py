@@ -47,6 +47,10 @@ me = os.path.splitext(os.path.basename(deck))[0]
 A = SV.load_model(deck, me)[0]
 if os.environ.get("PILOT"):
     SV.PILOT_BY_NAME[me] = os.environ["PILOT"]
+# FIELD_DECLINES_MULLIGAN_DRAWS=1: the field refuses the optional extra
+# cards when the candidate mulligans.
+if os.environ.get("FIELD_DECLINES_MULLIGAN_DRAWS"):
+    SV.MULLIGAN_DECLINE_EXCEPT = me
 res, unplayable = {}, []
 todo = []
 for f in sorted(glob.glob(os.path.join(field, "*.txt"))):

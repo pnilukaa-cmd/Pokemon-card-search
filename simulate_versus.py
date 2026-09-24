@@ -2143,6 +2143,17 @@ def play_supporter(pl, opp, turn, log):
     if pl.supporter_played:
         return
     hand_names = [n for k, n in pl.hand if k == "Supporter"]
+    # A "discard down to N" Supporter (Xerosic's Machinations) goes first
+    # when it strips enough: an opponent holding 8 loses 5 cards.
+    trim = POL.knob(pl, "hand_trim_first")
+    if trim:
+        for name in hand_names:
+            eff = trainer_effect_ir(name)
+            to = next(((a.filter or {}).get("down_to") for a in (eff.actions if eff else [])
+                       if a.op == IR.Op.DISCARD_FROM_OPPONENT and (a.filter or {}).get("down_to") is not None), None)
+            if to is not None and len(opp.hand) - to >= trim:
+                if play_trainer_from_ir(pl, opp, "Supporter", name, log, turn):
+                    return
 
     def use(name):
         pl.remove_from_hand("Supporter", name)
@@ -5754,12 +5765,21 @@ def _checkup_side(pl, opp, log, clear_paralysis):
 # Turn / game loop
 # --------------------------------------------------------------------------
 
+# The extra mulligan draws are optional ("may draw"). None: everyone takes
+# them. A player name: every OTHER player declines -- vs_field's
+# FIELD_DECLINES_MULLIGAN_DRAWS=1 measures a deck against a field that
+# refuses to feed a hand-disruption / mill plan.
+MULLIGAN_DECLINE_EXCEPT = None
+
+
 def extra_draws(a, b, mullA, mullB):
     """Mulligan compensation: the difference, drawn by the player who
-    mulliganed less."""
-    if mullB > mullA:
+    mulliganed less (if they choose to)."""
+    def takes(p):
+        return MULLIGAN_DECLINE_EXCEPT is None or p.name == MULLIGAN_DECLINE_EXCEPT
+    if mullB > mullA and takes(a):
         a.draw(mullB - mullA)
-    elif mullA > mullB:
+    elif mullA > mullB and takes(b):
         b.draw(mullA - mullB)
 
 
