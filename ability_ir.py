@@ -322,12 +322,17 @@ def parse_trigger(text):
         return Trigger.ON_OPPONENT_EVENT
     if "once during your turn" in t:
         return Trigger.ONCE_PER_TURN
+    # Fan Rotom's Fan Call. Read as PASSIVE, so it never fired at all.
+    if "once during your first turn" in t:
+        return Trigger.ONCE_PER_TURN
     return Trigger.PASSIVE
 
 
 def parse_conditions(text):
     t = text
     out = []
+    if re.search(r"once during your first turn", t, re.I):
+        out.append({"kind": "own_first_turn"})
     if re.search(r"if this pok[eé]mon is in the active spot|as long as this pok[eé]mon is in the active spot", t, re.I):
         out.append({"kind": "self_is_active"})
     if re.search(r"as long as this pok[eé]mon is on your bench|is on your bench", t, re.I):
@@ -1159,6 +1164,12 @@ def _r(m, text):
                    seg, re.I)
     if mm:
         filt["attacker_energy_at_most"] = int(mm.group(1))
+    # Battle Cage: not damage at all -- damage COUNTERS put on a Benched
+    # Pokemon by the opponent's attack or Ability effects. It compiled to a
+    # bare "prevent all damage", which nothing that plays Stadiums reads.
+    if re.search(r"prevent all damage counters from being placed on benched", seg, re.I):
+        return [Action(Op.PREVENT_DAMAGE, None, Target.YOUR_BENCHED,
+                       {"bench_counters": True})]
     return [Action(Op.PREVENT_DAMAGE, None, tgt, filt)]
 
 
@@ -1286,9 +1297,10 @@ def _r(m, text):
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
     if who == "each":
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED)]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
+                       {"attack_damage": True})]
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
-                   {"targets": int(who)})]
+                   {"targets": int(who), "attack_damage": True})]
 
 
 @rule("attack_snipe_any",
@@ -1302,9 +1314,10 @@ def _r(m, text):
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
     if who == "each":
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL)]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL,
+                       {"attack_damage": True})]
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY,
-                   {"targets": int(who)})]
+                   {"targets": int(who), "attack_damage": True})]
 
 
 @rule("asymmetric_hand_reset",
@@ -1661,7 +1674,7 @@ def _r(m, text):
     """Arboliva ex's Oil Salvo: six separate 20s aimed anywhere. Worth 120
     spread across the board, and it compiled to nothing."""
     return [Action(Op.PLACE_COUNTERS, int(m.group(2)) // 10, Target.OPP_ANY,
-                   {"targets": int(m.group(1))})]
+                   {"targets": int(m.group(1)), "attack_damage": True})]
 
 
 @rule("flip_per_opponent_pokemon",
@@ -1672,7 +1685,7 @@ def _r(m, text):
     on each heads. Expected value across a full board is the biggest
     single attack in the pool, and it scored zero."""
     return [Action(Op.PLACE_COUNTERS, int(m.group(1)) // 10, Target.OPP_ALL,
-                   {"chance_each": 0.5})]
+                   {"chance_each": 0.5, "attack_damage": True})]
 
 
 @rule("each_player_draws", r"each player draws? (?:a card|(\d+) cards?)")

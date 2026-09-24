@@ -392,6 +392,8 @@ def _is_special_energy(name):
 def conditions_met(effect, pl, opp, source, atk=None):
     for c in effect.conditions:
         k = c["kind"]
+        if k == "own_first_turn" and getattr(pl, "round_no", None) != 1:
+            return False
         if k == "self_is_active" and source is not pl.active:
             return False
         if k == "self_is_benched" and source not in pl.bench:
@@ -705,6 +707,17 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        # Attack DAMAGE that the IR models as counters (Bench spread,
+        # snipes) is stopped by damage prevention -- Shaymin's Flower
+        # Curtain and Neutralization Zone had never been asked, because the
+        # only caller of query_prevented was the Active hit. Real counters
+        # from effects are stopped on the Bench by Battle Cage instead.
+        if act.filter.get("attack_damage"):
+            hits = [h for h in hits if h is None
+                    or not query_prevented(opp, h, pl, attacker or source)]
+        else:
+            hits = [h for h in hits
+                    if not query_bench_counters_blocked(opp, h, pl)]
         per = act.filter.get("per_discard_card")
         if per:
             # "2 damage counters for each Basic Grass Energy card in your
@@ -817,6 +830,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         donors = [q for q in pool if q.damage >= 10]
         hits = resolve_targets(act.target, pl, opp, source, attacker) or \
             ([opp.active] if opp.active else [])
+        hits = [h for h in hits
+                if not query_bench_counters_blocked(opp, h, pl)]
         if not donors or not hits:
             return False
         donor = max(donors, key=lambda q: q.damage)
@@ -977,9 +992,16 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             cap = act.filter.get("hp_at_most")
             nobox = act.filter.get("no_rule_box")
             exonly = act.filter.get("ex_only")
+            ptype = act.filter.get("type")
             def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
-                     exonly=exonly):
+                     exonly=exonly, ptype=ptype):
                 if kind.startswith("pok") and k != "Pokemon":
+                    return False
+                # "search your deck for up to 3 Colorless Pokemon" -- the
+                # type was compiled and never checked, so Fan Call fetched
+                # Grass and Psychic Pokemon too.
+                if ptype and k == "Pokemon" and ptype not in (
+                        pl.POKEMON.get(n, {}).get("types") or []):
                     return False
                 if cap is not None and (
                         (pl.POKEMON.get(n, {}).get("hp") or 0) > cap
@@ -2026,6 +2048,26 @@ def query_damage_buff(pl, spot, opp=None):
     return total
 
 
+def _stadium_prevents(pl, opp=None):
+    """PREVENT_DAMAGE actions on the Stadium in play (shared by both sides)."""
+    name = getattr(pl, "stadium", None) or getattr(pl, "_opp_stadium", None) or (
+        getattr(opp, "stadium", None) if opp is not None else None)
+    if not name:
+        return []
+    eff = TRAINER_IR(name)
+    if eff is None:
+        return []
+    return [a for a in eff.actions if a.op == IR.Op.PREVENT_DAMAGE]
+
+
+def query_bench_counters_blocked(owner, spot, placer=None):
+    """Battle Cage: no damage counters on a Benched Pokemon from the
+    opponent's attack or Ability effects. `owner` holds `spot`."""
+    if spot is None or spot not in owner.bench:
+        return False
+    return any(a.filter.get("bench_counters") for a in _stadium_prevents(owner, placer))
+
+
 def query_prevented(pl, spot, opp=None, attacker=None):
     """Is all damage to `spot` prevented outright?
 
@@ -2036,7 +2078,7 @@ def query_prevented(pl, spot, opp=None, attacker=None):
     were silently ignored and the walls read as total immunity.
     """
     for holder, eff, act in _passive_actions(pl, IR.Op.PREVENT_DAMAGE):
-        if act.filter.get("effects_only"):
+        if act.filter.get("effects_only") or act.filter.get("bench_counters"):
             continue          # prevents EFFECTS, not damage
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
@@ -2064,6 +2106,19 @@ def query_prevented(pl, spot, opp=None, attacker=None):
                     not opp.EFFECTS.get(attacker.name):
                 continue
         return True
+    # Neutralization Zone: a Stadium, so it shelters BOTH players and never
+    # reached this function, which only read Pokemon Abilities.
+    if attacker is not None and opp is not None:
+        for act in _stadium_prevents(pl, opp):
+            f = act.filter
+            if f.get("bench_counters") or f.get("effects_only"):
+                continue
+            if f.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
+                continue
+            if f.get("attacker_is_ex") and \
+                    opp.POKEMON.get(attacker.name, {}).get("prize_value", 1) < 2:
+                continue
+            return True
     return False
 
 

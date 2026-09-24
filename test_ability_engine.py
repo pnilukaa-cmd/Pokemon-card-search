@@ -2492,14 +2492,22 @@ def test_no_card_in_any_decklist_is_silently_inert():
             return bool(V._is_reflip_tool(pl, nm)
                         or nm in V.on_damaged_tools())
         if "Stadium" in subs:
-            e = V.stadium_turn_effect_ir(nm)
-            if e is not None and e.actions:
-                return True
+            # A Stadium is live only if the pilot will actually PUT IT DOWN,
+            # which is _stadium_has_effect's call. The old check fell back
+            # to "any compiled action" (AE.PASSIVE_OPS does not exist), and
+            # passed Neutralization Zone and Battle Cage while both sat in
+            # hand for the whole game.
             if nm in V.EFFECT_STADIUMS or nm in V.RETREAT_STADIUMS:
                 return True
+            probe = V.Player("x", {}, [])
+            if V._stadium_has_effect(nm, probe):
+                return True
+            # Conditional on a Pokemon subtype in play (Tera): played when
+            # the condition holds, so live -- the probe board has none.
             ir = V.trainer_effect_ir(nm)
             return bool(ir is not None and any(
-                a.op in AE.PASSIVE_OPS if hasattr(AE, "PASSIVE_OPS") else True
+                (a.filter or {}).get("requires_subtype")
+                and a.op in (IR.Op.BENCH_CAP, IR.Op.MODIFY_ATTACK_COST)
                 for a in ir.actions))
         # Items and Supporters go through play_trainer_from_ir, which only
         # resolves ops in TRAINER_IR_OPS.
@@ -2772,9 +2780,95 @@ def test_a_copy_attack_deck_keeps_room_for_its_donor():
           got == {"N's Zekrom"}, str(got))
 
 
+def test_the_mill_wall_pieces_work():
+    """A tournament-winning Dudunsparce / Maushold list (2026-09-24) leans on
+    six cards the engine had compiled and never used:
+
+      * Neutralization Zone and Battle Cage compiled to PREVENT_DAMAGE, an
+        op the Stadium gate did not list, so neither was ever played.
+      * Nothing asked about damage prevention for a BENCHED Pokemon, so
+        Shaymin's Flower Curtain and the Zone's Bench half never applied.
+      * Battle Cage was read as plain damage prevention; it stops damage
+        COUNTERS from effects, and attack damage still lands.
+      * Fan Call's "once during your first turn" was read as passive, and
+        its "Colorless" type was compiled and never checked.
+      * Dark Bell Confused its own attacker whenever it was in hand.
+
+    Real deck models, real executors.
+    """
+    import copy
+    V, D, E = _real("decks/dudunsparce_maushold_mill_wall.ptcgl.txt", "m")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    for nm in ("Neutralization Zone", "Battle Cage"):
+        check(f"{nm} is worth putting down", V._stadium_has_effect(nm, me))
+
+    me.active = V.InPlay("Maushold", 0)
+    me.bench = [V.InPlay("Tandemaus", 0), V.InPlay("Dudunsparce ex", 0)]
+    op.active = V.InPlay("Dragapult ex", 0)
+    me.stadium, op._opp_stadium = "Neutralization Zone", "Neutralization Zone"
+    check("Zone: an ex attack on a no-Rule-Box Active is prevented",
+          AE.query_prevented(me, me.active, op, op.active))
+    check("Zone: an ex attack on a Rule-Box Pokemon is not",
+          not AE.query_prevented(me, me.bench[1], op, op.active))
+    op.active = V.InPlay("Dreepy", 0)
+    check("Zone: a non-ex attacker is not stopped",
+          not AE.query_prevented(me, me.active, op, op.active))
+
+    spread = IR.compile_effect("attack", "t", "This attack also does 30 damage "
+                               "to 1 of your opponent's Benched Pokemon.").actions[0]
+    counters = IR.compile_effect("attack", "t", "Put 3 damage counters on 1 of "
+                                 "your opponent's Benched Pokemon.").actions[0]
+    me.stadium, op._opp_stadium = "Battle Cage", "Battle Cage"
+    op.active = V.InPlay("Dreepy", 0)
+    tb = me.bench[0]
+    tb.damage = 0
+    AE.apply_action(counters, op, me, op.active, [], attacker=op.active)
+    check("Battle Cage: effect counters on the Bench are stopped", tb.damage == 0,
+          str(tb.damage))
+    AE.apply_action(spread, op, me, op.active, [], attacker=op.active)
+    check("Battle Cage: attack damage to the Bench still lands",
+          me.bench[0].damage + me.bench[1].damage == 30,
+          str([p.damage for p in me.bench]))
+
+    me.stadium = op._opp_stadium = None
+    me.bench = [V.InPlay("Tandemaus", 0), V.InPlay("Shaymin", 0)]
+    AE.apply_action(spread, op, me, op.active, [], attacker=op.active)
+    check("Shaymin: attack damage to a no-Rule-Box Bench is prevented",
+          all(p.damage == 0 for p in me.bench), str([p.damage for p in me.bench]))
+
+    fan = [e for e in E["Fan Rotom"] if e.name == "Fan Call"][0]
+    check("Fan Call is an activated Ability", fan.trigger == IR.Trigger.ONCE_PER_TURN,
+          str(fan.trigger))
+    me = V.Player("m", D[1], D[2], E)
+    me.active, me.bench, me.hand = V.InPlay("Fan Rotom", 0), [], []
+    me.round_no = 1
+    V.use_abilities(me, op, 1, [])
+    got = [n for k, n in me.hand if k == "Pokemon"]
+    check("Fan Call fires on the first turn", len(got) == 3, str(got))
+    check("and fetches only Colorless Pokemon",
+          all("Colorless" in D[1][n]["types"] for n in got), str(got))
+    me2 = V.Player("m", D[1], D[2], E)
+    me2.active, me2.bench, me2.hand, me2.round_no = V.InPlay("Fan Rotom", 0), [], [], 2
+    V.use_abilities(me2, op, 2, [])
+    check("and not on a later turn", not me2.hand, str(me2.hand))
+
+    me = V.Player("m", D[1], D[2], E)
+    me.active = V.InPlay("Maushold", 0)
+    me.active.energy, me.active.energy_names = [["Psychic"]], ["Basic Psychic Energy"]
+    me.bench = [V.InPlay("Dunsparce", 0)]
+    me.hand = [("Item", "Dark Bell")]
+    op.active = V.InPlay("Dragapult ex", 0)
+    V.play_trainer_from_ir(me, op, "Item", "Dark Bell", [], 5)
+    check("Dark Bell is held while it would Confuse my own attacker",
+          ("Item", "Dark Bell") in me.hand and not me.active.conditions)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_subjugating_chains_switches_in_your_own_attacker,
+    for fn in [test_the_mill_wall_pieces_work,
+               test_subjugating_chains_switches_in_your_own_attacker,
                test_a_copy_attack_deck_keeps_room_for_its_donor,
                test_hand_reset_draws_do_the_first_half_of_their_text,
                test_an_optional_draw_never_empties_the_deck,

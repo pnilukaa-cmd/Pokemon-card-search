@@ -723,6 +723,68 @@ Known open gap as of this writing: **`lock` fires on 0 of 154 card
 effects** — "can't retreat", "can't attack next turn" and friends are
 compiled and ignored, which undervalues every control deck in the folder.
 
+### 11e. Studying a deck someone else built: find what the engine is NOT doing
+
+Standing user instruction (2026-09-24): when handed a real decklist, study
+it, then teach the AI to play it, and keep learning and improving. A real
+tournament result is ground truth that the simulator is wrong somewhere;
+the job is to find where, fix it, and prove the fix. Two lists handled
+this way (N's Zoroark ex, a Dudunsparce / Maushold mill wall) turned up
+twelve bugs between them, and every one had the same shape: **a card
+compiled, and nothing used it.**
+
+Do these in order, and measure after each change, not at the end:
+
+1. **Read every card's full text** from the JSON and write down the deck's
+   plan in one paragraph: what wins, what protects it, what it recycles.
+   The plan tells you what to count in step 3.
+2. **Tally what the deck actually does** over ~60 logged games against
+   4-6 varied opponents: every `<name>: ...` log line, per game. Any key
+   card at or near 0/game is inert until proven otherwise. Found this way:
+   Neutralization Zone and Battle Cage (never played), Fan Call (never
+   fired), Familial March (almost never chosen).
+3. **Classify the idle turns.** Instrument `do_attack` and record, for
+   every turn the deck did not attack: the Active, its Energy, Energy in
+   hand and discard, what is on the Bench. This is how both "not enough
+   bench space" and "the Energy goes to the wrong Pokemon" were found, and
+   it is also how a guess was proved WRONG (bench space was worth +2, the
+   Energy target +4.6).
+4. **Check each suspicious card at the compile AND consume layer.**
+   `compile_effect` output first (Pecharunt ex compiled as "Poison the
+   opponent", Lillie's Determination as a bare "draw 6", Fan Call as
+   passive), then the consumer: is the op in the set the caller checks
+   (`TRAINER_IR_OPS`, `_STADIUM_OPS_WORTH_PLAYING`), is the query called
+   for this case at all (`query_prevented` was only asked about the
+   Active, so every Bench shield was dead), is every compiled filter read
+   (`type` on a search was not).
+5. **Measure each fix paired**: `vs_field.py <deck> decks/field 200 <tag>`
+   before and after with the same tag, and report the paired mean and SE.
+   **Revert what does not measure.** Two plausible pilot rules this
+   session measured at -0.18 and -0.93 and were removed.
+6. **Write a regression test on the real deck model that fails on the
+   previous commit** (check out the old commit in a scratch worktree and
+   run the new test there). A test that passes on the unfixed engine has
+   proved nothing.
+
+Wording patterns that have been dropped or misread, worth a grep on any
+new card: `Shuffle your hand into your deck. Then, draw` / `Discard your
+hand and draw` (the first half), `draw N cards instead` (a larger draw, not
+a gate), `the new Active Pokemon is now X` (YOUR Pokemon after a self
+switch, the OPPONENT's after a gust), `Once during your first turn`,
+`search ... for N <Type> Pokemon` (the type), `Prevent all damage counters
+from being placed` (counters, not damage), anything protecting the
+**Bench** (check it is asked about Benched targets), and any Stadium
+(check `_stadium_has_effect` says to play it: the inert-card guard now
+tests exactly that).
+
+Pilot lessons that measured positive and are now in the engine, all keyed
+off card text rather than deck names: keep Bench room for a copy
+attacker's donors; feed Energy to the copy attacker first; a mill deck
+gusts up a Pokemon that can neither attack nor retreat and holds the gust
+while the Active is already stuck; never play a symmetric Special
+Condition Item (Dark Bell) that would stop your own attacker this turn;
+decline an optional draw that would leave fewer than 6 cards in the deck.
+
 ### 12. Use `search_mechanic.py --help` instead of guessing a flag's behavior
 
 `scripts/search_mechanic.py` has full `--help` text with all flags and

@@ -545,6 +545,33 @@ def sweep_knocked_out(pl, opp, log):
 _STADIUM_OPS_WORTH_PLAYING = None
 
 
+def _stadium_value(pl, opp, name):
+    """Rough worth of a Stadium against the opponent's board right now.
+
+    Only the two damage walls are priced; any other modelled Stadium is 1.
+    """
+    eff = trainer_effect_ir(name)
+    for a in (eff.actions if eff else []):
+        if a.op != IR.Op.PREVENT_DAMAGE:
+            continue
+        f = a.filter or {}
+        if f.get("attacker_is_ex"):
+            # Neutralization Zone: worth it while their attackers are ex and
+            # mine are not.
+            theirs = sum(opp.POKEMON.get(p.name, {}).get("prize_value", 1) >= 2
+                         for p in opp.in_play())
+            mine = sum(not pl.POKEMON[p.name]["rule_box"] for p in pl.in_play())
+            return 1 + 2 * theirs * (mine > 0)
+        if f.get("bench_counters"):
+            # Battle Cage: worth it against a deck that places counters.
+            places = any(a2.op in (IR.Op.PLACE_COUNTERS, IR.Op.MOVE_COUNTERS)
+                         and not (a2.filter or {}).get("attack_damage")
+                         for effs in opp.EFFECTS.values() for e in effs
+                         for a2 in e.actions)
+            return 3 if places else 1
+    return 1
+
+
 def _stadium_has_effect(name, pl):
     """Does this Stadium do anything this player can use right now?
 
@@ -576,6 +603,10 @@ def _stadium_has_effect(name, pl):
         _STADIUM_OPS_WORTH_PLAYING = TRAINER_IR_OPS | {
             IR.Op.BENCH_CAP, IR.Op.CONDITION_IMMUNITY, IR.Op.MODIFY_RETREAT,
             IR.Op.BUFF_DAMAGE, IR.Op.REDUCE_DAMAGE, IR.Op.MODIFY_HP,
+            # Neutralization Zone and Battle Cage (read by query_prevented
+            # and query_bench_counters_blocked). Missing here, neither was
+            # ever put down: 9 and 3 turns a game sitting in hand.
+            IR.Op.PREVENT_DAMAGE,
         }
     # A Stadium whose only value is its ONCE-PER-TURN effect is still worth
     # putting down. Checking the passive IR alone meant Fossil Quarry never
@@ -595,6 +626,19 @@ def _stadium_has_effect(name, pl):
             if any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes")
                             or [])
                    for p in pl.in_play()):
+                return True
+        elif act.op is IR.Op.MODIFY_ATTACK_COST and (act.filter or {}).get("requires_subtype"):
+            # Nighttime Mine taxes every Tera attacker, both sides: worth it
+            # only when the Tera Pokemon are the opponent's. The op was read
+            # by the cost path and missing here, so it was never played.
+            need = act.filter["requires_subtype"]
+            opp = getattr(pl, "_opp_ref", None)
+            mine = any(need in ((pl.POKEMON.get(p.name) or {}).get("subtypes") or [])
+                       for p in pl.in_play())
+            theirs = opp is not None and any(
+                need in ((opp.POKEMON.get(p.name) or {}).get("subtypes") or [])
+                for p in opp.in_play())
+            if theirs and not mine:
                 return True
         elif act.op in _STADIUM_OPS_WORTH_PLAYING:
             return True
@@ -750,6 +794,45 @@ def _draw_would_deck_out(pl, eff):
     n = sum((a.amount or 1) for a in eff.actions if a.op == IR.Op.DRAW
             and a.target != IR.Target.BOTH_ALL)
     return n > 0 and len(pl.deck) - n < DRAW_FLOOR
+
+
+def _self_condition_ok(pl, opp, eff, turn):
+    """Dark Bell: "Both Active non-Darkness Pokemon are now Confused."
+
+    It hits your own Active as well, and it was played whenever it was in
+    hand -- 0.33 times a game the mill deck's own Dudunsparce ex then
+    failed its attack. Worth it only when your own Active does not care:
+    it is exempt, will not attack this turn anyway, is already Confused,
+    or can evolve this turn (evolving cures it).
+    """
+    for a in eff.actions:
+        if a.op != IR.Op.APPLY_CONDITION or a.target != IR.Target.BOTH_ALL:
+            continue
+        me = pl.active
+        if me is None:
+            return True
+        exempt = (a.filter or {}).get("type_not")
+        if exempt and exempt in (pl.POKEMON[me.name].get("types") or []):
+            continue
+        conds = set(a.filter.get("conditions") or [])
+        if conds <= me.conditions:
+            continue
+        # "Will it attack this turn?" -- Items resolve BEFORE the turn's
+        # Energy attachment, so an Active one Energy short with an Energy
+        # in hand is about to attack. Asking _ready_damage alone waved Dark
+        # Bell through on exactly those turns.
+        spare = 1 if any(k == "Energy" for k, _ in pl.hand) else 0
+        if not any(len(a["cost"]) <= me.energy_count() + spare
+                   for a in pl.POKEMON[me.name]["attacks"]):
+            continue
+        base = M.base_of(pl.POKEMON, me.name)
+        can_evolve = (turn > me.entered_turn and not me.evolved_this_turn
+                      and any(k == "Pokemon" and pl.POKEMON.get(n, {}).get("evolves_from") == base
+                              for k, n in pl.hand))
+        if can_evolve:
+            continue
+        return False
+    return True
 
 
 def _deck_left_after(pl, draw, returned=0):
@@ -1234,6 +1317,11 @@ def play_items(pl, opp, turn, log, first_turn):
                 and not _stadium_has_effect(name, pl)):
             continue
         if pl.stadium == name:
+            continue
+        # My own Stadium stays unless this one is worth more right now. A
+        # deck with two (Neutralization Zone and Battle Cage) otherwise
+        # threw its own down every turn to replace it with the other.
+        if pl.stadium and _stadium_value(pl, opp, name) <= _stadium_value(pl, opp, pl.stadium):
             continue
         pl.remove_from_hand(kind, name)
         pl.discard.append(name)
@@ -1821,6 +1909,8 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     if not actions:
         return False
     if not _draw_trainer_worth_it(pl, opp, eff, 1 + extra):
+        return False
+    if not _self_condition_ok(pl, opp, eff, turn):
         return False
     # A Trainer whose text is a coin flip has to actually flip. Crushing
     # Hammer is "Flip a coin. If heads, discard an Energy" and was resolving
@@ -4222,6 +4312,8 @@ def opening_hand(pl):
 
 
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
+    pl.round_no = turn          # "during your first turn" is round 1 for both
+    pl._opp_ref = opp
     # "healed during this turn" is scoped to the turn it happened in.
     for _s in ([pl.active] if pl.active else []) + list(pl.bench):
         _s.healed_this_turn = False
@@ -4320,10 +4412,52 @@ def _gust_score(pl, opp, spot):
     return (can_ko, info.get("prize_value", 1) if can_ko else 0, -left)
 
 
+def _is_mill_deck(pl):
+    """Does this deck win by decking the opponent out? Three or more
+    copies of Pokemon whose attack mills the opponent's deck."""
+    cached = getattr(pl, "_mill_deck", None)
+    if cached is not None:
+        return cached
+    names = ([n for k, n in pl.deck if k == "Pokemon"]
+             + [n for k, n in pl.hand if k == "Pokemon"]
+             + [p.name for p in pl.in_play()])
+    millers = {n for n, info in pl.POKEMON.items()
+               if any(a.op == IR.Op.MILL_OPPONENT
+                      for atk in info["attacks"] for a in _attack_ir(atk).actions)}
+    pl._mill_deck = sum(n in millers for n in names) >= 3
+    return pl._mill_deck
+
+
+def _millers(pl):
+    """Names of this deck's Pokemon whose attack mills the opponent."""
+    return {n for n, info in pl.POKEMON.items()
+            if any(a.op == IR.Op.MILL_OPPONENT
+                   for atk in info["attacks"] for a in _attack_ir(atk).actions)}
+
+
+def _stuck(pl, opp, spot):
+    """Would `spot`, as opp's Active, neither attack nor pay to retreat?"""
+    if _ready_damage(opp, pl, spot) > 0:
+        return False
+    tax = 1 if pl.active is not None and pl.active.tool == "Gravity Gemstone" else 0
+    return spot.energy_count() < retreat_of(opp, spot, pl) + tax
+
+
 def choose_gust_target(pl, opp):
     """The Benched Pokemon worth dragging up, or None to hold the card."""
     if not opp.bench or opp.active is None:
         return None
+    # A mill deck does not need Prizes; it needs turns the opponent cannot
+    # use. Drag up something that can neither attack nor pay its way back
+    # out (Gravity Gemstone adds one to that bill), and hold the card while
+    # the Active is already stuck.
+    if _is_mill_deck(pl):
+        if _stuck(pl, opp, opp.active):
+            return None
+        stuck = [p for p in opp.bench if _stuck(pl, opp, p)]
+        if stuck:
+            return min(stuck, key=lambda p: (p.energy_count(),
+                                             -retreat_of(opp, p, pl)))
     # Prize-aware, and deliberately NOT policy-gated -- it is the same kind
     # of change as Phantom Dive's counter budget: the card says you choose,
     # so choosing well is correctness, not strategy. It is also provably
