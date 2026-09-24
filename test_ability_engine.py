@@ -3486,9 +3486,72 @@ def test_the_lookahead_chooses_the_energy_target():
           sum(s.energy_count() for s in me.in_play()) == 1)
 
 
+def test_no_compiled_op_is_orphaned_by_class():
+    """Class-level guards. The per-card inert guard could not see a whole
+    CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
+    were DRAW / PREVENT_DAMAGE / REDUCE_DAMAGE / EVOLVE_FROM_DECK (150+),
+    an activated Ability's BUFF_DAMAGE had no executor (Torrential Heart),
+    and no attached Special Energy effect was read at all. Each of these
+    fails the day a new card or op arrives unwired.
+    """
+    import json as _j, re as _re
+    V = __import__("simulate_versus")
+    src = open("ability_engine.py").read() + open("simulate_versus.py").read()
+    name_of = {v: k for k, v in vars(IR.Op).items() if isinstance(v, str) and not k.startswith("_")}
+    cards = _j.load(open("pokemon_standard_cards.json"))
+    # ops that the damage code or a query reads directly off an attack
+    READ_BY_DAMAGE = {IR.Op.REVEAL_OPPONENT_HAND, IR.Op.BUFF_DAMAGE,
+                      IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.NO_OP_INFORMATION,
+                      IR.Op.CONDITIONAL_KO, IR.Op.MODIFY_ATTACK_COST,
+                      IR.Op.MODIFY_RETREAT, IR.Op.SET_BASE_DAMAGE, IR.Op.WIN_GAME,
+                      IR.Op.MODIFY_PRIZE}
+    orphan = set()
+    for c in cards:
+        for a in c.get("attacks") or []:
+            for x in IR.compile_effect("attack", a["name"], a.get("text") or "").actions:
+                if x.op not in V.ATTACK_RIDER_OPS and x.op not in READ_BY_DAMAGE:
+                    orphan.add(f"{name_of.get(x.op)} ({c['name']}/{a['name']})")
+    check("every attack op is run as a rider or read by the damage code",
+          not orphan, "; ".join(sorted(orphan)[:8]))
+
+    executed = {n for n in name_of.values()
+                if _re.search(r"op == O\." + n + r"\b|op in \([^)]*O\." + n + r"\b", src)}
+    dead = set()
+    for c in cards:
+        for a in c.get("abilities") or []:
+            e = IR.compile_effect(c["name"], a["name"], a["text"])
+            if e.trigger in (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN) \
+                    and not e.unsupported:
+                for x in e.actions:
+                    if name_of.get(x.op) not in executed:
+                        dead.add(f"{name_of.get(x.op)} ({c['name']}/{a['name']})")
+    check("every activated-Ability op has an executor", not dead, "; ".join(sorted(dead)))
+
+    import glob as _g
+    CONSUMED = {IR.Op.MODIFY_HP, IR.Op.MODIFY_RETREAT, IR.Op.PREVENT_DAMAGE,
+                IR.Op.MODIFY_PRIZE, IR.Op.CONDITION_IMMUNITY, IR.Op.PLACE_COUNTERS}
+    bad = set()
+    for f in _g.glob("decks/field/*.txt") + _g.glob("decks/*.ptcgl.txt"):
+        D = V.load_model(f, "x")[0]
+        for k, n in D[2]:
+            if k != "Energy" or M.BASIC_ENERGY_RE.match(n):
+                continue
+            e = V.trainer_effect_ir(n)
+            for x in (e.actions if e else []):
+                on_attach = (hasattr(V, "energy_on_attach")
+                             and _re.search(r"when you attach this card from your hand",
+                                            e.text or "", _re.I)
+                             and x.op in V.TRAINER_IR_OPS)
+                if x.op not in CONSUMED and not on_attach:
+                    bad.add(f"{n}: {name_of.get(x.op)}")
+    check("every Special Energy effect in a decklist has a consumer",
+          not bad, "; ".join(sorted(bad)))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_lookahead_chooses_the_energy_target,
+    for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_the_lookahead_chooses_the_energy_target,
                test_the_lookahead_chooses_the_supporter,
                test_choice_band_discount_and_boomerang_energy,
                test_tera_pokemon_on_the_bench_take_no_attack_damage,
