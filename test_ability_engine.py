@@ -3422,9 +3422,43 @@ def test_choice_band_discount_and_boomerang_energy():
           and "Boomerang Energy" not in me.discard, str(me.active.energy_names))
 
 
+def test_the_lookahead_chooses_the_supporter():
+    """Greedy plays Supporters in a fixed priority -- a draw Supporter from a
+    small hand before Boss's Orders. The lookahead plays each Supporter in
+    hand out through the opponent's reply: here Boss's Orders drags up a
+    Drakloak that Numbing Hold Knocks Out, and Lillie's Determination does
+    not take a Prize."""
+    import random as _r
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy = pilot
+        me.active = V.InPlay("Wugtrio ex", 0)
+        me.active.energy, me.active.energy_names = [["Water"], ["Water"]], ["Water Energy"] * 2
+        me.bench = [V.InPlay("Wiglett", 0)]
+        me.hand = [("Supporter", "Lillie's Determination"), ("Supporter", "Boss's Orders")]
+        op.active, op.bench = V.InPlay("Dragapult ex", 0), [V.InPlay("Drakloak", 0)]
+        me.round_no = op.round_no = 5
+        return me, op
+    me, op = board("greedy")
+    _r.seed(1)
+    V.play_supporter(me, op, 5, [])
+    check("greedy plays the draw Supporter", "Lillie's Determination" in me.played_supporters_this_turn)
+    me, op = board("lookahead")
+    _r.seed(1)
+    V.choose_supporter(me, op, 5, [])
+    check("the lookahead plays Boss's Orders into the Knock Out",
+          "Boss's Orders" in me.played_supporters_this_turn and op.active.name == "Drakloak",
+          str(me.played_supporters_this_turn))
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_choice_band_discount_and_boomerang_energy,
+    for fn in [test_the_lookahead_chooses_the_supporter,
+               test_choice_band_discount_and_boomerang_energy,
                test_tera_pokemon_on_the_bench_take_no_attack_damage,
                test_three_count_shapes_scale,
                test_special_energy_does_what_it_prints,

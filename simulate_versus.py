@@ -4681,8 +4681,49 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl._cards_by_name = cards_by_name
     try_evolve(pl, opp, turn, log, first_turn)
     play_items(pl, opp, turn, log, first_turn)
-    play_supporter(pl, opp, turn, log)
+    if POL.knob(pl, "lookahead_samples") and not _LOOKAHEAD[0]:
+        choose_supporter(pl, opp, turn, log)
+    else:
+        play_supporter(pl, opp, turn, log)
     return run_phases(pl, opp, log, 0)
+
+
+def _play_only(pl, opp, turn, log, name):
+    """play_supporter with every other Supporter hidden: forces `name`
+    (None: play no Supporter this turn)."""
+    if name is None:
+        return
+    hidden = [c for c in pl.hand if c[0] == "Supporter" and c[1] != name]
+    for c in hidden:
+        pl.hand.remove(c)
+    try:
+        play_supporter(pl, opp, turn, log)
+    finally:
+        pl.hand.extend(hidden)
+
+
+def choose_supporter(pl, opp, turn, log):
+    """The lookahead pilot's Supporter: each distinct Supporter in hand (and
+    none) played out through the opponent's reply. Greedy's own pick --
+    found by running greedy on a copy -- is the default."""
+    names = sorted({n for k, n in pl.hand if k == "Supporter"})
+    if pl.supporter_played or len(names) < 1:
+        return play_supporter(pl, opp, turn, log)
+    me, them = clone_state(pl, opp)
+    _LOOKAHEAD[0] = True
+    state = random.getstate()
+    try:
+        play_supporter(me, them, turn, [])
+    finally:
+        _LOOKAHEAD[0] = False
+        random.setstate(state)
+    greedy = next(iter(me.played_supporters_this_turn), None)
+    options = names + [None]
+
+    def apply(m, th, name):
+        _play_only(m, th, turn, [], name)
+    pick = lookahead_pick(pl, opp, options, apply, 0, greedy)
+    _play_only(pl, opp, turn, log, pick)
 
 
 # The rest of a turn after the Supporter, as named steps, so a lookahead can
