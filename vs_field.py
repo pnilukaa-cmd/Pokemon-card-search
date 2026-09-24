@@ -10,6 +10,8 @@ Usage:  python3 vs_field.py <deck.txt> <field_dir> <games> [tag] [out.json]
 
 PILOT=<name> in the environment runs the candidate under that pilot from
 policies.py (e.g. PILOT=lookahead); the field always plays greedy.
+JOBS=<n> plays the opponents on n processes; every opponent has its own
+seed, so the result is identical to a single process.
 """
 import glob
 import hashlib
@@ -46,6 +48,7 @@ A = SV.load_model(deck, me)[0]
 if os.environ.get("PILOT"):
     SV.PILOT_BY_NAME[me] = os.environ["PILOT"]
 res, unplayable = {}, []
+todo = []
 for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
     opp = os.path.splitext(os.path.basename(f))[0]
     if os.path.abspath(f) == os.path.abspath(deck):
@@ -53,14 +56,32 @@ for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
     if basics_in(f) == 0:
         unplayable.append(opp)
         continue
+    todo.append((opp, f))
+
+
+def play(job):
+    opp, f = job
     B = SV.load_model(f, opp)[0]
     if opp == me:                      # same slug, different file: keep names distinct
         B = (opp + "_opp",) + B[1:]
     seed = int(hashlib.sha256(f"{tag}|{opp}".encode()).hexdigest()[:12], 16)
     random.seed(seed)
-    wins = sum(SV.run_game(A, B)["winner"] == A[0] for _ in range(games))
-    res[opp] = wins
-    print(f"  {opp:<50} {100.0 * wins / games:6.2f}", flush=True)
+    SV._LOOKAHEAD_SEQ[0] = 0        # the lookahead's own seeds, per opponent
+    return opp, sum(SV.run_game(A, B)["winner"] == A[0] for _ in range(games))
+
+
+jobs = int(os.environ.get("JOBS", "1"))
+if jobs > 1:
+    import multiprocessing as mp
+    with mp.get_context("fork").Pool(jobs) as pool:
+        for opp, wins in pool.imap(play, todo):
+            res[opp] = wins
+            print(f"  {opp:<50} {100.0 * wins / games:6.2f}", flush=True)
+else:
+    for job in todo:
+        opp, wins = play(job)
+        res[opp] = wins
+        print(f"  {opp:<50} {100.0 * wins / games:6.2f}", flush=True)
 
 rates = [100.0 * w / games for w in res.values()]
 mean = sum(rates) / len(rates)
