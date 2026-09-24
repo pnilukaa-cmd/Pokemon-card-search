@@ -66,6 +66,10 @@ fails on the commit before it:
 - *Pilot, measured.* Basics that reach the hand after the Supporter are
   benched that turn: +0.97 +/- 0.27 over 6 meta decks, now the default.
   The lookahead also chooses the promotion after a Knock Out (measuring).
+- *Lookahead information leak.* The lookahead's copies kept the real
+  deck order and the opponent's real hand, so it played against the actual
+  future. Fixed (`_hide_information`); every earlier lookahead number is
+  optimistic (Mew ex read 17.29 -> 43.91 with the leak).
 
 **Pilot.** `policies.LOOKAHEAD` (`PILOT=lookahead` in `vs_field.py`): each
 attack (and gust-attack target), Boss's Orders target and retreat choice is

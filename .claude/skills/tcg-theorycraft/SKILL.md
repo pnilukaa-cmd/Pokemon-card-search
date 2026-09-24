@@ -815,7 +815,9 @@ that was already waiting for any deck with that card.
 python3 vs_field.py <deck> decks/field 200 <tag>` runs the candidate with a
 one-turn lookahead on its attack choice (the field stays greedy). It is
 ~18x slower. Measured paired against greedy: Mew ex lock +4.54, Wugtrio
-paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09. The gap between
+paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09 -- **all measured
+before 2026-09-24's `_hide_information` fix, when the lookahead could see
+both decks' order and the opponent's hand; treat them as optimistic.** The gap between
 the two pilots is how much of a deck's placement is sequencing. The
 lookahead now also chooses the Supporter, the Energy target, the retreat,
 the gust target and the promotion after a Knock Out
