@@ -109,6 +109,8 @@ class Op:
     # attachments, damage, Special Conditions and turns in play all
     # stay on the new Pokemon. Transformation Tome and Ogre's Mask.
     SWAP_IN_PLACE = "swap_in_place"
+    SWAP_FROM_DECK = "swap_from_deck"    # Ditto's Surprisingly Transform
+    KO_ATTACKER_ON_KO = "ko_attacker_on_ko"  # Gengar ex's Fainting Spell
     ATTACK_FIRST_TURN = "attack_first_turn"
     # Mew ex's Memory Helix: every Benched Pokemon's attacks, not just
     # the pre-evolution chain GRANT_ATTACK_ACCESS already walks.
@@ -2133,6 +2135,26 @@ def _r(m, text):
     if re.match(r"\s+that ", text[m.end():]):
         return []
     return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ANY, {"choose": True})]
+
+
+# Ditto's Surprisingly Transform: "search your deck for a Pokemon and
+# switch it with this Pokemon. Any attached cards, damage counters,
+# Special Conditions, turns in play ... remain on the new Pokemon ... put
+# this card into your deck." A Basic becomes any Pokemon, Stage 2 included,
+# without evolving. The flip is the effect's chance (parse_chance).
+@rule("swap_from_deck",
+      r"search your deck for a pok[eé]mon and switch it with this pok[eé]mon")
+def _r(m, text):
+    return [Action(Op.SWAP_FROM_DECK, 1, Target.SELF)]
+
+
+# Gengar ex's Fainting Spell: when it is Knocked Out by an attack's damage,
+# a coin flip Knocks Out the attacker.
+@rule("ko_attacker_on_ko",
+      r"if this pok[eé]mon is knock(?:ed|et) out by damage from an attack[^.]*?"
+      r"flip a coin\. if heads, the attacking pok[eé]mon is knock(?:ed|et) out")
+def _r(m, text):
+    return [Action(Op.KO_ATTACKER_ON_KO, 1, Target.ATTACKING_POKEMON)]
 
 
 @rule("ko_both_actives", r"both active pok[eé]mon are knocked out")

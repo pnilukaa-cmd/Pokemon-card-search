@@ -692,6 +692,8 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
+# The simulator sets this: what Ditto's Surprisingly Transform becomes.
+TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
 
@@ -1271,6 +1273,27 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if got:
             log.append(f"    search {', '.join(got)}")
         return bool(got)
+
+    if op == O.SWAP_FROM_DECK:
+        # Surprisingly Transform: the Pokemon found in the deck takes this
+        # one's place with everything on it; this card goes into the deck.
+        if source is None or source not in pl.in_play():
+            return False
+        cands = sorted({n for k, n in pl.deck if k == "Pokemon" and n != source.name})
+        if not cands:
+            return False
+        pick = TRANSFORM_PICK(pl, opp, source, cands)
+        if pick is None:
+            return False
+        pl.deck.remove(("Pokemon", pick))
+        for nm in _stack(source):
+            pl.deck.append(("Pokemon", nm))
+        pl.deck.append(("Pokemon", source.name))
+        source.under = []
+        log.append(f"    {source.name} transforms into {pick}")
+        source.name = pick
+        random.shuffle(pl.deck)
+        return True
 
     if op == O.SWAP_IN_PLACE:
         # The discarded Pokemon takes over a board position outright: the
@@ -2671,6 +2694,17 @@ def query_prize_modifier(taker, loser, spot=None, attacker=None, by_attack=None)
                 continue
             total += amount
     return total
+
+
+def query_ko_attacker_on_ko(owner, spot, attacker_player):
+    """Gengar ex's Fainting Spell: does this Knock Out (by an attack's
+    damage) Knock Out the attacker? Flips the coin."""
+    for eff in owner.EFFECTS.get(spot.name, []):
+        if eff.unsupported:
+            continue
+        if any(a.op == IR.Op.KO_ATTACKER_ON_KO for a in eff.actions):
+            return random.random() < getattr(eff, "chance", 1.0)
+    return False
 
 
 def query_retaliation(defender, attacker_spot, attacker_player=None):

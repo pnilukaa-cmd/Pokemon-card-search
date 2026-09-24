@@ -870,6 +870,30 @@ def _top_copy_want(pl, pool=None):
 
 AE.TOP_COPY_WANT = _top_copy_want
 
+
+def _transform_pick(pl, opp, spot, cands):
+    """What Ditto's Surprisingly Transform should become: the Pokemon
+    that hits hardest next turn with the Energy already attached plus one
+    more from hand, then the one that survives best."""
+    if opp is None or opp.active is None:
+        return cands[0]
+    extra = {n for k, n in pl.hand if k == "Energy"}
+    extra_prov = [energy_provisions(n, _CARDS_BY_NAME)[0] for n in extra][:1] or [[]]
+
+    def score(name):
+        tmp = _clone_spot(spot)
+        tmp.name = name
+        best = 0
+        for atk in pl.POKEMON[name]["attacks"]:
+            cost = effective_cost(pl, tmp, atk["cost"], opp, atk.get("name"))
+            if can_pay(cost, tmp.energy) or (extra_prov[0] and can_pay(cost, tmp.energy + extra_prov)):
+                best = max(best, min(attack_value(pl, opp, tmp, atk), 10 ** 4))
+        return (best, effective_hp(pl, tmp) - tmp.damage)
+    return max(cands, key=score)
+
+
+AE.TRANSFORM_PICK = _transform_pick
+
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
 
 # Academy at Night: "Once during each player's turn, that player may put a
@@ -3587,6 +3611,22 @@ def attack_rider_value(pl, opp, atk, spot=None):
         return 0
     value = 0
     for act in eff.actions:
+        if act.op == IR.Op.SWAP_FROM_DECK and spot is not None:
+            # Surprisingly Transform: worth what the Pokemon it becomes hits
+            # for next turn, times the chance of the flip (Backtrack Badge
+            # flips a tails again), halved for the turn it waits.
+            cands = sorted({n for k, n in pl.deck if k == "Pokemon" and n != spot.name})
+            if cands:
+                pick = _transform_pick(pl, opp, spot, cands)
+                tmp = _clone_spot(spot)
+                tmp.name = pick
+                nxt = max((min(attack_value(pl, opp, tmp, a), 10 ** 4)
+                           for a in pl.POKEMON[pick]["attacks"]), default=0)
+                p = getattr(eff, "chance", 1.0)
+                if AE.query_reflip(pl, spot):
+                    p = 1 - (1 - p) ** 2
+                value += 0.5 * p * max(nxt, 1)
+            continue
         if act.op == IR.Op.APPLY_CONDITION:
             already = getattr(opp.active, "conditions", set())
             for c in act.filter.get("conditions") or []:
@@ -4689,6 +4729,12 @@ def do_attack(pl, opp, log):
             return True
 
     if opp.active.damage >= effective_hp(opp, opp.active):
+        # Gengar ex's Fainting Spell: the Knock Out may take the attacker
+        # with it (resolved by the checkup's Knock Out at the turn's end).
+        if AE.query_ko_attacker_on_ko(opp, opp.active, pl) and pl.active is not None:
+            pl.active.damage = 10 ** 6
+            log.append(f"  {opp.name}: {opp.active.name}'s Fainting Spell -- "
+                       f"{pl.active.name} is Knocked Out")
         AE.salvage_energy_on_ko(opp, opp.active, log)
         taken = _ko_prizes(opp, opp.active, pl)
         log.append(f"  {pl.name}: KO on {opp.active.name} (+{taken} prizes)")
@@ -4722,6 +4768,7 @@ def do_attack(pl, opp, log):
 _ATTACK_IR_CACHE = {}
 
 ATTACK_RIDER_OPS = {
+    IR.Op.SWAP_FROM_DECK,
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,
@@ -4857,7 +4904,12 @@ def attack_side_effects(pl, opp, atk, log):
     if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return
     if getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
-        return
+        # Backtrack Badge: a failed flip for this attack may be flipped
+        # again. Only the damage coins honoured it, so Ditto's Surprisingly
+        # Transform -- the reason the Badge is in the deck -- never did.
+        if not (AE.query_reflip(pl, pl.active) and random.random() < eff.chance):
+            return
+        log.append(f"  {pl.name}: {pl.active.tool} -- flips again")
     AE.ATTACK_EFFECTS_BY[0] = pl
     try:
         for act in eff.actions:
@@ -5122,14 +5174,20 @@ def choose_supporter(pl, opp, turn, log):
 # The rest of a turn after the Supporter, as named steps, so a lookahead can
 # make a choice in a copy of the game and RESUME the turn from the step
 # after it (a gust resumes at "abilities", a retreat at "attack").
-PHASES = ("bench", "abilities", "stadium", "sweep", "attach", "tools",
+PHASES = ("items", "bench", "abilities", "stadium", "sweep", "attach", "tools",
           "evolve", "retreat", "attack")
 
 
 def run_phases(pl, opp, log, start):
     turn, first_turn = pl.round_no, pl._first_turn
     for ph in PHASES[start:]:
-        if ph == "bench":
+        if ph == "items":
+            # Items that reached the hand through the Supporter (Petrel's
+            # search, a draw) waited a whole turn: play_items ran only
+            # before it.
+            if POL.knob(pl, "items_after_supporter"):
+                play_items(pl, opp, turn, log, first_turn)
+        elif ph == "bench":
             # Basics that reached the hand this turn -- an Ultra Ball, a
             # draw Supporter -- sat there until the NEXT turn, because
             # play_basics only ran before the Items and the Supporter.

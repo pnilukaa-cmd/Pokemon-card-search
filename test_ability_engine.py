@@ -3925,6 +3925,61 @@ def test_the_lookahead_does_not_see_hidden_cards():
           (me.deck, op.deck, op.hand, me.hand) == real)
 
 
+def test_ditto_transforms_and_gengar_faints():
+    """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
+    the Ditto deck never attacked; Backtrack Badge re-flipped only damage
+    coins; Gengar ex's Fainting Spell did not compile."""
+    import random as _r
+    V, D, E = _real("decks/ditto_tyranitar_gengar_hydreigon.ptcgl.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(badge):
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.active = V.InPlay("Ditto", 0)
+        me.active.energy = [["Psychic"], ["Darkness"]]
+        me.active.energy_names = ["Psychic Energy", "Darkness Energy"]
+        me.active.damage = 20
+        me.active.tool = "Backtrack Badge" if badge else None
+        op.active = V.InPlay("Mega Kangaskhan ex", 0)
+        me.round_no = op.round_no = 3
+        me._opp_ref = op
+        me.deck = [("Pokemon", "Tyranitar"), ("Pokemon", "Hydreigon ex"),
+                   ("Pokemon", "Gengar ex"), ("Item", "Ultra Ball")]
+        return me, op
+    me, op = board(True)
+    atk = D[1]["Ditto"]["attacks"][0]
+    check("Surprisingly Transform is worth using",
+          V.attack_rider_value(me, op, atk, me.active) > 0)
+    hits = 0
+    for seed in range(200):
+        me, op = board(True)
+        _r.seed(seed)
+        V.do_attack(me, op, [])
+        if me.active.name != "Ditto":
+            hits += 1
+            ok = (me.active.energy_count() == 2 and me.active.damage == 20
+                  and ("Pokemon", "Ditto") in me.deck
+                  and me.deck.count(("Pokemon", me.active.name)) == 0)
+            if not ok:
+                break
+    check("it becomes a Pokemon from the deck, keeping Energy and damage", ok)
+    check("with Backtrack Badge the flip lands about 3 in 4", 130 <= hits <= 170, str(hits))
+    plain = 0
+    for seed in range(200):
+        me, op = board(False)
+        _r.seed(seed)
+        V.do_attack(me, op, [])
+        plain += me.active.name != "Ditto"
+    check("without it about 1 in 2", 80 <= plain <= 120, str(plain))
+
+    me, op = board(False)
+    import ability_engine as AE
+    g = V.InPlay("Gengar ex", 0)
+    ko = sum(AE.query_ko_attacker_on_ko(me, g, op) for _ in range(400))
+    check("Fainting Spell Knocks Out the attacker on heads", 150 <= ko <= 250, str(ko))
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3990,6 +4045,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_ditto_transforms_and_gengar_faints,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
