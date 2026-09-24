@@ -939,7 +939,22 @@ def _r(m, text):
     n = m.group(1).lower()
     amount = 5 if n == "any number of" else _num(n)
     return [Action(Op.SEARCH_TO_BENCH, amount, Target.YOUR_BENCHED,
-                   _search_filter(m.group(2)))]
+                   _bench_name_filter(m))]
+
+
+def _bench_name_filter(m):
+    """The qualifier before the noun, plus a name restriction after it.
+
+    "up to 2 Pokemon that have "Koffing" in their name": the restriction
+    sits after the noun and was dropped, so Smog Signals and Rotom's Roto
+    Call benched any Basic at all.
+    """
+    f = _search_filter(m.group(2))
+    nm = re.search(r"that have [\"“']([^\"”']+)[\"”'] in their names?",
+                   m.group(0))
+    if nm and not f.get("name_contains"):
+        f["name_contains"] = nm.group(1)
+    return f
 
 
 # Fossil Quarry: "search your deck for up to 2 Item cards that have
@@ -992,7 +1007,11 @@ def _r(m, text):
 @rule("search_to_hand",
       r"search your deck for (?:up to )?(\d+|a|an)? ?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
 def _r(m, text):
-    if "onto your bench" in text.lower():
+    # A search that puts onto the Bench is search_to_bench's. The trigger
+    # "when you play this Pokemon from your hand onto your Bench" is not:
+    # it blocked Meowth ex's Supporter search outright.
+    if "onto your bench" in re.sub(r"from your hand onto your bench", "",
+                                   text.lower()):
         return []
     # Crispin searches TWO and puts only ONE in hand, attaching the other.
     # search_energy_split owns that shape; matching here as well put both
@@ -1535,6 +1554,11 @@ def _r(m, text):
     # attacking even with the requirement met.
     if re.search(r"can'?t attack unless", text, re.I):
         return []
+    # "You can't use more than 1 Last-Ditch Catch Ability each turn" is a
+    # once-per-turn limit on the card's own Ability, not a lock: it
+    # compiled Meowth ex as a self-lock and dropped its Supporter search.
+    if re.match(r"can'?t use more than", m.group(0) + text[m.end():m.end() + 12], re.I):
+        return []
     what = m.group(1).lower()
     # "the Defending Pokemon can't USE ATTACKS" is an attack lock. It
     # compiled as what="use", which the executor does not know, so every
@@ -1566,7 +1590,7 @@ def _r(m, text):
     # between the noun and "onto your Bench". Shares the qualifier parser
     # so it does not re-emit the same action with a junk name filter.
     return [Action(Op.SEARCH_TO_BENCH, _num(m.group(1)), Target.YOUR_BENCHED,
-                   _search_filter(m.group(2)))]
+                   _bench_name_filter(m))]
 
 
 @rule("move_energy_between_yours",
@@ -1641,7 +1665,12 @@ def _r(m, text):
 
 @rule("switch_self_in", r"switch it with your active pok[eé]mon")
 def _r(m, text):
-    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, {"gust": False})]
+    f = {"gust": False}
+    # Iron Leaves ex's Rapid Vernier: "switch IT" is the Pokemon just
+    # played, not a Benched Pokemon of your choice.
+    if re.search(r"when you play this pok[eé]mon from your hand", text, re.I):
+        f["self_in"] = True
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
 @rule("prevent_card_effects",

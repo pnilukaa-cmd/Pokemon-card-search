@@ -560,7 +560,8 @@ def sweep_knocked_out(pl, opp, log):
             # Togekiss's Wonder Kiss and friends change how many Prizes a
             # Knock Out is worth, which is a change to the win condition
             # itself -- the most consequential thing on the dead-op list.
-            taken = max(0, taken + AE.query_prize_modifier(taker, owner))
+            taken = max(0, taken + AE.query_prize_modifier(
+                taker, owner, spot, taker.active if spot is owner.active else None))
             owner.discard.append(spot.name)
             owner.lost_pokemon_names += spot.name.lower() + "|"
             if spot is owner.active:
@@ -1163,6 +1164,106 @@ def play_basics(pl, turn, log):
             pl.bench.append(InPlay(name, turn))
             log.append(f"  {pl.name}: benches {name}")
             on_bench_entry(pl, pl.bench[-1], log)
+            if turn:
+                on_play_from_hand(pl, pl.bench[-1], turn, log)
+
+
+def on_play_from_hand(pl, spot, turn, log):
+    """ON_PLAY Abilities: "when you play this Pokemon from your hand onto
+    your Bench during your turn". Nothing called this trigger, so Meowth ex
+    (in six field decks), Iron Leaves ex, Chien-Pao, Bloodmoon Ursaluna and
+    the rest were vanilla Pokemon. Only the hand-to-Bench site calls it: a
+    Pokemon searched straight onto the Bench was not played from hand."""
+    opp = getattr(pl, "_opp_ref", None)
+    if opp is None or spot not in pl.bench:
+        return
+    for eff in pl.EFFECTS.get(spot.name, []):
+        if eff.unsupported or eff.trigger != IR.Trigger.ON_PLAY:
+            continue
+        # By name: "You can't use more than 1 Last-Ditch Catch Ability
+        # each turn" limits the name, not the copy.
+        key = ("on_play", eff.name)
+        if key in pl.abilities_used:
+            continue
+        ops = {a.op for a in eff.actions}
+        if any(a.op == IR.Op.SWITCH and (a.filter or {}).get("self_in")
+               for a in eff.actions):
+            if _switch_in_on_play(pl, opp, spot, log):
+                pl.abilities_used.add(key)
+                log.append(f"  {pl.name}: {spot.name} uses {eff.name}")
+            continue
+        # "you may discard a Stadium in play": only someone else's.
+        if IR.Op.DISCARD_STADIUM in ops and (getattr(pl, "stadium", None)
+                                             or not getattr(opp, "stadium", None)):
+            continue
+        if _draw_would_deck_out(pl, eff):
+            continue
+        if AE.activate(eff, pl, opp, spot, log,
+                       make_inplay=lambda n: InPlay(n, turn)):
+            pl.abilities_used.add(key)
+            log.append(f"  {pl.name}: {spot.name} uses {eff.name}")
+
+
+def _switch_in_on_play(pl, opp, spot, log):
+    """Rapid Vernier: switch the Pokemon just played into the Active Spot
+    and move any Energy from your other Pokemon onto it. Taken only when
+    the moved Energy pays for an attack that beats what the current Active
+    can do right now -- stripping the Bench to promote a worse attacker is
+    what "you may" is there to avoid."""
+    me = pl.active
+    if me is None or spot not in pl.bench:
+        return False
+    donors = [me] + [p for p in pl.bench if p is not spot]
+    atks = sorted(pl.POKEMON[spot.name]["attacks"],
+                  key=lambda a: -len(a["cost"]))
+    plan = None
+    for atk in atks:
+        cost = effective_cost(pl, spot, atk["cost"], opp, atk.get("name"))
+        have = list(spot.energy)
+        if can_pay(cost, have):
+            plan = []
+            break
+        pool = [(d, i) for d in donors for i in range(len(d.energy))]
+        take = []
+        for need in [c for c in cost if c != "Colorless"]:
+            hit = next((x for x in pool if need in x[0].energy[x[1]]), None)
+            if hit is None:
+                break
+            pool.remove(hit)
+            take.append(hit)
+            have.append(hit[0].energy[hit[1]])
+        while not can_pay(cost, have) and pool:
+            hit = pool.pop(0)
+            take.append(hit)
+            have.append(hit[0].energy[hit[1]])
+        if can_pay(cost, have):
+            plan = take
+            break
+    if plan is None:
+        return False
+    before = _ready_damage(pl, opp, me)
+    # Try it, and put everything back if it is not an upgrade.
+    saved = {id(d): (list(d.energy), list(getattr(d, "energy_names", []) or []))
+             for d in donors + [spot]}
+    for d, i in sorted(plan, key=lambda x: -x[1]):
+        prov = d.energy[i]
+        name = AE.pop_energy(d, i)
+        spot.energy.append(prov)
+        if getattr(spot, "energy_names", None) is not None:
+            spot.energy_names.append(name)
+    after = _ready_damage(pl, opp, spot)
+    if after <= before:
+        for d in donors + [spot]:
+            d.energy, names = saved[id(d)]
+            if hasattr(d, "energy_names"):
+                d.energy_names = names
+        return False
+    pl.bench.remove(spot)
+    AE.leaving_active(me, log)
+    pl.bench.append(me)
+    pl.active = spot
+    log.append(f"    {spot.name} switches in with {len(plan)} moved Energy")
+    return True
 
 
 # Risky Ruins is the only card in this pool that fires when a Pokemon is
@@ -3851,7 +3952,9 @@ def _ko_prizes(owner, spot, taker, by_attack=True):
     Abilities on either side (only the counter-KO path asked before), and
     Legacy Energy's one fewer -- once a game, for an attack's damage."""
     taken = (owner.POKEMON[spot.name]["prize_value"] + getattr(spot, "extra_prize", 0)
-             + AE.query_prize_modifier(taker, owner))
+             + AE.query_prize_modifier(taker, owner, spot,
+                                       taker.active if by_attack else None,
+                                       by_attack))
     if by_attack and not getattr(owner, "_legacy_used", False):
         for nm, a in energy_passives(owner, spot, IR.Op.MODIFY_PRIZE):
             if a.target == IR.Target.OPPONENT and (a.amount or 0) < 0:
@@ -4349,6 +4452,9 @@ def do_attack(pl, opp, log):
     if back:
         pl.active.damage += back
         log.append(f"  {opp.name}: retaliation puts {back} back on {pl.active.name}")
+    if dmg > 0 and opp.active is not None:
+        AE.on_damaged_riders(opp, pl, pl.active, log,
+                             make_inplay=lambda n: InPlay(n, pl.round_no))
     if pl.active and pl.active.damage >= effective_hp(pl, pl.active):
         taken = pl.POKEMON[pl.active.name]["prize_value"]
         log.append(f"  {pl.name}: {pl.active.name} KO'd by retaliation (+{taken} to {opp.name})")

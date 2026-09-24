@@ -2482,14 +2482,65 @@ def query_endures(pl, spot, opp=None):
     return False
 
 
-def query_prize_modifier(taker, loser):
+def _prize_clause_ok(eff, side, holder, taker, loser, spot, attacker,
+                     by_attack):
+    """Does this Prize-changing text cover THIS Knock Out?
+
+    The effects compiled with no conditions, so every one of them applied
+    to every Knock Out while its holder was in play: Mega Gengar ex's
+    Shadowy Concealment cut the Prize for any Pokemon KO'd by anything,
+    Hydreigon ex's Greedy Eater added one to every Knock Out, and a
+    Shedinja on the Bench would have made the whole board prize-free.
+    Unknown facts (spot / attacker / by_attack None) are not held against
+    the effect.
+    """
+    t = (eff.text or "").lower().replace("é", "e")
+    if spot is not None:
+        if "if this pokemon is knocked out" in t and holder is not spot:
+            return False
+        m = re.search(r"1 of your (\w+) pokemon is knocked out", t)
+        if m and m.group(1).capitalize() in _REAL_TYPES and \
+                m.group(1).capitalize() not in query_types(loser, spot):
+            return False
+        if "opponent's active pokemon is knocked out" in t and spot is not loser.active:
+            return False
+        if "opponent's basic pokemon is knocked out" in t and \
+                loser.POKEMON.get(spot.name, {}).get("stage") != "Basic":
+            return False
+    if by_attack is False and "by damage from an attack" in t:
+        return False
+    if attacker is not None:
+        if "from your opponent's pokemon ex" in t and \
+                not attacker.name.endswith(" ex"):
+            return False
+        if "attack used by this pokemon" in t and holder is not attacker:
+            return False
+    m = re.search(r"if you have any ([^.,]+?) in play", eff.text or "", re.I)
+    if m and not any(p.name == m.group(1).strip() for p in side.in_play()):
+        return False
+    return True
+
+
+_REAL_TYPES = {"Grass", "Fire", "Water", "Lightning", "Psychic", "Fighting",
+               "Darkness", "Metal", "Dragon", "Colorless"}
+
+
+def query_prize_modifier(taker, loser, spot=None, attacker=None, by_attack=None):
     """Extra (or fewer) Prizes for a Knock Out, from either side's Abilities."""
     total = 0
+    once = set()
     for side, sign in ((taker, 1), (loser, 1)):
         for holder, eff, act in _passive_actions(side, IR.Op.MODIFY_PRIZE):
             if not conditions_met(eff, side, taker if side is loser else loser,
                                   holder):
                 continue
+            if not _prize_clause_ok(eff, side, holder, taker, loser, spot,
+                                    attacker, by_attack):
+                continue
+            if "doesn't stack" in (eff.text or "").lower():
+                if (id(side), eff.name) in once:
+                    continue
+                once.add((id(side), eff.name))
             amount = act.amount or 0
             if act.filter.get("fewer") or side is loser:
                 amount = -abs(amount)
@@ -2516,6 +2567,28 @@ def query_retaliation(defender, attacker_spot, attacker_player=None):
                     continue
                 total += (act.amount or 0) * 10
     return total
+
+
+def on_damaged_riders(defender, attacker_player, attacker_spot, log,
+                      make_inplay=None):
+    """The non-counter half of "if this Pokemon is damaged by an attack".
+
+    query_retaliation reads only PLACE_COUNTERS, so every other when-damaged
+    Ability -- Numel's and Heatran's Incandescent Body (Burn the attacker),
+    Team Rocket's Koffing's Smog Signals (bench 2 Koffing) -- compiled and
+    never ran.
+    """
+    for holder in list(defender.in_play()):
+        for eff in defender.EFFECTS.get(holder.name, []):
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_DAMAGED:
+                continue
+            if not conditions_met(eff, defender, attacker_player, holder):
+                continue
+            for act in eff.actions:
+                if act.op == IR.Op.PLACE_COUNTERS:
+                    continue            # query_retaliation's
+                apply_action(act, defender, attacker_player, holder, log,
+                             attacker_spot, make_inplay)
 
 
 def query_retreat_modifier(pl, spot, opp=None):

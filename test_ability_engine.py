@@ -3486,6 +3486,108 @@ def test_the_lookahead_chooses_the_energy_target():
           sum(s.energy_count() for s in me.in_play()) == 1)
 
 
+def test_played_from_hand_abilities_fire():
+    """ON_PLAY ("when you play this Pokemon from your hand onto your Bench")
+    had no caller at all, and Meowth ex -- in six field decks -- had its
+    Supporter search compiled as a self-lock. Rapid Vernier switches Iron
+    Leaves ex in only when the moved Energy pays for Prism Edge; Snow Sink
+    discards only the opponent's Stadium."""
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+
+    def board():
+        me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+        me.active, op.active = V.InPlay("Mega Kangaskhan ex", 0), V.InPlay("Raging Bolt ex", 0)
+        me._opp_ref, me.round_no = op, 3
+        return me, op
+    me, op = board()
+    me.hand = [("Pokemon", "Meowth ex")]
+    me.deck = [("Item", "Ultra Ball"), ("Supporter", "Crispin"), ("Item", "Ultra Ball")]
+    V.play_basics(me, 3, [])
+    check("Last-Ditch Catch puts a Supporter into hand",
+          ("Supporter", "Crispin") in me.hand, str(me.hand))
+
+    me, op = board()
+    donor = V.InPlay("Raging Bolt ex", 0)
+    donor.energy, donor.energy_names = [["Grass"], ["Grass"], ["Fighting"]], \
+        ["Grass Energy", "Grass Energy", "Fighting Energy"]
+    me.bench = [donor]
+    me.hand = [("Pokemon", "Iron Leaves ex")]
+    V.play_basics(me, 3, [])
+    check("Rapid Vernier switches Iron Leaves ex in with its Energy",
+          me.active.name == "Iron Leaves ex" and me.active.energy_count() == 3
+          and len(me.active.energy_names) == 3, me.active.name)
+    me, op = board()
+    donor = V.InPlay("Raging Bolt ex", 0)
+    donor.energy, donor.energy_names = [["Lightning"]], ["Lightning Energy"]
+    me.bench = [donor]
+    me.hand = [("Pokemon", "Iron Leaves ex")]
+    V.play_basics(me, 3, [])
+    check("and stays on the Bench when it cannot pay for an attack",
+          me.active.name == "Mega Kangaskhan ex" and donor.energy_count() == 1)
+
+    me, op = board()
+    me.stadium = "Area Zero Underdepths"
+    me.hand = [("Pokemon", "Chien-Pao")]
+    V.play_basics(me, 3, [])
+    check("Snow Sink keeps your own Stadium", me.stadium == "Area Zero Underdepths")
+    me, op = board()
+    op.stadium = me._opp_stadium = "Area Zero Underdepths"
+    me.hand = [("Pokemon", "Chien-Pao")]
+    V.play_basics(me, 3, [])
+    check("Snow Sink discards the opponent's Stadium", op.stadium is None)
+
+
+def test_when_damaged_abilities_beyond_counters():
+    """ON_DAMAGED only ever placed counters: Numel's Incandescent Body never
+    Burned the attacker and Team Rocket's Koffing's Smog Signals never
+    benched anything (and its "Koffing" name filter was dropped)."""
+    V, D, E = _real("decks/field/eerie_inferno_ninetales_burn.txt", "n")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("n", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Magmortar", 0), V.InPlay("Numel", 0)
+    me.active.energy = [["Fire"]] * 4
+    me.active.energy_names = ["Fire Energy"] * 4
+    me._forced_attack = max(D[1]["Magmortar"]["attacks"], key=lambda a: len(a["cost"]))
+    me.round_no = op.round_no = 4
+    V.do_attack(me, op, [])
+    check("Incandescent Body Burns the attacker", "burned" in me.active.conditions,
+          str(me.active.conditions))
+
+    V, D, E = _real("decks/field/team_rockets_koffing_weezing_bench_swarm.txt", "k")
+    me, op = V.Player("m", D[1], D[2], E), V.Player("k", D[1], D[2], E)
+    me.active, op.active = V.InPlay("Team Rocket's Weezing", 0), V.InPlay("Team Rocket's Koffing", 0)
+    me.active.energy = [["Darkness"]] * 4
+    me.active.energy_names = ["Darkness Energy"] * 4
+    me._forced_attack = next(a for a in D[1]["Team Rocket's Weezing"]["attacks"]
+                             if a.get("damage"))
+    op.deck = [("Item", "Ultra Ball"), ("Pokemon", "Koffing"),
+               ("Pokemon", "Team Rocket's Koffing"), ("Pokemon", "Koffing")]
+    me.round_no = op.round_no = 4
+    V.do_attack(me, op, [])
+    # The Knock Out then promotes one of them, so count what left the deck.
+    check("Smog Signals benches 2 Koffing",
+          len(op.deck) == 2 and ("Item", "Ultra Ball") in op.deck
+          and all("Koffing" in p.name for p in op.in_play()), str(op.deck))
+
+
+def test_prize_changes_read_their_own_conditions():
+    """Every MODIFY_PRIZE applied to every Knock Out while its holder was in
+    play. Mega Gengar ex's Shadowy Concealment is only for a Darkness
+    Pokemon Knocked Out by a Pokemon ex, and does not stack."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/study_hydreigon_zweilous_mill.txt", "g")
+    me, op = V.Player("g", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Deino", 0)
+    me.bench = [V.InPlay("Mega Gengar ex", 0), V.InPlay("Mega Gengar ex", 0),
+                V.InPlay("Relicanth", 0)]
+    ex, plain = V.InPlay("N's Zoroark ex", 0), V.InPlay("Zweilous", 0)
+    check("Darkness Pokemon KO'd by an ex: 1 fewer, once",
+          AE.query_prize_modifier(op, me, me.active, ex, True) == -1)
+    check("not when the attacker is not an ex",
+          AE.query_prize_modifier(op, me, me.active, plain, True) == 0)
+    check("not for a non-Darkness Pokemon",
+          AE.query_prize_modifier(op, me, me.bench[2], ex, True) == 0)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3551,6 +3653,9 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_played_from_hand_abilities_fire,
+               test_when_damaged_abilities_beyond_counters,
+               test_prize_changes_read_their_own_conditions,
                test_the_lookahead_chooses_the_energy_target,
                test_the_lookahead_chooses_the_supporter,
                test_choice_band_discount_and_boomerang_energy,
