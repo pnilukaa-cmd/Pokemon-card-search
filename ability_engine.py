@@ -1708,7 +1708,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     if op == O.KO_OUTRIGHT:
         f = act.filter or {}
         victim = None
-        if f.get("lowest_hp"):
+        if f.get("choose"):
+            pool = _shield_effects(opp, list(opp.in_play()))
+            if pool:
+                victim = max(pool, key=lambda p: (
+                    (opp.POKEMON.get(p.name) or {}).get("prize_value", 1),
+                    p.energy_count(), p.damage))
+        elif f.get("lowest_hp"):
             pool = [(pl, p) for p in pl.in_play() if p is not source] + \
                    [(opp, p) for p in opp.in_play()]
             if pool:

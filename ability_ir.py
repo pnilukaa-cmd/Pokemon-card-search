@@ -2090,6 +2090,18 @@ def _r(m, text):
     return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE, f)]
 
 
+# Team Rocket's Exeggutor's Tri Kinesis: "Flip 3 coins. If all of them are
+# heads, Knock Out 1 of your opponent's Pokemon." The flip is the effect's
+# chance (parse_chance); the target is any of theirs, so the best Prize.
+@rule("ko_any_opponent", r"knock out 1 of your opponent'?s pok[eé]mon")
+def _r(m, text):
+    # "...1 of your opponent's Pokemon that has exactly 6 damage counters"
+    # is conditional_ko's (Glaceon ex's Euclase).
+    if re.match(r"\s+that ", text[m.end():]):
+        return []
+    return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ANY, {"choose": True})]
+
+
 @rule("ko_both_actives", r"both active pok[eé]mon are knocked out")
 def _r(m, text):
     return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE),

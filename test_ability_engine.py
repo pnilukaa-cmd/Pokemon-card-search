@@ -3627,6 +3627,25 @@ def test_seek_inspiration_reads_and_discards_the_top_card():
           me.deck[-2] == ("Pokemon", "Annihilape"), str(me.deck[-2:]))
 
 
+def test_tri_kinesis_knocks_out_the_best_prize():
+    """Tri Kinesis compiled to nothing. All three heads (1 in 8) Knocks Out
+    any one of the opponent's Pokemon -- the one worth the most Prizes."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    eff = IR.compile_effect("Team Rocket's Exeggutor", "Tri Kinesis",
+                            "Flip 3 coins. If all of them are heads, Knock Out 1 "
+                            "of your opponent's Pokémon.")
+    check("Tri Kinesis compiles, at 1 in 8", not eff.unsupported
+          and abs(eff.chance - 0.125) < 1e-9, repr(eff))
+    me, op = V.Player("m", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    me.active = V.InPlay("Passimian", 0)
+    op.active, op.bench = V.InPlay("Passimian", 0), [V.InPlay("Raging Bolt ex", 0)]
+    if not eff.unsupported:
+        AE.apply_action(eff.actions[0], me, op, me.active, [])
+    check("it takes the ex on the Bench", op.bench[0].damage >= 10 ** 6
+          and op.active.damage == 0)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3692,6 +3711,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_tri_kinesis_knocks_out_the_best_prize,
                test_seek_inspiration_reads_and_discards_the_top_card,
                test_played_from_hand_abilities_fire,
                test_when_damaged_abilities_beyond_counters,
