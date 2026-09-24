@@ -2701,7 +2701,10 @@ def test_a_self_attack_lock_ends_with_the_next_turn():
     def attacks(me, op):
         log = []
         V.do_attack(me, op, log)
-        return not any("can't attack" in l for l in log)
+        # the failure line, not the "can't attack during your next turn"
+        # the lock itself now logs when it is applied
+        return not any("can't attack this turn" in l or "can't attack (" in l
+                       for l in log)
 
     me, op, a, b = board()
     check("Night Joker borrows the locking attack", attacks(me, op)
@@ -2964,9 +2967,62 @@ def test_the_mew_lock_trainers_do_what_they_say():
           str(other.energy_names))
 
 
+def test_the_lookahead_pilot_sees_a_lock():
+    """"During your opponent's next turn, the Defending Pokemon can't use
+    attacks" compiled as what="use", which the lock executor ignores, so all
+    16 cards that say it did nothing -- Cubchoo's Snotted Up included.
+
+    And greedy cannot price such an attack: its value is the opponent's
+    next turn. The lookahead pilot plays each attack out through the
+    opponent's reply. Mew ex, one Knock Out from gone, facing a paid-up
+    Dragapult ex with no Bench and nothing to switch with: only borrowing
+    Snotted Up survives, and greedy takes Teleportation Burst's 30 instead.
+    The lookahead must not move the real game's random state.
+    """
+    import random as _r
+    V, D, E = _real("decks/mew_ex_baby_lock.ptcgl.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+
+    def board(pilot):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy, op.policy = pilot, "greedy"
+        me.active = V.InPlay("Mew ex", 0)
+        me.active.energy, me.active.energy_names = [["Water", "Psychic"]], ["Prism Energy"]
+        me.bench = [V.InPlay("Cubchoo", 0), V.InPlay("Comfey", 0)]
+        op.active = V.InPlay("Dragapult ex", 0)
+        op.active.energy = [["Fire"], ["Psychic"]]
+        op.active.energy_names = ["Basic Fire Energy", "Basic Psychic Energy"]
+        op.bench, op.hand = [], []
+        op.deck = [("Energy", "Basic Fire Energy")] * 20
+        me.round_no = op.round_no = 5
+        me._goes_first = True
+        return me, op
+
+    me, op = board("greedy")
+    snot = next(a for a in V.AE.query_extra_attacks(me, me.active)
+                if a["name"] == "Snotted Up")
+    me._forced_attack = snot
+    V.do_attack(me, op, [])
+    check("Snotted Up locks the Defending Pokemon",
+          bool(op.active.attack_locked_by_opponent))
+
+    me, op = board("greedy")
+    g = V.best_attack(me, me.active, opp=op)
+    check("greedy does not take the lock", g["name"] != "Snotted Up", g["name"])
+    me, op = board("lookahead")
+    _r.seed(3)
+    s0 = _r.getstate()
+    pick = V.lookahead_attack(me, op, g)
+    check("the lookahead takes the lock", pick["name"] == "Snotted Up", pick["name"])
+    check("and leaves the game's random state alone", _r.getstate() == s0)
+    check("greedy is still the default pilot", V.POL.knob(V.Player("x", {}, []), "lookahead_samples") == 0)
+
+
 def main():
     print("Ability runtime firing tests\n")
-    for fn in [test_the_mew_lock_trainers_do_what_they_say,
+    for fn in [test_the_lookahead_pilot_sees_a_lock,
+               test_the_mew_lock_trainers_do_what_they_say,
                test_the_mill_wall_pieces_work,
                test_subjugating_chains_switches_in_your_own_attacker,
                test_a_copy_attack_deck_keeps_room_for_its_donor,

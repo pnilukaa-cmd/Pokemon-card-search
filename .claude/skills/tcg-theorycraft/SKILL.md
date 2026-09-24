@@ -787,6 +787,13 @@ by an `energy` index after retreat had popped only one of the two). A new
 deck exercises code paths the field never reached; a crash there is a bug
 that was already waiting for any deck with that card.
 
+**Try the `lookahead` pilot before calling a deck weak.** `PILOT=lookahead
+python3 vs_field.py <deck> decks/field 200 <tag>` runs the candidate with a
+one-turn lookahead on its attack choice (the field stays greedy). It is
+~18x slower. Measured paired against greedy: Mew ex lock +4.54, Wugtrio
+paralysis +1.92, Dudunsparce mill +0.65, N's Zoroark -0.09. The gap between
+the two pilots is how much of a deck's placement is sequencing.
+
 **Some decks the greedy pilot cannot play, and saying so is the result.**
 The Mew ex "baby attacks" lock wants a different borrowed attack each turn
 (Snotted Up, Big Bite, Hypnosis, Follow Me) chosen against what the

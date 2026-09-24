@@ -3,9 +3,16 @@
 **Not my list.** Supplied 2026-09-24. Basic Energy is written without a set
 code (`Basic {P}/{W} Energy MEE` -> `Basic Psychic/Water Energy`).
 
-**17.47% (±0.15) against all 54 field decks at 1000 games each, winning 3.**
-Read that as the limit of a one-turn greedy pilot, not a verdict on the
-list -- see "Why the number is low".
+**23.21% (±0.37) under the `lookahead` pilot** against all 54 field decks,
+200 games each; 18.68% under `greedy`. (17.47% at 1000 games under greedy
+before the lock fix below.)
+
+- "The Defending Pokemon can't use attacks" did nothing, anywhere: it
+  compiled as `what="use"`, which the lock executor ignores (16 cards,
+  Cubchoo's Snotted Up among them). Fixed: +0.62 ± 0.47 under greedy.
+- The `lookahead` pilot plays every payable attack out through the
+  opponent's reply turn. On the fixed engine it is worth **+4.54 ± 0.69**
+  to this deck -- the largest pilot effect measured on any list here.
 
 ```
 Pokémon: 19

@@ -1460,6 +1460,12 @@ def _r(m, text):
     if re.search(r"can'?t attack unless", text, re.I):
         return []
     what = m.group(1).lower()
+    # "the Defending Pokemon can't USE ATTACKS" is an attack lock. It
+    # compiled as what="use", which the executor does not know, so every
+    # one of these (Cubchoo's Snotted Up, N's Vanillish, Cobalion ex; 16
+    # cards) did nothing at all.
+    if what == "use" and re.match(r"\s+attacks", text[m.end():], re.I):
+        what = "attack"
     tgt = Target.OPPONENT if "your opponent" in text.lower() else Target.SELF
     return [Action(Op.LOCK, None, tgt, {"what": what})]
 

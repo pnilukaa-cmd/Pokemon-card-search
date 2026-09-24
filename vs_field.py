@@ -7,6 +7,9 @@ measurement depends on that. The candidate's own file is skipped if it
 also sits in the field.
 
 Usage:  python3 vs_field.py <deck.txt> <field_dir> <games> [tag] [out.json]
+
+PILOT=<name> in the environment runs the candidate under that pilot from
+policies.py (e.g. PILOT=lookahead); the field always plays greedy.
 """
 import glob
 import hashlib
@@ -40,6 +43,8 @@ def basics_in(path):
 
 me = os.path.splitext(os.path.basename(deck))[0]
 A = SV.load_model(deck, me)[0]
+if os.environ.get("PILOT"):
+    SV.PILOT_BY_NAME[me] = os.environ["PILOT"]
 res, unplayable = {}, []
 for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
     opp = os.path.splitext(os.path.basename(f))[0]

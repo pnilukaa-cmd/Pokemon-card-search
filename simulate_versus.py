@@ -102,6 +102,8 @@ import policies as POL
 MAX_BENCH = 5
 STARTING_PRIZES = 6
 DEFAULT_POLICY = "v2"
+# Per-player pilot override by player name (vs_field.py sets the candidate's).
+PILOT_BY_NAME = {}
 MAX_TURNS = 40  # hard stop so a stalled pairing can't loop forever
 
 
@@ -250,7 +252,7 @@ class Player:
         # number. run_game keeps turn_no as a local, so no knob can vary
         # with the phase of the game -- `setup` is "always setup" rather
         # than "setup until the board is built".
-        self.policy = DEFAULT_POLICY
+        self.policy = PILOT_BY_NAME.get(name, DEFAULT_POLICY)
         # Re-entry guard for Festival Lead's second attack.
         self._attacking_twice = False
         # Energy types this deck can actually put on a Pokemon. Attacks
@@ -3913,7 +3915,14 @@ def do_attack(pl, opp, log):
         log.append(f"  {pl.name}: {pl.active.name} can't attack "
                    f"(requirement not met)")
         return False
-    atk = best_attack(pl, pl.active, opp=opp)
+    forced = getattr(pl, "_forced_attack", None)
+    if forced is not None:
+        atk = forced
+        pl._forced_attack = None
+    else:
+        atk = best_attack(pl, pl.active, opp=opp)
+        if atk and POL.knob(pl, "lookahead_samples") and not _LOOKAHEAD[0]:
+            atk = lookahead_attack(pl, opp, atk) or atk
     if not atk:
         return False
     # Festival Lead (Dipplin, Seaking, Goldeen): "if Festival Grounds is in
@@ -3957,7 +3966,7 @@ def do_attack(pl, opp, log):
     # Arbok's Panic Poison applies three Special Conditions and deals
     # nothing, and bailing on `dmg <= 0` skipped it even after the AI had
     # correctly chosen it.
-    if dmg <= 0 and attack_rider_value(pl, opp, atk, pl.active) <= 0:
+    if dmg <= 0 and forced is None and attack_rider_value(pl, opp, atk, pl.active) <= 0:
         return False
     atk_types = AE.query_types(pl, pl.active, opp)
     defender = opp.POKEMON[opp.active.name]
@@ -4354,6 +4363,7 @@ def opening_hand(pl):
 def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     pl.round_no = turn          # "during your first turn" is round 1 for both
     pl._opp_ref = opp
+    pl._goes_first = going_first
     # "healed during this turn" is scoped to the turn it happened in.
     for _s in ([pl.active] if pl.active else []) + list(pl.bench):
         _s.healed_this_turn = False
@@ -4401,6 +4411,115 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     if not first_turn or AE.query_can_attack_first_turn(pl):
         if do_attack(pl, opp, log):
             return "win"
+    return finish_turn(pl, opp, log)
+
+
+# --------------------------------------------------------------------------
+# One-turn lookahead (the "lookahead" pilot)
+# --------------------------------------------------------------------------
+#
+# Greedy scores an attack by what it does THIS turn, so an attack whose whole
+# value is the opponent's next turn -- "the Defending Pokemon can't attack",
+# "can't retreat", Asleep, a gust into a stuck Pokemon -- is priced by a
+# guessed constant or not at all. A Mew ex lock deck measured 17.5% under
+# that pilot, and pricing the riders by hand measured at zero.
+#
+# This plays it out instead. For every attack the Active can pay for: copy
+# both players, make that attack, finish the turn, play the opponent's whole
+# reply with THEIR pilot, and score the position. Each candidate sees the
+# same N seeds, and the real game's random state is restored afterwards, so
+# the game itself is only changed by the choice made.
+
+_LOOKAHEAD = [False]
+_LOOKAHEAD_SEQ = [0]
+
+
+def _position_value(pl, opp, ended):
+    """Score a position for `pl`. `ended` is "win" / "loss" / None."""
+    if ended == "win":
+        return 1e6
+    if ended == "loss":
+        return -1e6
+    v = 300.0 * ((STARTING_PRIZES - pl.prizes) - (STARTING_PRIZES - opp.prizes))
+
+    def board(side):
+        s = 0.0
+        for p in side.in_play():
+            info = side.POKEMON.get(p.name) or {}
+            hp = effective_hp(side, p) or 1
+            s += 120.0 * info.get("prize_value", 1) * min(1.0, p.damage / hp)
+            s -= 15.0 * p.energy_count()
+        return s
+    v += board(opp) - board(pl)
+    if _is_mill_deck(pl):
+        v -= 30.0 * len(opp.deck)
+    return v
+
+
+def lookahead_attack(pl, opp, greedy_pick):
+    """The attack whose position after the opponent's reply is best."""
+    spot = pl.active
+    cands = [a for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot)
+             if can_pay(effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy)]
+    seen, uniq = set(), []
+    for a in cands:
+        if a["name"] not in seen:
+            seen.add(a["name"])
+            uniq.append(a)
+    if len(uniq) < 2:
+        return greedy_pick
+    n = POL.knob(pl, "lookahead_samples")
+    _LOOKAHEAD_SEQ[0] += 1
+    base = _LOOKAHEAD_SEQ[0] * 7919
+    state = random.getstate()
+    _LOOKAHEAD[0] = True
+    scores = {}
+    try:
+        for a in uniq:
+            total = 0.0
+            for s in range(n):
+                random.seed(base + s)
+                total += _simulate_reply(pl, opp, a)
+            scores[a["name"]] = total / n
+    finally:
+        _LOOKAHEAD[0] = False
+        random.setstate(state)
+    best = max(uniq, key=lambda a: scores[a["name"]])
+    # Stay with greedy unless the difference is real: ties and noise keep
+    # the historical choice.
+    if scores[best["name"]] <= scores[greedy_pick["name"]] + POL.knob(pl, "lookahead_margin"):
+        return greedy_pick
+    return best
+
+
+def _simulate_reply(pl, opp, atk):
+    import copy
+    memo = {}
+    for side in (pl, opp):
+        memo[id(side.POKEMON)] = side.POKEMON
+        memo[id(side.EFFECTS)] = side.EFFECTS
+    me, them = copy.deepcopy((pl, opp), memo)
+    log = []
+    me._forced_attack = atk
+    if do_attack(me, them, log):
+        return _position_value(me, them, "win")
+    r = finish_turn(me, them, log)
+    if r in ("win", "loss", "no_pokemon"):
+        return _position_value(me, them, "win" if r == "win" else "loss")
+    end_of_turn(me, log)
+    rnd = me.round_no if getattr(me, "_goes_first", True) else me.round_no + 1
+    them.lost_pokemon_last_turn_snapshot = them.lost_pokemon_last_turn
+    r = take_turn(them, me, rnd, not getattr(me, "_goes_first", True), _CARDS_BY_NAME, log)
+    if r == "win":
+        return _position_value(me, them, "loss")
+    if r in ("loss", "no_pokemon", "deck_out"):
+        return _position_value(me, them, "win")
+    end_of_turn(them, log)
+    return _position_value(me, them, None)
+
+
+def finish_turn(pl, opp, log):
+    """Pokemon Checkup and the Knock Outs it causes -- the end of a turn."""
     pokemon_checkup(pl, opp, log)
     # Either Active can now die at checkup, since both resolve their
     # conditions there.

@@ -48,6 +48,9 @@ GREEDY = {
     "gust": "prize",
     "energy_to_active": True,
     "pitch_energy_guard": 1.0,
+    # One-turn lookahead on the attack choice: 0 is off (greedy).
+    "lookahead_samples": 0,
+    "lookahead_margin": 0.0,
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
@@ -107,7 +110,18 @@ PRIZEWISE = dict(GREEDY, **{
     "gust": "prize",
 })
 
-POLICIES = {p["name"]: p for p in (GREEDY, AGGRO, CONTROL, SETUP, PRIZEWISE)}
+# Greedy in everything but the attack: each payable attack is played out
+# through the opponent's whole reply turn, N times, and the best position
+# wins. Built for decks whose attacks pay off on the OPPONENT's turn (locks,
+# Sleep, "can't retreat") -- which greedy can only guess at.
+LOOKAHEAD = dict(GREEDY, **{
+    "name": "lookahead",
+    "blurb": "greedy, but each attack is played out through the opponent's reply.",
+    "lookahead_samples": 4,
+    "lookahead_margin": 10.0,
+})
+
+POLICIES = {p["name"]: p for p in (GREEDY, AGGRO, CONTROL, SETUP, PRIZEWISE, LOOKAHEAD)}
 # The engine's historical pilot answers to its old name too, so existing
 # callers and recorded measurements keep working.
 POLICIES["v2"] = GREEDY
