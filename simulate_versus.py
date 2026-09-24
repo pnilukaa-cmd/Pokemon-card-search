@@ -5271,8 +5271,33 @@ def clone_state(pl, opp):
     return a, b
 
 
+def _hide_information(me, them):
+    """Deal the unknown cards afresh in a lookahead copy.
+
+    The copy kept the real deck order and the opponent's real hand, so the
+    lookahead played against the actual future: it knew every card either
+    player would draw and what the opponent was holding. The pilot knows
+    its own hand and nothing else: its deck and Prizes are reshuffled
+    together, and the opponent's hand, deck and Prizes are pooled and
+    redealt at their current sizes. Each sample draws a different deal
+    (lookahead_pick seeds each sample)."""
+    for side, hand_hidden in ((me, False), (them, True)):
+        pool = list(side.deck) + list(getattr(side, "prize_cards", []) or [])
+        nh = len(side.hand)
+        if hand_hidden:
+            pool += list(side.hand)
+        random.shuffle(pool)
+        np_ = len(getattr(side, "prize_cards", []) or [])
+        if hand_hidden:
+            side.hand = pool[:nh]
+            pool = pool[nh:]
+        side.prize_cards = pool[:np_]
+        side.deck = pool[np_:]
+
+
 def _simulate_from(pl, opp, opt, apply, resume):
     me, them = clone_state(pl, opp)
+    _hide_information(me, them)
     log = []
     if resume == "promote":
         return _simulate_promotion(me, them, opt, apply, log)

@@ -3873,6 +3873,31 @@ def test_static_play_locks_and_metal_bridge():
     check("with Metal Energy attached it is free", AE.effective_retreat(me, me.active, op) == 0)
 
 
+def test_the_lookahead_does_not_see_hidden_cards():
+    """The lookahead's copy kept the real deck order and the opponent's
+    real hand: it played against the actual future. The copy now redeals
+    what the pilot cannot know, keeping every zone's size and contents."""
+    import random as _r
+    from collections import Counter
+    V, D, E = _real("decks/field/meta_raging_bolt.txt", "b")
+    me, op = V.Player("b", D[1], D[2], E), V.Player("o", D[1], D[2], E)
+    for p in (me, op):
+        _r.seed(3)
+        V.opening_hand(p)
+    real = (list(me.deck), list(op.deck), list(op.hand), list(me.hand))
+    a, b = V.clone_state(me, op)
+    _r.seed(5)
+    V._hide_information(a, b)
+    check("my hand is mine", a.hand == me.hand)
+    check("zone sizes kept", (len(a.deck), len(b.deck), len(b.hand), len(b.prize_cards))
+          == (len(me.deck), len(op.deck), len(op.hand), len(op.prize_cards)))
+    check("their hidden cards are redealt, not lost",
+          Counter(b.deck + b.hand + b.prize_cards) == Counter(op.deck + op.hand + op.prize_cards))
+    check("the future is not the real one", a.deck != me.deck and b.deck != op.deck)
+    check("and the real game is untouched",
+          (me.deck, op.deck, op.hand, me.hand) == real)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3938,6 +3963,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
                test_evolution_timing_for_both_players,
