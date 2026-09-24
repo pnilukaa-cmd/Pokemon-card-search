@@ -580,13 +580,7 @@ def sweep_knocked_out(pl, opp, log):
             log.append(f"  {owner.name}: {spot.name} Knocked Out "
                        f"(+{taken} Prize to {taker.name})")
             if owner.active is None and owner.bench:
-                owner.bench.sort(
-                    key=lambda p: (_ready_damage(owner, taker, p),
-                                   effective_hp(owner, p) - p.damage),
-                    reverse=True)
-                owner.active = owner.bench.pop(0)
-                owner.active.promoted_this_turn = True
-                log.append(f"  {owner.name}: promotes {owner.active.name}")
+                _promote_after_ko(owner, taker, log)
 
 
 # Stadiums whose text does nothing for the player who plays them, or
@@ -4568,16 +4562,7 @@ def do_attack(pl, opp, log):
         if pl.prizes <= 0:
             return True
         if opp.bench:
-            # Promote whoever can actually fight, falling back to the
-            # biggest body. Sorting on remaining HP alone put a Bench
-            # toolbox piece -- one whose attacks the deck cannot even pay
-            # for -- into the Active Spot ahead of the real attacker.
-            opp.bench.sort(key=lambda p: (_ready_damage(opp, pl, p),
-                                          effective_hp(opp, p) - p.damage),
-                           reverse=True)
-            opp.active = opp.bench.pop(0)
-            opp.active.promoted_this_turn = True
-            log.append(f"  {opp.name}: promotes {opp.active.name}")
+            _promote_after_ko(opp, pl, log)
         else:
             return True
     return False
@@ -5183,6 +5168,8 @@ def clone_state(pl, opp):
 def _simulate_from(pl, opp, opt, apply, resume):
     me, them = clone_state(pl, opp)
     log = []
+    if resume == "promote":
+        return _simulate_promotion(me, them, opt, apply, log)
     if apply(me, them, opt) == "win":
         return _position_value(me, them, "win")
     r = run_phases(me, them, log, resume) if resume is not None \
@@ -5196,6 +5183,36 @@ def _simulate_from(pl, opp, opt, apply, resume):
     them.lost_pokemon_last_turn_snapshot = them.lost_pokemon_last_turn
     r = take_turn(them, me, rnd, not getattr(me, "_goes_first", True),
                   me._cards_by_name, log)
+    if r == "win":
+        return _position_value(me, them, "loss")
+    if r in ("loss", "no_pokemon", "deck_out"):
+        return _position_value(me, them, "win")
+    end_of_turn(them, log)
+    return _position_value(me, them, None)
+
+
+def _simulate_promotion(me, them, opt, apply, log):
+    """`me` promotes during `them`'s turn: finish their turn, play mine,
+    then their reply, and score the position for `me`."""
+    apply(me, them, opt)
+    r = finish_turn(them, me, log)
+    if r == "win":
+        return _position_value(me, them, "loss")
+    if r in ("loss", "no_pokemon"):
+        return _position_value(me, them, "win")
+    end_of_turn(them, log)
+    first = getattr(them, "_goes_first", True)
+    cards = getattr(them, "_cards_by_name", None) or _CARDS_BY_NAME
+    me.lost_pokemon_last_turn_snapshot = me.lost_pokemon_last_turn
+    r = take_turn(me, them, them.round_no if first else them.round_no + 1,
+                  not first, cards, log)
+    if r == "win":
+        return _position_value(me, them, "win")
+    if r in ("loss", "no_pokemon", "deck_out"):
+        return _position_value(me, them, "loss")
+    end_of_turn(me, log)
+    them.lost_pokemon_last_turn_snapshot = them.lost_pokemon_last_turn
+    r = take_turn(them, me, them.round_no + 1, first, cards, log)
     if r == "win":
         return _position_value(me, them, "loss")
     if r in ("loss", "no_pokemon", "deck_out"):
@@ -5374,6 +5391,30 @@ def choose_gust_target(pl, opp):
     # often with no demonstrated benefit is exactly the kind of complexity
     # that rots in this codebase.
     return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
+
+def _promote_after_ko(owner, taker, log):
+    """The new Active after an attack's Knock Out, chosen by `owner`.
+
+    Greedy: whoever can actually fight, falling back to the biggest body.
+    Sorting on remaining HP alone put a Bench toolbox piece -- one whose
+    attacks the deck cannot even pay for -- into the Active Spot ahead of
+    the real attacker. The lookahead pilot plays each candidate out
+    through its own next turn and the opponent's reply.
+    """
+    owner.bench.sort(key=lambda p: (_ready_damage(owner, taker, p),
+                                    effective_hp(owner, p) - p.damage),
+                     reverse=True)
+    i = 0
+    if POL.knob(owner, "lookahead_samples") and len(owner.bench) > 1:
+        def apply(me, them, k):
+            me.active = me.bench.pop(k)
+            me.active.promoted_this_turn = True
+        i = lookahead_pick(owner, taker, list(range(len(owner.bench))),
+                           apply, "promote", 0)
+    owner.active = owner.bench.pop(i)
+    owner.active.promoted_this_turn = True
+    log.append(f"  {owner.name}: promotes {owner.active.name}")
+
 
 def promote_from_bench(side, opp=None):
     """Choose the new Active after a Knock Out: the healthiest body.

@@ -3646,6 +3646,32 @@ def test_tri_kinesis_knocks_out_the_best_prize():
           and op.active.damage == 0)
 
 
+def test_the_lookahead_chooses_the_promotion():
+    """After a Knock Out the lookahead pilot plays each Benched Pokemon out
+    as the new Active; greedy takes the first after its sort. Either way a
+    Pokemon is promoted, and the real game's dice are untouched."""
+    import random as _r
+    V, D, E = _real("decks/field/wugtrio_paralysis_pin.txt", "w")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    for pilot in ("greedy", "lookahead"):
+        me, op = V.Player("w", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.policy = pilot
+        me.bench = [V.InPlay("Wiglett", 0), V.InPlay("Wugtrio ex", 0)]
+        me.bench[1].energy, me.bench[1].energy_names = [["Water"]] * 2, ["Water Energy"] * 2
+        op.active = V.InPlay("Dragapult ex", 0)
+        me.round_no = op.round_no = 5
+        op._goes_first, op._cards_by_name, op._first_turn = True, V._CARDS_BY_NAME, False
+        _r.seed(7)
+        before = _r.random()
+        _r.seed(7)
+        log = []
+        V._promote_after_ko(me, op, log)
+        check(f"{pilot}: a Pokemon is promoted", me.active is not None
+              and len(me.bench) == 1, str(log))
+        check(f"{pilot}: the real dice are untouched", _r.random() == before)
+
+
 def test_no_compiled_op_is_orphaned_by_class():
     """Class-level guards. The per-card inert guard could not see a whole
     CLASS going dead: SWITCH was not an attack rider (35 attacks), neither
@@ -3711,6 +3737,7 @@ def test_no_compiled_op_is_orphaned_by_class():
 def main():
     print("Ability runtime firing tests\n")
     for fn in [test_no_compiled_op_is_orphaned_by_class,
+               test_the_lookahead_chooses_the_promotion,
                test_tri_kinesis_knocks_out_the_best_prize,
                test_seek_inspiration_reads_and_discards_the_top_card,
                test_played_from_hand_abilities_fire,
