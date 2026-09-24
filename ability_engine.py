@@ -692,8 +692,6 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
-# The simulator sets this: which of the legal targets moved counters go to.
-COUNTER_TARGET = lambda pl, opp, hits, amount: hits[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
 
@@ -1032,7 +1030,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             amount = donor.damage        # "any number" -- take it all
         else:
             amount = min((act.amount or 0) * 10, donor.damage)
-        tgt = COUNTER_TARGET(pl, opp, hits, amount)
+        tgt = hits[0]
         donor.damage -= amount
         tgt.damage += amount
         log.append(f"    move {amount} damage {donor.name} -> {tgt.name}")

@@ -870,19 +870,6 @@ def _top_copy_want(pl, pool=None):
 
 AE.TOP_COPY_WANT = _top_copy_want
 
-
-def _counter_target(pl, opp, hits, amount):
-    """Where moved damage counters go: a Pokemon they Knock Out, the most
-    Prizes first; otherwise the first legal target (the Active)."""
-    if POL.knob(pl, "counter_ko_target"):
-        ko = [h for h in hits if h in opp.in_play()
-              and h.damage + amount >= effective_hp(opp, h)]
-        if ko:
-            return max(ko, key=lambda h: opp.POKEMON[h.name].get("prize_value", 1))
-    return hits[0]
-
-
-AE.COUNTER_TARGET = _counter_target
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
 
 # Academy at Night: "Once during each player's turn, that player may put a
@@ -5136,7 +5123,7 @@ def choose_supporter(pl, opp, turn, log):
 # make a choice in a copy of the game and RESUME the turn from the step
 # after it (a gust resumes at "abilities", a retreat at "attack").
 PHASES = ("bench", "abilities", "stadium", "sweep", "attach", "tools",
-          "evolve", "abilities2", "retreat", "attack")
+          "evolve", "retreat", "attack")
 
 
 def run_phases(pl, opp, log, start):
@@ -5150,12 +5137,6 @@ def run_phases(pl, opp, log, start):
                 play_basics(pl, turn, log)
         elif ph == "abilities":
             use_abilities(pl, opp, turn, log)
-        elif ph == "abilities2":
-            # Once-per-turn Abilities not yet used, after the Energy and the
-            # evolutions: Adrena-Brain needs the Darkness Energy attached
-            # this turn, and a Pokemon evolved this turn has new Abilities.
-            if POL.knob(pl, "abilities_late"):
-                use_abilities(pl, opp, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
         elif ph == "sweep":
