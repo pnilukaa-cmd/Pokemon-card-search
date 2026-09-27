@@ -1,13 +1,15 @@
 # Team Rocket's Crobat / Mega Absol ex — early bench snipe
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **52.1% mean · 51.5% median · 31 of 53 winning matchups · rank 28 of 54**
+> ### Field results — 2026-09-27
+> **44.1% mean · 46.0% median · 16 of 54 winning matchups · rank 42 of 55**
 >
-> Best `meta_ns_zoroark` 91% · worst `lurantis_heal_punish` 18%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 86% · worst `lurantis_heal_punish` 15%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

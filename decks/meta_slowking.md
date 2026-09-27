@@ -1,13 +1,15 @@
 # slowking — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **41.8% mean · 42.2% median · 13 of 53 winning matchups · rank 44 of 54**
+> ### Field results — 2026-09-27
+> **54.6% mean · 55.0% median · 35 of 54 winning matchups · rank 20 of 55**
 >
-> Best `meta_ns_zoroark` 82% · worst `maushold_gnaw_together_mill` 20%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `tauros_risky_ruins` 17%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

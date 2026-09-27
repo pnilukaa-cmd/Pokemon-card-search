@@ -1,13 +1,15 @@
 # Team Rocket's Persian ex — Attack Theft (full-toolkit rebuild)
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **70.6% mean · 69.6% median · 52 of 53 winning matchups · rank 2 of 54**
+> ### Field results — 2026-09-27
+> **69.6% mean · 70.4% median · 50 of 54 winning matchups · rank 3 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 97% · worst `tauros_risky_ruins` 43%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 95% · worst `tauros_risky_ruins` 41%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

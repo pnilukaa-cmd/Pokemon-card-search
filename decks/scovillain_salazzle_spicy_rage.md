@@ -1,13 +1,15 @@
 # Scovillain ex / Salazzle ex — Spicy Rage
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **65.3% mean · 65.5% median · 45 of 53 winning matchups · rank 5 of 54**
+> ### Field results — 2026-09-27
+> **59.7% mean · 61.0% median · 41 of 54 winning matchups · rank 11 of 55**
 >
-> Best `meta_ns_zoroark` 94% · worst `kyurem_vanilluxe_blizzard` 36%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `maushold_gnaw_together_mill` 21%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

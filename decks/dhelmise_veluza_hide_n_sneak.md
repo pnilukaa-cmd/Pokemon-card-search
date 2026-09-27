@@ -1,13 +1,15 @@
 # Dhelmise / Veluza — Hide 'n' Sneak fuel + Food Prep
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **54.0% mean · 50.0% median · 25 of 53 winning matchups · rank 23 of 54**
+> ### Field results — 2026-09-27
+> **52.2% mean · 51.7% median · 30 of 54 winning matchups · rank 24 of 55**
 >
-> Best `meta_ns_zoroark` 94% · worst `lurantis_heal_punish` 23%.
+> Best `static_venom_drapion` 87% · worst `study_mega_excadrill_drill_mill` 24%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

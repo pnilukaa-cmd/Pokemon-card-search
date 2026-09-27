@@ -1,13 +1,15 @@
 # metal_metang_excadrill — Metal Maker / Mega Excadrill ex
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **54.1% mean · 51.4% median · 29 of 53 winning matchups · rank 22 of 54**
+> ### Field results — 2026-09-27
+> **51.3% mean · 51.5% median · 29 of 54 winning matchups · rank 26 of 55**
 >
-> Best `meta_ns_zoroark` 89% · worst `scovillain_salazzle_spicy_rage` 31%.
+> Best `static_venom_drapion` 82% · worst `ns_zoroark_night_joker_toolbox` 23%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

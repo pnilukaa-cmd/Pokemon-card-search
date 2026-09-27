@@ -1,13 +1,15 @@
 # Decidueye ex / Vivillon — "exactly 4" cost lock
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **54.7% mean · 54.4% median · 31 of 53 winning matchups · rank 20 of 54**
+> ### Field results — 2026-09-27
+> **50.5% mean · 51.2% median · 28 of 54 winning matchups · rank 28 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 93% · worst `lurantis_heal_punish` 19%.
+> Best `static_venom_drapion` 86% · worst `tauros_risky_ruins` 11%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

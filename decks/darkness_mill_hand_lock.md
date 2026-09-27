@@ -1,13 +1,15 @@
 # Darkness Hand-Lock / Mill
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **39.5% mean · 35.7% median · 11 of 53 winning matchups · rank 45 of 54**
+> ### Field results — 2026-09-27
+> **38.2% mean · 35.5% median · 11 of 54 winning matchups · rank 46 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 92% · worst `lurantis_heal_punish` 7%.
+> Best `study_centiskorch_bastiodon_mill` 89% · worst `lurantis_heal_punish` 6%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Maushold mill — Gnaw Together
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **58.1% mean · 58.0% median · 37 of 53 winning matchups · rank 16 of 54**
+> ### Field results — 2026-09-27
+> **69.2% mean · 70.2% median · 50 of 54 winning matchups · rank 4 of 55**
 >
-> Best `meta_ns_zoroark` 92% · worst `lurantis_heal_punish` 28%.
+> Best `static_venom_drapion` 90% · worst `tauros_risky_ruins` 33%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 A user list, reviewed 2026-09-21/22. `Maushold 30C 125`'s **Gnaw Together**

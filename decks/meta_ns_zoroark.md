@@ -1,13 +1,15 @@
 # ns_zoroark — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **12.5% mean · 10.1% median · 0 of 53 winning matchups · rank 54 of 54**
+> ### Field results — 2026-09-27
+> **37.7% mean · 40.5% median · 12 of 54 winning matchups · rank 48 of 55**
 >
-> Best `static_venom_drapion` 41% · worst `cradily_accelgor_conditions` 4%.
+> Best `static_venom_drapion` 75% · worst `tauros_risky_ruins` 11%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

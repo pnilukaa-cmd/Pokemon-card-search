@@ -1,0 +1,776 @@
+{
+ "stamp": "2026-09-27",
+ "games": 1000,
+ "summary": {
+  "arbok_muk_laser_darkbell": {
+   "mean": 48.84814814814815,
+   "median": 49.650000000000006,
+   "winning": 26,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    92.8
+   ],
+   "worst": [
+    "kangaskhan_tyrantrum_flip_mill",
+    20.5
+   ]
+  },
+  "arbok_muk_trolley_darkbell": {
+   "mean": 46.50370370370371,
+   "median": 47.0,
+   "winning": 21,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    93.0
+   ],
+   "worst": [
+    "kangaskhan_tyrantrum_flip_mill",
+    17.7
+   ]
+  },
+  "arbok_team_rockets_muk_condition_stack": {
+   "mean": 45.42962962962963,
+   "median": 45.8,
+   "winning": 18,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    91.3
+   ],
+   "worst": [
+    "kangaskhan_tyrantrum_flip_mill",
+    11.8
+   ]
+  },
+  "chandelure_centiskorch_deck_out": {
+   "mean": 43.96666666666667,
+   "median": 46.0,
+   "winning": 21,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    79.8
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    10.2
+   ]
+  },
+  "crabominable_veluza_food_prep": {
+   "mean": 40.38148148148148,
+   "median": 39.599999999999994,
+   "winning": 11,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    78.8
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    14.9
+   ]
+  },
+  "cradily_accelgor_conditions": {
+   "mean": 59.76851851851852,
+   "median": 57.099999999999994,
+   "winning": 40,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    95.9
+   ],
+   "worst": [
+    "wugtrio_paralysis_pin",
+    36.5
+   ]
+  },
+  "cradily_amoonguss_conditions": {
+   "mean": 56.95,
+   "median": 54.25,
+   "winning": 31,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    96.9
+   ],
+   "worst": [
+    "study_mega_excadrill_drill_mill",
+    26.3
+   ]
+  },
+  "darkness_mill_hand_lock": {
+   "mean": 38.16851851851852,
+   "median": 35.5,
+   "winning": 11,
+   "played": 54,
+   "best": [
+    "study_centiskorch_bastiodon_mill",
+    89.1
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    5.7
+   ]
+  },
+  "decidueye_ex_judge_sniper_lock": {
+   "mean": 50.51111111111111,
+   "median": 51.25,
+   "winning": 28,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    85.8
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    11.4
+   ]
+  },
+  "dhelmise_veluza_hide_n_sneak": {
+   "mean": 52.15925925925926,
+   "median": 51.7,
+   "winning": 30,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    87.0
+   ],
+   "worst": [
+    "study_mega_excadrill_drill_mill",
+    23.9
+   ]
+  },
+  "ditto_tyranitar_gengar_hydreigon": {
+   "mean": 66.0425925925926,
+   "median": 68.35,
+   "winning": 46,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    92.5
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    27.6
+   ]
+  },
+  "eerie_inferno_ninetales_burn": {
+   "mean": 40.32037037037037,
+   "median": 38.25,
+   "winning": 11,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    83.2
+   ],
+   "worst": [
+    "wugtrio_paralysis_pin",
+    10.5
+   ]
+  },
+  "feraligatr_munkidori_damage_transfer": {
+   "mean": 44.824074074074076,
+   "median": 42.7,
+   "winning": 14,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    86.9
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    10.5
+   ]
+  },
+  "heracross_sinistcha_tea": {
+   "mean": 54.55,
+   "median": 52.5,
+   "winning": 34,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    88.7
+   ],
+   "worst": [
+    "scovillain_salazzle_spicy_rage",
+    27.9
+   ]
+  },
+  "hops_snorlax_stacked_buff": {
+   "mean": 45.30925925925926,
+   "median": 41.5,
+   "winning": 16,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    88.9
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    17.2
+   ]
+  },
+  "kangaskhan_tyrantrum_flip_mill": {
+   "mean": 56.012962962962966,
+   "median": 57.75,
+   "winning": 38,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    88.6
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    10.2
+   ]
+  },
+  "krookodile_ex_relicanth_hand_disruption": {
+   "mean": 61.40925925925926,
+   "median": 62.599999999999994,
+   "winning": 40,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    94.1
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    28.3
+   ]
+  },
+  "kyurem_vanilluxe_blizzard": {
+   "mean": 49.79074074074074,
+   "median": 48.75,
+   "winning": 25,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    91.2
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    16.6
+   ]
+  },
+  "lurantis_heal_punish": {
+   "mean": 68.37592592592593,
+   "median": 68.65,
+   "winning": 49,
+   "played": 54,
+   "best": [
+    "darkness_mill_hand_lock",
+    94.3
+   ],
+   "worst": [
+    "scovillain_salazzle_spicy_rage",
+    39.7
+   ]
+  },
+  "maushold_gnaw_together_mill": {
+   "mean": 69.21851851851852,
+   "median": 70.2,
+   "winning": 50,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    90.3
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    32.7
+   ]
+  },
+  "mega_chandelure_ex_retreat_tax": {
+   "mean": 56.135185185185186,
+   "median": 59.7,
+   "winning": 33,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    83.6
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    14.8
+   ]
+  },
+  "mega_lopunny_dusknoir_snipe_finisher": {
+   "mean": 57.39259259259259,
+   "median": 56.5,
+   "winning": 39,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    85.7
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    24.3
+   ]
+  },
+  "mega_scrafty_ex_darkness_tank": {
+   "mean": 46.492592592592594,
+   "median": 44.9,
+   "winning": 23,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    87.1
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    15.2
+   ]
+  },
+  "meta_dragapult_blaziken": {
+   "mean": 53.01481481481481,
+   "median": 53.7,
+   "winning": 36,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    82.5
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    21.8
+   ]
+  },
+  "meta_dragapult_dusknoir": {
+   "mean": 45.53888888888889,
+   "median": 44.7,
+   "winning": 17,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    83.6
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    14.1
+   ]
+  },
+  "meta_dragapult_pure": {
+   "mean": 51.388888888888886,
+   "median": 50.55,
+   "winning": 28,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    84.7
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    21.6
+   ]
+  },
+  "meta_festival_lead": {
+   "mean": 34.82592592592593,
+   "median": 33.65,
+   "winning": 8,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    69.4
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    7.4
+   ]
+  },
+  "meta_mega_excadrill": {
+   "mean": 58.75,
+   "median": 60.45,
+   "winning": 44,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    86.7
+   ],
+   "worst": [
+    "maushold_gnaw_together_mill",
+    29.6
+   ]
+  },
+  "meta_ns_zoroark": {
+   "mean": 37.72037037037037,
+   "median": 40.45,
+   "winning": 12,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    75.3
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    11.1
+   ]
+  },
+  "meta_raging_bolt": {
+   "mean": 55.611111111111114,
+   "median": 56.1,
+   "winning": 42,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    78.7
+   ],
+   "worst": [
+    "maushold_gnaw_together_mill",
+    15.9
+   ]
+  },
+  "meta_slowking": {
+   "mean": 54.574074074074076,
+   "median": 55.05,
+   "winning": 35,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    84.4
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    17.1
+   ]
+  },
+  "metal_metang_excadrill": {
+   "mean": 51.32037037037037,
+   "median": 51.55,
+   "winning": 29,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    82.3
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    22.7
+   ]
+  },
+  "ns_zoroark_night_joker_toolbox": {
+   "mean": 72.7462962962963,
+   "median": 75.65,
+   "winning": 50,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    96.1
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    24.8
+   ]
+  },
+  "orthworm_ex_metal_retaliation": {
+   "mean": 49.68333333333333,
+   "median": 47.65,
+   "winning": 24,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    89.5
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    12.2
+   ]
+  },
+  "panic_poison_paralysis": {
+   "mean": 59.15185185185185,
+   "median": 57.55,
+   "winning": 38,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    92.1
+   ],
+   "worst": [
+    "kangaskhan_tyrantrum_flip_mill",
+    21.3
+   ]
+  },
+  "salazzle_ex_team_rockets_muk_condition_stack": {
+   "mean": 28.487037037037037,
+   "median": 28.799999999999997,
+   "winning": 2,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    53.0
+   ],
+   "worst": [
+    "ditto_tyranitar_gengar_hydreigon",
+    10.2
+   ]
+  },
+  "scovillain_salazzle_spicy_rage": {
+   "mean": 59.70185185185185,
+   "median": 61.05,
+   "winning": 41,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    87.2
+   ],
+   "worst": [
+    "maushold_gnaw_together_mill",
+    20.9
+   ]
+  },
+  "static_venom_drapion": {
+   "mean": 20.78148148148148,
+   "median": 17.5,
+   "winning": 4,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    61.1
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    4.5
+   ]
+  },
+  "stevens_carbink_damage_wall": {
+   "mean": 44.925925925925924,
+   "median": 44.4,
+   "winning": 19,
+   "played": 54,
+   "best": [
+    "meta_festival_lead",
+    81.2
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    15.7
+   ]
+  },
+  "study_centiskorch_bastiodon_mill": {
+   "mean": 35.68888888888889,
+   "median": 33.5,
+   "winning": 10,
+   "played": 54,
+   "best": [
+    "meta_ns_zoroark",
+    81.0
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    9.4
+   ]
+  },
+  "study_flygon_sandy_flapping_mill": {
+   "mean": 28.090740740740742,
+   "median": 22.0,
+   "winning": 5,
+   "played": 54,
+   "best": [
+    "meta_ns_zoroark",
+    76.3
+   ],
+   "worst": [
+    "cradily_amoonguss_conditions",
+    3.1
+   ]
+  },
+  "study_hydreigon_zweilous_mill": {
+   "mean": 36.74814814814815,
+   "median": 34.85,
+   "winning": 9,
+   "played": 54,
+   "best": [
+    "meta_ns_zoroark",
+    72.0
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    11.6
+   ]
+  },
+  "study_maushold_gnaw_latias": {
+   "mean": 45.22592592592593,
+   "median": 45.45,
+   "winning": 19,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    91.0
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    10.9
+   ]
+  },
+  "study_mega_excadrill_drill_mill": {
+   "mean": 64.05185185185185,
+   "median": 65.55,
+   "winning": 47,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    89.0
+   ],
+   "worst": [
+    "ditto_tyranitar_gengar_hydreigon",
+    25.3
+   ]
+  },
+  "tauros_risky_ruins": {
+   "mean": 73.46666666666667,
+   "median": 78.1,
+   "winning": 50,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    96.7
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    39.6
+   ]
+  },
+  "team_rockets_koffing_weezing_bench_swarm": {
+   "mean": 57.568518518518516,
+   "median": 58.3,
+   "winning": 36,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    91.0
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    20.5
+   ]
+  },
+  "team_rockets_persian_ex_attack_theft": {
+   "mean": 69.58333333333333,
+   "median": 70.4,
+   "winning": 50,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    94.9
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    40.9
+   ]
+  },
+  "team_rockets_spidops_swarm": {
+   "mean": 46.59814814814815,
+   "median": 43.0,
+   "winning": 20,
+   "played": 54,
+   "best": [
+    "static_venom_drapion",
+    83.0
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    17.3
+   ]
+  },
+  "team_rockets_wobbuffet_orbeetle_damage_launder": {
+   "mean": 19.3,
+   "median": 15.45,
+   "winning": 2,
+   "played": 54,
+   "best": [
+    "study_flygon_sandy_flapping_mill",
+    79.4
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    3.9
+   ]
+  },
+  "toxic_slumber_vileplume_ex": {
+   "mean": 48.77777777777778,
+   "median": 48.7,
+   "winning": 23,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    84.0
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    21.0
+   ]
+  },
+  "tr_arbok_yveltal_snow_coating": {
+   "mean": 37.98888888888889,
+   "median": 35.35,
+   "winning": 13,
+   "played": 54,
+   "best": [
+    "study_centiskorch_bastiodon_mill",
+    85.6
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    4.8
+   ]
+  },
+  "tr_crobat_absol_bench_snipe": {
+   "mean": 44.05925925925926,
+   "median": 45.95,
+   "winning": 16,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    86.3
+   ],
+   "worst": [
+    "lurantis_heal_punish",
+    15.0
+   ]
+  },
+  "veluza_sinistcha_ex_tea_service": {
+   "mean": 53.58148148148148,
+   "median": 52.5,
+   "winning": 32,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    87.0
+   ],
+   "worst": [
+    "study_mega_excadrill_drill_mill",
+    22.8
+   ]
+  },
+  "water_aggro": {
+   "mean": 51.214814814814815,
+   "median": 49.65,
+   "winning": 27,
+   "played": 54,
+   "best": [
+    "chandelure_centiskorch_deck_out",
+    88.2
+   ],
+   "worst": [
+    "tauros_risky_ruins",
+    11.6
+   ]
+  },
+  "wugtrio_paralysis_pin": {
+   "mean": 61.272222222222226,
+   "median": 62.7,
+   "winning": 38,
+   "played": 54,
+   "best": [
+    "team_rockets_wobbuffet_orbeetle_damage_launder",
+    95.5
+   ],
+   "worst": [
+    "ns_zoroark_night_joker_toolbox",
+    17.7
+   ]
+  }
+ }
+}

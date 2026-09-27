@@ -1,13 +1,15 @@
 # N's Zoroark ex — Night Joker toolbox
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **47.5% mean · 46.2% median · 19 of 53 winning matchups · rank 38 of 54**
+> ### Field results — 2026-09-27
+> **72.7% mean · 75.7% median · 50 of 54 winning matchups · rank 2 of 55**
 >
-> Best `static_venom_drapion` 81% · worst `study_mega_excadrill_drill_mill` 25%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 96% · worst `tauros_risky_ruins` 25%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

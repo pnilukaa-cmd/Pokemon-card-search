@@ -1,13 +1,15 @@
 # Lurantis ex Heal-Punish
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **73.2% mean · 72.9% median · 51 of 53 winning matchups · rank 1 of 54**
+> ### Field results — 2026-09-27
+> **68.4% mean · 68.7% median · 49 of 54 winning matchups · rank 5 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 98% · worst `scovillain_salazzle_spicy_rage` 43%.
+> Best `darkness_mill_hand_lock` 94% · worst `scovillain_salazzle_spicy_rage` 40%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

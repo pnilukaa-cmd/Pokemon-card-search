@@ -1,13 +1,15 @@
 # Team Rocket's Spidops — Count-Swarm / Supporter-Discard Blend
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **43.9% mean · 39.4% median · 15 of 53 winning matchups · rank 41 of 54**
+> ### Field results — 2026-09-27
+> **46.6% mean · 43.0% median · 20 of 54 winning matchups · rank 33 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 92% · worst `wugtrio_paralysis_pin` 16%.
+> Best `static_venom_drapion` 83% · worst `tauros_risky_ruins` 17%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

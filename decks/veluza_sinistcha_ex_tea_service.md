@@ -1,13 +1,15 @@
 # Veluza / Sinistcha ex — "tea service"
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **48.6% mean · 45.5% median · 21 of 53 winning matchups · rank 36 of 54**
+> ### Field results — 2026-09-27
+> **53.6% mean · 52.5% median · 32 of 54 winning matchups · rank 22 of 55**
 >
-> Best `meta_ns_zoroark` 94% · worst `wugtrio_paralysis_pin` 23%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `study_mega_excadrill_drill_mill` 23%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

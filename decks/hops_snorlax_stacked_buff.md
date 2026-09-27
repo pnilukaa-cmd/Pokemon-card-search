@@ -1,13 +1,15 @@
 # Hop's Snorlax Stacked-Buff
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **47.7% mean · 42.1% median · 20 of 53 winning matchups · rank 37 of 54**
+> ### Field results — 2026-09-27
+> **45.3% mean · 41.5% median · 16 of 54 winning matchups · rank 38 of 55**
 >
-> Best `study_centiskorch_bastiodon_mill` 97% · worst `lurantis_heal_punish` 20%.
+> Best `study_flygon_sandy_flapping_mill` 89% · worst `ns_zoroark_night_joker_toolbox` 17%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

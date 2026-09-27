@@ -1,13 +1,15 @@
 # Steven's Carbink Damage Wall
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **51.8% mean · 49.6% median · 25 of 53 winning matchups · rank 29 of 54**
+> ### Field results — 2026-09-27
+> **44.9% mean · 44.4% median · 19 of 54 winning matchups · rank 40 of 55**
 >
-> Best `meta_ns_zoroark` 95% · worst `scovillain_salazzle_spicy_rage` 24%.
+> Best `meta_festival_lead` 81% · worst `ns_zoroark_night_joker_toolbox` 16%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

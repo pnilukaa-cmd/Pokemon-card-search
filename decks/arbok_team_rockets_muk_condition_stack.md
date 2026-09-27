@@ -1,13 +1,15 @@
 # Arbok / Team Rocket's Muk Condition Stack (Pure Darkness)
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **53.6% mean · 52.6% median · 33 of 53 winning matchups · rank 25 of 54**
+> ### Field results — 2026-09-27
+> **45.4% mean · 45.8% median · 18 of 54 winning matchups · rank 37 of 55**
 >
-> Best `meta_ns_zoroark` 93% · worst `tauros_risky_ruins` 22%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 91% · worst `kangaskhan_tyrantrum_flip_mill` 12%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

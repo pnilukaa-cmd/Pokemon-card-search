@@ -1,13 +1,15 @@
 # Mega Scrafty ex Darkness Tank — Playbook
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **51.7% mean · 50.8% median · 29 of 53 winning matchups · rank 30 of 54**
+> ### Field results — 2026-09-27
+> **46.5% mean · 44.9% median · 23 of 54 winning matchups · rank 35 of 55**
 >
-> Best `meta_ns_zoroark` 90% · worst `lurantis_heal_punish` 15%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `lurantis_heal_punish` 15%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

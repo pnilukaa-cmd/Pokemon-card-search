@@ -1,13 +1,15 @@
 # raging_bolt — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-23
-> **61.2% mean · 61.8% median · 43 of 53 winning matchups · rank 10 of 54**
+> ### Field results — 2026-09-27
+> **55.6% mean · 56.1% median · 42 of 54 winning matchups · rank 19 of 55**
 >
-> Best `meta_ns_zoroark` 90% · worst `maushold_gnaw_together_mill` 30%.
+> Best `static_venom_drapion` 79% · worst `maushold_gnaw_together_mill` 16%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-23** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 
