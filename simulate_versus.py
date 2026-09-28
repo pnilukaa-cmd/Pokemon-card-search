@@ -1100,6 +1100,17 @@ def _transform_pick(pl, opp, spot, cands, use_forced=False):
     return max(cands, key=score)
 
 
+def _tool_from_deck_pick(pl, spot, names):
+    """Impromptu Carrier's Tool: one that does something on this Pokemon
+    (HP, retreat, retaliation, a re-flip it can use), else the first."""
+    for n in names:
+        if (n in hp_tools() or n in RETREAT_TOOLS or n in RETALIATE_CARDS
+                or n in on_damaged_tools() or _is_reflip_tool(pl, n, spot)):
+            return n
+    return names[0]
+
+
+AE.TOOL_FROM_DECK_PICK = _tool_from_deck_pick
 AE.TRANSFORM_PICK = lambda pl, opp, spot, cands: _transform_pick(pl, opp, spot, cands, True)
 
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)
@@ -4996,16 +5007,6 @@ def _is_reflip_tool(pl, name, spot=None):
 
 
 def attach_tools(pl, log):
-    # Farfetch'd's Impromptu Carrier pulls a Tool out of the DECK, so the
-    # hand loop below would never see it.
-    if AE.query_tool_from_deck(pl, pl.active) and pl.active and not pl.active.tool:
-        i = next((i for i, (k, n) in enumerate(pl.deck) if k == "Tool"), None)
-        if i is not None:
-            k, n = pl.deck.pop(i)
-            pl.active.tool = n
-            random.shuffle(pl.deck)
-            log.append(f"  {pl.name}: attaches {n} from deck to {pl.active.name}")
-
     """Attach a Pokemon Tool to whoever will be holding the Active Spot.
     Only Tools carrying a modeled effect (retaliation) are attached -- any
     other Tool would be decoration the engine cannot honor."""

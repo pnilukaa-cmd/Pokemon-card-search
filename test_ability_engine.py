@@ -3986,6 +3986,43 @@ def test_named_ability_limit_is_per_name_not_per_copy():
           f"rotom={me.active.energy_count()} ditto={me.bench[0].energy_count()}")
 
 
+def test_impromptu_carrier_attaches_once_to_farfetchd():
+    """Farfetch'd's Impromptu Carrier ("when you play this Pokemon from
+    your hand onto your Bench ... attach it to this Pokemon") was queried
+    as a passive: with Farfetch'd anywhere in play, the Active took a free
+    Tool off the deck every turn, and the on-play search did nothing."""
+    import os
+    import tempfile
+    src = open("decks/field/ditto_tyranitar_gengar_hydreigon.txt").read()
+    src = src.replace("2 Hydreigon ex SSP 240\n",
+                      "2 Hydreigon ex SSP 240\n1 Farfetch'd TWM 132\n")
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    os.write(fd, src.encode()); os.close(fd)
+    try:
+        V, D, E = _real(path, "d")
+    finally:
+        os.remove(path)
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2],
+                                                     V.compile_effects_for(O[1], O[3]))
+    me.active = V.InPlay("Ditto", 1)
+    op.active = V.InPlay("Mega Kangaskhan ex", 1)
+    me.round_no = op.round_no = 2
+    me._opp_ref, op._opp_ref = op, me
+    me.deck = [("Tool", "Air Balloon"), ("Tool", "Backtrack Badge")] + [("Item", "Ultra Ball")] * 10
+    me.hand = [("Pokemon", "Farfetch'd")]
+    V.play_basics(me, 2, [])
+    f = next((p for p in me.bench if p.name == "Farfetch'd"), None)
+    check("Farfetch'd is Benched from hand", f is not None)
+    check("  ...and Impromptu Carrier attaches a Tool from the deck to it",
+          f is not None and f.tool in ("Air Balloon", "Backtrack Badge")
+          and ("Tool", f.tool) not in me.deck, str(f and f.tool))
+    for _ in range(3):
+        V.attach_tools(me, [])
+    check("  ...and the Active never takes a free Tool off the deck",
+          me.active.tool is None, str(me.active.tool))
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4435,6 +4472,7 @@ def main():
                test_abilities_and_stadiums_that_were_ignored,
                test_ditto_transforms_and_gengar_faints,
                test_named_ability_limit_is_per_name_not_per_copy,
+               test_impromptu_carrier_attaches_once_to_farfetchd,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

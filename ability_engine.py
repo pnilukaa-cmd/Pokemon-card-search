@@ -284,14 +284,6 @@ def query_counters_locked(pl, opp=None):
     return False
 
 
-def query_tool_from_deck(pl, spot):
-    """Farfetch'd's Impromptu Carrier attaches a Tool straight off the deck."""
-    for holder, eff, act in _passive_actions(pl, IR.Op.ATTACH_TOOL):
-        if conditions_met(eff, pl, pl, holder):
-            return True
-    return False
-
-
 def query_condition_immunity(pl, spot, condition, opp=None):
     """Is this Pokemon immune to being given this Special Condition?
 
@@ -704,6 +696,8 @@ TOP_COPY_WANT = lambda pl: None
 TOOL_ATTACKS = lambda pl, spot: []
 # The simulator sets this: what Ditto's Surprisingly Transform becomes.
 TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
+# The simulator sets this: which Tool name from the deck goes on `spot`.
+TOOL_FROM_DECK_PICK = lambda pl, spot, names: names[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
 
@@ -875,6 +869,26 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             and hasattr(source, "turn_buff"):
         source.turn_buff = (source.turn_buff or 0) + (act.amount or 0)
         log.append(f"    {source.name}'s attacks do {act.amount} more this turn")
+        return True
+
+    # Farfetch'd's Impromptu Carrier: "search your deck for a Pokemon Tool
+    # card and attach it to this Pokemon", once, when played to the Bench.
+    # It sat in the passive list and was queried instead, so while any
+    # Farfetch'd was in play the Active took a free Tool off the deck
+    # every turn: worth +1.2 points to a deck that ran one.
+    if op == O.ATTACH_TOOL and (act.filter or {}).get("from") == "deck":
+        if source is None or getattr(source, "tool", None):
+            return False
+        names = [n for k, n in pl.deck if k == "Tool"]
+        if not names:
+            return False
+        name = TOOL_FROM_DECK_PICK(pl, source, names)
+        if not name:
+            return False
+        pl.deck.remove(("Tool", name))
+        random.shuffle(pl.deck)
+        source.tool = name
+        log.append(f"    attach {name} from deck to {source.name}")
         return True
 
     # Reached only as an attack rider: passive Abilities are queried, never
@@ -2499,7 +2513,6 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
               IR.Op.IGNORE_OPPONENT_EFFECTS, IR.Op.ENERGY_PROVIDES_EXTRA,
               IR.Op.EXTRA_TOOLS, IR.Op.ATTACK_TWICE,
               IR.Op.RETURN_TO_HAND_ON_KO, IR.Op.LOCK_COUNTER_MOVEMENT,
-              IR.Op.ATTACH_TOOL,
               # WIN_GAME ends the game rather than changing board state, so
               # the match loop owns it (see attack_wins_game).
               IR.Op.WIN_GAME):
