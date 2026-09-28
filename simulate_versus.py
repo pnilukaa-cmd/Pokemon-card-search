@@ -1092,6 +1092,8 @@ def _transform_pick(pl, opp, spot, cands, use_forced=False):
         tmp = _clone_spot(spot)
         tmp.name = name
         best = 0
+        if AE.gate_blocks_name(pl, name):     # Slaking ex with no ex to hit
+            return (0, effective_hp(pl, tmp) - tmp.damage)
         for atk in pl.POKEMON[name]["attacks"]:
             cost = effective_cost(pl, tmp, atk["cost"], opp, atk.get("name"))
             if can_pay(cost, tmp.energy) or (extra_prov[0] and can_pay(cost, tmp.energy + extra_prov)):

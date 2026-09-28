@@ -369,6 +369,28 @@ def query_attacks_twice(pl, spot, opp=None):
         return True
     return False
 
+def opponent_has_subtype(pl, need):
+    """Does `pl`'s opponent have a Pokemon of any of these subtypes in play
+    (Slaking ex's Born to Slack: "Pokemon ex or Pokemon V")? Unknown
+    opponent: assume yes, as the gate did before it existed."""
+    opp = getattr(pl, "_opp_ref", None)
+    if opp is None:
+        return True
+    return any(set(need) & set((opp.POKEMON.get(n) or {}).get("subtypes") or [])
+               for n in opp.in_play_names())
+
+
+def gate_blocks_name(pl, name):
+    """query_attack_gate's opponent-side check for a Pokemon that is not in
+    play yet: what Ditto's Transform is choosing between."""
+    for eff in pl.EFFECTS.get(name, []):
+        for act in eff.actions:
+            need = (act.filter or {}).get("opponent_needs")
+            if act.op == IR.Op.ATTACK_GATE and need and not opponent_has_subtype(pl, need):
+                return True
+    return False
+
+
 def query_attack_gate(pl, spot):
     """False when an Ability forbids this Pokemon from attacking.
 
@@ -379,6 +401,11 @@ def query_attack_gate(pl, spot):
     for holder, eff, act in _passive_actions(pl, IR.Op.ATTACK_GATE):
         if holder is not spot:
             continue            # the gate is on its own Pokemon only
+        need = (act.filter or {}).get("opponent_needs")
+        if need:
+            if not opponent_has_subtype(pl, need):
+                return False
+            continue
         if True:
             fam = (act.filter or {}).get("family", "").lower()
             names = pl.in_play_names()

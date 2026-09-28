@@ -1561,8 +1561,23 @@ def _r(m, text):
                    {"family": m.group(2).strip()})]
 
 
+@rule("attack_gate_opponent_rule_box",
+      r"if your opponent has no pok[eé]mon ex or pok[eé]mon v in play, "
+      r"this pok[eé]mon can'?t attack")
+def _r(m, text):
+    """Slaking ex's Born to Slack. The generic lock rule below read "your
+    opponent" and compiled it as a lock on the OPPONENT's attacks, which
+    nothing consumes, so the gate did not exist: Slaking swung for 280
+    against decks with no Pokemon ex."""
+    return [Action(Op.ATTACK_GATE, None, Target.SELF,
+                   {"opponent_needs": ["ex", "V"]})]
+
+
 @rule("lock", r"can'?t (attack|retreat|play|use)")
 def _r(m, text):
+    if re.search(r"if your opponent has no pok[eé]mon ex or pok[eé]mon v in play, "
+                 r"this pok[eé]mon can'?t attack", text, re.I):
+        return []
     # "can't attack UNLESS ..." is a conditional gate, owned by the
     # attack_gate rule above. Falling through to here as well stapled an
     # unconditional attack lock onto the same card, which would stop it

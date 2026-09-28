@@ -4023,6 +4023,37 @@ def test_impromptu_carrier_attaches_once_to_farfetchd():
           me.active.tool is None, str(me.active.tool))
 
 
+def test_born_to_slack_gates_slaking_on_the_opponents_ex():
+    """Slaking ex: "If your opponent has no Pokemon ex or Pokemon V in play,
+    this Pokemon can't attack." The generic lock rule compiled it as a lock
+    on the OPPONENT's attacks, which nothing reads, so Slaking swung for
+    280 against decks with no Pokemon ex."""
+    import os
+    import tempfile
+    src = open("decks/field/ditto_tyranitar_gengar_hydreigon.txt").read()
+    src = src.replace("2 Hydreigon ex SSP 240\n",
+                      "2 Hydreigon ex SSP 240\n1 Slaking ex SSP 147\n")
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    os.write(fd, src.encode()); os.close(fd)
+    try:
+        V, D, E = _real(path, "d")
+    finally:
+        os.remove(path)
+    for opp_deck, opp_mon, wanted in (
+            ("decks/field/meta_raging_bolt.txt", "Mega Kangaskhan ex", True),
+            ("decks/field/arbok_muk_laser_darkbell.txt", None, False)):
+        O = V.load_model(opp_deck, "o")[0]
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2],
+                                                         V.compile_effects_for(O[1], O[3]))
+        name = opp_mon or next(n for n, i in O[1].items()
+                               if "ex" not in (i.get("subtypes") or []))
+        op.active = V.InPlay(name, 1)
+        me.active = V.InPlay("Slaking ex", 1)
+        me._opp_ref, op._opp_ref = op, me
+        check(f"Slaking ex {'can' if wanted else 'cannot'} attack against {name}",
+              AE.query_attack_gate(me, me.active) == wanted)
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4473,6 +4504,7 @@ def main():
                test_ditto_transforms_and_gengar_faints,
                test_named_ability_limit_is_per_name_not_per_copy,
                test_impromptu_carrier_attaches_once_to_farfetchd,
+               test_born_to_slack_gates_slaking_on_the_opponents_ex,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
