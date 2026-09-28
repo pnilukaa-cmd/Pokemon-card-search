@@ -38,6 +38,18 @@ weak. Obsidian (needs Psychic) is left uncastable on purpose.
 - **Slaking ex** (280 for two Colorless): measured strong until the engine
   was found ignoring Born to Slack; with the gate fixed, 0 Slaking ties 2.
 - Mega Gengar ex instead of Gengar ex: -0.61 (three Prizes).
+- **Other Darkness targets in the Gengar ex slot** (2026-09-28, 200 games,
+  paired): Crobat CRI 51 -0.29, Marnie's Grimmsnarl ex -0.55, Gengar ex
+  30C -0.47, Tyranitar ex PRE 64 +1.38 -- which at 1000 games was -0.07
+  +/- 0.28 (two Tyranitar ex: +0.08 +/- 0.30). The one-of slots do not
+  move the deck; Hydreigon ex does the work. Crobat, Toxtricity and
+  Mandibuzz were mis-modelled until this study and are fixed.
+- **Why Farfetch'd**: it is a sixth Basic that Poffin finds (70 HP),
+  bought for the mulligan rate (60% -> 46%), measured +1.07 as a fifth
+  Basic. Impromptu Carrier is a small bonus (it takes Air Balloon); it
+  now declines a Backtrack Badge it cannot use.
+- **Turn 1**: only the player going FIRST cannot attack on turn 1. Going
+  second, Crispin's second Energy makes a turn-1 Transform legal.
 
 1000-trial baseline: Ditto in play 98.2% (avg turn 1.27), first attack by
 turn 6 in 97.2% (avg 2.27), Hydreigon ex by turn 6 61.6% (avg 2.87). The
