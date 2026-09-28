@@ -63,6 +63,7 @@ SENTINELS = [
     }),
     (r"(Poisoned|Burned|Asleep|Paralyzed|Confused)", "status condition mechanic", {
         "status_inflict", "status_cure", "status_immune", "damage_scales_with_special_condition",
+        "self_status_payoff",
         "status_persist_through_evolve", "attack_whiff_on_coin", "double_attack_conditional",
         "damage_boost_conditional_generic", "conditional_no_effect_attack",
         "retreat_prevent_opponent", "damage_both_sides_with_counters",

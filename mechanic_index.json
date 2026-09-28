@@ -133,7 +133,7 @@
     {
       "tag": "energy_discard_on_attack",
       "role": "produce",
-      "card_count": 116
+      "card_count": 117
     },
     {
       "tag": "energy_discard_opponent",
@@ -203,7 +203,7 @@
     {
       "tag": "damage_scales_with_energy_attached",
       "role": "consume",
-      "card_count": 48
+      "card_count": 49
     },
     {
       "tag": "damage_scales_with_energy_in_discard",
@@ -234,6 +234,16 @@
       "tag": "status_cure",
       "role": "produce",
       "card_count": 6
+    },
+    {
+      "tag": "self_status_payoff",
+      "role": "consume",
+      "card_count": 1
+    },
+    {
+      "tag": "heal_lock_opponent",
+      "role": "produce",
+      "card_count": 1
     },
     {
       "tag": "status_immune",
@@ -418,7 +428,7 @@
     {
       "tag": "free_or_reduced_retreat_self",
       "role": "produce",
-      "card_count": 12
+      "card_count": 13
     },
     {
       "tag": "retreat_cost_increase_opponent",
@@ -508,7 +518,7 @@
     {
       "tag": "attack_copy_generic",
       "role": "produce",
-      "card_count": 8
+      "card_count": 9
     },
     {
       "tag": "damage_reduction_self",
@@ -553,7 +563,7 @@
     {
       "tag": "weakness_modify",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "damage_boost_conditional_generic",
@@ -678,7 +688,7 @@
     {
       "tag": "prize_bonus_self",
       "role": "produce",
-      "card_count": 7
+      "card_count": 8
     },
     {
       "tag": "prize_reduction_opponent",
@@ -913,7 +923,7 @@
     {
       "tag": "pokemon_shuffle_from_discard_into_deck",
       "role": "produce",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "deck_peek_bottom",
@@ -51389,7 +51399,9 @@
         "Darkness"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "heal_lock_opponent"
+      ]
     },
     {
       "name": "Yveltal",
@@ -51491,7 +51503,9 @@
         "Metal"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "pokemon_shuffle_from_discard_into_deck"
+      ]
     },
     {
       "name": "Dialga",
@@ -51666,7 +51680,9 @@
         "Metal"
       ],
       "hp": "130",
-      "tags": []
+      "tags": [
+        "prize_bonus_self"
+      ]
     },
     {
       "name": "Gholdengo",
@@ -51932,7 +51948,8 @@
       ],
       "hp": "160",
       "tags": [
-        "heal_all_damage"
+        "heal_all_damage",
+        "self_status_payoff"
       ]
     },
     {
@@ -52002,7 +52019,9 @@
         "Colorless"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "energy_discard_on_attack"
+      ]
     },
     {
       "name": "Hisuian Zorua",
@@ -52666,7 +52685,9 @@
         "Psychic"
       ],
       "hp": "160",
-      "tags": []
+      "tags": [
+        "attack_copy_generic"
+      ]
     },
     {
       "name": "Mew ex",
@@ -52700,7 +52721,9 @@
         "Psychic"
       ],
       "hp": "270",
-      "tags": []
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
     },
     {
       "name": "Gengar ex",
@@ -53198,7 +53221,9 @@
         "Grass"
       ],
       "hp": "80",
-      "tags": []
+      "tags": [
+        "weakness_modify"
+      ]
     },
     {
       "name": "Illumise",
@@ -54406,7 +54431,9 @@
         "Darkness"
       ],
       "hp": "120",
-      "tags": []
+      "tags": [
+        "free_or_reduced_retreat_self"
+      ]
     },
     {
       "name": "Zoroark",

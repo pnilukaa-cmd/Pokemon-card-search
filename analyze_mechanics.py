@@ -224,7 +224,8 @@ FAMILIES = [
     ("energy_discard_self_all", "produce",
      r"discard (all|up to \d+|any amount of) .*Energy (from|attached to) this Pok[eé]mon|discard all Energy from this"),
     ("energy_discard_on_attack", "produce",
-     r"discard (an? |\d+ ?|all )?[A-Za-z]* ?Energy from (this Pok[eé]mon|your)"),
+     r"discard (an? |\d+ ?|all )?[A-Za-z]* ?Energy from (this Pok[eé]mon|your)|"
+     r"discard an? [A-Za-z]* Energy, .{0,60}Energy from this Pok[eé]mon"),
     ("energy_discard_opponent", "produce",
      r"discard (an? |\d+ ?|all )?[A-Za-z]* ?Energy (card )?from (1 of )?your opponent|discard all .*Energy from all of your opponent"),
     ("energy_search", "produce",
@@ -254,6 +255,7 @@ FAMILIES = [
      r"can only be attached to a [\w' ]+'s Pok[eé]mon"),
     ("damage_scales_with_energy_attached", "consume",
      r"more damage for each [A-Za-z]* ?Energy attached|"
+     r"damage for each type of Basic Energy attached|"
      r"damage for each [A-Za-z]* ?Energy( card)? attached to (this Pok[eé]mon|all)|"
      r"damage for each [A-Za-z]* ?Energy attached to your opponent'?s Active"),
     ("damage_scales_with_energy_in_discard", "consume",
@@ -270,6 +272,8 @@ FAMILIES = [
      r"is now affected by that Special Condition"),
     ("double_attack_conditional", "consume", r"may use an attack it has twice"),
     ("status_cure", "produce", r"recovers? from (all )?Special Condition"),
+    ("self_status_payoff", "consume", r"if this Pok[eé]mon remains (Asleep|Paralyzed|Confused|Poisoned|Burned)"),
+    ("heal_lock_opponent", "produce", r"can'?t be healed"),
     ("status_immune", "consume", r"can'?t be (Poisoned|Burned|Asleep|Paralyzed|Confused|Confused)|loses? any Ability that requires"),
     ("damage_scales_with_special_condition", "consume",
      r"damage for each Special Condition affecting"),
@@ -339,7 +343,7 @@ FAMILIES = [
     ("on_play_switch_to_active", "consume",
      r"you may switch (it|this Pok[eé]mon) with (your|1 of your) Active Pok[eé]mon"),
     ("free_or_reduced_retreat_self", "produce",
-     r"(no Retreat Cost|Retreat Cost.{0,60}? is [A-Za-z]* less|has no Retreat Cost)"),
+     r"(no Retreat Cost|Retreat Cost.{0,60}? is (\d+|[A-Za-z]*) less|has no Retreat Cost)"),
     ("retreat_cost_increase_opponent", "produce",
      r"(opponent'?s Active|Defending Pok[eé]mon|both Active Pok[eé]mon).*Retreat Cost is [A-Za-z]* more|"
      r"Retreat Cost.{0,50}is [A-Za-z]+ more"),
@@ -380,7 +384,7 @@ FAMILIES = [
     # Night Joker) copy an attack from the user's OWN Benched Pokemon, not
     # the opponent's -- "opponent" in the old name overclaimed the source.
     ("attack_copy_generic", "produce",
-     r"use it as this attack|use that attack as this attack"),
+     r"use it as this attack|use that attack as this attack|can use the attacks of"),
 
     # --- Damage math ---
     ("damage_reduction_self", "consume",
@@ -396,7 +400,7 @@ FAMILIES = [
     ("effect_prevention_conditional", "consume", r"prevent all effects"),
     ("ko_prevention", "consume", r"is not Knocked Out, and its remaining HP becomes"),
     ("weakness_modify", "produce",
-     r"[Ww]eakness of .*is now|has no Weakness|Weakness is now"),
+     r"[Ww]eakness of .*is now|has no Weakness|Weakness is now|apply Weakness for .{0,40} as [x×]\d"),
     ("damage_boost_conditional_generic", "consume",
      r"(does|do) \d+ more damage|damage (does|do) \d+ more"),
     ("damage_scales_with_pokemon_count", "consume",
@@ -441,7 +445,7 @@ FAMILIES = [
     ("devolve_opponent", "produce",
      r"devolve (1 of |each of )?your opponent'?s|devolve it by (putting|shuffling)"),
     ("self_devolve", "produce", r"[Dd]evolve 1 of your evolved"),
-    ("prize_bonus_self", "produce", r"take \d+ more Prize cards?|,? and take a Prize card"),
+    ("prize_bonus_self", "produce", r"take \d+ more Prize cards?|,? and take a Prize card|\btake \d+ Prize cards?"),
     ("prize_reduction_opponent", "produce",
      r"takes? 1 fewer Prize card|can'?t take any Prize cards"),
     ("prize_peek", "produce", r"face-down Prize cards?|Prize cards? face up"),
@@ -522,7 +526,7 @@ FAMILIES = [
     ("ability_pokemon_play_lock", "produce",
      r"opponent can'?t play any Pok[eé]mon that has an Ability from their hand"),
     ("pokemon_shuffle_from_discard_into_deck", "produce",
-     r"[Ss]huffle up to \d+ Pok[eé]mon from your discard pile into your deck"),
+     r"[Ss]huffle up to \d+ (in any combination of )?Pok[eé]mon.{0,40}? from your discard pile into your deck"),
     ("deck_peek_bottom", "produce", r"look at the bottom \d+ cards? of your deck"),
     ("hand_count_shuffle_redraw_opponent", "produce",
      r"opponent counts the cards in their hand, shuffles those cards"),
