@@ -1,0 +1,28 @@
+Pokémon: 12
+4 Ditto 30C 115
+2 Farfetch'd TWM 132
+4 Hydreigon ex SSP 119
+1 Tyranitar JTG 95
+1 Gengar ex TEF 104
+
+Trainer: 37
+4 Crispin SCR 133
+4 Lillie's Determination MEG 119
+2 Kofu SCR 138
+2 Boss's Orders MEG 114
+1 Team Rocket's Petrel ASC 207
+4 Buddy-Buddy Poffin MEG 167
+4 Pokégear 3.0 BLK 84
+4 Night Stretcher MEG 173
+3 Ultra Ball MEG 131
+2 Energy Switch MEG 115
+1 Switch MEG 130
+1 Secret Box TWM 163
+4 Backtrack Badge PBL 74
+1 Air Balloon MEG 166
+
+Energy: 11
+8 Basic Darkness Energy
+3 Basic Metal Energy
+
+Total Cards: 60
