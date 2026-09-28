@@ -2108,7 +2108,10 @@ def test_the_reflip_tool_is_actually_put_on_a_pokemon():
     V.RETALIATE_CARDS = V.build_retaliate_index(M.load_cards())
     POK = {
         "Maushold": {"hp": 110, "retreat": 1, "stage": "Stage 1",
-                     "types": ["Colorless"], "attacks": [], "weakness": None,
+                     "types": ["Colorless"], "weakness": None,
+                     "attacks": [{"name": "Gnaw", "cost": ["Colorless"], "damage": 20,
+                                  "text": "Flip 4 coins. This attack does 20 damage "
+                                          "for each heads."}],
                      "resistance": None, "abilities": [], "prize": 1,
                      "base_name": "Maushold"},
         "Wiglett": {"hp": 60, "retreat": 1, "stage": "Basic",
@@ -2127,6 +2130,21 @@ def test_the_reflip_tool_is_actually_put_on_a_pokemon():
               f"tool={pl.active.tool}")
         check(f"  ...and query_reflip agrees",
               AE.query_reflip(pl, pl.active) == wanted)
+
+    # It re-flips an attack's coins: a Colorless Active that flips none
+    # (an opening Fan Rotom) is the wrong home when a flipper waits.
+    POK["Fan Rotom"] = dict(POK["Maushold"], stage="Basic", base_name="Fan Rotom",
+                            attacks=[{"name": "Assault Landing", "cost": ["Colorless"],
+                                      "damage": 70, "text": "If there is no Stadium in "
+                                      "play, this attack does nothing."}])
+    pl = V.Player("me", POK, [])
+    pl.active = V.InPlay("Fan Rotom", 0)
+    pl.bench = [V.InPlay("Maushold", 0)]
+    pl.hand = [("Tool", "Backtrack Badge")]
+    V.attach_tools(pl, [])
+    check("Backtrack Badge skips a non-flipping Active for the Benched flipper",
+          pl.active.tool is None and pl.bench[0].tool == "Backtrack Badge",
+          f"active={pl.active.tool} bench={pl.bench[0].tool}")
 
 
 def test_a_search_respects_the_rule_box_clause_it_prints():
@@ -2509,7 +2527,9 @@ def test_no_card_in_any_decklist_is_silently_inert():
                     or nm in V.RETALIATE_CARDS or nm in V.DAMAGE_TOOLS):
                 return True
             pl = V.Player("x", {"P": {"hp": 60, "retreat": 1, "stage": "Basic",
-                                      "types": ["Colorless"], "attacks": [],
+                                      "types": ["Colorless"],
+                                      "attacks": [{"name": "F", "cost": [], "damage": 0,
+                                                   "text": "Flip a coin."}],
                                       "weakness": None, "resistance": None,
                                       "abilities": [], "prize": 1,
                                       "prize_value": 1, "rule_box": False,
@@ -3925,6 +3945,47 @@ def test_the_lookahead_does_not_see_hidden_cards():
           (me.deck, op.deck, op.hand, me.hand) == real)
 
 
+def test_named_ability_limit_is_per_name_not_per_copy():
+    """"You can't use more than 1 Fan Call Ability during your turn": the
+    once-per-turn key was per copy, so two Fan Rotom searched 6 Pokemon."""
+    import os
+    import tempfile
+    src = open("decks/field/ditto_tyranitar_gengar_hydreigon.txt").read()
+    src = src.replace("2 Hydreigon ex SSP 240\n",
+                      "2 Hydreigon ex SSP 240\n2 Fan Rotom ASC 171\n")
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    os.write(fd, src.encode()); os.close(fd)
+    try:
+        V, D, E = _real(path, "d")
+    finally:
+        os.remove(path)
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2],
+                                                     V.compile_effects_for(O[1], O[3]))
+    me.active = V.InPlay("Fan Rotom", 1)
+    me.bench = [V.InPlay("Fan Rotom", 1)]
+    op.active = V.InPlay("Mega Kangaskhan ex", 1)
+    me.round_no = op.round_no = 1
+    me._opp_ref = op
+    me.deck = [("Pokemon", "Ditto")] * 4 + [("Item", "Ultra Ball")] * 10
+    me.hand = []
+    V.use_abilities(me, op, 1, [])
+    got = sum(1 for c in me.hand if c == ("Pokemon", "Ditto"))
+    check("two Fan Rotom search 3 Pokemon, not 4+", got == 3, str(got))
+
+    # Assault Landing does nothing with no Stadium in play, so an opening
+    # Fan Rotom is a dead attacker: the Energy belongs on the Ditto that
+    # Transforms into a Stage 2 keeping it.
+    me.active = V.InPlay("Fan Rotom", 1)
+    me.bench = [V.InPlay("Ditto", 1)]
+    me.deck = [("Pokemon", "Hydreigon ex"), ("Pokemon", "Tyranitar")] + [("Item", "Ultra Ball")] * 10
+    me.hand = [("Energy", "Darkness Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("Energy skips a dead-attack Active for the Ditto behind it",
+          me.bench[0].energy_count() == 1 and me.active.energy_count() == 0,
+          f"rotom={me.active.energy_count()} ditto={me.bench[0].energy_count()}")
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4373,6 +4434,7 @@ def main():
                test_attack_texts_that_were_ignored,
                test_abilities_and_stadiums_that_were_ignored,
                test_ditto_transforms_and_gengar_faints,
+               test_named_ability_limit_is_per_name_not_per_copy,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

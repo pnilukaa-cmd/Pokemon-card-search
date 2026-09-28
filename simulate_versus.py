@@ -1376,6 +1376,9 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
     return _deck_left_after(pl, amount, rest if shuffles else 0) >= DRAW_FLOOR
 
 
+_NAME_LIMIT_RE = _re.compile(r"can'?t use more than 1 .{1,40}? Ability", _re.I)
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -1395,7 +1398,10 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                     continue
             elif eff.trigger not in ACTIVATED:
                 continue
-            key = (id(p), eff.name)
+            # "You can't use more than 1 Fan Call Ability during your turn"
+            # limits the name, not the copy: two Fan Rotom searched twice.
+            key = (("named", eff.name) if _NAME_LIMIT_RE.search(eff.text or "")
+                   else (id(p), eff.name))
             if key in pl.abilities_used and eff.trigger != IR.Trigger.ANY_TIMES_PER_TURN:
                 continue
             if _draw_would_deck_out(pl, eff):
@@ -4700,7 +4706,16 @@ def attach_energy(pl, cards_by_name, log):
         energy_on_attach(pl, target, name, log)
         return
     target = None
-    if (POL.knob(pl, "energy_to_active")
+    # ...unless the Active has nothing worth paying for and a Benched body
+    # does: an opening Fan Rotom (Assault Landing does nothing with no
+    # Stadium) took the Energy the Ditto behind it needed to Transform.
+    # Only truly dead: a 0 printed number is not (Tauros's Target Together
+    # scales off coin flips and printed nothing).
+    dead_active = (pl.active is not None
+                   and _attacks_dead(pl, pl.active)
+                   and any(energy_shortfall(pl, p) > 0
+                           and _potential_damage(pl, p) > 0 for p in pl.bench))
+    if (POL.knob(pl, "energy_to_active") and not dead_active
             and pl.active and energy_shortfall(pl, pl.active) > 0):
         target = pl.active
     else:
@@ -4804,6 +4819,18 @@ def _ready_damage(pl, opp, spot):
     return min(attack_value(pl, opp, spot, atk), 10 ** 5)
 
 
+_NEEDS_STADIUM_RE = _re.compile(r"if there is no stadium in play, this attack does nothing", _re.I)
+_SWAP_FROM_DECK_RE = _re.compile(r"search your deck for a pok[eé]mon and switch it with this", _re.I)
+
+
+def _attacks_dead(pl, spot):
+    """Nothing this Pokemon can attack with does anything: no attacks, or
+    every one needs a Stadium and none is in play."""
+    stadium = pl.stadium or getattr(pl, "_opp_stadium", None)
+    return all(_NEEDS_STADIUM_RE.search(a.get("text") or "") and not stadium
+               for a in (pl.POKEMON.get(spot.name) or {}).get("attacks") or [])
+
+
 def _potential_damage(pl, spot):
     """What this Pokemon would hit for once it IS paid up -- used to decide
     who deserves the Energy, where "what can it do right now" is always 0."""
@@ -4816,6 +4843,17 @@ def _potential_damage(pl, spot):
         return 0
 
     def printed(a):
+        text = a.get("text") or ""
+        # "If there is no Stadium in play, this attack does nothing."
+        if _NEEDS_STADIUM_RE.search(text) and not (
+                pl.stadium or getattr(pl, "_opp_stadium", None)):
+            return 0
+        # Ditto's Surprisingly Transform becomes a Pokemon from the deck,
+        # keeping its Energy: it is worth what that Pokemon hits for.
+        if _SWAP_FROM_DECK_RE.search(text):
+            return max((b["damage"] or 0
+                        for k, n in pl.deck if k == "Pokemon" and n in pl.POKEMON
+                        for b in pl.POKEMON[n]["attacks"]), default=0)
         # A copy attack (Night Joker) has no damage number of its own; it
         # is worth whatever it can borrow. Ranking it at 0 sent every
         # Energy to the Bench toolbox and starved the actual attacker.
@@ -4937,19 +4975,23 @@ def effective_hp(pl, spot):
             + sum(a.amount or 0 for _, a in energy_passives(pl, spot, IR.Op.MODIFY_HP)))
 
 
-def _is_reflip_tool(pl, name):
-    """Backtrack Badge, and only when the Active is the type it names."""
+def _is_reflip_tool(pl, name, spot=None):
+    """Backtrack Badge, and only on a Pokemon of the type it names that
+    flips a coin for an attack. Without the flip test it went on whatever
+    was Active: an opening Fan Rotom took the Badge the Ditto needed."""
+    spot = spot or pl.active
     eff = trainer_effect_ir(name)
-    if eff is None or eff.unsupported or not pl.active:
+    if eff is None or eff.unsupported or not spot:
         return False
+    info = pl.POKEMON.get(spot.name) or {}
     for act in eff.actions:
         if act.op is not IR.Op.REFLIP_COINS:
             continue
         want = (act.filter or {}).get("type")
-        if want and want not in ((pl.POKEMON.get(pl.active.name) or {})
-                                 .get("types") or []):
+        if want and want not in (info.get("types") or []):
             return False
-        return True
+        return any(_re.search(r"\bflip", a.get("text") or "", _re.I)
+                   for a in info.get("attacks") or [])
     return False
 
 
@@ -5002,13 +5044,15 @@ def attach_tools(pl, log):
                 pl.active.tool = name
                 log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
                 continue
-            if _is_reflip_tool(pl, name):
-                if not pl.active or (pl.active.tool
-                                     and not AE.query_extra_tool_slots(pl, pl.active)):
-                    continue
+            # The Active first, else a Benched flipper waiting its turn.
+            holder = next((p for p in pl.in_play()
+                           if _is_reflip_tool(pl, name, p)
+                           and (not p.tool or AE.query_extra_tool_slots(pl, p))),
+                          None)
+            if holder is not None:
                 pl.remove_from_hand(kind, name)
-                pl.active.tool = name
-                log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+                holder.tool = name
+                log.append(f"  {pl.name}: attaches {name} to {holder.name}")
             continue
         if name in DAMAGE_TOOLS:
             if not pl.active or pl.active.tool:
