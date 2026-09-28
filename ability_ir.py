@@ -1133,8 +1133,17 @@ def _r(m, text):
 @rule("attach_energy_from_deck",
       r"search your deck for (?:up to )?(\d+|a|an) ?(?:basic )?(" + TYPES + r")? ?energy[^.]{0,40}attach")
 def _r(m, text):
-    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), Target.YOUR_ANY,
-                   {"type": (m.group(2) or "").capitalize() or None, "from": "deck"})]
+    f = {"type": (m.group(2) or "").capitalize() or None, "from": "deck"}
+    # Toxtricity's Sinister Surge: "attach it to 1 of your Benched Darkness
+    # Pokemon ... place 2 damage counters on THAT Pokemon". It compiled as
+    # any recipient, with the counters on Toxtricity itself.
+    mm = re.search(r"attach it to 1 of your benched (" + TYPES + r") pok[eé]mon", text, re.I)
+    if mm:
+        f.update(each_of=1, recipient_type=mm.group(1).capitalize())
+        mc = re.search(r"place (\d+) damage counters? on that pok[eé]mon", text, re.I)
+        if mc:
+            f["counters_on_recipient"] = int(mc.group(1))
+    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), Target.YOUR_ANY, f)]
 
 
 @rule("move_energy", r"move (?:a|an|(\d+)) ?(" + TYPES + r")? ?energy from ([^.]{0,40}?) to ([^.]{0,40})")
@@ -1192,6 +1201,9 @@ def _r(m, text):
 def _r(m, text):
     if re.search(r"for each .{0,30}card in your discard pile", text, re.I):
         return []          # place_counters_per_discard above owns this
+    if re.match(r"\s*that pok[eé]mon", m.group(2), re.I) and \
+            re.search(r"if you attached energy", text, re.I):
+        return []          # attach_energy_from_deck's counters_on_recipient
     # "Choose 2 of your opponent's Pokemon and put 2 damage counters on
     # EACH of them" -- the target lives in the *earlier* clause, so
     # parsing only the "on ..." tail read "each of them" as this Pokemon
@@ -2003,6 +2015,11 @@ def _r(m, text):
     # this fired too the card would ALSO tutor something unrelated.
     if re.search(r"a card that (?:has no abilities and )?evolves from", text, re.I):
         return []
+    # Crobat's Nighttime Maneuvers puts the card on TOP of the deck
+    # (search_to_top_of_deck); as a hand search it was a free Ultra Ball
+    # for any card, every turn.
+    if re.search(r"then put that card on top of it", text, re.I):
+        return []
     return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF, {"kind": "card"})]
 
 
@@ -2012,9 +2029,10 @@ def _r(m, text):
 # Ultra Ball than the one that is printed.
 @rule("search_to_top_of_deck",
       r"search your deck for (\d+|a|an) cards?[^.]{0,60}?"
-      r"put (?:those|that) cards? on top of it")
+      r"put (?:those|that) cards? on top of it|"
+      r"search your deck for (\d+|a|an) cards?\. shuffle your deck, then put that card on top of it")
 def _r(m, text):
-    return [Action(Op.SEARCH_TO_TOP_OF_DECK, _num(m.group(1)), Target.SELF)]
+    return [Action(Op.SEARCH_TO_TOP_OF_DECK, _num(m.group(1) or m.group(2)), Target.SELF)]
 
 
 # Redeemable Ticket. Prize cards are real cards in this engine -- dealt off
@@ -3046,9 +3064,15 @@ def _r(m, text):
 
 
 @rule("bench_opponent_basics",
-      r"put any number of basic pok[eé]mon you find there onto their bench")
+      r"put (any number of|up to (\d+)|a) basic pok[eé]mon (?:with (\d+) hp or less )?"
+      r"(?:that )?you find there onto (?:their|your opponent'?s) bench")
 def _r(m, text):
-    return [Action(Op.FORCE_BENCH_OPPONENT, None, Target.OPPONENT)]
+    # Only "any number of" was matched: Mandibuzz's Look for Prey (a Basic
+    # with 70 HP or less) and Lickitung (up to 2) revealed the hand and
+    # benched nothing.
+    n = None if m.group(1).lower() == "any number of" else (_num(m.group(2)) if m.group(2) else 1)
+    f = {"hp_at_most": int(m.group(3))} if m.group(3) else {}
+    return [Action(Op.FORCE_BENCH_OPPONENT, n, Target.OPPONENT, f)]
 
 
 @rule("attack_cost_scales_by_prizes",

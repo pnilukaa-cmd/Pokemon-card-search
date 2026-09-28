@@ -1203,11 +1203,15 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pool = [p for p in pl.bench
                     if not rt or rt in (pl.POKEMON.get(p.name, {}).get("types") or [])]
             got = 0
+            ctr = act.filter.get("counters_on_recipient")
             for tgt in sorted(pool, key=lambda p: p.energy_count())[:each]:
                 card = _take()
                 if not card:
                     break
                 _put(tgt, card)
+                if ctr:
+                    tgt.damage += 10 * ctr
+                    log.append(f"    {ctr} damage counters on {tgt.name}")
                 got += 1
             return got > 0
         if act.filter.get("per_heads") or act.filter.get("per_opp_energy"):
@@ -2400,10 +2404,14 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.FORCE_BENCH_OPPONENT:
         placed = 0
+        cap = (act.filter or {}).get("hp_at_most")
         for kind, name in list(opp.hand):
-            if len(opp.bench) >= BENCH_LIMIT(opp):
+            if len(opp.bench) >= BENCH_LIMIT(opp) or (act.amount and placed >= act.amount):
                 break
-            if kind == "Pokemon" and opp.POKEMON.get(name, {}).get("stage") == "Basic" \
+            info = opp.POKEMON.get(name, {})
+            if cap and (info.get("hp") or 999) > cap:
+                continue
+            if kind == "Pokemon" and info.get("stage") == "Basic" \
                     and make_inplay is not None:
                 opp.hand.remove((kind, name))
                 opp.bench.append(make_inplay(name))

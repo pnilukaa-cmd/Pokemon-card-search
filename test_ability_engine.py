@@ -279,8 +279,43 @@ def test_search_to_hand():
     p = FakePlayer("A", POK, EFF, active=Spot("Crobat"),
                    deck=[("Item", "Ultra Ball"), ("Pokemon", "Zubat")])
     ok = AE.activate(eff, p, p, p.active, [])
-    check("Crobat searches a card into hand", ok and len(p.hand) == 1,
-          f"ok={ok} hand={p.hand}")
+    # "Search your deck for a card. Shuffle your deck, then put that card
+    # on top of it." It compiled as a search INTO HAND (this check used to
+    # assert exactly that): a free tutor every turn instead of next turn's
+    # draw.
+    check("Crobat puts the searched card on top of the deck, not in hand",
+          ok and p.hand == [] and len(p.deck) == 2, f"ok={ok} hand={p.hand} deck={p.deck}")
+
+
+def test_toxtricity_and_mandibuzz_do_what_they_print():
+    """Sinister Surge compiled as "attach to any of your Pokemon" with the
+    2 counters on Toxtricity; the card says a Benched Darkness Pokemon and
+    counters on THAT Pokemon. Look for Prey revealed the hand and benched
+    nothing (only "any number of" was matched)."""
+    sn = {"Toxtricity": ("PFL", "103"), "Mandibuzz": ("WHT", "145"),
+          "Hydreigon ex": ("SSP", "119"), "Farfetch'd": ("TWM", "132")}
+    POK, EFF = build(list(sn), setnums=sn)
+    eff = find(EFF["Toxtricity"], "Sinister Surge")
+    p = FakePlayer("A", POK, EFF, active=Spot("Toxtricity"),
+                   bench=[Spot("Farfetch'd"), Spot("Hydreigon ex")],
+                   deck=[("Energy", "Basic Darkness Energy")] * 3)
+    AE.activate(eff, p, p, p.active, [])
+    hyd, far = p.bench[1], p.bench[0]
+    check("Sinister Surge feeds the Benched Darkness Pokemon",
+          hyd.energy_count() == 1 and far.energy_count() == 0
+          and p.active.energy_count() == 0, f"hyd={hyd.energy_count()} far={far.energy_count()}")
+    check("  ...and the 2 counters land on it, not on Toxtricity",
+          hyd.damage == 20 and p.active.damage == 0, f"hyd={hyd.damage} tox={p.active.damage}")
+    eff = find(EFF["Mandibuzz"], "Look for Prey")
+    me = FakePlayer("A", POK, EFF, active=Spot("Mandibuzz"))
+    them = FakePlayer("B", POK, EFF, active=Spot("Hydreigon ex"))
+    them.hand = [("Pokemon", "Farfetch'd"), ("Pokemon", "Farfetch'd")]
+    for x in (me, them):
+        x.stadium = x._opp_stadium = None
+    AE.activate(eff, me, them, me.active, [], make_inplay=lambda n: Spot(n))
+    check("Look for Prey benches one Basic of 70 HP or less from their hand",
+          [b.name for b in them.bench] == ["Farfetch'd"] and len(them.hand) == 1,
+          f"bench={[b.name for b in them.bench]}")
 
 
 def test_shuffle_self_cost():
@@ -4021,6 +4056,14 @@ def test_impromptu_carrier_attaches_once_to_farfetchd():
         V.attach_tools(me, [])
     check("  ...and the Active never takes a free Tool off the deck",
           me.active.tool is None, str(me.active.tool))
+    # "you may search": with only a Badge left, Farfetch'd (no coin flips)
+    # takes nothing and the Badge stays for a Ditto.
+    me.bench, me.deck = [], [("Tool", "Backtrack Badge")] + [("Item", "Ultra Ball")] * 5
+    me.hand = [("Pokemon", "Farfetch'd")]
+    V.play_basics(me, 2, [])
+    f = next(p for p in me.bench if p.name == "Farfetch'd")
+    check("  ...and declines a Tool it cannot use", f.tool is None
+          and ("Tool", "Backtrack Badge") in me.deck, str(f.tool))
 
 
 def test_born_to_slack_gates_slaking_on_the_opponents_ex():
@@ -4505,6 +4548,7 @@ def main():
                test_named_ability_limit_is_per_name_not_per_copy,
                test_impromptu_carrier_attaches_once_to_farfetchd,
                test_born_to_slack_gates_slaking_on_the_opponents_ex,
+               test_toxtricity_and_mandibuzz_do_what_they_print,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

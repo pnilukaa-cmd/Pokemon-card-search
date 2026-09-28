@@ -1104,12 +1104,14 @@ def _transform_pick(pl, opp, spot, cands, use_forced=False):
 
 def _tool_from_deck_pick(pl, spot, names):
     """Impromptu Carrier's Tool: one that does something on this Pokemon
-    (HP, retreat, retaliation, a re-flip it can use), else the first."""
+    (HP, retreat, retaliation, a re-flip it can use), else none -- the
+    search is a "may", and a Backtrack Badge on a Farfetch'd that flips
+    nothing is a Badge the Ditto beside it never gets."""
     for n in names:
         if (n in hp_tools() or n in RETREAT_TOOLS or n in RETALIATE_CARDS
                 or n in on_damaged_tools() or _is_reflip_tool(pl, n, spot)):
             return n
-    return names[0]
+    return None
 
 
 AE.TOOL_FROM_DECK_PICK = _tool_from_deck_pick
@@ -5574,6 +5576,7 @@ ATTACK_RIDER_OPS = {
     IR.Op.SWAP_FROM_DECK, IR.Op.MILL_SELF, IR.Op.TRAINER_FLIP_LOCK,
     IR.Op.COPY_TOP_SUPPORTER, IR.Op.PRIZES_IF_HAND_SIZE, IR.Op.DISCARD_TO_DECK,
     IR.Op.SET_OPPONENT_HAND,
+    IR.Op.FORCE_BENCH_OPPONENT,   # Lickitung's Tongue Pull
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,
