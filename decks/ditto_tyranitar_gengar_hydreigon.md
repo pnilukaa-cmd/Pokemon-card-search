@@ -88,3 +88,64 @@ Energy: 12
 
 Total Cards: 60
 ```
+
+## Tested 2026-09-28: a second Basic to cut the mulligans
+
+1000 games against each of the 54 other field decks, paired (same dice),
+engine after the Fan Call / Backtrack Badge / Impromptu Carrier fixes:
+
+| Variant | Basics | Mulligan % | Win % | vs original |
+|---|---|---|---|---|
+| original | 4 | 60.1 | 65.86 | -- |
+| +1 Farfetch'd TWM 132, -1 Jumbo Ice Cream | 5 | 52.5 | 66.93 | **+1.07 ± 0.50** |
+| +1 Farfetch'd, +1 Fan Rotom, -1 Jumbo, -1 Energy Search | 6 | 45.9 | 66.88 | +1.02 ± 0.52 |
+| +1 Fan Rotom ASC 171, -1 Jumbo Ice Cream | 5 | 52.5 | 65.92 | -0.07 ± 0.38 |
+| +2 Fan Rotom, -2 Jumbo Ice Cream | 6 | 45.9 | 66.16 | +0.17 ± 0.51 |
+
+Fan Rotom (Fan Call fetches 3 Ditto on turn 1) looks like the natural
+fix and measures as nothing: as the opener it has no live attack (Assault
+Landing needs a Stadium, and this deck plays none) and costs a retreat
+before Ditto can Transform. Before the pilot fixes it measured -2.9,
+because the greedy pilot fed it the Energy and the Backtrack Badge that
+Ditto needed. Farfetch'd is the better fifth Basic: 70 HP (Poffin finds
+it), Mach Cut strips Special Energy, and Impromptu Carrier thins a Tool.
+About two standard errors -- a likely small gain, not a proven one.
+
+1000-trial baseline of the Farfetch'd list: Ditto in play 98.3% (avg turn
+1.19), first attack by turn 6 in 98.1% (avg 2.28), Hydreigon ex by turn 6
+72.7% (original: 88.7%). The baseline sim cannot retreat, so a Farfetch'd
+opener never lets Ditto attack there; the versus sim retreats, and that is
+where the +1.07 comes from.
+
+```
+Pokémon: 11
+4 Ditto 30C 115
+2 Tyranitar JTG 95
+2 Gengar ex 30C 90
+2 Hydreigon ex SSP 240
+1 Farfetch'd TWM 132
+
+Trainer: 37
+2 Boss's Orders MEG 114
+1 Energy Search POR 72
+4 Night Stretcher SSP 251
+2 Air Balloon MEG 166
+1 Xerosic's Machinations SFA 89
+1 Special Red Card CRI 113
+4 Buddy-Buddy Poffin TWM 223
+4 Crispin PRE 171
+1 Secret Box TWM 163
+4 Backtrack Badge PBL 74
+3 Team Rocket's Petrel DRI 226
+4 Pokégear 3.0 BLK 84
+2 Jumbo Ice Cream CRI 109
+4 Lillie's Determination MEG 184
+
+Energy: 12
+1 Mist Energy TEF 161
+3 Basic Metal Energy
+3 Basic Psychic Energy
+5 Basic Darkness Energy
+
+Total Cards: 60
+```

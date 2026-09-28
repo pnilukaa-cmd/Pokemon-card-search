@@ -5,10 +5,10 @@ Pokémon: 10
 2 Hydreigon ex SSP 240
 
 Trainer: 38
-2 Boss's Orders PAL 265
-1 Energy Search SVI 172
+2 Boss's Orders MEG 114
+1 Energy Search POR 72
 4 Night Stretcher SSP 251
-2 Air Balloon SSH 213
+2 Air Balloon MEG 166
 1 Xerosic's Machinations SFA 89
 1 Special Red Card CRI 113
 4 Buddy-Buddy Poffin TWM 223
@@ -16,7 +16,7 @@ Trainer: 38
 1 Secret Box TWM 163
 4 Backtrack Badge PBL 74
 3 Team Rocket's Petrel DRI 226
-4 Pokégear 3.0 UNB 233
+4 Pokégear 3.0 BLK 84
 3 Jumbo Ice Cream CRI 109
 4 Lillie's Determination MEG 184
 
