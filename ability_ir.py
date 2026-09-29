@@ -1155,6 +1155,12 @@ def _r(m, text):
     # your own Active -- and the executor ignored `from` anyway.
     if re.search(r"your opponent'?s pok[eé]mon to another of their", text, re.I):
         f["opp_internal"] = True
+    # Tricky Steps (Gengar ex, Meowstic) and Team Rocket's Zapdos's Jamming
+    # Wing: "from your opponent's Active Pokemon to 1 of THEIR Benched
+    # Pokemon". It fell through to the own-side branch, which moves YOUR
+    # Benched Energy to your Active, or nothing: the disruption never happened.
+    if re.search(r"from your opponent'?s active pok[eé]mon to 1 of their benched", text, re.I):
+        f["opp_internal"] = True
     return [Action(Op.MOVE_ENERGY, _num(m.group(1)), parse_target(m.group(4)), f)]
 
 

@@ -4125,6 +4125,31 @@ def test_brave_bangle_adds_30_once_and_only_against_an_ex():
         check(f"Brave Bangle adds {bonus} against {target}", got[1] - got[0] == bonus, str(got))
 
 
+def test_tricky_steps_moves_the_opponents_energy_to_their_bench():
+    """Gengar ex's and Meowstic's Tricky Steps and Team Rocket's Zapdos's
+    Jamming Wing move an Energy from the opponent's Active to one of THEIR
+    Benched Pokemon. Only Elgyem's wording was routed to that executor;
+    these moved the attacker's own Benched Energy, or nothing."""
+    import simulate_versus as V
+    eff = IR.compile_effect("attack", "Jamming Wing",
+                            "You may move an Energy from your opponent's Active Pokémon "
+                            "to 1 of their Benched Pokémon.")
+    POK, EFF = build(["Toucannon"])
+    me = FakePlayer("A", POK, EFF, active=Spot("Toucannon"), bench=[Spot("Toucannon")])
+    me.bench[0].energy = [["Grass"]]
+    me.bench[0].energy_names = ["Grass Energy"]
+    them = FakePlayer("B", POK, EFF, active=Spot("Toucannon"), bench=[Spot("Toucannon")])
+    them.active.energy = [["Water"], ["Water"]]
+    them.active.energy_names = ["Water Energy", "Water Energy"]
+    for a in eff.actions:
+        AE.apply_action(a, me, them, me.active, [], attacker=me.active)
+    check("one Energy leaves their Active for their Bench",
+          them.active.energy_count() == 1 and them.bench[0].energy_count() == 1,
+          f"active={them.active.energy_count()} bench={them.bench[0].energy_count()}")
+    check("  ...and none of mine moves",
+          me.bench[0].energy_count() == 1 and me.active.energy_count() == 0)
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4578,6 +4603,7 @@ def main():
                test_born_to_slack_gates_slaking_on_the_opponents_ex,
                test_toxtricity_and_mandibuzz_do_what_they_print,
                test_brave_bangle_adds_30_once_and_only_against_an_ex,
+               test_tricky_steps_moves_the_opponents_energy_to_their_bench,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
