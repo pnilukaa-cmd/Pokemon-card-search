@@ -1,13 +1,15 @@
 # mega_excadrill — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-27
-> **58.8% mean · 60.5% median · 44 of 54 winning matchups · rank 13 of 55**
+> ### Field results — 2026-09-29
+> **58.0% mean · 59.4% median · 44 of 56 winning matchups · rank 15 of 57**
 >
-> Best `static_venom_drapion` 87% · worst `maushold_gnaw_together_mill` 30%.
+> Best `static_venom_drapion` 87% · worst `ditto_transform_hydreigon` 22%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

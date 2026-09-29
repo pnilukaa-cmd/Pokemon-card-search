@@ -1,13 +1,15 @@
 # festival_lead — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-27
-> **34.8% mean · 33.6% median · 8 of 54 winning matchups · rank 51 of 55**
+> ### Field results — 2026-09-29
+> **29.9% mean · 29.1% median · 4 of 56 winning matchups · rank 53 of 57**
 >
-> Best `static_venom_drapion` 69% · worst `tauros_risky_ruins` 7%.
+> Best `static_venom_drapion` 63% · worst `tauros_risky_ruins` 6%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

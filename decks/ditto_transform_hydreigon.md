@@ -1,5 +1,15 @@
 # Ditto Transform: Hydreigon ex / Tyranitar / Gengar ex
 
+<!-- field-results -->
+> ### Field results — 2026-09-29
+> **69.8% mean · 71.0% median · 50 of 56 winning matchups · rank 3 of 57**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 95% · worst `team_rockets_persian_ex_attack_theft` 34%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+<!-- field-results -->
+
+
 Built 2026-09-28 from the request "get Ditto early and swap it for big
 Stage 2s, or ones with hard-to-handle early effects (Tyranitar's Item
 lock)". Ditto 30C 115's Surprisingly Transform puts any Pokemon from the

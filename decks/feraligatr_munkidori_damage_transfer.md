@@ -1,13 +1,15 @@
 # Feraligatr / Munkidori Damage-Transfer Engine
 
 <!-- field-results -->
-> ### Field results — 2026-09-27
-> **44.8% mean · 42.7% median · 14 of 54 winning matchups · rank 41 of 55**
+> ### Field results — 2026-09-29
+> **44.2% mean · 42.5% median · 15 of 56 winning matchups · rank 43 of 57**
 >
-> Best `study_flygon_sandy_flapping_mill` 87% · worst `tauros_risky_ruins` 10%.
+> Best `study_flygon_sandy_flapping_mill` 87% · worst `tauros_risky_ruins` 9%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Team Rocket's Koffing/Weezing Bench Swarm
 
 <!-- field-results -->
-> ### Field results — 2026-09-27
-> **57.6% mean · 58.3% median · 36 of 54 winning matchups · rank 14 of 55**
+> ### Field results — 2026-09-29
+> **57.3% mean · 58.0% median · 36 of 56 winning matchups · rank 16 of 57**
 >
 > Best `static_venom_drapion` 91% · worst `ns_zoroark_night_joker_toolbox` 20%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

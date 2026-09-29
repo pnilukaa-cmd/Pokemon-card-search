@@ -1,13 +1,15 @@
 # Water Aggro
 
 <!-- field-results -->
-> ### Field results — 2026-09-27
-> **51.2% mean · 49.6% median · 27 of 54 winning matchups · rank 27 of 55**
+> ### Field results — 2026-09-29
+> **50.5% mean · 49.6% median · 28 of 56 winning matchups · rank 29 of 57**
 >
-> Best `chandelure_centiskorch_deck_out` 88% · worst `tauros_risky_ruins` 12%.
+> Best `chandelure_centiskorch_deck_out` 88% · worst `tauros_risky_ruins` 10%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-27** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 
