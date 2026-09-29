@@ -1688,6 +1688,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     nm = pop_energy(h)
                     if nm:
                         opp.discard.append(nm)
+                        log.append(f"    discard {nm} from {h.name}")
                     n += 1
         if n:
             log.append(f"    discard {n} Energy from opponent")

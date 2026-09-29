@@ -4097,6 +4097,34 @@ def test_born_to_slack_gates_slaking_on_the_opponents_ex():
               AE.query_attack_gate(me, me.active) == wanted)
 
 
+def test_brave_bangle_adds_30_once_and_only_against_an_ex():
+    """Brave Bangle is priced in DAMAGE_TOOLS (ex target, no-Rule-Box
+    holder). The generic Tool-text reader matched its wording too, so it
+    added 60 -- Rocket Rush for 240 off a 6-Pokemon board -- and that path
+    ignored the ex-only clause."""
+    V, D, E = _real("decks/field/tr_spidops_mewtwo_hammer.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    nonex = max((n for n, i in O[1].items() if "ex" not in (i.get("subtypes") or [])),
+                key=lambda n: O[1][n].get("hp") or 0)
+    for target, bonus in (("Mega Kangaskhan ex", 30), (nonex, 0)):
+        got = []
+        for tool in (None, "Brave Bangle"):
+            me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+            me.active = V.InPlay("Team Rocket's Spidops", 1)
+            me.active.energy = [["Grass"], ["Grass"]]
+            me.active.energy_names = ["Grass Energy", "Grass Energy"]
+            me.active.tool = tool
+            me.bench = [V.InPlay("Team Rocket's Tarountula", 1) for _ in range(2)]
+            op.active = V.InPlay(target, 1)
+            op.bench = [V.InPlay(target, 1)]
+            me._opp_ref, op._opp_ref = op, me
+            me.round_no = op.round_no = 3
+            V.do_attack(me, op, [])
+            got.append(op.active.damage)
+        check(f"Brave Bangle adds {bonus} against {target}", got[1] - got[0] == bonus, str(got))
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4549,6 +4577,7 @@ def main():
                test_impromptu_carrier_attaches_once_to_farfetchd,
                test_born_to_slack_gates_slaking_on_the_opponents_ex,
                test_toxtricity_and_mandibuzz_do_what_they_print,
+               test_brave_bangle_adds_30_once_and_only_against_an_ex,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

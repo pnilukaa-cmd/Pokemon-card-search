@@ -531,7 +531,14 @@ def tool_damage_reduction(owner, spot, attacker_owner, attacker):
 
 
 def tool_damage_bonus(pl, spot, opp):
-    """Future Booster Energy Capsule: +N for its holder's attacks."""
+    """Future Booster Energy Capsule: +N for its holder's attacks.
+
+    Tools in DAMAGE_TOOLS are priced there, with their conditions. Brave
+    Bangle's "the attacks it uses do 30 more damage to your opponent's
+    Active Pokemon ex" matched here too, so it added 60 -- and this path
+    ignored both its ex-only and no-Rule-Box clauses."""
+    if spot is not None and spot.tool in DAMAGE_TOOLS:
+        return 0
     text = _tool_text(pl, spot, opp)
     m = _re.search(r"the attacks it uses do (\d+) more damage", text, _re.I)
     if m and _tool_holder_ok(pl, spot, text):
