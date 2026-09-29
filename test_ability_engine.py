@@ -4150,6 +4150,26 @@ def test_tricky_steps_moves_the_opponents_energy_to_their_bench():
           me.bench[0].energy_count() == 1 and me.active.energy_count() == 0)
 
 
+def test_ability_lock_cache_survives_a_reused_dict_address():
+    """The Ability-lock cache was keyed by id(EFFECTS). A freed deck's dict
+    address gets reused, and the next deck inherited its cached "no locks":
+    Flutter Mane lost its lock in whichever test or field pairing landed on
+    the address (test_ability_locks failed about 1 run in 8)."""
+    class Side:
+        def __init__(self, eff):
+            self.EFFECTS = eff
+    lock = next(e for e in effects_for("Flutter Mane", ("TEF", "78"))
+                if any(a.op == IR.Op.LOCK for a in e.actions))
+    locked = Side({"Flutter Mane": [lock]})
+    # What a freed no-lock deck left behind at this address.
+    AE._LOCK_SOURCES[id(locked.EFFECTS)] = ({"Pikachu": []}, set())
+    check("a dict at a reused address is not given the old deck's answer",
+          any(h.name == "Flutter Mane" for h, _, _ in
+              AE._ability_lock_effects(type("P", (), {
+                  "EFFECTS": locked.EFFECTS,
+                  "in_play": lambda self: [type("S", (), {"name": "Flutter Mane"})()]})())))
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4604,6 +4624,7 @@ def main():
                test_toxtricity_and_mandibuzz_do_what_they_print,
                test_brave_bangle_adds_30_once_and_only_against_an_ex,
                test_tricky_steps_moves_the_opponents_energy_to_their_bench,
+               test_ability_lock_cache_survives_a_reused_dict_address,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

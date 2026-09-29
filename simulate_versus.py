@@ -1122,6 +1122,9 @@ def _tool_from_deck_pick(pl, spot, names):
 
 
 AE.TOOL_FROM_DECK_PICK = _tool_from_deck_pick
+
+
+
 AE.TRANSFORM_PICK = lambda pl, opp, spot, cands: _transform_pick(pl, opp, spot, cands, True)
 
 AE.BENCH_LIMIT = lambda pl: bench_cap(pl)

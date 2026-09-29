@@ -2990,18 +2990,29 @@ def on_damaged_riders(defender, attacker_player, attacker_spot, log,
 _LOCK_SOURCES = {}
 
 
+def _lock_names(side):
+    """Names on `side`'s decklist that carry an Ability lock, cached per
+    EFFECTS dict. Keyed by id() alone, a freed dict's id was reused by the
+    next deck's, which inherited its "no locks" -- Flutter Mane lost its
+    lock in whichever test (or field pairing) happened to land on a reused
+    address. The dict itself is kept beside the answer and checked."""
+    key = id(side.EFFECTS)
+    hit = _LOCK_SOURCES.get(key)
+    if hit is not None and hit[0] is side.EFFECTS:
+        return hit[1]
+    names = {n for n, effs in side.EFFECTS.items() for e in effs
+             if not e.unsupported and any(a.op == IR.Op.LOCK and
+                                          (a.filter or {}).get("what") == "abilities"
+                                          for a in e.actions)}
+    _LOCK_SOURCES[key] = (side.EFFECTS, names)
+    return names
+
+
 def _ability_lock_effects(side):
     """(holder, effect, action) for every Ability-lock Ability on `side`'s
     board. Cached per deck: most decks have none, and this is asked for
     every passive query."""
-    key = id(side.EFFECTS)
-    names = _LOCK_SOURCES.get(key)
-    if names is None:
-        names = {n for n, effs in side.EFFECTS.items() for e in effs
-                 if not e.unsupported and any(a.op == IR.Op.LOCK and
-                                              (a.filter or {}).get("what") == "abilities"
-                                              for a in e.actions)}
-        _LOCK_SOURCES[key] = names
+    names = _lock_names(side)
     if not names:
         return
     for holder in side.in_play():
@@ -3040,7 +3051,7 @@ def ability_disabled(owner, spot, ability_name=None):
     stadium = getattr(owner, "stadium", None) or getattr(owner, "_opp_stadium", None)
     # Fast path: no lock anywhere on either board or in the Stadium.
     if not _stadium_locks(stadium) and not any(
-            _LOCK_SOURCES.get(id(side.EFFECTS), True) for side in (owner, opp) if side is not None):
+            _lock_names(side) for side in (owner, opp) if side is not None):
         return False
     info = owner.POKEMON.get(spot.name) or {}
     sources = []
