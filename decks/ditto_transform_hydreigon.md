@@ -21,6 +21,24 @@ of 54; +4.25 ± 0.89 over the original Ditto list on the same dice.**
 Worst: Team Rocket's Persian ex 32.7, Lurantis heal-punish 35.2, N's
 Zoroark toolbox 39.0.
 
+## 2026-09-29: Hero's Cape for Secret Box (+2.75)
+
+Built for an UNKNOWN field, so the target was the deck's weak spots
+rather than any one opponent. Its three worst matchups (Team Rocket's
+Persian ex 34, Lurantis 37, N's Zoroark 40) share a cause: Grass attackers
+(Spidops, Lurantis) hit Hydreigon ex for double, so 180 becomes 360 and
+takes a 330 HP body in one swing. Hero's Cape (the ACE SPEC slot, +100 HP)
+makes it 430. **Paired, 1000 games x 54 opponents: +2.75 +/- 0.36, 70.25 ->
+73.00%** -- level with the field's best. The gain is broad (the floor
+barely moves): a bigger Ditto/Hydreigon survives a hit it did not before
+against most of the field, not just the Grass decks.
+
+Tried and rejected on the way (200 games, paired): Persian ex as a second
+Transform target +0.27 (noise), three -0.76; Dragapult ex instead of
+Hydreigon (no Weakness) -6.8 / -5.8; zero-retreat openers instead of
+Farfetch'd (Larry's Dunsparce -6.8, Marnie's Morpeko -10.6); Prime Catcher
+for Secret Box -0.44.
+
 ## The plan
 
 Going second, turn 1: Poffin two Ditto, attach, Crispin attaches a
@@ -88,7 +106,7 @@ Trainer: 37
 3 Ultra Ball MEG 131
 2 Energy Switch MEG 115
 1 Switch MEG 130
-1 Secret Box TWM 163
+1 Hero's Cape TEF 152
 4 Backtrack Badge PBL 74
 1 Air Balloon MEG 166
 

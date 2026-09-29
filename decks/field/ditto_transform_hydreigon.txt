@@ -17,7 +17,7 @@ Trainer: 37
 3 Ultra Ball MEG 131
 2 Energy Switch MEG 115
 1 Switch MEG 130
-1 Secret Box TWM 163
+1 Hero's Cape TEF 152
 4 Backtrack Badge PBL 74
 1 Air Balloon MEG 166
 
