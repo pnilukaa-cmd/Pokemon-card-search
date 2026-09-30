@@ -590,6 +590,18 @@ def tool_on_ko(owner, spot, log):
     log.append(f"  {owner.name}: {spot.tool} -- searches {len(picks)} cards")
 
 
+_COST_TOOL_RE = _re.compile(
+    r"attacks used by the pok[eé]mon this card is attached to cost colorless less|"
+    r"that attack costs 1 energy less", _re.I)
+
+
+def _is_cost_tool(name):
+    card = _CARDS_BY_NAME.get(name)
+    card = card[0] if isinstance(card, list) and card else (card or {})
+    return "Pokémon Tool" in (card.get("subtypes") or []) and \
+        bool(_COST_TOOL_RE.search(" ".join(card.get("rules") or [])))
+
+
 def tool_cost_changes(pl, spot, cost, opp):
     """Counter Gain (Colorless less while behind on Prizes) and Sparkling
     Crystal (a Tera holder's attacks cost 1 Energy less, any type)."""
@@ -5063,6 +5075,17 @@ def attach_tools(pl, log):
                 pl.remove_from_hand(kind, name)
                 pl.active.tool = name
                 log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+                continue
+            # Cost Tools (Counter Gain, Sparkling Crystal): tool_cost_changes
+            # priced them once attached, and nothing ever attached them.
+            if _is_cost_tool(name):
+                a = pl.active
+                if a is not None and (not a.tool or AE.query_extra_tool_slots(pl, a)) \
+                        and any(c for atk in (pl.POKEMON.get(a.name) or {}).get("attacks") or []
+                                for c in atk["cost"]):
+                    pl.remove_from_hand(kind, name)
+                    a.tool = name
+                    log.append(f"  {pl.name}: attaches {name} to {a.name}")
                 continue
             # The Active first, else a Benched flipper waiting its turn.
             holder = next((p for p in pl.in_play()

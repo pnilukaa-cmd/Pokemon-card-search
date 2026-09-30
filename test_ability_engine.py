@@ -2556,6 +2556,13 @@ def test_no_card_in_any_decklist_is_silently_inert():
         subs = c.get("subtypes") or []
         if f'"{nm}"' in src:
             return True                      # named path in play_trainers
+        # _situational_trainer resolves these by the SHAPE of their effect,
+        # not by name (Acerola's Mischief: an ex-only damage-and-effect
+        # shield), so the name never appears in the source.
+        if nm in {"Acerola's Mischief"}:
+            return True
+        if "Pokémon Tool" in subs and V._is_cost_tool(nm):
+            return True                      # attach_tools' cost-Tool path
         if "Pokémon Tool" in subs:
             # Tools are consumed ONLY by these tables and the reflip path.
             if (nm in V.hp_tools() or nm in V.RETREAT_TOOLS
@@ -4154,21 +4161,32 @@ def test_ability_lock_cache_survives_a_reused_dict_address():
     """The Ability-lock cache was keyed by id(EFFECTS). A freed deck's dict
     address gets reused, and the next deck inherited its cached "no locks":
     Flutter Mane lost its lock in whichever test or field pairing landed on
-    the address (test_ability_locks failed about 1 run in 8)."""
+    the address (test_ability_locks failed about 1 run in 8). The cache now
+    lives on the side and is checked against its own EFFECTS."""
     class Side:
         def __init__(self, eff):
             self.EFFECTS = eff
+        def in_play(self):
+            return [type("S", (), {"name": "Flutter Mane"})()]
     lock = next(e for e in effects_for("Flutter Mane", ("TEF", "78"))
                 if any(a.op == IR.Op.LOCK for a in e.actions))
-    locked = Side({"Flutter Mane": [lock]})
-    # What a freed no-lock deck left behind at this address.
-    AE._LOCK_SOURCES[id(locked.EFFECTS)] = ({"Pikachu": []}, set())
-    check("a dict at a reused address is not given the old deck's answer",
-          any(h.name == "Flutter Mane" for h, _, _ in
-              AE._ability_lock_effects(type("P", (), {
-                  "EFFECTS": locked.EFFECTS,
-                  "in_play": lambda self: [type("S", (), {"name": "Flutter Mane"})()]})())))
-
+    side = Side({"Pikachu": []})
+    list(AE._ability_lock_effects(side))       # caches "no locks"
+    side.EFFECTS = {"Flutter Mane": [lock]}    # a different deck, same holder
+    check("a stale cached answer is not reused for different EFFECTS",
+          any(h.name == "Flutter Mane" for h, _, _ in AE._ability_lock_effects(side)))
+    import gc
+    import weakref
+    class D(dict):
+        pass
+    eff = D({"Pikachu": []})
+    ref = weakref.ref(eff)
+    s2 = Side(eff)
+    list(AE._ability_lock_effects(s2))
+    del s2, eff
+    gc.collect()
+    check("  ...and the cache does not keep a finished game's EFFECTS alive",
+          ref() is None)
 
 def test_mew_box_donor_attacks_do_what_they_print():
     """Four attacks in user-supplied Mew ex lists did not: Scream Tail ex's

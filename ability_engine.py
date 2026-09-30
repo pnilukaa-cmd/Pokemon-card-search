@@ -3001,24 +3001,26 @@ def on_damaged_riders(defender, attacker_player, attacker_spot, log,
                              attacker_spot, make_inplay)
 
 
-_LOCK_SOURCES = {}
-
-
 def _lock_names(side):
-    """Names on `side`'s decklist that carry an Ability lock, cached per
-    EFFECTS dict. Keyed by id() alone, a freed dict's id was reused by the
-    next deck's, which inherited its "no locks" -- Flutter Mane lost its
-    lock in whichever test (or field pairing) happened to land on a reused
-    address. The dict itself is kept beside the answer and checked."""
-    key = id(side.EFFECTS)
-    hit = _LOCK_SOURCES.get(key)
+    """Names on `side`'s decklist that carry an Ability lock.
+
+    Cached ON the side, next to the EFFECTS it was computed from. A module
+    cache keyed by id(EFFECTS) handed a reused address the previous deck's
+    "no locks" (Flutter Mane lost its lock); keeping the dict alive to
+    guard against that leaked every deck's effects for the life of a field
+    run (2 GB a shard). The side's own attribute dies with the game.
+    """
+    hit = getattr(side, "_lock_names_cache", None)
     if hit is not None and hit[0] is side.EFFECTS:
         return hit[1]
     names = {n for n, effs in side.EFFECTS.items() for e in effs
              if not e.unsupported and any(a.op == IR.Op.LOCK and
                                           (a.filter or {}).get("what") == "abilities"
                                           for a in e.actions)}
-    _LOCK_SOURCES[key] = (side.EFFECTS, names)
+    try:
+        side._lock_names_cache = (side.EFFECTS, names)
+    except AttributeError:
+        pass                              # a slotted stand-in: just recompute
     return names
 
 
