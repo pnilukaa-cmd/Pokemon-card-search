@@ -1,13 +1,15 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **28.3% mean · 28.2% median · 2 of 56 winning matchups · rank 54 of 57**
+> ### Field results — 2026-09-30
+> **28.2% mean · 28.2% median · 2 of 56 winning matchups · rank 54 of 57**
 >
-> Best `meta_festival_lead` 58% · worst `ditto_transform_hydreigon` 10%.
+> Best `meta_festival_lead` 58% · worst `ditto_transform_hydreigon` 6%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

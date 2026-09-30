@@ -1,13 +1,15 @@
 # Chandelure / Centiskorch — trap-and-deck-out
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **43.8% mean · 44.5% median · 21 of 56 winning matchups · rank 44 of 57**
+> ### Field results — 2026-09-30
+> **43.7% mean · 44.5% median · 21 of 56 winning matchups · rank 44 of 57**
 >
 > Best `study_flygon_sandy_flapping_mill` 80% · worst `tauros_risky_ruins` 9%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

@@ -1,13 +1,15 @@
 # Dragapult ex / Dusknoir — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **45.0% mean · 44.2% median · 17 of 56 winning matchups · rank 39 of 57**
+> ### Field results — 2026-09-30
+> **44.9% mean · 44.2% median · 17 of 56 winning matchups · rank 39 of 57**
 >
 > Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `ns_zoroark_night_joker_toolbox` 14%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

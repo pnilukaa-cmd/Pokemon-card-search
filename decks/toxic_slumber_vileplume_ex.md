@@ -1,13 +1,15 @@
 # Toxic Slumber (Erika's Oddish / Gloom / Vileplume ex)
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **48.4% mean · 48.1% median · 26 of 56 winning matchups · rank 34 of 57**
+> ### Field results — 2026-09-30
+> **48.3% mean · 48.1% median · 26 of 56 winning matchups · rank 34 of 57**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `ditto_transform_hydreigon` 21%.
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `ditto_transform_hydreigon` 19%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

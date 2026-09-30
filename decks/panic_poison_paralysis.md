@@ -1,13 +1,15 @@
 # Panic Poison (Ekans/Arbok + Team Rocket's Muk)
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **59.0% mean · 59.2% median · 38 of 56 winning matchups · rank 14 of 57**
+> ### Field results — 2026-09-30
+> **58.9% mean · 59.2% median · 38 of 56 winning matchups · rank 14 of 57**
 >
 > Best `team_rockets_wobbuffet_orbeetle_damage_launder` 92% · worst `kangaskhan_tyrantrum_flip_mill` 21%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 

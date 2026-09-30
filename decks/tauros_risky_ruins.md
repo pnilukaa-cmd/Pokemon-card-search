@@ -1,13 +1,15 @@
 # Tauros / Risky Ruins — Raging Charge
 
 <!-- field-results -->
-> ### Field results — 2026-09-29
-> **73.0% mean · 76.7% median · 51 of 56 winning matchups · rank 1 of 57**
+> ### Field results — 2026-09-30
+> **72.9% mean · 76.7% median · 51 of 56 winning matchups · rank 1 of 57**
 >
-> Best `study_flygon_sandy_flapping_mill` 97% · worst `lurantis_heal_punish` 39%.
+> Best `study_flygon_sandy_flapping_mill` 97% · worst `ditto_transform_hydreigon` 35%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-29** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
 <!-- field-results -->
+
+
 
 
 
