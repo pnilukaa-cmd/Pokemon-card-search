@@ -1,0 +1,36 @@
+Pokémon: 16
+3 Mew ex 30C 66
+2 Latias ex SSP 76
+2 Hypno SFA 17
+1 Team Rocket's Chingling DRI 85
+2 Elgyem BLK 40
+1 Frillish WHT 44
+1 Clefairy POR 30
+2 Jynx PBL 32
+2 Drowzee SFA 16
+
+Trainer: 36
+4 Buddy-Buddy Poffin ASC 184
+4 Poké Pad ASC 198
+3 Night Stretcher ASC 196
+4 Lillie's Determination MEG 119
+1 Rust Syndicate Grunt PBL 81
+2 Handheld Fan TWM 150
+1 Air Balloon BLK 79
+2 Boss's Orders MEG 114
+1 Special Red Card CRI 82
+2 Ultra Ball MEG 131
+2 Pokégear 3.0 SVI 186
+1 Unfair Stamp TWM 165
+2 Energy Swatter POR 73
+1 Sacred Ash DRI 168
+1 Tool Scrapper ASC 212
+1 Jacinthe POR 75
+2 Judge DRI 167
+2 Enhanced Hammer TWM 148
+
+Energy: 8
+4 Basic {P} Energy MEE 13
+4 Telepathic {P} Energy POR 88
+
+Total Cards: 60

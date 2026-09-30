@@ -115,7 +115,7 @@ class InPlay:
     __slots__ = ("name", "damage", "energy", "energy_names", "entered_turn",
                  "shield", "turn_buff",
                  "evolved_this_turn", "tool", "conditions", "attack_locked",
-                 "retreat_locked", "attack_locked_by_opponent", "prev_damage",
+                 "retreat_locked", "attack_locked_by_opponent", "attach_locked", "prev_damage",
                  "healed_this_turn", "promoted_this_turn", "last_attack_used",
                  "damage_penalty", "takes_more", "next_turn_attack_buff",
                  "delayed_discard", "extra_prize", "no_weakness",
@@ -153,6 +153,7 @@ class InPlay:
         # them) and were compiled and then thrown away, so every retreat
         # -lock control deck measured as if its main line did nothing.
         self.retreat_locked = 0
+        self.attach_locked = 0
         self.attack_locked_by_opponent = 0
         # "During your opponent's next turn, prevent all damage done to
         # this Pokemon" / "this Pokemon takes N less damage": set by the
@@ -4717,6 +4718,8 @@ def attach_energy(pl, cards_by_name, log):
         if forced >= len(spots):
             return
         target = spots[forced]
+        if getattr(target, "attach_locked", 0):
+            return
         idx = _energy_for(pl, target)
         if idx is None:
             return
@@ -4764,6 +4767,11 @@ def attach_energy(pl, cards_by_name, log):
         if short:
             target = min(short, key=lambda p: (p is not pl.active,
                                                energy_shortfall(pl, p)))
+    if target is not None and getattr(target, "attach_locked", 0):
+        # Daydream: attaching here would end the turn. Feed someone else.
+        others = [p for p in pl.in_play() if p is not target
+                  and not getattr(p, "attach_locked", 0) and energy_shortfall(pl, p) > 0]
+        target = max(others, key=lambda p: _potential_damage(pl, p)) if others else None
     if target is None:
         return
     idx = _energy_for(pl, target)
@@ -6774,6 +6782,9 @@ play_basics = _under_play_lock(play_basics)
 try_evolve = _under_play_lock(try_evolve)
 play_items = _under_play_lock(play_items)
 attach_tools = _under_play_lock(attach_tools)
+# Scream Tail ex's Scream is the pool's one Supporter lock; the Supporter
+# step was the only hand-playing step not wrapped, so it did nothing.
+play_supporter = _under_play_lock(play_supporter)
 
 
 

@@ -1019,6 +1019,15 @@ def _r(m, text):
                    {"name_contains": species})]
 
 
+@rule("search_per_benched",
+      r"search your deck for a number of cards up to the number of your benched pok[eé]mon"
+      r"[^.]{0,30}into your hand")
+def _r(m, text):
+    """Scrafty's Nab 'n' Dash. search_to_hand read "a number of" as a NAME
+    filter and searched for one card named that -- it found nothing."""
+    return [Action(Op.SEARCH_TO_HAND, None, Target.SELF, {"kind": "card", "per_benched": True})]
+
+
 @rule("search_to_hand",
       r"search your deck for (?:up to )?(\d+|a|an)? ?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
 def _r(m, text):
@@ -1033,6 +1042,8 @@ def _r(m, text):
     # into hand and then attached a third.
     if re.search(r"put 1 of them into your hand\. attach the other", text, re.I):
         return []
+    if re.search(r"a number of cards up to the number of your benched", text, re.I):
+        return []                       # search_per_benched owns it
     return [Action(Op.SEARCH_TO_HAND, _num(m.group(1)), Target.SELF,
                    dict(_search_filter(m.group(2)), kind=m.group(3).lower()))]
 
@@ -1143,7 +1154,11 @@ def _r(m, text):
         mc = re.search(r"place (\d+) damage counters? on that pok[eé]mon", text, re.I)
         if mc:
             f["counters_on_recipient"] = int(mc.group(1))
-    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), Target.YOUR_ANY, f)]
+    # Mega Floette ex's Eternity Bloom: "attach them to your Benched
+    # Pokemon in any way you like" -- not the Active.
+    tgt = Target.YOUR_BENCHED if re.search(r"attach them to your benched pok[eé]mon", text, re.I) \
+        else Target.YOUR_ANY
+    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), tgt, f)]
 
 
 @rule("move_energy", r"move (?:a|an|(\d+)) ?(" + TYPES + r")? ?energy from ([^.]{0,40}?) to ([^.]{0,40})")
@@ -1630,6 +1645,11 @@ def _r(m, text):
             kinds.append("Stadium")
         if "ace spec" in seg:
             kinds.append("ace_spec")
+        # Scream Tail ex's Scream: "can't play any Supporter cards". With no
+        # kind recorded the executor defaulted to Items, so it was an Item
+        # lock that left the opponent's Supporter free.
+        if "supporter" in seg:
+            kinds.append("Supporter")
         if re.search(r"pok[eé]mon that has an ability", seg):
             kinds.append("ability_pokemon")
             ex = re.search(r"except for ([\w'’ ]+?) pok[eé]mon", seg)

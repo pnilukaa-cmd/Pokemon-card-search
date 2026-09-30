@@ -4170,6 +4170,53 @@ def test_ability_lock_cache_survives_a_reused_dict_address():
                   "in_play": lambda self: [type("S", (), {"name": "Flutter Mane"})()]})())))
 
 
+def test_mew_box_donor_attacks_do_what_they_print():
+    """Four attacks in user-supplied Mew ex lists did not: Scream Tail ex's
+    Scream locked Items instead of Supporters (and the Supporter step
+    ignored play locks entirely); Hypno's Daydream compiled to a lock
+    nothing read; Scrafty's Nab 'n' Dash searched for a card NAMED "number
+    of"; Mega Floette ex's Eternity Bloom could feed the Active."""
+    import simulate_versus as V
+    scream = IR.compile_effect("attack", "Scream",
+        "You can use this attack only if you go second, and only during your first "
+        "turn. Your opponent can't play any Supporter cards from their hand during "
+        "their next turn.")
+    check("Scream locks Supporters", scream.actions[0].filter.get("kinds") == ["Supporter"],
+          str(scream.actions[0].filter))
+    POK, EFF = build(["Toucannon"])
+    me = FakePlayer("A", POK, EFF, active=Spot("Toucannon"))
+    them = FakePlayer("B", POK, EFF, active=Spot("Toucannon"))
+    them.turn_play_lock = {"Supporter"}
+    them.hand = [("Supporter", "Lillie's Determination"), ("Item", "Ultra Ball")]
+    them._opp_ref = me
+    them.item_locked = False
+    for x in (me, them):
+        x.stadium = x._opp_stadium = None
+    locked = V._locked_in_hand(them, me)
+    check("  ...and the Supporter step obeys it",
+          locked == [("Supporter", "Lillie's Determination")]
+          and getattr(V.play_supporter, "__wrapped__", None) is not None, str(locked))
+    day = IR.compile_effect("attack", "Daydream",
+        "During your opponent's next turn, if they attach an Energy card from their "
+        "hand to the Defending Pokémon, their turn ends.")
+    for a in day.actions:
+        AE.apply_action(a, me, them, me.active, [], attacker=me.active)
+    check("Daydream marks the Defending Pokemon", getattr(them.active, "attach_locked", 0) == 1)
+    nab = IR.compile_effect("attack", "Nab 'n' Dash",
+        "Search your deck for a number of cards up to the number of your Benched "
+        "Pokémon and put them into your hand. Then, shuffle your deck.")
+    me.bench = [Spot("Toucannon"), Spot("Toucannon"), Spot("Toucannon")]
+    me.deck = [("Item", "Ultra Ball")] * 6
+    me.hand = []
+    for a in nab.actions:
+        AE.apply_action(a, me, them, me.active, [], attacker=me.active)
+    check("Nab 'n' Dash takes one card per Benched Pokemon", len(me.hand) == 3, str(me.hand))
+    bloom = IR.compile_effect("attack", "Eternity Bloom",
+        "Search your deck for up to 4 Basic Psychic Energy cards and attach them to "
+        "your Benched Pokémon in any way you like. Then, shuffle your deck.")
+    check("Eternity Bloom feeds the Bench", bloom.actions[0].target == IR.Target.YOUR_BENCHED)
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4625,6 +4672,7 @@ def main():
                test_brave_bangle_adds_30_once_and_only_against_an_ex,
                test_tricky_steps_moves_the_opponents_energy_to_their_bench,
                test_ability_lock_cache_survives_a_reused_dict_address,
+               test_mew_box_donor_attacks_do_what_they_print,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

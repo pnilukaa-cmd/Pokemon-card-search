@@ -846,7 +846,7 @@ def pop_energy(spot, i=-1):
     return None
 
 
-_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent")
+_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent", "attach_locked")
 
 
 def tick_attack_locks(spot):
@@ -1325,7 +1325,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.SEARCH_TO_HAND:
         got = []
-        for _ in range(act.amount or 1):
+        n_search = len(pl.bench) if act.filter.get("per_benched") else (act.amount or 1)
+        for _ in range(n_search):
             want = act.filter.get("name_contains")
             kind = (act.filter.get("kind") or "").lower()
             cap = act.filter.get("hp_at_most")
@@ -2507,6 +2508,19 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     # did nothing at all, which quietly wrote off every retreat-lock
     # control deck in the folder. The genuinely static locks (Ability
     # lockdown, "as long as this Pokemon is Active") stay passive.
+    # Hypno's Daydream: "if they attach an Energy card from their hand to
+    # the Defending Pokemon, their turn ends". Compiled and read by nothing.
+    # The pilot never makes that attachment (it would forfeit the attack),
+    # so it is modelled as the Defending Pokemon taking no Energy from hand
+    # during their next turn.
+    if op == O.LOCK and act.filter.get("what") == "attach_energy":
+        victim = opp.active
+        if victim is None or not _shield_effects(opp, [victim]):
+            return False
+        victim.attach_locked = 1
+        log.append(f"    {victim.name} can't take Energy from hand during their next turn")
+        return True
+
     if op == O.LOCK and act.filter.get("what") in ("retreat", "attack", "play"):
         what = act.filter["what"]
         if act.target in (IR.Target.OPPONENT, IR.Target.OPP_ACTIVE):
