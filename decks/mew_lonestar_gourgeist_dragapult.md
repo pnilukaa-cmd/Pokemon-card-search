@@ -53,3 +53,24 @@
 - **Mulligans:** 19% of opening hands have no Basic (12 Basics).
 - **Opening odds:** 78% of opening hands have a setup card (Poffin, Poké Pad or Telepathic).
 - **Speed:** the development test gets Gourgeist ex down by turn 6 in 47% of games (average turn 3.4).
+
+## Upgrades tested (2026-10-01)
+
+Paired against the 62-deck field, same dice as the list as supplied:
+
+| Change | 200 games | 1000 games |
+|---|---|---|
+| **Jacinthe for 1 Xerosic + Hero's Cape for Unfair Stamp** | +2.13 ± 0.63 | **+0.99 ± 0.30** |
+| Jacinthe for 1 Xerosic | +1.77 ± 0.52 | +0.24 ± 0.28 (noise) |
+| 2 Jacinthe for 2 Xerosic | +1.48 ± 0.63 | |
+| Hero's Cape for Unfair Stamp | +0.35 ± 0.61 | |
+| Clefairy POR 30 for 1 Boss's Orders | -1.77 ± 0.67 | |
+| Clefairy POR 30 for Special Red Card | -2.52 ± 0.59 | |
+
+Clefairy's numbers say nothing about the card: the simulator's pilot used
+Follow Me **0 times** in 20 logged games (Mew always preferred Ghostly
+Touch), so it measured a dead 70 HP body. Follow Me's real job -- pulling up
+a high-Retreat Pokemon and stranding it under Itchy Pollen -- is a human
+line the greedy pilot does not see.
+
+Upgraded import: `mew_lonestar_gourgeist_upgraded.ptcgl.txt`.
