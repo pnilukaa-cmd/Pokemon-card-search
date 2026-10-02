@@ -74,3 +74,18 @@ a high-Retreat Pokemon and stranding it under Itchy Pollen -- is a human
 line the greedy pilot does not see.
 
 Upgraded import: `mew_lonestar_gourgeist_upgraded.ptcgl.txt`.
+
+## Other Psychic Pokemon tested (2026-10-02)
+
+Each in place of Battle Cage (Mismagius line: also Special Red Card) in the
+upgraded list, 200 games x 62 opponents, paired:
+
+| Addition | Change |
+|---|---|
+| 1 Misdreavus PFL 35 + 1 Mismagius ex PFL 112 | +0.90 ± 0.65 (not proven) |
+| 1 Mimikyu ex JTG 69 | -0.06 ± 0.63 |
+| 1 Team Rocket's Chingling DRI 85 | -1.44 ± 0.71 |
+
+Not tested, worth trying by hand: Mr. Mime TEF 63 (Look-Alike Show: use a
+Supporter from their hand), Espathra SSP 95 (Mystical Eyes devolves for 1
+Energy), Frillish WHT 126 (a second Item lock, but 3 Retreat).
