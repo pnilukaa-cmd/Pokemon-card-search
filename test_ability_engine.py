@@ -4235,6 +4235,36 @@ def test_mew_box_donor_attacks_do_what_they_print():
     check("Eternity Bloom feeds the Bench", bloom.actions[0].target == IR.Target.YOUR_BENCHED)
 
 
+def test_this_pokemon_is_now_asleep_is_the_attackers_drawback():
+    """"This Pokemon is now Asleep" (Munna's Rest, Snorlax's Collapse,
+    Wailord ex's Falling Down, Pikachu's Tropical Vibes, Larry's Komala;
+    Pangoro's "now Confused") compiled onto the OPPONENT's Active, turning
+    each drawback into a free lock. Komala's "Both Active Pokemon are now
+    Asleep" lost its condition entirely ("are now" never matched)."""
+    for name, text, want in (
+            ("Rest", "This Pokémon is now Asleep. Heal 30 damage from it.",
+             (IR.Target.SELF, ["asleep"])),
+            ("Collapse", "This Pokémon is now Asleep.", (IR.Target.SELF, ["asleep"])),
+            ("Tantrum", "This Pokémon is now Confused.", (IR.Target.SELF, ["confused"])),
+            ("Spore Ball", "Your opponent's Active Pokémon is now Asleep.",
+             (IR.Target.OPP_ACTIVE, ["asleep"]))):
+        conds = [(a.target, a.filter.get("conditions")) for a in
+                 IR.compile_effect("attack", name, text).actions
+                 if a.op == IR.Op.APPLY_CONDITION]
+        check(f"{name}: condition lands on {want[0]}", conds == [want], str(conds))
+    smack = IR.compile_effect("attack", "Slumbering Smack",
+        "Both Active Pokémon are now Asleep. During your next turn, attacks used by "
+        "this Pokémon do 100 more damage to your opponent's Active Pokémon (before "
+        "applying Weakness and Resistance).")
+    check("Slumbering Smack puts both Actives to sleep",
+          any(a.op == IR.Op.APPLY_CONDITION and a.target == IR.Target.BOTH_ALL
+              and a.filter.get("active_only") for a in smack.actions), str(smack.actions))
+    bell = IR.compile_effect("trainer", "Dark Bell",
+                             "Both Active non-Darkness Pokémon are now Confused.")
+    check("  ...without giving Dark Bell a second effect",
+          len([a for a in bell.actions if a.op == IR.Op.APPLY_CONDITION]) == 1, str(bell.actions))
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4691,6 +4721,7 @@ def main():
                test_tricky_steps_moves_the_opponents_energy_to_their_bench,
                test_ability_lock_cache_survives_a_reused_dict_address,
                test_mew_box_donor_attacks_do_what_they_print,
+               test_this_pokemon_is_now_asleep_is_the_attackers_drawback,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

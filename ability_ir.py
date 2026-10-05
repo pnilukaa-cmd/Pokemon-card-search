@@ -1442,7 +1442,7 @@ def _r(m, text):
     return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 
-@rule("apply_condition", r"is now (asleep|burned|confused|paralyzed|poisoned)")
+@rule("apply_condition", r"(?:is|are) now (asleep|burned|confused|paralyzed|poisoned)")
 def _r(m, text):
     # "the NEW Active Pokemon is now Poisoned" is your own, after a switch;
     # switch_benched_type_in owns it.
@@ -1451,10 +1451,38 @@ def _r(m, text):
     if re.search(r"switch 1 of your benched .{0,80}the new active pok[eé]mon is now",
                  text, re.I | re.S):
         return []
-    conds = re.findall(r"(asleep|burned|confused|paralyzed|poisoned)", text, re.I)
-    tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
-    return [Action(Op.APPLY_CONDITION, None, tgt,
-                   {"conditions": sorted({c.lower() for c in conds})})]
+    # Read each sentence's SUBJECT. "This Pokemon is now Asleep" (Munna's
+    # Rest, Snorlax's Collapse, Wailord ex's Falling Down, Pikachu's
+    # Tropical Vibes, Larry's Komala) is the attacker's own drawback; it
+    # compiled onto the opponent's Active, turning five drawbacks into free
+    # Sleep locks. Pangoro's Tantrum ("This Pokemon is now Confused") too.
+    # "Both Active Pokemon are now Asleep" (Komala) is both.
+    COND = r"(asleep|burned|confused|paralyzed|poisoned)"
+    if re.search(r"both active non-\w+ pok[eé]mon are now", text, re.I):
+        return []                       # condition_both_actives_except_type
+    out = []
+    for sent in re.split(r"(?<=\.)\s+", text):
+        if not re.search(r"(is|are) now " + COND, sent, re.I):
+            continue
+        if re.search(r"both active non-", sent, re.I):
+            continue                    # condition_both_actives_except_type
+        conds = sorted({c.lower() for c in re.findall(COND, sent, re.I)})
+        low = sent.lower()
+        if re.search(r"both active pok[eé]mon are now", low):
+            out.append(Action(Op.APPLY_CONDITION, None, Target.BOTH_ALL,
+                              {"conditions": conds, "active_only": True}))
+        elif re.match(r"\s*this pok[eé]mon is now", low):
+            out.append(Action(Op.APPLY_CONDITION, None, Target.SELF, {"conditions": conds}))
+        elif "attacking pok" in low:
+            out.append(Action(Op.APPLY_CONDITION, None, Target.ATTACKING_POKEMON, {"conditions": conds}))
+        else:
+            out.append(Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE, {"conditions": conds}))
+    if not out:
+        conds = re.findall(COND, text, re.I)
+        tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
+        out = [Action(Op.APPLY_CONDITION, None, tgt,
+                      {"conditions": sorted({c.lower() for c in conds})})]
+    return out
 
 
 @rule("attack_bench_spread",
