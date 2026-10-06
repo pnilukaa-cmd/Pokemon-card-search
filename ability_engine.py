@@ -1296,9 +1296,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if k != "Pokemon":
                     return False
                 info = pl.POKEMON.get(n, {})
-                # Only a Basic can go straight onto the Bench, whatever the
-                # card's own wording says.
-                if info.get("stage") != "Basic":
+                # Only a Basic goes onto the Bench -- unless the card NAMES
+                # what it benches: Lampent's Spreading Light ("up to 3
+                # Lampent") and Maushold's Familial March ("Maushold and
+                # Maushold ex") put Stage 1s there, and the card's text
+                # overrides the rule. Both did nothing until 2026-10-06.
+                if info.get("stage") != "Basic" and not want:
                     return False
                 if stage not in (None, "Basic") and info.get("stage") != stage:
                     return False

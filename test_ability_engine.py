@@ -4265,6 +4265,44 @@ def test_this_pokemon_is_now_asleep_is_the_attackers_drawback():
           len([a for a in bell.actions if a.op == IR.Op.APPLY_CONDITION]) == 1, str(bell.actions))
 
 
+def test_named_stage1_bench_searches_and_try_to_imitate():
+    """Lampent's Spreading Light and Maushold's Familial March name the
+    Stage 1 they bench, and the Bench search refused every non-Basic, so
+    both did nothing (Familial March is the setup attack of a top-5 field
+    deck). Ethan's Sudowoodo's Try to Imitate skipped its coin flip."""
+    import random
+    V, D, E = _real("decks/field/chandelure_maushold_dudunsparce_wall.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    cards = M.load_cards()
+    for who, an, want, n in (("Lampent", "Spreading Light", "Lampent", 3),
+                             ("Maushold", "Familial March", "Maushold", 2)):
+        me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+        me.active = V.InPlay(who, 1)
+        op.active = V.InPlay("Mega Kangaskhan ex", 1)
+        me._opp_ref, op._opp_ref = op, me
+        me.deck = [("Pokemon", want)] * 3 + [("Item", "Ultra Ball")] * 5
+        text = next(a["text"] for c in cards if c["name"] == who
+                    for a in c.get("attacks") or [] if a["name"] == an)
+        for a in IR.compile_effect("attack", an, text).actions:
+            AE.apply_action(a, me, op, me.active, [], attacker=me.active,
+                            make_inplay=lambda nm: V.InPlay(nm, 1))
+        check(f"{an} benches {n} {want}", [b.name for b in me.bench] == [want] * n,
+              str([b.name for b in me.bench]))
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    me.active = V.InPlay("Ethan's Sudowoodo", 1)
+    op.active = V.InPlay("Mega Kangaskhan ex", 1)
+    me._opp_ref, op._opp_ref = op, me
+    atk = next(a for a in D[1]["Ethan's Sudowoodo"]["attacks"] if a["name"] == "Try to Imitate")
+    V._RESOLVING[0] = True
+    random.seed(3)
+    try:
+        hits = sum(1 for _ in range(200) if V.attack_damage(me, op, me.active, atk, record=False))
+    finally:
+        V._RESOLVING[0] = False
+    check("Try to Imitate copies on heads only (about 1 in 2)", 70 <= hits <= 130, str(hits))
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4722,6 +4760,7 @@ def main():
                test_ability_lock_cache_survives_a_reused_dict_address,
                test_mew_box_donor_attacks_do_what_they_print,
                test_this_pokemon_is_now_asleep_is_the_attackers_drawback,
+               test_named_stage1_bench_searches_and_try_to_imitate,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

@@ -3436,6 +3436,13 @@ def _copied_attack_damage(pl, opp, spot, text):
         best = 0
         for a in opp.POKEMON[opp.active.name]["attacks"]:
             best = max(best, attack_damage(opp, pl, opp.active, a, record=False))
+        # Ethan's Sudowoodo's Try to Imitate: "Flip a coin. If heads, ..."
+        # The flip was skipped, so it always copied. Valued at the
+        # expectation; at resolution the coin is flipped.
+        if _re.match(r"\s*flip a coin\. if heads", text, _re.I):
+            if _RESOLVING[0]:
+                return best if random.random() < 0.5 else 0
+            return best // 2
         return best
 
     # "Discard the top card of your deck, and if that card is a Pokemon that
