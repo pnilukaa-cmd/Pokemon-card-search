@@ -44,3 +44,18 @@ confirmation was stopped before it finished):
 All three come from the 68.6% maushold_gnaw_together_mill list, which
 beat this deck 86-14. Import: `chandelure_maushold_dudunsparce_wall_upgraded.ptcgl.txt`
 (Basic Fighting Energy becomes a third Psychic once Sudowoodo is cut).
+
+## Delay cards tested on the upgraded list (2026-10-06, 200 games, paired)
+
+Each in place of Sacred Ash + Battle Cage (Scream Tail ex for a Dunsparce):
+
+| Addition | Result |
+|---|---|
+| **2 Enhanced Hammer TWM 148** | **+4.75 ± 0.68** (now in the upgraded import) |
+| 2 Xerosic's Machinations | -0.32 ± 0.74 |
+| 2 Eri | -0.55 ± 0.65 |
+| 1 Scream Tail ex | -0.56 ± 0.65 |
+| 2 Energy Swatter | -1.88 ± 0.52 |
+
+Enhanced Hammer always hits (no coin), and most of the field leans on
+Special Energy.

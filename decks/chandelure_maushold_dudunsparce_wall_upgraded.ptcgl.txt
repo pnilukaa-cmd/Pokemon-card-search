@@ -11,12 +11,11 @@ Pokémon: 23
 1 Shaymin DRI 10
 
 Trainer: 29
+2 Enhanced Hammer TWM 148
 3 Crushing Hammer POR 71
 3 Backtrack Badge PBL 74
-1 Battle Cage PFL 85
 4 Poké Pad ASC 198
 3 Night Stretcher ASC 196
-1 Sacred Ash DRI 168
 1 Lana's Aid TWM 155
 2 Hilda WHT 84
 4 Buddy-Buddy Poffin ASC 184
