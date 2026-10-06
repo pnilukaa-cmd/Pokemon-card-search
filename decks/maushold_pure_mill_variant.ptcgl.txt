@@ -1,0 +1,31 @@
+Pokémon: 23
+2 Fan Rotom ASC 171
+2 Dudunsparce TEF 129
+3 Dunsparce JTG 120
+4 Maushold 30C 125
+1 Maushold SSP 158
+4 Tandemaus SSP 157
+1 Shaymin DRI 10
+2 Drilbur SSP 108
+2 Excadrill SSP 109
+2 Team Rocket's Larvitar DRI 94
+
+Trainer: 29
+2 Enhanced Hammer TWM 148
+3 Crushing Hammer POR 71
+3 Backtrack Badge PBL 74
+4 Poké Pad ASC 198
+3 Night Stretcher ASC 196
+1 Lana's Aid TWM 155
+2 Hilda WHT 84
+4 Buddy-Buddy Poffin ASC 184
+4 Lillie's Determination MEG 119
+2 Boss's Orders ASC 183
+1 Neutralization Zone SFA 60
+
+Energy: 8
+1 Telepathic Psychic Energy POR 88
+3 Basic Psychic Energy
+4 Mist Energy TEF 161
+
+Total Cards: 60

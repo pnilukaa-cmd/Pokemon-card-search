@@ -59,3 +59,21 @@ Each in place of Sacred Ash + Battle Cage (Scream Tail ex for a Dunsparce):
 
 Enhanced Hammer always hits (no coin), and most of the field leans on
 Special Energy.
+
+## Other milling Pokemon (2026-10-06, 200 games, paired vs the upgraded list)
+
+Every Pokemon in the pool that discards from the top of the opponent's
+deck was listed; the ones payable with this deck's Psychic/Colorless
+Energy were tested.
+
+| Change | Result |
+|---|---|
+| +2 Durant ex (for Lana's Aid + 1 Night Stretcher) | -3.38 ± 0.70 |
+| +1 Drilbur +1 Excadrill SSP (same cuts) | -2.52 ± 0.65 |
+| +2 Team Rocket's Larvitar (same cuts) | -3.48 ± 0.69 |
+| Chandelure line -> 2 Durant ex, 2 Drilbur, 2 Excadrill | +1.73 ± 0.77 |
+| **Chandelure line -> 2 Drilbur, 2 Excadrill, 2 TR Larvitar** | **+3.66 ± 0.85 (57.5 -> 61.2%)** |
+
+The pure-mill version is `maushold_pure_mill_variant.ptcgl.txt`. One-card
+millers only pay off in the Chandelure slots, which attacked 5 times in 20
+games; taking recursion slots for them loses.
