@@ -1,0 +1,37 @@
+Pokémon: 22
+2 Litwick PBL 36
+2 Lampent PBL 37
+2 Dudunsparce TEF 129
+3 Dunsparce JTG 120
+1 Elgyem BLK 40
+3 Maushold 30C 125
+2 Mega Chandelure ex PBL 38
+1 Ethan's Sudowoodo DRI 93
+1 Maushold SSP 158
+4 Tandemaus SSP 157
+1 Shaymin DRI 10
+
+Trainer: 30
+1 Air Balloon BLK 79
+2 Battle Cage PFL 85
+4 Poké Pad ASC 198
+3 Night Stretcher ASC 196
+1 Sacred Ash DRI 168
+1 Lana's Aid TWM 155
+2 Hilda WHT 84
+1 Redeemable Ticket JTG 156
+2 Gravity Gemstone SCR 137
+4 Buddy-Buddy Poffin ASC 184
+4 Lillie's Determination MEG 119
+2 Boss's Orders ASC 183
+1 Neutralization Zone SFA 60
+1 Prism Tower CRI 111
+1 Tool Scrapper ASC 212
+
+Energy: 8
+1 Telepathic Psychic Energy POR 88
+2 Basic Psychic Energy
+4 Mist Energy TEF 161
+1 Basic Fighting Energy
+
+Total Cards: 60
