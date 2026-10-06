@@ -26,3 +26,21 @@ decks 12-14, Maushold mill 14. Best: Mew Pikachu box 86, Scovillain 77.
 ## Engine fixes this list exposed
 - **Spreading Light and Familial March benched nothing.** The Bench search refused every non-Basic, even when the card names its Stage 1. Fixing it moved three field decks: chandelure_centiskorch +2.4, mega_chandelure_ex +1.8, study_maushold_gnaw_latias +1.3.
 - **Ethan's Sudowoodo's Try to Imitate skipped its coin flip,** so it always copied the opponent's attack.
+
+## Upgrades tested (2026-10-06)
+
+Paired against the 63-deck field, 200 games per opponent (a 1000-game
+confirmation was stopped before it finished):
+
+| Change | Result |
+|---|---|
+| +2 Fan Rotom, +1 Maushold 30C (-Sudowoodo, -Elgyem, -Prism Tower) | **+7.32 ± 0.93** |
+| +3 Backtrack Badge (-2 Gravity Gemstone, -Tool Scrapper) | +3.16 ± 0.68 |
+| +3 Crushing Hammer (-Prism Tower, -Redeemable Ticket, -Air Balloon) | +1.79 ± 0.68 |
+| +2 Budew (-Sudowoodo, -Elgyem) | -0.15 ± 0.66 |
+| Rotom + Maushold + Badge | +9.40 ± 0.90 |
+| **All three (Rotom + Maushold, Badge, Hammer)** | **+12.95 ± 1.04 (39.7 -> 52.6%)** |
+
+All three come from the 68.6% maushold_gnaw_together_mill list, which
+beat this deck 86-14. Import: `chandelure_maushold_dudunsparce_wall_upgraded.ptcgl.txt`
+(Basic Fighting Energy becomes a third Psychic once Sudowoodo is cut).
