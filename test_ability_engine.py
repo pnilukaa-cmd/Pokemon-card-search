@@ -4303,6 +4303,24 @@ def test_named_stage1_bench_searches_and_try_to_imitate():
     check("Try to Imitate copies on heads only (about 1 in 2)", 70 <= hits <= 130, str(hits))
 
 
+def test_ability_gated_pokemon_gets_its_energy():
+    """Munkidori's Adrena-Brain needs a Darkness Energy attached; the attach
+    ranking priced only attacks, so a Munkidori with an unpayable attack
+    never got one (Adrena-Brain: 0 uses in 12 Feraligatr/Munkidori games)."""
+    V, D, E = _real("decks/field/feraligatr_munkidori_damage_transfer.txt", "d")
+    me = V.Player("d", D[1], D[2], E)
+    attacker = next(n for n in D[1] if n.startswith("Feraligatr"))
+    me.active = V.InPlay(attacker, 1)
+    me.active.energy = [["Water"]] * 4
+    me.active.energy_names = ["Water Energy"] * 4
+    m = V.InPlay("Munkidori", 1)
+    me.bench = [m]
+    me.hand = [("Energy", "Darkness Energy")]
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("a ready Active leaves the Darkness Energy for Munkidori",
+          m.energy_count() == 1, f"munkidori={m.energy_count()} active={me.active.energy_count()}")
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4761,6 +4779,7 @@ def main():
                test_mew_box_donor_attacks_do_what_they_print,
                test_this_pokemon_is_now_asleep_is_the_attackers_drawback,
                test_named_stage1_bench_searches_and_try_to_imitate,
+               test_ability_gated_pokemon_gets_its_energy,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

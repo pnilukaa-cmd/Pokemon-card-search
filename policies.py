@@ -65,8 +65,9 @@ GREEDY = {
     # this many cards (0: off). Measuring.
     "hand_trim_first": 0,
     # Feed a Pokemon whose Ability needs an Energy type attached (Munkidori).
-    # Off until measured (paired run in progress, 2026-10-07).
-    "ability_energy": int(__import__("os").environ.get("ABILITY_ENERGY", 0)),
+    # Paired, 200 games x 63 opponents: positive on all 8 Munkidori decks
+    # (+0.4 to +10.4; Feraligatr/Munkidori +4.51 +/- 0.62).
+    "ability_energy": int(__import__("os").environ.get("ABILITY_ENERGY", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
