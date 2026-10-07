@@ -4723,6 +4723,34 @@ def _energy_for(pl, target):
     return fits[0] if fits else None
 
 
+_ABILITY_ENERGY_RE = _re.compile(
+    r"if this pok[eé]mon has any (?:(\w+) )?energy attached", _re.I)
+
+
+def _ability_energy_wants(pl):
+    """A Pokemon whose Ability is off for want of one Energy of a type in
+    hand -- fed only when the Active can already pay an attack (or has none
+    worth paying for), so the attacker is never starved."""
+    a = pl.active
+    if a is not None and energy_shortfall(pl, a) > 0 and not _attacks_dead(pl, a):
+        return None
+    hand = [n for k, n in pl.hand if k == "Energy"]
+    for p in pl.in_play():
+        for ab in (pl.POKEMON.get(p.name) or {}).get("abilities") or []:
+            m = _ABILITY_ENERGY_RE.search(ab.get("text") or "")
+            if not m:
+                continue
+            t = (m.group(1) or "").capitalize()
+            if t not in M.REAL_TYPES:
+                t = ""
+            if any((not t) or t in e for e in p.energy):
+                continue
+            if any((not t) or t in (energy_provisions(n, _CARDS_BY_NAME)[0] or [])
+                   for n in hand):
+                return p
+    return None
+
+
 def attach_energy(pl, cards_by_name, log):
     idx = next((i for i, (k, n) in enumerate(pl.hand) if k == "Energy"), None)
     if idx is None:
@@ -4759,7 +4787,15 @@ def attach_energy(pl, cards_by_name, log):
                    and _attacks_dead(pl, pl.active)
                    and any(energy_shortfall(pl, p) > 0
                            and _potential_damage(pl, p) > 0 for p in pl.bench))
-    if (POL.knob(pl, "energy_to_active") and not dead_active
+    # An Ability gated on "if this Pokemon has any <Type> Energy attached"
+    # (Munkidori's Adrena-Brain, Shuckle, Dragonair): the attach ranking
+    # priced only attacks, so a Munkidori whose attack is unpayable never got
+    # its Darkness Energy -- Adrena-Brain ran 0 times in 12 games for the
+    # Feraligatr/Munkidori field deck.
+    gated = _ability_energy_wants(pl) if POL.knob(pl, "ability_energy") else None
+    if gated is not None:
+        target = gated
+    elif (POL.knob(pl, "energy_to_active") and not dead_active
             and pl.active and energy_shortfall(pl, pl.active) > 0):
         target = pl.active
     else:

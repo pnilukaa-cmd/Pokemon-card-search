@@ -64,6 +64,9 @@ GREEDY = {
     # Play a "discard down to N" Supporter first when it strips at least
     # this many cards (0: off). Measuring.
     "hand_trim_first": 0,
+    # Feed a Pokemon whose Ability needs an Energy type attached (Munkidori).
+    # Off until measured (paired run in progress, 2026-10-07).
+    "ability_energy": int(__import__("os").environ.get("ABILITY_ENERGY", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
