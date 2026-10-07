@@ -1,26 +1,17 @@
 Pokémon: 21
-
 3 Trevenant CRI 39
 3 Uxie SSP 78
-
 3 Phantump CRI 38
-
 2 Dunsparce JTG 120
 2 Dudunsparce TEF 129
-
 1 Lillie's Clefairy ex JTG 56
-
 2 N's Vanillite ASC 49
-
 1 N's Vanillish ASC 50
-
 2 N's Vanilluxe ASC 51
-
-2 Rare Candy MEG 125
-
 2 Azelf SSP 80
 
 Trainer: 31
+2 Rare Candy MEG 125
 3 Buddy-Buddy Poffin ASC 184
 1 Switch MEG 130
 3 Poké Pad ASC 198

@@ -2,14 +2,11 @@ Pokémon: 22
 3 Ponyta TEF 26
 3 Trevenant CRI 39
 3 Uxie SSP 78
-
 3 Phantump CRI 38
 3 Rapidash DRI 30
 2 Dunsparce JTG 120
 2 Dudunsparce TEF 129
-
 1 Lillie's Clefairy ex JTG 56
-
 2 Azelf SSP 80
 
 Trainer: 30
