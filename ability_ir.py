@@ -1222,6 +1222,8 @@ def _r(m, text):
 def _r(m, text):
     if re.search(r"for each .{0,30}card in your discard pile", text, re.I):
         return []          # place_counters_per_discard above owns this
+    if re.search(r"on the pok[eé]mon you evolved in this way", text, re.I):
+        return []          # evolve_self_from_hand's counters_after
     if re.match(r"\s*that pok[eé]mon", m.group(2), re.I) and \
             re.search(r"if you attached energy", text, re.I):
         return []          # attach_energy_from_deck's counters_on_recipient
@@ -1513,11 +1515,18 @@ def _r(m, text):
     damage field alone they read as 0-damage attacks."""
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
+    f = {"attack_damage": True}
+    # "...to each of your opponent's Pokemon ex (and Pokemon V)": Mewtwo
+    # ex's Photon Bullets, Vaporeon ex's Severe Squall, Flygon ex's Sonic
+    # Peridot. The qualifier was dropped, so all three hit every Pokemon.
+    q = re.match(r"\s+(ex|v)\b(?:\s+and\s+pok[eé]mon\s+(v)\b)?", text[m.end():], re.I)
+    if q:
+        f["subtypes_any"] = [x.upper() if x.lower() == "v" else "ex"
+                             for x in q.groups() if x]
     if who == "each":
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL,
-                       {"attack_damage": True})]
-    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY,
-                   {"targets": int(who), "attack_damage": True})]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL, f)]
+    f["targets"] = int(who)
+    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY, f)]
 
 
 @rule("asymmetric_hand_reset",
@@ -1636,6 +1645,10 @@ def _r(m, text):
 
 @rule("lock", r"can'?t (attack|retreat|play|use)")
 def _r(m, text):
+    # "You can't use this Ability during your first turn" is a timing
+    # condition (evolve_self_from_hand's not_first_turn), not a lock.
+    if re.match(r"can'?t use this ability during your first turn", m.group(0) + text[m.end():m.end() + 40], re.I):
+        return []
     if re.search(r"if your opponent has no pok[eé]mon ex or pok[eé]mon v in play, "
                  r"this pok[eé]mon can'?t attack", text, re.I):
         return []
@@ -2061,6 +2074,22 @@ def _r(m, text):
         f["self"] = True                  # Ascension: this Pokemon only
     return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1,
                    Target.SELF if f.get("self") else Target.YOUR_ANY, f)]
+
+
+@rule("evolve_self_from_hand",
+      r"choose a card in your hand that evolves from this pok[eé]mon and put it onto "
+      r"this pok[eé]mon to evolve it")
+def _r(m, text):
+    """Phantump's Spiteful Evolution. It compiled as "2 damage counters on
+    itself" plus a lock -- the evolution never happened, so using it only
+    hurt the Phantump."""
+    f = {"self": True, "from": "hand"}
+    mc = re.search(r"place (\d+) damage counters? on the pok[eé]mon you evolved", text, re.I)
+    if mc:
+        f["counters_after"] = int(mc.group(1))
+    if re.search(r"can'?t use this ability during your first turn", text, re.I):
+        f["not_first_turn"] = True
+    return [Action(Op.EVOLVE_FROM_DECK, 1, Target.SELF, f)]
 
 
 @rule("search_any_card", r"search your deck for a card\b")

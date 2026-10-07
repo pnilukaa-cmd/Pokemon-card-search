@@ -4321,6 +4321,39 @@ def test_ability_gated_pokemon_gets_its_energy():
           m.energy_count() == 1, f"munkidori={m.energy_count()} active={me.active.energy_count()}")
 
 
+def test_spiteful_evolution_and_ex_only_spreads():
+    """Phantump's Spiteful Evolution compiled to "2 counters on itself" and
+    never evolved. "...damage to each of your opponent's Pokemon ex" (Mewtwo
+    ex's Photon Bullets, Vaporeon ex, Flygon ex) dropped its qualifier and
+    hit every Pokemon."""
+    V, D, E = _real("decks/field/trevenant_rapidash_uxie.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    OE = V.compile_effects_for(O[1], O[3])
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2], OE)
+    op.active = V.InPlay("Mega Kangaskhan ex", 1)
+    op.bench = [V.InPlay("Meowth ex", 1), V.InPlay("Chien-Pao", 1)]
+    me._opp_ref, op._opp_ref = op, me
+    me.round_no = op.round_no = 3
+    me.active = V.InPlay("Mewtwo ex", 1)
+    me.active.energy = [["Psychic"], ["Psychic"]]
+    V.do_attack(me, op, [])
+    dmg = {p.name: p.damage for p in [op.active] + op.bench}
+    check("Photon Bullets hits only Pokemon ex",
+          dmg == {"Mega Kangaskhan ex": 50, "Meowth ex": 50, "Chien-Pao": 0}, str(dmg))
+    me.active = V.InPlay("Phantump", 3)
+    me.hand = [("Pokemon", "Trevenant")]
+    V.use_abilities(me, op, 3, [])
+    check("Spiteful Evolution evolves Phantump from hand, with 2 counters",
+          me.active.name == "Trevenant" and me.active.damage == 20 and not me.hand,
+          f"{me.active.name} {me.active.damage}")
+    me.active = V.InPlay("Phantump", 1)
+    me.hand = [("Pokemon", "Trevenant")]
+    me.round_no = 1
+    me.abilities_used = set()
+    V.use_abilities(me, op, 1, [])
+    check("  ...but not during your first turn", me.active.name == "Phantump")
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4780,6 +4813,7 @@ def main():
                test_this_pokemon_is_now_asleep_is_the_attackers_drawback,
                test_named_stage1_bench_searches_and_try_to_imitate,
                test_ability_gated_pokemon_gets_its_energy,
+               test_spiteful_evolution_and_ex_only_spreads,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,

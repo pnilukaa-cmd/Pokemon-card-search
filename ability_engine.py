@@ -970,6 +970,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        if act.filter.get("subtypes_any"):
+            want = set(act.filter["subtypes_any"])
+            hits = [h for h in hits if h is not None and
+                    want & set((opp.POKEMON.get(h.name) or {}).get("subtypes") or [])]
         # Attack DAMAGE that the IR models as counters (Bench spread,
         # snipes) is stopped by damage prevention -- Shaymin's Flower
         # Curtain and Neutralization Zone had never been asked, because the
@@ -2194,6 +2198,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # attack's own "evolve this Pokemon" is left to the attack's timing.
         if source is None and rnd <= 1 and not anytime:
             return False
+        if f.get("not_first_turn") and rnd <= 1:
+            return False
+        from_hand = f.get("from") == "hand"
         placed, chained = [], None
         for _ in range(act.amount or 1):
             base = None
@@ -2212,7 +2219,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 nxt = next((n for n, i in pl.POKEMON.items()
                             if i.get("evolves_from") == _printed(pl, spot.name)
                             and not (f.get("no_ability") and pl.EFFECTS.get(n))
-                            and any(k == "Pokemon" and x == n for k, x in pl.deck)),
+                            and any(k == "Pokemon" and x == n
+                                    for k, x in (pl.hand if from_hand else pl.deck))),
                            None)
                 ok = spot is chained or (
                     not getattr(spot, "evolved_this_turn", False)
@@ -2223,7 +2231,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if not base:
                 break
             spot, nxt = base
-            pl.deck.remove(("Pokemon", nxt))
+            (pl.hand if from_hand else pl.deck).remove(("Pokemon", nxt))
             # The Pokemon it evolves from stays UNDER it -- discarding it
             # put a card in the discard pile that was still in play.
             _stack(spot).append(spot.name)
@@ -2231,10 +2239,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             chained = spot if f.get("chain") else None
             spot.evolved_this_turn = True
             clear_attack_locks(spot)
+            if f.get("counters_after"):
+                spot.damage += 10 * f["counters_after"]
             placed.append(nxt)
         if placed:
-            random.shuffle(pl.deck)
-            log.append(f"    evolves from deck: {', '.join(placed)}")
+            if not from_hand:
+                random.shuffle(pl.deck)
+            log.append(f"    evolves from {'hand' if from_hand else 'deck'}: {', '.join(placed)}")
         return bool(placed)
 
     if op == O.DISCARD_TO_DECK:
