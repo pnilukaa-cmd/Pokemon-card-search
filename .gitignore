@@ -9,3 +9,8 @@ __pycache__/
 # grading.json, benchmark.json, etc.) -- transient test artifacts, not source.
 .claude/skills/*-workspace/
 runs/*/log_*.txt
+
+# Live round-robin checkpoints change every pairing; a copy is committed
+# under runs/<date>/checkpoint/ instead (see the run's launch.sh).
+runs/*/*.partial
+runs/*/*.partial.tmp
