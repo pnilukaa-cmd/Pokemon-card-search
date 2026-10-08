@@ -1,16 +1,13 @@
 # Ditto Transform: Hydreigon ex / Tyranitar / Gengar ex
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **72.6% mean · 75.0% median · 51 of 56 winning matchups · rank 2 of 57**
+> ### Field results — 2026-10-08
+> **71.3% mean · 71.9% median · 69 of 76 winning matchups · rank 5 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 98% · worst `team_rockets_persian_ex_attack_theft` 35%.
+> Best `mew_pikachu_box` 97% · worst `lurantis_heal_punish` 32%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
 
 Built 2026-09-28 from the request "get Ditto early and swap it for big
 Stage 2s, or ones with hard-to-handle early effects (Tyranitar's Item

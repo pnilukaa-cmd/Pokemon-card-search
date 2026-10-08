@@ -1,38 +1,13 @@
 # Mega Kangaskhan ex / Tyrantrum — flip-until-tails
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **55.5% mean · 57.8% median · 38 of 56 winning matchups · rank 20 of 57**
+> ### Field results — 2026-10-08
+> **50.8% mean · 50.9% median · 39 of 76 winning matchups · rank 40 of 77**
 >
-> Best `static_venom_drapion` 89% · worst `tauros_risky_ruins` 11%.
+> Best `static_venom_drapion` 89% · worst `tauros_risky_ruins` 10%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built from the four cards asked for: `Team Rocket's Diglett`,
 `Mega Kangaskhan ex`, `Tyrantrum`, `Houndstone`. All four share the

@@ -1,38 +1,13 @@
 # Veluza / Sinistcha ex — "tea service"
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **50.7% mean · 48.5% median · 26 of 56 winning matchups · rank 28 of 57**
+> ### Field results — 2026-10-08
+> **48.8% mean · 45.5% median · 29 of 76 winning matchups · rank 44 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 86% · worst `study_mega_excadrill_drill_mill` 17%.
+> Best `static_venom_drapion` 86% · worst `study_mega_excadrill_drill_mill` 18%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Answer to "can you combine Kofu and Sinistcha?" **Yes, and it is a
 markedly better deck than the pure Food Prep build — but not for the

@@ -1,38 +1,13 @@
 # Scovillain ex / Salazzle ex — Spicy Rage
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **59.2% mean · 61.5% median · 41 of 56 winning matchups · rank 13 of 57**
+> ### Field results — 2026-10-08
+> **57.0% mean · 58.7% median · 52 of 76 winning matchups · rank 25 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 87% · worst `maushold_gnaw_together_mill` 23%.
+> Best `static_venom_drapion` 88% · worst `mew_alex_centiskorch_mill` 16%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 `Scovillain ex` **SSP 216**, Stage 1 from Capsakid, **260 HP**, Fire.
 `F``F` **Spicy Rage 10+ — 70 more damage for each damage counter on this

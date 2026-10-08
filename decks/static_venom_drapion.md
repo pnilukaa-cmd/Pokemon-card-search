@@ -1,38 +1,13 @@
 # Static Venom (Skorupi / Drapion)
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **20.6% mean · 17.4% median · 4 of 56 winning matchups · rank 56 of 57**
+> ### Field results — 2026-10-08
+> **21.3% mean · 16.1% median · 7 of 76 winning matchups · rank 75 of 77**
 >
-> Best `study_flygon_sandy_flapping_mill` 61% · worst `tauros_risky_ruins` 6%.
+> Best `mew_pikachu_box` 79% · worst `diggersby_munkidori_earthquake` 4%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Fourth of five decks built around the Special Condition stacking research in this repo (see
 `combo_patterns.md` Pattern 5). A second guaranteed same-turn **Paralyzed + Poisoned** lockdown

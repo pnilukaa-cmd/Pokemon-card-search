@@ -1,38 +1,13 @@
 # Team Rocket's Koffing/Weezing Bench Swarm
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **57.2% mean · 58.0% median · 36 of 56 winning matchups · rank 16 of 57**
+> ### Field results — 2026-10-08
+> **58.5% mean · 57.0% median · 49 of 76 winning matchups · rank 21 of 77**
 >
-> Best `static_venom_drapion` 91% · worst `ns_zoroark_night_joker_toolbox` 20%.
+> Best `mew_baby_box` 97% · worst `ns_zoroark_night_joker_toolbox` 23%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built from a real deck the user played against — described as "the weezing hit
 hard and the bench was filled fast." Confirmed both halves against the actual

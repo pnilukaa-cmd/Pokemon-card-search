@@ -1,34 +1,13 @@
 # Pure Dragapult ex — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **50.9% mean · 50.8% median · 29 of 56 winning matchups · rank 25 of 57**
+> ### Field results — 2026-10-08
+> **52.2% mean · 52.8% median · 43 of 76 winning matchups · rank 36 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 85% · worst `ns_zoroark_night_joker_toolbox` 22%.
+> Best `mew_baby_box` 87% · worst `ns_zoroark_night_joker_toolbox` 21%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **Not my list.** Taken from Natalie Millar's *The Best Pokémon TCG Decks
 Right Now (September 2026)* on TCGplayer, published 2026-08-25, and

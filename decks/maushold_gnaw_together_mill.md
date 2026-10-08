@@ -1,20 +1,13 @@
 # Maushold mill — Gnaw Together
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **68.6% mean · 71.1% median · 50 of 56 winning matchups · rank 5 of 57**
+> ### Field results — 2026-10-08
+> **67.6% mean · 69.0% median · 64 of 76 winning matchups · rank 9 of 77**
 >
-> Best `static_venom_drapion` 91% · worst `tauros_risky_ruins` 34%.
+> Best `mew_baby_box` 98% · worst `team_rocket_nidoking_nidoqueen` 29%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
 
 A user list, reviewed 2026-09-21/22. `Maushold 30C 125`'s **Gnaw Together**
 (1 Colorless) flips a coin for each Maushold in play and mills 2 per heads;

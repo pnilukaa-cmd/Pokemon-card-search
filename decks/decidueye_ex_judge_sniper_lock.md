@@ -1,38 +1,13 @@
 # Decidueye ex / Vivillon — "exactly 4" cost lock
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **50.7% mean · 51.8% median · 30 of 56 winning matchups · rank 27 of 57**
+> ### Field results — 2026-10-08
+> **53.3% mean · 53.8% median · 45 of 76 winning matchups · rank 34 of 77**
 >
-> Best `static_venom_drapion` 86% · worst `tauros_risky_ruins` 11%.
+> Best `mew_baby_box` 95% · worst `tauros_risky_ruins` 12%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 A deck whose entire job is to keep the opponent's hand at exactly four
 cards, because that is the switch on `Decidueye ex`'s Ability.

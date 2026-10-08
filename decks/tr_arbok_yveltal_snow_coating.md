@@ -1,34 +1,13 @@
 # Team Rocket's Arbok / Yveltal / N's Vanilluxe — the Snow Coating deck
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **37.6% mean · 34.4% median · 13 of 56 winning matchups · rank 49 of 57**
+> ### Field results — 2026-10-08
+> **26.3% mean · 22.0% median · 10 of 76 winning matchups · rank 72 of 77**
 >
-> Best `study_centiskorch_bastiodon_mill` 86% · worst `tauros_risky_ruins` 4%.
+> Best `mew_pikachu_box` 78% · worst `tauros_risky_ruins` 4%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **50.8% mean · 50.5% median · 18 of 35 winning matchups**, and 50.7% on an
 independent seed.

@@ -1,141 +1,205 @@
 # Field results — every deck against every other deck
 
-Full round robin over **57 decks**, **1000 games** per pairing, 1596 pairings, 1,596,000 games. Each pairing uses its own fixed seed, so a re-run of this field reproduces exactly.
+Full round robin over **77 decks**, **1000 games** per pairing, 2926 pairings, 2,926,000 games. Each pairing uses its own fixed seed, so a re-run of this field reproduces exactly.
 
-Measured 2026-09-30. **These supersede every number in the deck files before this date.**
+Measured 2026-10-08. **These supersede every number in the deck files before this date.**
 
-## What changed since the 2026-09-29 table
+## What changed since the 2026-09-30 table
 
-**The field.** The same 57 decks and per-pair seeds (`rr1`). One list
-changed: `ditto_transform_hydreigon` plays Hero's Cape instead of Secret
-Box (+2.75 +/- 0.36 paired against the field before this run).
+**The field.** 57 → 77 decks, same per-pair seeds (`rr1`). Twenty lists
+added, none removed:
 
-**The engine** (commit in `ENGINE_COMMIT`): the Ability-lock cache no
-longer hands a reused dict address another deck's "no locks" (Flutter
-Mane, Iron Thorns ex, Watchtower, Gastrodon could lose their locks
-between pairings). Only decks with an Ability lock, and their opponents,
-can move for that reason.
+- **Six user Mew ex lists:** `mew_alex_centiskorch_mill`, `mew_baby_box`,
+  `mew_dbc_bastiodon`, `mew_dbc_hypno`, `mew_lonestar_gourgeist_dragapult`,
+  `mew_pikachu_box`.
+- **User and study lists:** `chandelure_maushold_dudunsparce_wall`,
+  `diggersby_munkidori_earthquake`, `trevenant_rapidash_uxie`,
+  `golbat_brute_bonnet_punch`.
+- **Ten Team Rocket lists from the Team Rocket's study:** `team_rocket_*`
+  (see [TEAM_ROCKET_STUDY_2026-10-08.md](TEAM_ROCKET_STUDY_2026-10-08.md)).
+
+**The engine** (commit in `ENGINE_COMMIT`). Every deck can move, mostly
+because of the first item:
+
+- **Prize cards now reach the hand** after an attack, Checkup or retaliation
+  Knock Out. Before, only the Bench sweep moved them.
+- **"Whenever your opponent ..." and Checkup Abilities fire:** Holes, Darkest
+  Impulse, Gnawing Curse, Lava Zone, Swirling Prose, Sand Stream, Freezing
+  Shroud, Good Sleep.
+- **Card texts that resolved wrongly:**
+  - "Flip 2 coins. If both of them are tails" was read as 75%.
+  - "If <name> is on your Bench" was read as the attacker being Benched.
+  - "an Item card" searched for a name containing "n", and search stage
+    filters were never read.
+  - Poison's "N counters instead of 1" landed on the attacker.
+  - Unfair Stamp and Archer kept your hand.
+  - Torment was not applied.
+  - Rocket Mirror moved from the Active.
+- **Earlier in the same window:** Scream, Daydream, Nab 'n' Dash, Eternity
+  Bloom; Ability-lock cache; cost Tools; self-Asleep attacks; named Stage 1
+  Bench searches; Spiteful Evolution; ex-only spreads; Corrosive Winds.
+- **Pilot:** Energy for Ability-gated Pokémon (Munkidori); an aimed Rocket Brain.
 
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
-| 1 | `tauros_risky_ruins` | **72.9%** | 76.7% | 51/56 | study_flygon_sandy_flapping_mill (97%) | ditto_transform_hydreigon (35%) |
-| 2 | `ditto_transform_hydreigon` | **72.6%** | 75.0% | 51/56 | team_rockets_wobbuffet_orbeetle_damage_launder (98%) | team_rockets_persian_ex_attack_theft (35%) |
-| 3 | `ns_zoroark_night_joker_toolbox` | **72.3%** | 75.8% | 52/56 | team_rockets_wobbuffet_orbeetle_damage_launder (96%) | tauros_risky_ruins (24%) |
-| 4 | `team_rockets_persian_ex_attack_theft` | **69.4%** | 70.4% | 53/56 | team_rockets_wobbuffet_orbeetle_damage_launder (95%) | ns_zoroark_night_joker_toolbox (43%) |
-| 5 | `maushold_gnaw_together_mill` | **68.6%** | 71.1% | 50/56 | static_venom_drapion (91%) | tauros_risky_ruins (34%) |
-| 6 | `lurantis_heal_punish` | **68.1%** | 68.5% | 51/56 | darkness_mill_hand_lock (94%) | scovillain_salazzle_spicy_rage (40%) |
-| 7 | `ditto_tyranitar_gengar_hydreigon` | **65.5%** | 67.7% | 47/56 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | lurantis_heal_punish (29%) |
-| 8 | `tr_spidops_mewtwo_hammer` | **64.4%** | 65.8% | 50/56 | static_venom_drapion (89%) | tauros_risky_ruins (34%) |
-| 9 | `study_mega_excadrill_drill_mill` | **63.4%** | 63.9% | 48/56 | team_rockets_wobbuffet_orbeetle_damage_launder (89%) | ditto_transform_hydreigon (18%) |
-| 10 | `krookodile_ex_relicanth_hand_disruption` | **60.6%** | 62.2% | 40/56 | team_rockets_wobbuffet_orbeetle_damage_launder (94%) | lurantis_heal_punish (28%) |
-| 11 | `wugtrio_paralysis_pin` | **60.4%** | 62.7% | 38/56 | team_rockets_wobbuffet_orbeetle_damage_launder (96%) | ns_zoroark_night_joker_toolbox (18%) |
-| 12 | `cradily_accelgor_conditions` | **59.4%** | 57.1% | 41/56 | study_flygon_sandy_flapping_mill (96%) | wugtrio_paralysis_pin (36%) |
-| 13 | `scovillain_salazzle_spicy_rage` | **59.2%** | 61.5% | 41/56 | team_rockets_wobbuffet_orbeetle_damage_launder (87%) | maushold_gnaw_together_mill (23%) |
-| 14 | `panic_poison_paralysis` | **58.9%** | 59.2% | 38/56 | team_rockets_wobbuffet_orbeetle_damage_launder (92%) | kangaskhan_tyrantrum_flip_mill (21%) |
-| 15 | `meta_mega_excadrill` | **58.1%** | 59.4% | 44/56 | static_venom_drapion (87%) | ditto_transform_hydreigon (22%) |
-| 16 | `team_rockets_koffing_weezing_bench_swarm` | **57.2%** | 58.0% | 36/56 | static_venom_drapion (91%) | ns_zoroark_night_joker_toolbox (20%) |
-| 17 | `mega_lopunny_dusknoir_snipe_finisher` | **57.0%** | 56.4% | 38/56 | static_venom_drapion (86%) | ns_zoroark_night_joker_toolbox (24%) |
-| 18 | `cradily_amoonguss_conditions` | **56.5%** | 52.7% | 31/56 | study_flygon_sandy_flapping_mill (97%) | study_mega_excadrill_drill_mill (26%) |
-| 19 | `mega_chandelure_ex_retreat_tax` | **55.7%** | 59.5% | 34/56 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | tauros_risky_ruins (15%) |
-| 20 | `kangaskhan_tyrantrum_flip_mill` | **55.5%** | 57.8% | 38/56 | static_venom_drapion (89%) | tauros_risky_ruins (11%) |
-| 21 | `meta_raging_bolt` | **55.5%** | 56.2% | 42/56 | static_venom_drapion (79%) | maushold_gnaw_together_mill (18%) |
-| 22 | `heracross_sinistcha_tea` | **54.1%** | 52.3% | 35/56 | team_rockets_wobbuffet_orbeetle_damage_launder (89%) | scovillain_salazzle_spicy_rage (28%) |
-| 23 | `meta_slowking` | **53.8%** | 55.0% | 35/56 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | tauros_risky_ruins (15%) |
-| 24 | `meta_dragapult_blaziken` | **52.2%** | 53.0% | 35/56 | static_venom_drapion (82%) | ns_zoroark_night_joker_toolbox (22%) |
-| 25 | `meta_dragapult_pure` | **50.9%** | 50.8% | 29/56 | team_rockets_wobbuffet_orbeetle_damage_launder (85%) | ns_zoroark_night_joker_toolbox (22%) |
-| 26 | `metal_metang_excadrill` | **50.8%** | 51.5% | 29/56 | static_venom_drapion (82%) | ditto_transform_hydreigon (15%) |
-| 27 | `decidueye_ex_judge_sniper_lock` | **50.7%** | 51.8% | 30/56 | static_venom_drapion (86%) | tauros_risky_ruins (11%) |
-| 28 | `veluza_sinistcha_ex_tea_service` | **50.7%** | 48.5% | 26/56 | team_rockets_wobbuffet_orbeetle_damage_launder (86%) | study_mega_excadrill_drill_mill (17%) |
-| 29 | `water_aggro` | **50.5%** | 49.6% | 28/56 | chandelure_centiskorch_deck_out (88%) | tauros_risky_ruins (10%) |
-| 30 | `kyurem_vanilluxe_blizzard` | **49.2%** | 48.8% | 27/56 | team_rockets_wobbuffet_orbeetle_damage_launder (91%) | ns_zoroark_night_joker_toolbox (17%) |
-| 31 | `orthworm_ex_metal_retaliation` | **49.0%** | 47.6% | 25/56 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | ns_zoroark_night_joker_toolbox (12%) |
-| 32 | `arbok_muk_laser_darkbell` | **48.6%** | 49.1% | 27/56 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | kangaskhan_tyrantrum_flip_mill (20%) |
-| 33 | `dhelmise_veluza_hide_n_sneak` | **48.5%** | 48.5% | 24/56 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | study_mega_excadrill_drill_mill (21%) |
-| 34 | `toxic_slumber_vileplume_ex` | **48.3%** | 48.1% | 26/56 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | ditto_transform_hydreigon (19%) |
-| 35 | `team_rockets_spidops_swarm` | **46.6%** | 43.4% | 20/56 | static_venom_drapion (83%) | tauros_risky_ruins (19%) |
-| 36 | `arbok_muk_trolley_darkbell` | **46.2%** | 47.0% | 22/56 | team_rockets_wobbuffet_orbeetle_damage_launder (93%) | kangaskhan_tyrantrum_flip_mill (18%) |
-| 37 | `mega_scrafty_ex_darkness_tank` | **45.6%** | 44.6% | 23/56 | team_rockets_wobbuffet_orbeetle_damage_launder (87%) | lurantis_heal_punish (15%) |
-| 38 | `arbok_team_rockets_muk_condition_stack` | **45.1%** | 44.9% | 19/56 | team_rockets_wobbuffet_orbeetle_damage_launder (91%) | kangaskhan_tyrantrum_flip_mill (12%) |
-| 39 | `meta_dragapult_dusknoir` | **44.9%** | 44.2% | 17/56 | team_rockets_wobbuffet_orbeetle_damage_launder (84%) | ns_zoroark_night_joker_toolbox (14%) |
-| 40 | `stevens_carbink_damage_wall` | **44.8%** | 43.8% | 20/56 | meta_festival_lead (86%) | ns_zoroark_night_joker_toolbox (16%) |
-| 41 | `study_maushold_gnaw_latias` | **44.7%** | 44.0% | 20/56 | study_flygon_sandy_flapping_mill (89%) | tauros_risky_ruins (9%) |
-| 42 | `hops_snorlax_stacked_buff` | **44.6%** | 41.3% | 16/56 | study_flygon_sandy_flapping_mill (89%) | ditto_transform_hydreigon (15%) |
-| 43 | `feraligatr_munkidori_damage_transfer` | **44.2%** | 42.5% | 15/56 | study_flygon_sandy_flapping_mill (87%) | tauros_risky_ruins (9%) |
-| 44 | `chandelure_centiskorch_deck_out` | **43.7%** | 44.5% | 21/56 | study_flygon_sandy_flapping_mill (80%) | tauros_risky_ruins (9%) |
-| 45 | `tr_crobat_absol_bench_snipe` | **43.5%** | 46.0% | 16/56 | team_rockets_wobbuffet_orbeetle_damage_launder (86%) | lurantis_heal_punish (15%) |
-| 46 | `eerie_inferno_ninetales_burn` | **39.7%** | 36.5% | 11/56 | study_flygon_sandy_flapping_mill (83%) | wugtrio_paralysis_pin (10%) |
-| 47 | `crabominable_veluza_food_prep` | **38.3%** | 36.8% | 10/56 | static_venom_drapion (77%) | ns_zoroark_night_joker_toolbox (13%) |
-| 48 | `darkness_mill_hand_lock` | **37.8%** | 35.5% | 11/56 | study_centiskorch_bastiodon_mill (89%) | lurantis_heal_punish (6%) |
-| 49 | `tr_arbok_yveltal_snow_coating` | **37.6%** | 34.4% | 13/56 | study_centiskorch_bastiodon_mill (86%) | tauros_risky_ruins (4%) |
-| 50 | `meta_ns_zoroark` | **37.0%** | 40.2% | 12/56 | static_venom_drapion (75%) | ditto_transform_hydreigon (8%) |
-| 51 | `study_hydreigon_zweilous_mill` | **36.4%** | 34.2% | 9/56 | meta_ns_zoroark (72%) | ditto_transform_hydreigon (10%) |
-| 52 | `study_centiskorch_bastiodon_mill` | **35.4%** | 33.5% | 10/56 | meta_ns_zoroark (81%) | ditto_tyranitar_gengar_hydreigon (10%) |
-| 53 | `meta_festival_lead` | **29.9%** | 29.1% | 4/56 | static_venom_drapion (63%) | tauros_risky_ruins (6%) |
-| 54 | `salazzle_ex_team_rockets_muk_condition_stack` | **28.2%** | 28.2% | 2/56 | meta_festival_lead (58%) | ditto_transform_hydreigon (6%) |
-| 55 | `study_flygon_sandy_flapping_mill` | **27.7%** | 22.0% | 5/56 | meta_ns_zoroark (76%) | cradily_amoonguss_conditions (3%) |
-| 56 | `static_venom_drapion` | **20.6%** | 17.4% | 4/56 | study_flygon_sandy_flapping_mill (61%) | tauros_risky_ruins (6%) |
-| 57 | `team_rockets_wobbuffet_orbeetle_damage_launder` | **19.1%** | 15.4% | 3/56 | study_flygon_sandy_flapping_mill (79%) | ditto_transform_hydreigon (2%) |
+| 1 | `team_rocket_raticate_rush` | **72.8%** | 72.0% | 74/76 | mew_baby_box (98%) | ns_zoroark_night_joker_toolbox (43%) |
+| 2 | `tauros_risky_ruins` | **72.3%** | 75.4% | 68/76 | study_flygon_sandy_flapping_mill (98%) | diggersby_munkidori_earthquake (36%) |
+| 3 | `ns_zoroark_night_joker_toolbox` | **72.3%** | 75.7% | 71/76 | mew_dbc_hypno (97%) | tauros_risky_ruins (22%) |
+| 4 | `team_rocket_nidoking_nidoqueen` | **71.5%** | 73.7% | 68/76 | mew_baby_box (99%) | ns_zoroark_night_joker_toolbox (31%) |
+| 5 | `ditto_transform_hydreigon` | **71.3%** | 71.9% | 69/76 | mew_pikachu_box (97%) | lurantis_heal_punish (32%) |
+| 6 | `lurantis_heal_punish` | **69.4%** | 69.1% | 69/76 | mew_baby_box (99%) | team_rocket_moltres_houndoom (39%) |
+| 7 | `team_rocket_honchkrow_kangaskhan` | **69.4%** | 68.7% | 71/76 | mew_pikachu_box (99%) | ns_zoroark_night_joker_toolbox (32%) |
+| 8 | `team_rockets_persian_ex_attack_theft` | **67.9%** | 68.8% | 67/76 | mew_baby_box (95%) | team_rocket_raticate_rush (40%) |
+| 9 | `maushold_gnaw_together_mill` | **67.6%** | 69.0% | 64/76 | mew_baby_box (98%) | team_rocket_nidoking_nidoqueen (29%) |
+| 10 | `ditto_tyranitar_gengar_hydreigon` | **65.6%** | 67.0% | 61/76 | mew_pikachu_box (95%) | lurantis_heal_punish (28%) |
+| 11 | `team_rocket_raticate_ampharos` | **63.6%** | 61.7% | 67/76 | mew_baby_box (94%) | ns_zoroark_night_joker_toolbox (38%) |
+| 12 | `tr_spidops_mewtwo_hammer` | **63.5%** | 63.1% | 64/76 | mew_dbc_hypno (92%) | tauros_risky_ruins (28%) |
+| 13 | `diggersby_munkidori_earthquake` | **63.5%** | 62.5% | 58/76 | mew_pikachu_box (97%) | ns_zoroark_night_joker_toolbox (30%) |
+| 14 | `team_rocket_porygon_z_kangaskhan` | **63.1%** | 62.8% | 65/76 | static_venom_drapion (91%) | ditto_transform_hydreigon (32%) |
+| 15 | `team_rocket_tyranitar_sandstorm` | **62.1%** | 59.7% | 59/76 | mew_pikachu_box (95%) | lurantis_heal_punish (18%) |
+| 16 | `study_mega_excadrill_drill_mill` | **62.1%** | 62.1% | 59/76 | mew_pikachu_box (92%) | ditto_transform_hydreigon (17%) |
+| 17 | `panic_poison_paralysis` | **60.3%** | 60.4% | 49/76 | mew_baby_box (97%) | kangaskhan_tyrantrum_flip_mill (26%) |
+| 18 | `krookodile_ex_relicanth_hand_disruption` | **60.2%** | 60.1% | 52/76 | mew_baby_box (94%) | lurantis_heal_punish (24%) |
+| 19 | `team_rocket_orbeetle_morpeko` | **59.5%** | 58.8% | 55/76 | mew_baby_box (95%) | ns_zoroark_night_joker_toolbox (25%) |
+| 20 | `wugtrio_paralysis_pin` | **58.9%** | 57.6% | 45/76 | mew_baby_box (99%) | ns_zoroark_night_joker_toolbox (20%) |
+| 21 | `team_rockets_koffing_weezing_bench_swarm` | **58.5%** | 57.0% | 49/76 | mew_baby_box (97%) | ns_zoroark_night_joker_toolbox (23%) |
+| 22 | `cradily_accelgor_conditions` | **58.1%** | 55.8% | 48/76 | mew_pikachu_box (98%) | team_rocket_raticate_rush (29%) |
+| 23 | `team_rocket_moltres_houndoom` | **58.0%** | 58.8% | 49/76 | mew_pikachu_box (95%) | ns_zoroark_night_joker_toolbox (18%) |
+| 24 | `meta_mega_excadrill` | **57.3%** | 57.0% | 51/76 | mew_pikachu_box (88%) | ditto_transform_hydreigon (18%) |
+| 25 | `scovillain_salazzle_spicy_rage` | **57.0%** | 58.7% | 52/76 | static_venom_drapion (88%) | mew_alex_centiskorch_mill (16%) |
+| 26 | `mega_lopunny_dusknoir_snipe_finisher` | **56.4%** | 54.0% | 49/76 | mew_baby_box (90%) | ns_zoroark_night_joker_toolbox (25%) |
+| 27 | `mega_chandelure_ex_retreat_tax` | **56.3%** | 57.9% | 51/76 | mew_baby_box (91%) | tauros_risky_ruins (15%) |
+| 28 | `mew_lonestar_gourgeist_dragapult` | **56.3%** | 55.3% | 48/76 | team_rockets_wobbuffet_orbeetle_damage_launder (90%) | ditto_transform_hydreigon (16%) |
+| 29 | `team_rocket_hypno_wobbuffet` | **56.3%** | 55.5% | 50/76 | mew_baby_box (97%) | ditto_transform_hydreigon (16%) |
+| 30 | `cradily_amoonguss_conditions` | **55.9%** | 51.7% | 40/76 | study_flygon_sandy_flapping_mill (98%) | study_mega_excadrill_drill_mill (25%) |
+| 31 | `team_rocket_hypno_exeggutor` | **55.6%** | 54.7% | 48/76 | mew_baby_box (96%) | ditto_transform_hydreigon (16%) |
+| 32 | `meta_raging_bolt` | **55.4%** | 55.0% | 54/76 | static_venom_drapion (82%) | tauros_risky_ruins (17%) |
+| 33 | `meta_dragapult_blaziken` | **53.6%** | 55.0% | 45/76 | mew_dbc_hypno (84%) | ns_zoroark_night_joker_toolbox (24%) |
+| 34 | `decidueye_ex_judge_sniper_lock` | **53.3%** | 53.8% | 45/76 | mew_baby_box (95%) | tauros_risky_ruins (12%) |
+| 35 | `heracross_sinistcha_tea` | **53.0%** | 52.5% | 41/76 | mew_pikachu_box (95%) | scovillain_salazzle_spicy_rage (26%) |
+| 36 | `meta_dragapult_pure` | **52.2%** | 52.8% | 43/76 | mew_baby_box (87%) | ns_zoroark_night_joker_toolbox (21%) |
+| 37 | `mew_alex_centiskorch_mill` | **51.9%** | 48.0% | 36/76 | mew_pikachu_box (96%) | tauros_risky_ruins (8%) |
+| 38 | `water_aggro` | **51.9%** | 49.4% | 36/76 | mew_baby_box (93%) | tauros_risky_ruins (12%) |
+| 39 | `meta_slowking` | **51.6%** | 52.5% | 44/76 | tr_arbok_yveltal_snow_coating (85%) | tauros_risky_ruins (14%) |
+| 40 | `kangaskhan_tyrantrum_flip_mill` | **50.8%** | 50.9% | 39/76 | static_venom_drapion (89%) | tauros_risky_ruins (10%) |
+| 41 | `metal_metang_excadrill` | **49.8%** | 49.0% | 37/76 | static_venom_drapion (85%) | ditto_transform_hydreigon (14%) |
+| 42 | `arbok_muk_laser_darkbell` | **49.0%** | 48.2% | 35/76 | mew_baby_box (96%) | team_rocket_tyranitar_sandstorm (12%) |
+| 43 | `kyurem_vanilluxe_blizzard` | **48.9%** | 46.2% | 33/76 | mew_pikachu_box (91%) | ns_zoroark_night_joker_toolbox (15%) |
+| 44 | `veluza_sinistcha_ex_tea_service` | **48.8%** | 45.5% | 29/76 | static_venom_drapion (86%) | study_mega_excadrill_drill_mill (18%) |
+| 45 | `golbat_brute_bonnet_punch` | **48.8%** | 45.7% | 32/76 | mew_baby_box (93%) | lurantis_heal_punish (17%) |
+| 46 | `orthworm_ex_metal_retaliation` | **48.2%** | 46.4% | 33/76 | tr_arbok_yveltal_snow_coating (93%) | team_rocket_moltres_houndoom (8%) |
+| 47 | `toxic_slumber_vileplume_ex` | **48.2%** | 45.8% | 30/76 | mew_baby_box (91%) | team_rocket_honchkrow_kangaskhan (18%) |
+| 48 | `mega_scrafty_ex_darkness_tank` | **47.5%** | 46.0% | 33/76 | mew_pikachu_box (92%) | lurantis_heal_punish (15%) |
+| 49 | `arbok_muk_trolley_darkbell` | **46.7%** | 45.6% | 33/76 | mew_baby_box (95%) | team_rocket_tyranitar_sandstorm (11%) |
+| 50 | `dhelmise_veluza_hide_n_sneak` | **45.9%** | 45.1% | 24/76 | static_venom_drapion (84%) | team_rocket_tyranitar_sandstorm (16%) |
+| 51 | `team_rockets_spidops_swarm` | **45.7%** | 41.6% | 26/76 | mew_baby_box (87%) | tauros_risky_ruins (14%) |
+| 52 | `stevens_carbink_damage_wall` | **45.7%** | 44.6% | 27/76 | meta_festival_lead (87%) | ns_zoroark_night_joker_toolbox (15%) |
+| 53 | `feraligatr_munkidori_damage_transfer` | **45.4%** | 42.5% | 24/76 | study_flygon_sandy_flapping_mill (91%) | tauros_risky_ruins (8%) |
+| 54 | `tr_crobat_absol_bench_snipe` | **45.2%** | 44.8% | 26/76 | mew_baby_box (89%) | lurantis_heal_punish (14%) |
+| 55 | `meta_dragapult_dusknoir` | **45.1%** | 43.4% | 21/76 | mew_baby_box (84%) | ns_zoroark_night_joker_toolbox (15%) |
+| 56 | `hops_snorlax_stacked_buff` | **44.9%** | 39.2% | 22/76 | mew_baby_box (92%) | ditto_transform_hydreigon (16%) |
+| 57 | `arbok_team_rockets_muk_condition_stack` | **44.7%** | 42.6% | 26/76 | mew_baby_box (94%) | team_rocket_tyranitar_sandstorm (10%) |
+| 58 | `chandelure_centiskorch_deck_out` | **44.1%** | 42.0% | 27/76 | mew_pikachu_box (90%) | tauros_risky_ruins (11%) |
+| 59 | `meta_ns_zoroark` | **41.8%** | 43.5% | 25/76 | static_venom_drapion (77%) | ditto_transform_hydreigon (11%) |
+| 60 | `study_maushold_gnaw_latias` | **41.5%** | 38.0% | 22/76 | mew_pikachu_box (94%) | tauros_risky_ruins (6%) |
+| 61 | `eerie_inferno_ninetales_burn` | **40.3%** | 37.3% | 18/76 | mew_pikachu_box (88%) | wugtrio_paralysis_pin (10%) |
+| 62 | `mew_dbc_bastiodon` | **40.3%** | 37.5% | 25/76 | meta_festival_lead (84%) | ditto_transform_hydreigon (7%) |
+| 63 | `darkness_mill_hand_lock` | **38.2%** | 35.2% | 18/76 | mew_pikachu_box (90%) | lurantis_heal_punish (7%) |
+| 64 | `crabominable_veluza_food_prep` | **38.2%** | 35.8% | 17/76 | static_venom_drapion (79%) | ditto_transform_hydreigon (14%) |
+| 65 | `study_hydreigon_zweilous_mill` | **36.7%** | 36.7% | 14/76 | static_venom_drapion (71%) | lurantis_heal_punish (8%) |
+| 66 | `chandelure_maushold_dudunsparce_wall` | **36.5%** | 35.4% | 13/76 | mew_pikachu_box (86%) | tauros_risky_ruins (2%) |
+| 67 | `trevenant_rapidash_uxie` | **34.7%** | 34.0% | 11/76 | mew_pikachu_box (76%) | ns_zoroark_night_joker_toolbox (9%) |
+| 68 | `study_centiskorch_bastiodon_mill` | **34.6%** | 31.9% | 13/76 | meta_ns_zoroark (82%) | tauros_risky_ruins (7%) |
+| 69 | `meta_festival_lead` | **28.4%** | 26.9% | 5/76 | static_venom_drapion (63%) | tauros_risky_ruins (5%) |
+| 70 | `salazzle_ex_team_rockets_muk_condition_stack` | **27.7%** | 26.4% | 5/76 | meta_festival_lead (57%) | ditto_transform_hydreigon (7%) |
+| 71 | `study_flygon_sandy_flapping_mill` | **26.5%** | 20.7% | 6/76 | mew_pikachu_box (72%) | tauros_risky_ruins (2%) |
+| 72 | `tr_arbok_yveltal_snow_coating` | **26.3%** | 22.0% | 10/76 | mew_pikachu_box (78%) | tauros_risky_ruins (4%) |
+| 73 | `mew_dbc_hypno` | **23.9%** | 17.4% | 9/76 | mew_pikachu_box (91%) | ns_zoroark_night_joker_toolbox (3%) |
+| 74 | `team_rockets_wobbuffet_orbeetle_damage_launder` | **22.6%** | 17.2% | 7/76 | study_flygon_sandy_flapping_mill (84%) | team_rocket_nidoking_nidoqueen (1%) |
+| 75 | `static_venom_drapion` | **21.3%** | 16.1% | 7/76 | mew_pikachu_box (79%) | diggersby_munkidori_earthquake (4%) |
+| 76 | `mew_pikachu_box` | **15.9%** | 12.0% | 2/76 | meta_festival_lead (70%) | team_rocket_honchkrow_kangaskhan (1%) |
+| 77 | `mew_baby_box` | **15.8%** | 11.1% | 4/76 | mew_pikachu_box (77%) | team_rocket_nidoking_nidoqueen (1%) |
 
 ## Full matrix
 
 Row's win rate against column.
 
-| |tauros_risky_r|ditto_transfor|ns_zoroark_nig|team_rockets_p|maushold_gnaw_|lurantis_heal_|ditto_tyranita|tr_spidops_mew|study_mega_exc|krookodile_ex_|wugtrio_paraly|cradily_accelg|scovillain_sal|panic_poison_p|meta_mega_exca|team_rockets_k|mega_lopunny_d|cradily_amoong|mega_chandelur|kangaskhan_tyr|meta_raging_bo|heracross_sini|meta_slowking|meta_dragapult|meta_dragapult|metal_metang_e|decidueye_ex_j|veluza_sinistc|water_aggro|kyurem_vanillu|orthworm_ex_me|arbok_muk_lase|dhelmise_veluz|toxic_slumber_|team_rockets_s|arbok_muk_trol|mega_scrafty_e|arbok_team_roc|meta_dragapult|stevens_carbin|study_maushold|hops_snorlax_s|feraligatr_mun|chandelure_cen|tr_crobat_abso|eerie_inferno_|crabominable_v|darkness_mill_|tr_arbok_yvelt|meta_ns_zoroar|study_hydreigo|study_centisko|meta_festival_|salazzle_ex_te|study_flygon_s|static_venom_d|team_rockets_w|
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **tauros_risky_r** |—|35|76|56|66|39|49|66|48|60|61|58|66|66|48|76|51|61|85|89|78|52|85|61|57|54|89|56|90|57|83|74|57|79|81|76|84|80|65|82|91|77|91|91|70|81|81|88|96|89|87|90|94|83|97|94|89|
-| **ditto_transfor** |65|—|40|35|65|38|51|46|82|69|70|56|68|55|78|73|56|57|72|70|59|55|81|75|74|85|47|59|79|81|84|67|74|81|52|71|81|74|75|80|80|85|88|76|79|86|85|89|90|92|90|86|76|94|96|94|98|
-| **ns_zoroark_nig** |24|60|—|57|62|42|67|54|41|62|82|57|65|72|68|80|76|66|75|77|59|63|77|78|78|77|55|79|84|83|88|76|76|69|73|80|81|75|86|84|75|83|68|62|85|82|87|87|84|85|78|45|78|88|68|93|96|
-| **team_rockets_p** |44|65|43|—|54|58|58|54|44|68|58|63|57|62|56|66|60|71|52|71|57|72|63|61|69|62|76|68|72|70|77|70|74|78|78|70|78|71|72|68|68|76|74|76|78|80|80|90|83|73|82|84|81|82|83|92|95|
-| **maushold_gnaw_** |34|35|38|46|—|57|45|43|54|53|68|59|77|68|72|60|50|59|65|65|82|71|77|69|68|75|75|56|65|75|82|75|54|76|64|77|76|82|71|75|65|71|60|77|80|73|71|72|83|84|82|90|82|88|89|91|90|
-| **lurantis_heal_** |61|62|58|42|43|—|71|52|46|72|62|61|40|63|52|67|56|63|50|59|48|64|55|51|65|60|82|64|73|69|64|73|76|74|69|72|85|74|68|61|85|71|61|88|85|73|71|94|91|75|88|74|77|80|88|91|92|
-| **ditto_tyranita** |51|49|33|42|55|29|—|45|77|56|56|46|60|57|64|65|50|52|60|69|43|36|63|68|68|67|42|55|69|71|70|66|70|66|60|72|72|74|70|72|78|75|79|83|63|79|82|81|90|82|81|90|68|87|84|87|93|
-| **tr_spidops_mew** |34|54|46|46|57|48|55|—|36|61|60|59|57|58|55|54|56|66|45|65|60|68|68|61|67|62|60|72|68|62|71|63|73|71|71|68|75|69|72|62|56|71|67|56|72|76|83|74|72|79|72|62|83|76|76|89|85|
-| **study_mega_exc** |52|18|59|56|46|54|23|64|—|39|73|58|41|54|60|51|59|74|67|61|54|68|64|59|74|70|53|83|59|78|56|71|79|63|77|77|55|74|74|70|46|74|62|36|71|45|82|51|76|89|72|69|86|84|76|77|89|
-| **krookodile_ex_** |40|31|38|32|47|28|44|39|61|—|47|41|50|58|50|60|52|47|63|60|43|41|58|59|62|54|41|55|67|68|67|72|68|52|53|74|68|74|62|75|73|72|77|67|71|76|72|72|73|78|78|71|69|86|81|83|94|
-| **wugtrio_paraly** |39|30|18|42|32|38|44|40|27|53|—|64|40|64|37|63|42|65|45|46|48|51|53|51|49|50|76|64|68|61|64|74|65|54|74|73|71|77|63|62|84|73|76|88|69|90|74|83|85|44|60|68|84|87|56|92|96|
-| **cradily_accelg** |42|44|43|37|41|39|54|41|42|59|36|—|38|52|46|53|48|50|56|41|56|54|52|49|52|56|64|52|62|59|54|67|60|61|64|68|73|69|54|61|71|67|70|58|79|67|71|85|54|80|85|74|70|74|96|87|90|
-| **scovillain_sal** |34|32|35|43|23|60|40|43|59|50|60|62|—|53|67|63|62|70|33|49|59|72|59|55|59|68|60|61|41|35|84|73|65|77|71|71|71|73|66|80|54|65|54|32|75|66|48|64|75|68|67|42|73|82|37|86|87|
-| **panic_poison_p** |34|45|28|38|32|37|43|42|46|42|36|48|47|—|48|52|48|42|66|21|49|65|55|51|55|61|66|60|57|57|67|66|64|53|58|69|59|68|64|66|75|72|67|72|67|77|70|80|81|52|76|88|61|82|91|92|92|
-| **meta_mega_exca** |52|22|32|44|28|48|36|45|40|50|63|54|33|52|—|49|57|66|32|50|51|69|51|54|61|61|51|74|66|75|68|61|57|61|71|64|66|67|67|56|56|68|60|46|62|59|78|70|78|72|65|51|86|69|55|87|81|
-| **team_rockets_k** |24|27|20|34|40|33|35|46|49|40|37|47|37|48|51|—|45|50|64|42|47|51|54|48|49|61|65|65|55|52|58|63|68|64|58|64|58|62|55|63|75|62|65|77|60|70|76|78|79|60|76|84|68|76|89|91|90|
-| **mega_lopunny_d** |49|44|24|40|50|44|50|44|41|48|58|52|38|52|43|55|—|53|57|47|46|47|46|48|53|51|59|48|60|54|61|58|54|65|68|61|62|61|59|56|66|62|68|78|62|72|58|74|66|51|59|70|74|70|86|86|86|
-| **cradily_amoong** |39|43|34|29|41|37|48|34|26|53|35|50|30|58|34|50|47|—|55|41|48|49|45|46|49|45|52|46|63|51|45|70|50|59|58|72|75|72|55|48|74|67|68|60|76|63|69|87|64|76|83|65|70|78|97|90|93|
-| **mega_chandelur** |15|28|25|48|35|50|40|55|33|37|55|44|67|34|68|36|43|45|—|73|49|68|48|58|52|74|77|68|66|68|59|35|62|68|66|37|55|41|60|70|48|64|74|63|49|64|74|64|63|45|60|64|69|80|61|79|84|
-| **kangaskhan_tyr** |11|30|23|29|35|41|31|35|39|40|54|59|51|79|50|58|53|59|27|—|44|47|50|59|54|51|38|62|54|59|62|80|54|65|62|82|58|88|63|68|39|63|60|36|58|77|73|54|72|73|62|54|74|82|62|89|81|
-| **meta_raging_bo** |22|41|41|43|18|52|57|40|46|57|52|44|41|51|49|53|54|52|51|56|—|50|58|56|56|60|50|62|61|66|58|47|55|67|65|47|65|54|64|60|52|62|59|48|62|64|66|70|76|59|59|53|75|66|63|79|77|
-| **heracross_sini** |48|45|37|28|29|36|64|32|32|59|49|46|28|35|31|49|53|51|32|53|50|—|51|45|51|39|48|52|52|62|49|51|50|51|60|54|76|58|58|57|73|60|41|58|70|55|66|82|67|67|76|62|74|68|84|85|89|
-| **meta_slowking** |15|19|23|37|23|45|37|32|36|42|47|48|41|45|49|46|54|55|52|50|42|49|—|59|53|52|45|59|64|59|62|56|56|64|64|57|59|63|61|66|49|69|60|45|55|64|67|66|80|68|56|53|83|72|71|83|84|
-| **meta_dragapult** |39|25|22|39|31|49|32|39|41|41|49|51|45|49|46|52|52|54|42|41|44|55|41|—|54|51|66|56|58|54|57|54|51|59|68|54|59|58|61|51|49|57|60|52|56|65|60|63|69|56|43|40|73|65|58|82|82|
-| **meta_dragapult** |43|26|22|31|32|35|32|33|26|38|51|48|41|45|39|51|47|51|48|46|44|49|47|46|—|48|58|48|61|53|52|52|56|49|64|54|51|57|59|47|54|55|60|52|57|69|64|59|68|64|45|43|80|70|66|81|85|
-| **metal_metang_e** |46|15|23|38|25|40|33|38|30|46|50|44|32|39|39|39|49|55|26|49|40|61|48|49|52|—|46|67|57|69|62|48|54|54|63|54|58|53|63|45|48|63|53|42|52|55|67|64|71|63|54|51|81|61|55|82|80|
-| **decidueye_ex_j** |11|53|45|24|25|18|58|40|47|59|24|36|40|34|49|35|41|48|23|62|50|52|55|34|42|54|—|57|45|57|60|44|53|66|52|47|73|46|49|54|64|58|51|54|64|62|69|72|40|76|79|22|68|72|55|86|86|
-| **veluza_sinistc** |44|41|21|32|44|36|45|28|17|45|36|48|39|40|26|35|52|54|32|38|38|48|41|44|52|33|43|—|48|49|49|55|48|46|59|52|70|57|62|40|66|58|59|55|67|72|61|73|69|58|58|63|85|62|75|84|86|
-| **water_aggro** |10|21|16|28|35|27|31|32|41|33|32|38|59|43|34|45|40|37|34|46|39|48|36|42|39|43|55|52|—|48|55|50|48|53|50|54|56|54|49|55|72|52|59|88|54|72|65|76|68|60|70|86|71|78|88|82|80|
-| **kyurem_vanillu** |43|19|17|30|25|31|29|38|22|32|39|41|65|43|25|48|46|49|32|41|34|38|41|46|47|31|43|51|52|—|34|52|51|51|67|52|54|56|57|43|68|58|52|70|53|75|64|68|74|47|55|71|76|80|52|87|91|
-| **orthworm_ex_me** |17|16|12|23|18|36|30|29|44|33|36|46|16|33|32|42|39|55|41|38|42|51|38|43|48|38|40|51|45|66|—|42|57|49|60|48|47|52|52|58|74|67|52|73|53|55|62|69|86|47|50|80|89|64|84|83|90|
-| **arbok_muk_lase** |26|33|24|30|25|27|34|37|29|28|26|33|27|34|39|37|42|30|65|20|53|49|44|46|48|52|56|45|50|48|58|—|48|40|55|51|41|51|54|54|63|66|58|56|53|64|62|65|59|52|74|72|60|72|85|81|93|
-| **dhelmise_veluz** |43|26|24|26|46|24|30|27|21|32|35|40|35|36|43|32|46|50|38|46|45|50|44|49|44|46|47|52|52|49|43|52|—|42|55|54|49|58|56|45|58|55|48|52|54|69|71|58|53|66|52|54|81|72|69|84|84|
-| **toxic_slumber_** |21|19|31|22|24|26|34|29|37|48|46|39|23|47|39|36|35|41|32|35|33|49|36|41|51|46|34|54|47|49|51|60|58|—|47|64|66|61|54|61|57|55|51|51|54|38|57|72|76|56|71|68|63|67|82|80|84|
-| **team_rockets_s** |19|48|27|22|36|31|40|29|23|47|26|36|29|42|29|42|32|42|34|38|35|40|36|32|36|37|48|41|50|33|40|45|45|53|—|48|63|50|42|44|55|52|61|70|56|60|58|74|57|60|66|69|67|65|78|83|82|
-| **arbok_muk_trol** |24|29|20|30|23|28|28|32|23|26|27|32|29|31|36|36|39|28|63|18|53|46|43|46|46|46|53|48|46|48|52|49|46|36|52|—|40|52|52|49|60|63|57|48|51|61|60|60|55|48|71|66|58|67|83|79|93|
-| **mega_scrafty_e** |16|19|19|22|24|15|28|25|45|32|29|27|29|41|34|42|38|25|45|42|35|24|41|41|49|42|27|30|44|46|53|59|51|34|37|60|—|63|48|59|58|54|54|66|54|68|62|55|54|59|69|74|61|74|85|79|87|
-| **arbok_team_roc** |20|26|25|29|18|26|26|31|26|26|23|31|27|32|33|38|39|28|59|12|46|42|37|42|43|47|54|43|46|44|48|49|42|39|50|48|37|—|53|52|60|59|57|50|50|59|55|65|55|49|71|71|59|69|85|83|91|
-| **meta_dragapult** |35|25|14|28|29|32|30|28|26|38|37|46|34|36|33|45|41|45|40|37|36|42|39|39|41|37|51|38|51|43|48|46|44|46|58|48|52|47|—|42|53|45|57|56|51|61|50|58|62|49|45|41|70|65|64|79|84|
-| **stevens_carbin** |18|20|16|32|25|39|28|38|30|25|38|39|20|34|44|37|44|52|30|32|40|43|34|49|53|55|46|60|45|57|42|46|55|39|56|51|41|48|58|—|44|52|42|40|50|40|65|50|41|56|55|61|86|65|56|72|77|
-| **study_maushold** |9|20|25|32|35|15|22|44|54|27|16|29|46|25|44|25|34|26|52|61|48|27|51|51|46|52|36|34|28|32|26|37|42|43|45|40|42|40|47|56|—|42|59|69|45|53|58|46|51|70|73|85|71|81|89|70|81|
-| **hops_snorlax_s** |23|15|17|24|29|29|25|29|26|28|27|33|35|28|32|38|38|33|36|37|38|40|31|43|45|37|42|42|48|42|33|34|45|45|48|37|46|41|55|48|58|—|56|66|48|60|62|57|65|59|58|83|75|75|89|83|80|
-| **feraligatr_mun** |9|12|32|26|40|39|21|33|38|23|24|30|46|33|40|35|32|32|26|40|41|59|40|40|40|47|49|41|41|48|48|42|52|49|39|43|46|43|43|58|41|44|—|52|51|57|54|44|46|62|59|72|63|72|87|76|75|
-| **chandelure_cen** |9|24|38|24|23|12|17|44|64|33|12|42|68|28|54|23|22|40|37|64|52|42|55|48|48|58|46|45|12|30|27|44|48|49|30|52|34|50|44|60|31|34|48|—|51|56|55|17|25|79|66|77|64|79|80|62|71|
-| **tr_crobat_abso** |30|21|15|22|20|15|37|28|29|29|31|21|25|33|38|40|38|24|51|42|38|30|45|44|43|48|36|33|46|47|47|47|46|46|44|49|46|50|49|50|55|52|49|49|—|55|60|59|58|56|69|56|54|67|58|80|86|
-| **eerie_inferno_** |19|14|18|20|27|27|21|24|55|24|10|33|34|23|41|30|28|37|36|23|36|45|36|35|31|45|38|28|28|25|45|36|31|62|40|39|32|41|39|60|47|40|43|44|45|—|36|55|55|46|65|79|48|69|83|76|74|
-| **crabominable_v** |19|15|13|20|29|29|18|17|18|28|26|29|52|30|22|24|42|31|26|27|34|34|33|40|36|33|31|39|35|36|38|38|29|43|42|40|38|45|50|35|42|38|46|45|40|64|—|52|48|52|46|59|76|63|62|77|67|
-| **darkness_mill_** |12|11|13|10|28|6|19|26|49|28|17|15|36|20|30|22|26|13|36|46|30|18|34|37|41|36|28|27|24|32|31|35|42|28|26|40|45|35|42|50|54|43|56|83|41|45|48|—|54|56|66|89|40|72|82|70|74|
-| **tr_arbok_yvelt** |4|10|16|17|17|9|10|28|24|27|15|46|25|19|22|21|34|36|37|28|24|33|20|31|32|29|60|31|32|26|14|41|47|24|43|45|46|45|38|59|49|35|54|75|42|45|52|46|—|58|59|86|68|58|78|66|72|
-| **meta_ns_zoroar** |11|8|15|27|16|25|18|21|11|22|56|20|32|48|28|40|49|24|55|27|41|33|32|44|36|37|24|42|40|53|53|48|34|44|40|52|41|51|51|44|30|41|38|21|44|54|48|44|42|—|28|19|52|54|24|75|66|
-| **study_hydreigo** |13|10|22|18|18|12|19|28|28|22|40|15|33|24|35|24|41|17|40|38|41|24|44|57|55|46|21|42|30|45|50|26|48|29|34|29|31|29|55|45|27|42|41|34|31|35|54|34|41|72|—|49|61|59|44|70|68|
-| **study_centisko** |10|14|55|16|10|26|10|38|31|29|32|26|58|12|49|16|30|35|36|46|47|38|47|60|57|49|78|37|14|29|20|28|46|32|31|34|26|29|59|39|15|17|28|23|44|21|41|11|14|81|51|—|75|61|44|41|37|
-| **meta_festival_** |6|24|22|19|18|23|32|17|14|31|16|30|27|39|14|32|26|30|31|26|25|26|17|27|20|19|32|15|29|24|11|40|19|37|33|42|39|41|30|14|29|25|37|36|46|52|24|60|32|48|39|25|—|42|51|63|49|
-| **salazzle_ex_te** |17|6|12|18|12|20|13|24|16|14|13|26|18|18|31|24|30|22|20|18|34|32|28|35|30|39|28|38|22|20|36|28|28|33|35|33|26|31|35|35|19|25|28|21|33|31|37|28|42|46|41|39|58|—|33|47|53|
-| **study_flygon_s** |3|4|32|17|11|12|16|24|24|19|44|4|63|9|45|11|14|3|39|38|37|16|29|42|34|45|45|25|12|48|16|15|31|18|22|17|15|15|36|44|11|11|13|20|42|17|38|18|22|76|56|56|49|67|—|39|21|
-| **static_venom_d** |6|6|7|8|9|9|13|11|23|17|8|13|14|8|13|9|14|10|21|11|21|15|17|18|19|18|14|16|18|13|17|19|16|20|17|21|21|17|21|28|30|17|24|38|20|24|23|30|34|25|30|59|37|53|61|—|52|
-| **team_rockets_w** |11|2|4|5|10|8|7|15|11|6|4|10|13|8|19|10|14|7|16|19|23|11|16|18|15|20|14|14|20|9|10|7|16|16|18|7|13|9|16|23|19|20|25|29|14|26|33|26|28|34|32|63|51|47|79|48|—|
+| |team_rocket_ra|tauros_risky_r|ns_zoroark_nig|team_rocket_ni|ditto_transfor|lurantis_heal_|team_rocket_ho|team_rockets_p|maushold_gnaw_|ditto_tyranita|team_rocket_ra|tr_spidops_mew|diggersby_munk|team_rocket_po|team_rocket_ty|study_mega_exc|panic_poison_p|krookodile_ex_|team_rocket_or|wugtrio_paraly|team_rockets_k|cradily_accelg|team_rocket_mo|meta_mega_exca|scovillain_sal|mega_lopunny_d|mega_chandelur|mew_lonestar_g|team_rocket_hy|cradily_amoong|team_rocket_hy|meta_raging_bo|meta_dragapult|decidueye_ex_j|heracross_sini|meta_dragapult|mew_alex_centi|water_aggro|meta_slowking|kangaskhan_tyr|metal_metang_e|arbok_muk_lase|kyurem_vanillu|veluza_sinistc|golbat_brute_b|orthworm_ex_me|toxic_slumber_|mega_scrafty_e|arbok_muk_trol|dhelmise_veluz|team_rockets_s|stevens_carbin|feraligatr_mun|tr_crobat_abso|meta_dragapult|hops_snorlax_s|arbok_team_roc|chandelure_cen|meta_ns_zoroar|study_maushold|eerie_inferno_|mew_dbc_bastio|darkness_mill_|crabominable_v|study_hydreigo|chandelure_mau|trevenant_rapi|study_centisko|meta_festival_|salazzle_ex_te|study_flygon_s|tr_arbok_yvelt|mew_dbc_hypno|team_rockets_w|static_venom_d|mew_pikachu_bo|mew_baby_box|
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **team_rocket_ra** |—|49|43|62|63|58|55|60|52|63|59|59|63|56|62|52|63|68|59|71|72|71|69|64|63|62|61|65|68|69|70|60|64|72|72|69|74|73|72|71|71|77|74|71|80|84|81|81|78|74|84|71|78|79|77|80|79|82|60|86|84|89|90|79|83|87|83|84|86|88|86|95|94|95|94|97|98|
+| **tauros_risky_r** |51|—|78|50|41|36|45|58|66|50|62|72|36|53|55|48|63|60|52|65|76|60|48|52|66|50|85|46|74|62|72|83|60|88|57|59|92|88|86|90|57|76|57|59|73|86|75|78|78|58|86|82|92|70|67|79|82|89|88|94|81|77|89|83|91|98|83|93|95|82|98|96|92|89|95|96|98|
+| **ns_zoroark_nig** |57|22|—|69|57|39|68|55|61|66|62|56|70|67|52|37|69|64|75|80|77|54|82|69|67|75|71|76|82|64|81|59|76|51|63|79|66|84|81|81|77|76|85|79|83|88|71|82|76|77|71|85|67|84|85|82|74|60|80|78|85|49|83|86|77|71|91|46|82|88|72|87|97|94|94|76|94|
+| **team_rocket_ni** |38|50|31|—|44|50|48|45|71|44|50|65|62|51|65|52|65|59|56|65|68|68|67|59|64|65|69|74|79|74|82|54|63|72|63|68|84|74|61|63|66|78|74|74|71|77|76|74|81|80|76|74|82|72|74|80|80|88|68|87|81|84|83|84|84|92|89|79|86|90|88|93|97|99|93|98|99|
+| **ditto_transfor** |37|59|43|56|—|32|58|34|64|50|41|49|62|68|55|83|53|65|64|66|70|52|66|82|66|52|72|84|84|54|84|56|70|44|51|68|68|77|83|70|86|66|80|63|74|79|77|81|71|74|53|78|87|78|72|84|72|75|89|80|84|93|89|86|91|84|64|89|78|93|94|93|94|97|95|97|96|
+| **lurantis_heal_** |42|64|61|50|68|—|50|52|47|72|53|55|59|50|82|51|66|76|62|68|69|64|39|51|42|60|48|60|66|68|64|56|53|77|69|64|59|75|61|70|63|76|70|69|83|64|76|85|75|79|78|59|68|86|72|72|79|87|78|89|74|58|93|73|92|67|84|72|82|78|89|94|94|92|92|99|99|
+| **team_rocket_ho** |45|55|32|52|42|50|—|51|42|59|53|54|64|53|70|46|60|60|56|62|61|63|68|60|58|59|63|70|68|68|67|58|64|58|68|65|71|66|69|66|70|70|69|66|81|80|82|77|73|76|80|71|73|74|76|81|76|71|60|83|83|88|86|78|72|86|81|77|87|83|87|96|97|97|94|99|98|
+| **team_rockets_p** |40|42|45|55|66|48|49|—|51|61|49|56|59|50|49|47|63|65|57|58|67|64|61|52|56|61|50|56|57|68|59|57|59|73|72|64|73|65|66|70|63|71|67|72|74|74|72|79|70|75|78|65|73|76|71|76|73|76|70|72|81|81|87|79|85|78|79|85|83|83|82|89|92|93|92|90|95|
+| **maushold_gnaw_** |48|34|39|29|36|53|58|49|—|44|43|46|42|58|47|57|66|50|67|69|56|58|72|72|78|48|64|65|58|55|59|83|66|69|69|63|65|61|77|70|71|72|75|61|74|85|77|73|76|58|67|75|58|81|66|71|81|78|82|69|70|86|70|65|84|89|83|88|83|88|90|88|86|86|92|96|98|
+| **ditto_tyranita** |37|50|34|56|50|28|41|39|56|—|48|46|52|50|74|74|52|57|58|56|61|44|52|66|60|49|58|73|76|47|78|44|68|41|34|65|74|67|65|73|67|64|73|54|62|68|63|75|67|69|57|71|81|59|69|75|73|80|78|82|77|89|80|80|81|78|80|90|66|90|85|91|88|91|90|95|94|
+| **team_rocket_ra** |41|38|38|50|59|47|47|51|57|52|—|53|46|46|53|39|54|58|52|55|70|57|52|52|53|54|54|55|59|61|58|50|52|69|60|61|64|70|61|65|60|65|64|59|69|70|71|68|66|59|76|62|73|71|69|73|69|67|54|73|79|70|83|67|76|76|78|73|78|80|82|84|88|90|89|89|94|
+| **tr_spidops_mew** |41|28|44|35|51|45|46|44|54|54|47|—|60|49|49|36|61|59|62|59|53|62|61|51|57|56|42|59|56|65|57|59|55|59|68|62|71|64|69|71|61|70|62|68|71|67|68|74|72|68|70|58|69|73|70|69|76|52|74|60|74|80|76|82|73|71|78|65|85|78|79|80|92|85|90|81|87|
+| **diggersby_munk** |37|64|30|38|38|41|36|41|58|48|54|40|—|37|47|42|66|54|42|59|73|52|62|49|49|56|54|56|61|50|63|41|45|51|55|52|88|69|48|54|57|75|59|53|79|68|72|75|74|70|66|60|71|71|68|68|77|89|53|91|86|69|84|66|76|88|70|84|79|81|87|88|88|96|96|97|94|
+| **team_rocket_po** |44|47|33|49|32|50|47|50|42|50|54|51|63|—|52|44|53|57|54|50|55|62|63|53|54|58|44|59|56|66|55|56|61|56|63|61|62|60|66|64|66|60|64|63|73|79|75|72|63|66|74|64|73|67|70|72|68|60|59|71|81|81|80|76|60|70|70|65|85|76|70|82|88|88|91|85|90|
+| **team_rocket_ty** |38|45|48|35|45|18|30|51|53|26|47|51|53|48|—|56|42|53|56|63|46|45|59|52|56|67|58|42|60|48|53|46|57|56|52|61|60|63|56|74|60|88|76|58|76|63|37|74|89|84|69|74|59|68|63|71|90|67|74|64|58|87|61|75|66|76|87|80|57|81|85|88|94|94|76|95|90|
+| **study_mega_exc** |48|52|63|48|17|49|54|53|43|26|61|64|58|56|44|—|52|43|47|73|48|60|38|60|40|59|66|62|60|75|61|54|59|49|67|70|26|54|63|63|66|70|79|82|58|53|63|52|77|81|75|66|58|72|70|70|76|38|87|47|46|76|50|80|72|67|86|68|85|82|79|76|82|85|82|92|86|
+| **panic_poison_p** |37|37|31|35|47|34|40|37|34|48|46|39|34|47|58|48|—|45|47|40|50|55|64|49|44|47|70|58|60|47|60|57|50|62|64|54|73|57|60|26|64|68|62|66|43|66|51|48|75|66|61|67|66|68|60|72|69|73|48|81|75|81|79|74|79|65|85|87|63|82|93|90|93|90|91|94|97|
+| **krookodile_ex_** |32|40|36|41|35|24|40|35|50|43|42|41|46|43|47|57|55|—|45|49|61|40|49|52|52|53|59|57|69|43|68|45|59|37|37|57|46|66|58|65|56|66|67|53|67|66|50|65|74|69|55|72|72|70|63|73|71|66|72|74|76|82|72|73|79|70|80|72|69|86|81|85|91|92|85|93|94|
+| **team_rocket_or** |41|48|25|44|36|38|44|43|33|42|48|38|58|46|44|53|53|55|—|57|53|50|64|59|48|60|40|56|49|54|53|39|56|44|56|62|38|60|53|52|67|65|68|61|72|73|68|68|70|67|69|64|58|69|68|69|71|64|51|73|75|73|76|68|61|54|64|59|78|85|53|89|88|91|91|94|95|
+| **wugtrio_paraly** |29|35|20|35|34|32|38|42|31|44|45|41|41|50|37|27|60|51|43|—|59|66|72|41|41|43|38|47|47|68|47|49|46|67|57|48|58|63|49|54|49|73|65|66|76|63|58|67|76|70|77|59|74|70|58|71|76|89|44|87|90|42|83|70|62|54|47|69|83|86|57|93|93|93|94|97|99|
+| **team_rockets_k** |28|24|23|32|30|31|39|33|44|39|30|47|27|45|54|52|50|39|47|41|—|49|58|48|41|44|65|57|61|48|62|45|46|58|53|47|87|54|58|49|61|66|50|73|54|56|59|54|66|66|60|62|69|61|57|62|64|81|56|82|66|55|76|78|81|92|80|84|73|73|93|89|89|88|92|95|97|
+| **cradily_accelg** |29|40|46|32|48|36|37|36|42|56|43|38|48|38|55|40|45|60|50|34|51|—|40|43|36|48|60|43|44|48|46|58|42|60|53|42|56|55|56|49|55|65|56|56|59|50|60|72|67|60|63|56|68|73|51|63|70|62|76|78|66|52|87|73|84|88|75|74|71|72|97|75|89|86|90|98|97|
+| **team_rocket_mo** |31|52|18|33|34|61|32|39|28|48|48|39|38|37|41|62|36|51|36|28|42|60|—|64|30|53|40|49|39|67|41|51|56|58|69|60|49|55|47|46|73|58|59|55|62|92|82|64|64|47|74|76|60|65|68|68|64|49|53|78|69|73|81|53|64|64|70|66|86|77|79|89|88|91|90|95|93|
+| **meta_mega_exca** |36|48|31|41|18|49|40|48|28|34|48|49|51|47|48|40|51|48|41|59|52|57|36|—|33|56|29|58|48|67|49|48|54|51|67|60|41|62|52|54|60|62|77|72|63|68|65|63|65|61|74|55|62|62|65|67|67|47|70|60|56|72|72|78|64|56|65|55|86|68|57|81|84|82|87|88|84|
+| **scovillain_sal** |37|34|33|36|34|58|42|44|22|40|47|43|51|46|44|60|56|48|52|59|59|64|70|67|—|62|25|50|54|73|55|57|51|58|74|53|16|40|63|53|72|72|34|59|69|81|77|70|74|66|74|80|54|73|64|66|73|31|60|55|67|34|65|43|68|29|63|41|73|82|42|74|79|84|88|82|88|
+| **mega_lopunny_d** |38|50|25|35|48|40|41|39|52|51|46|44|44|42|33|41|53|47|40|57|56|52|47|44|38|—|50|48|55|52|50|46|45|57|46|49|65|63|48|50|52|55|53|50|60|62|64|58|57|51|66|56|65|59|58|60|60|81|48|72|71|63|75|56|60|85|55|72|75|74|86|78|80|84|86|89|90|
+| **mega_chandelur** |39|15|29|31|28|52|37|50|36|42|46|58|46|56|42|34|30|41|60|62|35|40|60|71|75|50|—|55|59|46|59|52|62|79|71|57|37|63|54|77|76|38|70|74|47|62|68|55|35|65|69|70|74|51|60|66|42|62|39|54|63|41|65|75|60|51|57|65|72|80|58|73|70|82|78|84|91|
+| **mew_lonestar_g** |35|54|24|26|16|40|30|44|35|27|45|41|44|41|58|38|42|43|44|53|43|57|51|42|50|52|45|—|50|65|53|50|58|55|63|66|54|63|60|53|53|51|69|68|66|64|58|57|56|60|73|48|67|58|72|67|60|58|46|62|77|47|68|77|47|69|74|47|84|74|76|85|88|90|85|80|87|
+| **team_rocket_hy** |32|26|18|21|16|34|32|43|42|24|41|44|39|44|40|40|40|31|51|53|39|56|61|52|46|45|41|50|—|57|50|52|51|51|61|55|52|59|57|61|60|48|61|66|51|66|57|46|55|63|70|64|58|53|61|72|58|64|50|77|71|82|67|78|60|75|72|77|82|78|83|92|91|90|81|90|97|
+| **cradily_amoong** |31|38|36|26|46|32|32|32|45|53|39|35|50|34|52|25|53|57|46|32|52|52|33|33|27|48|54|35|43|—|42|50|39|47|49|46|60|57|46|49|46|69|52|48|61|43|56|72|69|51|61|48|66|77|49|65|72|61|76|76|63|47|84|72|86|90|80|69|69|76|98|81|93|89|91|97|97|
+| **team_rocket_hy** |30|28|19|18|16|36|33|41|41|22|42|43|37|45|47|39|40|32|47|53|38|54|59|51|45|50|41|47|50|58|—|50|50|48|58|54|57|60|57|59|60|52|60|69|53|63|62|49|50|64|69|64|57|47|62|69|59|60|51|72|67|82|63|78|55|71|73|76|80|82|80|89|88|91|85|88|96|
+| **meta_raging_bo** |40|17|41|46|44|44|42|43|17|56|50|41|59|44|54|46|43|55|61|51|55|42|49|52|43|54|48|50|48|50|50|—|55|46|52|54|54|59|58|61|60|45|64|62|65|59|67|66|45|55|62|56|60|61|64|63|54|50|60|53|62|73|66|64|62|61|56|58|74|67|67|78|76|76|82|66|76|
+| **meta_dragapult** |36|40|24|37|30|47|36|41|34|32|48|45|55|39|43|41|50|41|44|54|54|58|44|46|49|55|38|42|49|61|50|45|—|63|63|55|42|58|46|51|57|57|58|57|63|59|56|57|58|53|71|52|60|59|66|59|64|54|55|57|66|55|64|64|46|57|47|43|75|65|58|76|84|83|83|71|83|
+| **decidueye_ex_j** |28|12|49|28|56|23|42|27|31|59|31|41|49|44|44|51|38|63|56|33|42|40|42|49|42|43|21|45|49|53|52|54|37|—|58|47|38|51|58|66|58|46|61|60|60|63|63|73|46|57|54|57|51|68|54|63|49|61|72|68|62|60|73|71|80|53|65|24|70|71|59|74|86|82|90|64|95|
+| **heracross_sini** |28|43|37|37|49|31|32|28|31|66|40|32|45|37|48|33|36|63|44|43|47|47|31|33|26|54|29|37|39|51|42|48|37|42|—|43|34|54|54|60|38|54|60|55|60|44|52|76|54|57|60|54|41|68|56|61|58|58|65|75|51|66|83|66|75|69|54|63|75|68|84|82|77|86|87|95|92|
+| **meta_dragapult** |31|41|21|32|32|36|35|36|37|35|39|38|48|39|39|30|46|43|38|52|53|58|40|40|47|51|43|34|45|54|46|46|45|53|57|—|36|60|49|53|52|56|59|55|59|57|54|54|58|58|65|53|61|60|60|56|56|56|62|60|69|44|63|68|51|62|41|47|79|74|72|76|84|83|86|78|87|
+| **mew_alex_centi** |26|8|34|16|32|41|29|27|35|26|36|29|12|38|40|74|27|54|62|42|13|44|51|59|84|35|63|46|48|40|43|46|58|62|66|64|—|22|60|69|56|46|48|46|45|40|63|64|50|36|27|65|46|57|58|45|46|78|70|53|42|80|47|48|70|79|82|85|63|82|92|73|78|69|63|96|91|
+| **water_aggro** |27|12|16|26|23|25|34|35|39|33|30|36|31|40|37|46|43|34|40|37|46|45|45|38|60|37|37|37|41|43|40|41|42|49|46|40|78|—|46|54|46|53|52|56|51|54|50|52|55|50|52|52|60|51|49|53|56|88|55|78|74|50|75|65|72|78|67|88|71|79|90|77|84|81|84|89|93|
+| **meta_slowking** |28|14|19|39|17|39|31|34|23|35|39|31|52|34|44|37|40|42|47|51|42|44|53|48|37|52|46|40|43|54|43|42|54|42|46|51|40|54|—|49|54|51|54|57|53|64|60|63|52|54|59|64|63|53|61|66|62|42|61|56|63|68|64|68|57|68|55|54|82|72|69|85|78|84|84|55|85|
+| **kangaskhan_tyr** |29|10|19|37|30|30|34|30|30|27|35|29|46|36|26|37|74|35|48|46|51|51|54|46|47|50|23|47|39|51|41|39|49|34|40|47|31|46|51|—|48|73|55|58|63|58|58|53|78|57|54|66|56|58|56|61|87|30|71|40|72|73|53|66|58|48|58|55|73|79|60|74|77|76|89|69|80|
+| **metal_metang_e** |29|43|23|34|14|37|30|37|29|33|40|39|43|34|40|34|36|44|33|51|39|45|27|40|28|48|24|47|40|54|40|40|43|42|62|48|44|54|46|52|—|47|71|65|57|62|56|58|49|53|65|46|53|53|58|66|52|38|65|53|50|64|62|71|56|65|57|55|82|60|61|73|78|74|85|79|77|
+| **arbok_muk_lase** |23|24|24|22|34|24|30|29|28|36|35|30|25|40|12|30|32|34|35|27|34|35|42|38|28|45|62|49|52|31|48|55|43|54|46|44|54|47|49|27|53|—|48|52|28|58|36|31|53|55|55|53|56|46|53|63|52|55|45|67|61|77|68|63|74|64|80|68|60|72|89|78|90|92|82|93|96|
+| **kyurem_vanillu** |26|43|15|26|20|30|31|33|25|27|36|38|41|36|24|21|38|33|32|35|50|44|41|23|66|47|30|31|39|48|40|36|42|39|40|41|52|48|46|45|29|52|—|52|55|33|50|55|56|55|64|40|58|51|52|53|60|68|44|70|73|73|69|64|59|58|62|73|79|82|52|85|84|87|86|91|87|
+| **veluza_sinistc** |29|41|21|26|37|31|34|28|39|46|41|32|47|37|42|18|34|47|39|34|27|44|45|28|41|50|26|32|34|52|31|38|43|40|45|45|54|44|43|42|35|48|48|—|64|48|44|70|49|44|60|39|57|61|58|53|56|49|55|62|67|50|76|59|58|69|71|61|83|56|74|68|84|78|86|85|79|
+| **golbat_brute_b** |20|27|17|29|26|17|19|26|26|38|31|29|21|27|24|42|57|33|28|24|46|41|38|37|31|40|53|34|49|39|47|35|37|40|40|41|55|49|47|37|43|72|45|36|—|46|55|43|75|50|51|55|60|59|48|50|70|66|43|72|68|62|76|61|78|65|66|72|56|77|72|85|79|86|88|90|93|
+| **orthworm_ex_me** |16|14|12|23|21|36|20|26|15|32|30|33|32|21|37|47|34|34|27|37|44|50|8|32|19|38|38|36|34|57|37|41|41|37|56|43|60|46|36|42|38|42|67|52|54|—|51|49|49|59|63|58|49|53|52|69|49|73|44|79|56|74|68|59|54|66|62|78|87|63|85|93|83|88|84|88|82|
+| **toxic_slumber_** |19|25|29|24|23|24|18|28|23|37|29|32|28|25|63|37|49|50|32|42|41|40|18|35|23|36|32|42|43|44|38|33|44|37|48|46|37|50|40|42|44|64|50|56|45|49|—|63|69|61|45|57|48|54|52|54|69|51|61|64|38|66|73|56|71|49|73|67|63|66|81|78|78|78|83|91|91|
+| **mega_scrafty_e** |19|22|18|26|19|15|23|21|27|25|32|26|25|28|26|48|52|35|32|33|46|28|36|37|30|42|45|43|54|28|51|34|43|27|24|46|36|48|37|47|42|69|45|30|57|51|37|—|70|51|39|60|51|56|47|54|70|65|54|63|69|72|60|59|69|64|67|71|64|76|88|75|83|82|82|92|87|
+| **arbok_muk_trol** |22|22|24|19|29|25|27|30|24|33|34|28|26|37|11|23|25|26|30|24|34|33|36|35|26|43|65|44|45|31|50|55|42|54|46|42|50|45|48|22|51|47|44|51|25|51|31|30|—|54|52|52|58|43|54|64|51|47|47|62|61|74|62|63|73|58|80|68|60|69|86|73|91|88|80|91|95|
+| **dhelmise_veluz** |26|42|23|20|26|21|24|25|42|31|41|32|30|34|16|19|34|31|33|30|34|40|53|39|34|49|35|40|37|49|36|45|47|43|43|42|64|50|46|43|47|45|45|56|50|41|39|49|46|—|54|40|45|48|56|53|53|45|58|54|68|36|56|70|50|62|76|51|80|65|65|55|78|77|84|71|72|
+| **team_rockets_s** |16|14|29|24|47|22|20|22|33|43|24|30|34|26|31|25|39|45|31|23|40|37|26|26|26|34|31|27|30|39|31|38|29|46|40|35|73|48|41|46|35|45|36|40|49|37|55|61|48|46|—|41|61|52|42|50|49|68|51|59|61|54|76|63|68|71|61|75|65|67|80|79|76|80|86|82|87|
+| **stevens_carbin** |29|18|15|26|22|41|29|35|25|29|38|42|40|36|26|34|33|28|36|41|38|44|24|45|20|44|30|52|36|52|36|44|48|43|46|47|35|48|36|34|54|47|60|61|45|42|43|40|48|60|59|—|46|51|54|54|50|39|52|49|41|61|53|67|57|45|71|59|87|66|54|59|68|72|78|76|78|
+| **feraligatr_mun** |22|8|33|18|13|32|27|27|42|19|27|31|29|27|41|42|34|28|42|26|31|32|40|38|46|35|26|33|42|34|43|40|40|49|59|39|54|40|37|44|47|44|42|43|40|51|52|49|42|55|39|54|—|53|42|47|46|58|60|49|58|46|50|52|59|69|60|77|65|74|91|70|73|70|78|84|90|
+| **tr_crobat_abso** |21|30|16|28|22|14|26|24|19|41|29|27|29|33|32|28|32|30|31|30|39|27|35|38|27|41|49|42|47|23|53|39|41|32|32|40|43|49|47|42|47|54|49|39|41|47|46|44|57|52|48|49|47|—|51|54|52|54|45|60|58|58|65|63|69|60|58|54|56|73|59|78|77|82|81|87|89|
+| **meta_dragapult** |23|33|15|26|28|28|24|29|34|31|31|30|32|30|37|30|40|37|32|42|43|49|32|35|36|42|40|28|39|51|38|36|34|46|44|40|42|51|39|44|42|47|48|42|52|48|48|53|46|44|58|46|58|49|—|47|51|58|48|58|61|42|58|48|46|61|29|46|73|68|70|72|73|79|79|76|84|
+| **hops_snorlax_s** |20|21|18|20|16|28|19|24|29|25|27|31|32|28|29|30|28|27|31|29|38|37|32|33|34|40|34|33|28|35|31|37|41|37|39|44|55|47|34|39|34|37|47|47|50|31|46|46|36|47|50|46|53|46|53|—|39|68|49|64|62|51|60|63|62|81|63|83|76|77|91|83|74|78|81|91|92|
+| **arbok_team_roc** |21|18|26|20|28|21|24|27|19|27|31|24|23|32|10|24|31|29|29|24|36|30|36|33|27|40|58|40|42|28|41|46|36|51|42|44|54|44|38|13|48|48|40|44|30|51|31|30|49|47|51|50|54|48|49|61|—|50|43|63|58|73|63|59|72|55|79|65|59|66|86|78|86|88|82|84|94|
+| **chandelure_cen** |18|11|40|12|25|13|29|24|22|20|33|48|11|40|33|62|27|34|36|11|19|38|51|53|69|19|38|42|36|39|40|50|46|39|42|44|22|12|58|70|62|45|32|51|34|27|49|35|53|55|32|61|42|46|42|32|50|—|78|34|57|69|16|61|68|53|76|75|65|79|79|49|68|65|65|90|79|
+| **meta_ns_zoroar** |40|12|20|32|11|22|40|30|18|22|46|26|47|41|26|13|52|28|49|56|44|24|47|30|40|52|61|54|50|24|49|40|45|28|35|38|30|45|39|29|35|55|56|45|57|56|39|46|53|42|49|48|40|55|52|51|57|22|—|37|58|23|47|51|30|36|55|18|61|57|30|54|70|71|77|42|64|
+| **study_maushold** |14|6|22|13|20|11|17|28|31|18|27|40|9|29|36|53|19|26|27|13|18|22|22|40|45|28|46|38|23|24|28|47|43|32|25|40|47|22|44|60|47|33|30|38|28|21|36|37|38|46|41|51|51|40|42|36|37|66|63|—|51|70|44|53|70|77|78|83|70|78|92|66|69|74|61|94|89|
+| **eerie_inferno_** |16|19|15|19|16|26|17|19|30|23|21|26|14|19|42|54|25|24|25|10|34|34|31|44|33|29|37|23|29|37|33|38|34|38|49|31|58|26|37|28|50|39|27|33|32|44|62|31|39|32|39|59|42|42|39|38|42|43|42|49|—|50|57|37|62|74|55|80|49|67|87|75|57|72|79|88|80|
+| **mew_dbc_bastio** |11|23|51|16|7|42|12|19|14|11|30|20|31|19|13|24|19|18|27|58|45|48|27|28|66|37|59|53|18|53|18|27|45|40|34|56|20|50|32|27|36|23|27|50|38|26|34|28|26|64|46|39|54|42|58|49|27|31|77|30|50|—|34|52|53|51|66|61|84|70|79|61|62|57|68|84|76|
+| **darkness_mill_** |10|11|17|17|11|7|14|13|30|20|17|24|16|20|39|50|21|28|24|17|24|13|19|28|35|25|35|32|33|16|37|34|36|27|17|37|53|25|36|47|38|32|31|24|24|32|27|40|38|44|24|47|50|35|42|40|37|84|53|56|43|66|—|45|66|74|59|89|42|68|86|64|70|68|72|90|88|
+| **crabominable_v** |21|17|14|16|14|27|22|21|35|20|33|18|34|24|25|20|26|27|32|30|22|27|47|22|57|44|25|23|22|28|22|36|36|29|34|32|52|35|32|34|29|37|36|41|39|41|44|41|37|30|37|33|48|37|52|37|41|39|49|47|63|48|55|—|45|57|55|60|76|61|61|51|65|63|79|71|62|
+| **study_hydreigo** |17|9|23|16|9|8|28|15|16|19|24|27|24|40|34|28|21|21|39|38|19|16|36|36|32|40|40|53|40|14|45|38|54|20|25|49|30|28|43|42|44|26|41|42|22|46|29|31|27|50|32|43|41|31|54|38|28|32|70|30|38|47|34|55|—|47|51|48|60|62|51|42|62|68|71|69|67|
+| **chandelure_mau** |13|2|29|8|16|33|14|22|11|22|24|29|12|30|24|33|35|30|46|46|8|12|36|44|71|15|49|31|25|10|29|39|43|47|31|38|21|22|32|52|35|36|42|31|35|34|51|36|42|38|29|55|31|40|39|19|45|47|64|23|26|49|26|43|53|—|67|75|56|67|66|45|47|43|39|86|76|
+| **trevenant_rapi** |17|17|9|11|36|16|19|21|17|20|22|22|30|30|13|14|15|20|36|53|20|25|30|35|37|45|43|26|28|20|27|44|53|35|46|59|18|33|45|42|43|20|38|29|34|38|27|33|20|24|39|29|40|42|71|37|21|24|45|22|45|34|41|45|49|33|—|34|69|63|39|46|64|61|58|76|58|
+| **study_centisko** |16|7|54|21|11|28|23|15|12|10|27|35|16|35|20|32|13|28|41|31|16|26|34|45|59|28|35|53|23|31|24|42|57|76|37|53|15|12|46|45|45|32|27|39|28|22|33|29|32|49|25|41|23|46|54|17|35|25|82|17|20|39|11|40|52|25|66|—|75|60|45|26|46|34|43|66|48|
+| **meta_festival_** |14|5|18|14|22|18|13|17|17|34|22|15|21|15|43|15|37|31|22|17|27|29|14|14|27|25|28|16|18|31|20|26|25|30|25|21|37|29|18|27|18|40|21|17|44|13|37|36|40|20|35|13|35|44|27|24|41|35|39|30|51|16|58|24|40|44|31|25|—|43|50|42|38|50|63|30|48|
+| **salazzle_ex_te** |12|18|12|10|7|22|17|17|12|10|20|22|19|24|19|18|18|14|15|14|27|28|23|32|18|26|20|26|22|24|18|33|35|29|32|26|18|21|28|21|40|28|18|44|23|37|34|24|31|35|33|34|26|27|32|23|34|21|43|22|33|30|32|39|38|33|37|40|57|—|35|52|36|51|49|55|53|
+| **study_flygon_s** |14|2|28|12|6|11|13|18|10|15|18|21|13|30|15|21|7|19|47|43|7|3|21|43|58|14|42|24|17|2|20|33|42|41|16|28|8|10|31|40|39|11|48|26|28|15|19|12|14|35|20|46|9|41|30|9|14|21|70|8|13|21|14|39|49|34|61|55|50|65|—|35|27|16|37|72|45|
+| **tr_arbok_yvelt** |5|4|13|7|7|6|4|11|12|9|16|20|12|18|12|24|10|15|11|7|11|25|11|19|26|22|27|15|8|19|11|22|24|26|18|24|27|23|15|26|27|22|15|32|15|7|22|25|27|45|21|41|30|22|28|17|22|51|46|34|25|39|36|49|58|55|54|74|58|48|65|—|32|33|58|78|67|
+| **mew_dbc_hypno** |6|8|3|3|6|6|3|8|14|12|12|8|12|12|6|18|7|9|12|7|11|11|12|16|21|20|30|12|9|7|12|24|16|14|23|16|22|16|22|23|22|10|16|16|21|17|22|17|9|22|24|32|27|23|27|26|14|32|30|31|43|38|30|35|38|53|36|54|62|64|73|68|—|64|46|91|71|
+| **team_rockets_w** |5|11|6|1|3|8|3|7|14|9|10|15|4|12|6|15|10|8|9|7|12|14|9|18|16|16|18|10|10|11|9|24|17|18|14|17|31|19|16|24|26|8|13|22|14|12|22|18|12|23|20|28|30|18|21|22|12|35|29|26|28|43|32|37|32|57|39|66|50|49|84|67|36|—|53|79|66|
+| **static_venom_d** |6|5|6|7|5|8|6|8|8|10|11|10|4|9|24|18|9|15|9|6|8|10|10|13|12|14|22|15|19|9|15|18|17|10|13|14|37|16|16|11|15|18|14|14|12|16|17|18|20|16|14|22|22|19|21|19|18|35|23|39|21|32|28|21|29|61|42|57|37|51|63|42|54|47|—|79|76|
+| **mew_pikachu_bo** |3|4|24|2|3|1|1|10|4|5|11|19|3|15|5|8|6|7|6|3|5|2|5|12|18|11|16|20|10|3|12|34|29|36|5|22|4|11|45|31|21|7|9|15|10|12|9|8|9|29|18|24|16|13|24|9|16|10|58|6|12|16|10|29|31|14|24|34|70|45|28|22|9|21|21|—|23|
+| **mew_baby_box** |2|2|6|1|4|1|2|5|2|6|6|13|6|10|10|14|3|6|5|1|3|3|7|16|12|10|9|13|3|3|4|24|17|5|8|13|9|7|15|20|23|4|13|21|7|18|9|13|5|28|13|22|10|11|16|8|6|21|36|11|20|24|12|38|33|24|42|52|52|47|55|33|29|34|24|77|—|

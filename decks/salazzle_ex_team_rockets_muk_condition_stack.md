@@ -1,38 +1,13 @@
 # Salazzle ex / Team Rocket's Muk Condition Stack
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **28.2% mean · 28.2% median · 2 of 56 winning matchups · rank 54 of 57**
+> ### Field results — 2026-10-08
+> **27.7% mean · 26.4% median · 5 of 76 winning matchups · rank 70 of 77**
 >
-> Best `meta_festival_lead` 58% · worst `ditto_transform_hydreigon` 6%.
+> Best `meta_festival_lead` 57% · worst `ditto_transform_hydreigon` 7%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built from a card-name lookup ("Slazzle ex" -> Salazzle ex), then a search
 for a real synergy piece rather than just packing the best individual

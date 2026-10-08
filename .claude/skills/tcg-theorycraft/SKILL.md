@@ -781,6 +781,20 @@ until 2026-09-24), `Choose up to N ... (yours or your opponent's)` (up to
 means never forced onto your own side), and any new op (is it in
 `TRAINER_IR_OPS`?).
 
+Found by the Team Rocket's audit (2026-10-08), each on several cards:
+`If both of them are tails` (read as "at least one heads", 75%), `If <Name>
+is on your Bench` / `If a Pokemon that has "X" in its name is on your
+Bench` (read as THIS Pokemon being Benched), `search your deck for an Item
+card` (the "n" of "an" became a name filter), `put N damage counters on that
+Pokemon instead of 1` (a Poison amount, compiled as counters on the
+attacker), `Each player shuffles their hand into their deck` (yours too),
+and `Choose 1 of your opponent's Active Pokemon's attacks ... can't use that
+attack`. Two whole trigger families had **no caller at all**:
+`Whenever your opponent ...` and `During Pokemon Checkup, ...`. And the one
+that moved every deck: an attack Knock Out lowered the Prize count without
+putting the Prize cards in hand. Probe a family by playing its attacks on a
+fixed board AND resolving one real Knock Out end to end.
+
 **Check the trigger, not just the op.** An Ability can compile perfectly
 and still never run because nothing calls its TRIGGER: `on_play` ("when you
 play this Pokemon from your hand onto your Bench": Meowth ex in six field

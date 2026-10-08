@@ -1,18 +1,13 @@
 # Ditto Transform: Tyranitar / Gengar ex / Hydreigon ex
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **65.5% mean · 67.7% median · 47 of 56 winning matchups · rank 7 of 57**
+> ### Field results — 2026-10-08
+> **65.6% mean · 67.0% median · 61 of 76 winning matchups · rank 10 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 93% · worst `lurantis_heal_punish` 29%.
+> Best `mew_pikachu_box` 95% · worst `lurantis_heal_punish` 28%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
 
 **Not my list.** Supplied 2026-09-24. The only Basic is Ditto: its
 Surprisingly Transform ("flip a coin; on heads search your deck for a

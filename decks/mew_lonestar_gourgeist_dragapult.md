@@ -1,5 +1,14 @@
 # Lonestar's Mew ex / Gourgeist ex -- playbook
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **56.3% mean · 55.3% median · 48 of 76 winning matchups · rank 28 of 77**
+>
+> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 90% · worst `ditto_transform_hydreigon` 16%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 **Not my list.** Supplied 2026-09-30. 59.2% against the 62-deck field
 (200 games per opponent, greedy pilot), winning 46 of 62. Import:
 `mew_lonestar_gourgeist_dragapult.ptcgl.txt`.

@@ -1,38 +1,13 @@
 # Krookodile ex / Relicanth Hand Disruption
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **60.6% mean · 62.2% median · 40 of 56 winning matchups · rank 10 of 57**
+> ### Field results — 2026-10-08
+> **60.2% mean · 60.1% median · 52 of 76 winning matchups · rank 18 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 94% · worst `lurantis_heal_punish` 28%.
+> Best `mew_baby_box` 94% · worst `lurantis_heal_punish` 24%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built around a specific request: a Basic-or-Stage-1 attack that strips the
 opponent's hand down, paired with a Stage 2/ex-level HP shell to survive

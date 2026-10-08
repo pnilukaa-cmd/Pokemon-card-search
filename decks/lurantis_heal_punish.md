@@ -1,38 +1,13 @@
 # Lurantis ex Heal-Punish
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **68.1% mean · 68.5% median · 51 of 56 winning matchups · rank 6 of 57**
+> ### Field results — 2026-10-08
+> **69.4% mean · 69.1% median · 69 of 76 winning matchups · rank 6 of 77**
 >
-> Best `darkness_mill_hand_lock` 94% · worst `scovillain_salazzle_spicy_rage` 40%.
+> Best `mew_baby_box` 99% · worst `team_rocket_moltres_houndoom` 39%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **The question this deck answers**: can you build a deck that just out-heals the meta?
 

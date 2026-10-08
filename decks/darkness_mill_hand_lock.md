@@ -1,38 +1,13 @@
 # Darkness Hand-Lock / Mill
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **37.8% mean · 35.5% median · 11 of 56 winning matchups · rank 48 of 57**
+> ### Field results — 2026-10-08
+> **38.2% mean · 35.2% median · 18 of 76 winning matchups · rank 63 of 77**
 >
-> Best `study_centiskorch_bastiodon_mill` 89% · worst `lurantis_heal_punish` 6%.
+> Best `mew_pikachu_box` 90% · worst `lurantis_heal_punish` 7%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 A control deck built around unconditional hand disruption (Sandile/Krokorok/Krookodile's
 `Tighten Up`), deck drawdown/mill (Deino/Zweilous/Hydreigon ex's `Stomp Off` /

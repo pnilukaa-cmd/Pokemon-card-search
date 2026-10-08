@@ -1,5 +1,14 @@
 # Team Rocket's Moltres ex / Houndoom
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **58.0% mean · 58.8% median · 49 of 76 winning matchups · rank 23 of 77**
+>
+> Best `mew_pikachu_box` 95% · worst `ns_zoroark_night_joker_toolbox` 18%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 Built 2026-10-08 in the Team Rocket's study
 ([TEAM_ROCKET_STUDY_2026-10-08.md](TEAM_ROCKET_STUDY_2026-10-08.md)).
 **Lines:** Moltres ex, Houndour → Houndoom.

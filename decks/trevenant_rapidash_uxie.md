@@ -1,5 +1,14 @@
 # Trevenant / Uxie spread, Rapidash draw
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **34.7% mean · 34.0% median · 11 of 76 winning matchups · rank 67 of 77**
+>
+> Best `mew_pikachu_box` 76% · worst `ns_zoroark_night_joker_toolbox` 9%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 **Not my list.** Supplied 2026-10-07. Import (legal reprints for Switch
 and Crushing Hammer): `trevenant_rapidash_uxie.ptcgl.txt`.
 

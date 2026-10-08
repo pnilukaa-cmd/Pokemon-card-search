@@ -1,5 +1,14 @@
 # Team Rocket's Raticate rush
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **72.8% mean · 72.0% median · 74 of 76 winning matchups · rank 1 of 77**
+>
+> Best `mew_baby_box` 98% · worst `ns_zoroark_night_joker_toolbox` 43%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 Built 2026-10-08 in the Team Rocket's study
 ([TEAM_ROCKET_STUDY_2026-10-08.md](TEAM_ROCKET_STUDY_2026-10-08.md)).
 **Lines:** Rattata → Raticate (main), Meowth → Persian ex, Kangaskhan ex.
@@ -35,7 +44,7 @@ to 8.
 **Their outs.** Raticate has 90 HP, so expect to lose one every turn; that is
 the trade. It's weak to Fighting (every Colorless Team Rocket's Pokémon is),
 and the 25% self-Knock Out gives them a free Prize when it happens.
-N's Zoroark is the worst matchup (40%).
+N's Zoroark is the worst matchup (43% in the full run).
 
 ## How it was tuned
 

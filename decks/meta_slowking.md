@@ -1,32 +1,13 @@
 # slowking — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **53.8% mean · 55.0% median · 35 of 56 winning matchups · rank 23 of 57**
+> ### Field results — 2026-10-08
+> **51.6% mean · 52.5% median · 44 of 76 winning matchups · rank 39 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `tauros_risky_ruins` 15%.
+> Best `tr_arbok_yveltal_snow_coating` 85% · worst `tauros_risky_ruins` 14%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.

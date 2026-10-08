@@ -1,24 +1,13 @@
 # metal_metang_excadrill — Metal Maker / Mega Excadrill ex
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **50.8% mean · 51.5% median · 29 of 56 winning matchups · rank 26 of 57**
+> ### Field results — 2026-10-08
+> **49.8% mean · 49.0% median · 37 of 76 winning matchups · rank 41 of 77**
 >
-> Best `static_venom_drapion` 82% · worst `ditto_transform_hydreigon` 15%.
+> Best `static_venom_drapion` 85% · worst `ditto_transform_hydreigon` 14%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
 
 **Not my list.** Submitted by the user for review. Reproduced card-for-card
 with three lines corrected (below); nothing else was changed, because

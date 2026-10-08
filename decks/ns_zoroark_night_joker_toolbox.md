@@ -1,38 +1,13 @@
 # N's Zoroark ex — Night Joker toolbox
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **72.3% mean · 75.8% median · 52 of 56 winning matchups · rank 3 of 57**
+> ### Field results — 2026-10-08
+> **72.3% mean · 75.7% median · 71 of 76 winning matchups · rank 3 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 96% · worst `tauros_risky_ruins` 24%.
+> Best `mew_dbc_hypno` 97% · worst `tauros_risky_ruins` 22%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 `N's Zoroark ex` ASC 137, Stage 1, 280 HP.
 **`Night Joker`, `D``D`: choose 1 of your Benched N's Pokémon's attacks

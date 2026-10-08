@@ -1,38 +1,13 @@
 # Team Rocket's Spidops — Count-Swarm / Supporter-Discard Blend
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **46.6% mean · 43.4% median · 20 of 56 winning matchups · rank 35 of 57**
+> ### Field results — 2026-10-08
+> **45.7% mean · 41.6% median · 26 of 76 winning matchups · rank 51 of 77**
 >
-> Best `static_venom_drapion` 83% · worst `tauros_risky_ruins` 19%.
+> Best `mew_baby_box` 87% · worst `tauros_risky_ruins` 14%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built from a full survey of every "Team Rocket's"-named Pokémon in the
 pool (35+ cards, ranked by role before building — see chat history).

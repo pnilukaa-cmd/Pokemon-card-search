@@ -1,5 +1,14 @@
 # Team Rocket's Tyranitar sandstorm
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **62.1% mean · 59.7% median · 59 of 76 winning matchups · rank 15 of 77**
+>
+> Best `mew_pikachu_box` 95% · worst `lurantis_heal_punish` 18%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 Built 2026-10-08 in the Team Rocket's study
 ([TEAM_ROCKET_STUDY_2026-10-08.md](TEAM_ROCKET_STUDY_2026-10-08.md)).
 **Lines:** Larvitar → Pupitar → Tyranitar, Diglett → Dugtrio, Sneasel.

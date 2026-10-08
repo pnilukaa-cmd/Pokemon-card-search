@@ -1,32 +1,13 @@
 # dragapult_blaziken — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **52.2% mean · 53.0% median · 35 of 56 winning matchups · rank 24 of 57**
+> ### Field results — 2026-10-08
+> **53.6% mean · 55.0% median · 45 of 76 winning matchups · rank 33 of 77**
 >
-> Best `static_venom_drapion` 82% · worst `ns_zoroark_night_joker_toolbox` 22%.
+> Best `mew_dbc_hypno` 84% · worst `ns_zoroark_night_joker_toolbox` 24%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.

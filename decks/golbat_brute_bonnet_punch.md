@@ -1,5 +1,14 @@
 # Team Rocket's Golbat / Crobat ex counters + Brute Bonnet
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **48.8% mean · 45.7% median · 32 of 76 winning matchups · rank 45 of 77**
+>
+> Best `mew_baby_box` 93% · worst `lurantis_heal_punish` 17%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 Built 2026-10-08 as a faster answer to the Trevenant/Uxie spread list
 (37.4%), which needs several turns of spreading before it threatens
 anything. This deck puts a few counters on the opponent's **Active**

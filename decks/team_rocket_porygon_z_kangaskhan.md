@@ -1,5 +1,14 @@
 # Team Rocket's Porygon-Z / Kangaskhan ex
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **63.1% mean · 62.8% median · 65 of 76 winning matchups · rank 14 of 77**
+>
+> Best `static_venom_drapion` 91% · worst `ditto_transform_hydreigon` 32%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 Built 2026-10-08 in the Team Rocket's study
 ([TEAM_ROCKET_STUDY_2026-10-08.md](TEAM_ROCKET_STUDY_2026-10-08.md)).
 **Lines:** Porygon → Porygon2 → Porygon-Z, Kangaskhan ex, Chingling.

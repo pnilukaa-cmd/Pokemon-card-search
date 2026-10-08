@@ -1,38 +1,13 @@
 # Team Rocket's Persian ex — Attack Theft (full-toolkit rebuild)
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **69.4% mean · 70.4% median · 53 of 56 winning matchups · rank 4 of 57**
+> ### Field results — 2026-10-08
+> **67.9% mean · 68.8% median · 67 of 76 winning matchups · rank 8 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 95% · worst `ns_zoroark_night_joker_toolbox` 43%.
+> Best `mew_baby_box` 95% · worst `team_rocket_raticate_rush` 40%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built around a specific request: punish opponents running strong Pokémon
 by stealing their own attacks. Rebuilt after a full survey of all 12

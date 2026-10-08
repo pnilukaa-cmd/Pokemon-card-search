@@ -1,32 +1,13 @@
 # ns_zoroark — TCGplayer, September 2026
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **37.0% mean · 40.2% median · 12 of 56 winning matchups · rank 50 of 57**
+> ### Field results — 2026-10-08
+> **41.8% mean · 43.5% median · 25 of 76 winning matchups · rank 59 of 77**
 >
-> Best `static_venom_drapion` 75% · worst `ditto_transform_hydreigon` 8%.
+> Best `static_venom_drapion` 77% · worst `ditto_transform_hydreigon` 11%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 **Not my list.** From Natalie Millar's *The Best Pokémon TCG Decks Right
 Now (September 2026)* on TCGplayer (2026-08-25), reproduced card-for-card.

@@ -1,38 +1,13 @@
 # Steven's Carbink Damage Wall
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **44.8% mean · 43.8% median · 20 of 56 winning matchups · rank 40 of 57**
+> ### Field results — 2026-10-08
+> **45.7% mean · 44.6% median · 27 of 76 winning matchups · rank 52 of 77**
 >
-> Best `meta_festival_lead` 86% · worst `ns_zoroark_night_joker_toolbox` 16%.
+> Best `meta_festival_lead` 87% · worst `ns_zoroark_night_joker_toolbox` 15%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 The mirror image of the Hop's Snorlax stacked-buff deck: instead of
 stacking +30 damage-dealt bonuses onto your own attacks, this stacks a

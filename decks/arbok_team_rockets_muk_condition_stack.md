@@ -1,38 +1,13 @@
 # Arbok / Team Rocket's Muk Condition Stack (Pure Darkness)
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **45.1% mean · 44.9% median · 19 of 56 winning matchups · rank 38 of 57**
+> ### Field results — 2026-10-08
+> **44.7% mean · 42.6% median · 26 of 76 winning matchups · rank 57 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 91% · worst `kangaskhan_tyrantrum_flip_mill` 12%.
+> Best `mew_baby_box` 94% · worst `team_rocket_tyranitar_sandstorm` 10%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Replaces an earlier Fire/Darkness draft (Salazzle ex + Team Rocket's Muk)
 with an all-Darkness version once research turned up a strictly stronger,

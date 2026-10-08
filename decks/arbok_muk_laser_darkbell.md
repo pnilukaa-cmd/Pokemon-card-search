@@ -1,38 +1,13 @@
 # Arbok / Team Rocket's Muk — Dangerous Laser + Dark Bell variant
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **48.6% mean · 49.1% median · 27 of 56 winning matchups · rank 32 of 57**
+> ### Field results — 2026-10-08
+> **49.0% mean · 48.2% median · 35 of 76 winning matchups · rank 42 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 93% · worst `kangaskhan_tyrantrum_flip_mill` 20%.
+> Best `mew_baby_box` 96% · worst `team_rocket_tyranitar_sandstorm` 12%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 The other of two sibling variants branching from
 `arbok_team_rockets_muk_condition_stack.md` — see

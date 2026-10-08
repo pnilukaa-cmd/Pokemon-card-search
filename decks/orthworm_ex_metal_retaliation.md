@@ -1,38 +1,13 @@
 # Orthworm ex Metal Retaliation
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **49.0% mean · 47.6% median · 25 of 56 winning matchups · rank 31 of 57**
+> ### Field results — 2026-10-08
+> **48.2% mean · 46.4% median · 33 of 76 winning matchups · rank 46 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 90% · worst `ns_zoroark_night_joker_toolbox` 12%.
+> Best `tr_arbok_yveltal_snow_coating` 93% · worst `team_rocket_moltres_houndoom` 8%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 A beefy-attacker deck built around the `counterattack_on_hit` mechanic family
 (17 real cards in the pool: Iron Jugulis, Mega Slowbro ex, Mega Scrafty ex,

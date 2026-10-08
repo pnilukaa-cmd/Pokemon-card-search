@@ -1,38 +1,13 @@
 # Team Rocket's Wobbuffet / Orbeetle Damage-Laundering Control
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **19.1% mean · 15.4% median · 3 of 56 winning matchups · rank 57 of 57**
+> ### Field results — 2026-10-08
+> **22.6% mean · 17.2% median · 7 of 76 winning matchups · rank 74 of 77**
 >
-> Best `study_flygon_sandy_flapping_mill` 79% · worst `ditto_transform_hydreigon` 2%.
+> Best `study_flygon_sandy_flapping_mill` 84% · worst `team_rocket_nidoking_nidoqueen` 1%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 A different shape than every other deck built this session: instead of
 applying Special Conditions or scaling off a count, this one turns

@@ -1,38 +1,13 @@
 # Toxic Slumber (Erika's Oddish / Gloom / Vileplume ex)
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **48.3% mean · 48.1% median · 26 of 56 winning matchups · rank 34 of 57**
+> ### Field results — 2026-10-08
+> **48.2% mean · 45.8% median · 30 of 76 winning matchups · rank 47 of 77**
 >
-> Best `team_rockets_wobbuffet_orbeetle_damage_launder` 84% · worst `ditto_transform_hydreigon` 19%.
+> Best `mew_baby_box` 91% · worst `team_rocket_honchkrow_kangaskhan` 18%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Third of five decks built around the Special Condition stacking research in this repo (see
 `combo_patterns.md` Pattern 5). Where Deck 1 (Panic Poison) leans on the persistent half of the

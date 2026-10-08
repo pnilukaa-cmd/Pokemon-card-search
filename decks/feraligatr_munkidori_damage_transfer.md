@@ -1,38 +1,13 @@
 # Feraligatr / Munkidori Damage-Transfer Engine
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **44.2% mean · 42.5% median · 15 of 56 winning matchups · rank 43 of 57**
+> ### Field results — 2026-10-08
+> **45.4% mean · 42.5% median · 24 of 76 winning matchups · rank 53 of 77**
 >
-> Best `study_flygon_sandy_flapping_mill` 87% · worst `tauros_risky_ruins` 9%.
+> Best `study_flygon_sandy_flapping_mill` 91% · worst `tauros_risky_ruins` 8%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 A unique combo found by scanning every ability across **all 10 Standard types** for two
 narrow, complementary effects: an ability that puts damage counters on its *own* Pokémon,

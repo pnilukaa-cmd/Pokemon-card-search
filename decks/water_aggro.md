@@ -1,38 +1,13 @@
 # Water Aggro
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **50.5% mean · 49.6% median · 28 of 56 winning matchups · rank 29 of 57**
+> ### Field results — 2026-10-08
+> **51.9% mean · 49.4% median · 36 of 76 winning matchups · rank 38 of 77**
 >
-> Best `chandelure_centiskorch_deck_out` 88% · worst `tauros_risky_ruins` 10%.
+> Best `mew_baby_box` 93% · worst `tauros_risky_ruins` 12%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 > **Decklist corrected.** Every line in this list originally carried a bare card name with no `SET NUM`. The simulator resolves a bare name to the *first* printing in the pool, which for `Palafin` is **TEF 49** — a printing with no `Zero to Hero` Ability. `Palafin ex`'s rule is "put this Pokémon into play **only** with the effect of Palafin's Zero to Hero", so the deck's 250-damage finisher had no legal route into play in any game this deck ever played. The line is now pinned to `Finizen TWM 59 / Palafin TWM 60 / Palafin ex TWM 61` and every card carries an exact set number.
 

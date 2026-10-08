@@ -1,5 +1,14 @@
 # Mega Chandelure ex / Maushold / Dudunsparce
 
+<!-- field-results -->
+> ### Field results — 2026-10-08
+> **36.5% mean · 35.4% median · 13 of 76 winning matchups · rank 66 of 77**
+>
+> Best `mew_pikachu_box` 86% · worst `tauros_risky_ruins` 2%.
+>
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
+<!-- field-results -->
+
 **Not my list.** Supplied 2026-10-06. Import: `chandelure_maushold_dudunsparce_wall.ptcgl.txt`.
 
 **39.44% (±0.18) against the 63-deck field, 1000 games per opponent,

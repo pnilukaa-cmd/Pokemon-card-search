@@ -1,38 +1,13 @@
 # Hop's Snorlax Stacked-Buff
 
 <!-- field-results -->
-> ### Field results — 2026-09-30
-> **44.6% mean · 41.3% median · 16 of 56 winning matchups · rank 42 of 57**
+> ### Field results — 2026-10-08
+> **44.9% mean · 39.2% median · 22 of 76 winning matchups · rank 56 of 77**
 >
-> Best `study_flygon_sandy_flapping_mill` 89% · worst `ditto_transform_hydreigon` 15%.
+> Best `mew_baby_box` 92% · worst `ditto_transform_hydreigon` 16%.
 >
-> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-09-30** and was measured against a different field or engine.
+> Full round robin, 1000 games per pairing, every deck against every other — see [FIELD_RESULTS.md](FIELD_RESULTS.md). **Any win rate written in the body below this box predates 2026-10-08** and was measured against a different field or engine.
 <!-- field-results -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Built to match a real deck the user lost to fast — "two Snorlax, a
 Phantump, and a Stadium" before they could get started. That's the
