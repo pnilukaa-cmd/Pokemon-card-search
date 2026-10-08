@@ -1,0 +1,71 @@
+# Every Team Rocket card in the pool, one of each (not a legal deck):
+# the model the Team Rocket regression tests load.
+1 Team Rocket's Diglett ASC 100
+1 Team Rocket's Dugtrio ASC 101
+1 Team Rocket's Murkrow ASC 126
+1 Team Rocket's Honchkrow ASC 127
+1 Team Rocket's Meowth ASC 161
+1 Team Rocket's Kangaskhan ex ASC 162
+1 Team Rocket's Tarountula ASC 18
+1 Team Rocket's Spidops ASC 19
+1 Team Rocket's Archer ASC 201
+1 Team Rocket's Ariana ASC 202
+1 Team Rocket's Factory ASC 203
+1 Team Rocket's Giovanni ASC 204
+1 Team Rocket's Great Ball ASC 205
+1 Team Rocket's Hypnotizer ASC 206
+1 Team Rocket's Petrel ASC 207
+1 Team Rocket's Proton ASC 208
+1 Team Rocket's Transceiver ASC 209
+1 Team Rocket's Watchtower ASC 210
+1 Team Rocket's Energy ASC 217
+1 Team Rocket's Mimikyu ASC 238
+1 Team Rocket's Mewtwo ex ASC 281
+1 Team Rocket's Exeggcute ASC 77
+1 Team Rocket's Exeggutor ASC 78
+1 Team Rocket's Ekans DRI 112
+1 Team Rocket's Arbok DRI 113
+1 Team Rocket's Nidoran♀ DRI 114
+1 Team Rocket's Nidorina DRI 115
+1 Team Rocket's Nidoqueen DRI 116
+1 Team Rocket's Nidoran♂ DRI 117
+1 Team Rocket's Nidorino DRI 118
+1 Team Rocket's Nidoking ex DRI 119
+1 Team Rocket's Zubat DRI 120
+1 Team Rocket's Golbat DRI 121
+1 Team Rocket's Crobat ex DRI 122
+1 Team Rocket's Grimer DRI 123
+1 Team Rocket's Muk DRI 124
+1 Team Rocket's Koffing DRI 125
+1 Team Rocket's Weezing DRI 126
+1 Team Rocket's Sneasel DRI 128
+1 Team Rocket's Rattata DRI 147
+1 Team Rocket's Raticate DRI 148
+1 Team Rocket's Blipbug DRI 15
+1 Team Rocket's Persian ex DRI 150
+1 Team Rocket's Porygon DRI 153
+1 Team Rocket's Porygon2 DRI 154
+1 Team Rocket's Porygon-Z DRI 155
+1 Team Rocket's Bother-Bot DRI 172
+1 Team Rocket's Venture Bomb DRI 179
+1 Team Rocket's Houndoom DRI 191
+1 Team Rocket's Orbeetle DRI 198
+1 Team Rocket's Moltres ex DRI 208
+1 Team Rocket's Houndour DRI 37
+1 Team Rocket's Articuno DRI 51
+1 Team Rocket's Zapdos DRI 70
+1 Team Rocket's Mareep DRI 72
+1 Team Rocket's Flaaffy DRI 73
+1 Team Rocket's Ampharos DRI 74
+1 Team Rocket's Drowzee DRI 79
+1 Team Rocket's Hypno DRI 80
+1 Team Rocket's Wobbuffet DRI 82
+1 Team Rocket's Chingling DRI 85
+1 Team Rocket's Dottler DRI 88
+1 Team Rocket's Larvitar DRI 94
+1 Team Rocket's Pupitar DRI 95
+1 Team Rocket's Tyranitar DRI 96
+1 Ultra Ball MEG 131
+1 Switch MEG 130
+1 Boss's Orders MEG 114
+10 Basic Darkness Energy

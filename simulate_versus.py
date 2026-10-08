@@ -120,7 +120,7 @@ class InPlay:
                  "damage_penalty", "takes_more", "next_turn_attack_buff",
                  "delayed_discard", "extra_prize", "no_weakness",
                  "damage_taken_last_turn", "retaliate_counters", "under",
-                 "last_attack_round", "weakness_set")
+                 "last_attack_round", "weakness_set", "poison_counters")
 
     def __init__(self, name, turn):
         self.name = name
@@ -169,6 +169,9 @@ class InPlay:
         self.prev_damage = 0
         self.tool = None
         self.conditions = set()   # asleep / burned / confused / paralyzed / poisoned
+        # Counters a Poison places at each Checkup: 1, unless the attack
+        # that Poisoned it said otherwise (Tainted Horn: 8).
+        self.poison_counters = 1
         # Mega Lopunny ex's Gale Thrust is 60 that becomes 230 "if this
         # Pokemon moved from your Bench to the Active Spot this turn".
         self.promoted_this_turn = False
@@ -740,6 +743,20 @@ def ability_key(p, ab):
 ACTIVATED = (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN)
 
 
+def take_prizes(taker, n):
+    """Take `n` Prizes: the count drops and the cards go to `taker`'s hand.
+
+    Only the Bench sweep below moved the cards. The attack Knock Out, the
+    Checkup Knock Out and the retaliation Knock Out all just lowered the
+    counter, so the cards a Prize is supposed to hand you -- the main way a
+    deck refills after its first Knock Outs -- never arrived for almost any
+    Prize taken in the simulator."""
+    taker.prizes -= n
+    for _ in range(max(0, n)):
+        if getattr(taker, "prize_cards", None):
+            taker.hand.append(taker.prize_cards.pop())
+
+
 def sweep_knocked_out(pl, opp, log):
     """Remove Pokemon killed outside the attack step and award the Prizes.
 
@@ -771,14 +788,11 @@ def sweep_knocked_out(pl, opp, log):
                 owner.active = None
             elif spot in owner.bench:
                 owner.bench.remove(spot)
-            taker.prizes -= taken
             # Taking a Prize puts that card in your hand. Now that the
             # Prizes are really set aside, this is where they come back --
             # without it, removing them would be a pure cost that never
             # pays anything back, and a KO would be worth less than it is.
-            for _ in range(taken):
-                if taker.prize_cards:
-                    taker.hand.append(taker.prize_cards.pop())
+            take_prizes(taker, taken)
             owner.lost_pokemon_last_turn = True
             log.append(f"  {owner.name}: {spot.name} Knocked Out "
                        f"(+{taken} Prize to {taker.name})")
@@ -1220,6 +1234,7 @@ def _stadium_text_effects(pl, log):
             pl.active = best
             pl.abilities_used.add((name, "stadium_text"))
             log.append(f"  {pl.name}: {name} -- switches in {best.name}")
+            AE.opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
 
 
 def use_stadium(pl, log):
@@ -1406,7 +1421,11 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
     shuffles = any(a.op == IR.Op.SHUFFLE_HAND_INTO_DECK for a in eff.actions)
     dumps = any(a.op == IR.Op.DISCARD_FROM_SELF and (a.amount or 0) >= 99
                 for a in eff.actions)
-    if (shuffles or dumps) and rest >= amount:
+    # Unfair Stamp / Team Rocket's Archer reset the OPPONENT's hand too
+    # (to 2-3). Smaller than yours is still worth it when theirs is big.
+    squeeze = max([len(opp.hand) - (a.amount or 0) for a in eff.actions
+                   if a.op == IR.Op.SET_OPPONENT_HAND] + [0]) if opp is not None else 0
+    if (shuffles or dumps) and rest >= amount + squeeze:
         return False
     return _deck_left_after(pl, amount, rest if shuffles else 0) >= DRAW_FLOOR
 
@@ -1706,6 +1725,7 @@ def _switch_in_on_play(pl, opp, spot, log):
     pl.bench.append(me)
     pl.active = spot
     log.append(f"    {spot.name} switches in with {len(plan)} moved Energy")
+    AE.opponent_event(pl, opp, "active_to_bench", me, log)
     return True
 
 
@@ -1782,6 +1802,7 @@ def try_evolve(pl, opp, turn, log, first_turn):
                 AE.clear_attack_locks(spot)
                 clear_conditions(spot, "evolved", log, pl.name)
                 log.append(f"  {pl.name}: {pre} -> {name}")
+                AE.opponent_event(pl, opp, "evolve_from_hand", spot, log)
                 use_abilities(pl, opp, turn, log, just_evolved=spot)
                 break
 
@@ -1839,6 +1860,7 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
                 spot.evolved_this_turn = True
                 AE.clear_attack_locks(spot)
                 log.append(f"  {pl.name}: Rare Candy -> {name}")
+                AE.opponent_event(pl, opp, "evolve_from_hand", spot, log)
                 use_abilities(pl, opp, turn, log, just_evolved=spot)
                 return True
     return False
@@ -2167,12 +2189,37 @@ def judge_unlocks_attack(pl, opp):
         opp.hand = saved
 
 
+def _giovanni_partner(pl, opp):
+    """Team Rocket's Giovanni swaps your Active Team Rocket's Pokemon with a
+    Benched one FIRST, and gusts only "if you do". It was played as a plain
+    Boss's Orders, with no requirement and no switch."""
+    fam = "team rocket's"
+    if pl.active is None or not pl.active.name.lower().startswith(fam):
+        return None
+    cands = [p for p in pl.bench if p.name.lower().startswith(fam)]
+    if not cands:
+        return None
+    return max(cands, key=lambda p: (_ready_damage(pl, opp, p),
+                                     effective_hp(pl, p) - p.damage))
+
+
 def _gust_supporter(pl, opp, name, target, log):
     """Boss's Orders / Giovanni, resolved on `target`."""
+    if name == "Team Rocket's Giovanni":
+        mine = _giovanni_partner(pl, opp)
+        if mine is None:
+            return False
     pl.remove_from_hand("Supporter", name)
     pl.discard.append(name)
     pl.supporter_played = True
     pl.played_supporters_this_turn.add(name)
+    if name == "Team Rocket's Giovanni":
+        pl.bench.remove(mine)
+        clear_conditions(pl.active, "switched", log, pl.name)
+        pl.bench.append(pl.active)
+        pl.active = mine
+        log.append(f"  {pl.name}: {name} -- switches in {mine.name}")
+        AE.opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
     opp.bench.remove(target)
     clear_conditions(opp.active, "left the Active Spot", log, opp.name)
     opp.bench.append(opp.active)
@@ -2431,6 +2478,8 @@ def play_supporter(pl, opp, turn, log):
     # Gust effects: drag up their weakest benched Pokemon
     for name in ("Boss's Orders", "Team Rocket's Giovanni"):
         if name in hand_names and opp.bench and opp.active is not None:
+            if name == "Team Rocket's Giovanni" and _giovanni_partner(pl, opp) is None:
+                continue
             target = choose_gust_target(pl, opp)
             if target is None:
                 continue          # nothing on the Bench beats the Active
@@ -2951,6 +3000,9 @@ _MORE_DMG_FLIP_RE = _re.compile(
     _re.I)
 _FLIP_N_RE = _re.compile(r"flip (\d+) coins", _re.I)
 _FLIP_PER_EACH_RE = _re.compile(r"flip a coin for each ([^.]+)", _re.I)
+_OPP_FLIPS_PER_BENCH_RE = _re.compile(
+    r"your opponent flips a coin for each of their benched pok[eé]mon", _re.I)
+_PER_TAILS_DMG_RE = _re.compile(r"does (\d+) damage[^.]*?for each tails", _re.I)
 _PER_HEADS_DMG_RE = _re.compile(r"does (\d+) damage[^.]*?for each heads", _re.I)
 _DOES_DMG_LOOSE_RE = _re.compile(r"does (\d+) damage[^.]*?for each", _re.I)
 _ALSO_DOES_FOR_EACH_RE = _re.compile(
@@ -3748,6 +3800,13 @@ def attack_damage(pl, opp, spot, atk, record=True):
         if not eff.conditions or AE.conditions_met(eff, pl, opp, spot, atk):
             base = int(m.group(1))
 
+    # Strike the Sleeper's whole damage goes to a Benched Pokemon through
+    # its rider; the Active takes nothing.
+    if not base and "for each damage counter on that pok" in text.lower():
+        eff = _attack_ir(atk)
+        if any(a.filter.get("per_counter_on_target") for a in eff.actions):
+            return 0
+
     # A copy-attack evaluates the attack it borrows, which can itself be a
     # copy-attack -- Team Rocket's Persian ex's Haughty Order reads the
     # opponent's DECK, and in a mirror that deck contains another Persian
@@ -3822,6 +3881,15 @@ def attack_damage(pl, opp, spot, atk, record=True):
         if odds >= 1.0:
             odds = 0.5
         return base if random.random() < odds else 0
+
+    # Team Rocket's Hypno's Bench Manipulation: the OPPONENT flips one coin
+    # per Pokemon on their Bench, and it is 80 for each TAILS. Nothing read
+    # either half, so it hit for the printed 80 whatever the Bench held.
+    if _OPP_FLIPS_PER_BENCH_RE.search(text):
+        m2 = _PER_TAILS_DMG_RE.search(text)
+        per = int(m2.group(1)) if m2 else (base or 0)
+        n = len(opp.bench) if opp is not None else 0
+        return per * sum(1 for _ in range(n) if random.random() < 0.5)
 
     # Coin-flip attacks: actually flip.
     if _FLIP_UNTIL_TAILS_RE.search(text):
@@ -4345,7 +4413,18 @@ def attack_rider_value(pl, opp, atk, spot=None):
         if act.op == IR.Op.APPLY_CONDITION:
             already = getattr(opp.active, "conditions", set())
             for c in act.filter.get("conditions") or []:
-                if c not in already:          # re-applying an existing one is worth nothing
+                if c == "poisoned":
+                    # Worth its counters: a heavy Poison (Tainted Horn's 8)
+                    # lands once for sure at the next Checkup and maybe once
+                    # more before they cure it -- 15 a counter. A plain one
+                    # keeps its long-standing 30, and a stronger Poison over
+                    # a weaker one still adds the difference.
+                    n = act.filter.get("poison_counters") or 1
+                    cur = (getattr(opp.active, "poison_counters", 1) or 1
+                           if c in already else 0)
+                    if n > cur:
+                        value += RIDER_VALUE[c] if n == 1 else 15 * (n - cur)
+                elif c not in already:        # re-applying an existing one is worth nothing
                     value += RIDER_VALUE.get(c, 20)
         elif act.op == IR.Op.DISCARD_ENERGY_FROM_OPPONENT:
             value += 25 if opp.active.energy else 0
@@ -4382,6 +4461,23 @@ def attack_rider_value(pl, opp, atk, spot=None):
                     continue
                 hp = (opp.POKEMON.get(sp.name) or {}).get("hp") or 0
                 value += max(0, max(0, hp - (act.amount or 0)) - sp.damage)
+        elif act.op == IR.Op.KO_OUTRIGHT and (act.filter or {}).get("choose"):
+            # Team Rocket's Exeggutor's Tri Kinesis: 3 heads Knocks Out any
+            # one of their Pokemon. No price, so it was never used even with
+            # nothing else payable. Worth the best victim (the chance is
+            # applied to the total below).
+            pool = list(opp.in_play())
+            if pool:
+                value += max(((opp.POKEMON.get(p.name) or {}).get("hp") or 0) - p.damage
+                             + 100 * ((opp.POKEMON.get(p.name) or {}).get("prize_value", 1) - 1)
+                             for p in pool)
+        elif act.op == IR.Op.CONDITIONAL_KO and act.filter.get("discard_not_ko"):
+            # Evil Incineration: worth the HP and Energy it removes, but no
+            # Prize, and nothing at all without the Energy to pay for it.
+            if opp.active is not None and spot is not None and \
+                    _discard_active_cost(spot, act) is not None:
+                hp = (opp.POKEMON.get(opp.active.name) or {}).get("hp") or 0
+                value += max(0, hp - opp.active.damage) + 20 * len(opp.active.energy)
         elif act.op == IR.Op.CONDITIONAL_KO:
             for victim in conditional_ko_targets(pl, opp, atk):
                 # Worth the whole Pokemon: it dies regardless of HP.
@@ -4406,7 +4502,12 @@ def attack_rider_value(pl, opp, atk, spot=None):
         elif act.op == IR.Op.PLACE_COUNTERS and act.target in (
                 IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):
             per = act.filter.get("per_discard_card")
-            if per:
+            per_on = act.filter.get("per_counter_on_target")
+            if per_on:
+                # Strike the Sleeper is worth the best target's own counters.
+                value += max([(b.damage // 10) * per_on * 10 for b in opp.bench],
+                             default=0)
+            elif per:
                 # Re-Brew is worth whatever fuel is sitting in the discard
                 # right now -- zero on an empty pile, 100+ on a loaded one.
                 want = per.replace("basic ", "").strip()
@@ -4435,6 +4536,32 @@ def attack_rider_value(pl, opp, atk, spot=None):
             value += sum(s.damage * ((act.amount or 2) - 1) for s in spots)
         elif act.op == IR.Op.MOVE_COUNTERS:
             value += 20
+        elif act.op == IR.Op.EVOLVE_FROM_DECK:
+            # Team Rocket's Nidorina's Dark Awakening (two Darkness Pokemon
+            # straight from the deck) had no price and was never chosen over
+            # a 50-damage Scratch. Worth a turn of development per Pokemon
+            # it can actually evolve: a flat 50 plus half the HP it adds.
+            f = act.filter or {}
+            pool = ([spot] if f.get("self") and spot is not None else
+                    list(pl.bench) if f.get("bench_only") else list(pl.in_play()))
+            if f.get("type"):
+                pool = [p for p in pool
+                        if f["type"] in ((pl.POKEMON.get(p.name) or {}).get("types") or [])]
+            src = pl.hand if f.get("from") == "hand" else pl.deck
+            have = {n for k, n in src if k == "Pokemon"}
+            gains = []
+            for p in pool:
+                if p is None or getattr(p, "evolved_this_turn", False):
+                    continue
+                printed = M.base_of(pl.POKEMON, p.name)
+                nxt = [n for n in have
+                       if (pl.POKEMON.get(n) or {}).get("evolves_from") == printed]
+                if nxt:
+                    hp0 = (pl.POKEMON.get(p.name) or {}).get("hp") or 0
+                    gains.append(max(((pl.POKEMON.get(n) or {}).get("hp") or 0) - hp0
+                                     for n in nxt))
+            for g in sorted(gains, reverse=True)[:act.amount or 1]:
+                value += 50 + g // 2
         elif act.op == IR.Op.SEARCH_TO_BENCH:
             # Worth something only while there is Bench room to fill.
             room = max(0, 5 - len(pl.bench))
@@ -4490,6 +4617,47 @@ def _borrowed_text(pl, opp, spot, atk):
         return text
     chosen = _best_borrowed(pl, opp, spot, text)
     return (chosen.get("text") or "") if chosen else text
+
+
+def _discard_active_cost(spot, act):
+    """Index of the Energy a "Discard a <name> Energy from this Pokemon. If
+    you do, ..." attack would pay with, or None when it cannot pay."""
+    want = (act.filter.get("cost_energy_name") or "").lower()
+    if not want:
+        return -1
+    for i, n in enumerate(getattr(spot, "energy_names", None) or []):
+        if want in (n or "").lower():
+            return i
+    return None
+
+
+def _discard_active_now(pl, opp, atk, log):
+    """Team Rocket's Moltres ex's Evil Incineration: pay the named Energy,
+    then the opponent's Active and everything on it go to the discard.
+    Not a Knock Out, so no Prize; the opponent promotes, and loses if they
+    have nothing to promote. Returns True when that ends the game."""
+    for act in _attack_ir(atk).actions:
+        if act.op != IR.Op.CONDITIONAL_KO or not act.filter.get("discard_not_ko"):
+            continue
+        if opp.active is None or pl.active is None:
+            return False
+        i = _discard_active_cost(pl.active, act)
+        if i is None:
+            log.append(f"  {pl.name}: {atk['name']} -- no "
+                       f"{act.filter.get('cost_energy_name')} to discard")
+            return False
+        if i >= 0:
+            pl.discard.append(pl.active.energy_names.pop(i))
+            pl.active.energy.pop(i)
+        gone = opp.active
+        AE.discard_pokemon(opp, gone)
+        opp.active = None
+        log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
+                   f"{gone.name} and all attached cards are discarded")
+        if not opp.bench:
+            return True
+        _promote_after_ko(opp, pl, log)
+    return False
 
 
 def conditional_ko_targets(pl, opp, atk):
@@ -4548,6 +4716,8 @@ def conditional_ko_target(pl, opp, atk):
         # is the whole requirement.
         # Team Rocket's Moltres ex discards the Active outright; Alolan
         # Exeggutor ex Knocks Out a Basic on either side of its flip.
+        if act.filter.get("discard_not_ko"):
+            continue                       # _discard_active_now owns it
         if act.filter.get("unconditional"):
             return pool[0] if pool else None
         if act.filter.get("basic_only"):
@@ -4864,6 +5034,8 @@ def energy_on_attach(pl, target, name, log):
     else: nothing ran an Energy's on-attach effect.
     """
     _luminous_check(target)
+    AE.opponent_event(pl, getattr(pl, "_opp_ref", None), "attach_from_hand",
+                      target, log)
     if M.BASIC_ENERGY_RE.match(name):
         return
     eff = trainer_effect_ir(name)
@@ -5370,6 +5542,8 @@ def _do_retreat(pl, target, cost, log):
     pl.active = target
     pl.active.promoted_this_turn = True
     log.append(f"  {pl.name}: retreats into {target.name}")
+    AE.opponent_event(pl, getattr(pl, "_opp_ref", None), "active_to_bench",
+                      pl.bench[-1], log)
 
 
 def do_attack(pl, opp, log):
@@ -5438,6 +5612,8 @@ def do_attack(pl, opp, log):
     if attack_wins_game(pl, opp, pl.active, atk):
         pl.prizes = 0
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- WINS THE GAME OUTRIGHT")
+        return True
+    if _discard_active_now(pl, opp, atk, log):
         return True
     for victim in conditional_ko_targets(pl, opp, atk):
         victim.damage = 10 ** 6      # forced Knock Out, HP is irrelevant
@@ -5603,7 +5779,7 @@ def do_attack(pl, opp, log):
         pl.lost_pokemon_names += pl.active.name.lower() + "|"
         pl.active = None
         pl.lost_pokemon_last_turn = True
-        opp.prizes -= taken
+        take_prizes(opp, taken)
         if opp.prizes <= 0:
             return True
         if pl.bench:
@@ -5632,7 +5808,7 @@ def do_attack(pl, opp, log):
         opp.lost_pokemon_names += opp.active.name.lower() + "|"
         opp.active = None
         opp.lost_pokemon_last_turn = True
-        pl.prizes -= taken
+        take_prizes(pl, taken)
         if pl.prizes <= 0:
             return True
         if opp.bench:
@@ -5866,6 +6042,26 @@ def pokemon_checkup(pl, opp, log):
     """
     _checkup_side(pl, opp, log, clear_paralysis=True)
     _checkup_side(opp, pl, log, clear_paralysis=False)
+    _checkup_abilities(pl, opp, log)
+    _checkup_abilities(opp, pl, log)
+
+
+def _checkup_abilities(pl, opp, log):
+    """Abilities that act "during Pokemon Checkup" (Team Rocket's
+    Tyranitar's Sand Stream, Froslass's Freezing Shroud, Snorlax's Good
+    Sleep). Compiled as passives that nothing ran, so none ever happened.
+    After the Special Conditions, so "remains Asleep" sees the wake flip."""
+    for p in list(pl.in_play()):
+        for eff in pl.EFFECTS.get(p.name, []):
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_CHECKUP:
+                continue
+            if AE.ability_disabled(pl, p, eff.name):
+                continue
+            if not AE.conditions_met(eff, pl, opp, p):
+                continue
+            log.append(f"  checkup: {pl.name}'s {p.name} -- {eff.name}")
+            for act in eff.actions:
+                AE.apply_action(act, pl, opp, p, log)
 
 
 def _checkup_side(pl, opp, log, clear_paralysis):
@@ -5874,7 +6070,7 @@ def _checkup_side(pl, opp, log, clear_paralysis):
         return
     if "poisoned" in a.conditions:
         extra = AE.query_condition_damage_bonus(opp, "poisoned")
-        dmg = 10 + extra * 10
+        dmg = 10 * (getattr(a, "poison_counters", 1) or 1) + extra * 10
         a.damage += dmg
         log.append(f"  checkup: {a.name} takes {dmg} from Poison")
     if "burned" in a.conditions:
@@ -6450,6 +6646,23 @@ def finish_turn(pl, opp, log):
     pl._forced_self_switch = "unset"
     pl._forced_transform = "unset"
     pokemon_checkup(pl, opp, log)
+    # A Checkup Ability can Knock Out a BENCHED Pokemon (Sand Stream puts
+    # counters on every opposing Basic), which the Active-only loop below
+    # never looked at.
+    for side, other, mine in ((pl, opp, True), (opp, pl, False)):
+        for b in list(side.bench):
+            if b.damage < effective_hp(side, b):
+                continue
+            taken = _ko_prizes(side, b, other, by_attack=False)
+            log.append(f"  {side.name}: {b.name} KO'd at checkup "
+                       f"(+{taken} to {other.name})")
+            AE.discard_pokemon(side, b)
+            side.bench.remove(b)
+            side.lost_pokemon_names += b.name.lower() + "|"
+            side.lost_pokemon_last_turn = True
+            take_prizes(other, taken)
+            if other.prizes <= 0:
+                return "loss" if mine else "win"
     # Either Active can now die at checkup, since both resolve their
     # conditions there.
     for side, other, mine in ((pl, opp, True), (opp, pl, False)):
@@ -6462,7 +6675,7 @@ def finish_turn(pl, opp, log):
         side.lost_pokemon_names += side.active.name.lower() + "|"
         side.active = None
         side.lost_pokemon_last_turn = True
-        other.prizes -= taken
+        take_prizes(other, taken)
         if other.prizes <= 0:
             return "loss" if mine else "win"
         if side.bench:

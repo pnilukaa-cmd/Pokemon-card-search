@@ -56,12 +56,16 @@ DAMAGE_JUST_DEALT = [0]
 _SLEEP_GROUP = ("asleep", "confused", "paralyzed")
 
 
-def apply_condition(spot, cond):
+def apply_condition(spot, cond, poison_counters=None):
     cond = str(cond).lower()
     if cond in _SLEEP_GROUP:
         for other in _SLEEP_GROUP:
             spot.conditions.discard(other)
     spot.conditions.add(cond)
+    # A new Poison replaces the old one, including how many counters it
+    # places at Checkup (Tainted Horn's 8, Poison Fang's 2, a plain 1).
+    if cond == "poisoned" and hasattr(spot, "poison_counters"):
+        spot.poison_counters = poison_counters or 1
 
 
 def _printed(pl, key):
@@ -453,6 +457,12 @@ def conditions_met(effect, pl, opp, source, atk=None):
                 return False
         if k == "self_is_active" and source is not pl.active:
             return False
+        if k == "self_asleep" and "asleep" not in (getattr(source, "conditions", None) or ()):
+            return False
+        if k == "named_on_bench":
+            want = c["name"].lower()
+            if not any(want in (b.name or "").lower() for b in pl.bench):
+                return False
         if k == "self_is_benched" and source not in pl.bench:
             return False
         if k == "lost_pokemon_last_turn":
@@ -707,6 +717,57 @@ def leaving_active(spot, log=None):
             log.append(f"    {spot.name} clears "
                        f"{', '.join(sorted(spot.conditions))} (left the Active Spot)")
         spot.conditions = set()
+
+
+# "Whenever your opponent ..." Abilities. The trigger compiled, and nothing
+# ever fired it: Team Rocket's Dugtrio's Holes, Team Rocket's Ampharos's
+# Darkest Impulse, Gengar ex's Gnawing Curse, Magcargo's Lava Zone and
+# Mismagius ex's Swirling Prose all did nothing. The engine calls this
+# wherever the event happens; `subject` is "that Pokemon" in the text.
+_OPP_EVENT_RE = {
+    "active_to_bench": re.compile(r"active pok[eé]mon moves to the bench during their turn", re.I),
+    "evolve_from_hand": re.compile(r"plays a pok[eé]mon from their hand to evolve", re.I),
+    "attach_from_hand": re.compile(r"attaches an energy card from their hand", re.I),
+}
+
+
+def opponent_event(actor, foe, event, subject, log):
+    """`actor` just did `event` on their own turn; `foe`'s Abilities react."""
+    rx = _OPP_EVENT_RE[event]
+    if foe is None or subject is None:
+        return
+    fired = set()
+    for holder in list(foe.in_play()):
+        for eff in foe.EFFECTS.get(holder.name, []):
+            if eff.unsupported or eff.trigger != IR.Trigger.ON_OPPONENT_EVENT:
+                continue
+            if not rx.search(eff.text or ""):
+                continue
+            if ability_disabled(foe, holder, eff.name):
+                continue
+            # "The effect of Darkest Impulse doesn't stack."
+            if eff.name in fired and re.search(r"doesn'?t stack", eff.text or "", re.I):
+                continue
+            if not conditions_met(eff, foe, actor, holder):
+                continue
+            did = False
+            for act in eff.actions:
+                if act.op == IR.Op.PLACE_COUNTERS:
+                    if subject in actor.bench and query_bench_counters_blocked(actor, subject, foe):
+                        continue
+                    subject.damage += (act.amount or 0) * 10
+                    log.append(f"    {foe.name}'s {holder.name} ({eff.name}): "
+                               f"{(act.amount or 0) * 10} on {subject.name}")
+                    did = True
+                elif act.op == IR.Op.APPLY_CONDITION and actor.active is not None:
+                    for c in act.filter.get("conditions") or []:
+                        if not query_condition_immunity(actor, actor.active, c, foe):
+                            apply_condition(actor.active, c)
+                            log.append(f"    {foe.name}'s {holder.name} ({eff.name}): "
+                                       f"{actor.active.name} is now {c}")
+                            did = True
+            if did:
+                fired.add(eff.name)
 
 
 # Which Benched Pokemon a "switch this Pokemon with 1 of your Benched"
@@ -972,6 +1033,17 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         hits = resolve_targets(act.target, pl, opp, source, attacker)
         if act.filter.get("only_damaged"):
             hits = [h for h in hits if h is not None and getattr(h, "damage", 0) > 0]
+        if act.filter.get("stage"):
+            hits = [h for h in hits if h is not None and
+                    ((opp if h in opp.in_play() else pl).POKEMON.get(h.name) or {})
+                    .get("stage") == act.filter["stage"]]
+        if act.filter.get("has_ability"):
+            hits = [h for h in hits if h is not None and
+                    ((opp if h in opp.in_play() else pl).POKEMON.get(h.name) or {})
+                    .get("abilities")]
+        if act.filter.get("exclude_name"):
+            hits = [h for h in hits if h is not None and
+                    act.filter["exclude_name"].lower() not in h.name.lower()]
         if act.filter.get("subtypes_any"):
             want = set(act.filter["subtypes_any"])
             hits = [h for h in hits if h is not None and
@@ -988,6 +1060,32 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             hits = [h for h in hits
                     if not query_bench_counters_blocked(opp, h, pl)]
             hits = _shield_effects(opp, hits)
+        if act.filter.get("tails_self") and random.random() >= 0.5:
+            if pl.active is None:
+                return False
+            pl.active.damage += 10 * act.filter["tails_self"]
+            log.append(f"    tails: {10 * act.filter['tails_self']} on own {pl.active.name}")
+            return True
+        per_on = act.filter.get("per_counter_on_target")
+        if per_on:
+            # Strike the Sleeper: the number is read off the chosen target.
+            # Take a Knock Out if one is there (richest Prize first), else
+            # the biggest hit.
+            pool = [h for h in hits if h is not None and h.damage >= 10]
+            if not pool:
+                return False
+            def _gain(h):
+                amt = (h.damage // 10) * per_on * 10
+                left = ((opp.POKEMON.get(h.name) or {}).get("hp") or 0) - h.damage
+                ko = amt >= left > 0
+                return (ko, (opp.POKEMON.get(h.name) or {}).get("prize_value", 1) if ko else 0,
+                        amt)
+            tgt = max(pool, key=_gain)
+            amt = (tgt.damage // 10) * per_on * 10
+            tgt.damage += amt
+            log.append(f"    {amt} damage to {tgt.name} ({amt // 10 // per_on} "
+                       f"counters on it)")
+            return True
         per = act.filter.get("per_discard_card")
         if per:
             # "2 damage counters for each Basic Grass Energy card in your
@@ -1200,6 +1298,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if getattr(tgt, "energy_names", None) is not None:
                 tgt.energy_names.append(card[1])
             log.append(f"    attach {card[1]} to {tgt.name}")
+            if src == "hand":
+                opponent_event(pl, opp, "attach_from_hand", tgt, log)
 
         each = act.filter.get("each_of")
         if each:
@@ -1336,15 +1436,27 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         got = []
         n_search = len(pl.bench) if act.filter.get("per_benched") else (act.amount or 1)
         for _ in range(n_search):
-            want = act.filter.get("name_contains")
+            coin = act.filter.get("coin")
+            sub = (coin["heads"] if random.random() < 0.5 else coin["tails"]) if coin else act.filter
+            want = sub.get("name_contains")
+            stage = sub.get("stage")
             kind = (act.filter.get("kind") or "").lower()
             cap = act.filter.get("hp_at_most")
             nobox = act.filter.get("no_rule_box")
             exonly = act.filter.get("ex_only")
-            ptype = act.filter.get("type")
+            ptype = sub.get("type")
             def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
-                     exonly=exonly, ptype=ptype):
+                     exonly=exonly, ptype=ptype, stage=stage):
                 if kind.startswith("pok") and k != "Pokemon":
+                    return False
+                # The stage was compiled and never read: Team Rocket's
+                # Proton ("3 Basic Team Rocket's Pokemon") fetched Stage 2s.
+                if stage and k == "Pokemon":
+                    st = pl.POKEMON.get(n, {}).get("stage")
+                    if (st == "Basic") != (stage == "Basic") or (
+                            stage not in ("Basic", "Evolution") and st != stage):
+                        return False
+                if kind == "trainer" and k not in ("Item", "Supporter", "Stadium", "Tool"):
                     return False
                 # "search your deck for up to 3 Colorless Pokemon" -- the
                 # type was compiled and never checked, so Fan Call fetched
@@ -1370,6 +1482,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 # Tool matched anything at all.
                 if kind in ("supporter", "item", "stadium", "tool") \
                         and k.lower() != kind:
+                    return False
+                if act.filter.get("distinct") and n in got:
                     return False
                 return not want or want.lower() in n.lower()
             card = _find_in_deck(pl, pred)
@@ -1614,6 +1728,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pl.bench.append(pl.active)
             pl.active = tgt
             log.append(f"    switch in {tgt.name}")
+            opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
             if f.get("then_condition"):
                 tgt.conditions.add(f["then_condition"])
                 log.append(f"    {tgt.name} is now {f['then_condition']}")
@@ -1622,6 +1737,15 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             f = act.filter or {}
             cands = [p for p in pl.bench if not f.get("type")
                      or f["type"] in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+            fam = (f.get("family") or "").lower()
+            if fam:
+                # Giovanni: "your Active Team Rocket's Pokemon with 1 of your
+                # Benched Team Rocket's Pokemon".
+                if not pl.active.name.lower().startswith(fam):
+                    return False
+                cands = [p for p in cands if p.name.lower().startswith(fam)]
+                if not cands:
+                    return False
             forced = getattr(pl, "_forced_self_switch", "unset")
             pl._forced_self_switch = "unset"
             if forced != "unset":
@@ -1637,6 +1761,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pl.bench.append(pl.active)
             pl.active = tgt
             log.append(f"    switch into {tgt.name}")
+            opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
+            if f.get("then_gust") and opp.bench:
+                apply_action(IR.Action(O.SWITCH, 1, IR.Target.OPP_ACTIVE, {"gust": True}),
+                             pl, opp, source, log, attacker, make_inplay)
             return True
         return False
 
@@ -2217,6 +2345,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if f.get("basic_first") and chained is None:
                 spots = [p for p in spots
                          if (pl.POKEMON.get(p.name) or {}).get("stage") == "Basic"]
+            if f.get("type"):
+                spots = [p for p in spots
+                         if f["type"] in ((pl.POKEMON.get(p.name) or {}).get("types") or [])]
             for spot in spots:
                 nxt = next((n for n, i in pl.POKEMON.items()
                             if i.get("evolves_from") == _printed(pl, spot.name)
@@ -2244,6 +2375,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if f.get("counters_after"):
                 spot.damage += 10 * f["counters_after"]
             placed.append(nxt)
+            if from_hand:
+                opponent_event(pl, opp, "evolve_from_hand", spot, log)
         if placed:
             if not from_hand:
                 random.shuffle(pl.deck)
@@ -2486,7 +2619,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     continue
                 if c in EXCLUSIVE:
                     h.conditions -= EXCLUSIVE
-                apply_condition(h, c)
+                apply_condition(h, c, act.filter.get("poison_counters"))
                 applied.append(c)
             conds = applied
         if not conds:

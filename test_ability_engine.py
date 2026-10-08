@@ -1461,8 +1461,10 @@ def test_meta_trainers_compile_once_and_correctly():
     check("Crispin searches 1 and attaches 1",
           ops("Crispin") == [("search_to_hand", 1), ("attach_energy", 1)],
           ops("Crispin"))
-    check("Unfair Stamp draws 5 for YOU and sets the opponent to 2",
-          ops("Unfair Stamp") == [("draw", 5), ("set_opponent_hand", 2)],
+    # "EACH player shuffles their hand into their deck" -- yours as well.
+    check("Unfair Stamp resets YOUR hand to 5 and the opponent's to 2",
+          ops("Unfair Stamp") == [("shuffle_hand_into_deck", None), ("draw", 5),
+                                  ("set_opponent_hand", 2)],
           ops("Unfair Stamp"))
 
 
@@ -4956,3 +4958,230 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# --------------------------------------------------------------------------
+# Team Rocket's study (2026-10-08): every Team Rocket card checked against
+# its text on a real board. Each test below failed on the previous commit.
+# --------------------------------------------------------------------------
+
+def _tr_board(active, energy=(), bench=(), opp_active="Mega Kangaskhan ex",
+              opp_bench=()):
+    V, D, E = _real("test_fixtures/team_rocket_all_cards.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me = V.Player("d", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    me.active = V.InPlay(active, 1)
+    for t in energy:
+        tr = t == "TR"
+        me.active.energy.append(["Psychic", "Darkness"] if tr else [t])
+        me.active.energy_names.append("Team Rocket's Energy" if tr else f"{t} Energy")
+    me.bench = [V.InPlay(b, 1) for b in bench]
+    op.active = V.InPlay(opp_active, 1)
+    op.bench = [V.InPlay(b, 1) for b in opp_bench]
+    me.round_no = op.round_no = 3
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand = [], []
+    return V, me, op
+
+
+def _tr_attack(V, me, op, name, seed=0):
+    import random as _r
+    _r.seed(seed)
+    me._forced_attack = next(a for a in me.POKEMON[me.active.name]["attacks"]
+                             if a["name"] == name)
+    log = []
+    V.do_attack(me, op, log)
+    return log
+
+
+def test_a_knock_out_by_attack_hands_over_the_prize_cards():
+    """Only the Bench sweep moved Prize cards to the hand; an attack's Knock
+    Out, a Checkup Knock Out and a retaliation Knock Out lowered the count
+    and left the cards where they were."""
+    V, me, op = _tr_board("Team Rocket's Nidoking ex", ["Darkness"] * 4,
+                          opp_bench=["Raging Bolt ex"])
+    me.prize_cards = [("Item", "Ultra Ball")] * 6
+    me.prizes = 6
+    op.active.damage = 200
+    _tr_attack(V, me, op, "Kingly Impact")
+    check("Kingly Impact's Knock Out takes 3 Prizes", me.prizes == 3, me.prizes)
+    check("and puts those 3 cards in hand", len(me.hand) == 3 and len(me.prize_cards) == 3,
+          (len(me.hand), len(me.prize_cards)))
+
+
+def test_nidoking_poison_and_nidoqueen_love_impact():
+    """Tainted Horn put its 8 counters on Nidoking ex itself; "If a Pokemon
+    that has "Nidoking" in its name is on your Bench" read as Nidoqueen
+    being on the Bench, so Love Impact never paid its 120."""
+    V, me, op = _tr_board("Team Rocket's Nidoking ex", ["Darkness"] * 4)
+    _tr_attack(V, me, op, "Tainted Horn")
+    check("Tainted Horn puts nothing on Nidoking ex", me.active.damage == 0, me.active.damage)
+    log = []
+    V.pokemon_checkup(me, op, log)
+    check("its Poison places 8 counters at Checkup", op.active.damage == 180, op.active.damage)
+    V, me, op = _tr_board("Team Rocket's Nidoqueen", ["Darkness"],
+                          bench=["Team Rocket's Nidoking ex"])
+    _tr_attack(V, me, op, "Love Impact")
+    check("Love Impact with Nidoking ex on the Bench is 180", op.active.damage == 180,
+          op.active.damage)
+    check("Raticate hurts itself on 2 tails, a 25% chance",
+          IR.parse_chance("Flip 2 coins. If both of them are tails, this Pokémon "
+                          "also does 90 damage to itself.") == 0.25)
+
+
+def test_hypno_sneasel_and_moltres_do_what_they_print():
+    """Bench Manipulation paid its printed 80 whatever the Bench held;
+    Strike the Sleeper hit the Active for the Active's counters; Evil
+    Incineration Knocked Out (3 Prizes) with or without Team Rocket's
+    Energy and kept the Energy."""
+    import random as _r
+    V, me, op = _tr_board("Team Rocket's Hypno", ["Psychic"] * 3,
+                          opp_active="Raging Bolt ex",
+                          opp_bench=["Mega Kangaskhan ex"] * 4)
+    atk = next(a for a in me.POKEMON[me.active.name]["attacks"]
+               if a["name"] == "Bench Manipulation")
+    _r.seed(0)
+    avg = sum(V.attack_damage(me, op, me.active, atk, record=False)
+              for _ in range(400)) / 400
+    check("Bench Manipulation averages 80 per tails over 4 Benched (~160)",
+          140 <= avg <= 180, avg)
+    V, me, op = _tr_board("Team Rocket's Sneasel", ["Darkness"] * 2,
+                          opp_bench=["Raging Bolt ex", "Mega Kangaskhan ex"])
+    op.active.damage, op.bench[0].damage = 50, 30
+    _tr_attack(V, me, op, "Strike the Sleeper")
+    check("Strike the Sleeper leaves the Active alone", op.active.damage == 50,
+          op.active.damage)
+    check("and does 20 per counter to the Benched one", op.bench[0].damage == 90,
+          op.bench[0].damage)
+    for energy, gone in ((["Fire", "TR", "Darkness"], True),
+                         (["Fire", "Darkness", "Darkness", "Darkness"], False)):
+        V, me, op = _tr_board("Team Rocket's Moltres ex", energy,
+                              opp_bench=["Raging Bolt ex"])
+        me.prizes = 6
+        _tr_attack(V, me, op, "Evil Incineration")
+        check(f"Evil Incineration {'discards' if gone else 'cannot discard'} the Active",
+              (op.active.name == "Raging Bolt ex") == gone, op.active.name)
+        check("and takes no Prize", me.prizes == 6, me.prizes)
+        if gone:
+            check("paying with the Team Rocket's Energy",
+                  "Team Rocket's Energy" not in me.active.energy_names,
+                  me.active.energy_names)
+
+
+def test_checkup_abilities_happen():
+    """Sand Stream, Freezing Shroud and Good Sleep act "during Pokemon
+    Checkup"; nothing ran them, so none of the three ever happened."""
+    V, me, op = _tr_board("Team Rocket's Tyranitar", ["Fighting"],
+                          opp_active="Raging Bolt ex",
+                          opp_bench=["Mega Kangaskhan ex"])
+    V.pokemon_checkup(me, op, [])
+    check("Sand Stream: 2 counters on each opposing Basic",
+          op.active.damage == 20 and op.bench[0].damage == 20,
+          (op.active.damage, op.bench[0].damage))
+    me.bench, me.active = [me.active], V.InPlay("Team Rocket's Zubat", 1)
+    op.active.damage = 0
+    V.pokemon_checkup(me, op, [])
+    check("and nothing while Tyranitar is on the Bench", op.active.damage == 0,
+          op.active.damage)
+    for name, text in (("Freezing Shroud", "During Pokémon Checkup, put 1 damage counter on "
+                        "each Pokémon that has an Ability (both yours and your opponent's), "
+                        "except any Froslass."),
+                       ("Good Sleep", "If this Pokémon remains Asleep during Pokémon "
+                        "Checkup, heal all damage from this Pokémon.")):
+        e = IR.compile_effect("x", name, text)
+        check(f"{name} resolves at Checkup", e.trigger == IR.Trigger.ON_CHECKUP, e.trigger)
+    e = IR.compile_effect(
+        "x", "Freezing Shroud", "During Pokémon Checkup, put 1 damage counter on each Pokémon "
+        "that has an Ability (both yours and your opponent's), except any Froslass.")
+    a = e.actions[0]
+    check("Freezing Shroud hits Ability holders on both sides but Froslass",
+          a.target == IR.Target.BOTH_ALL and a.filter.get("has_ability")
+          and a.filter.get("exclude_name") == "Froslass", (a.target, a.filter))
+
+
+def test_whenever_your_opponent_abilities_fire():
+    """Darkest Impulse, Holes and Gnawing Curse compiled with a trigger
+    nothing ever fired."""
+    V, me, op = _tr_board("Team Rocket's Ampharos", ["Lightning"])
+    G = V.load_model("decks/field/golbat_brute_bonnet_punch.txt", "g")[0]
+    g = V.Player("g", G[1], list(G[2]), V.compile_effects_for(G[1], G[3]))
+    g.active = V.InPlay("Team Rocket's Zubat", 1)
+    g.hand = [("Pokemon", "Team Rocket's Golbat")]
+    g.round_no = 3
+    g._opp_ref, me._opp_ref = me, g
+    V.try_evolve(g, me, 3, [], False)
+    check("Darkest Impulse: 4 counters on the Pokemon that evolved",
+          g.active.name == "Team Rocket's Golbat" and g.active.damage == 40, g.active.damage)
+    V, me, op = _tr_board("Team Rocket's Dugtrio", ["Fighting"])
+    op.bench = [V.InPlay("Raging Bolt ex", 1)]
+    V._do_retreat(op, op.bench[0], 0, [])
+    check("Holes: 2 counters on the Pokemon that retreated",
+          op.bench[0].name == "Mega Kangaskhan ex" and op.bench[0].damage == 20,
+          op.bench[0].damage)
+    G = V.load_model("decks/field/ditto_transform_hydreigon.txt", "g")[0]
+    g = V.Player("g", G[1], list(G[2]), V.compile_effects_for(G[1], G[3]))
+    g.active = V.InPlay("Gengar ex", 1)
+    me._opp_ref, g._opp_ref = g, me
+    V.energy_on_attach(me, me.active, "Darkness Energy", [])
+    check("Gnawing Curse: 2 counters on the Pokemon given Energy from hand",
+          me.active.damage == 20, me.active.damage)
+
+
+def test_team_rocket_trainers_do_what_they_print():
+    """Giovanni was a free Boss's Orders; Great Ball searched for a Pokemon
+    named "n Evolution Team Rocket's" on heads and nothing on tails;
+    Transceiver fetched any Supporter; Archer drew 5 on top of your hand;
+    Venture Bomb's tails did nothing."""
+    import random as _r
+    V, me, op = _tr_board("Team Rocket's Zubat", opp_bench=["Raging Bolt ex"])
+    me.hand = [("Supporter", "Team Rocket's Giovanni")]
+    V.play_supporter(me, op, 3, [])
+    check("Giovanni needs a Benched Team Rocket's Pokemon to switch with",
+          op.active.name == "Mega Kangaskhan ex" and len(me.hand) == 1, op.active.name)
+    V, me, op = _tr_board("Team Rocket's Zubat", bench=["Team Rocket's Golbat"],
+                          opp_bench=["Raging Bolt ex"])
+    me.hand = [("Supporter", "Team Rocket's Giovanni")]
+    V.play_supporter(me, op, 3, [])
+    check("and with one, switches it in before the gust",
+          me.active.name == "Team Rocket's Golbat" and op.active.name == "Raging Bolt ex",
+          (me.active.name, op.active.name))
+    got = set()
+    for s in range(30):
+        _r.seed(s)
+        V, me, op = _tr_board("Team Rocket's Zubat")
+        me.deck = [("Pokemon", "Team Rocket's Golbat"), ("Pokemon", "Team Rocket's Zubat"),
+                   ("Item", "Ultra Ball")]
+        for a in V.trainer_effect_ir("Team Rocket's Great Ball").actions:
+            AE.apply_action(a, me, op, None, [])
+        got |= {n for _, n in me.hand}
+    check("Great Ball: an Evolution on heads, a Basic on tails",
+          got == {"Team Rocket's Golbat", "Team Rocket's Zubat"}, got)
+    f = V.trainer_effect_ir("Team Rocket's Transceiver").actions[0].filter
+    check("Transceiver only finds a Team Rocket Supporter",
+          f.get("name_contains") == "Team Rocket", f)
+    f = IR.compile_effect("x", "Procurement", "Search your deck for an Item card, reveal "
+                          "it, and put it into your hand. Then, shuffle your deck.").actions[0].filter
+    check("'an Item card' is any Item, not one named 'n'", "name_contains" not in f, f)
+    V, me, op = _tr_board("Team Rocket's Zubat")
+    me.hand = [("Supporter", "Team Rocket's Archer"), ("Item", "Ultra Ball")]
+    op.hand = [("Item", "Ultra Ball")] * 7
+    me.lost_pokemon_last_turn = me.lost_pokemon_last_turn_snapshot = True
+    V.play_supporter(me, op, 3, [])
+    check("Archer: your hand becomes 5, theirs 3", (len(me.hand), len(op.hand)) == (5, 3),
+          (len(me.hand), len(op.hand)))
+    tails = 0
+    for s in range(60):
+        _r.seed(s)
+        V, me, op = _tr_board("Team Rocket's Zubat")
+        for a in V.trainer_effect_ir("Team Rocket's Venture Bomb").actions:
+            AE.apply_action(a, me, op, None, [])
+        tails += me.active.damage == 20
+    check("Venture Bomb's tails lands on your own Active", 15 <= tails <= 45, tails)
+    e = IR.compile_effect("x", "Dark Awakening", "Choose up to 2 of your Darkness Pokémon. "
+                          "For each of those Pokémon, search your deck for a card that evolves "
+                          "from that Pokémon and put it onto that Pokémon to evolve it. Then, "
+                          "shuffle your deck.")
+    check("Dark Awakening evolves up to 2 Darkness Pokemon",
+          e.actions[0].amount == 2 and e.actions[0].filter.get("type") == "Darkness",
+          (e.actions[0].amount, e.actions[0].filter))

@@ -62,6 +62,7 @@ class Trigger:
     ON_DAMAGED = "on_damaged"            # this/your Pokemon took an attack
     ON_KO = "on_ko"                      # something was Knocked Out
     ON_OPPONENT_EVENT = "on_opp_event"   # opponent evolved/retreated/etc.
+    ON_CHECKUP = "on_checkup"            # resolves at every Pokemon Checkup
     PASSIVE = "passive"                  # continuously true, no activation
 
 
@@ -329,6 +330,14 @@ def parse_trigger(text):
         return Trigger.ON_KO
     if "whenever your opponent" in t:
         return Trigger.ON_OPPONENT_EVENT
+    # "During Pokemon Checkup, put 2 damage counters on each of your
+    # opponent's Basic Pokemon" (Team Rocket's Tyranitar), Froslass's
+    # Freezing Shroud, Snorlax's Good Sleep. Read as PASSIVE, and nothing
+    # runs a passive at Checkup, so none of them ever happened. "N MORE
+    # damage counters" is a buff to Poison/Burn and stays passive.
+    if re.search(r"during pok[eé]mon checkup", t) and not re.search(
+            r"more damage counters|instead of 1", t):
+        return Trigger.ON_CHECKUP
     if "once during your turn" in t:
         return Trigger.ONCE_PER_TURN
     # Fan Rotom's Fan Call. Read as PASSIVE, so it never fired at all.
@@ -366,7 +375,18 @@ def parse_conditions(text):
         out.append({"kind": "opponent_prizes_exactly", "counts": [int(m.group(1))]})
     if re.search(r"if this pok[eé]mon is in the active spot|as long as this pok[eé]mon is in the active spot", t, re.I):
         out.append({"kind": "self_is_active"})
-    if re.search(r"as long as this pok[eé]mon is on your bench|is on your bench", t, re.I):
+    # "is on your Bench" alone also matched "If Mightyena is on your Bench"
+    # and Nidoqueen's "If a Pokemon that has "Nidoking" in its name is on
+    # your Bench" -- a condition on ANOTHER Pokemon read as one on the
+    # attacker, which is Active when it attacks, so all four bonuses (Love
+    # Impact's 120 among them) were never paid.
+    m = re.search(r"[Ii]f (?:a [Pp]ok[eé]mon that has [\"“']([^\"”']+)[\"”'] in its name"
+                  r"|([A-Z][\w'’ -]+?)) is on your [Bb]ench", t)
+    if m and not re.match(r"this pok", m.group(2) or "", re.I):
+        out.append({"kind": "named_on_bench",
+                    "name": (m.group(1) or m.group(2)).strip()})
+    elif re.search(r"this pok[eé]mon is on your bench|attached to is on your bench",
+                   t, re.I):
         out.append({"kind": "self_is_benched"})
     m = re.search(r"were knocked out during your opponent'?s last turn", t, re.I)
     if m:
@@ -385,6 +405,8 @@ def parse_conditions(text):
     m = re.search(r"if this pok[eé]mon has any (" + TYPES + r") energy attached", t, re.I)
     if m:
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
+    if re.search(r"if this pok[eé]mon remains asleep", t, re.I):
+        out.append({"kind": "self_asleep"})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
         out.append({"kind": "self_full_hp"})
     # "your Active Pokemon THAT HAS 3 or more Energy attached" is a gate on
@@ -615,13 +637,22 @@ def parse_chance(text):
     # Drasna: the coin picks how many to draw, and both sides draw.
     if re.search(r"if heads, draw \d+ cards?\. if tails, draw \d+", t):
         return 1.0
+    # Team Rocket's Venture Bomb places counters on either side of it.
+    if re.search(r"if heads, put \d+ damage counters[^.]+\. if tails, put \d+ damage counters", t):
+        return 1.0
+    # Team Rocket's Great Ball searches on BOTH sides of the coin.
+    if re.search(r"if heads, search your deck for[^.]+\. if tails, search your deck for", t):
+        return 1.0
     # The printed phrasing puts a FULL STOP between the clauses -- "Flip a
     # coin. If heads, ..." -- and [^.] cannot cross one. Every card in this
     # pool written that way (158 of them) parsed as chance 1.0, so EVERY
     # coin flip in the game was a guaranteed success: Ekans always
     # Confused, Crushing Hammer always discarded, and a coin-flip deck in
     # decks/ was measured never missing a flip.
-    m = re.search(r"flip (\d+) coins?[^.]{0,40}\.?\s*if all of them are heads", t)
+    # "If both of them are tails" (Team Rocket's Raticate's 90 to itself)
+    # fell through to "at least one heads" and resolved 75% of the time.
+    m = re.search(r"flip (\d+) coins?[^.]{0,40}\.?\s*if (?:all|both) of them are "
+                  r"(?:heads|tails)", t)
     if m:
         return 0.5 ** int(m.group(1))
     if re.search(r"flip a coin[^.]{0,30}\.?\s*if (heads|tails)", t):
@@ -1029,8 +1060,12 @@ def _r(m, text):
 
 
 @rule("search_to_hand",
-      r"search your deck for (?:up to )?(\d+|a|an)? ?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
+      r"search your deck for (?:up to )?(?:(\d+|an|a|any number of) )?([\w'’ -]*?)(pok[eé]mon|card|supporter|item|stadium|energy)[^.]{0,60}?(?:put (?:it|them) into your hand|into your hand)")
 def _r(m, text):
+    # The count was "(\d+|a|an)? ?" -- "a" matched the first letter of "an"
+    # and left "n" in the qualifier, so "an Item card" searched for an Item
+    # whose NAME contains "n" and "an Evolution Pokemon" (Hilda, Team
+    # Rocket's Great Ball, Dragonair) for one named "n Evolution".
     # A search that puts onto the Bench is search_to_bench's. The trigger
     # "when you play this Pokemon from your hand onto your Bench" is not:
     # it blocked Meowth ex's Supporter search outright.
@@ -1044,8 +1079,44 @@ def _r(m, text):
         return []
     if re.search(r"a number of cards up to the number of your benched", text, re.I):
         return []                       # search_per_benched owns it
-    return [Action(Op.SEARCH_TO_HAND, _num(m.group(1)), Target.SELF,
-                   dict(_search_filter(m.group(2)), kind=m.group(3).lower()))]
+    if re.search(r"flip a coin\. if heads, search your deck for[^.]+\. if tails, "
+                 r"search your deck for", text, re.I):
+        return []                       # search_by_coin owns it
+    kind = m.group(3).lower()
+    qual = m.group(2)
+    # Team Rocket's Petrel: "a Trainer card" is a KIND (any Item, Tool,
+    # Supporter or Stadium), not a card whose name contains "Trainer".
+    if kind == "card" and qual.strip().lower() == "trainer":
+        kind, qual = "trainer", ""
+    # "any number of Basic Energy cards of different types" (Energy Search
+    # Pro), "any number of Fennel cards" (Musharna): read as the qualifier
+    # "any number of Basic", a name nothing has.
+    many = (m.group(1) or "").lower() == "any number of"
+    f = dict(_search_filter(qual), kind=kind)
+    # Team Rocket's Transceiver: 'a Supporter card that has "Team Rocket" in
+    # its name'. The restriction sits after the noun and was dropped, so it
+    # fetched Boss's Orders or Lillie's Determination as readily.
+    named = re.match(r"(?: cards?)? that ha(?:s|ve) [\"“']([^\"”']+)[\"”'] in (?:its|their) names?",
+                     text[m.end(3):], re.I)
+    if named and not f.get("name_contains"):
+        f["name_contains"] = named.group(1)
+    if re.search(r"of different types", text, re.I):
+        f["distinct"] = True
+    return [Action(Op.SEARCH_TO_HAND, 4 if many else _num(m.group(1)), Target.SELF, f)]
+
+
+@rule("search_by_coin",
+      r"flip a coin\. if heads, search your deck for an? ([\w'’ -]+?)pok[eé]mon, reveal it, "
+      r"and put it into your hand\. if tails, search your deck for an? ([\w'’ -]+?)pok[eé]mon")
+def _r(m, text):
+    """Team Rocket's Great Ball: heads an Evolution Team Rocket's Pokemon,
+    tails a Basic one -- a search either way. Read as one search gated on
+    heads, for a Pokemon named "n Evolution Team Rocket's": it found
+    nothing on heads and did nothing on tails."""
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF,
+                   {"kind": "pokémon",
+                    "coin": {"heads": _search_filter(m.group(1)),
+                             "tails": _search_filter(m.group(2))}})]
 
 
 # Secret Box: one sentence naming four different kinds of card. The
@@ -1224,6 +1295,10 @@ def _r(m, text):
         return []          # place_counters_per_discard above owns this
     if re.search(r"on the pok[eé]mon you evolved in this way", text, re.I):
         return []          # evolve_self_from_hand's counters_after
+    if re.search(r"damage counters on that pok[eé]mon instead of 1", text, re.I):
+        return []          # apply_condition's poison_counters
+    if re.search(r"if tails, put \d+ damage counters on your active", text, re.I):
+        return []          # coin_counters_either_side
     if re.match(r"\s*that pok[eé]mon", m.group(2), re.I) and \
             re.search(r"if you attached energy", text, re.I):
         return []          # attach_energy_from_deck's counters_on_recipient
@@ -1248,8 +1323,20 @@ def _r(m, text):
     if re.search(r"on each of your opponent'?s pok[eé]mon that has any damage counters on it",
                  text, re.I):
         filt["only_damaged"] = True
-    return [Action(Op.PLACE_COUNTERS, int(m.group(1)),
-                   parse_target(m.group(2)), filt)]
+    tgt = parse_target(m.group(2))
+    # Sand Stream: "each of your opponent's BASIC Pokemon".
+    if re.match(r"\s*each of your opponent'?s basic pok", m.group(2), re.I):
+        filt["stage"] = "Basic"
+    # Froslass's Freezing Shroud: "each Pokemon that has an Ability (both
+    # yours and your opponent's), except any Froslass". The 60-character
+    # capture stopped inside the parenthesis and read it as this Pokemon.
+    if re.search(r"each pok[eé]mon that has an ability \(both yours and your opponent", text, re.I):
+        tgt = Target.BOTH_ALL
+        filt["has_ability"] = True
+        ex = re.search(r"except any ([A-Z][\w'’-]+)", text)
+        if ex:
+            filt["exclude_name"] = ex.group(1)
+    return [Action(Op.PLACE_COUNTERS, int(m.group(1)), tgt, filt)]
 
 
 @rule("move_counters", r"move (?:up to )?(\d+) damage counters? from ([^.]{0,40}?) to ([^.]{0,40})")
@@ -1413,8 +1500,22 @@ def _r(m, text):
     return [Action(Op.FILL_OPPONENT_BENCH, int(m.group(1)), Target.OPPONENT)]
 
 
+@rule("switch_own_family_then_gust",
+      r"switch your active ([\w'’]+(?: [\w'’]+)?) pok[eé]mon with 1 of your benched "
+      r"\1 pok[eé]mon\. if you do, switch in 1 of your opponent'?s benched pok[eé]mon")
+def _r(m, text):
+    """Team Rocket's Giovanni: your Active Team Rocket's Pokemon trades
+    places with a Benched one, and ONLY IF you do, the gust. Compiled as
+    the gust alone -- a free Boss's Orders with no requirement at all."""
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE,
+                   {"gust": False, "family": m.group(1), "then_gust": True})]
+
+
 @rule("switch_opponent", r"switch (?:in )?1 of your opponent's benched (basic )?pok[eé]mon")
 def _r(m, text):
+    if re.search(r"switch your active [\w'’ ]+? pok[eé]mon with 1 of your benched "
+                 r"[\w'’ ]+? pok[eé]mon\. if you do, switch in", text, re.I):
+        return []             # switch_own_family_then_gust owns the gust
     # Lisia's Appeal gusts only a BASIC Pokemon, and "Benched Basic
     # Pokemon" did not match at all, so the card only Confused.
     f = {"gust": True}
@@ -1476,6 +1577,16 @@ def _r(m, text):
             continue                    # condition_both_actives_except_type
         conds = sorted({c.lower() for c in re.findall(COND, sent, re.I)})
         low = sent.lower()
+        # "...is now Poisoned. During Pokemon Checkup, put 8 damage counters
+        # on that Pokemon instead of 1." (Team Rocket's Nidoking ex, Crobat,
+        # Mega Dragalge ex). The second sentence compiled as its own
+        # place_counters with no target, which resolved to the ATTACKER:
+        # Tainted Horn put 80 damage on Nidoking ex and an ordinary Poison
+        # on the defender.
+        pc = re.search(r"(?:put|place) (\d+) damage counters on that pok[eé]mon "
+                       r"instead of 1", text, re.I)
+        extra = ({"poison_counters": int(pc.group(1))}
+                 if pc and "poisoned" in conds else {})
         if re.search(r"both active pok[eé]mon are now", low):
             out.append(Action(Op.APPLY_CONDITION, None, Target.BOTH_ALL,
                               {"conditions": conds, "active_only": True}))
@@ -1484,7 +1595,8 @@ def _r(m, text):
         elif "attacking pok" in low:
             out.append(Action(Op.APPLY_CONDITION, None, Target.ATTACKING_POKEMON, {"conditions": conds}))
         else:
-            out.append(Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE, {"conditions": conds}))
+            out.append(Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE,
+                              {"conditions": conds, **extra}))
     if not out:
         conds = re.findall(COND, text, re.I)
         tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
@@ -1535,6 +1647,28 @@ def _r(m, text):
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY, f)]
 
 
+@rule("coin_counters_either_side",
+      r"flip a coin\. if heads, put (\d+) damage counters on 1 of your opponent'?s "
+      r"pok[eé]mon\. if tails, put (\d+) damage counters on your active pok[eé]mon")
+def _r(m, text):
+    """Team Rocket's Venture Bomb: heads 2 counters on them, tails 2 on
+    your own Active. Only the heads half compiled."""
+    return [Action(Op.PLACE_COUNTERS, int(m.group(1)), Target.OPP_ANY,
+                   {"tails_self": int(m.group(2))})]
+
+
+@rule("snipe_per_counter_on_target",
+      r"this attack does (\d+) damage to 1 of your opponent'?s benched "
+      r"pok[eé]mon for each damage counter on that pok[eé]mon")
+def _r(m, text):
+    """Team Rocket's Sneasel's Strike the Sleeper: 20 to a BENCHED Pokemon
+    for each counter already on it. The generic per-counter scaler read the
+    Active's counters and hit the Active with the total."""
+    return [Action(Op.PLACE_COUNTERS, 0, Target.OPP_BENCHED,
+                   {"attack_damage": True, "targets": 1,
+                    "per_counter_on_target": int(m.group(1)) // 10})]
+
+
 @rule("asymmetric_hand_reset",
       r"each player shuffles their hand into their deck\. then, you draw "
       r"(\d+) cards?, and your opponent draws (\d+) cards?")
@@ -1542,7 +1676,11 @@ def _r(m, text):
     """Unfair Stamp. The generic "each player draws N" rule read this as
     BOTH players drawing 5, handing the opponent three free cards off a
     card whose whole point is that the draw is lopsided in your favour."""
-    return [Action(Op.DRAW, int(m.group(1)), Target.SELF),
+    # "EACH player shuffles their hand into their deck" includes yours:
+    # without the shuffle, Unfair Stamp and Team Rocket's Archer drew 5 on
+    # top of the hand you already held.
+    return [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF),
+            Action(Op.DRAW, int(m.group(1)), Target.SELF),
             Action(Op.SET_OPPONENT_HAND, int(m.group(2)), Target.OPPONENT)]
 
 
@@ -1966,9 +2104,18 @@ def _r(m, text):
       r"discard your opponent'?s active pok[eé]mon and all attached cards")
 def _r(m, text):
     """Team Rocket's Moltres ex's Evil Incineration removes the Active
-    outright. Scored on damage it read as a 0-damage attack."""
-    return [Action(Op.CONDITIONAL_KO, 0, Target.OPP_ACTIVE,
-                   {"unconditional": True})]
+    outright. Scored on damage it read as a 0-damage attack.
+
+    It is a DISCARD, not a Knock Out -- no Prize is taken -- and it only
+    happens "if you do" discard a Team Rocket's Energy from the attacker.
+    It was resolved as a Knock Out worth 2-3 Prizes, with or without the
+    Energy, and the Energy stayed attached."""
+    f = {"unconditional": True, "discard_not_ko": True}
+    c = re.search(r"discard an? ([\w'’ ]+? energy) from this pok[eé]mon\. if you do",
+                  text, re.I)
+    if c:
+        f["cost_energy_name"] = c.group(1)
+    return [Action(Op.CONDITIONAL_KO, 0, Target.OPP_ACTIVE, f)]
 
 
 @rule("flip_ko_a_basic",
@@ -2074,11 +2221,19 @@ def _r(m, text):
     """
     each = bool(re.search(r"for each of your benched pok[eé]mon", text, re.I))
     f = {}
+    n = 5 if each else 1
     if each:
         f["bench_only"] = True
     elif re.search(r"evolves from this pok[eé]mon", text, re.I):
         f["self"] = True                  # Ascension: this Pokemon only
-    return [Action(Op.EVOLVE_FROM_DECK, 5 if each else 1,
+    # Team Rocket's Nidorina's Dark Awakening: "Choose up to 2 of your
+    # Darkness Pokemon. For each of those Pokemon, ..." -- one Pokemon of
+    # any type was all it ever evolved.
+    up = re.search(r"choose up to (\d+) of your (" + TYPES + r") pok[eé]mon\. for each "
+                   r"of those pok[eé]mon", text, re.I)
+    if up:
+        n, f["type"] = int(up.group(1)), up.group(2).capitalize()
+    return [Action(Op.EVOLVE_FROM_DECK, n,
                    Target.SELF if f.get("self") else Target.YOUR_ANY, f)]
 
 
