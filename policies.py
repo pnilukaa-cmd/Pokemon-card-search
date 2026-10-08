@@ -63,7 +63,7 @@ GREEDY = {
     "items_after_supporter": 1,
     # Play a "discard down to N" Supporter first when it strips at least
     # this many cards (0: off). Measuring.
-    "hand_trim_first": 0,
+    "hand_trim_first": int(__import__("os").environ.get("HAND_TRIM_FIRST", 0)),
     # Feed a Pokemon whose Ability needs an Energy type attached (Munkidori).
     # Paired, 200 games x 63 opponents: positive on all 8 Munkidori decks
     # (+0.4 to +10.4; Feraligatr/Munkidori +4.51 +/- 0.62).

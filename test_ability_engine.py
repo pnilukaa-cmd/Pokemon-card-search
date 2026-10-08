@@ -5295,3 +5295,21 @@ def test_backtrack_badge_rerolls_raticates_drawback_not_its_luck():
     ops = sorted(a.op for a in e.actions)
     check("Thump-Thump Boom: certain self-damage, a coin for the Knock Out",
           e.chance == 1.0 and ops == ["ko_outright", "self_damage"], (e.chance, ops))
+
+
+def test_judge_shuffles_the_opponents_hand_in():
+    """Judge: "Each player shuffles their hand into their deck and draws 4."
+    The opponent's hand went to the BOTTOM of their deck unshuffled, so the
+    cards it took away could never come back."""
+    import random as _r
+    _r.seed(3)
+    V, me, op = _tr_board("Team Rocket's Rattata")
+    me.hand = [("Supporter", "Judge"), ("Item", "Ultra Ball")]
+    op.hand = [("Item", f"Marker {i}") for i in range(6)]
+    op.deck = [("Energy", "Psychic Energy")] * 40
+    V.play_supporter(me, op, 3, [])
+    bottom = [n for _, n in op.deck[:6]]
+    check("Judge was played and both hands are 4", len(me.hand) == 4 and len(op.hand) == 4,
+          (len(me.hand), len(op.hand)))
+    check("their old hand is shuffled in, not stacked on the bottom",
+          not all(n.startswith("Marker") for n in bottom), bottom)

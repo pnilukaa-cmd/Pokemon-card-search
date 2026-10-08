@@ -2356,8 +2356,11 @@ def play_supporter(pl, opp, turn, log):
     # that will spend the Supporter slot on it even from a full hand.
     if "Judge" in hand_names and (len(pl.hand) - 1 <= 4 or judge_unlocks_attack(pl, opp)):
         use("Judge")
+        # "Each player SHUFFLES their hand into their deck": the opponent's
+        # hand went to the bottom unshuffled, so it could never be redrawn.
         opp.deck[:0] = opp.hand
         opp.hand = []
+        random.shuffle(opp.deck)
         for _ in range(4):
             if opp.deck:
                 opp.hand.append(opp.deck.pop())
