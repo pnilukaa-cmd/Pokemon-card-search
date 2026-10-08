@@ -35,7 +35,7 @@ Win rates are from the full round robin of 2026-10-08 — **77 decks, 1000 games
 
 | Line | Best home | How it plays | Also in |
 |---|---|---|---|
-| **Rattata → Raticate** | [`team_rocket_raticate_rush`](team_rocket_raticate_rush.md) **72.8%** (rank 1/77, 74/76 winning) | 90 for one Energy of any type on a one-Prize Stage 1; Brave Bangle / Maximum Belt push it to 120/140 against an ex. Trade one Prize for two every turn. |  |
+| **Rattata → Raticate** | [`team_rocket_raticate_rush`](team_rocket_raticate_rush.md) **72.8%** (rank 1/77, 74/76 winning) | 90 for one Energy of any type on a one-Prize Stage 1; Maximum Belt makes it 140 into an ex, Backtrack Badge re-flips its two-tails self-Knock Out, Mist Energy makes it immune to placed counters (Alakazam). Trade one Prize for two every turn. |  |
 | **Nidoran♀ → Nidorina → Nidoqueen** | [`team_rocket_nidoking_nidoqueen`](team_rocket_nidoking_nidoqueen.md) **71.5%** (rank 4/77, 68/76 winning) | Love Impact: 180 for a single Darkness Energy while any Nidoking is on the Bench. Rare Candy or Nidorina's Dark Awakening gets it out on turn 2-3. |  |
 | **Nidoran♂ → Nidorino → Nidoking ex** | [`team_rocket_nidoking_nidoqueen`](team_rocket_nidoking_nidoqueen.md) **71.5%** (rank 4/77, 68/76 winning) | The 330-HP Bench enabler for Nidoqueen, and the backup: Tainted Horn Poisons for 8 counters a Checkup, Kingly Impact 240. |  |
 | **Meowth → Persian ex** | [`team_rockets_persian_ex_attack_theft`](team_rockets_persian_ex_attack_theft.md) **67.9%** (rank 8/77, 67/76 winning) | Haughty Order borrows an attack from the top 10 of the opponent's deck; Cruel Slash 140 + Confusion when the reveal misses. | [`team_rocket_raticate_rush`](team_rocket_raticate_rush.md) |
@@ -100,6 +100,20 @@ board. Each fix below has a regression test that fails on the commit before it.
   now resolves as printed.
 - **Pilot:** Orbeetle's Rocket Brain is aimed at a counter-scaling attacker:
   +6.0 for Orbeetle / Morpeko ex, +3.6 for Wobbuffet / Orbeetle.
+
+## Raticate against Alakazam (after a real loss)
+
+Alakazam's Powerful Hand places 2 damage counters per card in hand, and
+Alakazam is not an ex, so Raticate's ex-only damage Tools do nothing to it.
+Hand disruption barely helped: Xerosic's Machinations moved the matchup 0.6
+points and two Archer 2.5, because Alakazam refills its hand. Blocking the
+counters works. **Mist Energy** on Raticate took the matchup from 67% to 80%,
+and **Team Rocket's Articuno** (Repelling Veil now covers every Basic Team
+Rocket's Pokémon) to 82%. Together with one Archer it reaches 91%. Mist
+Energy is also +1.5 across the whole field, so the Raticate list now runs 4
+Mist Energy plus the user's Backtrack Badge in place of Brave Bangle; the two
+Tools measured identical. Details are in
+[team_rocket_raticate_rush.md](team_rocket_raticate_rush.md).
 
 ## What did not work
 

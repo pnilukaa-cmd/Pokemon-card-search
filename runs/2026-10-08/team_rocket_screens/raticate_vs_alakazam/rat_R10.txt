@@ -10,14 +10,15 @@ Trainer: 34
 4 Ultra Ball MEG 131
 2 Team Rocket's Proton ASC 208
 4 Team Rocket's Ariana ASC 202
-2 Team Rocket's Petrel ASC 207
+1 Team Rocket's Petrel ASC 207
+1 Team Rocket's Archer ASC 201
 2 Lillie's Determination MEG 119
 2 Boss's Orders MEG 114
 1 Team Rocket's Giovanni ASC 204
 3 Night Stretcher MEG 173
 2 Team Rocket's Transceiver ASC 209
 2 Team Rocket's Factory ASC 203
-2 Backtrack Badge PBL 74
+2 Brave Bangle PBL 104
 2 Air Balloon MEG 166
 1 Poké Pad ASC 198
 1 Maximum Belt TEF 154

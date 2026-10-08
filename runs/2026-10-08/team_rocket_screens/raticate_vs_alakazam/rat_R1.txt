@@ -24,7 +24,6 @@ Trainer: 34
 
 Energy: 12
 4 Team Rocket's Energy ASC 217
-4 Mist Energy TEF 161
-4 Basic Darkness Energy
+8 Basic Darkness Energy
 
 Total Cards: 60

@@ -1,0 +1,14 @@
+rat_R0 51s rat_R0: 72.08% (±0.34) over 78 decks at 200 games, winning 77
+rat_R1 52s rat_R1: 72.37% (±0.34) over 78 decks at 200 games, winning 75
+rat_R2 50s rat_R2: 71.54% (±0.35) over 78 decks at 200 games, winning 75
+rat_R3 50s rat_R3: 71.69% (±0.35) over 78 decks at 200 games, winning 75
+rat_R4 52s rat_R4: 73.85% (±0.34) over 78 decks at 200 games, winning 76
+rat_R5 56s rat_R5: 72.45% (±0.34) over 78 decks at 200 games, winning 76
+rat_R6 59s rat_R6: 72.56% (±0.34) over 78 decks at 200 games, winning 74
+rat_R7 60s rat_R7: 72.79% (±0.34) over 78 decks at 200 games, winning 75
+rat_R8 60s rat_R8: 73.04% (±0.34) over 78 decks at 200 games, winning 75
+rat_R9 54s rat_R9: 74.08% (±0.34) over 78 decks at 200 games, winning 76
+rat_R10 54s rat_R10: 73.47% (±0.34) over 78 decks at 200 games, winning 75
+rat_R0 251s rat_R0: 72.32% (±0.15) over 78 decks at 1000 games, winning 76
+rat_R4 261s rat_R4: 73.80% (±0.15) over 78 decks at 1000 games, winning 77
+rat_R9 260s rat_R9: 73.78% (±0.15) over 78 decks at 1000 games, winning 76

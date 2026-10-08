@@ -36,6 +36,20 @@ board. Each fix below has a regression test that fails on the commit before it.
 - **Pilot:** Orbeetle's Rocket Brain is aimed at a counter-scaling attacker:
   +6.0 for Orbeetle / Morpeko ex, +3.6 for Wobbuffet / Orbeetle.
 
+## Raticate against Alakazam (after a real loss)
+
+Alakazam's Powerful Hand places 2 damage counters per card in hand, and
+Alakazam is not an ex, so Raticate's ex-only damage Tools do nothing to it.
+Hand disruption barely helped: Xerosic's Machinations moved the matchup 0.6
+points and two Archer 2.5, because Alakazam refills its hand. Blocking the
+counters works. **Mist Energy** on Raticate took the matchup from 67% to 80%,
+and **Team Rocket's Articuno** (Repelling Veil now covers every Basic Team
+Rocket's Pokémon) to 82%. Together with one Archer it reaches 91%. Mist
+Energy is also +1.5 across the whole field, so the Raticate list now runs 4
+Mist Energy plus the user's Backtrack Badge in place of Brave Bangle; the two
+Tools measured identical. Details are in
+[team_rocket_raticate_rush.md](team_rocket_raticate_rush.md).
+
 ## What did not work
 
 | Tried | Result (200-game screen) |

@@ -23,7 +23,7 @@ def link(slug):
 # line -> (best home deck, how the line plays, other homes)
 LINES = [
  ("Rattata → Raticate", "team_rocket_raticate_rush",
-  "90 for one Energy of any type on a one-Prize Stage 1; Brave Bangle / Maximum Belt push it to 120/140 against an ex. Trade one Prize for two every turn.", []),
+  "90 for one Energy of any type on a one-Prize Stage 1; Maximum Belt makes it 140 into an ex, Backtrack Badge re-flips its two-tails self-Knock Out, Mist Energy makes it immune to placed counters (Alakazam). Trade one Prize for two every turn.", []),
  ("Nidoran♀ → Nidorina → Nidoqueen", "team_rocket_nidoking_nidoqueen",
   "Love Impact: 180 for a single Darkness Energy while any Nidoking is on the Bench. Rare Candy or Nidorina's Dark Awakening gets it out on turn 2-3.", []),
  ("Nidoran♂ → Nidorino → Nidoking ex", "team_rocket_nidoking_nidoqueen",
