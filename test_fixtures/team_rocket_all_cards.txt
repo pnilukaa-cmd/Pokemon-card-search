@@ -1,5 +1,7 @@
 # Every Team Rocket card in the pool, one of each (not a legal deck):
-# the model the Team Rocket regression tests load.
+# the model the Team Rocket regression tests load, plus the partners
+# those tests pair them with (Morpeko ex for Rocket Brain).
+1 Morpeko ex PBL 102
 1 Team Rocket's Diglett ASC 100
 1 Team Rocket's Dugtrio ASC 101
 1 Team Rocket's Murkrow ASC 126

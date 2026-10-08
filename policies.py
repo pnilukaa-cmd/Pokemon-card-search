@@ -68,18 +68,15 @@ GREEDY = {
     # Paired, 200 games x 63 opponents: positive on all 8 Munkidori decks
     # (+0.4 to +10.4; Feraligatr/Munkidori +4.51 +/- 0.62).
     "ability_energy": int(__import__("os").environ.get("ABILITY_ENERGY", 1)),
-    # Team Rocket's Petrel takes the Trainer that does something THIS turn
-    # (Rare Candy onto a waiting Basic, a search with Bench room, a Tool
-    # for an empty slot) instead of whichever one the shuffle put first.
-    # Off until measured.
-    "petrel_pick": int(__import__("os").environ.get("PETREL_PICK", 0)),
     # Team Rocket's Orbeetle's Rocket Brain ("move 1 damage counter from 1
     # of your Team Rocket's Pokemon to another of your Pokemon", as often as
     # you like) aimed: onto an Active whose attack grows with its own
     # counters, onto a Benched battery for a Rocket Mirror Active, else off
     # a damaged Active. The generic executor moved one counter from the
-    # most damaged Pokemon onto whatever came first. Off until measured.
-    "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 0)),
+    # most damaged Pokemon onto whatever came first. Measured paired, 200
+    # games x 67 opponents: Orbeetle / Morpeko ex +5.98 +/- 0.64 (better on
+    # 57), Wobbuffet / Orbeetle +3.58 +/- 0.56 (better on 53).
+    "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

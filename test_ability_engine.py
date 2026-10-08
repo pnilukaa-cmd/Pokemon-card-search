@@ -5215,3 +5215,27 @@ def test_torment_takes_one_attack_away_for_a_turn():
           before == "Bellowing Thunder" and after != before, (before, after))
     AE.tick_attack_locks(op.active)
     check("for one turn only", V.best_attack(op, op.active, opp=me)["name"] == before)
+
+
+def test_rocket_brain_loads_the_rage_attacker():
+    """Rocket Brain ("move 1 damage counter from 1 of your Team Rocket's
+    Pokemon to another of your Pokemon", as often as you like) moved one
+    counter from the most damaged Pokemon onto whatever came first. Aimed,
+    it loads an Active whose attack grows with its own counters (Morpeko
+    ex's Hangry Blaster) up to the Knock Out, and no further than it can
+    survive."""
+    V, me, op = _tr_board("Morpeko ex", ["Darkness"] * 2,
+                          bench=["Team Rocket's Orbeetle", "Team Rocket's Kangaskhan ex"],
+                          opp_active="Raging Bolt ex")
+    me.bench[1].damage = 150                       # a hit the tank already took
+    op.bench = [V.InPlay("Mega Kangaskhan ex", 1)]
+    me._first_turn = False
+    me.prizes = 6
+    log = []
+    V.run_phases(me, op, log, V.PHASES.index("attack"))
+    moved = 150 - me.bench[1].damage
+    check("counters move from the Team Rocket's tank onto Morpeko ex",
+          moved > 0 and me.active.damage >= moved, (moved, me.active.damage))
+    check("enough for Hangry Blaster to Knock Out Raging Bolt ex (240)",
+          me.prizes == 4, (me.prizes, log[-4:]))
+    check("and Morpeko ex keeps at least a third of its HP", moved <= 120, moved)

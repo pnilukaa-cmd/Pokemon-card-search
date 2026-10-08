@@ -2304,47 +2304,6 @@ def _giovanni_partner(pl, opp):
                                      effective_hp(pl, p) - p.damage))
 
 
-def _petrel_pick(pl, opp, fallback):
-    """Index in the deck of the Trainer Team Rocket's Petrel should take:
-    whatever can be played to effect this turn, ranked, else `fallback`."""
-    hand = {n for _, n in pl.hand}
-    stage2_in_hand = {n for k, n in pl.hand if k == "Pokemon"
-                      and pl.POKEMON[n]["stage"] == "Stage 2"}
-    candy_target = stage2_in_hand and any(
-        pl.POKEMON[p.name]["stage"] == "Basic" and p.entered_turn < pl.round_no
-        for p in pl.in_play()) and pl.round_no > 1
-    room = len(pl.bench) < 5
-    deck_mons = [n for k, n in pl.deck if k == "Pokemon"]
-    in_discard = any(n in pl.POKEMON for n in pl.discard)
-    stuck = pl.active is not None and (pl.active.conditions & CANNOT_ATTACK
-                                       or _ready_damage(pl, opp, pl.active) <= 0)
-
-    def score(k, n):
-        if n == "Rare Candy":
-            return 9 if candy_target and n not in hand else 1
-        if n in ("Buddy-Buddy Poffin", "Precious Trolley") and room:
-            return 6 if any(pl.POKEMON[x]["stage"] == "Basic" for x in deck_mons) else 0
-        if n in ("Ultra Ball", "Poké Pad", "Team Rocket's Great Ball") and deck_mons:
-            return 5
-        if n == "Night Stretcher" and in_discard:
-            return 4
-        if n in ("Switch", "Air Balloon") and stuck:
-            return 7
-        if k == "Tool" and any(not p.tool for p in pl.in_play()) and n not in hand:
-            return 3
-        if k == "Supporter":
-            return 2           # for next turn
-        return 1
-    best, best_s = fallback, -1
-    for i, (k, n) in enumerate(pl.deck):
-        if k not in ("Item", "Supporter", "Stadium", "Tool"):
-            continue
-        sc = score(k, n)
-        if sc > best_s:
-            best, best_s = i, sc
-    return best
-
-
 def _gust_supporter(pl, opp, name, target, log):
     """Boss's Orders / Giovanni, resolved on `target`."""
     if name == "Team Rocket's Giovanni":
@@ -2562,8 +2521,6 @@ def play_supporter(pl, opp, turn, log):
     if "Team Rocket's Petrel" in hand_names:
         idx = next((i for i, (k, n) in enumerate(pl.deck)
                     if k in ("Item", "Supporter", "Stadium", "Tool")), None)
-        if idx is not None and POL.knob(pl, "petrel_pick"):
-            idx = _petrel_pick(pl, opp, idx)
         if idx is not None:
             use("Team Rocket's Petrel")
             card = pl.deck.pop(idx)
