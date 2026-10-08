@@ -1039,6 +1039,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.PLACE_COUNTERS:
+        if act.filter.get("per_hand_card"):
+            # Counted when it resolves: Powerful Hand reads the hand you
+            # attack with.
+            act = IR.Action(act.op, (act.amount or 0) * len(pl.hand), act.target,
+                            {k: v for k, v in act.filter.items() if k != "per_hand_card"})
+            if not act.amount:
+                return False
         hits = resolve_targets(act.target, pl, opp, source, attacker)
         if act.filter.get("only_damaged"):
             hits = [h for h in hits if h is not None and getattr(h, "damage", 0) > 0]
@@ -2923,6 +2930,12 @@ def query_effect_immune(owner, spot, attacker_owner=None):
         if act.target == IR.Target.SELF and holder is not spot:
             continue
         if act.target == IR.Target.YOUR_BENCHED and spot not in owner.bench:
+            continue
+        if f.get("protects_stage") and (owner.POKEMON.get(spot.name) or {}).get(
+                "stage") != f["protects_stage"]:
+            continue
+        if f.get("protects_family") and not spot.name.lower().startswith(
+                f["protects_family"].lower()):
             continue
         return True
     for nm in list(getattr(spot, "energy_names", None) or []) + [getattr(spot, "tool", None)]:

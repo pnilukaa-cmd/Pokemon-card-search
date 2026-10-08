@@ -5239,3 +5239,33 @@ def test_rocket_brain_loads_the_rage_attacker():
     check("enough for Hangry Blaster to Knock Out Raging Bolt ex (240)",
           me.prizes == 4, (me.prizes, log[-4:]))
     check("and Morpeko ex keeps at least a third of its HP", moved <= 120, moved)
+
+
+def test_powerful_hand_places_counters_that_effect_immunity_stops():
+    """Alakazam's Powerful Hand ("Place 2 damage counters ... for each card
+    in your hand") was charged as attack DAMAGE for the whole hand plus 2
+    counters, so Mist Energy could not stop it; Team Rocket's Articuno's
+    Repelling Veil protected only Articuno instead of every Basic Team
+    Rocket's Pokemon."""
+    V, me, op = _tr_board("Team Rocket's Kangaskhan ex", ["Darkness"])
+    A = V.load_model("decks/field/alakazam_dudunsparce_powerful_hand.txt", "ala")[0]
+    atk = next(a for a in A[1]["Alakazam"]["attacks"] if a["name"] == "Powerful Hand")
+
+    def hit(me):
+        ala = V.Player("ala", A[1], list(A[2]), V.compile_effects_for(A[1], A[3]))
+        ala.active = V.InPlay("Alakazam", 1)
+        ala.active.energy, ala.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+        ala.hand = [("Item", "Ultra Ball")] * 8
+        ala.round_no = 3
+        ala._opp_ref, me._opp_ref = me, ala
+        ala._forced_attack = atk
+        V.do_attack(ala, me, [])
+        return me.active.damage
+
+    check("8 cards in hand: 16 counters, not 160 damage + 2 counters", hit(me) == 160)
+    V, me, op = _tr_board("Team Rocket's Kangaskhan ex", ["Darkness"])
+    me.active.energy, me.active.energy_names = [["Colorless"]], ["Mist Energy"]
+    check("Mist Energy stops them (counters are an effect)", hit(me) == 0)
+    V, me, op = _tr_board("Team Rocket's Kangaskhan ex", ["Darkness"],
+                          bench=["Team Rocket's Articuno"])
+    check("Repelling Veil covers a Basic Team Rocket's Pokemon", hit(me) == 0)

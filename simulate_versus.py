@@ -3901,6 +3901,13 @@ def attack_damage(pl, opp, spot, atk, record=True):
         if not eff.conditions or AE.conditions_met(eff, pl, opp, spot, atk):
             base = int(m.group(1))
 
+    # Powerful Hand's counters are placed by its rider (and only there):
+    # counters, not damage, so no Weakness and effect immunity stops them.
+    if not base and "for each card in your hand" in text.lower():
+        eff = _attack_ir(atk)
+        if any(a.filter.get("per_hand_card") for a in eff.actions):
+            return 0
+
     # Strike the Sleeper's whole damage goes to a Benched Pokemon through
     # its rider; the Active takes nothing.
     if not base and "for each damage counter on that pok" in text.lower():
@@ -4627,6 +4634,8 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 value += int((act.amount or 0) * 10 * max(len(spots), 1) * odds)
             else:
                 value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
+        elif act.op == IR.Op.PLACE_COUNTERS and act.target is IR.Target.OPP_ACTIVE:
+            value += _active_counter_damage(pl, opp, act)
         elif act.op == IR.Op.MULTIPLY_COUNTERS:
             # Worth exactly the damage it would add, which is zero on a
             # clean board and enormous on a spread one. Pricing it flat
@@ -4908,6 +4917,23 @@ def attack_ignores_effects(atk):
             and any(a.op == IR.Op.IGNORE_OPPONENT_EFFECTS for a in eff.actions))
 
 
+def _active_counter_damage(pl, opp, act):
+    """Damage-equivalent of an attack rider placing counters on the
+    opponent's Active (Powerful Hand: per card in hand). Zero when the
+    Active is immune to the effects of attacks (Mist Energy, Team Rocket's
+    Articuno for a Basic Team Rocket's Pokemon)."""
+    if opp is None or opp.active is None:
+        return 0
+    n = (act.amount or 0) * (len(pl.hand) if act.filter.get("per_hand_card") else 1)
+    AE.ATTACK_EFFECTS_BY[0] = pl
+    try:
+        if not AE._shield_effects(opp, [opp.active]):
+            return 0
+    finally:
+        AE.ATTACK_EFFECTS_BY[0] = None
+    return 10 * n
+
+
 def attack_value(pl, opp, spot, atk):
     if opp is not None and attack_wins_game(pl, opp, spot, atk):
         return 10 ** 6            # nothing outranks winning on the spot
@@ -4915,6 +4941,9 @@ def attack_value(pl, opp, spot, atk):
     value = dmg + attack_rider_value(pl, opp, atk, spot)
     if opp is not None and opp.active is not None:
         remaining = effective_hp(opp, opp.active) - opp.active.damage
+        # Counters a rider puts on the Active count toward the Knock Out.
+        dmg += sum(_active_counter_damage(pl, opp, a) for a in _attack_ir(atk).actions
+                   if a.op == IR.Op.PLACE_COUNTERS and a.target is IR.Target.OPP_ACTIVE)
         if dmg >= remaining:
             prize = opp.POKEMON[opp.active.name]["prize_value"]
             ko_bonus = POL.knob(pl, "ko_bonus_per_prize")

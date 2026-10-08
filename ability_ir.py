@@ -1323,6 +1323,13 @@ def _r(m, text):
     if re.search(r"on each of your opponent'?s pok[eé]mon that has any damage counters on it",
                  text, re.I):
         filt["only_damaged"] = True
+    # Alakazam's Powerful Hand: "Place 2 damage counters on your opponent's
+    # Active Pokemon for each card in your hand". The count was dropped, so
+    # it placed 2 counters -- and the damage path separately charged the
+    # whole hand as attack DAMAGE, which effect immunity (Mist Energy, Team
+    # Rocket's Articuno) cannot stop and Weakness can double.
+    if re.search(r"damage counters? on [^.]{0,60}for each card in your hand", text, re.I):
+        filt["per_hand_card"] = True
     tgt = parse_target(m.group(2))
     # Sand Stream: "each of your opponent's BASIC Pokemon".
     if re.match(r"\s*each of your opponent'?s basic pok", m.group(2), re.I):
@@ -1368,11 +1375,22 @@ def _r(m, text):
 def _r(m, text):
     seg = m.group(0)
     tgt = Target.SELF
+    filt = {}
     if "your benched" in seg.lower():
         tgt = Target.YOUR_BENCHED
     elif "each of your" in seg.lower() or "all of your" in seg.lower():
         tgt = Target.YOUR_ALL
-    filt = {}
+    else:
+        # Team Rocket's Articuno's Repelling Veil: "done to your Basic Team
+        # Rocket's Pokemon". Read as protecting only Articuno, so the Basics
+        # it exists to cover took every Powerful Hand counter.
+        mm = re.search(r"done to your ((?i:basic|stage [12]) )?([A-Z][\w'’ ]*?'s )?(?i:pok[eé]mon)", seg)
+        if mm:
+            tgt = Target.YOUR_ALL
+            if mm.group(1):
+                filt["protects_stage"] = mm.group(1).strip().title()
+            if mm.group(2):
+                filt["protects_family"] = mm.group(2).strip()
     mm = re.search(r"from your opponent's ([\w' ]+?) pok", seg, re.I)
     if mm and "done to" not in mm.group(1).lower():
         filt["attacker_is"] = mm.group(1).strip()

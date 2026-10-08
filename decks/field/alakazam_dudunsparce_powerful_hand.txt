@@ -1,0 +1,31 @@
+Pokémon: 21
+4 Abra MEG 54
+3 Kadabra MEG 55
+3 Alakazam MEG 56
+3 Dunsparce TEF 128
+3 Dudunsparce TEF 129
+1 Fezandipiti ex ASC 142
+1 Fan Rotom ASC 171
+2 Duskull SFA 18
+1 Dusknoir SFA 20
+
+Trainer: 33
+3 Hilda WHT 164
+3 Dawn PFL 118
+2 Rare Candy MEG 125
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Night Stretcher MEG 173
+2 Boss's Orders MEG 114
+2 Lillie's Determination MEG 119
+2 Enhanced Hammer TWM 148
+2 Wondrous Patch PFL 94
+1 Battle Cage PFL 116
+2 Pokégear 3.0 BLK 84
+2 Switch MEG 130
+2 Air Balloon MEG 166
+
+Energy: 6
+6 Basic Psychic Energy
+
+Total Cards: 60
