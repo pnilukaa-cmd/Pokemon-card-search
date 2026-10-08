@@ -970,6 +970,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.PLACE_COUNTERS:
         hits = resolve_targets(act.target, pl, opp, source, attacker)
+        if act.filter.get("only_damaged"):
+            hits = [h for h in hits if h is not None and getattr(h, "damage", 0) > 0]
         if act.filter.get("subtypes_any"):
             want = set(act.filter["subtypes_any"])
             hits = [h for h in hits if h is not None and

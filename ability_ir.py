@@ -1242,6 +1242,12 @@ def _r(m, text):
     filt = {}
     if re.search(r"in any way you like", text, re.I):
         filt["distribute"] = True
+    # Yveltal's Corrosive Winds: "on each of your opponent's Pokemon THAT
+    # HAS ANY DAMAGE COUNTERS ON IT". The condition was dropped, so it hit
+    # every Pokemon -- a free 2-counter spread instead of a follow-up.
+    if re.search(r"on each of your opponent'?s pok[eé]mon that has any damage counters on it",
+                 text, re.I):
+        filt["only_damaged"] = True
     return [Action(Op.PLACE_COUNTERS, int(m.group(1)),
                    parse_target(m.group(2)), filt)]
 

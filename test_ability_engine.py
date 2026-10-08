@@ -4354,6 +4354,28 @@ def test_spiteful_evolution_and_ex_only_spreads():
     check("  ...but not during your first turn", me.active.name == "Phantump")
 
 
+def test_corrosive_winds_hits_only_damaged_pokemon():
+    """Yveltal's Corrosive Winds puts 2 counters on each opposing Pokemon
+    "that has any damage counters on it". The condition sat past the
+    60-character target capture and was dropped, so it hit every Pokemon."""
+    V, D, E = _real("decks/field/tr_arbok_yveltal_snow_coating.txt", "d")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me, op = V.Player("d", D[1], D[2], E), V.Player("o", O[1], O[2],
+                                                     V.compile_effects_for(O[1], O[3]))
+    op.active = V.InPlay("Mega Kangaskhan ex", 1)
+    op.active.damage = 30
+    op.bench = [V.InPlay("Meowth ex", 1)]
+    me.active = V.InPlay("Yveltal", 1)
+    me._opp_ref, op._opp_ref = op, me
+    for a in IR.compile_effect("attack", "Corrosive Winds",
+                               "Put 2 damage counters on each of your opponent's Pokémon "
+                               "that has any damage counters on it.").actions:
+        AE.apply_action(a, me, op, me.active, [], attacker=me.active)
+    check("Corrosive Winds adds 2 counters only where there were some",
+          op.active.damage == 50 and op.bench[0].damage == 0,
+          f"{op.active.damage} {op.bench[0].damage}")
+
+
 def test_ditto_transforms_and_gengar_faints():
     """Ditto's Surprisingly Transform compiled to nothing and scored 0, so
     the Ditto deck never attacked; Backtrack Badge re-flipped only damage
@@ -4814,6 +4836,7 @@ def main():
                test_named_stage1_bench_searches_and_try_to_imitate,
                test_ability_gated_pokemon_gets_its_energy,
                test_spiteful_evolution_and_ex_only_spreads,
+               test_corrosive_winds_hits_only_damaged_pokemon,
                test_the_lookahead_does_not_see_hidden_cards,
                test_static_play_locks_and_metal_bridge,
                test_mulligans_give_the_opponent_extra_cards,
