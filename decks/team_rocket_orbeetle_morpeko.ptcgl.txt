@@ -1,0 +1,29 @@
+Pokémon: 13
+4 Team Rocket's Blipbug DRI 15
+1 Team Rocket's Dottler DRI 88
+3 Team Rocket's Orbeetle DRI 198
+3 Morpeko ex PBL 102
+2 Team Rocket's Kangaskhan ex ASC 162
+
+Trainer: 35
+3 Rare Candy MEG 125
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+4 Team Rocket's Venture Bomb DRI 179
+3 Janine's Secret Art SFA 59
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Team Rocket's Ariana ASC 202
+2 Team Rocket's Proton ASC 208
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+1 Team Rocket's Transceiver ASC 209
+2 Air Balloon MEG 166
+1 Hero's Cape TEF 152
+1 Poké Pad ASC 198
+
+Energy: 12
+4 Team Rocket's Energy ASC 217
+8 Basic Darkness Energy
+
+Total Cards: 60
