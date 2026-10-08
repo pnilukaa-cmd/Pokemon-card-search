@@ -57,3 +57,12 @@ Snow Coating at 120 against Trevenant's 180 now, and cannot see that
 doubling first makes the next Trevenant 300+.
 
 Imports: `trevenant_rapidash_uxie_azelf.ptcgl.txt`, `trevenant_rapidash_uxie_vanilluxe.ptcgl.txt`.
+
+## Faster alternative (2026-10-08)
+
+`golbat_brute_bonnet_punch.md`: Team Rocket's Golbat/Crobat ex put
+counters on the Active for free when they evolve, and Brute Bonnet hits
+for 50 + 50 per counter that turn. 53.0% against the field at 1000 games,
+and 67-33 against this list. Other types checked: Water (Frosmoth spread,
+Glalie 20 per counter) is too small a payoff; Metal's Ferrothorn does 50
+to everything but Knocks itself Out; Dusknoir's 13 counters cost a Prize.
