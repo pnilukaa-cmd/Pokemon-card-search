@@ -4,6 +4,7 @@ Pokémon: 14
 2 Team Rocket's Kangaskhan ex ASC 162
 2 Team Rocket's Meowth ASC 161
 2 Team Rocket's Persian ex DRI 150
+2 Team Rocket's Chingling DRI 85
 
 Trainer: 34
 4 Buddy-Buddy Poffin MEG 167
@@ -18,8 +19,7 @@ Trainer: 34
 2 Team Rocket's Transceiver ASC 209
 2 Team Rocket's Factory ASC 203
 2 Backtrack Badge PBL 74
-2 Air Balloon MEG 166
-1 Xerosic's Machinations SFA 64
+1 Air Balloon MEG 166
 1 Maximum Belt TEF 154
 
 Energy: 12

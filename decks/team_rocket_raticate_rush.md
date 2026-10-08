@@ -50,7 +50,8 @@ to 8.
 the trade. Against Alakazam (140 HP, not an ex, so no Belt bonus) use
 Persian ex's Cruel Slash (exactly 140) or Kangaskhan ex (220) for one-hit
 Knock Outs. Keep a Mist Energy on whatever stays Active into a big hand.
-Boss's Orders an Abra or Kadabra before Alakazam's Psychic Draw lands. It's weak to Fighting (every Colorless Team Rocket's Pokémon is),
+Boss's Orders an Abra or Kadabra before Alakazam's Psychic Draw lands. Play
+Xerosic's Machinations the turn they hold 6 or more cards. It's weak to Fighting (every Colorless Team Rocket's Pokémon is),
 and the 25% self-Knock Out gives them a free Prize when it happens.
 N's Zoroark is the worst matchup (43% in the full run).
 
@@ -89,17 +90,51 @@ Energy is also worth +1.5 across the whole field. Badge and Bangle tie
 (−0.03 ± 0.22). For a field full of Alakazam, Mist + Articuno + 1 Archer
 reaches 90.9% in that matchup.
 
+## Hand control and other ways to slow Alakazam down (2026-10-08)
+
+Measured on the Mist Energy + Backtrack Badge list (81.2% against Alakazam,
+74.0% against the 78-deck field). Each row swaps the named cards in; 1000
+games against `alakazam_dudunsparce_powerful_hand`, 200 games x 78 decks paired.
+
+| Change | vs Alakazam | Field, paired |
+|---|---|---|
+| **+1 Xerosic's Machinations (for Poké Pad)** | **84.8%** | +0.15 ± 0.43 (this list) |
+| +2 Xerosic's Machinations | 85.4% | −0.12 ± 0.50 |
+| +2 Team Rocket's Archer | 84.8% | −0.21 ± 0.44 |
+| 2 Xerosic's + Watchtower for Factory | 86.5% | not run |
+| 1 Xerosic's + 1 Archer | 84.7% | not run |
+| Unfair Stamp for Maximum Belt | 83.8% | −0.36 ± 0.44 |
+| +2 Hand Trimmer | 83.1% | **−1.21 ± 0.43** |
+| Team Rocket's Watchtower for Factory | 81.8% | **−1.87 ± 0.51** |
+| +2 Bother-Bot | 80.8% | |
+| +2 Eri | 80.2% | |
+| +2 Judge | 79.7% | |
+| +2 Chingling | 79.4% | |
+| +2 Budew (Itchy Pollen Item lock) | 78.2% | |
+| +2 Ekans, 1 Arbok (Potent Glare) | 77.3% | |
+| Raticate / Ampharos list (Darkest Impulse) | 55.5% (65.6% with Mist) | |
+
+**Xerosic's only works if you play it at the right time.** Held as a fallback
+behind Lillie's / Ariana it was worth nothing (81.2%). Played first whenever
+it strips 3 or more cards, which means into a hand of 6+, it was worth +3.6.
+The simulator now does that by default: +0.26 on average across the 16
+field decks that run Xerosic's. Watchtower turns off Dudunsparce and Fan
+Rotom (Colorless) but not Kadabra/Alakazam's Psychic Draw (Psychic), and it
+costs the Factory draws (−1.9 across the field). Hand Trimmer discards your
+hand to 5 as well. Judge, Eri, Chingling, Budew and Arbok cost tempo for
+less than they take.
+
 ## 1000-trial setup baseline
 
 | Pokémon | in play by turn 6 | average turn |
 |---|---|---|
-| Team Rocket's Rattata | 99.5% | 1.37 |
-| Team Rocket's Raticate | 90.6% | 2.95 |
-| Team Rocket's Kangaskhan ex | 85.5% | 2.22 |
-| Team Rocket's Meowth | 96.8% | 1.74 |
-| Team Rocket's Persian ex | 66.1% | 3.52 |
+| Team Rocket's Rattata | 99.6% | 1.33 |
+| Team Rocket's Raticate | 87.6% | 3.00 |
+| Team Rocket's Kangaskhan ex | 83.1% | 2.16 |
+| Team Rocket's Meowth | 96.5% | 1.83 |
+| Team Rocket's Persian ex | 64.8% | 3.65 |
 
-First attack by turn 6 in 93.5% of games (average turn 2.79).
+First attack by turn 6 in 94.1% of games (average turn 2.79).
 
 ## PTCGL import
 
@@ -125,7 +160,7 @@ Trainer: 34
 2 Team Rocket's Factory ASC 203
 2 Backtrack Badge PBL 74
 2 Air Balloon MEG 166
-1 Poké Pad ASC 198
+1 Xerosic's Machinations SFA 64
 1 Maximum Belt TEF 154
 
 Energy: 12

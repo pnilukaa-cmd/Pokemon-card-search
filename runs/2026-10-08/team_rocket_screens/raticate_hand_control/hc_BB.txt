@@ -18,8 +18,8 @@ Trainer: 34
 2 Team Rocket's Transceiver ASC 209
 2 Team Rocket's Factory ASC 203
 2 Backtrack Badge PBL 74
-2 Air Balloon MEG 166
-1 Xerosic's Machinations SFA 64
+1 Air Balloon MEG 166
+2 Team Rocket's Bother-Bot DRI 172
 1 Maximum Belt TEF 154
 
 Energy: 12

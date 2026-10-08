@@ -5313,3 +5313,21 @@ def test_judge_shuffles_the_opponents_hand_in():
           (len(me.hand), len(op.hand)))
     check("their old hand is shuffled in, not stacked on the bottom",
           not all(n.startswith("Marker") for n in bottom), bottom)
+
+
+def test_xerosic_goes_first_into_a_big_hand():
+    """Xerosic's Machinations was only played when no draw Supporter was in
+    hand, so a deck holding it beside Lillie's Determination never cut an
+    8-card hand. It now goes first when it strips 3 or more cards."""
+    V, me, op = _tr_board("Team Rocket's Rattata")
+    me.hand = [("Supporter", "Lillie's Determination"),
+               ("Supporter", "Xerosic's Machinations"), ("Item", "Ultra Ball")]
+    op.hand = [("Item", "Ultra Ball")] * 8
+    V.play_supporter(me, op, 3, [])
+    check("Xerosic's is played into 8 cards", len(op.hand) == 3, len(op.hand))
+    V, me, op = _tr_board("Team Rocket's Rattata")
+    me.hand = [("Supporter", "Lillie's Determination"),
+               ("Supporter", "Xerosic's Machinations"), ("Item", "Ultra Ball")]
+    op.hand = [("Item", "Ultra Ball")] * 4
+    V.play_supporter(me, op, 3, [])
+    check("and not into 4, where Lillie's is worth more", len(op.hand) == 4, len(op.hand))
