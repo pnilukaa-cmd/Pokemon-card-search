@@ -907,7 +907,16 @@ def pop_energy(spot, i=-1):
     return None
 
 
-_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent", "attach_locked")
+_LOCKS = ("attack_locked", "retreat_locked", "attack_locked_by_opponent", "attach_locked",
+          "disabled_attack_turns")
+
+# Which of the victim's attacks a "choose 1 of your opponent's Active
+# Pokemon's attacks ... can't use that attack" lock takes away. Set by
+# simulate_versus to the one its owner would value most; this default is
+# the biggest printed number.
+NAMED_ATTACK_PICK = lambda owner, foe, spot: max(
+    (owner.POKEMON.get(spot.name) or {}).get("attacks") or [{"name": None, "damage": 0}],
+    key=lambda a: a.get("damage") or 0)["name"]
 
 
 def tick_attack_locks(spot):
@@ -1193,9 +1202,25 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         src = act.filter.get("from")
         if src in (IR.Target.OPP_BENCHED, IR.Target.OPP_ANY, IR.Target.OPP_ALL):
             pool = opp.bench if src == IR.Target.OPP_BENCHED else opp.in_play()
+        elif src == IR.Target.YOUR_BENCHED:
+            # Rocket Mirror, Perplexing Transfer, Nine-Tailed Transfer: "from
+            # 1 of your BENCHED Pokemon" -- the attacker's own pile is not
+            # theirs to move.
+            pool = list(pl.bench)
         else:
             pool = pl.in_play()
-        donors = [q for q in pool if q.damage >= 10]
+        # "1 of your Benched Team Rocket's / Ancient Pokemon": a name family
+        # or a subtype. Dropped, so Rocket Mirror moved any Pokemon's pile.
+        fam = (act.filter.get("family") or "").lower()
+        def _in_family(q, owner):
+            if not fam:
+                return True
+            info = owner.POKEMON.get(q.name) or {}
+            return q.name.lower().startswith(fam) or fam in [
+                x.lower() for x in info.get("subtypes") or []]
+        owner = opp if src in (IR.Target.OPP_BENCHED, IR.Target.OPP_ANY,
+                               IR.Target.OPP_ALL) else pl
+        donors = [q for q in pool if q.damage >= 10 and _in_family(q, owner)]
         hits = resolve_targets(act.target, pl, opp, source, attacker) or \
             ([opp.active] if opp.active else [])
         hits = [h for h in hits
@@ -2662,6 +2687,18 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     # The pilot never makes that attachment (it would forfeit the attack),
     # so it is modelled as the Defending Pokemon taking no Energy from hand
     # during their next turn.
+    if op == O.LOCK and act.filter.get("what") == "named_attack":
+        victim = opp.active
+        if victim is None or not _shield_effects(opp, [victim]):
+            return False
+        name = NAMED_ATTACK_PICK(opp, pl, victim)
+        if not name:
+            return False
+        victim.disabled_attack = name
+        victim.disabled_attack_turns = 1
+        log.append(f"    {victim.name} can't use {name} during their next turn")
+        return True
+
     if op == O.LOCK and act.filter.get("what") == "attach_energy":
         victim = opp.active
         if victim is None or not _shield_effects(opp, [victim]):

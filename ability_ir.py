@@ -1787,8 +1787,20 @@ def _r(m, text):
                    {"opponent_needs": ["ex", "V"]})]
 
 
+@rule("lock_one_attack",
+      r"choose 1 of your opponent'?s active pok[eé]mon'?s attacks\. during your "
+      r"opponent'?s next turn, that pok[eé]mon can'?t use that attack")
+def _r(m, text):
+    """Torment (Team Rocket's Murkrow, Pangoro) and Klefki's Memory Lock:
+    one named attack is off for a turn. Read as what="use", which nothing
+    executes, so all three were plain damage."""
+    return [Action(Op.LOCK, None, Target.OPP_ACTIVE, {"what": "named_attack"})]
+
+
 @rule("lock", r"can'?t (attack|retreat|play|use)")
 def _r(m, text):
+    if re.search(r"that pok[eé]mon can'?t use that attack", text, re.I):
+        return []                       # lock_one_attack owns it
     # "You can't use this Ability during your first turn" is a timing
     # condition (evolve_self_from_hand's not_first_turn), not a lock.
     if re.match(r"can'?t use this ability during your first turn", m.group(0) + text[m.end():m.end() + 40], re.I):

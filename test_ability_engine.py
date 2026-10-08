@@ -5185,3 +5185,33 @@ def test_team_rocket_trainers_do_what_they_print():
     check("Dark Awakening evolves up to 2 Darkness Pokemon",
           e.actions[0].amount == 2 and e.actions[0].filter.get("type") == "Darkness",
           (e.actions[0].amount, e.actions[0].filter))
+
+
+def test_rocket_mirror_moves_a_benched_team_rocket_pile_only():
+    """Rocket Mirror: "Move all damage counters from 1 of your Benched Team
+    Rocket's Pokemon". The donor could be the Active itself or any Pokemon,
+    because neither "Benched" nor the family was read."""
+    V, me, op = _tr_board("Team Rocket's Wobbuffet", ["Psychic"] * 2,
+                          bench=["Team Rocket's Zubat"])
+    me.active.damage = 100                  # the attacker's own pile
+    me.bench[0].damage = 30
+    _tr_attack(V, me, op, "Rocket Mirror")
+    check("moves the Benched Team Rocket's pile, not its own",
+          op.active.damage == 30 and me.active.damage == 100 and me.bench[0].damage == 0,
+          (op.active.damage, me.active.damage, me.bench[0].damage))
+
+
+def test_torment_takes_one_attack_away_for_a_turn():
+    """Torment (Team Rocket's Murkrow, Pangoro) and Klefki's Memory Lock
+    compiled to a lock nothing executed."""
+    V, me, op = _tr_board("Team Rocket's Murkrow", ["Darkness"] * 2,
+                          opp_active="Raging Bolt ex")
+    op.active.energy = [["Lightning"], ["Fighting"], ["Lightning"]]
+    op.active.energy_names = ["Lightning Energy", "Fighting Energy", "Lightning Energy"]
+    before = V.best_attack(op, op.active, opp=me)["name"]
+    _tr_attack(V, me, op, "Torment")
+    after = (V.best_attack(op, op.active, opp=me) or {}).get("name")
+    check("Torment takes away the attack they would have used",
+          before == "Bellowing Thunder" and after != before, (before, after))
+    AE.tick_attack_locks(op.active)
+    check("for one turn only", V.best_attack(op, op.active, opp=me)["name"] == before)

@@ -120,7 +120,8 @@ class InPlay:
                  "damage_penalty", "takes_more", "next_turn_attack_buff",
                  "delayed_discard", "extra_prize", "no_weakness",
                  "damage_taken_last_turn", "retaliate_counters", "under",
-                 "last_attack_round", "weakness_set", "poison_counters")
+                 "last_attack_round", "weakness_set", "poison_counters",
+                 "disabled_attack", "disabled_attack_turns")
 
     def __init__(self, name, turn):
         self.name = name
@@ -172,6 +173,9 @@ class InPlay:
         # Counters a Poison places at each Checkup: 1, unless the attack
         # that Poisoned it said otherwise (Tainted Horn: 8).
         self.poison_counters = 1
+        # Torment / Memory Lock: one named attack is off for a turn.
+        self.disabled_attack = None
+        self.disabled_attack_turns = 0
         # Mega Lopunny ex's Gale Thrust is 60 that becomes 230 "if this
         # Pokemon moved from your Bench to the Active Spot this turn".
         self.promoted_this_turn = False
@@ -741,6 +745,101 @@ def ability_key(p, ab):
 
 
 ACTIVATED = (IR.Trigger.ONCE_PER_TURN, IR.Trigger.ANY_TIMES_PER_TURN)
+
+
+_RAGE_RE = _re.compile(r"(\d+) (?:more )?damage for each damage counter on this pok", _re.I)
+
+
+def _own_counter_mover(eff):
+    """The MOVE_COUNTERS action of an "as often as you like, move 1 damage
+    counter from 1 of your Pokemon to another of your Pokemon" Ability."""
+    if eff.trigger != IR.Trigger.ANY_TIMES_PER_TURN:
+        return None
+    for a in eff.actions:
+        if a.op == IR.Op.MOVE_COUNTERS and a.target in (
+                IR.Target.YOUR_ANY, IR.Target.YOUR_ALL) and (a.filter or {}).get("from") in (
+                IR.Target.YOUR_ANY, IR.Target.YOUR_ALL):
+            return a
+    return None
+
+
+def _plan_counter_moves(pl, opp, log):
+    """Aim every own-to-own counter mover in play, once, before the attack.
+
+    1. The Active has an attack that grows with its OWN counters (Morpeko
+       ex's Hangry Blaster, Scovillain ex's Spicy Rage): load it up to the
+       Knock Out, never past what it can survive.
+    2. The Active moves a Benched Pokemon's counters to the opponent
+       (Wobbuffet's Rocket Mirror): pile them on one Benched battery.
+    3. Otherwise heal the Active by spreading its counters onto the Bench.
+    """
+    if pl.active is None or opp.active is None:
+        return
+    movers = [(p, eff) for p in pl.in_play() for eff in pl.EFFECTS.get(p.name, [])
+              if not eff.unsupported and _own_counter_mover(eff)
+              and not AE.ability_disabled(pl, p, eff.name)]
+    if not movers or AE.query_counters_locked(pl, opp):
+        return
+    fam = ""
+    m = _re.search(r"from 1 of your ([\w'’ ]+?) pok", movers[0][1].text or "", _re.I)
+    if m:
+        fam = m.group(1).lower()
+
+    def is_donor(q):
+        return q.damage >= 10 and (not fam or q.name.lower().startswith(fam))
+
+    def move(src, dst, n):
+        for _ in range(n):
+            src.damage -= 10
+            dst.damage += 10
+        if n:
+            log.append(f"  {pl.name}: {movers[0][1].name} moves {n * 10} damage "
+                       f"{src.name} -> {dst.name}")
+
+    me = pl.active
+    hp = lambda q: effective_hp(pl, q)
+    payable = [a for a in pl.POKEMON[me.name]["attacks"]
+               if can_pay(effective_cost(pl, me, a["cost"], opp, a.get("name")), me.energy)]
+    rage = [a for a in payable if _RAGE_RE.search(a.get("text") or "")
+            and "less damage" not in (a.get("text") or "")]
+    if rage:
+        atk = rage[0]
+        left = effective_hp(opp, opp.active) - opp.active.damage
+        cap = hp(me) - me.damage - max(30, hp(me) // 3)
+        while cap >= 10:
+            if attack_damage(pl, opp, me, atk, record=False) >= left:
+                break
+            donors = [q for q in pl.in_play() if q is not me and is_donor(q)]
+            if not donors:
+                break
+            move(max(donors, key=lambda q: q.damage), me, 1)
+            cap -= 10
+        return
+    mirror = [a for a in payable for x in _attack_ir(a).actions
+              if x.op == IR.Op.MOVE_COUNTERS and x.target == IR.Target.OPP_ACTIVE
+              and (x.filter or {}).get("from") == IR.Target.YOUR_BENCHED]
+    if mirror:
+        fam2 = ""
+        for x in _attack_ir(mirror[0]).actions:
+            if x.op == IR.Op.MOVE_COUNTERS:
+                fam2 = ((x.filter or {}).get("family") or "").lower()
+        cands = [q for q in pl.bench if not fam2 or q.name.lower().startswith(fam2)]
+        if not cands:
+            return
+        bat = max(cands, key=lambda q: (q.damage, hp(q)))
+        need = effective_hp(opp, opp.active) - opp.active.damage
+        while bat.damage < need and hp(bat) - bat.damage > 20:
+            donors = [q for q in pl.in_play() if q is not bat and is_donor(q)]
+            if not donors:
+                break
+            move(max(donors, key=lambda q: q.damage), bat, 1)
+        return
+    if is_donor(me):
+        while me.damage >= 10:
+            room = [q for q in pl.bench if hp(q) - q.damage > 50]
+            if not room:
+                break
+            move(me, max(room, key=lambda q: hp(q) - q.damage), 1)
 
 
 def take_prizes(taker, n):
@@ -1460,6 +1559,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if _draw_would_deck_out(pl, eff):
                 continue
+            if POL.knob(pl, "counter_mover") and _own_counter_mover(eff):
+                continue             # aimed by _plan_counter_moves instead
             if not _self_damage_buff_ok(pl, opp, p, eff):
                 continue
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
@@ -2203,6 +2304,47 @@ def _giovanni_partner(pl, opp):
                                      effective_hp(pl, p) - p.damage))
 
 
+def _petrel_pick(pl, opp, fallback):
+    """Index in the deck of the Trainer Team Rocket's Petrel should take:
+    whatever can be played to effect this turn, ranked, else `fallback`."""
+    hand = {n for _, n in pl.hand}
+    stage2_in_hand = {n for k, n in pl.hand if k == "Pokemon"
+                      and pl.POKEMON[n]["stage"] == "Stage 2"}
+    candy_target = stage2_in_hand and any(
+        pl.POKEMON[p.name]["stage"] == "Basic" and p.entered_turn < pl.round_no
+        for p in pl.in_play()) and pl.round_no > 1
+    room = len(pl.bench) < 5
+    deck_mons = [n for k, n in pl.deck if k == "Pokemon"]
+    in_discard = any(n in pl.POKEMON for n in pl.discard)
+    stuck = pl.active is not None and (pl.active.conditions & CANNOT_ATTACK
+                                       or _ready_damage(pl, opp, pl.active) <= 0)
+
+    def score(k, n):
+        if n == "Rare Candy":
+            return 9 if candy_target and n not in hand else 1
+        if n in ("Buddy-Buddy Poffin", "Precious Trolley") and room:
+            return 6 if any(pl.POKEMON[x]["stage"] == "Basic" for x in deck_mons) else 0
+        if n in ("Ultra Ball", "Poké Pad", "Team Rocket's Great Ball") and deck_mons:
+            return 5
+        if n == "Night Stretcher" and in_discard:
+            return 4
+        if n in ("Switch", "Air Balloon") and stuck:
+            return 7
+        if k == "Tool" and any(not p.tool for p in pl.in_play()) and n not in hand:
+            return 3
+        if k == "Supporter":
+            return 2           # for next turn
+        return 1
+    best, best_s = fallback, -1
+    for i, (k, n) in enumerate(pl.deck):
+        if k not in ("Item", "Supporter", "Stadium", "Tool"):
+            continue
+        sc = score(k, n)
+        if sc > best_s:
+            best, best_s = i, sc
+    return best
+
+
 def _gust_supporter(pl, opp, name, target, log):
     """Boss's Orders / Giovanni, resolved on `target`."""
     if name == "Team Rocket's Giovanni":
@@ -2420,6 +2562,8 @@ def play_supporter(pl, opp, turn, log):
     if "Team Rocket's Petrel" in hand_names:
         idx = next((i for i, (k, n) in enumerate(pl.deck)
                     if k in ("Item", "Supporter", "Stadium", "Tool")), None)
+        if idx is not None and POL.knob(pl, "petrel_pick"):
+            idx = _petrel_pick(pl, opp, idx)
         if idx is not None:
             use("Team Rocket's Petrel")
             card = pl.deck.pop(idx)
@@ -4535,7 +4679,15 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 spots = sorted(spots, key=lambda s: -s.damage)[:act.filter["targets"]]
             value += sum(s.damage * ((act.amount or 2) - 1) for s in spots)
         elif act.op == IR.Op.MOVE_COUNTERS:
-            value += 20
+            f = act.filter or {}
+            if (act.amount or 0) >= 99 and f.get("from") == IR.Target.YOUR_BENCHED:
+                # Rocket Mirror / Nine-Tailed Transfer: worth the biggest
+                # pile it can move, not a flat 20.
+                fam = (f.get("family") or "").lower()
+                value += max([q.damage for q in pl.bench
+                              if not fam or q.name.lower().startswith(fam)] + [0])
+            else:
+                value += 20
         elif act.op == IR.Op.EVOLVE_FROM_DECK:
             # Team Rocket's Nidorina's Dark Awakening (two Darkness Pokemon
             # straight from the deck) had no price and was never chosen over
@@ -4828,6 +4980,27 @@ def attack_value(pl, opp, spot, atk):
     return value
 
 
+def _attack_disabled(spot, atk):
+    """Torment / Memory Lock took this attack away for the turn."""
+    return bool(getattr(spot, "disabled_attack_turns", 0)
+                and getattr(spot, "disabled_attack", None) == atk.get("name"))
+
+
+def _named_attack_pick(owner, foe, spot):
+    """The attack Torment should take: whichever its owner values most now."""
+    best, val = None, -1
+    for a in (owner.POKEMON.get(spot.name) or {}).get("attacks") or []:
+        v = attack_value(owner, foe, spot, a) if can_pay(
+            effective_cost(owner, spot, a["cost"], foe, a.get("name")), spot.energy) \
+            else (a.get("damage") or 0) / 2
+        if v > val:
+            best, val = a.get("name"), v
+    return best
+
+
+AE.NAMED_ATTACK_PICK = _named_attack_pick
+
+
 def best_attack(pl, spot, only_payable=True, opp=None):
     info = pl.POKEMON[spot.name]
     best, best_val = None, -1
@@ -4838,6 +5011,8 @@ def best_attack(pl, spot, only_payable=True, opp=None):
         if only_payable and not can_pay(effective_cost(pl, spot, atk["cost"], opp,
                                                        atk.get("name")),
                                         spot.energy):
+            continue
+        if _attack_disabled(spot, atk):
             continue
         val = attack_value(pl, opp, spot, atk)
         if val > best_val:
@@ -6316,6 +6491,8 @@ def run_phases(pl, opp, log, start):
                 # used last, when the Seek attacker is already Active,
                 # rather than stacking a card nobody attacks with.
                 _stadium_hand_to_top(pl, log)
+                if POL.knob(pl, "counter_mover"):
+                    _plan_counter_moves(pl, opp, log)
                 if do_attack(pl, opp, log):
                     return "win"
     return finish_turn(pl, opp, log)
@@ -6587,7 +6764,8 @@ def lookahead_attack(pl, opp, greedy_pick):
     cands, seen = [], set()
     for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot):
         if a["name"] in seen or not can_pay(
-                effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy):
+                effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy) \
+                or _attack_disabled(spot, a):
             continue
         seen.add(a["name"])
         cands.append(a)
