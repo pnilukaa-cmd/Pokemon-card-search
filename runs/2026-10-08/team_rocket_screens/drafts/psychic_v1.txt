@@ -1,0 +1,29 @@
+Pokémon: 16
+4 Team Rocket's Drowzee DRI 79
+3 Team Rocket's Hypno DRI 80
+3 Team Rocket's Exeggcute ASC 77
+3 Team Rocket's Exeggutor ASC 78
+2 Team Rocket's Mewtwo ex ASC 281
+1 Team Rocket's Mimikyu ASC 238
+
+Trainer: 31
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Team Rocket's Proton ASC 208
+4 Team Rocket's Ariana ASC 202
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Team Rocket's Transceiver ASC 209
+1 Team Rocket's Factory ASC 203
+2 Switch MEG 130
+2 Air Balloon MEG 166
+1 Hero's Cape TEF 152
+1 Team Rocket's Giovanni ASC 204
+2 Poké Pad ASC 198
+
+Energy: 13
+4 Team Rocket's Energy ASC 217
+9 Basic Psychic Energy
+
+Total Cards: 60

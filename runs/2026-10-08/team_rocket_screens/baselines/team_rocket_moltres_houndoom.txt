@@ -1,0 +1,11 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Team Rocket's Houndour        99.7%   avg turn 1.30
+  Team Rocket's Houndoom        93.5%   avg turn 2.63
+  Team Rocket's Moltres ex      98.1%   avg turn 1.66
+
+First attack landed by turn 6: 91.9% of trials (avg turn 3.14)
+Average final hand size (turn 6): 5.96
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

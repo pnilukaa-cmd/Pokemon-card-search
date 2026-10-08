@@ -45,6 +45,10 @@ for md in sorted(glob.glob(os.path.join(REPO, "decks", "*.md"))):
     # strip any previous block, then insert after the H1
     text = re.sub(re.escape(MARK) + r".*?" + re.escape(MARK) + r"\n", "",
                   text, flags=re.S)
+    # The insert below adds a blank line before the block; removing the old
+    # block left that line behind, so every rerun stacked one more blank
+    # line under the title (25 of them in some deck files).
+    text = re.sub(r"(^# [^\n]*\n)\n+", r"\1", text, count=1, flags=re.M)
     lines = text.split("\n")
     for i, ln in enumerate(lines):
         if ln.startswith("# "):

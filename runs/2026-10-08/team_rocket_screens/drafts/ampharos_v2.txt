@@ -1,0 +1,27 @@
+Pokémon: 15
+4 Team Rocket's Mareep DRI 72
+3 Team Rocket's Flaaffy DRI 73
+4 Team Rocket's Ampharos DRI 74
+2 Team Rocket's Zapdos DRI 70
+2 Team Rocket's Sneasel DRI 128
+
+Trainer: 32
+4 Rare Candy MEG 125
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Team Rocket's Proton ASC 208
+4 Team Rocket's Ariana ASC 202
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Team Rocket's Transceiver ASC 209
+1 Team Rocket's Factory ASC 203
+2 Air Balloon MEG 166
+1 Hero's Cape TEF 152
+2 Poké Pad ASC 198
+
+Energy: 13
+4 Team Rocket's Energy ASC 217
+9 Basic Lightning Energy
+
+Total Cards: 60

@@ -1,0 +1,27 @@
+Pokémon: 15
+4 Team Rocket's Houndour DRI 37
+3 Team Rocket's Houndoom DRI 191
+3 Team Rocket's Grimer DRI 123
+3 Team Rocket's Muk DRI 124
+2 Team Rocket's Zubat DRI 120
+
+Trainer: 33
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+3 Team Rocket's Proton ASC 208
+4 Team Rocket's Ariana ASC 202
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Team Rocket's Transceiver ASC 209
+1 Team Rocket's Factory ASC 203
+4 Switch MEG 130
+2 Air Balloon MEG 166
+2 Poké Pad ASC 198
+1 Hero's Cape TEF 152
+
+Energy: 12
+4 Team Rocket's Energy ASC 217
+8 Basic Fire Energy
+
+Total Cards: 60

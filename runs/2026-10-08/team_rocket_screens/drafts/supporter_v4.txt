@@ -1,0 +1,26 @@
+Pokémon: 12
+4 Team Rocket's Murkrow ASC 126
+4 Team Rocket's Honchkrow ASC 127
+4 Team Rocket's Kangaskhan ex ASC 162
+
+Trainer: 36
+4 Buddy-Buddy Poffin MEG 167
+3 Ultra Ball MEG 131
+1 Maximum Belt TEF 154
+3 Team Rocket's Proton ASC 208
+4 Team Rocket's Ariana ASC 202
+4 Team Rocket's Petrel ASC 207
+2 Team Rocket's Archer ASC 201
+2 Team Rocket's Giovanni ASC 204
+4 Team Rocket's Transceiver ASC 209
+2 Team Rocket's Factory ASC 203
+2 Lillie's Determination MEG 119
+1 Boss's Orders MEG 114
+2 Night Stretcher MEG 173
+2 Air Balloon MEG 166
+
+Energy: 12
+4 Team Rocket's Energy ASC 217
+8 Basic Darkness Energy
+
+Total Cards: 60

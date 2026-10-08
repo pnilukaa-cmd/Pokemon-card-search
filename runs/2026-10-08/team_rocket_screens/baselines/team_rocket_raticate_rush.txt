@@ -1,0 +1,13 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Team Rocket's Rattata         99.6%   avg turn 1.31
+  Team Rocket's Raticate        88.0%   avg turn 2.87
+  Team Rocket's Kangaskhan ex   86.7%   avg turn 2.21
+  Team Rocket's Meowth          95.8%   avg turn 1.76
+  Team Rocket's Persian ex      63.7%   avg turn 3.55
+
+First attack landed by turn 6: 94.0% of trials (avg turn 2.84)
+Average final hand size (turn 6): 5.23
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

@@ -1,0 +1,14 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Team Rocket's Drowzee         97.2%   avg turn 1.72
+  Team Rocket's Hypno           84.2%   avg turn 3.20
+  Team Rocket's Mewtwo ex       65.2%   avg turn 2.03
+  Team Rocket's Wobbuffet       85.1%   avg turn 2.06
+  Team Rocket's Mimikyu         92.8%   avg turn 1.66
+  Team Rocket's Chingling       71.8%   avg turn 1.80
+
+First attack landed by turn 6: 91.1% of trials (avg turn 2.94)
+Average final hand size (turn 6): 6.14
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.
