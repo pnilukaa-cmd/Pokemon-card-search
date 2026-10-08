@@ -40,8 +40,23 @@ for n, f in zip(names, files):
 pairs = [p for p in itertools.combinations([n for n in names if playable[n]], 2)]
 mine = [p for i, p in enumerate(pairs) if i % nshards == shard]
 
+# Checkpoint after every pairing and resume from it: a full field run is
+# hours long, the container can be reclaimed mid-run, and the shard used to
+# write nothing until its last pairing. Every pairing has its own fixed
+# seed, so a resumed pairing is exactly the one that would have run.
+partial = out_path + ".partial"
 res = {}
+if os.path.exists(partial):
+    try:
+        prev = json.load(open(partial))
+        if prev.get("games") == games and prev.get("tag", tag) == tag:
+            keep = {f"{a}|{b}" for a, b in mine}
+            res = {k: v for k, v in prev["results"].items() if k in keep}
+    except (ValueError, KeyError):
+        res = {}
 for a, b in mine:
+    if f"{a}|{b}" in res:
+        continue
     seed = int(hashlib.sha256(f"{tag}|{a}|{b}".encode()).hexdigest()[:12], 16)
     random.seed(seed)
     wins = 0
@@ -51,6 +66,10 @@ for a, b in mine:
         if SV.run_game(A, B)["winner"] == a:
             wins += 1
     res[f"{a}|{b}"] = wins
+    tmp = partial + ".tmp"
+    json.dump({"games": games, "tag": tag, "results": res}, open(tmp, "w"))
+    os.replace(tmp, partial)
+    print(f"shard {shard}: {len(res)}/{len(mine)} {a} vs {b}: {wins}/{games}", flush=True)
 json.dump({"games": games, "results": res,
            "unplayable": [n for n in names if not playable[n]]},
           open(out_path, "w"))
