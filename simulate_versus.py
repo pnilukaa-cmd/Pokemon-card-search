@@ -4403,6 +4403,16 @@ RIDER_VALUE = {
 }
 
 
+def _rider_is_drawback(eff):
+    """Every rider this coin decides only hurts the attacker (self-damage,
+    a Special Condition on itself)."""
+    acts = [a for a in eff.actions if a.op in ATTACK_RIDER_OPS]
+    return bool(acts) and all(
+        a.op == IR.Op.SELF_DAMAGE
+        or (a.op == IR.Op.APPLY_CONDITION and a.target == IR.Target.SELF)
+        for a in acts)
+
+
 def _attack_ir(atk):
     key = (atk["name"], atk.get("text") or "")
     eff = _ATTACK_IR_CACHE.get(key)
@@ -6130,7 +6140,18 @@ def attack_side_effects(pl, opp, atk, log):
     # as always-on.
     if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return
-    if getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
+    if getattr(eff, "chance", 1.0) < 1.0 and _rider_is_drawback(eff):
+        # The flip decides a DRAWBACK (Team Rocket's Raticate: "if both of
+        # them are tails, this Pokemon also does 90 damage to itself").
+        # Backtrack Badge is spent on the bad result, not the good one --
+        # re-flipping a miss here would only add self-damage.
+        if random.random() >= eff.chance:
+            return
+        if AE.query_reflip(pl, pl.active):
+            log.append(f"  {pl.name}: {pl.active.tool} -- flips again")
+            if random.random() >= eff.chance:
+                return
+    elif getattr(eff, "chance", 1.0) < 1.0 and random.random() >= eff.chance:
         # Backtrack Badge: a failed flip for this attack may be flipped
         # again. Only the damage coins honoured it, so Ditto's Surprisingly
         # Transform -- the reason the Badge is in the deck -- never did.

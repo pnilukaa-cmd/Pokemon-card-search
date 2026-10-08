@@ -2164,6 +2164,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.KO_OUTRIGHT:
         f = act.filter or {}
+        if f.get("coin") and random.random() >= f["coin"]:
+            log.append("    tails -- no Knock Out")
+            return False
         victim = None
         if f.get("choose"):
             pool = _shield_effects(opp, list(opp.in_play()))

@@ -5269,3 +5269,29 @@ def test_powerful_hand_places_counters_that_effect_immunity_stops():
     V, me, op = _tr_board("Team Rocket's Kangaskhan ex", ["Darkness"],
                           bench=["Team Rocket's Articuno"])
     check("Repelling Veil covers a Basic Team Rocket's Pokemon", hit(me) == 0)
+
+
+def test_backtrack_badge_rerolls_raticates_drawback_not_its_luck():
+    """Reckless Abandon's coins decide a DRAWBACK (two tails: 90 to itself).
+    Backtrack Badge re-flipped the miss -- the safe result -- which could
+    only add self-damage; a player re-flips the two tails. Iono's
+    Electrode's self-damage is certain and its heads is a Knock Out; only
+    the self-damage had compiled, gated on the coin."""
+    import random as _r
+    rates = {}
+    for tool in (None, "Backtrack Badge"):
+        hit = 0
+        for s in range(800):
+            V, me, op = _tr_board("Team Rocket's Raticate", ["Darkness"],
+                                  opp_active="Raging Bolt ex")
+            me.active.tool = tool
+            log = _tr_attack(V, me, op, "Reckless Abandon", s)
+            hit += any("recoil" in l for l in log)
+        rates[tool] = hit / 800
+    check("Raticate hurts itself on 2 tails, about 25%", 0.21 <= rates[None] <= 0.29, rates)
+    check("with Backtrack Badge, about 6%", 0.04 <= rates["Backtrack Badge"] <= 0.09, rates)
+    e = IR.compile_effect("a", "Thump-Thump Boom", "This Pokémon does 100 damage to itself. "
+                          "Flip a coin. If heads, your opponent's Active Pokémon is Knocked Out.")
+    ops = sorted(a.op for a in e.actions)
+    check("Thump-Thump Boom: certain self-damage, a coin for the Knock Out",
+          e.chance == 1.0 and ops == ["ko_outright", "self_damage"], (e.chance, ops))

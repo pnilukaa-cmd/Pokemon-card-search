@@ -637,6 +637,11 @@ def parse_chance(text):
     # Drasna: the coin picks how many to draw, and both sides draw.
     if re.search(r"if heads, draw \d+ cards?\. if tails, draw \d+", t):
         return 1.0
+    # Iono's Electrode: the self-damage is certain; only the Knock Out
+    # waits on the coin (carried on that action).
+    if re.search(r"does \d+ damage to itself\. flip a coin\. if heads, your opponent'?s "
+                 r"active pok[eé]mon is knocked out", t):
+        return 1.0
     # Team Rocket's Venture Bomb places counters on either side of it.
     if re.search(r"if heads, put \d+ damage counters[^.]+\. if tails, put \d+ damage counters", t):
         return 1.0
@@ -1663,6 +1668,14 @@ def _r(m, text):
         return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ALL, f)]
     f["targets"] = int(who)
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_ANY, f)]
+
+
+@rule("coin_ko_active",
+      r"flip a coin\. if heads, your opponent'?s active pok[eé]mon is knocked out")
+def _r(m, text):
+    """Iono's Electrode's Thump-Thump Boom: 100 to itself, and heads Knocks
+    Out their Active. Only the self-damage compiled, gated on the coin."""
+    return [Action(Op.KO_OUTRIGHT, 1, Target.OPP_ACTIVE, {"coin": 0.5})]
 
 
 @rule("coin_counters_either_side",
