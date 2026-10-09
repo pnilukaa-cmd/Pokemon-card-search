@@ -1,0 +1,22 @@
+Pokémon: 18
+4 Applin TWM 17
+4 Dipplin TWM 18
+2 Hydrapple DRI 18
+4 Goldeen TWM 44
+4 Seaking PRE 21
+
+Trainer: 27
+4 Lillie's Determination MEG 169
+1 Boss's Orders MEG 114
+2 Lana's Aid TWM 207
+4 Buddy-Buddy Poffin MEG 167
+4 Poké Pad POR 113
+4 Bug Catching Set TWM 143
+3 Energy Retrieval WHT 82
+1 Max Rod PRE 116
+4 Festival Grounds TWM 149
+
+Energy: 15
+15 Basic Grass Energy
+
+Total Cards: 60
