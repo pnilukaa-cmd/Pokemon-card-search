@@ -82,8 +82,6 @@ GREEDY = {
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
     # Skip a self-shuffling draw Ability that would leave one Pokemon in play.
     "selfshuffle_keep_bench": int(__import__("os").environ.get("SELFSHUFFLE_KEEP_BENCH", 0)),
-    # Play Items and bench Basics again after Abilities have drawn.
-    "bench_after_abilities": int(__import__("os").environ.get("BENCH_AFTER_ABILITIES", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

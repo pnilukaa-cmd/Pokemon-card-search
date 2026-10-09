@@ -6562,11 +6562,6 @@ def run_phases(pl, opp, log, start):
                 play_basics(pl, turn, log)
         elif ph == "abilities":
             use_abilities(pl, opp, turn, log)
-            # Cards an Ability drew (Run Away Draw, Psychic Draw) waited a
-            # turn: the Item and Bench steps had already run.
-            if POL.knob(pl, "bench_after_abilities"):
-                play_items(pl, opp, turn, log, first_turn)
-                play_basics(pl, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
             _stadium_text_effects(pl, log)
