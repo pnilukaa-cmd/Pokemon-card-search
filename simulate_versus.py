@@ -4383,8 +4383,10 @@ def _holds_for_hand_ko(pl, target):
             _hand_energy_cost(pl, a.get("text") or "")
             for p in pl.in_play() for a in pl.POKEMON[p.name]["attacks"]):
         return False
-    if target is pl.active and not _payable_damage(pl, target, target.energy,
-                                                   getattr(pl, "_opp_ref", None)):
+    # "Can attack" means does something now: Hydra Breath is paid for with
+    # one Energy and does nothing until the hand holds the other six.
+    opp = getattr(pl, "_opp_ref", None)
+    if target is pl.active and (opp is None or _ready_damage(pl, opp, target) <= 0):
         return False
     return True
 
