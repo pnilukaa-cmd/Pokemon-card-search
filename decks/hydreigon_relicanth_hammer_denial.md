@@ -2,10 +2,12 @@
 
 Tuned 2026-10-09 from a submitted Hydreigon / Grafaiai Energy-denial list
 ([hydreigon_grafaiai_energy_denial.md](hydreigon_grafaiai_energy_denial.md)).
-**62.88% against the 79-deck field at 1000 games per opponent, against 46.64%
-for the list it came from (+16.24 ± 0.91 paired, better on 77 of 79).** That
+**63.56% against the 80-deck field at 1000 games per opponent, against 47.11%
+for the list it came from (+16.45 ± 1.00 paired, better on 78 of 80).** That
 would place it about 15th of 78 in the 2026-10-08 round robin; the original
-sits about 50th.
+sits about 50th. Both numbers come from the engine after the Energy-placement
+fix below. The tuning table further down was measured before that fix
+(62.88% vs 46.64% then).
 
 **Lines:** Deino → Zweilous → Hydreigon (main), Dunsparce → Dudunsparce (draw),
 Relicanth, Pecharunt ex, Shaymin, Psyduck.
@@ -58,12 +60,66 @@ The support Pokémon:
 4. **Recovery.** Night Stretcher brings back a Hydreigon or a Basic Energy.
    Lana's Aid returns up to 3 non-Rule-Box Pokémon and Basic Energy.
 
-**Their outs.** Lurantis (24%) and Nidoking ex / Nidoqueen (25%) are the worst
-matchups. Next are the Ditto Hydreigon decks (28-29%), Raticate rush (32%), N's
-Zoroark (33%), Diggersby (33%) and Persian ex (34%). These are fast single-Prize
+**Their outs.** Lurantis (25%) and Nidoking ex / Nidoqueen (28%) are the worst
+matchups. Next are the Ditto Hydreigon decks (29%), Diggersby (31%) and
+Raticate rush (32%). These are fast single-Prize
 attackers or decks that don't care about losing Energy. The mirror against
 Ditto / Hydreigon dropped from 40% to 28% with this tuning; it is the one
 matchup that got clearly worse.
+
+## The stall-and-mill plan (and where Grafaiai fits)
+
+The submitter's plan: strip the opponent's Energy, then put it back on their
+board where it can't be used. That means a Pokémon that isn't meant to
+attack, the wrong type, or a mismatched place. Meanwhile Zweilous's Stomp
+Off mills 2 a turn. The simulator agrees that the deck wins by milling. In
+120 logged games against eight opponents, 32 of the 1-1 Grafaiai list's 55
+wins were deck-outs; the submitted list's were 31 of 47.
+
+**Engine fix (2026-10-09).** Mischievous Painting and Handheld Fan both let
+the player GIVING the Energy choose where it goes, and the simulator chose
+badly:
+- **Painting** put every Energy on the opponent's Active, their attacker, and
+  turned it into Colorless Energy.
+- **The Fan** took the last Energy attached and gave it to the first Benched
+  Pokémon, often the next attacker.
+
+Both now put each Energy on the opponent's Pokémon that can use it least.
+That's one with no attack, on it or anything it evolves into, that the type
+can pay part of, and no Ability that wants it (Munkidori). So against
+Dragapult, the Energy goes on Budew, not Dreepy. The Fan now takes the Energy
+the attacker most needs: it leaves Dragapult ex without Fire + Psychic for
+Phantom Dive. Worth +1.27 ± 0.51 to the submitted list and +0.75 ± 0.46 to
+this one.
+
+**Mischievous Painting itself doesn't pay for the attack.** It was tried at
+several values, paired on the submitted list:
+
+| What a Painting attack was worth | Paired change |
+|---|---|
+| 20 / 40 / 80 per discarded Energy | −2.02 / −1.90 / −3.69 |
+| 40 / 120 per Energy that lands where nothing can use it | −0.04 ± 0.30 / −0.52 ± 0.32 |
+
+**Fewer Grafaiai measures better.** 1000 games x 80 decks:
+
+| Build | Win rate | Paired vs submitted |
+|---|---|---|
+| Submitted list | 47.11% | |
+| 2-2 Grafaiai, 10 Energy, 4-4-2 Hydreigon, no Psyduck | 57.08% | +9.97 ± 0.90 |
+| **1-1 Grafaiai, 10 Energy, 4-4-3 Hydreigon** ([import](hydreigon_grafaiai_stall_mill.ptcgl.txt)) | **61.19%** | **+14.08 ± 1.00** |
+| No Grafaiai (this list) | 63.56% | +16.45 ± 1.00; +2.37 ± 0.30 vs 1-1 |
+
+The stall that measures comes from the 4 Crushing Hammers, Handheld Fan
+parking Energy on dead Benched Pokémon, and enough Energy (10) to Stomp Off
+every turn. If you want Painting available, the 1-1 Grafaiai list costs about
+2.4 points. Its worst matchups are Lurantis 21%, Nidoking ex 24%, Raticate 26%
+and Ditto Hydreigon 27%. In the 1000-trial baseline it has Hydreigon in play
+by turn 6 in 47.9% of games and its first attack by turn 6 in 91.5%.
+
+Tried and removed in the same pass, neither measured:
+- Not using Run Away Draw when it would leave one Pokémon in play: +0.21 at
+  200 games; −0.04 / +0.25 at 1000.
+- Benching Basics an Ability drew the same turn: −0.30.
 
 ## How it was tuned
 

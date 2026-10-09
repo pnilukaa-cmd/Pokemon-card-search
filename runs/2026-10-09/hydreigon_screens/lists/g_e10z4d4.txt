@@ -1,0 +1,31 @@
+Pokémon: 12
+4 Zweilous SSP 118
+4 Deino SSP 117
+2 Dudunsparce TEF 129
+2 Dunsparce JTG 120
+2 Grafaiai SSP 121
+2 Shroodle SSP 120
+2 Hydreigon 30C 99
+1 Pecharunt ex SFA 39
+1 Shaymin DRI 10
+1 Relicanth TEF 84
+
+Trainer: 18
+4 Crushing Hammer POR 71
+1 Prime Catcher TEF 157
+4 Poké Pad ASC 198
+2 Night Stretcher ASC 196
+2 Handheld Fan TWM 150
+1 Lana's Aid TWM 155
+1 Hilda WHT 84
+1 Rust Syndicate Grunt PBL 81
+1 Janine's Secret Art SFA 59
+4 Buddy-Buddy Poffin ASC 184
+4 Lillie's Determination MEG 119
+3 Boss's Orders MEG 114
+1 Rare Candy MEG 125
+
+Energy: 1
+10 Basic {D} Energy MEE 15
+
+Total Cards: 60

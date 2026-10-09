@@ -4,14 +4,22 @@ A list submitted for study on 2026-10-09, kept in the field as submitted with
 one change: **Rare Candy SVI 191 is a rotated printing, so it is listed as
 Rare Candy MEG 125** (same card text).
 
-**46.64% against the 79-deck field at 1000 games per opponent** (median
-47.0%, 29 winning matchups), about 50th of 78 in the 2026-10-08 round robin.
-The tuned version,
-**[hydreigon_relicanth_hammer_denial.md](hydreigon_relicanth_hammer_denial.md),
-scores 62.88% (+16.24 ± 0.91 paired, better on 77 of 79)**. It cuts the
-Grafaiai line, plays 10 Darkness Energy and runs 4-4-3 Hydreigon.
+**47.11% against the 80-deck field at 1000 games per opponent** (median
+47.3%, 34 winning matchups), about 50th of 78 in the 2026-10-08 round robin.
+Two tuned versions, 1000 games each, paired against this list:
+- **[1-1 Grafaiai stall-and-mill](hydreigon_grafaiai_stall_mill.ptcgl.txt):
+  61.19% (+14.08 ± 1.00, better on 78 of 80).** Keeps one Grafaiai for
+  Mischievous Painting; 10 Darkness Energy, 4-4-3 Hydreigon.
+- **[No Grafaiai](hydreigon_relicanth_hammer_denial.md): 63.56% (+16.45 ± 1.00,
+  better on 78 of 80).**
 
 ## Plan
+
+As the submitter describes it: strip the opponent's Energy, then put it back
+on their board where it can't be used. That means a Pokémon not meant to
+attack, the wrong type, or a mismatched place. That stalls them while
+Zweilous's Stomp Off mills 2 a turn. The simulator agrees the deck wins by
+milling: 31 of its 47 wins in 120 logged games were deck-outs.
 
 Hydreigon 30C 99 strips Energy (Three-Headed Bite) or hits for 140
 (Pitch-Black Fangs). Relicanth's Memory Dive gives every evolved Pokémon
@@ -36,19 +44,28 @@ The deck also strips Energy with Trainers:
 - **Six Energy is too few.** In a logged game against Dragapult, Pecharunt ex
   sat Active for three turns with at most one Energy, and Hydreigon came Active
   and never attacked.
-- **Grafaiai works against the hammers.** The hammers empty the board that
-  Energized Graffiti counts. In 60 logged games against six opponents,
-  Mischievous Painting was never worth using.
+- **The simulator put the Energy in the wrong place (fixed).** Painting put
+  every Energy on the opponent's Active as Colorless. The Fan gave the moved
+  Energy to the first Benched Pokémon, often the next attacker. Both now pick
+  the Pokémon that can use it least, such as Budew rather than Dreepy against
+  Dragapult. Worth +1.27 ± 0.51 to this list.
+- **Spending Grafaiai's attack on Painting still doesn't pay.** Valued per
+  Energy it parks, it measured −1.9 to −3.7. Valued only for Energy with
+  nowhere useful to go, it measured −0.04 and −0.52. The stall that measures
+  comes from Crushing Hammer, Handheld Fan and having the Energy to Stomp Off
+  every turn.
+- **Fewer Grafaiai measures better.** The 2-2 line at 10 Energy scores 57.08%,
+  1-1 61.19%, none 63.56%.
 
-Each fix measured on its own: cutting Grafaiai +7.0, 8 Energy +4.2, a third
-Hydreigon with a second Rare Candy +1.7. Together with 4 Zweilous they make the
-tuned list. The full table is in the tuned list's notes.
+Each change measured on its own (before the fix): cutting Grafaiai +7.0,
+8 Energy +4.2, a third Hydreigon with a second Rare Candy +1.7. The full
+tables are in the [tuned list's notes](hydreigon_relicanth_hammer_denial.md).
 
 **Matchups (1000 games):**
-- **Worst:** Lurantis 9.8%, Nidoking ex / Nidoqueen 11.3%, Tauros 13.8%,
-  Raticate rush 13.8%, Diggersby 16.4%, Persian ex 17.4%.
-- **Best:** Mew / Pikachu box 94.4%, Mew baby box 89.9%, Salazzle ex / Muk
-  88.0%, Flygon mill 84.3%.
+- **Worst:** Lurantis 10.7%, Nidoking ex / Nidoqueen 11.3%, Raticate rush 13.4%,
+  Diggersby 13.7%, Tauros 13.8%, Cradily / Amoonguss 18.6%.
+- **Best:** Mew / Pikachu box 94.3%, Mew baby box 89.7%, Salazzle ex / Muk
+  88.0%.
 
 ## 1000-trial setup baseline
 
