@@ -1559,6 +1559,12 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if _draw_would_deck_out(pl, eff):
                 continue
+            # Run Away Draw shuffles Dudunsparce away; with one other
+            # Pokemon in play, that leaves a single Knock Out from losing.
+            if (POL.knob(pl, "selfshuffle_keep_bench") and len(pl.in_play()) <= 2
+                    and any(a.op in (IR.Op.SHUFFLE_SELF_INTO_DECK, IR.Op.SELF_TO_DECK)
+                            and a.target is IR.Target.SELF for a in eff.actions)):
+                continue
             if POL.knob(pl, "counter_mover") and _own_counter_mover(eff):
                 continue             # aimed by _plan_counter_moves instead
             if not _self_damage_buff_ok(pl, opp, p, eff):
@@ -4619,9 +4625,14 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # Mischievous Painting: Energy parked where it does nothing, and
             # one more 40 for the next Energized Graffiti each.
             w = POL.knob(pl, "painting_value")
-            if w:
-                n = sum(1 for c in opp.discard if str(c).endswith("Energy"))
-                value += w * min(act.amount or 1, n)
+            spots = ([opp.active] if opp.active else []) + list(opp.bench)
+            if w and spots:
+                # Only Energy that lands where nothing can use it stalls.
+                pool = [c for c in opp.discard if str(c).endswith("Energy")]
+                for nm in pool[:act.amount or 1]:
+                    types = AE.ENERGY_PROVIDES(opp, nm, spots[0]) or ["Colorless"]
+                    if _energy_use(opp, _energy_sink(opp, types, spots), types) == 0:
+                        value += w
         elif act.op == IR.Op.MILL_OPPONENT:
             # Decking someone out is a whole win, worth six Prizes. Milling
             # N of the D cards they have left is N/D of the way there, so
@@ -6563,6 +6574,11 @@ def run_phases(pl, opp, log, start):
                 play_basics(pl, turn, log)
         elif ph == "abilities":
             use_abilities(pl, opp, turn, log)
+            # Cards an Ability drew (Run Away Draw, Psychic Draw) waited a
+            # turn: the Item and Bench steps had already run.
+            if POL.knob(pl, "bench_after_abilities"):
+                play_items(pl, opp, turn, log, first_turn)
+                play_basics(pl, turn, log)
         elif ph == "stadium":
             use_stadium(pl, log)
             _stadium_text_effects(pl, log)
