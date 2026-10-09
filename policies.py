@@ -80,6 +80,9 @@ GREEDY = {
     # games x 67 opponents: Orbeetle / Morpeko ex +5.98 +/- 0.64 (better on
     # 57), Wobbuffet / Orbeetle +3.58 +/- 0.56 (better on 53).
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
+    # Hold Boss's Orders / Giovanni while nothing we have in play could
+    # attack this turn, even with the Energy attachment still to come.
+    "gust_needs_attacker": int(__import__("os").environ.get("GUST_NEEDS_ATTACKER", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
