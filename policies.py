@@ -67,11 +67,6 @@ GREEDY = {
     # opponents: +0.26 on average across the 16 field decks that run it
     # (better on 13), and +3.6 for Raticate rush against Alakazam.
     "hand_trim_first": int(__import__("os").environ.get("HAND_TRIM_FIRST", 3)),
-    # Price an attack that strips Energy from the opponent's Active by the
-    # damage it stops them dealing next turn (after their one attachment),
-    # times this weight, instead of a flat 25 per Energy (0: flat).
-    # Off until measured.
-    "denial_weight": float(__import__("os").environ.get("DENIAL_WEIGHT", 0)),
     # Feed a Pokemon whose Ability needs an Energy type attached (Munkidori).
     # Paired, 200 games x 63 opponents: positive on all 8 Munkidori decks
     # (+0.4 to +10.4; Feraligatr/Munkidori +4.51 +/- 0.62).
