@@ -4443,6 +4443,17 @@ def _expected_heads(flips, reflip):
     return out
 
 
+def _coin_scale(act, pl, spot):
+    """Expected number of times a "for each heads" action happens: N/2 for
+    N coins, 1 for flip-until-tails, 1 when there is no coin."""
+    flips = (act.filter or {}).get("flips")
+    if not flips:
+        return 1
+    if flips == "until_tails":
+        return 1.0
+    return _expected_heads(int(flips), False)
+
+
 def attack_rider_value(pl, opp, atk, spot=None):
     """Damage-equivalent worth of an attack's side effects, right now.
 
@@ -4548,7 +4559,10 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 elif c not in already:        # re-applying an existing one is worth nothing
                     value += RIDER_VALUE.get(c, 20)
         elif act.op == IR.Op.DISCARD_ENERGY_FROM_OPPONENT:
-            value += 25 if opp.active.energy else 0
+            # Per Energy it is expected to strip (one per heads for Three-
+            # Headed Bite), never more than is there to strip.
+            value += 25 * min(_coin_scale(act, pl, spot) * (act.amount or 1),
+                              len(opp.active.energy))
         elif act.op == IR.Op.MILL_OPPONENT:
             # Decking someone out is a whole win, worth six Prizes. Milling
             # N of the D cards they have left is N/D of the way there, so
@@ -4565,13 +4579,13 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # 21-turn game. The executor already scales the mill itself;
             # this is the valuation catching up.
             per = (act.filter or {}).get("per_heads")
-            n = (act.amount or 1)
+            n = (act.amount or 1) * _coin_scale(act, pl, spot)
             if per:
                 flips = _clause_count(per, pl, opp, spot)
                 n = n * _expected_heads(flips or 0, AE.query_reflip(pl, spot))
             value += n / left * 6 * 250
         elif act.op == IR.Op.DISCARD_FROM_OPPONENT:
-            value += 10 * (act.amount or 1)
+            value += 10 * (act.amount or 1) * _coin_scale(act, pl, spot)
         elif act.op == IR.Op.DAMAGE_TO_HP_THRESHOLD:
             # Worth exactly the counters it would place, which on a big
             # Active is the largest single hit in the pool.
@@ -4706,7 +4720,7 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # An Energy attach is roughly a turn of tempo, and worth more
             # while the Active is still short of its own attack cost.
             short = energy_shortfall(pl, pl.active) if pl.active else 0
-            value += (45 if short else 20) * (act.amount or 1)
+            value += (45 if short else 20) * (act.amount or 1) * _coin_scale(act, pl, spot)
         elif act.op == IR.Op.SEARCH_TO_HAND:
             value += 25 * (act.amount or 1)
         elif act.op == IR.Op.DRAW:

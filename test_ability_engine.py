@@ -5331,3 +5331,25 @@ def test_xerosic_goes_first_into_a_big_hand():
     op.hand = [("Item", "Ultra Ball")] * 4
     V.play_supporter(me, op, 3, [])
     check("and not into 4, where Lillie's is worth more", len(op.hand) == 4, len(op.hand))
+
+
+def test_for_each_heads_effects_repeat_per_heads():
+    """"Flip 3 coins. For each heads, discard an Energy from your opponent's
+    Active Pokemon" (Hydreigon's Three-Headed Bite) and eight more like it
+    did their action exactly once, whatever the coins said."""
+    import random as _r
+    e = IR.compile_effect("a", "Three-Headed Bite", "Flip 3 coins. For each heads, discard an "
+                          "Energy from your opponent's Active Pokémon.")
+    check("Three-Headed Bite flips 3 coins", e.actions[0].filter.get("flips") == 3,
+          e.actions[0].filter)
+    stripped = []
+    for s in range(400):
+        _r.seed(s)
+        V, me, op = _tr_board("Team Rocket's Zubat", opp_active="Raging Bolt ex")
+        op.active.energy = [["Lightning"]] * 4
+        op.active.energy_names = ["Lightning Energy"] * 4
+        AE.apply_action(e.actions[0], me, op, me.active, [], attacker=me.active)
+        stripped.append(4 - len(op.active.energy))
+    check("it strips 0-3 Energy, 1.5 on average",
+          set(stripped) == {0, 1, 2, 3} and 1.3 <= sum(stripped) / 400 <= 1.7,
+          (sorted(set(stripped)), sum(stripped) / 400))

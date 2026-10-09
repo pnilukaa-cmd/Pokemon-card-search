@@ -3467,6 +3467,33 @@ _RESTRICTED_OPS = (Op.SEARCH_TO_BENCH, Op.SEARCH_TO_HAND, Op.RECOVER_TO_BENCH,
 _EX_ONLY_RE = re.compile(r"search your deck for[^.]{0,40}?pok[eé]mon ex\b", re.I)
 
 
+_COIN_REPEAT_RE = re.compile(
+    r"flip (\d+|a) coins?(?: until you get tails)?\. for each heads, (\w+)", re.I)
+
+
+def _stamp_coin_repeats(eff, text):
+    """ "Flip 3 coins. For each heads, discard an Energy from your opponent's
+    Active Pokemon" (Hydreigon's Three-Headed Bite, Centiskorch, Klawf,
+    Tyrantrum, Crawdaunt, Sharpedo, Mega Audino ex): the action happens once
+    PER HEADS. Every one of them compiled to doing it exactly once, so
+    Three-Headed Bite never stripped two or three Energy and Kaleidowaltz
+    was a flat 2 Energy instead of 0-6. Damage scalers ("this attack does N
+    damage for each heads") are read by attack_damage and untouched here."""
+    m = _COIN_REPEAT_RE.search(text)
+    if not m or m.group(2).lower() == "this":
+        return
+    until_tails = "until you get tails" in m.group(0).lower()
+    flips = "until_tails" if until_tails else (1 if m.group(1).lower() == "a" else int(m.group(1)))
+    for a in eff.actions:
+        f = a.filter if a.filter is not None else {}
+        if f.get("per_heads") or f.get("flips"):
+            continue
+        if a.op in (Op.REVEAL_OPPONENT_HAND, Op.NO_OP_INFORMATION):
+            continue
+        f["flips"] = flips
+        a.filter = f
+
+
 def _stamp_target_restrictions(eff):
     """"a Basic Pokemon WITH 70 HP OR LESS", "a Pokemon THAT DOESN'T HAVE A
     RULE BOX" -- both are restrictions on what the search may take, and
@@ -3558,6 +3585,7 @@ def compile_effect(source, name, text):
                                       and c.get("count") == ii["count"])]
     eff.actions = _collapse_duplicate_attachments(eff, spans)
     _stamp_target_restrictions(eff)
+    _stamp_coin_repeats(eff, text)
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:

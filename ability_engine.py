@@ -960,6 +960,25 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
 
+    # "Flip N coins. For each heads, <do this>": once per heads.
+    flips = (act.filter or {}).get("flips")
+    if flips:
+        if flips == "until_tails":
+            heads = 0
+            while random.random() < 0.5:
+                heads += 1
+        else:
+            heads = sum(1 for _ in range(int(flips)) if random.random() < 0.5)
+        if not heads:
+            log.append("    no heads")
+            return False
+        once = IR.Action(op, act.amount, act.target,
+                         {k: v for k, v in act.filter.items() if k != "flips"})
+        did = False
+        for _ in range(heads):
+            did = apply_action(once, pl, opp, source, log, attacker, make_inplay) or did
+        return did
+
     # An ACTIVATED Ability's damage buff for this turn (Torrential Heart);
     # the only one in the pool with no executor.
     if op == O.BUFF_DAMAGE and act.target == IR.Target.SELF and source is not None \
