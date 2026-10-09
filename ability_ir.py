@@ -1182,8 +1182,47 @@ def _r(m, text):
     return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF, f)]
 
 
+_LOOK_REVEAL_RE = re.compile(
+    r"you may reveal (up to (\d+)|an?|any number of) (?:in any combination of )?(.+?)"
+    r" (?:cards? )?you find there and put (?:it|them) into your hand", re.I)
+
+
+def _look_selector(item):
+    """One "Grass Pokemon" / "Basic Grass Energy" / "Trainer" / "Supporter"
+    phrase of a reveal clause, as a card test."""
+    item = re.sub(r"^(?:an?|and) ", "", item.strip(), flags=re.I)
+    m = re.fullmatch(r"basic (" + TYPES + r") energy", item, re.I)
+    if m:
+        return {"kind": "Energy", "basic": True, "type": m.group(1).capitalize()}
+    m = re.fullmatch(r"(?:(" + TYPES + r") )?pok[eé]mon", item, re.I)
+    if m:
+        return {"kind": "Pokemon", "type": m.group(1).capitalize() if m.group(1) else None}
+    m = re.fullmatch(r"(trainer|supporter|item|stadium)", item, re.I)
+    if m:
+        return {"kind": m.group(1).capitalize()}
+    return None
+
+
 @rule("look_at_deck", r"look at the top (\d+) cards? of your deck")
 def _r(m, text):
+    # "You may reveal up to 2 in any combination of Grass Pokemon and Basic
+    # Grass Energy cards you find there and put them into your hand"
+    # (Bug Catching Set), "a Pokemon and a Trainer card" (Drayton), "any
+    # number of Supporter cards" (Roto-Stick). Without the clause the
+    # executor took the single top card, of any kind.
+    r = _LOOK_REVEAL_RE.search(text)
+    if r:
+        items = [_look_selector(x) for x in re.split(r" and ", r.group(3), flags=re.I)]
+        if items and all(items):
+            q = r.group(1).lower()
+            f = {"selectors": items, "shuffle_rest": True}
+            if q == "any number of":
+                f["take"] = "all"
+            elif r.group(2):
+                f["take"] = int(r.group(2))
+            else:
+                f["take"] = "each" if len(items) > 1 else 1
+            return [Action(Op.LOOK_AT_DECK, int(m.group(1)), Target.SELF, f)]
     return [Action(Op.LOOK_AT_DECK, int(m.group(1)), Target.SELF)]
 
 
@@ -3068,8 +3107,10 @@ def _r(m, text):
       r"each player'?s (" + TYPES + r") pok[eé]mon can evolve into \1 pok[eé]mon"
       r" during the turn they play those pok[eé]mon")
 def _r(m, text):
-    return [Action(Op.EVOLVE_EARLY, None, Target.BOTH_ALL,
-                   {"type": m.group(1).capitalize()})]
+    f = {"type": m.group(1).capitalize()}
+    if re.search(r"except during their first turn", text, re.I):
+        f["not_first_turn"] = True
+    return [Action(Op.EVOLVE_EARLY, None, Target.BOTH_ALL, f)]
 
 
 @rule("devolve_own",

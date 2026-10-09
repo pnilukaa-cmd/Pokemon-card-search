@@ -1895,7 +1895,7 @@ def try_evolve(pl, opp, turn, log, first_turn):
             normal = (turn > 1 and turn > spot.entered_turn
                       and not spot.evolved_this_turn)
             # Luxio's Fighting Roar is the printed exception to both halves.
-            if normal or AE.query_evolves_early(pl, spot, opp):
+            if normal or AE.query_evolves_early(pl, spot, opp, into=name):
                 pl.remove_from_hand(kind, name)
                 spot.under.append(spot.name)
                 spot.name = name
@@ -2475,6 +2475,9 @@ def play_supporter(pl, opp, turn, log):
         lillie = 8 if pl.prizes == STARTING_PRIZES else 6
         for name, amount in (("Lillie's Determination", lillie), ("Professor's Research", 7)):
             back = len(pl.hand) - 1 if name == "Lillie's Determination" else 0
+            plan = POL.knob(pl, "hand_cost_hold") and _hand_ko_plan(pl)
+            if plan and _hand_energy_count(pl, plan[1]) >= plan[0] // 2:
+                continue        # the hand is the Hydra Breath being built
             if name in hand_names and _deck_left_after(pl, amount, back) >= DRAW_FLOOR:
                 use(name)
                 if name == "Professor's Research":
@@ -2817,6 +2820,31 @@ def _energy_sink(owner, types, spots):
 
 
 AE.ENERGY_SINK = _energy_sink
+
+
+def _look_pick(pl, cands):
+    """Which matching cards to take off a look at the deck (Bug Catching
+    Set's "up to 2", Drayton's one of each): an Evolution for something in
+    play first, then Energy a hand-cost Knock Out is being built from,
+    then a Basic with Bench room, then the rest."""
+    in_play = {M.base_of(pl.POKEMON, p.name) for p in pl.in_play()}
+
+    def rank(card):
+        kind, name = card
+        if kind == "Pokemon":
+            info = pl.POKEMON.get(name) or {}
+            if info.get("evolves_from") in in_play:
+                return 0
+            if info.get("stage") == "Basic" and len(pl.bench) < bench_cap(pl):
+                return 2
+            return 3
+        if kind == "Energy":
+            return 1 if _hand_ko_plan(pl) else 2
+        return 2
+    return sorted(cands, key=rank)
+
+
+AE.LOOK_PICK = _look_pick
 
 
 def _payable_damage(owner, spot, energy, foe=None):
@@ -4320,6 +4348,42 @@ def _hand_energy_count(pl, etype):
                and _re.fullmatch(rf"(basic )?{etype} energy", n, _re.I))
 
 
+_HAND_KO_RE = _re.compile(r"knock out your opponent's active pok[eé]mon", _re.I)
+
+
+def _hand_ko_plan(pl):
+    """(count, type) of this deck's "discard N Basic <Type> Energy from your
+    hand, and Knock Out your opponent's Active Pokemon" attack (Hydrapple's
+    Hydra Breath), or None."""
+    cached = getattr(pl, "_hand_ko_cache", "unset")
+    if cached != "unset":
+        return cached
+    plan = None
+    for info in pl.POKEMON.values():
+        for a in info.get("attacks") or []:
+            text = a.get("text") or ""
+            hc = _hand_energy_cost(pl, text)
+            if hc and _HAND_KO_RE.search(text) and "this attack does nothing" in text.lower():
+                plan = hc
+    pl._hand_ko_cache = plan
+    return plan
+
+
+def _holds_for_hand_ko(pl, target):
+    """Keep the Energy in hand for the hand-cost Knock Out: attach only to
+    let the Active attack this turn, or out of a surplus beyond the cost."""
+    plan = _hand_ko_plan(pl)
+    if not plan:
+        return False
+    n, etype = plan
+    if _hand_energy_count(pl, etype) > n:
+        return False
+    if target is pl.active and not _payable_damage(pl, target, target.energy,
+                                                   getattr(pl, "_opp_ref", None)):
+        return False
+    return True
+
+
 def _generic_attack_damage(pl, opp, spot, atk, text, base):
     base = base or 0
     gated = False
@@ -5238,6 +5302,8 @@ def attach_energy(pl, cards_by_name, log):
                   and not getattr(p, "attach_locked", 0) and energy_shortfall(pl, p) > 0]
         target = max(others, key=lambda p: _potential_damage(pl, p)) if others else None
     if target is None:
+        return
+    if POL.knob(pl, "hand_cost_hold") and _holds_for_hand_ko(pl, target):
         return
     idx = _energy_for(pl, target)
     if idx is None:

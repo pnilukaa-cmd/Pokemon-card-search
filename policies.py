@@ -80,6 +80,10 @@ GREEDY = {
     # games x 67 opponents: Orbeetle / Morpeko ex +5.98 +/- 0.64 (better on
     # 57), Wobbuffet / Orbeetle +3.58 +/- 0.56 (better on 53).
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
+    # Build the hand for a "discard N Energy from your hand" Knock Out
+    # (Hydra Breath): attach only what lets the Active attack, and don't
+    # shuffle away a hand holding half the cost with Lillie's.
+    "hand_cost_hold": int(__import__("os").environ.get("HAND_COST_HOLD", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -2595,9 +2595,12 @@ def test_no_card_in_any_decklist_is_silently_inert():
             # Conditional on a Pokemon subtype in play (Tera): played when
             # the condition holds, so live -- the probe board has none.
             ir = V.trainer_effect_ir(nm)
+            # Forest of Vitality: put down when a matching Evolution is in
+            # hand, which the empty probe hand never holds.
             return bool(ir is not None and any(
-                (a.filter or {}).get("requires_subtype")
-                and a.op in (IR.Op.BENCH_CAP, IR.Op.MODIFY_ATTACK_COST)
+                ((a.filter or {}).get("requires_subtype")
+                 and a.op in (IR.Op.BENCH_CAP, IR.Op.MODIFY_ATTACK_COST))
+                or (a.op is IR.Op.EVOLVE_EARLY and (a.filter or {}).get("type"))
                 for a in ir.actions))
         # Items and Supporters go through play_trainer_from_ir, which only
         # resolves ops in TRAINER_IR_OPS.
@@ -5406,3 +5409,53 @@ def test_handheld_fan_takes_the_energy_the_attacker_needs():
     check("the Energy goes to Budew, not Dreepy (the next Dragapult)",
           op.bench[0].energy == [] and len(op.bench[1].energy) == 1,
           [(s.name, s.energy) for s in op.bench])
+
+
+def test_look_at_the_top_cards_takes_what_the_card_allows():
+    """Bug Catching Set: "reveal up to 2 in any combination of Grass Pokemon
+    and Basic Grass Energy cards you find there". Drayton: "a Pokemon and a
+    Trainer card". Roto-Stick: "any number of Supporter cards". All three
+    compiled to a bare look at the deck, whose executor took the single top
+    card of whatever kind."""
+    V, H, HE = _real("decks/field/hydrapple_hydra_breath_festival.txt", "h")
+
+    def look(trainer, top):
+        pl = V.Player("h", H[1], list(H[2]), HE)
+        pl.active = V.InPlay("Applin", 1)
+        pl.bench, pl.hand = [], []
+        pl.deck = [("Item", "Max Rod")] * 10 + top
+        AE.apply_action(V.trainer_effect_ir(trainer).actions[0], pl, None, None, [])
+        return sorted(pl.hand)
+
+    top = [("Supporter", "Lillie's Determination"), ("Energy", "Grass Energy"),
+           ("Item", "Poké Pad"), ("Pokemon", "Dipplin"), ("Energy", "Grass Energy"),
+           ("Pokemon", "Seaking"), ("Item", "Night Stretcher")]
+    got = look("Bug Catching Set", top)
+    check("Bug Catching Set takes 2: Dipplin and a Grass Energy",
+          got == [("Energy", "Grass Energy"), ("Pokemon", "Dipplin")], got)
+    got = look("Drayton", top)
+    check("Drayton takes one Pokemon and one Trainer",
+          len(got) == 2 and sum(k == "Pokemon" for k, _ in got) == 1
+          and sum(k in ("Item", "Supporter") for k, _ in got) == 1, got)
+    got = look("Roto-Stick", [("Supporter", "Boss's Orders"), ("Item", "Poké Pad"),
+                              ("Supporter", "Lillie's Determination"), ("Energy", "Grass Energy")])
+    check("Roto-Stick takes every Supporter in the top 4",
+          got == [("Supporter", "Boss's Orders"), ("Supporter", "Lillie's Determination")], got)
+
+
+def test_forest_of_vitality_is_for_grass_and_not_the_first_turn():
+    """"Each player's Grass Pokemon can evolve into Grass Pokemon during the
+    turn they play those Pokemon, except during their first turn." The
+    engine let ANY Pokemon evolve early under it, on any turn: Goldeen into
+    Seaking (both Water) the turn it was benched."""
+    V, H, HE = _real("decks/field/hydrapple_hydra_breath_festival.txt", "h")
+    pl = V.Player("h", H[1], list(H[2]), HE)
+    pl.bench, pl.stadium = [], "Forest of Vitality"
+
+    def early(name, into, rnd):
+        pl.round_no = rnd
+        return AE.query_evolves_early(pl, V.InPlay(name, rnd), None)
+
+    check("Applin -> Dipplin the turn it is played", early("Applin", "Dipplin", 3))
+    check("not Goldeen -> Seaking (Water)", not early("Goldeen", "Seaking", 3))
+    check("not on the first turn", not early("Applin", "Dipplin", 1))

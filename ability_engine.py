@@ -779,6 +779,8 @@ SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else No
 SWITCH_RANK = lambda pl, opp, spot: 0
 # Where an Energy given to `owner` does the least good; set by the simulator.
 ENERGY_SINK = lambda owner, types, spots: spots[0]
+# Order in which to take matching cards off a look at the deck; set by the simulator.
+LOOK_PICK = lambda pl, cands: list(cands)
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
@@ -2690,6 +2692,45 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         log.append(f"    apply {', '.join(conds)}")
         return True
 
+    if op == O.LOOK_AT_DECK and act.filter.get("selectors"):
+        n = act.amount or 1
+        top = pl.deck[-n:]
+        if not top:
+            return False
+        sels = act.filter["selectors"]
+
+        def fits(card, sel):
+            kind, name = card
+            want = sel["kind"]
+            if want == "Energy":
+                return (kind == "Energy" and re.fullmatch(
+                    rf"(basic )?{sel['type']} energy", name, re.I) is not None)
+            if want == "Pokemon":
+                return kind == "Pokemon" and (not sel.get("type") or sel["type"] in (
+                    (pl.POKEMON.get(name) or {}).get("types") or []))
+            if want == "Trainer":
+                return kind in ("Item", "Supporter", "Stadium", "Tool")
+            return kind == want
+
+        ranked = LOOK_PICK(pl, [c for c in top if any(fits(c, s) for s in sels)])
+        take = act.filter.get("take", 1)
+        picks = []
+        if take == "each":
+            for sel in sels:
+                c = next((c for c in ranked if fits(c, sel) and c not in picks), None)
+                if c is not None:
+                    picks.append(c)
+        else:
+            picks = ranked if take == "all" else ranked[:take]
+        for c in picks:
+            pl.deck.remove(c)
+            pl.hand.append(c)
+        if act.filter.get("shuffle_rest"):
+            random.shuffle(pl.deck)
+        log.append(f"    looks at top {n}, takes "
+                   f"{', '.join(c[1] for c in picks) if picks else 'nothing'}")
+        return True
+
     if op == O.LOOK_AT_DECK:
         # Look at the top N and take the most useful one. Without this the
         # 13 selection Abilities in the pool drew nothing at all; with it
@@ -3676,7 +3717,7 @@ def query_cost_reduction(pl, spot, opp=None):
     return out
 
 
-def query_evolves_early(pl, spot, opp=None):
+def query_evolves_early(pl, spot, opp=None, into=None):
     """Can this Pokemon be evolved on the turn it was played (or turn 1)?
 
     Luxio's Fighting Roar is the reason this exists: against an ex Active
@@ -3688,6 +3729,16 @@ def query_evolves_early(pl, spot, opp=None):
         if act.target == IR.Target.SELF and holder is not spot:
             continue
         if not conditions_met(eff, pl, opp or pl, holder):
+            continue
+        # Forest of Vitality: "Each player's Grass Pokemon can evolve into
+        # Grass Pokemon ... except during their first turn." Both halves of
+        # the type gate and the first-turn exclusion were ignored.
+        f = act.filter or {}
+        if f.get("not_first_turn") and (getattr(pl, "round_no", 2) or 2) <= 1:
+            continue
+        t = f.get("type")
+        if t and (t not in query_types(pl, spot)
+                  or (into and t not in ((pl.POKEMON.get(into) or {}).get("types") or []))):
             continue
         return True
     return False
