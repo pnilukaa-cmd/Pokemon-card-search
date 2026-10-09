@@ -4621,18 +4621,6 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # Headed Bite), never more than is there to strip.
             value += 25 * min(_coin_scale(act, pl, spot) * (act.amount or 1),
                               len(opp.active.energy))
-        elif act.op == IR.Op.OPP_ATTACH_FROM_DISCARD:
-            # Mischievous Painting: Energy parked where it does nothing, and
-            # one more 40 for the next Energized Graffiti each.
-            w = POL.knob(pl, "painting_value")
-            spots = ([opp.active] if opp.active else []) + list(opp.bench)
-            if w and spots:
-                # Only Energy that lands where nothing can use it stalls.
-                pool = [c for c in opp.discard if str(c).endswith("Energy")]
-                for nm in pool[:act.amount or 1]:
-                    types = AE.ENERGY_PROVIDES(opp, nm, spots[0]) or ["Colorless"]
-                    if _energy_use(opp, _energy_sink(opp, types, spots), types) == 0:
-                        value += w
         elif act.op == IR.Op.MILL_OPPONENT:
             # Decking someone out is a whole win, worth six Prizes. Milling
             # N of the D cards they have left is N/D of the way there, so
