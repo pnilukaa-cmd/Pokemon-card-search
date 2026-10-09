@@ -2774,6 +2774,58 @@ def _energy_provides(pl, name, spot):
 
 
 AE.ENERGY_PROVIDES = _energy_provides
+
+
+def _evolutions_of(owner, name):
+    """Every Pokemon in `owner`'s deck that evolves, directly or not, from
+    the Pokemon in play as `name`."""
+    out, frontier = set(), {M.base_of(owner.POKEMON, name)}
+    while frontier:
+        nxt = {k for k, v in owner.POKEMON.items()
+               if v.get("evolves_from") in frontier and k not in out}
+        out |= nxt
+        frontier = {M.base_of(owner.POKEMON, k) for k in nxt}
+    return out
+
+
+def _energy_use(owner, spot, types):
+    """How much good an Energy providing `types` does `spot`: the biggest
+    attack, on it or on anything it evolves into, whose cost the Energy can
+    pay part of. 0 for a Pokemon it can do nothing for (no attack takes
+    that type and none has a Colorless symbol)."""
+    best = 0
+    for n in {spot.name} | _evolutions_of(owner, spot.name):
+        info = owner.POKEMON.get(n) or {}
+        for atk in info.get("attacks") or []:
+            if any(c == "Colorless" or c in types for c in atk.get("cost") or []):
+                best = max(best, atk.get("damage") or 0, 20)
+        # An Ability that only works with that type attached (Munkidori's
+        # Adrena-Brain) is a use too.
+        if any(ab.get("requires_energy_type") in types for ab in info.get("abilities") or []):
+            best = max(best, 100)
+    return best
+
+
+def _energy_sink(owner, types, spots):
+    """Where an Energy handed to `owner` does the least good. Grafaiai's
+    Mischievous Painting ("in any way you like") and Handheld Fan ("to 1 of
+    your opponent's Benched Pokemon") let the player who is GIVING the
+    Energy choose, and the choice that stalls is a Pokemon that cannot use
+    it: a support Pokemon, the wrong type, anything but the attacker."""
+    return min(spots, key=lambda sp: (_energy_use(owner, sp, types),
+                                      sp is owner.active))
+
+
+AE.ENERGY_SINK = _energy_sink
+
+
+def _payable_damage(owner, spot, energy, foe=None):
+    """The most printed damage `spot` could pay for with `energy` attached."""
+    best = 0
+    for atk in (owner.POKEMON.get(spot.name) or {}).get("attacks") or []:
+        if can_pay(effective_cost(owner, spot, atk["cost"], foe, atk.get("name")), energy):
+            best = max(best, atk.get("damage") or 0, 1)
+    return best
 AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
@@ -5605,12 +5657,25 @@ def fire_on_damaged_tool(pl, opp, dmg, log):
     elif kind == "move_energy" and pl.active is not None and pl.active.energy:
         # "to 1 of your opponent's Benched Pokemon" -- the attacker's own
         # Bench, from the point of view of the Pokemon wearing the Tool.
+        # The Fan's owner picks both the Energy and where it goes: the one
+        # the attacker most needs, onto whatever can least use it. It took
+        # the last Energy attached and always gave it to the first Benched
+        # Pokemon -- often the next attacker.
         if pl.bench:
-            pl.bench[0].energy.append(pl.active.energy.pop())
-            if getattr(pl.active, "energy_names", None):
-                pl.bench[0].energy_names.append(pl.active.energy_names.pop())
+            src = pl.active
+            i = min(range(len(src.energy)),
+                    key=lambda k: (_payable_damage(pl, src, src.energy[:k] + src.energy[k + 1:], opp),
+                                   -k))
+            e = src.energy.pop(i)
+            dest = _energy_sink(pl, e, pl.bench)
+            dest.energy.append(e)
+            names = getattr(src, "energy_names", None)
+            if names and i < len(names):
+                nm = names.pop(i)
+                if getattr(dest, "energy_names", None) is not None:
+                    dest.energy_names.append(nm)
             log.append(f"  {opp.name}: {opp.active.tool} -- moves an Energy off "
-                       f"{pl.active.name}")
+                       f"{src.name} onto {dest.name}")
 
 
 

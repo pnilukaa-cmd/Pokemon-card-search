@@ -777,6 +777,8 @@ SELF_SWITCH_TARGET = lambda pl, opp, cands, optional: (cands[0] if cands else No
 # How much a Pokemon is worth in the Active Spot right now. Set by
 # simulate_versus (its _ready_damage), which this module cannot import.
 SWITCH_RANK = lambda pl, opp, spot: 0
+# Where an Energy given to `owner` does the least good; set by the simulator.
+ENERGY_SINK = lambda owner, types, spots: spots[0]
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
@@ -2297,14 +2299,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Grafaiai's Mischievous Painting hands the OPPONENT Energy off
         # their own discard -- a real cost paid for a big number, and it was
         # free.
+        # "in any way you like": the Grafaiai player places them, so each
+        # goes where it does the least good (ENERGY_SINK), keeping the type
+        # it provides. It used to land on the Active -- the attacker -- as
+        # a Colorless Energy.
         moved = 0
+        spots = ([opp.active] if opp.active else []) + list(opp.bench)
         for _ in range(act.amount or 1):
             nm = next((n for n in opp.discard if n.endswith("Energy")), None)
-            tgt = opp.active or (opp.bench[0] if opp.bench else None)
-            if not nm or tgt is None:
+            if not nm or not spots:
                 break
+            types = ENERGY_PROVIDES(opp, nm, spots[0]) or ["Colorless"]
+            tgt = ENERGY_SINK(opp, types, spots)
             opp.discard.remove(nm)
-            tgt.energy.append(["Colorless"])
+            tgt.energy.append(list(types))
             if getattr(tgt, "energy_names", None) is not None:
                 tgt.energy_names.append(nm)
             moved += 1

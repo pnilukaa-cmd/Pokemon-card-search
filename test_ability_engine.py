@@ -5353,3 +5353,56 @@ def test_for_each_heads_effects_repeat_per_heads():
     check("it strips 0-3 Energy, 1.5 on average",
           set(stripped) == {0, 1, 2, 3} and 1.3 <= sum(stripped) / 400 <= 1.7,
           (sorted(set(stripped)), sum(stripped) / 400))
+
+
+def _hyd_vs_dragapult():
+    V, H, HE = _real("decks/field/hydreigon_grafaiai_energy_denial.txt", "h")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    me = V.Player("h", H[1], list(H[2]), HE)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    op.active = V.InPlay("Dragapult ex", 1)
+    op.bench = [V.InPlay("Dreepy", 1), V.InPlay("Budew", 1), V.InPlay("Munkidori", 1)]
+    me.round_no = op.round_no = 3
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand = [], []
+    return V, H, me, op
+
+
+def test_mischievous_painting_parks_energy_where_it_does_nothing():
+    """Grafaiai's Mischievous Painting attaches the opponent's discarded
+    Energy "to their Pokemon in any way you like" -- the Grafaiai player
+    chooses. All of it landed on the opponent's Active, their attacker, and
+    every one became a Colorless Energy."""
+    V, H, me, op = _hyd_vs_dragapult()
+    me.active = V.InPlay("Grafaiai", 1)
+    me.active.energy, me.active.energy_names = [["Darkness"]], ["Darkness Energy"]
+    op.discard = ["Fire Energy", "Psychic Energy", "Darkness Energy"]
+    me._forced_attack = next(a for a in H[1]["Grafaiai"]["attacks"]
+                             if a["name"] == "Mischievous Painting")
+    V.do_attack(me, op, [])
+    check("none on Dragapult ex, which attacks with them", op.active.energy == [],
+          op.active.energy)
+    check("all three on Budew, whose only attack costs Grass",
+          sorted(map(tuple, op.bench[1].energy)) == [("Darkness",), ("Fire",), ("Psychic",)],
+          [(s.name, s.energy) for s in op.bench])
+    check("and none on Munkidori, whose Ability wants Darkness",
+          op.bench[2].energy == [], op.bench[2].energy)
+
+
+def test_handheld_fan_takes_the_energy_the_attacker_needs():
+    """Handheld Fan moves "an Energy from the Attacking Pokemon to 1 of your
+    opponent's Benched Pokemon"; the Fan's owner picks both. It took the
+    last Energy attached and gave it to the first Benched Pokemon."""
+    V, H, me, op = _hyd_vs_dragapult()
+    me.active = V.InPlay("Zweilous", 1)
+    me.active.tool = "Handheld Fan"
+    op.active.energy = [["Fire"], ["Psychic"], ["Darkness"]]
+    op.active.energy_names = ["Fire Energy", "Psychic Energy", "Darkness Energy"]
+    log = []
+    V.fire_on_damaged_tool(op, me, 70, log)
+    left = [e[0] for e in op.active.energy]
+    check("Phantom Dive (Fire + Psychic) can no longer be paid",
+          not ("Fire" in left and "Psychic" in left), (left, log))
+    check("the Energy goes to Budew, not Dreepy (the next Dragapult)",
+          op.bench[0].energy == [] and len(op.bench[1].energy) == 1,
+          [(s.name, s.energy) for s in op.bench])
