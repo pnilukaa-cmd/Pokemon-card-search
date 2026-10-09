@@ -1,0 +1,26 @@
+Pokémon: 20
+3 Hydrapple DRI 18
+4 Seaking PRE 21
+3 Dipplin TWM 18
+1 Dunsparce JTG 120
+2 Dudunsparce TEF 129
+4 Goldeen TWM 44
+3 Applin TWM 17
+
+Trainer: 29
+1 Forest of Vitality POR 109
+1 Night Stretcher MEG 173
+4 Lillie's Determination MEG 169
+3 Buddy-Buddy Poffin MEG 167
+1 Max Rod PRE 116
+4 Poké Pad POR 113
+1 Lana's Aid TWM 207
+3 Energy Retrieval CRI 108
+4 Bug Catching Set TWM 143
+1 Boss's Orders RCL 189
+3 Festival Grounds TWM 149
+
+Energy: 11
+14 Basic Grass Energy
+
+Total Cards: 60
