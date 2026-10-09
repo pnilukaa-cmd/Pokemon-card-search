@@ -1,4 +1,4 @@
-Pokémon: 20
+Pokémon: 12
 2 Zweilous SSP 118
 3 Deino SSP 117
 1 Dunsparce TEF 128
@@ -12,16 +12,13 @@ Pokémon: 20
 1 Relicanth TEF 84
 1 Psyduck ASC 39
 
-Trainer: 34
+Trainer: 18
 1 Enhanced Hammer TWM 148
 1 Team Rocket's Petrel DRI 176
-1 Xerosic's Machinations SFA 64
 4 Crushing Hammer POR 71
 1 Prime Catcher TEF 157
 4 Poké Pad ASC 198
 2 Night Stretcher ASC 196
-1 Nighttime Mine ASC 197
-1 Air Balloon BLK 79
 2 Handheld Fan TWM 150
 1 Lana's Aid TWM 155
 1 Hilda WHT 84
@@ -32,7 +29,7 @@ Trainer: 34
 3 Boss's Orders MEG 114
 1 Rare Candy MEG 125
 
-Energy: 6
-6 Basic Darkness Energy
+Energy: 1
+9 Basic {D} Energy MEE 15
 
 Total Cards: 60

@@ -1,27 +1,21 @@
-Pokémon: 20
+Pokémon: 12
 2 Zweilous SSP 118
-3 Deino SSP 117
-1 Dunsparce TEF 128
+4 Deino SSP 117
+2 Dunsparce TEF 128
 2 Dudunsparce TEF 129
 2 Dunsparce JTG 120
-2 Grafaiai SSP 121
-2 Shroodle SSP 120
-2 Hydreigon 30C 99
+3 Hydreigon 30C 99
 1 Pecharunt ex SFA 39
 1 Shaymin DRI 10
 1 Relicanth TEF 84
 1 Psyduck ASC 39
 
-Trainer: 34
+Trainer: 18
 1 Enhanced Hammer TWM 148
-1 Team Rocket's Petrel DRI 176
-1 Xerosic's Machinations SFA 64
 4 Crushing Hammer POR 71
 1 Prime Catcher TEF 157
 4 Poké Pad ASC 198
 2 Night Stretcher ASC 196
-1 Nighttime Mine ASC 197
-1 Air Balloon BLK 79
 2 Handheld Fan TWM 150
 1 Lana's Aid TWM 155
 1 Hilda WHT 84
@@ -30,9 +24,9 @@ Trainer: 34
 4 Buddy-Buddy Poffin ASC 184
 4 Lillie's Determination MEG 119
 3 Boss's Orders MEG 114
-1 Rare Candy MEG 125
+2 Rare Candy MEG 125
 
-Energy: 6
-6 Basic Darkness Energy
+Energy: 1
+10 Basic {D} Energy MEE 15
 
 Total Cards: 60
