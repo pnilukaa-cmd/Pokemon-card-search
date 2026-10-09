@@ -6979,30 +6979,7 @@ def choose_gust_target(pl, opp):
     # decisions and bought nothing measurable, and a rule that fires that
     # often with no demonstrated benefit is exactly the kind of complexity
     # that rots in this codebase.
-    if POL.knob(pl, "gust_needs_attacker") and not _board_can_attack(pl, opp):
-        return None
     return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
-
-
-def _board_can_attack(pl, opp):
-    """Could anything we have in play attack this turn? Counts the one
-    Energy attachment still to come (the Supporter is played before it)
-    and a retreat into the Active Spot (also after it)."""
-    hand_e = [n for k, n in pl.hand if k == "Energy"]
-    for spot in pl.in_play():
-        info = pl.POKEMON[spot.name]
-        for atk in list(info["attacks"]) + AE.query_extra_attacks(pl, spot):
-            if _attack_disabled(spot, atk):
-                continue
-            cost = effective_cost(pl, spot, atk["cost"], opp, atk.get("name"))
-            if can_pay(cost, spot.energy):
-                return True
-            for n in hand_e:
-                prov = _energy_provides(pl, n, spot)
-                if prov and can_pay(cost, spot.energy + [prov]):
-                    return True
-    return False
-
 
 def _promote_after_ko(owner, taker, log):
     """The new Active after an attack's Knock Out, chosen by `owner`.
