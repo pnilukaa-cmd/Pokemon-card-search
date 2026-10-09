@@ -1559,12 +1559,6 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if _draw_would_deck_out(pl, eff):
                 continue
-            # Run Away Draw shuffles Dudunsparce away; with one other
-            # Pokemon in play, that leaves a single Knock Out from losing.
-            if (POL.knob(pl, "selfshuffle_keep_bench") and len(pl.in_play()) <= 2
-                    and any(a.op in (IR.Op.SHUFFLE_SELF_INTO_DECK, IR.Op.SELF_TO_DECK)
-                            and a.target is IR.Target.SELF for a in eff.actions)):
-                continue
             if POL.knob(pl, "counter_mover") and _own_counter_mover(eff):
                 continue             # aimed by _plan_counter_moves instead
             if not _self_damage_buff_ok(pl, opp, p, eff):
