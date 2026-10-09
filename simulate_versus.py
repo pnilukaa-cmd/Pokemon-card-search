@@ -4443,6 +4443,73 @@ def _expected_heads(flips, reflip):
     return out
 
 
+def _threat(opp, pl, spot):
+    """The most damage `spot` (opp's) can deal to pl's Active with the
+    Energy it holds right now."""
+    if pl.active is None:
+        return 0
+    best = 0
+    for a in (opp.POKEMON.get(spot.name) or {}).get("attacks") or []:
+        if can_pay(effective_cost(opp, spot, a["cost"], pl, a.get("name")), spot.energy):
+            best = max(best, attack_damage(opp, pl, spot, a, record=False))
+    left = effective_hp(pl, pl.active) - pl.active.damage
+    return min(best, max(left, 0))
+
+
+def _denial_value(pl, opp, act):
+    """Damage an Energy-stripping attack stops the opponent's Active dealing
+    next turn: strip the Energy that matters most, give them back their one
+    attachment of their best type, and compare. Averaged over the coins
+    (Three-Headed Bite strips 0-3)."""
+    spot = opp.active
+    if spot is None or not spot.energy:
+        return 0
+    flips = (act.filter or {}).get("flips")
+    per = act.amount or 1
+    if flips == "until_tails":
+        dist = {0: 0.5, 1: 0.25, 2: 0.125, 3: 0.125}
+    elif flips:
+        from math import comb
+        n = int(flips)
+        dist = {k: comb(n, k) / 2 ** n for k in range(n + 1)}
+    else:
+        dist = {1: 1.0}
+    saved = (list(spot.energy), list(getattr(spot, "energy_names", []) or []))
+    try:
+        now = _threat(opp, pl, spot)
+        if now <= 0:
+            return 0
+        types = sorted(getattr(opp, "energy_types", set()) or {"Colorless"})
+        total = 0.0
+        for k, p in dist.items():
+            if not p:
+                continue
+            spot.energy = list(saved[0])
+            for _ in range(min(k * per, len(spot.energy))):
+                # Strip whichever Energy hurts their threat most.
+                worst_i, worst_t = 0, None
+                for i in range(len(spot.energy)):
+                    trial = spot.energy[:i] + spot.energy[i + 1:]
+                    keep = spot.energy
+                    spot.energy = trial
+                    t = _threat(opp, pl, spot)
+                    spot.energy = keep
+                    if worst_t is None or t < worst_t:
+                        worst_i, worst_t = i, t
+                spot.energy = spot.energy[:worst_i] + spot.energy[worst_i + 1:]
+            stripped = spot.energy
+            after = 0
+            for t in types:
+                spot.energy = stripped + [[t]]
+                after = max(after, _threat(opp, pl, spot))
+            total += p * max(0, now - after)
+        return total
+    finally:
+        spot.energy, names = saved
+        if hasattr(spot, "energy_names"):
+            spot.energy_names = names
+
+
 def _coin_scale(act, pl, spot):
     """Expected number of times a "for each heads" action happens: N/2 for
     N coins, 1 for flip-until-tails, 1 when there is no coin."""
@@ -4559,10 +4626,14 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 elif c not in already:        # re-applying an existing one is worth nothing
                     value += RIDER_VALUE.get(c, 20)
         elif act.op == IR.Op.DISCARD_ENERGY_FROM_OPPONENT:
-            # Per Energy it is expected to strip (one per heads for Three-
-            # Headed Bite), never more than is there to strip.
-            value += 25 * min(_coin_scale(act, pl, spot) * (act.amount or 1),
-                              len(opp.active.energy))
+            w = POL.knob(pl, "denial_weight")
+            if w and act.target is IR.Target.OPP_ACTIVE:
+                value += w * _denial_value(pl, opp, act)
+            else:
+                # Per Energy it is expected to strip (one per heads for
+                # Three-Headed Bite), never more than is there to strip.
+                value += 25 * min(_coin_scale(act, pl, spot) * (act.amount or 1),
+                                  len(opp.active.energy))
         elif act.op == IR.Op.MILL_OPPONENT:
             # Decking someone out is a whole win, worth six Prizes. Milling
             # N of the D cards they have left is N/D of the way there, so
