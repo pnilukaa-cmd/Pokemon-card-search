@@ -80,6 +80,9 @@ GREEDY = {
     # games x 67 opponents: Orbeetle / Morpeko ex +5.98 +/- 0.64 (better on
     # 57), Wobbuffet / Orbeetle +3.58 +/- 0.56 (better on 53).
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
+    # Worth of each Energy Mischievous Painting parks on the opponent's
+    # side (0: the attack is worth nothing and is never chosen).
+    "painting_value": float(__import__("os").environ.get("PAINTING_VALUE", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
