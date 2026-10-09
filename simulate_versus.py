@@ -2475,7 +2475,7 @@ def play_supporter(pl, opp, turn, log):
         lillie = 8 if pl.prizes == STARTING_PRIZES else 6
         for name, amount in (("Lillie's Determination", lillie), ("Professor's Research", 7)):
             back = len(pl.hand) - 1 if name == "Lillie's Determination" else 0
-            plan = POL.knob(pl, "hand_cost_hold") and _hand_ko_plan(pl)
+            plan = POL.knob(pl, "hand_cost_hold") == 1 and _hand_ko_plan(pl)
             if plan and _hand_energy_count(pl, plan[1]) >= plan[0] // 2:
                 continue        # the hand is the Hydra Breath being built
             if name in hand_names and _deck_left_after(pl, amount, back) >= DRAW_FLOOR:
@@ -4377,6 +4377,11 @@ def _holds_for_hand_ko(pl, target):
         return False
     n, etype = plan
     if _hand_energy_count(pl, etype) > n:
+        return False
+    # 2: only once the hand-cost attacker is in play.
+    if POL.knob(pl, "hand_cost_hold") >= 2 and not any(
+            _hand_energy_cost(pl, a.get("text") or "")
+            for p in pl.in_play() for a in pl.POKEMON[p.name]["attacks"]):
         return False
     if target is pl.active and not _payable_damage(pl, target, target.energy,
                                                    getattr(pl, "_opp_ref", None)):
