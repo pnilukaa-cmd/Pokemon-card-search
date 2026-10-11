@@ -2563,8 +2563,15 @@ def test_no_card_in_any_decklist_is_silently_inert():
         # shield), so the name never appears in the source.
         if nm in {"Acerola's Mischief"}:
             return True
+        # Premium Power Pro: a one-turn typed damage buff, played by
+        # _situational_trainer by shape (ops == {BUFF_DAMAGE}).
+        _eff = V.trainer_effect_ir(nm)
+        if _eff is not None and {a.op for a in _eff.actions} == {IR.Op.BUFF_DAMAGE}:
+            return True
         if "Pokémon Tool" in subs and V._is_cost_tool(nm):
             return True                      # attach_tools' cost-Tool path
+        if "Pokémon Tool" in subs and V._is_attack_tool(nm):
+            return True                      # Core Memory: attach_tools' attack-Tool path
         if "Pokémon Tool" in subs:
             # Tools are consumed ONLY by these tables and the reflip path.
             if (nm in V.hp_tools() or nm in V.RETREAT_TOOLS
@@ -5527,3 +5534,65 @@ def test_a_search_takes_the_piece_that_evolves_something():
     pl.deck = [("Pokemon", "Mega Emboar ex"), ("Pokemon", "Pignite")]
     got = V.search_pokemon_from_deck(pl, lambda n: E[1][n]["stage"] != "Basic")
     check("Hilda's search takes Pignite, not a second Mega Emboar ex", got == "Pignite", got)
+
+
+def test_cinderace_opens_and_turbo_flare_feeds_the_attacker():
+    """Cinderace MEG 28's Explosiveness puts it face down as the opening
+    Active from the hand. It compiled as a no-op setup rule, so the deck's
+    four Cinderace (a Stage 2 with no Scorbunny or Raboot) could never be
+    played and never stopped a mulligan. Turbo Flare's three Energy ("in any
+    way you like") all went to the first Benched Pokemon. Mega Signal
+    searched for a NAME containing "Mega Evolution", and Fighting Gong lost
+    its "or a Basic Fighting Pokemon" half."""
+    import random as _r
+    V, Z, ZE = _real("decks/field/mega_zygarde_cinderace_turbo_flare.txt", "z")
+    pl = V.Player("z", Z[1], list(Z[2]), ZE)
+    pl.hand = [("Pokemon", "Cinderace"), ("Item", "Switch")]
+    check("Cinderace alone is a legal opening hand", pl.has_basic_in_hand())
+    V.play_basics(pl, 0, [])
+    check("and it opens Active", pl.active is not None and pl.active.name == "Cinderace",
+          pl.active and pl.active.name)
+
+    op = V.Player("o", Z[1], list(Z[2]), ZE)
+    op.active, op.bench, op.hand = V.InPlay("Mega Audino ex", 1), [], []
+    pl.energy_types = {"Fighting"}
+    pl.active.energy, pl.active.energy_names = [["Fighting"]], ["Fighting Energy"]
+    pl.bench = [V.InPlay("Mega Audino ex", 1), V.InPlay("Mega Zygarde ex", 1)]
+    pl.deck = [("Energy", "Fighting Energy")] * 10
+    pl.round_no = op.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    pl._forced_attack = Z[1]["Cinderace"]["attacks"][0]
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    check("Turbo Flare's three Energy go to Mega Zygarde ex",
+          len(pl.bench[1].energy) == 3 and not pl.bench[0].energy,
+          [(b.name, len(b.energy)) for b in pl.bench])
+
+    def search(trainer, deck):
+        pl.bench, pl.hand, pl.deck = [], [], list(deck)
+        AE.apply_action(V.trainer_effect_ir(trainer).actions[0], pl, None, None, [])
+        return pl.hand
+    got = search("Mega Signal", [("Pokemon", "Cinderace"), ("Pokemon", "Mega Zygarde ex")])
+    check("Mega Signal finds a Mega Evolution Pokemon ex", got == [("Pokemon", "Mega Zygarde ex")], got)
+    got = search("Fighting Gong", [("Energy", "Rocky Fighting Energy"), ("Pokemon", "Mega Zygarde ex")])
+    check("Fighting Gong finds a Basic Fighting Pokemon", got == [("Pokemon", "Mega Zygarde ex")], got)
+
+
+def test_core_memory_goes_on_mega_zygarde_ex_only():
+    """Core Memory: "The Mega Zygarde ex this card is attached to can use the
+    attack on this card." Nothing attached it, and the holder check looked
+    for "<X> Pokemon this card is attached to" -- the named holder never
+    matched, so any Pokemon holding it could use Geobuster."""
+    V, Z, ZE = _real("decks/field/mega_zygarde_cinderace_turbo_flare.txt", "z")
+    pl = V.Player("z", Z[1], list(Z[2]), ZE)
+    pl.active = V.InPlay("Cinderace", 1)
+    pl.bench = [V.InPlay("Mega Audino ex", 1), V.InPlay("Mega Zygarde ex", 1)]
+    pl.hand = [("Tool", "Core Memory")]
+    V.attach_tools(pl, [])
+    check("Core Memory is attached to Mega Zygarde ex",
+          pl.bench[1].tool == "Core Memory" and not pl.active.tool,
+          [(p.name, p.tool) for p in pl.in_play()])
+    c = V.InPlay("Cinderace", 1)
+    c.tool = "Core Memory"
+    check("a Cinderace holding it has no Geobuster", V.tool_attacks(pl, c) == [],
+          V.tool_attacks(pl, c))

@@ -88,7 +88,9 @@ class GameState:
                 self.hand.append(self.deck.pop())
 
     def has_basic_in_hand(self, POKEMON):
-        return any(k == "Pokemon" and POKEMON[n]["stage"] == "Basic" for k, n in self.hand)
+        return any(k == "Pokemon" and (POKEMON[n]["stage"] == "Basic"
+                                       or POKEMON[n].get("opens_active"))
+                   for k, n in self.hand)
 
     def remove_from_hand(self, kind, name):
         self.hand.remove((kind, name))
@@ -135,6 +137,10 @@ def opening_hand(deck, POKEMON):
 def play_basics(state, POKEMON, turn, log):
     if state.active is None:
         basics_in_hand = [n for k, n in state.hand if k == "Pokemon" and POKEMON[n]["stage"] == "Basic"]
+        # Explosiveness (Cinderace MEG 28): it may open face down instead.
+        if turn == 0:
+            basics_in_hand = [n for k, n in state.hand if k == "Pokemon"
+                              and POKEMON[n].get("opens_active")] + basics_in_hand
         if basics_in_hand:
             name = basics_in_hand[0]
             state.remove_from_hand("Pokemon", name)

@@ -979,6 +979,14 @@ def _search_filter(qualifier):
                 "Stage 2" if word == "stage 2" else word.title())
             low = low[len(word):].strip()
             break
+    # Mega Signal: "a Mega Evolution Pokemon ex" -- a subtype, not a name.
+    # As a name fragment it matched no card in any deck.
+    mg = re.fullmatch(r"(?:(\w+) )?mega evolution", low)
+    if mg and (mg.group(1) is None or mg.group(1) in TYPE_WORDS):
+        filt["subtype"] = "MEGA"
+        if mg.group(1):
+            filt["type"] = mg.group(1).title()
+        low = ""
     if low in TYPE_WORDS:
         filt["type"] = low.title()
         low = ""
@@ -1114,6 +1122,11 @@ def _r(m, text):
         f["name_contains"] = named.group(1)
     if re.search(r"of different types", text, re.I):
         f["distinct"] = True
+    # Fighting Gong: "a Basic Fighting Energy card or a Basic Fighting
+    # Pokemon". The second half was dropped, so it never found the Pokemon.
+    alt = re.match(r"(?: cards?)? or an? basic (" + TYPES + r") pok[eé]mon", text[m.end(3):], re.I)
+    if kind == "energy" and alt:
+        f["or_pokemon"] = {"stage": "Basic", "type": alt.group(1).capitalize()}
     return [Action(Op.SEARCH_TO_HAND, 4 if many else _num(m.group(1)), Target.SELF, f)]
 
 

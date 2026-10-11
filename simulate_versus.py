@@ -316,8 +316,9 @@ class Player:
         at all.
         """
         return any(k == "Pokemon"
-                   and self.POKEMON[n]["stage"] == "Basic"
-                   and not self.POKEMON[n].get("is_fossil")
+                   and ((self.POKEMON[n]["stage"] == "Basic"
+                         and not self.POKEMON[n].get("is_fossil"))
+                        or self.POKEMON[n].get("opens_active"))
                    for k, n in self.hand)
 
     def remove_from_hand(self, kind, name):
@@ -511,9 +512,20 @@ def _qualifies(pl, spot, q):
     return spot.name.lower().startswith(q.lower())
 
 
+# Core Memory: "The Mega Zygarde ex this card is attached to can use the
+# attack on this card" -- a NAMED holder, with no "Pokemon" for the pattern
+# above to find, so any Pokemon holding it could use Geobuster.
+_TOOL_NAMED_HOLDER_RE = _re.compile(r"the ([\w'’ -]+?) this card is attached to can use", _re.I)
+
+
 def _tool_holder_ok(pl, spot, text):
     m = _TOOL_HOLDER_RE.search(text)
-    return True if not m else _qualifies(pl, spot, m.group(1))
+    if m:
+        return _qualifies(pl, spot, m.group(1))
+    m = _TOOL_NAMED_HOLDER_RE.search(text)
+    if m and m.group(1).strip().lower() not in ("pokémon", "pokemon"):
+        return M.base_of(pl.POKEMON, spot.name).lower() == m.group(1).strip().lower()
+    return True
 
 
 def tool_damage_reduction(owner, spot, attacker_owner, attacker):
@@ -1709,6 +1721,17 @@ def _bench_plan(pl):
 
 
 def play_basics(pl, turn, log):
+    # Setup only: Cinderace's Explosiveness puts it face down as the Active
+    # from the hand. A deck runs it to lead with it, so it leads. Compiled
+    # as a no-op, it could never be played at all (a Stage 2 with no
+    # Scorbunny or Raboot in the list) and never stopped a mulligan.
+    if pl.active is None and turn == 0:
+        lead = next((n for k, n in pl.hand if k == "Pokemon"
+                     and (pl.POKEMON.get(n) or {}).get("opens_active")), None)
+        if lead:
+            pl.remove_from_hand("Pokemon", lead)
+            pl.active = InPlay(lead, turn)
+            log.append(f"  {pl.name}: {lead} to Active (face down)")
     if pl.active is None:
         bs = basics_in_hand(pl)
         if bs:
@@ -5596,6 +5619,14 @@ def _is_reflip_tool(pl, name, spot=None):
     return False
 
 
+def _is_attack_tool(name):
+    """A Tool with an attack printed on it that stays attached (Core
+    Memory). Technical Machines are discarded at the end of the turn."""
+    text = _card_text(name)
+    return bool(_re.search(r"can use the attack on this card", text, _re.I)
+                and not _re.search(r"discard it at the end of your turn", text, _re.I))
+
+
 def attach_tools(pl, log):
     """Attach a Pokemon Tool to whoever will be holding the Active Spot.
     Only Tools carrying a modeled effect (retaliation) are attached -- any
@@ -5634,6 +5665,24 @@ def attach_tools(pl, log):
                 pl.remove_from_hand(kind, name)
                 pl.active.tool = name
                 log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+                continue
+            # Core Memory: an attack printed on the Tool, for the Pokemon it
+            # names. tool_attacks read it once attached, and nothing attached
+            # it. Technical Machines are left alone: they are discarded at
+            # the end of the turn, so attaching one is a decision about this
+            # turn's attack, not a standing upgrade.
+            if _is_attack_tool(name):
+                holder = None
+                for p in ([pl.active] if pl.active else []) + list(pl.bench):
+                    if p.tool and not AE.query_extra_tool_slots(pl, p):
+                        continue
+                    if _tool_holder_ok(pl, p, _card_text(name)):
+                        holder = p
+                        break
+                if holder is not None:
+                    pl.remove_from_hand(kind, name)
+                    holder.tool = name
+                    log.append(f"  {pl.name}: attaches {name} to {holder.name}")
                 continue
             # Cost Tools (Counter Gain, Sparkling Crystal): tool_cost_changes
             # priced them once attached, and nothing ever attached them.

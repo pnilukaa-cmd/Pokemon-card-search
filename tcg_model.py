@@ -309,7 +309,22 @@ def build_pokemon_info(card):
         "subtypes": list(card.get("subtypes") or []),
         "attacks": attacks,
         "abilities": [classify_ability(ab) for ab in (card.get("abilities") or [])],
+        # Cinderace MEG 28's Explosiveness: it may be put face down as the
+        # opening Active, so it is an opener (and stops a mulligan) like a
+        # Basic, though it is a Stage 2.
+        "opens_active": opens_face_down(card),
     }
+
+
+_OPENS_FACE_DOWN_RE = re.compile(
+    r"if this pok[eé]mon is in your hand when you are setting up to play, you may put it"
+    r" face down in the active spot", re.I)
+
+
+def opens_face_down(card):
+    """Can this Pokemon be your opening Active from the hand, Basic or not?"""
+    return any(_OPENS_FACE_DOWN_RE.search(ab.get("text") or "")
+               for ab in (card.get("abilities") or []))
 
 
 # --------------------------------------------------------------------------

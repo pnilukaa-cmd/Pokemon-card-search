@@ -1412,8 +1412,15 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         tgt = hits[0] if hits else source
         if tgt is None:
             return False
+        # "Attach them to your Benched Pokemon in any way you like" (Turbo
+        # Flare, Kaleidowaltz): the player places each card. All of them
+        # went to the first Benched Pokemon -- Mega Audino ex took Turbo
+        # Flare's three Energy while Mega Zygarde ex, the attacker, got none.
+        spread = act.target in (IR.Target.YOUR_BENCHED, IR.Target.YOUR_ANY) and len(hits) > 1
         got = 0
         for _ in range(max(act.amount or 1, 1)):
+            if spread:
+                tgt = (ATTACH_RANK(pl, opp, [p for p in hits if p is not None]) or [tgt])[0]
             card = _take()
             if not card:
                 break
@@ -1510,9 +1517,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             nobox = act.filter.get("no_rule_box")
             exonly = act.filter.get("ex_only")
             ptype = sub.get("type")
+            subtype = sub.get("subtype")
             def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
                      exonly=exonly, ptype=ptype, stage=stage):
                 if kind.startswith("pok") and k != "Pokemon":
+                    return False
+                if subtype and (k != "Pokemon" or subtype not in (
+                        pl.POKEMON.get(n, {}).get("subtypes") or [])):
                     return False
                 # The stage was compiled and never read: Team Rocket's
                 # Proton ("3 Basic Team Rocket's Pokemon") fetched Stage 2s.
@@ -1541,6 +1552,11 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     return False
                 if kind == "energy" and k != "Energy":
                     return False
+                # "a Basic Fighting Energy card": the type and Basic were
+                # read for Pokemon only, so a Special Energy matched too.
+                if kind == "energy" and ptype and not re.fullmatch(
+                        rf"(basic )?{ptype} energy", n, re.I):
+                    return False
                 # "Tool" is its own kind in the deck model (a Pokemon Tool
                 # is an Item subtype but the model splits it out), and this
                 # predicate did not know the word -- so a search naming a
@@ -1551,7 +1567,21 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if act.filter.get("distinct") and n in got:
                     return False
                 return not want or want.lower() in n.lower()
-            card = _find_in_deck(pl, pred)
+            alt = act.filter.get("or_pokemon")
+            if alt:
+                # Fighting Gong: the Energy or a Basic Pokemon of the type.
+                # Take the Pokemon while fewer than two of them are in play
+                # or in hand, else the Energy.
+                def alt_pred(k, n, alt=alt):
+                    info = pl.POKEMON.get(n, {})
+                    return (k == "Pokemon" and info.get("stage") == "Basic"
+                            and alt["type"] in (info.get("types") or []))
+                have = sum(1 for p in pl.in_play() if alt_pred("Pokemon", p.name)) + \
+                    sum(1 for k, n in pl.hand if alt_pred(k, n))
+                first, second = (alt_pred, pred) if have < 2 else (pred, alt_pred)
+                card = _find_in_deck(pl, first) or _find_in_deck(pl, second)
+            else:
+                card = _find_in_deck(pl, pred)
             if not card:
                 break
             pl.hand.append(card)
