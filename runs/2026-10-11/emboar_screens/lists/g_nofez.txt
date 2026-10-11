@@ -1,0 +1,28 @@
+Pokémon: 20
+3 Dunsparce JTG 120
+1 Pignite WHT 97
+2 Latias ex SSP 239
+2 Fan Rotom ASC 250
+2 Munkidori SFA 72
+3 Tepig WHT 96
+2 Dudunsparce PRE 80
+2 Mega Emboar ex ASC 273
+2 Oricorio ex MEP 24
+
+Trainer: 26
+1 Ultra Ball ASC 264
+2 Jamming Tower ASC 261
+3 Lillie's Determination MEG 169
+2 Rare Candy MEG 175
+2 Boss's Orders LOR-TG 24
+2 Dawn PFL 129
+4 Buddy-Buddy Poffin MEG 167
+2 Hilda WHT 171
+4 Poké Pad POR 113
+
+Energy: 14
+1 Enriching Energy SSP 191
+14 Basic Fire Energy
+4 Basic Darkness Energy
+
+Total Cards: 60
