@@ -362,6 +362,13 @@ def parse_conditions(text):
         else:
             names = [x.strip() for x in re.split(r",\s*(?:and\s+)?|\s+and\s+", req) if x.strip()]
             out.append({"kind": "have_in_play", "names": names})
+    # The "Excited" Abilities (Oricorio ex, Seviper, Ludicolo, Linoone):
+    # "if you have any [Fire] Mega Evolution Pokemon ex in play". Dropped,
+    # so every one of them worked with no Mega in play at all.
+    m = re.search(r"if you have any (?:(" + TYPES + r") )?mega evolution pok[eé]mon ex in play", t, re.I)
+    if m:
+        out.append({"kind": "have_in_play", "subtype": "MEGA",
+                    "type": m.group(1).capitalize() if m.group(1) else None})
     if re.search(r"once during your first turn", t, re.I):
         out.append({"kind": "own_first_turn"})
     # Call Bell, Chill Teaser Toy: "You can use this card only if you go
@@ -1252,8 +1259,13 @@ def _r(m, text):
 @rule("attach_energy_from_hand",
       r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your hand to ([^.]{0,50})")
 def _r(m, text):
-    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
-                   {"type": (m.group(2) or "").capitalize() or None, "from": "hand"})]
+    f = {"type": (m.group(2) or "").capitalize() or None, "from": "hand"}
+    # Excited Turbo: "to 1 of your Benched Fire Pokemon" -- the recipient's
+    # type, which compiled to any Benched Pokemon.
+    rt = re.match(r"1 of your benched (" + TYPES + r") pok[eé]mon", m.group(3), re.I)
+    if rt:
+        f["recipient_type"] = rt.group(1).capitalize()
+    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)), f)]
 
 
 @rule("attach_energy_from_deck",

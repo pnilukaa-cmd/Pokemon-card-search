@@ -1566,6 +1566,16 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
                 log.append(f"  {pl.name}: {p.name} uses {eff.name}")
+                # "As often as you like" (Excited Turbo): every use spends a
+                # card from hand, so repeat while it still finds a home.
+                if (eff.trigger == IR.Trigger.ANY_TIMES_PER_TURN and eff.actions
+                        and all(a.op is IR.Op.ATTACH_ENERGY
+                                and (a.filter or {}).get("from") == "hand"
+                                for a in eff.actions)):
+                    for _ in range(10):
+                        if not AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
+                            break
+                        log.append(f"  {pl.name}: {p.name} uses {eff.name}")
 
 
 # --------------------------------------------------------------------------
@@ -2854,6 +2864,17 @@ def _look_pick(pl, cands):
 
 
 AE.LOOK_PICK = _look_pick
+
+
+def _attach_rank(pl, opp, cands):
+    """Recipients for an Ability that attaches Energy from hand to a typed
+    Benched Pokemon (Excited Turbo): those still short of their biggest
+    attack, the hardest hitter first. Nobody short means nobody."""
+    short = [p for p in cands if energy_shortfall(pl, p) > 0]
+    return sorted(short, key=lambda p: -_potential_damage(pl, p))
+
+
+AE.ATTACH_RANK = _attach_rank
 
 
 def _payable_damage(owner, spot, energy, foe=None):

@@ -5459,3 +5459,37 @@ def test_forest_of_vitality_is_for_grass_and_not_the_first_turn():
     check("Applin -> Dipplin the turn it is played", early("Applin", "Dipplin", 3))
     check("not Goldeen -> Seaking (Water)", not early("Goldeen", "Seaking", 3))
     check("not on the first turn", not early("Applin", "Dipplin", 1))
+
+
+def test_excited_turbo_needs_a_fire_mega_and_feeds_fire_pokemon():
+    """Oricorio ex's Excited Turbo: "As often as you like during your turn,
+    if you have any Fire Mega Evolution Pokemon ex in play ... Attach a Basic
+    Fire Energy card from your hand to 1 of your Benched Fire Pokemon." The
+    Mega condition compiled to nothing and the recipient to any Benched
+    Pokemon -- Latias ex got Fire Energy on turn 1 -- and it ran once a
+    turn. The same dropped condition left Seviper's Excited Power (+120)
+    and Ludicolo's and Linoone's Abilities always on."""
+    V, E, EE = _real("decks/field/mega_emboar_oricorio_munkidori.txt", "e")
+
+    def turbo(bench):
+        pl = V.Player("e", E[1], list(E[2]), EE)
+        pl.energy_types = {"Fire", "Darkness", "Colorless"}
+        pl.active = V.InPlay("Oricorio ex", 1)
+        pl.bench = [V.InPlay(n, 1) for n in bench]
+        pl.hand = [("Energy", "Fire Energy")] * 3
+        pl.round_no, pl.abilities_used = 3, set()
+        V.use_abilities(pl, pl, 3, [])
+        return {b.name: len(b.energy) for b in pl.bench}
+
+    got = turbo(["Latias ex", "Tepig"])
+    check("no Fire Mega in play: no attachment", got == {"Latias ex": 0, "Tepig": 0}, got)
+    got = turbo(["Latias ex", "Mega Emboar ex"])
+    check("with Mega Emboar ex: all three onto it, none onto Latias ex",
+          got == {"Latias ex": 0, "Mega Emboar ex": 3}, got)
+    seviper = IR.compile_effect("Seviper", "Excited Power", "If you have any Darkness Mega "
+                                "Evolution Pokémon ex in play, attacks used by this Pokémon do "
+                                "120 more damage to your opponent's Active Pokémon (before "
+                                "applying Weakness and Resistance).")
+    check("Excited Power is gated on a Darkness Mega in play",
+          {"kind": "have_in_play", "subtype": "MEGA", "type": "Darkness"} in seviper.conditions,
+          seviper.conditions)

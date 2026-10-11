@@ -450,8 +450,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
         if k == "have_in_play":
             here = [p.name for p in pl.in_play()]
             if c.get("subtype") and not any(
-                    c["subtype"] in (pl.POKEMON.get(n, {}).get("subtypes") or [])
-                    for n in here):
+                    c["subtype"] in (pl.POKEMON.get(p.name, {}).get("subtypes") or [])
+                    and (not c.get("type") or c["type"] in query_types(pl, p))
+                    for p in pl.in_play()):
                 return False
             if c.get("names") and not all(n in here for n in c["names"]):
                 return False
@@ -781,6 +782,8 @@ SWITCH_RANK = lambda pl, opp, spot: 0
 ENERGY_SINK = lambda owner, types, spots: spots[0]
 # Order in which to take matching cards off a look at the deck; set by the simulator.
 LOOK_PICK = lambda pl, cands: list(cands)
+# Order of attach recipients, neediest first, [] for none worth it; set by the simulator.
+ATTACH_RANK = lambda pl, opp, cands: list(cands)
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
@@ -1399,6 +1402,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 got += 1
             return got > 0
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
+        rt = act.filter.get("recipient_type")
+        if rt:
+            # Only a Pokemon of that type, and the one that needs it most.
+            hits = ATTACH_RANK(pl, opp, [p for p in hits if p is not None
+                                         and rt in query_types(pl, p)])
+            if not hits:
+                return False
         tgt = hits[0] if hits else source
         if tgt is None:
             return False
