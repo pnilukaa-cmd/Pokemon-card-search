@@ -5514,3 +5514,16 @@ def test_ultra_ball_pays_its_discards_before_it_searches():
     check("and keeps Mega Emboar ex, pitching the two Supporters",
           ("Pokemon", "Mega Emboar ex") in pl.hand
           and pl.discard.count("Lillie's Determination") == 2, (pl.hand, pl.discard))
+
+
+def test_a_search_takes_the_piece_that_evolves_something():
+    """A Pokemon search took the first match in the deck. Hilda's "an
+    Evolution Pokemon" fetched a second Mega Emboar ex with one already in
+    hand and only a Tepig in play, where Pignite was the missing piece."""
+    V, E, EE = _real("decks/field/mega_emboar_oricorio_munkidori.txt", "e")
+    pl = V.Player("e", E[1], list(E[2]), EE)
+    pl.active, pl.bench = V.InPlay("Tepig", 1), []
+    pl.hand = [("Pokemon", "Mega Emboar ex")]
+    pl.deck = [("Pokemon", "Mega Emboar ex"), ("Pokemon", "Pignite")]
+    got = V.search_pokemon_from_deck(pl, lambda n: E[1][n]["stage"] != "Basic")
+    check("Hilda's search takes Pignite, not a second Mega Emboar ex", got == "Pignite", got)

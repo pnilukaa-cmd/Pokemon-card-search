@@ -2014,8 +2014,6 @@ def _search_ranker(pl):
         if kind != "Pokemon":
             return 9
         info = pl.POKEMON.get(name) or {}
-        if info.get("stage") == "Basic" and POL.knob(pl, "smart_search") >= 2:
-            return 2                 # 2: steer only the Evolution picks
         if name in held:
             return 4
         pre = info.get("evolves_from")

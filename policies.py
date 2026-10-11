@@ -82,8 +82,12 @@ GREEDY = {
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
     # Searches take the Pokemon that evolves something in play (or a Stage 2
     # with Rare Candy in hand), then a Basic with Bench room, never a copy of
-    # one already in hand. 0: the first match in the shuffled deck.
-    "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 0)),
+    # one already in hand. 0: the first match in the shuffled deck. Paired,
+    # 200 games x 83 opponents, on for the measured deck only (PILOT=probe):
+    # better on all 10 decks tried, +2.62 on average (Dragapult +5.27, Mega
+    # Emboar ex +4.15, Lurantis +4.18, Raging Bolt +0.06). Steering only the
+    # Evolution picks was no better.
+    "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
