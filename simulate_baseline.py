@@ -138,7 +138,8 @@ def play_basics(state, POKEMON, turn, log):
     if state.active is None:
         basics_in_hand = [n for k, n in state.hand if k == "Pokemon" and POKEMON[n]["stage"] == "Basic"]
         # Explosiveness (Cinderace MEG 28): it may open face down instead.
-        if turn == 0:
+        # This tool has no setup step; the first Active goes down on turn 1.
+        if turn <= 1:
             basics_in_hand = [n for k, n in state.hand if k == "Pokemon"
                               and POKEMON[n].get("opens_active")] + basics_in_hand
         if basics_in_hand:
