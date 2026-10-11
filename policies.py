@@ -157,6 +157,13 @@ LOOKAHEAD = dict(GREEDY, **{
 POLICIES = {p["name"]: p for p in (GREEDY, AGGRO, CONTROL, SETUP, PRIZEWISE, LOOKAHEAD)}
 # The engine's historical pilot answers to its old name too, so existing
 # callers and recorded measurements keep working.
+# "probe": greedy with knobs overridden from PROBE_KNOBS ("smart_search=1,
+# other=0.5"), for measuring a knob on ONE deck (vs_field.py PILOT=probe)
+# while the field keeps playing greedy. An env knob changes every player,
+# so a paired run with it measures the field getting better too.
+POLICIES["probe"] = dict(GREEDY, name="probe", **{
+    k: float(v) for k, v in (kv.split("=") for kv in
+                             __import__("os").environ.get("PROBE_KNOBS", "").split(",") if kv)})
 POLICIES["v2"] = GREEDY
 POLICIES["v1"] = GREEDY
 
