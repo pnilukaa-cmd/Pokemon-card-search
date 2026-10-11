@@ -80,6 +80,10 @@ GREEDY = {
     # games x 67 opponents: Orbeetle / Morpeko ex +5.98 +/- 0.64 (better on
     # 57), Wobbuffet / Orbeetle +3.58 +/- 0.56 (better on 53).
     "counter_mover": int(__import__("os").environ.get("COUNTER_MOVER", 1)),
+    # Searches take the Pokemon that evolves something in play (or a Stage 2
+    # with Rare Candy in hand), then a Basic with Bench room, never a copy of
+    # one already in hand. 0: the first match in the shuffled deck.
+    "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

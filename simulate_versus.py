@@ -1982,7 +1982,12 @@ def search_pokemon_from_deck(pl, pred):
     # While a copy-attack deck is missing a piece of its plan, that piece
     # comes first (see _bench_plan); otherwise the order is unchanged.
     first = _missing_pieces(pl)
-    order = sorted(range(len(pl.deck)), key=lambda i: first.get(pl.deck[i][1], 9))
+    if POL.knob(pl, "smart_search"):
+        rank = _search_ranker(pl)
+        order = sorted(range(len(pl.deck)),
+                       key=lambda i: (first.get(pl.deck[i][1], 9), rank(pl.deck[i])))
+    else:
+        order = sorted(range(len(pl.deck)), key=lambda i: first.get(pl.deck[i][1], 9))
     for i in order:
         k, n = pl.deck[i]
         if k == "Pokemon" and pred(n):
@@ -1990,6 +1995,41 @@ def search_pokemon_from_deck(pl, pred):
             random.shuffle(pl.deck)
             return n
     return None
+
+
+def _search_ranker(pl):
+    """Which matching Pokemon a search should take (lower first). A search
+    took the first match in a shuffled deck: Hilda fetched a second Mega
+    Emboar ex with one already in hand and no Pignite down."""
+    in_play = {M.base_of(pl.POKEMON, n) for n in pl.in_play_names()}
+    held = {n for k, n in pl.hand if k == "Pokemon"}
+    candy = any(n == "Rare Candy" for _, n in pl.hand)
+    room = len(pl.bench) < bench_cap(pl)
+
+    def stage1_of(name):
+        return (pl.POKEMON.get(name) or {}).get("evolves_from")
+
+    def rank(card):
+        kind, name = card
+        if kind != "Pokemon":
+            return 9
+        info = pl.POKEMON.get(name) or {}
+        if name in held:
+            return 4
+        pre = info.get("evolves_from")
+        if pre and pre in in_play:
+            return 0
+        if info.get("stage") == "Stage 2" and pre:
+            basic = next((stage1_of(k) for k, v in pl.POKEMON.items()
+                          if M.base_of(pl.POKEMON, k) == pre), None)
+            if candy and basic in in_play:
+                return 0
+            if pre in {M.base_of(pl.POKEMON, n) for n in held}:
+                return 1
+        if info.get("stage") == "Basic":
+            return 2 if room else 5
+        return 3
+    return rank
 
 
 def want_pokemon(pl, name):
