@@ -2208,13 +2208,19 @@ def play_items(pl, opp, turn, log, first_turn):
         others = [c for c in pl.hand if c != ("Item", "Ultra Ball")]
         if len(others) < 2:
             break
+        # The two discards are the COST, paid before the search. Ranked
+        # after it, a Stage 2 whose Stage 1 the search had just pulled from
+        # the deck looked unreachable and was pitched -- Mega Emboar ex
+        # thrown away to find its own Pignite.
+        pl.remove_from_hand("Item", "Ultra Ball")
+        pitched = [pl.hand.pop(i) for i in cards_to_pitch(pl, 2)]
         n = search_pokemon_from_deck(pl, lambda x: want_pokemon(pl, x))
         if n is None:
+            pl.hand.extend(pitched)
+            pl.hand.append(("Item", "Ultra Ball"))
             break
-        pl.remove_from_hand("Item", "Ultra Ball")
         pl.discard.append("Ultra Ball")
-        for i in cards_to_pitch(pl, 2):
-            pl.discard.append(pl.hand.pop(i)[1])
+        pl.discard.extend(c[1] for c in pitched)
         pl.hand.append(("Pokemon", n))
         log.append(f"  {pl.name}: Ultra Ball -> {n}")
 

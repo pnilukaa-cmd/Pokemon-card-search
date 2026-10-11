@@ -5493,3 +5493,24 @@ def test_excited_turbo_needs_a_fire_mega_and_feeds_fire_pokemon():
     check("Excited Power is gated on a Darkness Mega in play",
           {"kind": "have_in_play", "subtype": "MEGA", "type": "Darkness"} in seviper.conditions,
           seviper.conditions)
+
+
+def test_ultra_ball_pays_its_discards_before_it_searches():
+    """Ultra Ball's two discards are its cost. They were chosen AFTER the
+    search, so a Stage 2 whose only Stage 1 the search had just taken out
+    of the deck looked unreachable and was the first card thrown away:
+    Mega Emboar ex pitched to find its own Pignite."""
+    V, E, EE = _real("decks/field/mega_emboar_oricorio_munkidori.txt", "e")
+    pl = V.Player("e", E[1], list(E[2]), EE)
+    op = V.Player("o", E[1], list(E[2]), EE)
+    pl.active, pl.bench = V.InPlay("Tepig", 1), []
+    pl.deck = [("Pokemon", "Pignite")] + [("Supporter", "Hilda")] * 10
+    pl.hand = [("Item", "Ultra Ball"), ("Supporter", "Lillie's Determination"),
+               ("Supporter", "Lillie's Determination"), ("Pokemon", "Mega Emboar ex")]
+    pl.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    V.play_items(pl, op, 3, [], False)
+    check("Ultra Ball finds Pignite", ("Pokemon", "Pignite") in pl.hand, pl.hand)
+    check("and keeps Mega Emboar ex, pitching the two Supporters",
+          ("Pokemon", "Mega Emboar ex") in pl.hand
+          and pl.discard.count("Lillie's Determination") == 2, (pl.hand, pl.discard))
