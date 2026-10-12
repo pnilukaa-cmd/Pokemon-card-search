@@ -1,0 +1,25 @@
+Pokémon: 8
+4 Cinderace MEG 28
+2 Black Kyurem ex SSP 218
+1 Dondozo ex DRI 211
+1 Mega Audino ex ASC 253
+
+Trainer: 27
+4 Lillie's Determination MEG 184
+4 Team Rocket's Petrel DRI 226
+2 Iris's Fighting Spirit JTG 180
+3 Boss's Orders MEG 114
+4 Jumbo Ice Cream CRI 109
+1 Mega Signal MEG 171
+1 Switch PFL 123
+1 Hero's Cape TEF 152
+1 Team Rocket's Factory DRI 173
+4 Ultra Ball MEG 131
+1 Misty's Vitality PBL 111
+1 Lively Stadium SSP 180
+
+Energy: 25
+22 Basic Water Energy
+3 Bubbly Water Energy CRI 84
+
+Total Cards: 60

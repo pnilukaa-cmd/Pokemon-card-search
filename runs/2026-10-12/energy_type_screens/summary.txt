@@ -1,0 +1,15 @@
+F_tuned: 83.37% (±0.27) over 86 decks at 200 games, winning 86
+F_ctl_ub: 86.35% (±0.25) over 86 decks at 200 games, winning 85
+F_ctl_en: 79.15% (±0.30) over 86 decks at 200 games, winning 84
+T_lightning_ub: 87.76% (±0.24) over 86 decks at 200 games, winning 84
+T_psychic_ub: 80.90% (±0.29) over 86 decks at 200 games, winning 84
+T_colorless_ub: 82.14% (±0.28) over 86 decks at 200 games, winning 83
+T_darkness_ub: 83.72% (±0.27) over 86 decks at 200 games, winning 83
+T_fire_ub: 85.41% (±0.26) over 86 decks at 200 games, winning 86
+T_water_ub: 83.68% (±0.27) over 86 decks at 200 games, winning 84
+T_grass_ub: 82.30% (±0.28) over 86 decks at 200 games, winning 86
+T_metal_ub: 84.11% (±0.27) over 86 decks at 200 games, winning 83
+T_firepsychic_ub: 74.47% (±0.32) over 86 decks at 200 games, winning 81
+F_ub_only: 82.19% (±0.28) over 86 decks at 200 games, winning 85
+F_nopc: 86.98% (±0.24) over 86 decks at 200 games, winning 86
+F_ub2: 83.05% (±0.27) over 86 decks at 200 games, winning 85

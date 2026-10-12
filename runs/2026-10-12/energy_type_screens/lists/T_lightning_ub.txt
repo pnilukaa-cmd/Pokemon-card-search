@@ -1,0 +1,24 @@
+Pokémon: 8
+4 Cinderace MEG 28
+2 Mega Zeraora ex PBL 114
+1 Pikachu ex PRE 28
+1 Mega Audino ex ASC 253
+
+Trainer: 26
+4 Lillie's Determination MEG 184
+4 Team Rocket's Petrel DRI 226
+2 Iris's Fighting Spirit JTG 180
+3 Boss's Orders MEG 114
+4 Jumbo Ice Cream CRI 109
+1 Mega Signal MEG 171
+1 Switch PFL 123
+1 Hero's Cape TEF 152
+1 Team Rocket's Factory DRI 173
+4 Ultra Ball MEG 131
+1 Lively Stadium SSP 180
+
+Energy: 26
+23 Basic Lightning Energy
+3 Voltaic Lightning Energy PBL 84
+
+Total Cards: 60
