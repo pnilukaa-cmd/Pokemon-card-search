@@ -5660,3 +5660,37 @@ def test_you_may_do_more_damage_is_a_choice_with_a_price():
     check("healthy: it takes the extra 120 and pays the 50", got == (240, 50), got)
     got = dive(230)
     check("at 30 HP left: it declines, so no recoil", got == (120, 230), got)
+
+
+def test_oil_salvo_spends_its_six_hits_on_knock_outs():
+    """Arboliva ex's Oil Salvo: "Choose 1 of your opponent's Pokemon 6
+    times ... do 20 damage to it." The hits went round the board one at a
+    time, so a Pokemon one hit from a Knock Out could be left standing
+    while a fresh 3-Prize Active took 40. And the pilot priced the attack
+    at a flat 120, so Aroma Shot's 160 always won, even with three Benched
+    Knock Outs on offer."""
+    import random as _r, tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n2 Arboliva ex DRI 207\n1 Smoliv DRI 21\n1 Mega Zygarde ex POR 120\n\n"
+                "Energy: 56\n56 Basic Grass Energy\n")
+    try:
+        V, D, E = _real(f.name, "a")
+    finally:
+        os.unlink(f.name)
+    atks = {a["name"]: a for a in D[1]["Arboliva ex"]["attacks"]}
+    pl, op = V.Player("a", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.active = V.InPlay("Arboliva ex", 1)
+    pl.active.energy, pl.active.energy_names = [["Grass"]] * 3, ["Grass Energy"] * 3
+    op.active = V.InPlay("Mega Zygarde ex", 1)
+    op.bench = [V.InPlay("Smoliv", 1), V.InPlay("Smoliv", 1), V.InPlay("Smoliv", 1)]
+    op.bench[0].damage, op.bench[1].damage = 50, 30
+    pl.bench, pl.round_no, op.round_no = [], 3, 3
+    pl._opp_ref, op._opp_ref = op, pl
+    pick = V.best_attack(pl, pl.active, True, op)["name"]
+    check("three Benched Knock Outs outrank Aroma Shot's 160", pick == "Oil Salvo", pick)
+    pl._forced_attack = atks["Oil Salvo"]
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    got = [b.damage for b in op.bench]
+    check("all three Smoliv take enough to be Knocked Out (1 + 2 + 3 hits)",
+          all(d >= 60 for d in got), got)

@@ -2968,6 +2968,7 @@ def _energy_need_types(pl, spot):
 
 
 AE.ENERGY_NEED = _energy_need_types
+AE.EFFECTIVE_HP = lambda owner, spot: effective_hp(owner, spot)
 
 
 def _payable_damage(owner, spot, energy, foe=None):
@@ -4907,6 +4908,15 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 # ceiling would be chosen over a guaranteed Knock Out.
                 odds = act.filter.get("chance_each", 1.0)
                 value += int((act.amount or 0) * 10 * max(len(spots), 1) * odds)
+            elif act.filter.get("repeat"):
+                # Oil Salvo: the damage, plus the Knock Outs its six hits
+                # can take. A flat 120 lost to any 160 attack, so Arboliva
+                # ex never spent it on the two Benched Knock Outs it set up.
+                pool = [h for h in ([opp.active] if opp.active else []) + list(opp.bench)
+                        if not AE.query_prevented(opp, h, pl, spot)]
+                _, prizes = AE.plan_repeated_hits(act, opp, pool)
+                value += ((act.amount or 0) * 10 * act.filter.get("targets", 1)
+                          + POL.knob(pl, "ko_bonus_per_prize") * prizes)
             else:
                 value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
         elif act.op == IR.Op.PLACE_COUNTERS and act.target is IR.Target.OPP_ACTIVE:

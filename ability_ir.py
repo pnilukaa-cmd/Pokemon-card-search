@@ -2243,7 +2243,8 @@ def _r(m, text):
     """Arboliva ex's Oil Salvo: six separate 20s aimed anywhere. Worth 120
     spread across the board, and it compiled to nothing."""
     return [Action(Op.PLACE_COUNTERS, int(m.group(2)) // 10, Target.OPP_ANY,
-                   {"targets": int(m.group(1)), "attack_damage": True})]
+                   {"targets": int(m.group(1)), "attack_damage": True,
+                    "repeat": True})]
 
 
 @rule("flip_per_opponent_pokemon",

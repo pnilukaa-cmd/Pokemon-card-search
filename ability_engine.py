@@ -965,6 +965,66 @@ def clear_attack_locks(spot):
         setattr(spot, k, 0)
 
 
+# Remaining-HP lookup for targeting. Printed HP by default; the engine
+# swaps in its own, which counts HP Tools and HP Abilities.
+EFFECTIVE_HP = lambda owner, spot: (owner.POKEMON.get(spot.name) or {}).get("hp") or 0
+
+
+def plan_repeated_hits(act, opp, pool):
+    """Arboliva ex's Oil Salvo: "Choose 1 of your opponent's Pokemon 6
+    times ... do 20 damage to it", the same Pokemon as often as you like.
+
+    The hits went round the board one each, so a Pokemon two hits from a
+    Knock Out got one and a 60 HP Basic got two. Six hits are a budget:
+    spend it on the set of Knock Outs worth the most Prizes (fewest hits
+    on a tie), then put what is left on the most valuable survivor.
+    Returns ([(spot, hits)], Prizes those hits Knock Out).
+    """
+    from itertools import combinations
+    step = act.amount * 10
+    budget = act.filter["targets"]
+    if not pool or opp is None:
+        return [], 0
+
+    def left(h):
+        return max(0, EFFECTIVE_HP(opp, h) - h.damage)
+
+    def prize(h):
+        return (opp.POKEMON.get(h.name) or {}).get("prize_value", 1)
+
+    need = {id(h): -(-left(h) // step) for h in pool}
+    best, best_key = (), (0, 0)
+    for r in range(1, len(pool) + 1):
+        for combo in combinations(pool, r):
+            cost = sum(need[id(h)] for h in combo)
+            if cost > budget or any(need[id(h)] == 0 for h in combo):
+                continue
+            key = (sum(prize(h) for h in combo), -cost)
+            if key > best_key:
+                best, best_key = combo, key
+    hits = {id(h): need[id(h)] for h in best}
+    spare = budget - sum(hits.values())
+    if spare:
+        alive = [h for h in pool if id(h) not in hits and left(h) > 0]
+        if alive:
+            tgt = max(alive, key=lambda h: (prize(h), -left(h)))
+            hits[id(tgt)] = hits.get(id(tgt), 0) + spare
+        elif best:
+            hits[id(best[0])] += spare
+    by_id = {id(h): h for h in pool}
+    return [(by_id[k], n) for k, n in hits.items()], best_key[0]
+
+
+def _aim_repeated_hits(act, pl, opp, pool, log):
+    plan, _ = plan_repeated_hits(act, opp, pool)
+    step = act.amount * 10
+    for h, n in plan:
+        h.damage += n * step
+    if plan:
+        log.append("    " + ", ".join(f"{n * step} to {h.name}" for h, n in plan))
+    return bool(plan)
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
@@ -1186,6 +1246,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append(f"    place {placed * 10} damage, split to finish "
                            f"what it could")
             return placed > 0
+
+        if act.filter.get("repeat") and (act.amount or 0) > 0:
+            return _aim_repeated_hits(act, pl, opp, [h for h in hits if h is not None], log)
 
         if act.target == IR.Target.OPP_ALL:
             chosen = hits
