@@ -1025,6 +1025,21 @@ def _aim_repeated_hits(act, pl, opp, pool, log):
     return bool(plan)
 
 
+def _devolve_to(owner, spot):
+    """The card a devolve leaves on top: the one actually underneath.
+
+    A Rare Candy Hydreigon ex sits on a Deino, not a Zweilous, so the
+    printed "evolves from" is the wrong card -- and a Zweilous the deck
+    doesn't run crashed the whole run (KeyError in effective_hp). Falls
+    back to the printed Stage only when it is a card this deck knows.
+    """
+    st = _stack(spot)
+    if st:
+        return st[-1]
+    prev = (owner.POKEMON.get(spot.name) or {}).get("evolves_from")
+    return prev if prev in owner.POKEMON else None
+
+
 def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
     O = IR.Op
     op = act.op
@@ -2635,8 +2650,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             def worth(spot):
                 o = pl if spot in pl.in_play() else opp
                 info = o.POKEMON.get(spot.name) or {}
-                prev = o.POKEMON.get(info.get("evolves_from") or "") or {}
-                if not info.get("evolves_from"):
+                below = _devolve_to(o, spot)
+                prev = o.POKEMON.get(below or "") or {}
+                if not below:
                     return (-1, 0, 0)
                 ko = spot.damage >= (prev.get("hp") or 0) > 0
                 return (1 if ko else 0, info.get("prize_value", 1),
@@ -2645,11 +2661,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                              reverse=True)[:act.amount]
         hit = 0
         for spot in targets:
-            info = pl.POKEMON.get(spot.name) or opp.POKEMON.get(spot.name) or {}
-            prev = info.get("evolves_from")
-            if not prev:
+            if spot is None:
                 continue
             owner = pl if spot in pl.in_play() else opp
+            prev = _devolve_to(owner, spot)
+            if not prev:
+                continue
             # The Evolution card goes back to its owner's HAND (or, on
             # Espeon ex, is shuffled into their deck) -- it is never
             # discarded, and discarding it handed the opponent a free

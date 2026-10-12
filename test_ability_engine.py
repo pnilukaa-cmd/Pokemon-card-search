@@ -5731,5 +5731,30 @@ def test_every_evolves_from_names_a_real_card():
     check("every Pokemon evolves from a card that exists", not bad, bad)
 
 
+def test_devolve_leaves_the_card_actually_underneath():
+    """A Rare Candy Hydreigon ex sits on a Deino. Devolving it used the
+    printed "evolves from" (Zweilous), which is the wrong card, and in a
+    deck with no Zweilous crashed the run outright (KeyError in
+    effective_hp)."""
+    import random as _r
+    V, D, E = _disruption_model()
+    B = V.load_model("decks/field/darkness_mill_hand_lock.txt", "b")[0]
+    EB = V.compile_effects_for(B[1], B[3])
+    pl, op = V.Player("d", D[1], list(D[2]), E), V.Player("b", B[1], list(B[2]), EB)
+    pl.round_no = op.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    h = V.InPlay("Hydreigon ex", 1)
+    h.under = ["Deino"]
+    op.active, op.bench, op.hand, pl.bench = h, [], [], []
+    pl.active = V.InPlay("Espathra", 1)
+    pl.active.energy, pl.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    pl._forced_attack = next(a for a in D[1]["Espathra"]["attacks"] if a["name"] == "Mystical Eyes")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    check("Rare Candy Hydreigon ex devolves to the Deino under it",
+          op.active.name == "Deino" and ("Pokemon", "Hydreigon ex") in op.hand,
+          (op.active.name, op.hand))
+
+
 if __name__ == "__main__":
     sys.exit(main())
