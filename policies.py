@@ -88,6 +88,9 @@ GREEDY = {
     # Emboar ex +4.15, Lurantis +4.18, Raging Bolt +0.06). Steering only the
     # Evolution picks was no better.
     "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 1)),
+    # Put an HP Tool on the attacker (best castable attack, then most
+    # Energy) instead of whatever is Active.
+    "hp_tool_to_attacker": int(__import__("os").environ.get("HP_TOOL_TO_ATTACKER", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

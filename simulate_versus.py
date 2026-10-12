@@ -5696,12 +5696,40 @@ def _is_attack_tool(name):
                 and not _re.search(r"discard it at the end of your turn", text, _re.I))
 
 
+def _hp_tool_holder(pl):
+    """Who an HP Tool (Hero's Cape) should go on: the Pokemon doing the
+    attacking, not whatever is Active. It went straight onto the Active,
+    which in a Cinderace deck is the Cinderace pivot, so the +100 HP sat
+    on a Pokemon that was about to retreat."""
+    def score(p):
+        info = pl.POKEMON.get(p.name) or {}
+        dmg = max([a.get("damage") or 0 for a in info.get("attacks") or []
+                   if all(c == "Colorless" or c in pl.energy_types for c in a["cost"])]
+                  or [0])
+        return (dmg, len(p.energy), p is pl.active)
+    open_slots = [p for p in pl.in_play()
+                  if not p.tool or AE.query_extra_tool_slots(pl, p)]
+    return max(open_slots, key=score, default=None)
+
+
 def attach_tools(pl, log):
     """Attach a Pokemon Tool to whoever will be holding the Active Spot.
     Only Tools carrying a modeled effect (retaliation) are attached -- any
     other Tool would be decoration the engine cannot honor."""
-    for kind, name in list(pl.hand):
+    to_attacker = POL.knob(pl, "hp_tool_to_attacker")
+    hand = list(pl.hand)
+    if to_attacker:
+        # HP Tools first, so Core Memory does not take the slot first.
+        hand.sort(key=lambda kn: kn[1] not in hp_tools())
+    for kind, name in hand:
         if kind != "Tool":
+            continue
+        if to_attacker and name in hp_tools() and name not in RETREAT_TOOLS:
+            holder = _hp_tool_holder(pl)
+            if holder is not None:
+                pl.remove_from_hand(kind, name)
+                holder.tool = name
+                log.append(f"  {pl.name}: attaches {name} to {holder.name}")
             continue
         # Retreat and HP Tools were consulted elsewhere in this file but
         # never actually attached, so Air Balloon, Rescue Board and Hero's
