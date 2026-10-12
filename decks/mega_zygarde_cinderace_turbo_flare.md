@@ -11,7 +11,9 @@ the import below uses this pool's printings:
 68.6%, 80 winning matchups). That's already a top-tier result. The tuned
 version,
 **[mega_zygarde_cinderace_gaia_wave.md](mega_zygarde_cinderace_gaia_wave.md),
-scores 81.63% (+13.77 ± 0.57 paired, better on all 85)**.
+scores 81.63% (+13.77 ± 0.57 paired, better on all 85)**. With a
+Cornerstone Mask Ogerpon ex added (2026-10-12), it scores 83.30% against
+the 86-deck field.
 
 ## Plan
 

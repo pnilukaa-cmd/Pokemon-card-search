@@ -21,3 +21,7 @@ bb_add_ogerpon: 82.67% (±0.27) over 86 decks at 200 games, winning 85
 bb_add_kang: 82.69% (±0.28) over 86 decks at 200 games, winning 85
 bb_add_hawlucha: 81.90% (±0.28) over 86 decks at 200 games, winning 83
 bb_add_zygarde: 82.36% (±0.28) over 86 decks at 200 games, winning 84
+bb_base: 81.48% (±0.13) over 86 decks at 1000 games, winning 84
+bb_add_kang: 82.51% (±0.12) over 86 decks at 1000 games, winning 84
+bb_add_ogerpon: 83.30% (±0.12) over 86 decks at 1000 games, winning 85
+bb_add_both: 83.50% (±0.12) over 86 decks at 1000 games, winning 85
