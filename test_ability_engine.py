@@ -4828,133 +4828,17 @@ def test_no_compiled_op_is_orphaned_by_class():
 
 
 def main():
+    """Run every test_ function in this file, in definition order.
+
+    This used to be a hand-kept list, and every test defined below it (the
+    Team Rocket study onward, ~45 of them) was skipped here while pytest
+    ran them, so `python test_ability_engine.py` reported "All passed"
+    without running a quarter of the file.
+    """
     print("Ability runtime firing tests\n")
-    for fn in [test_no_compiled_op_is_orphaned_by_class,
-               test_mulligan_draws_are_optional_and_xerosic_can_go_first,
-               test_special_energy_and_stadium_gaps,
-               test_tools_read_from_their_text,
-               test_trainers_that_compiled_and_did_nothing,
-               test_ability_locks,
-               test_every_card_effect_is_read,
-               test_attack_texts_that_were_ignored,
-               test_abilities_and_stadiums_that_were_ignored,
-               test_ditto_transforms_and_gengar_faints,
-               test_named_ability_limit_is_per_name_not_per_copy,
-               test_impromptu_carrier_attaches_once_to_farfetchd,
-               test_born_to_slack_gates_slaking_on_the_opponents_ex,
-               test_toxtricity_and_mandibuzz_do_what_they_print,
-               test_brave_bangle_adds_30_once_and_only_against_an_ex,
-               test_tricky_steps_moves_the_opponents_energy_to_their_bench,
-               test_ability_lock_cache_survives_a_reused_dict_address,
-               test_mew_box_donor_attacks_do_what_they_print,
-               test_this_pokemon_is_now_asleep_is_the_attackers_drawback,
-               test_named_stage1_bench_searches_and_try_to_imitate,
-               test_ability_gated_pokemon_gets_its_energy,
-               test_spiteful_evolution_and_ex_only_spreads,
-               test_corrosive_winds_hits_only_damaged_pokemon,
-               test_the_lookahead_does_not_see_hidden_cards,
-               test_static_play_locks_and_metal_bridge,
-               test_mulligans_give_the_opponent_extra_cards,
-               test_evolution_timing_for_both_players,
-               test_no_supporter_on_the_first_turn_going_first,
-               test_conservation_audit_is_clean,
-               test_cards_are_conserved,
-               test_the_lookahead_chooses_the_promotion,
-               test_tri_kinesis_knocks_out_the_best_prize,
-               test_seek_inspiration_reads_and_discards_the_top_card,
-               test_played_from_hand_abilities_fire,
-               test_when_damaged_abilities_beyond_counters,
-               test_prize_changes_read_their_own_conditions,
-               test_the_lookahead_chooses_the_energy_target,
-               test_the_lookahead_chooses_the_supporter,
-               test_choice_band_discount_and_boomerang_energy,
-               test_tera_pokemon_on_the_bench_take_no_attack_damage,
-               test_three_count_shapes_scale,
-               test_special_energy_does_what_it_prints,
-               test_effect_immunity_blocks_attack_effects_only,
-               test_torrential_heart_buffs_the_attacker_and_spares_the_bench,
-               test_prevention_never_wins_and_attack_effects_run,
-               test_switching_attacks_switch,
-               test_requirements_and_attached_energy_types_are_real,
-               test_the_lookahead_pilot_sees_a_lock,
-               test_the_mew_lock_trainers_do_what_they_say,
-               test_the_mill_wall_pieces_work,
-               test_subjugating_chains_switches_in_your_own_attacker,
-               test_a_copy_attack_deck_keeps_room_for_its_donor,
-               test_hand_reset_draws_do_the_first_half_of_their_text,
-               test_an_optional_draw_never_empties_the_deck,
-               test_a_self_attack_lock_ends_with_the_next_turn,
-               test_when_damaged_tools_fire_and_are_attached,
-               test_no_card_in_any_decklist_is_silently_inert,
-               test_every_bonus_damage_tool_is_registered_and_gated,
-               test_the_last_three_loose_searches_are_closed,
-               test_a_copy_attack_chain_cannot_run_away,
-               test_a_wall_respects_the_attacker_restriction_it_prints,
-               test_a_search_respects_the_rule_box_clause_it_prints,
-               test_a_search_respects_the_hp_cap_it_prints,
-               test_the_reflip_tool_is_actually_put_on_a_pokemon,
-               test_a_gate_on_the_target_is_a_gate_and_not_decoration,
-               test_one_attach_sentence_attaches_exactly_what_it_prints,
-               test_paralysis_and_sleep_pin_the_active_in_place,
-               test_conditions_come_off_when_a_switch_moves_you_to_the_bench,
-               test_recall_puts_cards_in_the_right_zone,
-               test_rider_shapes_that_no_deck_here_carries,
-               test_resistance_can_be_ignored_and_all_or_nothing_flips_flip,
-               test_a_card_already_pitched_is_not_played_from_a_stale_snapshot,
-               test_draw_fires, test_draw_with_discard_cost,
-               test_cost_unaffordable_blocks, test_active_only_condition,
-               test_ko_condition, test_energy_type_condition_and_counter_move,
-               test_passive_damage_reduction, test_passive_damage_buff,
-               test_retaliation, test_spiritomb_team_retaliation_type_gate,
-               test_search_to_hand, test_shuffle_self_cost,
-               test_apply_condition, test_exclusive_conditions,
-               test_checkup_damage_and_clearing,
-               test_conditions_clear_on_retreat_and_evolve,
-               test_condition_blocks_attack,
-               test_opponent_hand_reset,
-               test_sniper_eye_cost_reduction_is_conditional,
-               test_fighting_roar_needs_an_ex_active,
-               test_flower_curtain_skips_rule_box_pokemon,
-               test_retreat_tax_reaches_across_the_table,
-               test_skyliner_frees_only_basics,
-               test_alluring_light_draws_one_each,
-               test_victory_symbol_is_prize_gated,
-               test_biting_spree_hits_the_opponent,
-               test_terminal_period_needs_exactly_six_counters,
-               test_food_prep_scales_with_kofu_in_discard,
-               test_hide_n_sneak_threshold,
-               test_matcha_spin_is_not_charged_twice,
-               test_board_wide_spread_is_priced_across_the_board,
-               test_neurokinesis_counts_the_whole_opposing_board,
-               test_prevention_walls_check_who_is_attacking,
-               test_turn_locks_are_applied_not_just_compiled,
-               test_unregistered_trainers_resolve_from_card_text,
-               test_hp_tools_are_attached_and_raise_the_KO_threshold,
-               test_ai_values_knockouts_and_setup_rather_than_raw_damage,
-               test_wall_breakers_endure_and_ability_hp,
-               test_counter_multiplier_scales_what_is_already_there,
-               test_rare_candy_bridges_a_line_the_deck_does_not_own,
-               test_typed_energy_scalers_count_only_that_type,
-               test_bench_counts_honour_their_filter,
-               test_type_words_are_types_not_name_fragments,
-               test_discard_scalers_are_paid_for,
-               test_hp_threshold_and_conditional_kos_execute,
-               test_attack_gates_are_conditional_and_enforced,
-               test_promo_set_codes_parse,
-               test_attack_costs_that_were_never_paid,
-               test_heal_scaling_and_spread_are_counted_once,
-               test_special_energy_provides_what_it_says,
-               test_rare_candy_bridges_in_the_baseline_sim_too,
-               test_resistance_is_applied,
-               test_coin_flips_are_actually_flipped,
-               test_meta_trainers_compile_once_and_correctly,
-               test_counter_budgets_are_allocated_to_take_a_knockout,
-               test_gust_targeting_prefers_prizes_and_is_otherwise_identical,
-               test_area_zero_underdepths_raises_the_bench_cap,
-               test_fairy_zone_rewrites_weakness,
-               test_copied_attacks_carry_their_riders,
-               test_copy_attacks_cannot_recurse_forever,
-               test_copied_attack_survives_a_missing_attacker]:
+    tests = [fn for name, fn in list(globals().items())
+             if name.startswith("test_") and callable(fn)]
+    for fn in tests:
         print(f"{fn.__name__}:")
         try:
             fn()
@@ -4969,8 +4853,6 @@ def main():
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
 
 
 # --------------------------------------------------------------------------
@@ -5727,3 +5609,33 @@ def test_wild_growth_makes_each_basic_grass_energy_count_twice():
           got and got["name"])
     got = V.attack_damage(pl, op, pl.active, atk, record=False)
     check("Myriad Leaf Shower counts 4 Energy: 30 + 4 x 30", got == 150, got)
+
+
+def test_import_decklist_maps_printings_and_refuses_to_guess():
+    """import_decklist.py turns a published list into this pool's printings.
+
+    A Trainer reprint maps by name (Boss's Orders RCL 189 -> MEG 114, the
+    mapping the submitted Zygarde list needed by hand). A Pokemon with
+    several different pool printings and an unknown SET NUM is left for a
+    person to decide, and a card with no legal printing is never replaced."""
+    import import_decklist as I
+    by_name, by_setnum, sets, folded = I.index()
+    text = ("2 Mega Zygarde ex POR 120\n3 Boss’s Orders RCL 189\n4 Pokegear 3.0 UNB 233\n"
+            "4 Pikachu ex SVI 63\n2 Arven SVI 166\n9 Fighting Energy SVE 6\n")
+    rows = {r[1].split(" ")[0] + r[1].split(" ")[1]: r for r in
+            I.resolve(M.parse_decklist_entries(text), by_name, by_setnum, sets, folded)}
+    got = {k: (r[1], r[2]) for k, r in rows.items()}
+    check("an exact printing is kept", got["MegaZygarde"] == ("Mega Zygarde ex POR 120", "exact"),
+          got["MegaZygarde"])
+    check("a Trainer reprint maps by name", got["Boss'sOrders"] == ("Boss's Orders MEG 114", "reprint"),
+          got["Boss'sOrders"])
+    check("accents and apostrophes are folded", got["Pokégear3.0"][1] == "reprint", got["Pokégear3.0"])
+    check("a Pokemon with differing printings is not guessed", got["Pikachuex"][1] == "AMBIGUOUS",
+          got["Pikachuex"])
+    check("a rotated card is not replaced", got["ArvenSVI"][1] == "NOT IN POOL", got["ArvenSVI"])
+    check("Basic Energy is written the PTCGL way", got["BasicFighting"][0] == "Basic Fighting Energy",
+          got["BasicFighting"])
+
+
+if __name__ == "__main__":
+    sys.exit(main())
