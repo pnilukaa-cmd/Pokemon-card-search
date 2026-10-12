@@ -4082,34 +4082,8 @@ def _flip_damage(pl, opp, spot, atk, base, text):
     return None
 
 
-_COIN_SAMPLES = 24
-
-
 def attack_damage(pl, opp, spot, atk, record=True):
-    """Best-effort damage for one attack in the current board state.
-
-    While an attack is only being CHOSEN, its coins have not been flipped.
-    The coin shapes below flip real coins, so choosing previewed the real
-    outcome and spent the game's random stream: Mega Kangaskhan ex's
-    Rapid-Fire Combo priced at 500 one call and 200 the next. With
-    coin_expectation on, a choice averages the outcomes on a private
-    stream; only resolution (_RESOLVING) flips for real.
-    """
-    text = atk.get("text") or ""
-    if (not _RESOLVING[0] and _FLIP_ANY_RE.search(text)
-            and POL.knob(pl, "coin_expectation")):
-        state = random.getstate()
-        random.seed(0xC0FFEE)
-        try:
-            total = sum(_attack_damage_once(pl, opp, spot, atk, record and i == 0)
-                        for i in range(_COIN_SAMPLES))
-        finally:
-            random.setstate(state)
-        return int(round(total / _COIN_SAMPLES))
-    return _attack_damage_once(pl, opp, spot, atk, record)
-
-
-def _attack_damage_once(pl, opp, spot, atk, record=True):
+    """Best-effort damage for one attack in the current board state."""
     text = atk.get("text") or ""
     base = atk["damage"]
 
