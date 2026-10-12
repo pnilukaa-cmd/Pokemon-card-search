@@ -5625,3 +5625,38 @@ def test_turbo_flare_picks_the_energy_type_the_target_is_missing():
     V.do_attack(pl, op, [])
     got = sorted(t for e in pl.bench[0].energy for t in e)
     check("Koraidon ex gets Fire + Fighting + Fighting", got == ["Fighting", "Fighting", "Fire"], got)
+
+
+def test_you_may_do_more_damage_is_a_choice_with_a_price():
+    """Dondozo ex's Dynamic Dive: "You may do 120 more damage. If you do,
+    this Pokemon also does 50 damage to itself." The +120 was never added
+    and the 50 was always taken, so it did 120 and paid the recoil every
+    time. Copperajah (can't attack next turn), Poliwrath (shuffles itself
+    away) and Gurdurr (recoil) are the same shape."""
+    import random as _r, tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Dondozo ex DRI 211\n1 Mega Zygarde ex POR 120\n\n"
+                "Energy: 58\n58 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "d")
+    finally:
+        os.unlink(f.name)
+    atk = next(a for a in D[1]["Dondozo ex"]["attacks"] if a["name"] == "Dynamic Dive")
+
+    def dive(my_damage):
+        pl, op = V.Player("d", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        pl.active, op.active = V.InPlay("Dondozo ex", 1), V.InPlay("Mega Zygarde ex", 1)
+        pl.active.damage = my_damage
+        pl.active.energy, pl.active.energy_names = [["Water"]] * 4, ["Water Energy"] * 4
+        pl.bench, op.bench = [], [V.InPlay("Dondozo ex", 1)]
+        pl.round_no = op.round_no = 3
+        pl._opp_ref, op._opp_ref = op, pl
+        pl._forced_attack = atk
+        _r.seed(1)
+        V.do_attack(pl, op, [])
+        return op.active.damage, (pl.active.damage if pl.active else "Knocked Out")
+
+    got = dive(0)
+    check("healthy: it takes the extra 120 and pays the 50", got == (240, 50), got)
+    got = dive(230)
+    check("at 30 HP left: it declines, so no recoil", got == (120, 230), got)

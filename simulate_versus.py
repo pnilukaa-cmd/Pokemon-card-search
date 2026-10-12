@@ -4082,8 +4082,53 @@ def _flip_damage(pl, opp, spot, atk, base, text):
     return None
 
 
+_MAY_MORE_RE = _re.compile(r"you may do (\d+) more damage\. if you do, ([^.]*)", _re.I)
+# Whether the attack resolving now took its "you may do N more" option,
+# so attack_side_effects charges the "if you do" cost only when it did.
+_OPTIONAL_TAKEN = [False]
+
+
+def _take_optional_damage(pl, opp, spot, atk, base, bonus):
+    """"You may do N more damage. If you do, <cost>." (Dondozo ex's Dynamic
+    Dive, Copperajah, Poliwrath, Gurdurr.) The bonus was never added and
+    the cost always paid: Dynamic Dive did 120 and took its 50 recoil
+    anyway. Take it when it turns a miss into a Knock Out, or when the
+    cost is recoil the attacker survives.
+    """
+    foe = opp.active if opp is not None else None
+    if foe is None or spot is None:
+        return False
+    info = opp.POKEMON.get(foe.name) or {}
+    mult = 1
+    weak = info.get("weakness")
+    if weak and weak in (pl.POKEMON[spot.name].get("types") or []):
+        mult = AE.query_weakness_multiplier(pl, opp)
+    left = effective_hp(opp, foe) - foe.damage
+    if base * mult >= left:
+        return False
+    cost = _MAY_MORE_RE.search(atk.get("text") or "").group(2)
+    recoil = _re.search(r"does (\d+) damage to itself", cost, _re.I)
+    survives = (not recoil
+                or effective_hp(pl, spot) - spot.damage > int(recoil.group(1)))
+    if (base + bonus) * mult >= left:
+        return survives
+    return bool(recoil) and survives
+
+
 def attack_damage(pl, opp, spot, atk, record=True):
     """Best-effort damage for one attack in the current board state."""
+    dmg = _attack_damage_core(pl, opp, spot, atk, record)
+    m = _MAY_MORE_RE.search(atk.get("text") or "")
+    if m:
+        take = _take_optional_damage(pl, opp, spot, atk, dmg, int(m.group(1)))
+        if _RESOLVING[0]:
+            _OPTIONAL_TAKEN[0] = take
+        if take:
+            dmg += int(m.group(1))
+    return dmg
+
+
+def _attack_damage_core(pl, opp, spot, atk, record=True):
     text = atk.get("text") or ""
     base = atk["damage"]
 
@@ -6399,6 +6444,12 @@ def attack_side_effects(pl, opp, atk, log):
     # as always-on.
     if eff.conditions and not AE.conditions_met(eff, pl, opp, pl.active):
         return
+    # "You may do N more damage. If you do, ..." -- every rider on these
+    # attacks is the price of the option, so no option, no price.
+    if _MAY_MORE_RE.search(text):
+        took, _OPTIONAL_TAKEN[0] = _OPTIONAL_TAKEN[0], False
+        if not took:
+            return
     if getattr(eff, "chance", 1.0) < 1.0 and _rider_is_drawback(eff):
         # The flip decides a DRAWBACK (Team Rocket's Raticate: "if both of
         # them are tails, this Pokemon also does 90 damage to itself").
