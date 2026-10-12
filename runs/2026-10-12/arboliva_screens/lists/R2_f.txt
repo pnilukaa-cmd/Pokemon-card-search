@@ -1,0 +1,26 @@
+Pokémon: 15
+3 Teal Mask Ogerpon ex TWM 190
+3 Smoliv DRI 21
+2 Dolliv DRI 22
+3 Arboliva ex DRI 207
+2 Meowth ex POR 107
+1 Celebi MEG 12
+1 Fezandipiti ex ASC 142
+
+Trainer: 29
+4 Lillie's Determination MEG 184
+2 Boss's Orders MEG 114
+2 Iris's Fighting Spirit JTG 180
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Rare Candy MEG 125
+3 Bug Catching Set TWM 143
+2 Night Stretcher MEG 173
+1 Switch PFL 123
+1 Hero's Cape TEF 152
+2 Forest of Vitality MEG 117
+
+Energy: 16
+16 Basic Grass Energy
+
+Total Cards: 60
