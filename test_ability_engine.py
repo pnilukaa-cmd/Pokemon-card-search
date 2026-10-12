@@ -5596,3 +5596,32 @@ def test_core_memory_goes_on_mega_zygarde_ex_only():
     c.tool = "Core Memory"
     check("a Cinderace holding it has no Geobuster", V.tool_attacks(pl, c) == [],
           V.tool_attacks(pl, c))
+
+
+def test_turbo_flare_picks_the_energy_type_the_target_is_missing():
+    """Turbo Flare: "Search your deck for up to 3 Basic Energy cards and
+    attach them to your Benched Pokemon in any way you like." The player
+    picks which Energy. It took the first three in the deck, so a Koraidon
+    ex (Kaiser Tackle: Fire + Fighting + Fighting) in a Fighting deck with a
+    few Fire never got the one Fire it needed."""
+    import random as _r
+    import tcg_model as _M
+    V, Z, ZE = _real("decks/field/mega_zygarde_cinderace_gaia_wave.txt", "z")
+    c = V._CARDS_BY_NAME["Koraidon ex"]
+    Z[1]["Koraidon ex"] = _M.build_pokemon_info(c[0] if isinstance(c, list) else c)
+    pl = V.Player("z", Z[1], list(Z[2]), ZE)
+    op = V.Player("o", Z[1], list(Z[2]), ZE)
+    pl.energy_types = {"Fighting", "Fire"}
+    pl.active = V.InPlay("Cinderace", 1)
+    pl.active.energy, pl.active.energy_names = [["Fighting"]], ["Fighting Energy"]
+    pl.bench = [V.InPlay("Koraidon ex", 1)]
+    pl.deck = ([("Energy", "Fighting Energy")] * 10 + [("Energy", "Fire Energy")] * 2
+               + [("Energy", "Fighting Energy")] * 5)
+    op.active, op.bench, op.hand, pl.hand = V.InPlay("Mega Audino ex", 1), [], [], []
+    pl.round_no = op.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    pl._forced_attack = Z[1]["Cinderace"]["attacks"][0]
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    got = sorted(t for e in pl.bench[0].energy for t in e)
+    check("Koraidon ex gets Fire + Fighting + Fighting", got == ["Fighting", "Fighting", "Fire"], got)

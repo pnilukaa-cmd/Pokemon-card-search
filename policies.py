@@ -88,6 +88,9 @@ GREEDY = {
     # Emboar ex +4.15, Lurantis +4.18, Raging Bolt +0.06). Steering only the
     # Evolution picks was no better.
     "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 1)),
+    # Price a coin-flip attack by its average while choosing it, on a
+    # private random stream, instead of by one preview flip.
+    "coin_expectation": int(__import__("os").environ.get("COIN_EXPECTATION", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

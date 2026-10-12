@@ -784,6 +784,8 @@ ENERGY_SINK = lambda owner, types, spots: spots[0]
 LOOK_PICK = lambda pl, cands: list(cands)
 # Order of attach recipients, neediest first, [] for none worth it; set by the simulator.
 ATTACH_RANK = lambda pl, opp, cands: list(cands)
+# Energy types a Pokemon still needs for its attack; set by the simulator.
+ENERGY_NEED = lambda pl, spot: []
 # The simulator sets this: the Pokemon a "discard the top card and use its
 # attack" attacker wants on top of the deck (None: no such attacker).
 TOP_COPY_WANT = lambda pl: None
@@ -1328,7 +1330,17 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         differ = act.filter.get("different_type")
         blocked = getattr(pl, "last_searched_energy", None) if differ else None
 
-        def _take():
+        def _take(prefer=None):
+            # "Search your deck for up to 3 Basic Energy cards" lets the
+            # player pick which: the type the recipient is still missing
+            # (Koraidon ex's one Fire among Fighting), else the first.
+            if prefer and src == "deck":
+                card = _find_in_deck(pl, lambda k, n: k == "Energy"
+                                     and (not want_type or want_type in n)
+                                     and (blocked is None or n != blocked)
+                                     and any(t in n for t in prefer))
+                if card:
+                    return card
             if src == "hand":
                 i = next((i for i, (k, n) in enumerate(pl.hand)
                           if k == "Energy" and (not want_type or want_type in n)), None)
@@ -1421,7 +1433,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         for _ in range(max(act.amount or 1, 1)):
             if spread:
                 tgt = (ATTACH_RANK(pl, opp, [p for p in hits if p is not None]) or [tgt])[0]
-            card = _take()
+            card = _take(ENERGY_NEED(pl, tgt))
             if not card:
                 break
             _put(tgt, card)

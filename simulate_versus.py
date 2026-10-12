@@ -2946,6 +2946,30 @@ def _attach_rank(pl, opp, cands):
 AE.ATTACH_RANK = _attach_rank
 
 
+def _energy_need_types(pl, spot):
+    """The Energy types `spot` is still missing for its biggest attack."""
+    info = pl.POKEMON.get(spot.name) or {}
+    atks = [a for a in info.get("attacks") or []
+            if all(c == "Colorless" or c in pl.energy_types for c in a["cost"])]
+    if not atks:
+        return []
+    atk = max(atks, key=lambda a: (a.get("damage") or 0, len(a["cost"])))
+    have = [list(e) for e in spot.energy]
+    need = []
+    for c in atk["cost"]:
+        if c == "Colorless":
+            continue
+        i = next((i for i, e in enumerate(have) if c in e), None)
+        if i is None:
+            need.append(c)
+        else:
+            have.pop(i)
+    return need
+
+
+AE.ENERGY_NEED = _energy_need_types
+
+
 def _payable_damage(owner, spot, energy, foe=None):
     """The most printed damage `spot` could pay for with `energy` attached."""
     best = 0
@@ -4058,8 +4082,34 @@ def _flip_damage(pl, opp, spot, atk, base, text):
     return None
 
 
+_COIN_SAMPLES = 24
+
+
 def attack_damage(pl, opp, spot, atk, record=True):
-    """Best-effort damage for one attack in the current board state."""
+    """Best-effort damage for one attack in the current board state.
+
+    While an attack is only being CHOSEN, its coins have not been flipped.
+    The coin shapes below flip real coins, so choosing previewed the real
+    outcome and spent the game's random stream: Mega Kangaskhan ex's
+    Rapid-Fire Combo priced at 500 one call and 200 the next. With
+    coin_expectation on, a choice averages the outcomes on a private
+    stream; only resolution (_RESOLVING) flips for real.
+    """
+    text = atk.get("text") or ""
+    if (not _RESOLVING[0] and _FLIP_ANY_RE.search(text)
+            and POL.knob(pl, "coin_expectation")):
+        state = random.getstate()
+        random.seed(0xC0FFEE)
+        try:
+            total = sum(_attack_damage_once(pl, opp, spot, atk, record and i == 0)
+                        for i in range(_COIN_SAMPLES))
+        finally:
+            random.setstate(state)
+        return int(round(total / _COIN_SAMPLES))
+    return _attack_damage_once(pl, opp, spot, atk, record)
+
+
+def _attack_damage_once(pl, opp, spot, atk, record=True):
     text = atk.get("text") or ""
     base = atk["damage"]
 
