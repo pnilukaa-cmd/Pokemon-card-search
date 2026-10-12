@@ -5694,3 +5694,33 @@ def test_oil_salvo_spends_its_six_hits_on_knock_outs():
     got = [b.damage for b in op.bench]
     check("all three Smoliv take enough to be Knocked Out (1 + 2 + 3 hits)",
           all(d >= 60 for d in got), got)
+
+
+def test_wild_growth_makes_each_basic_grass_energy_count_twice():
+    """Meganium's Wild Growth: "Each Basic Grass Energy attached to all of
+    your Pokemon provides GrassGrass Energy." It compiled, and nothing
+    asked: every cost check and every "for each Energy attached" counted
+    one Energy per card, so Meganium did nothing at all. Teal Mask Ogerpon
+    ex with 2 Basic Grass could not pay GGG, and Myriad Leaf Shower counted
+    half its Energy."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n2 Teal Mask Ogerpon ex TWM 190\n1 Meganium MEG 10\n\n"
+                "Energy: 57\n57 Basic Grass Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    atk = D[1]["Teal Mask Ogerpon ex"]["attacks"][0]
+    pl, op = V.Player("g", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.energy_types = {"Grass"}
+    pl.active = V.InPlay("Teal Mask Ogerpon ex", 1)
+    pl.active.energy, pl.active.energy_names = [["Grass"]] * 2, ["Grass Energy"] * 2
+    pl.bench = [V.InPlay("Meganium", 1)]
+    op.active = V.InPlay("Teal Mask Ogerpon ex", 1)
+    pl._opp_ref, op._opp_ref = op, pl
+    got = V.best_attack(pl, pl.active, True, op)
+    check("2 Basic Grass pay GGG with Meganium in play", got is not None and got["name"] == atk["name"],
+          got and got["name"])
+    got = V.attack_damage(pl, op, pl.active, atk, record=False)
+    check("Myriad Leaf Shower counts 4 Energy: 30 + 4 x 30", got == 150, got)

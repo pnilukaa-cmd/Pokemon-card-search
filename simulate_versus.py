@@ -811,7 +811,7 @@ def _plan_counter_moves(pl, opp, log):
     me = pl.active
     hp = lambda q: effective_hp(pl, q)
     payable = [a for a in pl.POKEMON[me.name]["attacks"]
-               if can_pay(effective_cost(pl, me, a["cost"], opp, a.get("name")), me.energy)]
+               if can_pay(effective_cost(pl, me, a["cost"], opp, a.get("name")), provided(pl, me))]
     rage = [a for a in payable if _RAGE_RE.search(a.get("text") or "")
             and "less damage" not in (a.get("text") or "")]
     if rage:
@@ -1241,7 +1241,7 @@ def _transform_pick(pl, opp, spot, cands, use_forced=False):
             return (0, effective_hp(pl, tmp) - tmp.damage)
         for atk in pl.POKEMON[name]["attacks"]:
             cost = effective_cost(pl, tmp, atk["cost"], opp, atk.get("name"))
-            if can_pay(cost, tmp.energy) or (extra_prov[0] and can_pay(cost, tmp.energy + extra_prov)):
+            if can_pay(cost, provided(pl, tmp)) or (extra_prov[0] and can_pay(cost, provided(pl, tmp) + extra_prov)):
                 best = max(best, min(attack_value(pl, opp, tmp, atk), 10 ** 4))
         return (best, effective_hp(pl, tmp) - tmp.damage)
     return max(cands, key=score)
@@ -1282,7 +1282,7 @@ def _stadium_hand_to_top(pl, log):
     seek = next(a for a in pl.POKEMON[pl.active.name]["attacks"]
                 if _SELF_TOP_COPY_RE.search(a.get("text") or ""))
     if not can_pay(effective_cost(pl, pl.active, seek["cost"], opp, seek.get("name")),
-                   pl.active.energy):
+                   provided(pl, pl.active)):
         return
     want = _top_copy_want(pl, pool=pl.hand)
     if want is None:
@@ -1815,7 +1815,7 @@ def _switch_in_on_play(pl, opp, spot, log):
     plan = None
     for atk in atks:
         cost = effective_cost(pl, spot, atk["cost"], opp, atk.get("name"))
-        have = list(spot.energy)
+        have = list(provided(pl, spot))
         if can_pay(cost, have):
             plan = []
             break
@@ -2975,7 +2975,8 @@ def _payable_damage(owner, spot, energy, foe=None):
     """The most printed damage `spot` could pay for with `energy` attached."""
     best = 0
     for atk in (owner.POKEMON.get(spot.name) or {}).get("attacks") or []:
-        if can_pay(effective_cost(owner, spot, atk["cost"], foe, atk.get("name")), energy):
+        if can_pay(effective_cost(owner, spot, atk["cost"], foe, atk.get("name")),
+                   provided(owner, spot, energy)):
             best = max(best, atk.get("damage") or 0, 1)
     return best
 AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
@@ -3399,18 +3400,50 @@ _TYPED_ENERGY_RE = _re.compile(
     r"fairy|colorless)\s+energy", _re.I)
 
 
+def _energy_bonus_possible(owner):
+    """Does anything in this deck make one Energy card provide more?"""
+    flag = getattr(owner, "_energy_bonus_possible", None)
+    if flag is None:
+        flag = any(a.op == IR.Op.ENERGY_PROVIDES_EXTRA
+                   for effs in (getattr(owner, "EFFECTS", None) or {}).values()
+                   for eff in effs for a in eff.actions)
+        owner._energy_bonus_possible = flag
+    return flag
+
+
+def provided(owner, spot, energy=None):
+    """The Energy `spot` actually provides: one entry per attached card,
+    plus the extra a card provides under an Ability like Meganium's Wild
+    Growth ("each Basic Grass Energy ... provides GrassGrass Energy").
+
+    Wild Growth compiled, and energy_units() could count it, but nothing
+    called either: every cost check and every "for each Energy attached"
+    read one Energy per card, so Meganium did nothing at all. `energy`
+    overrides the attached list for a what-if (names unknown: Basic).
+    """
+    if energy is None:
+        energy, names = spot.energy, spot.energy_names
+    else:
+        names = [None] * len(energy)
+    if owner is None or not _energy_bonus_possible(owner):
+        return energy
+    out = []
+    for e, nm in zip(energy, list(names) + [None] * (len(energy) - len(names))):
+        out.append(e)
+        if nm is None or AE._is_basic_energy_name(nm):
+            for typ in e:
+                out.extend([e] * AE.query_energy_bonus(owner, spot, typ))
+                break
+    return out
+
+
 def energy_units(pl, spot):
     """How many Energy this Pokemon effectively has, after any Ability that
     makes one card provide more (Meganium's Wild Growth)."""
-    total = len(spot.energy)
-    for e in spot.energy:
-        for typ in e:
-            total += AE.query_energy_bonus(pl, spot, typ)
-            break
-    return total
+    return len(provided(pl, spot))
 
 
-def _energy_matching(clause, spots):
+def _energy_matching(clause, spots, *players):
     """Energy on `spots`, restricted to the type the clause names.
 
     "for each Psychic Energy attached to this Pokemon" was being counted as
@@ -3425,10 +3458,13 @@ def _energy_matching(clause, spots):
     for s in spots:
         if s is None:
             continue
+        owner = next((p for p in players if p is not None
+                      and (s is p.active or s in p.bench)), None)
+        prov = provided(owner, s)
         if want is None:
-            n += s.energy_count()
+            n += len(prov)
         else:
-            n += sum(1 for prov in s.energy if want in prov)
+            n += sum(1 for e in prov if want in e)
     return n
 
 
@@ -3492,16 +3528,16 @@ def _clause_count(clause, pl, opp, spot):
     if "your benched pok" in c:
         return _bench_matching(c, pl.bench)
     if "energy attached to your opponent's active" in c:
-        return _energy_matching(c, [opp.active]) if opp and opp.active else 0
+        return _energy_matching(c, [opp.active], pl, opp) if opp and opp.active else 0
     # "attached to all of your Pokemon" counts the whole board, not the
     # Active -- Hydrapple ex's Syrup Storm and Mega Gardevoir ex's Mega
     # Symphonia are both board-wide and were scoring base damage only.
     # Checked before the Active-only clause, which "to all of your Pokemon"
     # would otherwise never reach.
     if "energy attached to all of your pok" in c:
-        return _energy_matching(c, ([pl.active] if pl.active else []) + list(pl.bench))
+        return _energy_matching(c, ([pl.active] if pl.active else []) + list(pl.bench), pl, opp)
     if "energy attached to this pok" in c:
-        return _energy_matching(c, [spot])
+        return _energy_matching(c, [spot], pl, opp)
     # Azelf's Neurokinesis and Trevenant's Overwhelming Pain count the
     # WHOLE opposing board, not just the Active -- which is the entire
     # reason they pair with a spread attack. Checked before the Active-only
@@ -3536,9 +3572,9 @@ def _clause_count(clause, pl, opp, spot):
     # Energy counted somewhere other than one Pokemon.
     if "energy attached to all of your opponent's pok" in c:
         return _energy_matching(
-            c, ([opp.active] if opp.active else []) + list(opp.bench))
+            c, ([opp.active] if opp.active else []) + list(opp.bench), pl, opp)
     if "energy attached to both active pok" in c:
-        return _energy_matching(c, [pl.active, opp.active if opp else None])
+        return _energy_matching(c, [pl.active, opp.active if opp else None], pl, opp)
     if "energy card in your discard pile" in c:
         return sum(1 for x in pl.discard if "energy" in str(x).lower())
     if "energy card in your opponent's discard pile" in c:
@@ -5262,7 +5298,7 @@ def _named_attack_pick(owner, foe, spot):
     best, val = None, -1
     for a in (owner.POKEMON.get(spot.name) or {}).get("attacks") or []:
         v = attack_value(owner, foe, spot, a) if can_pay(
-            effective_cost(owner, spot, a["cost"], foe, a.get("name")), spot.energy) \
+            effective_cost(owner, spot, a["cost"], foe, a.get("name")), provided(owner, spot)) \
             else (a.get("damage") or 0) / 2
         if v > val:
             best, val = a.get("name"), v
@@ -5281,7 +5317,7 @@ def best_attack(pl, spot, only_payable=True, opp=None):
     for atk in list(info["attacks"]) + AE.query_extra_attacks(pl, spot):
         if only_payable and not can_pay(effective_cost(pl, spot, atk["cost"], opp,
                                                        atk.get("name")),
-                                        spot.energy):
+                                        provided(pl, spot)):
             continue
         if _attack_disabled(spot, atk):
             continue
@@ -5319,7 +5355,7 @@ def energy_shortfall(pl, spot):
         for c in _attack_ir(a).conditions or []:
             if c.get("kind") == "self_extra_energy":
                 need = max(need, len(a["cost"]) + c["count"])
-    return max(0, need - spot.energy_count())
+    return max(0, need - energy_units(pl, spot))
 
 
 _ONLY_ATTACH_RE = _re.compile(r"this card can only be attached to an? ([\w'’ -]+?) pok[eé]mon", _re.I)
@@ -7119,7 +7155,7 @@ def lookahead_attack(pl, opp, greedy_pick):
     cands, seen = [], set()
     for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot):
         if a["name"] in seen or not can_pay(
-                effective_cost(pl, spot, a["cost"], opp, a.get("name")), spot.energy) \
+                effective_cost(pl, spot, a["cost"], opp, a.get("name")), provided(pl, spot)) \
                 or _attack_disabled(spot, a):
             continue
         seen.add(a["name"])
