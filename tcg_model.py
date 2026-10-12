@@ -257,6 +257,13 @@ def parse_damage(dmg):
     return int(m.group(1)) if m else 0
 
 
+# Misspellings in the card data's evolvesFrom. Archen WHT 131 evolves from
+# "Antiuqe Plume Fossil", a name no card has, so it could never be played
+# onto the fossil and the whole Archeops line was dead. Every other
+# evolvesFrom in the pool names a real card (checked 2026-10-12).
+_EVOLVES_FROM_FIX = {"Antiuqe Plume Fossil": "Antique Plume Fossil"}
+
+
 def build_pokemon_info(card):
     fossil = fossil_stats(card)
     if fossil:
@@ -295,7 +302,7 @@ def build_pokemon_info(card):
         # but `evolves_from` on every other card still names the printed
         # form, so evolution has to match on this rather than on the key.
         "base_name": card.get("name"),
-        "evolves_from": card.get("evolvesFrom"),
+        "evolves_from": _EVOLVES_FROM_FIX.get(card.get("evolvesFrom"), card.get("evolvesFrom")),
         "hp": int(card.get("hp") or 0),
         "retreat": retreat,
         "rule_box": is_rule_box(card),

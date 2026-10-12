@@ -5719,5 +5719,17 @@ def test_hand_disruption_does_what_the_card_says():
     check("it is used on a 7-card hand", len(op.hand) == 3, len(op.hand))
 
 
+def test_every_evolves_from_names_a_real_card():
+    """Archen WHT 131 evolves from "Antiuqe Plume Fossil" in the card data,
+    a name no card has, so it could never go onto the fossil and the
+    Archeops line (Ancient Wing, a devolve every turn) was dead."""
+    cards = M.load_cards()
+    names = {c["name"] for c in cards}
+    bad = sorted({(c["name"], M.build_pokemon_info(c)["evolves_from"]) for c in cards
+                  if c.get("supertype") == "Pokémon" and c.get("evolvesFrom")
+                  and M.build_pokemon_info(c)["evolves_from"] not in names})
+    check("every Pokemon evolves from a card that exists", not bad, bad)
+
+
 if __name__ == "__main__":
     sys.exit(main())
