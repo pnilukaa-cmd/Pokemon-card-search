@@ -4804,8 +4804,11 @@ def test_no_compiled_op_is_orphaned_by_class():
     check("every activated-Ability op has an executor", not dead, "; ".join(sorted(dead)))
 
     import glob as _g
+    # BUFF_DAMAGE: Voltaic Lightning Energy's +20, read in do_attack via
+    # energy_passives(..., BUFF_DAMAGE).
     CONSUMED = {IR.Op.MODIFY_HP, IR.Op.MODIFY_RETREAT, IR.Op.PREVENT_DAMAGE,
-                IR.Op.MODIFY_PRIZE, IR.Op.CONDITION_IMMUNITY, IR.Op.PLACE_COUNTERS}
+                IR.Op.MODIFY_PRIZE, IR.Op.CONDITION_IMMUNITY, IR.Op.PLACE_COUNTERS,
+                IR.Op.BUFF_DAMAGE}
     bad = set()
     for f in _g.glob("decks/field/*.txt") + _g.glob("decks/*.ptcgl.txt"):
         D = V.load_model(f, "x")[0]

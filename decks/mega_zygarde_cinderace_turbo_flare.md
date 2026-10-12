@@ -12,8 +12,8 @@ the import below uses this pool's printings:
 version,
 **[mega_zygarde_cinderace_gaia_wave.md](mega_zygarde_cinderace_gaia_wave.md),
 scores 81.63% (+13.77 ± 0.57 paired, better on all 85)**. With a
-Cornerstone Mask Ogerpon ex added (2026-10-12), it scores 83.30% against
-the 86-deck field.
+Cornerstone Mask Ogerpon ex added and Core Memory cut (2026-10-12), it
+scores 87.07% against the 86-deck field.
 
 ## Plan
 

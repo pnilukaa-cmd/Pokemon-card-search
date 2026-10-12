@@ -2,13 +2,21 @@
 
 Tuned 2026-10-11 from a submitted Mega Zygarde ex / Cinderace list
 ([mega_zygarde_cinderace_turbo_flare.md](mega_zygarde_cinderace_turbo_flare.md)),
-updated 2026-10-12 with a Cornerstone Mask Ogerpon ex.
+updated 2026-10-12 twice: a Cornerstone Mask Ogerpon ex went in, then
+Core Memory came out.
 
-**83.30% against the 86-deck field at 1000 games per opponent.** It wins
-85 of 86 matchups (median 86.0%), the highest field result in the repo.
-- Against the 2026-10-11 list (no Ogerpon, one more Energy) on the same
-  seeds: 81.48%, so **+1.83 ± 0.41 paired**, better on 57 and worse on 27.
-- Against the submitted list: 68.23%.
+**87.07% against the 86-deck field at 1000 games per opponent.** It wins
+all 86 matchups (median 90.1%).
+- **+3.83 ± 0.27 paired** (better on 83 of 86) over the list with Core
+  Memory (83.24% on the same seeds).
+- That list was itself +1.83 ± 0.41 over the 2026-10-11 list with no
+  Ogerpon.
+- The submitted list scored 68.23%.
+
+The Lightning version,
+[mega_zeraora_cinderace_thunderous_fist.md](mega_zeraora_cinderace_thunderous_fist.md),
+scores 90.03% against the same field. It loses to this deck, though (37.1%
+against the version with Core Memory): Mega Zeraora ex is weak to Fighting.
 
 **Lines:** Cinderace (opens face down), Mega Zygarde ex, Mega Audino ex,
 Cornerstone Mask Ogerpon ex.
@@ -20,12 +28,13 @@ down as your opening Active straight from the hand. Its **Turbo Flare** (C)
 does 50 and attaches 3 Basic Energy from your deck to your Benched Pokémon.
 On turn 1 or 2 that loads a Benched Mega Zygarde ex.
 
-**Mega Zygarde ex** (Basic, 310 HP) has three attacks:
+**Mega Zygarde ex** (Basic, 310 HP) has two attacks:
 - **Gaia Wave** (FFF): 200, and it takes 30 less damage next turn.
 - **Nullifying Zero** (FFFFF): 150 to each of the opponent's Pokémon on
   heads.
-- **Geobuster** (FFFF, from **Core Memory**): 350, discarding all its
-  Energy.
+
+Core Memory would add **Geobuster** (FFFF, 350, discarding all its Energy),
+but it measured −3.97 (see below).
 
 **Mega Audino ex**'s Kaleidowaltz (2 Basic Energy per heads, 3 coins) is a
 second accelerator, and its Ear Force punishes a loaded Active.
@@ -41,8 +50,8 @@ Spidops, the Mega Chandelure ex list.
 
 The tuning turned almost every tech card into Basic Fighting Energy.
 Turbo Flare, Kaleidowaltz and Fighting Gong all pull Basic Energy from the
-deck, and Gaia Wave and Geobuster spend a lot of it. With 21 in the deck
-every search hits.
+deck, and Gaia Wave and Nullifying Zero spend a lot of it. With 22 in the
+deck every search hits.
 
 ## How to play
 
@@ -52,11 +61,10 @@ every search hits.
 2. **Turns 1-2.** Turbo Flare: 50 damage and 3 Energy onto the Benched
    Zygarde. Fighting Gong finds Zygarde or Ogerpon (both Basic Fighting), or
    a Basic Fighting Energy. Mega Signal finds whichever Mega you are missing.
-   Attach Core Memory to a Zygarde.
+   Hero's Cape goes on a Zygarde.
 3. **Then.** Switch or retreat into Mega Zygarde ex and Gaia Wave for 200
-   (230 with Premium Power Pro). Geobuster the 300+ HP targets. Jumbo Ice
-   Cream heals 80 off an Active with 3+ Energy. Rocky Fighting Energy stops
-   attack effects on it.
+   (230 with Premium Power Pro). Jumbo Ice Cream heals 80 off an Active with
+   3+ Energy. Rocky Fighting Energy stops attack effects on it.
 4. **Ogerpon.** Put it in front of an attacker with an Ability, which then
    can't damage it, and to take 2-Prize Knock Outs without giving up 3.
 5. **Boss's Orders** (3) and **Team Rocket's Petrel** (4, any Trainer) take
@@ -64,15 +72,15 @@ every search hits.
 
 **Matchups (1000 games):**
 - **Worst:**
-  - the 2026-10-11 list 49.3%
-  - Lurantis 54.0%
-  - N's Zoroark 56.9%
-  - the submitted list 61.3%
-  - Mega Chandelure ex 63.4%
-  - Mega Emboar ex Fire Turbo 64.7%
-  - Hydrapple / Seaking 65.9%
-- **Best:** Mew baby box 99.0%, Mew / Pikachu box 98.3%, Mew / Hypno 97.0%,
-  Mew / Bastiodon 96.6%.
+  - the version with Core Memory 53.0%
+  - Lurantis 59.7%
+  - the submitted list 60.4%
+  - N's Zoroark 60.7%
+  - Mega Chandelure ex 67.3%
+  - Mega Emboar ex Fire Turbo 69.4%
+  - Heracross / Sinistcha 70.0%
+- **Best:** Arbok / Yveltal 99.8%, Mew baby box 99.4%, Mew / Hypno 99.0%,
+  Mew / Pikachu box 98.3%.
 - **Ogerpon's biggest gains:** N's Zoroark +14.3, Raging Bolt +13.5, Mega
   Chandelure ex +12.6, Spidops / Mewtwo +11.5.
 - **Its biggest losses:** Nidoking / Nidoqueen −4.9, Lurantis −4.5.
@@ -83,7 +91,8 @@ every search hits.
 round is paired against the best list of the round before. Rounds 0-5 ran
 on the engine after the fixes in the submitted list's notes. Their lists
 and results are in `runs/2026-10-11/zygarde_screens/`; round 6 is in
-`runs/2026-10-12/big_basic_screens/`.
+`runs/2026-10-12/big_basic_screens/` and rounds 7-8 in
+`runs/2026-10-12/energy_type_screens/`.
 
 | Round | Change | Win rate | Paired |
 |---|---|---|---|
@@ -121,18 +130,29 @@ and results are in `runs/2026-10-11/zygarde_screens/`; round 6 is in
 | 1000 games | 2026-10-11 list | 81.48% | |
 | 1000 games | Mega Kangaskhan ex added | 82.51% | +1.03 ± 0.28 |
 | 1000 games | Kangaskhan and Ogerpon added (−2 Energy) | 83.50% | +2.02 ± 0.44 |
-| 1000 games | **Cornerstone Mask Ogerpon ex added (this list)** | **83.30%** | **+1.83 ± 0.41** |
+| 1000 games | **Cornerstone Mask Ogerpon ex added** | **83.30%** | **+1.83 ± 0.41** |
+| 7 | 86-deck field, with the Ogerpon list in it | 83.37% | |
+| 7 | 4 Ultra Ball for the 4 Fighting Gong | 82.19% | −1.17 ± 0.37 |
+| 7 | 2 Ultra Ball for 2 Fighting Gong | 83.05% | −0.31 ± 0.39 |
+| 7 | −Premium Power Pro, +1 Energy | 83.41% | +0.05 ± 0.39 |
+| 7 | 4 Ultra Ball for Gong, −Premium Power Pro, −Core Memory, +2 Energy | 86.35% | +2.98 ± 0.43 |
+| 7 | −Premium Power Pro, −Core Memory, +2 Energy | 86.98% | +3.62 ± 0.46 |
+| 7 | **−Core Memory, +1 Energy** | **87.34%** | **+3.97 ± 0.43** |
+| 8 | −Premium Power Pro, +1 Energy | 86.98% | −0.35 ± 0.32 |
+| 8 | 3rd Mega Zygarde ex (−1 Energy) | 86.72% | −0.62 ± 0.37 |
+| 8 | Mega Kangaskhan ex (−1 Energy) | 86.54% | −0.80 ± 0.37 |
+| 1000 games | With Core Memory / **without (this list)** | 83.24% / **87.07%** | **+3.83 ± 0.27** |
 
 Adding both is +0.19 ± 0.26 over Ogerpon alone, a tie, and it loses the
 mirror against the 2026-10-11 list (44.2%, against 49.3% for this list).
-So this list adds only Ogerpon. Mega Kangaskhan ex (Run Errand draws 2 while
-it's Active) is the next card to add.
+So the list added only Ogerpon. With Core Memory gone, Mega Kangaskhan ex
+no longer helps (−0.80).
 
 **What made the difference:**
 
 1. **Energy in the deck.** Turbo Flare, Kaleidowaltz and Fighting Gong
-   search Basic Energy, and Gaia Wave (3), Nullifying Zero (5) and Geobuster
-   (4, then discarded) burn through it. 9 Basic Fighting Energy ran dry.
+   search Basic Energy, and Gaia Wave (3) and Nullifying Zero (5) burn
+   through it. 9 Basic Fighting Energy ran dry.
    Every round, trading a situational card for one measured positive, up
    to 22.
 2. **The situational cards cost more than they gave.** Acerola's Mischief
@@ -148,6 +168,17 @@ it's Active) is the next card to add.
    the list got worse every time (best: Cornerstone Mask Ogerpon ex
    −0.07). Its second accelerator is worth more than a second hitter; see
    `runs/2026-10-12/big_basic_screens/`.
+5. **Core Memory cost more than Geobuster gave.** In 60 logged games:
+   - **The Tool slot.** Core Memory took the Zygarde's one Tool slot, so
+     Hero's Cape (+100 HP) reached a Zygarde 0.08 times a game, against
+     0.30 without it.
+   - **Empty Zygarde.** Each Geobuster (0.4 a game, every one a Knock Out)
+     discarded the attacker's Energy. Gaia Wave fell from 2.22 uses a game
+     to 1.62.
+
+   Putting Hero's Cape on the attacker first was tried as a pilot change
+   and measured neutral (+0.20 average over 10 decks), so the cost is in
+   the card, not just in how the simulator plays it.
 
 Logged against six hard opponents (Raging Bolt, Dragapult, Raticate, N's
 Zoroark, Tauros, Lurantis), the 2026-10-11 list won 40 of 60, against 36
@@ -164,12 +195,12 @@ too, the deck's real mulligan rate is higher (4 Basics: 60.1% of hands).
 
 | Pokémon | in play by turn 6 | average turn |
 |---|---|---|
-| Cinderace | 61.4% | 1.00 |
-| Mega Zygarde ex | 46.0% | 1.67 |
-| Mega Audino ex | 26.2% | 2.04 |
-| Cornerstone Mask Ogerpon ex | 27.6% | 1.88 |
+| Cinderace | 59.7% | 1.00 |
+| Mega Zygarde ex | 47.1% | 1.64 |
+| Mega Audino ex | 24.1% | 2.05 |
+| Cornerstone Mask Ogerpon ex | 26.0% | 1.92 |
 
-First attack by turn 6 in 98.1% of games (average turn 2.39). The baseline
+First attack by turn 6 in 98.8% of games (average turn 2.40). The baseline
 doesn't model Turbo Flare's attachment.
 
 **Checks:** 60 cards, no card over 4 copies, one ACE SPEC (Hero's Cape).
@@ -186,7 +217,7 @@ Pokémon: 8
 1 Mega Audino ex ASC 253
 1 Cornerstone Mask Ogerpon ex TWM 112
 
-Trainer: 28
+Trainer: 27
 4 Lillie's Determination MEG 184
 4 Team Rocket's Petrel DRI 226
 2 Iris's Fighting Spirit JTG 180
@@ -196,13 +227,12 @@ Trainer: 28
 1 Mega Signal MEG 171
 1 Switch PFL 123
 1 Premium Power Pro MEG 174
-1 Core Memory POR 70
 1 Hero's Cape TEF 152
 1 Team Rocket's Factory DRI 173
 1 Lively Stadium SSP 180
 
-Energy: 24
-21 Basic Fighting Energy
+Energy: 25
+22 Basic Fighting Energy
 3 Rocky Fighting Energy POR 87
 
 Total Cards: 60

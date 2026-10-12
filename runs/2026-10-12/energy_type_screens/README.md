@@ -1,4 +1,4 @@
-# Cinderace shell on every Energy type, 2026-10-12 (in progress)
+# Cinderace shell on every Energy type, 2026-10-12
 
 The question: does the Cinderace / two-big-Basics build work better on an
 Energy type other than Fighting?
@@ -16,3 +16,13 @@ apples-to-apples comparison.
 
 200 games against each of the 86 field decks (tag et1), paired on the
 same seeds. Results in `summary.txt` and `results/`.
+
+## Results
+
+The type-by-type table, the tuning rounds and the 1000-game confirmation
+(tag etc) are written up in `decks/mega_zeraora_cinderace_thunderous_fist.md`
+(Lightning) and `decks/mega_zygarde_cinderace_gaia_wave.md` (Fighting,
+rounds 7-8). 1000 games:
+- Fighting with Core Memory: 83.24%.
+- Fighting without Core Memory: 87.07%.
+- Lightning, 4 Mega Zeraora ex: 90.03%.

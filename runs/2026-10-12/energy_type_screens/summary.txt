@@ -42,3 +42,8 @@ L3_b4z: 89.42% (±0.22) over 86 decks at 200 games, winning 84
 L3_bc4z: 89.75% (±0.22) over 86 decks at 200 games, winning 84
 L3_boss1: 89.53% (±0.22) over 86 decks at 200 games, winning 84
 L3_bc2: 89.78% (±0.21) over 86 decks at 200 games, winning 83
+F_tuned: 83.24% (±0.12) over 86 decks at 1000 games, winning 85
+F_nocm: 87.07% (±0.11) over 86 decks at 1000 games, winning 86
+L3_bc2: 89.76% (±0.10) over 86 decks at 1000 games, winning 83
+L3_bc4z: 89.63% (±0.10) over 86 decks at 1000 games, winning 84
+L4_bc2_4z: 90.03% (±0.09) over 86 decks at 1000 games, winning 84
