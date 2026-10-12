@@ -2017,6 +2017,21 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if picks:
                 log.append(f"    discard {len(picks)} {kind} card(s) from opponent's hand")
             return bool(picks)
+        if (act.filter or {}).get("chosen"):
+            # Claw of Darkness / Piercing Gaze: the attacker looks at the
+            # revealed hand and picks. A Supporter is the turn the opponent
+            # was planning; then a Pokemon (an Evolution in waiting), then
+            # Items and Tools, Stadiums, Energy last.
+            rank = {"Supporter": 0, "Pokemon": 1, "Item": 2, "Tool": 2,
+                    "Stadium": 3, "Energy": 4}
+            picks = sorted(opp.hand, key=lambda c: rank.get(c[0], 3))[:act.amount or 1]
+            for c in picks:
+                opp.hand.remove(c)
+                opp.discard.append(c[1])
+            if picks:
+                log.append("    discard " + ", ".join(n for _, n in picks)
+                           + " from the opponent's revealed hand")
+            return bool(picks)
         if down_to is not None:
             n = max(0, len(opp.hand) - down_to)
         else:
@@ -2612,6 +2627,22 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
 
     if op == O.DEVOLVE:
         targets = resolve_targets(act.target, pl, opp, source, attacker)
+        if (act.amount or 99) < 99:
+            # "Devolve 1 of your opponent's evolved Pokemon" -- ONE, the
+            # player's choice. Every evolved target was devolved, so
+            # Espathra's Mystical Eyes and Archeops' Ancient Wing hit the
+            # whole board like Espeon's Miraculous Shine.
+            def worth(spot):
+                o = pl if spot in pl.in_play() else opp
+                info = o.POKEMON.get(spot.name) or {}
+                prev = o.POKEMON.get(info.get("evolves_from") or "") or {}
+                if not info.get("evolves_from"):
+                    return (-1, 0, 0)
+                ko = spot.damage >= (prev.get("hp") or 0) > 0
+                return (1 if ko else 0, info.get("prize_value", 1),
+                        (info.get("hp") or 0) - (prev.get("hp") or 0))
+            targets = sorted((t for t in targets if t is not None), key=worth,
+                             reverse=True)[:act.amount]
         hit = 0
         for spot in targets:
             info = pl.POKEMON.get(spot.name) or opp.POKEMON.get(spot.name) or {}

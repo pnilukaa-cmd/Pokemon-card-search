@@ -5637,5 +5637,87 @@ def test_import_decklist_maps_printings_and_refuses_to_guess():
           got["BasicFighting"])
 
 
+def _disruption_model():
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 8\n1 Espathra SSP 95\n1 Flittle SSP 94\n1 Gothitelle WHT 43\n"
+                "1 Mega Absol ex MEG 161\n1 Claydol CRI 47\n1 Dreepy PRE 71\n1 Drakloak ASC 159\n"
+                "1 Dragapult ex TWM 130\n\nEnergy: 52\n26 Basic Psychic Energy\n"
+                "26 Basic Darkness Energy\n")
+    try:
+        return _real(f.name, "d")
+    finally:
+        os.unlink(f.name)
+
+
+def test_devolve_one_takes_one_and_the_knock_out_first():
+    """Espathra's Mystical Eyes and Archeops' Ancient Wing: "Devolve 1 of
+    your opponent's evolved Pokemon". The executor devolved EVERY evolved
+    Pokemon, like Espeon's Miraculous Shine. It is one, the player's pick:
+    the one whose damage now exceeds its lower Stage's HP. And Claydol's
+    Devolution Ray only ever touches the Active."""
+    import random as _r
+    V, D, E = _disruption_model()
+    pl, op = V.Player("d", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.round_no = op.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    drag = V.InPlay("Dragapult ex", 1)
+    drag.under = ["Dreepy", "Drakloak"]
+    dk = V.InPlay("Drakloak", 1)
+    dk.under = ["Dreepy"]
+    dk.damage = 70                      # Dreepy has 70 HP
+    op.active, op.bench, op.hand = drag, [dk], []
+    pl.bench = []
+    pl.active = V.InPlay("Espathra", 1)
+    pl.active.energy, pl.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    pl._forced_attack = next(a for a in D[1]["Espathra"]["attacks"] if a["name"] == "Mystical Eyes")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    names = [op.active.name] + [b.name for b in op.bench]
+    check("Mystical Eyes devolves one Pokemon, the one it Knocks Out",
+          names == ["Dragapult ex", "Dreepy"], names)
+    acts = V._attack_ir(next(a for a in D[1]["Claydol"]["attacks"]
+                             if a["name"] == "Devolution Ray")).actions
+    check("Devolution Ray targets the Active only",
+          [a.target for a in acts if a.op == IR.Op.DEVOLVE] == [IR.Target.OPP_ACTIVE],
+          [(a.op, a.target) for a in acts])
+
+
+def test_hand_disruption_does_what_the_card_says():
+    """Mega Absol ex's Claw of Darkness ("reveals their hand, and you
+    discard a card you find there") compiled to the reveal alone, so the
+    hand was never touched. Gothitelle's Distorted Future put the hand on
+    the BOTTOM of the deck though the card says shuffle, and fired on a
+    1-card hand, giving the opponent two more cards."""
+    import random as _r
+    V, D, E = _disruption_model()
+    pl, op = V.Player("d", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.round_no = op.round_no = 3
+    pl._opp_ref, op._opp_ref = op, pl
+    op.active, op.bench = V.InPlay("Dreepy", 1), []
+    op.hand = [("Item", "Ultra Ball"), ("Supporter", "Lillie's Determination"),
+               ("Energy", "Psychic Energy")]
+    pl.bench = []
+    pl.active = V.InPlay("Mega Absol ex", 1)
+    pl.active.energy, pl.active.energy_names = [["Darkness"]] * 3, ["Darkness Energy"] * 3
+    pl._forced_attack = next(a for a in D[1]["Mega Absol ex"]["attacks"]
+                             if a["name"] == "Claw of Darkness")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    check("Claw of Darkness discards the Supporter from the revealed hand",
+          ("Supporter", "Lillie's Determination") not in op.hand and len(op.hand) == 2, op.hand)
+    eff = next(e for e in E["Gothitelle"] if e.name == "Distorted Future")
+    check("Distorted Future shuffles the hand in",
+          [(a.filter or {}).get("shuffle") for a in eff.actions] == [True],
+          [(a.op, a.filter) for a in eff.actions])
+    pl.active = V.InPlay("Gothitelle", 1)
+    op.hand, op.deck, pl.hand = [("Item", "Ultra Ball")], [("Item", "x")] * 20, []
+    V.use_abilities(pl, op, 3, [])
+    check("it is not used on a 1-card hand", len(op.hand) == 1, len(op.hand))
+    op.hand = [("Item", "Ultra Ball")] * 7
+    V.use_abilities(pl, op, 3, [])
+    check("it is used on a 7-card hand", len(op.hand) == 3, len(op.hand))
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -833,6 +833,12 @@ def _r(m, text):
     n = re.search(r"(?:they |and )draw (\d+) cards?", text[m.start():], re.I)
     if not n:
         return []
+    # Distorted Future SHUFFLES the hand into the deck; only Grand Wing
+    # puts it on the bottom. Both went to the bottom, which is harsher than
+    # Gothitelle's card: the cards it takes away could never come back.
+    if "bottom" not in m.group(0).lower():
+        return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT,
+                       {"shuffle": True})]
     return [Action(Op.SET_OPPONENT_HAND, int(n.group(1)), Target.OPPONENT)]
 
 
@@ -2204,6 +2210,10 @@ def _r(m, text):
                              text, re.I) else "hand"
     if (m.group(1) or "").lower() == "each":
         return [Action(Op.DEVOLVE, 99, Target.OPP_ALL, {"to": to})]
+    # Claydol's Devolution Ray: "If your opponent's ACTIVE Pokemon is an
+    # evolved Pokemon, devolve it". It compiled as any 1 of them.
+    if m.group(2):
+        return [Action(Op.DEVOLVE, 1, Target.OPP_ACTIVE, {"to": to})]
     return [Action(Op.DEVOLVE, 1, Target.OPP_ANY, {"to": to})]
 
 
@@ -3256,6 +3266,17 @@ def _r(m, text):
         m.group(2).lower(), m.group(2).capitalize())
     return [Action(Op.DISCARD_FROM_OPPONENT, int(m.group(1)), Target.OPPONENT,
                    {"kind": kind})]
+
+
+@rule("discard_chosen_from_revealed_hand",
+      r"(?:you )?discard (a|\d+) cards? you find there")
+def _r(m, text):
+    """Mega Absol ex's Claw of Darkness and Luxray ex's Piercing Gaze:
+    "Your opponent reveals their hand ... discard a card you find there."
+    Only the reveal compiled, so the hand was never touched. The card is
+    CHOSEN from the revealed hand, not random."""
+    n = 1 if m.group(1).lower() == "a" else int(m.group(1))
+    return [Action(Op.DISCARD_FROM_OPPONENT, n, Target.OPPONENT, {"chosen": True})]
 
 
 @rule("attach_tool_from_deck", r"search your deck for a pok[eé]mon tool card and attach")

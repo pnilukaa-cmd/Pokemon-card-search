@@ -88,6 +88,9 @@ GREEDY = {
     # Emboar ex +4.15, Lurantis +4.18, Raging Bolt +0.06). Steering only the
     # Evolution picks was no better.
     "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 1)),
+    # Only reset the opponent's hand (Distorted Future) when it takes cards
+    # away or sets up an exact-count payoff.
+    "hand_reset_guard": int(__import__("os").environ.get("HAND_RESET_GUARD", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -1544,6 +1544,37 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
 _NAME_LIMIT_RE = _re.compile(r"can'?t use more than 1 .{1,40}? Ability", _re.I)
 
 
+_EXACT_OPP_HAND_RE = _re.compile(r"opponent has exactly (\d+) cards? in their hand", _re.I)
+_SAME_HAND_RE = _re.compile(r"same number of cards in your hand as your opponent", _re.I)
+
+
+def _hand_reset_ok(pl, opp, eff):
+    """Gothitelle's Distorted Future / Vivillon's Grand Wing reset the
+    opponent's hand to N cards. On a hand of N or fewer that is a gift:
+    Gothitelle handed a 1-card hand two more, every turn. Fire it when it
+    takes cards away, or when the deck has a payoff for that exact count:
+    Decidueye ex's Sniper's Eye (exactly 4) or Gothitelle's own Synchro
+    Shot (same hand size as yours)."""
+    if not POL.knob(pl, "hand_reset_guard"):
+        return True
+    for a in eff.actions:
+        if a.op != IR.Op.SET_OPPONENT_HAND or not a.amount:
+            continue
+        if opp is None:
+            return False
+        if len(opp.hand) > a.amount:
+            continue
+        texts = [x.get("text") or "" for info in pl.POKEMON.values()
+                 for x in (info.get("attacks") or []) + (info.get("abilities") or [])]
+        if any(int(m.group(1)) == a.amount for t in texts
+               for m in _EXACT_OPP_HAND_RE.finditer(t)):
+            continue
+        if len(pl.hand) == a.amount and any(_SAME_HAND_RE.search(t) for t in texts):
+            continue
+        return False
+    return True
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -1574,6 +1605,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
             if POL.knob(pl, "counter_mover") and _own_counter_mover(eff):
                 continue             # aimed by _plan_counter_moves instead
             if not _self_damage_buff_ok(pl, opp, p, eff):
+                continue
+            if not _hand_reset_ok(pl, opp, eff):
                 continue
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
