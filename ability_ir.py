@@ -1663,6 +1663,7 @@ def _r(m, text):
     if re.search(r"both active non-\w+ pok[eé]mon are now", text, re.I):
         return []                       # condition_both_actives_except_type
     out = []
+    own_side = False
     for sent in re.split(r"(?<=\.)\s+", text):
         if not re.search(r"(is|are) now " + COND, sent, re.I):
             continue
@@ -1680,17 +1681,31 @@ def _r(m, text):
                        r"instead of 1", text, re.I)
         extra = ({"poison_counters": int(pc.group(1))}
                  if pc and "poisoned" in conds else {})
+        # The subject can follow an "If ..." clause. Okidogi ex's Poisonous
+        # Musculature ("If you attached Energy to a Pokemon in this way, this
+        # Pokemon is now Poisoned") Poisoned the OPPONENT, so Chain-Crazed's
+        # "+130 if this Pokemon is Poisoned" was never on after it and the
+        # opponent got a free Poison. Janine's Secret Art ("If you attached
+        # Energy to your Active Pokemon in this way, it is now Poisoned") is
+        # your own Active, and only when Energy went there: its Supporter
+        # play is hand-written in simulate_versus, so it compiles to nothing
+        # here rather than to a Poison on either Active.
+        subj = re.sub(r"^\s*if [^,]*,\s*", "", low)
+        if re.match(r"it is now", subj) and "your active pok" in low:
+            own_side = True
+            continue
         if re.search(r"both active pok[eé]mon are now", low):
             out.append(Action(Op.APPLY_CONDITION, None, Target.BOTH_ALL,
                               {"conditions": conds, "active_only": True}))
-        elif re.match(r"\s*this pok[eé]mon is now", low):
+        elif re.match(r"\s*this pok[eé]mon is now", low) or \
+                re.match(r"this pok[eé]mon is now", subj):
             out.append(Action(Op.APPLY_CONDITION, None, Target.SELF, {"conditions": conds}))
         elif "attacking pok" in low:
             out.append(Action(Op.APPLY_CONDITION, None, Target.ATTACKING_POKEMON, {"conditions": conds}))
         else:
             out.append(Action(Op.APPLY_CONDITION, None, Target.OPP_ACTIVE,
                               {"conditions": conds, **extra}))
-    if not out:
+    if not out and not own_side:
         conds = re.findall(COND, text, re.I)
         tgt = Target.ATTACKING_POKEMON if "attacking pok" in text.lower() else Target.OPP_ACTIVE
         out = [Action(Op.APPLY_CONDITION, None, tgt,

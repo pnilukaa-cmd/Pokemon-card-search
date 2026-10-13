@@ -5094,6 +5094,15 @@ _SETUP_RIDER_OPS = {
 
 _SELF_ATTACK_LOCK_RE = _re.compile(
     r"during your next turn, this pok[eé]mon can'?t (?:attack|use attacks)", _re.I)
+# "During your next turn, this Pokemon can't use Dirty Headbutt" -- one of
+# its own attacks off for a turn (Munkidori ex, Feraligatr's Giant Wave,
+# Annihilape's Impact Blow, Crabominable's Haymaker; 23 Pokemon). It
+# compiled to a LOCK the executor treats as passive, so nothing stopped the
+# same 190 every turn. "Can't use Blaze Blitz again until it leaves the
+# Active Spot" (Gouging Fire ex) lasts until it does.
+_SELF_NAMED_LOCK_RE = _re.compile(
+    r"during your next turn, this pok[eé]mon can'?t use ([\w'’ -]+?)(?:\.|$)|"
+    r"this pok[eé]mon can'?t use ([\w'’ -]+?) again until it leaves the active spot", _re.I)
 
 
 def _borrowed_text(pl, opp, spot, atk):
@@ -6126,6 +6135,7 @@ def _do_retreat(pl, target, cost, log):
             pl.discard.append(nm)
     pl.bench.remove(target)
     clear_conditions(pl.active, "retreated", log, pl.name)
+    AE.clear_until_leaves_lock(pl.active)
     pl.bench.append(pl.active)
     pl.active = target
     pl.active.promoted_this_turn = True
@@ -6346,6 +6356,11 @@ def do_attack(pl, opp, log):
 
     if _SELF_ATTACK_LOCK_RE.search(_borrowed_text(pl, opp, pl.active, atk)):
         pl.active.attack_locked = 2
+    m = _SELF_NAMED_LOCK_RE.search(atk.get("text") or "")
+    if m:
+        # Counted like the other self-locks: 2 ticks is "your next turn".
+        pl.active.disabled_attack = (m.group(1) or m.group(2)).strip()
+        pl.active.disabled_attack_turns = 2 if m.group(1) else 99
 
     attack_side_effects(pl, opp, atk, log)
     # Gholdengo's Celebration takes Prize cards without a Knock Out.

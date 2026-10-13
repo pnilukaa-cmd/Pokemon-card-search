@@ -5828,5 +5828,73 @@ def test_earthquake_is_not_free_when_it_knocks_out_your_own_bench():
           V.best_attack(pl, pl.active, opp=op) is None,
           V.best_attack(pl, pl.active, opp=op))
 
+
+def _loyal_model():
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Munkidori ex SFA 37\n1 Pecharunt ex SFA 39\n"
+                "1 Okidogi ex SFA 36\n1 Dreepy PRE 71\n\n"
+                "Energy: 56\n56 Basic Darkness Energy\n")
+    try:
+        return _real(f.name, "m")
+    finally:
+        os.unlink(f.name)
+
+
+def test_poisoned_self_and_named_attack_locks_do_what_the_card_says():
+    """Okidogi ex's Poisonous Musculature ("If you attached Energy ..., this
+    Pokemon is now Poisoned") Poisoned the OPPONENT: Chain-Crazed's +130 for
+    being Poisoned never followed it, and the opponent got a free Poison.
+    Janine's Secret Art's "it is now Poisoned" (your own Active) compiled to
+    a Poison on theirs. And "During your next turn, this Pokemon can't use
+    Dirty Headbutt" (23 Pokemon) locked nothing: Munkidori ex hit for 190
+    every turn."""
+    import random as _r
+    import ability_ir as IR
+    V, D, E = _loyal_model()
+    def player(lbl):
+        p = V.Player(lbl, D[1], list(D[2]), E)
+        p.round_no, p.hand = 3, []
+        return p
+    pl, op = player("m"), player("o")
+    pl._opp_ref, op._opp_ref = op, pl
+    atk = lambda n, a: next(x for x in D[1][n]["attacks"] if x["name"] == a)
+    def dark(sp, n):
+        sp.energy, sp.energy_names = [["Darkness"]] * n, ["Darkness Energy"] * n
+    pl.active, pl.bench = V.InPlay("Okidogi ex", 1), []
+    dark(pl.active, 1)
+    op.active, op.bench = V.InPlay("Okidogi ex", 1), []
+    pl._forced_attack = atk("Okidogi ex", "Poisonous Musculature")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    check("Poisonous Musculature Poisons Okidogi ex itself, not the opponent",
+          "poisoned" in pl.active.conditions and not op.active.conditions,
+          (pl.active.conditions, op.active.conditions))
+    check("so Chain-Crazed is 260 next turn",
+          V.attack_damage(pl, op, pl.active, atk("Okidogi ex", "Chain-Crazed"),
+                          record=False) == 260)
+    eff = V.trainer_effect_ir("Janine's Secret Art")
+    check("Janine's Secret Art never Poisons the opponent's Active",
+          not any(a.op == IR.Op.APPLY_CONDITION and a.target == IR.Target.OPP_ACTIVE
+                  for a in eff.actions), [(a.op, a.target) for a in eff.actions])
+    a, b = V.InPlay("Munkidori ex", 1), V.InPlay("Munkidori ex", 1)
+    dark(a, 3)
+    dark(b, 3)
+    pl.active, pl.bench = a, [b, V.InPlay("Pecharunt ex", 1)]
+    op.active.damage, op.active.conditions = 0, set()
+    pl._forced_attack = atk("Munkidori ex", "Dirty Headbutt")
+    V.do_attack(pl, op, [])
+    V.AE.tick_attack_locks(a)
+    check("Dirty Headbutt can't be used again the next turn",
+          V.best_attack(pl, a, opp=op) is None, V.best_attack(pl, a, opp=op))
+    V.use_abilities(pl, op, 4, [])
+    check("Subjugating Chains brings the other Munkidori ex up, Poisoned and ready",
+          pl.active is b and "poisoned" in b.conditions
+          and (V.best_attack(pl, b, opp=op) or {}).get("name") == "Dirty Headbutt",
+          (pl.active.name, b.conditions))
+    pl.active, pl.bench = a, [V.InPlay("Pecharunt ex", 1)]
+    check("with Pecharunt ex in play, Munkidori ex gives up 1 Prize",
+          V._ko_prizes(pl, a, op, by_attack=True) == 1)
+
 if __name__ == "__main__":
     sys.exit(main())

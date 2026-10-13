@@ -718,6 +718,14 @@ def leaving_active(spot, log=None):
             log.append(f"    {spot.name} clears "
                        f"{', '.join(sorted(spot.conditions))} (left the Active Spot)")
         spot.conditions = set()
+    clear_until_leaves_lock(spot)
+
+
+def clear_until_leaves_lock(spot):
+    """Gouging Fire ex's "can't use Blaze Blitz again until it leaves the
+    Active Spot" ends when it does."""
+    if spot is not None and getattr(spot, "disabled_attack_turns", 0) >= 99:
+        spot.disabled_attack, spot.disabled_attack_turns = None, 0
 
 
 # "Whenever your opponent ..." Abilities. The trigger compiled, and nothing
