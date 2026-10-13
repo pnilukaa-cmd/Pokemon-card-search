@@ -1,0 +1,25 @@
+Pokémon: 15
+4 Aron TWM 120
+1 Lairon TWM 121
+3 Aggron TWM 122
+4 Bunnelby POR 64
+3 Diggersby POR 65
+
+Trainer: 33
+4 Lillie's Determination MEG 119
+2 Iris's Fighting Spirit ASC 190
+2 Boss's Orders MEG 114
+1 Team Rocket's Petrel ASC 207
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+4 Rare Candy MEG 125
+3 Poké Pad ASC 198
+3 Switch MEG 130
+2 Night Stretcher MEG 173
+1 Hero's Cape TEF 152
+3 Risky Ruins MEG 127
+
+Energy: 12
+12 Basic Metal Energy
+
+Total Cards: 60

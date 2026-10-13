@@ -16,6 +16,12 @@ ONE Colorless Energy, plus 30 to each of your own Benched Pokemon.
 winning 52 of 63.** Beats Tauros (field #1) 65%. Worst: N's Zoroark 32,
 Raging Bolt 36, Ditto Transform 38, Team Rocket's Spidops 39, Persian ex 41.
 
+**2026-10-13:** the pilot now prices Earthquake's own-Bench Knock Outs (a
+Prize each), so it uses Whap Down or holds off rather than handing over
+Prizes. That measured +3.44 ± 0.57 for this list; it is 63.49% on the
+89-deck field at 1000 games. A Diggersby partner that does better:
+[Gourgeist ex, 75.74%](gourgeist_diggersby_horrifying_rondo.md).
+
 ## Why it works: the drawback is the engine
 - **Munkidori**, Adrena-Brain (needs any Darkness Energy attached): moves up to 3 damage counters from one of your Pokémon to one of theirs. Earthquake puts exactly 3 counters on each Benched Pokémon, so each Munkidori turns that self-damage into **+30 on their board** and heals yours.
 - **Mega Darkrai ex**, Dusk Raid (DD): 110, **+110 if your Benched Pokémon have damage counters**. Earthquake guarantees that, so it's 220 for two Energy as the second attacker. It's a Mega ex, so it gives up 3 Prizes when Knocked Out.
