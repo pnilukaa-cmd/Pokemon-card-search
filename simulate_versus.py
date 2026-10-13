@@ -5330,6 +5330,22 @@ def attack_value(pl, opp, spot, atk):
             # attack that still kills is preferred and the bigger one is
             # saved for something that needs it.
             value -= max(0, dmg - remaining) * POL.knob(pl, "overkill_penalty")
+    # "This attack also does 30 damage to each of your Benched Pokemon"
+    # (Diggersby's Earthquake, Centiskorch, Sandaconda) hands over a Prize
+    # for every own Benched Pokemon it Knocks Out, and was priced at nothing:
+    # an Aggron / Diggersby list gave away 1.5 Prizes a game to its own
+    # Earthquake, and one game five.
+    per = POL.knob(pl, "self_bench_ko_cost") * POL.knob(pl, "ko_bonus_per_prize")
+    if per and opp is not None:
+        n = sum(a.amount or 0 for a in _attack_ir(atk).actions
+                if a.op == IR.Op.SELF_BENCH_DAMAGE)
+        if n:
+            lost = sum((pl.POKEMON.get(b.name) or {}).get("prize_value", 1)
+                       for b in pl.bench if b.damage + n >= effective_hp(pl, b))
+            if lost and lost >= opp.prizes:
+                value -= 10 ** 5           # it hands them the game
+            else:
+                value -= per * lost
     # What this attacker is worth losing. A 3-Prize MEGA ex standing in the
     # Active Spot is a liability the greedy pilot never priced.
     liab = POL.knob(pl, "prize_liability")

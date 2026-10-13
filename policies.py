@@ -92,6 +92,13 @@ GREEDY = {
     # away or sets up an exact-count payoff. Measured on the Gothitelle lock,
     # the only card it changes: +2.22 +/- 0.51 at 200 games x 88 decks.
     "hand_reset_guard": int(__import__("os").environ.get("HAND_RESET_GUARD", 1)),
+    # Price "damage to each of your Benched Pokemon" by the Prizes it hands
+    # over: each own Benched Pokemon it Knocks Out costs this many times
+    # ko_bonus_per_prize per Prize. 0 is off. Measured at 200 games x 89
+    # decks, on for the measured deck only: Aggron / Diggersby +5.41 +/- 0.52
+    # (0.5x -1.05, 2x -1.28 against 1x), Diggersby / Munkidori +3.44 +/- 0.57.
+    # Earthquake is the only such attack in the field.
+    "self_bench_ko_cost": float(__import__("os").environ.get("SELF_BENCH_KO_COST", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

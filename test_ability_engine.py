@@ -5795,5 +5795,38 @@ def test_angry_slam_counts_your_damaged_pokemon_and_round_counts_round():
           V.attack_damage(pl, op, pl.active, rnd, record=False) == 210,
           V.attack_damage(pl, op, pl.active, rnd, record=False))
 
+
+def test_earthquake_is_not_free_when_it_knocks_out_your_own_bench():
+    """Diggersby's Earthquake ("also does 30 damage to each of your Benched
+    Pokemon") was priced at its 140 alone, so it was used even when it
+    Knocked Out the Bench and handed over the Prizes: an Aggron / Diggersby
+    list gave away 1.5 a game, one game five. Each own Knock Out now costs
+    what taking a Prize is worth, and one that hands over the last Prize is
+    never chosen."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Bunnelby POR 64\n1 Diggersby POR 65\n1 Aron TWM 120\n\n"
+                "Energy: 57\n57 Basic Metal Energy\n")
+    try:
+        V, D, E = _real(f.name, "a")
+    finally:
+        os.unlink(f.name)
+    pl, op = V.Player("a", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl._opp_ref, op._opp_ref = op, pl
+    pl.active = V.InPlay("Diggersby", 1)
+    pl.active.energy, pl.active.energy_names = [["Metal"]] * 3, ["Metal Energy"] * 3
+    op.active, op.bench = V.InPlay("Diggersby", 1), []
+    pl.bench = [V.InPlay("Aron", 1), V.InPlay("Bunnelby", 1)]
+    pick = lambda: V.best_attack(pl, pl.active, opp=op)["name"]
+    check("a healthy Bench: Earthquake", pick() == "Earthquake", pick())
+    for b in pl.bench:
+        b.damage = 50                       # 70 HP: Earthquake Knocks both Out
+    check("two own Knock Outs for no Prize: Whap Down", pick() == "Whap Down", pick())
+    op.prizes = 2
+    pl.active.energy, pl.active.energy_names = [["Metal"]], ["Metal Energy"]
+    check("Earthquake that hands over the last Prizes is never chosen",
+          V.best_attack(pl, pl.active, opp=op) is None,
+          V.best_attack(pl, pl.active, opp=op))
+
 if __name__ == "__main__":
     sys.exit(main())
