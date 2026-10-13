@@ -5756,5 +5756,44 @@ def test_devolve_leaves_the_card_actually_underneath():
           (op.active.name, op.hand))
 
 
+
+def test_angry_slam_counts_your_damaged_pokemon_and_round_counts_round():
+    """Aggron's Angry Slam: "50 damage for each of your Pokemon that has any
+    damage counters on it". No count rule read that shape, so it scored its
+    printed 50 on every board, 0 damaged or 6. And "for each of your Pokemon
+    in play that has the Round attack" (Seismitoad, Palpitoad, Tympole,
+    Wigglytuff) fell through to the in-play rule and counted every Pokemon,
+    Round or not: 350 for a lone Seismitoad on a full Bench."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 6\n1 Aron TWM 120\n1 Aggron TWM 122\n1 Bunnelby POR 64\n"
+                "1 Seismitoad BLK 105\n1 Palpitoad BLK 104\n1 Tympole BLK 103\n\n"
+                "Energy: 54\n54 Basic Metal Energy\n")
+    try:
+        V, D, E = _real(f.name, "a")
+    finally:
+        os.unlink(f.name)
+    pl, op = V.Player("a", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl._opp_ref, op._opp_ref = op, pl
+    slam = next(a for a in D[1]["Aggron"]["attacks"] if a["name"] == "Angry Slam")
+    got = []
+    for n in (0, 3, 6):
+        pl.active = V.InPlay("Aggron", 1)
+        pl.bench = [V.InPlay("Bunnelby", 1) for _ in range(5)]
+        for sp in ([pl.active] + pl.bench)[:n]:
+            sp.damage = 10
+        op.active, op.bench = V.InPlay("Aron", 1), [V.InPlay("Aron", 1)]
+        op.active.damage = op.bench[0].damage = 10      # theirs don't count
+        got.append(V.attack_damage(pl, op, pl.active, slam, record=False))
+    check("Angry Slam is 50 per damaged Pokemon of yours, Active included",
+          got == [0, 150, 300], got)
+    rnd = next(a for a in D[1]["Seismitoad"]["attacks"] if a["name"] == "Round")
+    pl.active = V.InPlay("Seismitoad", 1)
+    pl.bench = [V.InPlay("Palpitoad", 1), V.InPlay("Tympole", 1),
+                V.InPlay("Bunnelby", 1), V.InPlay("Bunnelby", 1)]
+    check("Round counts only the Pokemon that have Round",
+          V.attack_damage(pl, op, pl.active, rnd, record=False) == 210,
+          V.attack_damage(pl, op, pl.active, rnd, record=False))
+
 if __name__ == "__main__":
     sys.exit(main())

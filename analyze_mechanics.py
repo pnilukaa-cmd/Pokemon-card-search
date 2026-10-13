@@ -183,8 +183,11 @@ FAMILIES = [
      r"damage counters? from (your opponent'?s|1 of your opponent'?s) Benched Pok[eé]mon to (their|your opponent'?s) Active|"
      r"move any number of damage counters from your opponent'?s Pok[eé]mon to (their|your opponent'?s) other Pok[eé]mon"),
     ("damage_both_sides_with_counters", "produce",
-     r"damage to each Pok[eé]mon that has any damage counters on it|"
-     r"damage for each( of your| of your opponent'?s)? Pok[eé]mon.{0,40}that has any damage counters on it"),
+     r"damage to each Pok[eé]mon that has any damage counters on it"),
+    # Angry Slam / Raging Charge / Horrifying Rondo COUNT your damaged
+    # Pokemon; they don't damage them. They were tagged as producers above.
+    ("damage_scales_with_own_damaged_pokemon", "consume",
+     r"damage for each of your( Benched)? Pok[eé]mon.{0,40}that has any damage counters on it"),
     ("damage_counter_move_lock", "consume",
      r"damage counters? on .*can'?t be moved"),
     ("counterattack_on_hit", "consume",

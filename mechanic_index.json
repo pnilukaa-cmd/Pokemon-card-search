@@ -38,6 +38,11 @@
     {
       "tag": "damage_both_sides_with_counters",
       "role": "produce",
+      "card_count": 1
+    },
+    {
+      "tag": "damage_scales_with_own_damaged_pokemon",
+      "role": "consume",
       "card_count": 3
     },
     {
@@ -7310,7 +7315,7 @@
       ],
       "hp": "180",
       "tags": [
-        "damage_both_sides_with_counters",
+        "damage_scales_with_own_damaged_pokemon",
         "damage_boost_if_damage_counters_present"
       ]
     },
@@ -28941,7 +28946,7 @@
       ],
       "hp": "130",
       "tags": [
-        "damage_both_sides_with_counters"
+        "damage_scales_with_own_damaged_pokemon"
       ]
     },
     {
@@ -47304,6 +47309,7 @@
       ],
       "hp": "270",
       "tags": [
+        "damage_scales_with_own_damaged_pokemon",
         "damage_boost_conditional_generic",
         "damage_scales_with_pokemon_count",
         "damage_boost_if_damage_counters_present"

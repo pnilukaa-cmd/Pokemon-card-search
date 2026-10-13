@@ -3657,6 +3657,24 @@ def _clause_count(clause, pl, opp, spot):
         if m.group("dmg"):
             hits = [sp for sp in hits if sp.damage > 0]
         return len(hits)
+    # "for each of your Pokemon that has any damage counters on it" (Aggron's
+    # Angry Slam) counts the whole board, Active included. No rule read it,
+    # so it scored its printed 50 at every board state. "for each of your
+    # Pokemon in play that has the Round attack" (Seismitoad, Palpitoad,
+    # Tympole, Wigglytuff) fell through to the in-play rule below and
+    # counted every Pokemon, Round or not.
+    m = _re.search(r"of your pok[eé]mon(?: in play)? that ha(?:s|ve) "
+                   r"(?:the ([\w'’ -]+?) attack|(?:any )?damage counters on it)", c)
+    if m:
+        board = ([pl.active] if pl.active else []) + list(pl.bench)
+        if spot is not None and spot not in board:
+            board.append(spot)
+        if m.group(1):
+            want = m.group(1).strip().lower()
+            return sum(1 for sp in board if any(
+                a["name"].lower() == want
+                for a in (pl.POKEMON.get(sp.name) or {}).get("attacks", [])))
+        return sum(1 for sp in board if sp.damage > 0)
     # Three shapes that returned None, so the attack scored its printed
     # base: Team Rocket's Porygon2 / Porygon-Z's R Command (Supporters with
     # "Team Rocket" in the discard), Team Rocket's Weezing's Explode Together
