@@ -1,0 +1,27 @@
+Pokémon: 16
+4 Eevee SSP 143
+3 Espeon 30C 69
+1 Espeon ex PRE 155
+3 Flittle SSP 94
+3 Espathra SSP 95
+2 Budew ASC 16
+
+Trainer: 33
+4 Lillie's Determination MEG 119
+4 Xerosic's Machinations SFA 64
+1 Eri TEF 146
+2 Iris's Fighting Spirit ASC 190
+2 Hilda WHT 164
+2 Team Rocket's Petrel ASC 207
+2 Boss's Orders MEG 114
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+1 Unfair Stamp TWM 165
+3 Hand Trimmer TEF 150
+
+Energy: 11
+11 Basic Psychic Energy
+
+Total Cards: 60

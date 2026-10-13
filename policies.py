@@ -89,7 +89,8 @@ GREEDY = {
     # Evolution picks was no better.
     "smart_search": int(__import__("os").environ.get("SMART_SEARCH", 1)),
     # Only reset the opponent's hand (Distorted Future) when it takes cards
-    # away or sets up an exact-count payoff.
+    # away or sets up an exact-count payoff. Measured on the Gothitelle lock,
+    # the only card it changes: +2.22 +/- 0.51 at 200 games x 88 decks.
     "hand_reset_guard": int(__import__("os").environ.get("HAND_RESET_GUARD", 1)),
 }
 

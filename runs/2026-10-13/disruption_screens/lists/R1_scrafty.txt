@@ -1,0 +1,26 @@
+Pokémon: 12
+4 Mega Absol ex MEG 161
+2 Budew ASC 16
+3 Scraggy ASC 134
+3 Mega Scrafty ex ASC 135
+
+Trainer: 34
+4 Lillie's Determination MEG 119
+4 Xerosic's Machinations SFA 64
+2 Eri TEF 146
+2 Janine's Secret Art SFA 59
+2 Team Rocket's Petrel ASC 207
+2 Boss's Orders MEG 114
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+1 Mega Signal MEG 121
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+2 Hand Trimmer TEF 150
+2 Iris's Fighting Spirit ASC 190
+1 Unfair Stamp TWM 165
+
+Energy: 14
+14 Basic Darkness Energy
+
+Total Cards: 60

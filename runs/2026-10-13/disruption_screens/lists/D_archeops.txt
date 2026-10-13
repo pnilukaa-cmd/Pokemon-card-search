@@ -1,0 +1,26 @@
+Pokémon: 15
+4 Archen WHT 131
+3 Archeops WHT 132
+3 Flittle SSP 94
+3 Espathra SSP 95
+2 Budew ASC 16
+
+Trainer: 34
+4 Antique Plume Fossil WHT 79
+4 Lillie's Determination MEG 119
+3 Xerosic's Machinations SFA 64
+1 Eri TEF 146
+2 Team Rocket's Petrel ASC 207
+2 Hilda WHT 164
+2 Boss's Orders MEG 114
+4 Rare Candy MEG 125
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Night Stretcher MEG 173
+1 Switch MEG 130
+1 Unfair Stamp TWM 165
+
+Energy: 11
+11 Basic Fighting Energy
+
+Total Cards: 60
