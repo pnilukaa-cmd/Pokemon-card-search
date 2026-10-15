@@ -1,0 +1,2 @@
+max Prizes a Strange Hacking could take, best turn per game: {0: 22, 1: 21, 2: 32, 3: 17, 4: 5, 5: 2, 7: 1}
+largest pool of damage on their board per game: median 160  90th pct 360  max 600
