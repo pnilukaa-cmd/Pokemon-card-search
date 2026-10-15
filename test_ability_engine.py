@@ -5896,5 +5896,60 @@ def test_poisoned_self_and_named_attack_locks_do_what_the_card_says():
     check("with Pecharunt ex in play, Munkidori ex gives up 1 Prize",
           V._ko_prizes(pl, a, op, by_attack=True) == 1)
 
+
+def test_strange_hacking_spends_the_whole_board_on_knock_outs():
+    """Alakazam's Strange Hacking: "move any number of damage counters from
+    your opponent's Pokemon to their other Pokemon in any way you like".
+    The executor took every counter off the single most-damaged Pokemon and
+    put them all on one target, and the AI priced the attack at a flat 20,
+    so the six-Prize turn the card is built for never happened. Every
+    counter on their board is one pool now, spent on the Knock Outs worth
+    the most Prizes. Sableye's Damage Collection (their Bench to their
+    Active) moved from one Benched Pokemon only."""
+    import tempfile, os, random as _r
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 6\n1 Alakazam TWM 82\n1 Sableye TEF 107\n1 Okidogi ex SFA 36\n"
+                "1 Pecharunt ex SFA 39\n1 Munkidori ex SFA 37\n1 Mega Absol ex MEG 161\n\n"
+                "Energy: 54\n27 Basic Psychic Energy\n27 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "a")
+    finally:
+        os.unlink(f.name)
+    def board():
+        pl, op = V.Player("a", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        pl.round_no = op.round_no = 5
+        pl._opp_ref, op._opp_ref = op, pl
+        pl.hand, op.hand, pl.bench = [], [], []
+        op.active = V.InPlay("Okidogi ex", 1)          # 250 HP
+        op.bench = [V.InPlay("Pecharunt ex", 1), V.InPlay("Munkidori ex", 1),
+                    V.InPlay("Mega Absol ex", 1)]      # 190, 210, 280 (3 Prizes)
+        for sp, d in zip([op.active] + op.bench, (240, 180, 200, 100)):
+            sp.damage = d                              # 720 on the board
+        return pl, op
+    pl, op = board()
+    pl.active = V.InPlay("Alakazam", 1)
+    pl.active.energy, pl.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    check("the AI picks Strange Hacking when it Knocks Out three",
+          (V.best_attack(pl, pl.active, opp=op) or {}).get("name") == "Strange Hacking",
+          V.best_attack(pl, pl.active, opp=op))
+    pl._forced_attack = next(a for a in D[1]["Alakazam"]["attacks"]
+                             if a["name"] == "Strange Hacking")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    V.finish_turn(pl, op, [])
+    check("one Strange Hacking takes 7 Prizes (Okidogi ex, Pecharunt ex, Mega Absol ex)",
+          pl.prizes == 6 - 7, pl.prizes)
+    pl, op = board()
+    op.active.damage = 150                             # 100 short of 250
+    for sp, d in zip(op.bench, (60, 50, 40)):          # no one pile is enough
+        sp.damage = d
+    pl.active = V.InPlay("Sableye", 1)
+    pl.active.energy, pl.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+    pl._forced_attack = next(a for a in D[1]["Sableye"]["attacks"]
+                             if a["name"] == "Damage Collection")
+    V.do_attack(pl, op, [])
+    check("Damage Collection gathers from the whole Bench to Knock Out the Active",
+          op.active is None or op.active.name != "Okidogi ex", op.active and op.active.damage)
+
 if __name__ == "__main__":
     sys.exit(main())

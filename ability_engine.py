@@ -978,6 +978,52 @@ def clear_attack_locks(spot):
 EFFECTIVE_HP = lambda owner, spot: (owner.POKEMON.get(spot.name) or {}).get("hp") or 0
 
 
+def plan_counter_knockouts(owner, donors, receivers):
+    """Strange Hacking ("move any number of damage counters from your
+    opponent's Pokemon to their other Pokemon in any way you like") and
+    Damage Collection (their Bench to their Active): every counter on a
+    donor is one pool, and the move worth making is the set of Knock Outs
+    worth the most Prizes. A receiver's own counters count toward its own
+    Knock Out; the rest has to come from donors that are not being Knocked
+    Out. Returns (chosen, transfers): transfers is [(donor, receiver, dmg)].
+    The executor took every counter off the single most-damaged Pokemon and
+    put them all on one target, so a six-Prize Strange Hacking never
+    happened."""
+    receivers = list(receivers)[:8]
+    best_key, best = (0, 0), []
+    for mask in range(1, 1 << len(receivers)):
+        chosen = [r for i, r in enumerate(receivers) if mask >> i & 1]
+        need = sum(max(0, EFFECTIVE_HP(owner, r) - r.damage) for r in chosen)
+        supply = sum(d.damage for d in donors if d not in chosen)
+        if need > supply:
+            continue
+        prizes = sum((owner.POKEMON.get(r.name) or {}).get("prize_value", 1)
+                     for r in chosen)
+        key = (prizes, -need)
+        if key > best_key:
+            best_key, best = key, chosen
+    transfers = []
+    if not best:
+        return [], transfers
+    # Take from the survivors that matter least first, so the counters left
+    # behind stay on the Pokemon worth Knocking Out next turn.
+    pool = sorted((d for d in donors if d not in best),
+                  key=lambda d: ((owner.POKEMON.get(d.name) or {}).get("prize_value", 1),
+                                 d.damage))
+    left = {id(d): d.damage for d in pool}
+    for r in best:
+        need = max(0, EFFECTIVE_HP(owner, r) - r.damage)
+        for d in pool:
+            if need <= 0:
+                break
+            take = min(need, left[id(d)])
+            if take:
+                left[id(d)] -= take
+                need -= take
+                transfers.append((d, r, take))
+    return best, transfers
+
+
 def plan_repeated_hits(act, opp, pool):
     """Arboliva ex's Oil Salvo: "Choose 1 of your opponent's Pokemon 6
     times ... do 20 damage to it", the same Pokemon as often as you like.
@@ -1349,6 +1395,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         hits = _shield_effects(opp, hits)
         if not donors or not hits:
             return False
+        if act.filter.get("any_number") and owner is opp:
+            # "in any way you like": plan the Knock Outs. Counters can't be
+            # put on a Pokemon that is shielded from them.
+            receivers = [h for h in hits if h in opp.in_play()]
+            if src == IR.Target.OPP_ANY or src == IR.Target.OPP_ALL:
+                donors = [q for q in opp.in_play() if q.damage >= 10]
+            chosen, transfers = plan_counter_knockouts(opp, donors, receivers)
+            if not chosen:
+                return False
+            for d, r, amt in transfers:
+                d.damage -= amt
+                r.damage += amt
+                log.append(f"    move {amt} damage {d.name} -> {r.name}")
+            return True
         donor = max(donors, key=lambda q: q.damage)
         if act.filter.get("any_number"):
             amount = donor.damage        # "any number" -- take it all

@@ -5018,7 +5018,26 @@ def attack_rider_value(pl, opp, atk, spot=None):
             value += sum(s.damage * ((act.amount or 2) - 1) for s in spots)
         elif act.op == IR.Op.MOVE_COUNTERS:
             f = act.filter or {}
-            if (act.amount or 0) >= 99 and f.get("from") == IR.Target.YOUR_BENCHED:
+            if f.get("any_number") and f.get("from") in (
+                    IR.Target.OPP_ANY, IR.Target.OPP_ALL, IR.Target.OPP_BENCHED):
+                # Strange Hacking / Damage Collection: worth the Prizes the
+                # planned move Knocks Out (it was priced at a flat 20, so
+                # a six-Prize Strange Hacking lost to a 30-damage attack).
+                donors = (list(opp.bench) if f["from"] == IR.Target.OPP_BENCHED
+                          else list(opp.in_play()))
+                receivers = ([opp.active] if act.target == IR.Target.OPP_ACTIVE
+                             and opp.active else list(opp.in_play()))
+                receivers = [r for r in receivers
+                             if not AE.query_bench_counters_blocked(opp, r, pl)]
+                chosen, _ = AE.plan_counter_knockouts(
+                    opp, [d for d in donors if d.damage >= 10], receivers)
+                prizes = sum((opp.POKEMON.get(r.name) or {}).get("prize_value", 1)
+                             for r in chosen)
+                if prizes >= getattr(pl, "prizes", 6):
+                    value += 10 ** 5            # the move takes the last Prizes
+                else:
+                    value += POL.knob(pl, "ko_bonus_per_prize") * prizes
+            elif (act.amount or 0) >= 99 and f.get("from") == IR.Target.YOUR_BENCHED:
                 # Rocket Mirror / Nine-Tailed Transfer: worth the biggest
                 # pile it can move, not a flat 20.
                 fam = (f.get("family") or "").lower()
