@@ -1,0 +1,31 @@
+Pokémon: 15
+3 Munkidori SFA 72
+2 Alakazam MEG 56
+3 Abra MEG 54
+1 Kadabra TWM 81
+2 Kadabra MEG 55
+2 Uxie SSP 78
+2 Alakazam TWM 82
+
+Trainer: 28
+1 Boss's Orders MEG 114
+1 Lana's Aid TWM 207
+1 Hassel TWM 205
+4 Lillie's Determination MEG 169
+1 Air Balloon MEG 166
+4 Buddy-Buddy Poffin MEG 167
+1 Pokégear 3.0 BLK 84
+3 Night Stretcher MEG 173
+2 Hilda WHT 171
+3 Gwynn PBL 119
+4 Poké Pad POR 113
+1 Special Red Card CRI 113
+2 Rare Candy MEG 125
+
+Energy: 17
+1 Legacy Energy TWM 167
+2 Telepathic Psychic Energy POR 88
+5 Basic Darkness Energy
+9 Basic Psychic Energy
+
+Total Cards: 60

@@ -4,10 +4,11 @@ Built 2026-10-15 from a list submitted with the tag "taking 6 Prizes in
 one turn": Froslass, Munkidori, both Alakazam lines and Uxie. The question
 was how that turn works and what else supports it.
 
-**This list: 68.69% against the 92-deck field at 1000 games per
-opponent** (median 73.0%, 76 of 92 winning). That is **+32.40 ± 1.04**
-over the submitted list (36.29%), better on all 92. The best version that
-keeps Froslass measured 53.87%.
+**This list: 68.51% against the 93-deck field at 1000 games per
+opponent** (76 of 93 winning), re-measured 2026-10-15 after the Freezing
+Shroud fix below. That is **+29.24 ± 1.41** over the submitted list
+(39.27%), better on all 93. The best version that keeps Froslass measured
+54.98%.
 
 **Lines:** Abra → Kadabra → Alakazam, both printings:
 - **Alakazam MEG 56** (Powerful Hand, and Psychic Draw on Kadabra MEG and
@@ -66,7 +67,11 @@ At every one of this list's attacks in 100 field games, I measured the most
 Prizes a Strange Hacking could have taken with the counters on the board.
 - A 4+ Prize Strange Hacking was available in 11 games, a 5-Prize one in 1,
   and a 6-Prize one in none.
-- The submitted list: 6+ in 4 games of 100.
+- The submitted list: 6+ in 4 games of 100, measured with the broken
+  Freezing Shroud. With it fixed: 4+ in 15, 6+ in 1. A working Froslass
+  grows the pool a little, but it costs more on your own board (below).
+- The Froslass build with Munkidori as its only Ability Pokémon: 4+ in 14,
+  6+ in 2.
 - Every variant tested: 0-4 in 100.
 
 Their own Knock Outs and yours keep clearing the board. The pool's peak
@@ -81,18 +86,47 @@ Hacking cashing in 1-3 Prizes most turns, behind Powerful Hand.
 
 ## What the measurements changed
 
-**Froslass hurts this list.** Freezing Shroud also damages your own
-Pokémon with Abilities: Kadabra MEG (80 HP), Alakazam MEG (140), Munkidori
-(110) and Shaymin (80).
-- With 3 Froslass in play a Kadabra takes 6 counters a round and dies
-  before it evolves.
-- 3-3 to 2-2 Froslass: **+7.68**. Then none: **+13.84**.
-- A Froslass build with no Abilities of its own (TWM Kadabra / Alakazam,
-  4-4 Froslass, no Shaymin) measured 39.07%, 21.5 below. It lost Powerful
-  Hand and Psychic Draw.
-- The real Froslass / Munkidori archetype runs no Alakazam MEG for exactly
-  this reason. [Dittobase](https://www.dittobase.com/tcg/decks/meta/pbl/froslass-munkidori)
-  tracks it at 0.24% of the meta with a 41.6% win rate.
+**Froslass costs this list more than it gives**, even with Munkidori
+moving its counters. Freezing Shroud was broken when the rounds below were
+run. It put one counter on one Pokémon, usually its owner's Munkidori, and
+never touched the opponent. So these numbers are from the fixed engine (200
+games against the 93 decks, paired).
+
+Counter flow per game, submitted list (60 games):
+- Freezing Shroud put **18.3 counters on your board and 16.0 on theirs.**
+  The list has six Pokémon with Abilities: 3 Munkidori, Kadabra MEG,
+  Alakazam MEG, Shaymin.
+- Adrena-Brain moved **4.9**: 1.8 uses a game, out of 1.9 chances with a
+  Darkness-Energy Munkidori and counters to move.
+- 0.9 of your own Pokémon a game were Knocked Out at checkup, each a Prize
+  for them.
+
+Why Munkidori can't absorb it:
+- **It moves at most 3 counters a turn**, and only while it has Darkness
+  Energy.
+- **It never lacks fuel without Froslass.** Their attacks put 100+ on your
+  Active every turn. So Froslass's counters on your side don't add Adrena-
+  Brain uses; they are damage you keep.
+
+With 7 Darkness Energy instead of 3, Adrena-Brain fired 3.1 times and moved
+8.7 a game. Freezing Shroud still put 22.7 on your board against 16.3 on
+theirs.
+
+| Change | Paired |
+|---|---|
+| Submitted list, 3-3 → 2-2 Froslass (+2 Energy) | +8.73 ± 0.69 |
+| Submitted list, no Froslass (+6 Energy) | **+21.44 ± 1.33** |
+| Submitted list with 7 Darkness, then no Froslass | +16.52 ± 1.33 |
+| This list + 2-2 / 3-3 Froslass | −13.00 / −21.21 |
+| This list with 5 Darkness + 2-2 Froslass (and a 4th Munkidori) | −13.54 (−14.09) |
+| Froslass build where Munkidori is your only Ability Pokémon (TWM Kadabra / Alakazam, 4-4 Froslass) | 46.71%, +7.31 over the submitted list |
+
+**Froslass pays when the opponent has more Pokémon with Abilities than you
+do.** That's why the real Froslass / Munkidori archetype keeps Munkidori as
+its only one. [Dittobase](https://www.dittobase.com/tcg/decks/meta/pbl/froslass-munkidori)
+tracks it at 0.24% of the meta with a 41.6% win rate, close to the 46.71%
+above. Built that way it gives up Powerful Hand and Psychic Draw, which
+are worth more here.
 
 **Energy.** The submitted list had 9, three of them Darkness for
 Munkidori. Every round's top changes traded a situational card for an
@@ -124,8 +158,14 @@ games each).
 
 ## What the simulator found
 
-**One engine fix** (2026-10-15), with a regression test that fails on the
-previous commit:
+**Two engine fixes** (2026-10-15), each with a regression test that fails
+on the previous commit:
+- **Freezing Shroud put one counter on one Pokémon**, in practice its
+  owner's Munkidori, instead of one on every Pokémon with an Ability on both
+  sides. Every "10 damage to each of your opponent's Benched Pokémon" rider
+  hit one Benched Pokémon too: Blizzard, Ground Crasher, Blizzard Burst.
+  The tuning rounds below ran before this fix, so their Froslass rows are
+  from the broken card. The table above re-measures them.
 - **Strange Hacking took every counter off the single most-damaged
   Pokémon and put them all on one target.** The AI also priced the attack
   at a flat 20, so the turn this deck is built for never happened.
@@ -141,6 +181,9 @@ previous commit:
 ## How it was tuned
 
 200 games against each of the 92 field decks, paired on the same seeds.
+**These rounds ran before the Freezing Shroud fix**, so every row with
+Froslass in it measured a Froslass that only damaged its owner. The
+re-measured Froslass comparisons are under "What the measurements changed".
 Each round is paired against the best list of the round before. Lists and
 results are in `runs/2026-10-15/strange_hacking_screens/`.
 
@@ -166,6 +209,7 @@ results are in `runs/2026-10-15/strange_hacking_screens/`.
 | 5 | 4th Abra / 4th Munkidori / 3rd Alakazam MEG | 66.3-67.2% | −0.47 to +0.42 |
 | 5 | **2 Rare Candy for 2 Energy (this list)** | **68.97%** | **+2.16 ± 0.47** |
 | 1000 games | Submitted / Froslass kept / **this list** | 36.29% / 53.87% / **68.69%** | **+32.40 ± 1.04** |
+| 1000 games, fixed engine (93 decks) | Submitted / Froslass kept / **this list** | 39.27% / 54.98% / **68.51%** | **+29.24 ± 1.41** |
 
 **Matchups (1000 games):**
 - **Worst:** Mega Zygarde ex / Cinderace 14.0%, Mega Zeraora ex /
@@ -234,7 +278,8 @@ Energy: 17
 Total Cards: 60
 ```
 
-**The best version that keeps Froslass** (53.87% at 1000 games):
+**The best version that keeps Froslass** (54.98% at 1000 games on the
+fixed engine):
 Froslass 2-2, no Budew, Shaymin swapped for a second Alakazam TWM 82, and
 Nighttime Mine for Energy. It is `s3_bh` in the run archive.
 
