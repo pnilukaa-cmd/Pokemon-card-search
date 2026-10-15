@@ -3389,9 +3389,16 @@ def test_special_energy_does_what_it_prints():
     Knock Out also never asked the Prize-changing Abilities.
     """
     import glob as _g
-    def deck(card):
-        f = next(x for x in sorted(_g.glob("decks/field/*.txt")) if card in open(x).read())
-        return _real(f, "x")
+    def deck(card, need=None):
+        # The first field deck that runs the card (and, for the Legacy
+        # Energy check, a Pokemon ex to attach it to: the field gained a
+        # Legacy Energy deck with no ex, which sorted first).
+        for x in sorted(_g.glob("decks/field/*.txt")):
+            if card in open(x).read():
+                got = _real(x, "x")
+                if need is None or need(got[1]):
+                    return got
+        raise AssertionError(f"no field deck runs {card}")
     V, D, E = deck("Telepathic Psychic Energy")
     me = V.Player("x", D[1], D[2], E)
     psy = next(n for n, i in D[1].items() if "Psychic" in i["types"]
@@ -3431,7 +3438,8 @@ def test_special_energy_does_what_it_prints():
     me.active, me.bench = s, []
     check("but not in the Active Spot", not AE.query_prevented(me, s, op, op.active))
 
-    V, D, E = deck("Legacy Energy")
+    V, D, E = deck("Legacy Energy",
+                   lambda D: any(i["prize_value"] >= 2 for i in D[1].values()))
     me, op = V.Player("x", D[1], D[2], E), V.Player("o", D[1], D[2], E)
     ex = next(n for n, i in D[1].items() if i["prize_value"] >= 2)
     s = V.InPlay(ex, 0)
@@ -5950,6 +5958,52 @@ def test_strange_hacking_spends_the_whole_board_on_knock_outs():
     V.do_attack(pl, op, [])
     check("Damage Collection gathers from the whole Bench to Knock Out the Active",
           op.active is None or op.active.name != "Okidogi ex", op.active and op.active.damage)
+
+
+def test_each_means_every_pokemon_not_one():
+    """Froslass's Freezing Shroud ("put 1 damage counter on each Pokemon
+    that has an Ability (both yours and your opponent's)") fell through to
+    the executor's "choose 1" branch: one counter on one Pokemon, in
+    practice its owner's own Munkidori, and nothing on the opponent's
+    board. Every "also does 10 damage to each of your opponent's Benched
+    Pokemon" (Regice and N's Vanilluxe's Blizzard, Ting-Lu, Kyurem ex) hit
+    one Benched Pokemon the same way."""
+    import tempfile, os, random as _r
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 7\n1 Froslass TWM 53\n1 Munkidori SFA 72\n1 Kadabra MEG 55\n"
+                "1 Fezandipiti ex ASC 142\n1 Dreepy PRE 71\n1 Regice JTG 42\n1 Abra MEG 54\n\n"
+                "Energy: 53\n53 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "a")
+    finally:
+        os.unlink(f.name)
+    pl, op = V.Player("a", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.round_no = op.round_no = 5
+    pl._opp_ref, op._opp_ref = op, pl
+    pl.hand, op.hand = [], []
+    pl.active = V.InPlay("Abra", 1)
+    pl.bench = [V.InPlay("Froslass", 1), V.InPlay("Froslass", 1),
+                V.InPlay("Munkidori", 1), V.InPlay("Kadabra", 1)]
+    op.active = V.InPlay("Fezandipiti ex", 1)
+    op.bench = [V.InPlay("Munkidori", 1), V.InPlay("Dreepy", 1)]
+    V.pokemon_checkup(pl, op, [])
+    dmg = {(side, s.name): s.damage for side, p in (("me", pl), ("opp", op))
+           for s in [p.active] + p.bench}
+    check("two Froslass put 2 counters on every Pokemon with an Ability, both sides",
+          dmg[("me", "Munkidori")] == dmg[("me", "Kadabra")] == 20
+          and dmg[("opp", "Fezandipiti ex")] == dmg[("opp", "Munkidori")] == 20, dmg)
+    check("and none on Froslass or on a Pokemon without an Ability",
+          dmg[("me", "Froslass")] == 0 and dmg[("opp", "Dreepy")] == 0
+          and dmg[("me", "Abra")] == 0, dmg)
+    pl.active = V.InPlay("Regice", 1)
+    pl.active.energy, pl.active.energy_names = [["Water"]] * 3, ["Water Energy"] * 3
+    op.active = V.InPlay("Fezandipiti ex", 1)
+    op.bench = [V.InPlay("Abra", 1), V.InPlay("Abra", 1), V.InPlay("Dreepy", 1)]
+    pl._forced_attack = next(a for a in D[1]["Regice"]["attacks"] if a["name"] == "Blizzard")
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    check("Blizzard does 10 to each Benched Pokemon",
+          [b.damage for b in op.bench] == [10, 10, 10], [b.damage for b in op.bench])
 
 if __name__ == "__main__":
     sys.exit(main())

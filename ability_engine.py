@@ -1319,7 +1319,14 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if act.filter.get("repeat") and (act.amount or 0) > 0:
             return _aim_repeated_hits(act, pl, opp, [h for h in hits if h is not None], log)
 
-        if act.target == IR.Target.OPP_ALL:
+        # "Each" means every one of them. Froslass's Freezing Shroud ("on
+        # each Pokemon that has an Ability (both yours and your
+        # opponent's)") and every "also does 10 damage to each of your
+        # opponent's Benched Pokemon" (Blizzard, Ground Crasher, Blizzard
+        # Burst) fell through to "choose 1" below: Freezing Shroud put one
+        # counter on one Pokemon -- in practice its owner's own Munkidori --
+        # and never touched the opponent's board.
+        if act.target in (IR.Target.OPP_ALL, IR.Target.BOTH_ALL) or act.filter.get("each"):
             chosen = hits
         else:
             # "choose N of your opponent's Pokemon and put X on each"

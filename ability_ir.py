@@ -1415,6 +1415,7 @@ def _r(m, text):
     if re.search(r"each pok[eé]mon that has an ability \(both yours and your opponent", text, re.I):
         tgt = Target.BOTH_ALL
         filt["has_ability"] = True
+        filt["each"] = True
         ex = re.search(r"except any ([A-Z][\w'’-]+)", text)
         if ex:
             filt["exclude_name"] = ex.group(1)
@@ -1725,8 +1726,10 @@ def _r(m, text):
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
     if who == "each":
+        # EACH Benched Pokemon: with no count the executor read it as
+        # "choose 1", so Regice's Blizzard hit one Benched Pokemon.
         return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
-                       {"attack_damage": True})]
+                       {"attack_damage": True, "each": True})]
     return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
                    {"targets": int(who), "attack_damage": True})]
 
