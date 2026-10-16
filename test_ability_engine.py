@@ -6136,5 +6136,61 @@ def test_sinister_surge_stacks_on_the_attacker_that_needs_it():
           gengar.energy_count() == 2 and gengar.damage == 20,
           [(b.name, b.energy_count(), b.damage) for b in me.bench])
 
+def test_look_and_attach_and_one_recipient_attaches():
+    """Four cards that "look at the top N cards of your deck and attach the
+    Energy you find there" (Metang's Metal Maker, Grumpig, Lapras ex,
+    Waitress) compiled to the plain look rule: one of the top N into the
+    hand, nothing attached. "Attach up to 2 Basic Energy cards from your
+    discard pile to 1 of your Stage 2 Pokemon" (Rosa's Encouragement)
+    could load any Pokemon, and split the two Energy between two."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Beldum TEF 113\n1 Metang TEF 114\n1 Gengar ex 30C 90\n"
+                "1 Okidogi ex SFA 36\n\nTrainer: 2\n1 Rosa's Encouragement POR 114\n1 Waitress ASC 215\n\n"
+                "Energy: 54\n27 Basic Metal Energy\n27 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board():
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        op.active = V.InPlay("Okidogi ex", 1)
+        return me, op
+    me, op = board()
+    me.energy_types = {"Metal"}
+    me.active = V.InPlay("Beldum", 1)
+    me.bench = [V.InPlay("Metang", 1)]
+    me.deck = [("Pokemon", "Beldum")] * 6 + [("Energy", "Metal Energy"), ("Pokemon", "Beldum"),
+                                             ("Energy", "Metal Energy"), ("Pokemon", "Beldum")]
+    V.use_abilities(me, op, 5, [])
+    check("Metal Maker attaches the Metal Energy in the top 4 instead of taking a card",
+          sum(p.energy_count() for p in me.in_play()) == 2 and not me.hand and len(me.deck) == 8,
+          ([(p.name, p.energy_count()) for p in me.in_play()], me.hand, len(me.deck)))
+    me, op = board()
+    me.energy_types = {"Darkness"}
+    me.active = V.InPlay("Okidogi ex", 1)
+    me.bench = [V.InPlay("Gengar ex", 1)]
+    me.deck = [("Energy", "Darkness Energy")] + [("Pokemon", "Beldum")] * 5
+    me.hand = [("Supporter", "Waitress")]
+    V.play_supporter(me, op, 5, [])
+    check("Waitress attaches the Energy it finds",
+          sum(p.energy_count() for p in me.in_play()) == 1 and not me.hand,
+          ([(p.name, p.energy_count()) for p in me.in_play()], me.hand))
+    me, op = board()
+    me.energy_types = {"Darkness"}
+    me.prizes, op.prizes = 5, 3
+    me.active = V.InPlay("Okidogi ex", 1)
+    me.bench = [V.InPlay("Beldum", 1), V.InPlay("Gengar ex", 1)]
+    me.discard = ["Darkness Energy"] * 4
+    me.hand = [("Supporter", "Rosa's Encouragement")]
+    V.play_supporter(me, op, 5, [])
+    check("Rosa's Encouragement puts both Energy on the Stage 2",
+          me.bench[1].energy_count() == 2 and me.active.energy_count() == 0,
+          [(p.name, p.energy_count()) for p in me.in_play()])
+
 if __name__ == "__main__":
     sys.exit(main())

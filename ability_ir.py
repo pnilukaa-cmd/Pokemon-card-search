@@ -1231,6 +1231,8 @@ def _look_selector(item):
 
 @rule("look_at_deck", r"look at the top (\d+) cards? of your deck")
 def _r(m, text):
+    if re.search(r"look at the top \d+ cards? of your deck and attach", text, re.I):
+        return []          # look_attach_energy owns it
     # "You may reveal up to 2 in any combination of Grass Pokemon and Basic
     # Grass Energy cards you find there and put them into your hand"
     # (Bug Catching Set), "a Pokemon and a Trainer card" (Drayton), "any
@@ -1266,13 +1268,55 @@ def _r(m, text):
                     "recipient_type": m.group(2).capitalize()})]
 
 
+_ATTACH_TO_RE = re.compile(r"(1 of )?your (benched )?(?:(" + TYPES + r"|stage 2|stage 1|basic) )?pok[eé]mon",
+                           re.I)
+
+
+def _attach_recipient(phrase, f):
+    """Target for "attach ... to <phrase>", writing the recipient's
+    qualifier into `f`. "To 1 of your Stage 2 Pokemon" (Rosa's
+    Encouragement) is ONE Stage 2 Pokemon: it compiled as any of your
+    Pokemon, and the executor spread its two Energy over two of them.
+    "To your Metal Pokemon in any way you like" (Archaludon ex, Magneton)
+    compiled as this Pokemon, so Overvolt Discharge loaded the Magneton it
+    Knocks Out."""
+    m = _ATTACH_TO_RE.match(phrase.strip())
+    if not m:
+        return parse_target(phrase)
+    q = (m.group(3) or "").lower()
+    if q in ("stage 2", "stage 1", "basic"):
+        f["recipient_stage"] = {"stage 2": "Stage 2", "stage 1": "Stage 1", "basic": "Basic"}[q]
+    elif q:
+        f["recipient_type"] = q.capitalize()
+    if m.group(1):
+        f["one_recipient"] = True
+    return Target.YOUR_BENCHED if m.group(2) else Target.YOUR_ANY
+
+
 @rule("attach_energy_from_discard",
       r"attach (?:a|an|up to (\d+)) ?(?:basic )?(" + TYPES + r")? ?energy (?:cards? )?from your discard pile to ([^.]{0,50})")
 def _r(m, text):
     if m.group(3).strip().lower().startswith("each of them"):
         return []          # attach_to_each_benched_type owns it
-    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), parse_target(m.group(3)),
-                   {"type": (m.group(2) or "").capitalize() or None, "from": "discard"})]
+    f = {"type": (m.group(2) or "").capitalize() or None, "from": "discard"}
+    return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), _attach_recipient(m.group(3), f), f)]
+
+
+@rule("look_attach_energy",
+      r"look at the top (\d+) cards? of your deck and attach (any number of|an?|up to (\d+)) "
+      r"(basic )?(?:(" + TYPES + r") )?energy cards? you find there to ([^.]{0,60})")
+def _r(m, text):
+    """Metang's Metal Maker, Grumpig's Energized Steps, Lapras ex's Larimar
+    Rain, Waitress: look at the top N and attach the Energy found there.
+    They compiled to the plain look_at_deck rule, which put one of the top
+    N cards into the hand and attached nothing."""
+    f = {"from": "top", "look": int(m.group(1)),
+         "type": (m.group(5) or "").capitalize() or None, "basic_only": bool(m.group(4))}
+    if re.search(r"put them on the bottom of your deck", text, re.I):
+        f["rest_to_bottom"] = True
+    q = m.group(2).lower()
+    n = 99 if q == "any number of" else (int(m.group(3)) if m.group(3) else 1)
+    return [Action(Op.ATTACH_ENERGY, n, _attach_recipient(m.group(6), f), f)]
 
 
 @rule("attach_energy_from_hand",

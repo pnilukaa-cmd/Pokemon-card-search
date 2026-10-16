@@ -1513,7 +1513,21 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         differ = act.filter.get("different_type")
         blocked = getattr(pl, "last_searched_energy", None) if differ else None
 
+        # "Look at the top N cards of your deck and attach the Energy you
+        # find there" (Metal Maker, Waitress): the N cards come off the top
+        # once, and what isn't attached goes back afterwards.
+        window = None
+
         def _take(prefer=None):
+            if src == "top":
+                basic = act.filter.get("basic_only")
+                ok = [i for i in range(len(window) - 1, -1, -1)
+                      if window[i][0] == "Energy"
+                      and (not want_type or want_type in window[i][1])
+                      and (not basic or _is_basic_energy_name(window[i][1]))]
+                i = next((i for i in ok if prefer and any(t in window[i][1] for t in prefer)),
+                         ok[0] if ok else None)
+                return window.pop(i) if i is not None else None
             # "Search your deck for up to 3 Basic Energy cards" lets the
             # player pick which: the type the recipient is still missing
             # (Koraidon ex's one Fire among Fighting), else the first.
@@ -1597,6 +1611,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 got += 1
             return got > 0
         hits = resolve_targets(act.target, pl, opp, source, attacker) or [source]
+        rs = act.filter.get("recipient_stage")
+        if rs:
+            # Rosa's Encouragement: "to 1 of your Stage 2 Pokemon".
+            hits = [p for p in hits if p is not None
+                    and (pl.POKEMON.get(p.name) or {}).get("stage") == rs]
+            if not hits:
+                return False
         rt = act.filter.get("recipient_type")
         if rt:
             # Only a Pokemon of that type, and the one that needs it most.
@@ -1611,7 +1632,19 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Flare, Kaleidowaltz): the player places each card. All of them
         # went to the first Benched Pokemon -- Mega Audino ex took Turbo
         # Flare's three Energy while Mega Zygarde ex, the attacker, got none.
-        spread = act.target in (IR.Target.YOUR_BENCHED, IR.Target.YOUR_ANY) and len(hits) > 1
+        # "To 1 of your Pokemon" is one recipient for every card it
+        # attaches (Rosa's Encouragement, Philippe, Mewtwo's Empower): the
+        # one that needs it most.
+        one = act.filter.get("one_recipient")
+        if one and not rt and len(hits) > 1:
+            tgt = (ATTACH_RANK(pl, opp, [p for p in hits if p is not None]) or [tgt])[0]
+        spread = (not one and act.target in (IR.Target.YOUR_BENCHED, IR.Target.YOUR_ANY)
+                  and len(hits) > 1)
+        if src == "top":
+            k = act.filter.get("look") or 1
+            window = pl.deck[-k:]
+            del pl.deck[-k:]
+            log.append(f"    looks at top {len(window)}")
         got = 0
         for _ in range(max(act.amount or 1, 1)):
             if spread:
@@ -1621,6 +1654,13 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 break
             _put(tgt, card)
             got += 1
+        if window is not None:
+            if act.filter.get("rest_to_bottom"):
+                random.shuffle(window)
+                pl.deck[:0] = window
+            else:
+                pl.deck.extend(window)
+                random.shuffle(pl.deck)
         return got > 0
 
     if op == O.MOVE_ENERGY and act.filter.get("opp_internal"):
