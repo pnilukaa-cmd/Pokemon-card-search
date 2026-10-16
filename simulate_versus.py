@@ -3013,6 +3013,11 @@ def _payable_damage(owner, spot, energy, foe=None):
             best = max(best, atk.get("damage") or 0, 1)
     return best
 AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
+# An Energy moved off the attacker (Void Gale) goes to the Benched Pokemon
+# that most needs it: one still short of its attack, the hardest hitter first.
+AE.BENCH_ENERGY_TARGET = lambda pl, bench: max(
+    bench, key=lambda p: (energy_shortfall(pl, p) > 0, _potential_damage(pl, p),
+                          -p.energy_count()))
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
 # A lambda, not the function object: the hooks are wired well above
@@ -5005,7 +5010,15 @@ def attack_rider_value(pl, opp, atk, spot=None):
                 value += ((act.amount or 0) * 10 * act.filter.get("targets", 1)
                           + POL.knob(pl, "ko_bonus_per_prize") * prizes)
             else:
-                value += (act.amount or 0) * 10 * act.filter.get("targets", 1)
+                n = act.filter.get("targets", 1)
+                value += (act.amount or 0) * 10 * n
+                # ...plus the Knock Outs it takes. Chaotic Pain's 13 counters
+                # were priced at a flat 130 whether or not they finished
+                # anything.
+                hits = list(opp.bench) if act.target is IR.Target.OPP_BENCHED else (
+                    ([opp.active] if opp.active else []) + list(opp.bench))
+                _, prizes = AE.pick_counter_targets(act, pl, opp, hits, n)
+                value += POL.knob(pl, "ko_bonus_per_prize") * prizes
         elif act.op == IR.Op.PLACE_COUNTERS and act.target is IR.Target.OPP_ACTIVE:
             value += _active_counter_damage(pl, opp, act)
         elif act.op == IR.Op.MULTIPLY_COUNTERS:

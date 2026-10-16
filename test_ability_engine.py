@@ -1634,9 +1634,16 @@ def test_copied_attacks_carry_their_riders():
                 if a["name"] == "Seek Inspiration")
 
     me.deck = [("Pokemon", "Kyurem")]
+    # Worth exactly what Kyurem's own Trifrost is worth on this board: its
+    # 330 damage plus the three Dunsparce (60 HP) it Knocks Out, since
+    # single-target counter placement is priced with its Knock Outs.
+    ky = SV.InPlay("Kyurem", 0)
+    ky.energy = [["Water"]] * 2 + [["Metal"]] * 2 + [["Colorless"]]
+    tri = next(a for a in POK["Kyurem"]["attacks"] if a["name"] == "Trifrost")
+    own = SV.attack_value(me, op, ky, tri)
     check("the AI values the copy at what it borrows",
-          SV.attack_value(me, op, sk, seek) == 330,
-          SV.attack_value(me, op, sk, seek))
+          SV.attack_value(me, op, sk, seek) == own and own > 330,
+          (SV.attack_value(me, op, sk, seek), own))
     check("and picks it over its own 120-damage attack",
           SV.best_attack(me, sk, True, op)["name"] == "Seek Inspiration")
     before = sum(s.damage for s in [op.active] + op.bench)
@@ -6004,6 +6011,55 @@ def test_each_means_every_pokemon_not_one():
     V.do_attack(pl, op, [])
     check("Blizzard does 10 to each Benched Pokemon",
           [b.damage for b in op.bench] == [10, 10, 10], [b.damage for b in op.bench])
+
+
+def test_chaotic_pain_takes_the_knock_out_and_void_gale_gives_the_energy_away():
+    """Gengar ex's Chaotic Pain ("Place 13 damage counters on 1 of your
+    opponent's Pokemon") put all 13 on a fresh 250 HP Active while a
+    Pokemon ex 120 from a Knock Out sat on the Bench, and was priced at a
+    flat 130. Mega Gengar ex's Void Gale ("Move an Energy from this Pokemon
+    to 1 of your Benched Pokemon") moved nothing: the Energy-move executor
+    only knew Bench -> Active, so the attacker kept both Energy and swung
+    for 230 every turn."""
+    import tempfile, os, random as _r
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 6\n1 Gengar ex 30C 90\n1 Mega Gengar ex ASC 125\n1 Okidogi ex SFA 36\n"
+                "1 Dreepy PRE 71\n1 Fezandipiti ex ASC 142\n1 Munkidori ASC 99\n\n"
+                "Energy: 54\n54 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    pl, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    pl.round_no = op.round_no = 5
+    pl._opp_ref, op._opp_ref = op, pl
+    pl.hand, op.hand, pl.bench = [], [], []
+    pl.active = V.InPlay("Gengar ex", 1)
+    pl.active.energy, pl.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+    op.active = V.InPlay("Okidogi ex", 1)
+    op.bench = [V.InPlay("Dreepy", 1), V.InPlay("Fezandipiti ex", 1), V.InPlay("Munkidori", 1)]
+    op.bench[1].damage = 90                      # 120 left: a 2-Prize Knock Out
+    pain = next(a for a in D[1]["Gengar ex"]["attacks"] if a["name"] == "Chaotic Pain")
+    check("Chaotic Pain is priced with the Knock Out it takes",
+          V.attack_value(pl, op, pl.active, pain) > 200,
+          V.attack_value(pl, op, pl.active, pain))
+    pl._forced_attack = pain
+    _r.seed(1)
+    V.do_attack(pl, op, [])
+    V.finish_turn(pl, op, [])
+    check("Chaotic Pain Knocks Out the Pokemon ex it can finish",
+          pl.prizes == 4 and all(b.name != "Fezandipiti ex" for b in op.bench),
+          (pl.prizes, [(b.name, b.damage) for b in op.bench]))
+    pl.active = V.InPlay("Mega Gengar ex", 1)
+    pl.active.energy, pl.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+    pl.bench = [V.InPlay("Gengar ex", 1)]
+    op.active = V.InPlay("Okidogi ex", 1)
+    pl._forced_attack = next(a for a in D[1]["Mega Gengar ex"]["attacks"]
+                             if a["name"] == "Void Gale")
+    V.do_attack(pl, op, [])
+    check("Void Gale moves an Energy off Mega Gengar ex onto the Bench",
+          pl.active.energy_count() == 1 and pl.bench[0].energy_count() == 1,
+          (pl.active.energy_count(), pl.bench[0].energy_count()))
 
 if __name__ == "__main__":
     sys.exit(main())

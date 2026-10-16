@@ -936,6 +936,36 @@ NAMED_ATTACK_PICK = lambda owner, foe, spot: max(
     key=lambda a: a.get("damage") or 0)["name"]
 
 
+# Which Benched Pokemon an Energy moved off the attacker goes to. The engine
+# swaps in its own (the one that most needs Energy); this default is the
+# one with the least.
+BENCH_ENERGY_TARGET = lambda pl, bench: min(bench, key=lambda p: p.energy_count())
+
+
+def pick_counter_targets(act, pl, opp, hits, n):
+    """Who "put N damage counters on 1 (or 2) of your opponent's Pokemon"
+    lands on: the Knock Outs worth the most Prizes first, the fewest
+    counters wasted next, then the old build-toward-a-threshold order.
+    Gengar ex's Chaotic Pain (13 counters) put all 13 on a fresh 250 HP
+    Active while a Pokemon ex 120 from a Knock Out sat on the Bench."""
+    step = (act.amount or 0) * 10
+    def owner(h):
+        return opp if h in opp.in_play() else pl
+    def left(h):
+        return EFFECTIVE_HP(owner(h), h) - h.damage
+    def prize(h):
+        return (owner(h).POKEMON.get(h.name) or {}).get("prize_value", 1)
+    kos = sorted((h for h in hits if h is not None and 0 < left(h) <= step),
+                 key=lambda h: (-prize(h), left(h)))
+    def _priority(h):
+        room = KO_THRESHOLD - h.damage
+        if 0 < room and room >= step:
+            return (0, room)          # can still climb toward it
+        return (1, -(pl.POKEMON.get(h.name, {}).get("hp", 0) - h.damage))
+    rest = [h for h in sorted(hits, key=_priority) if h not in kos]
+    return (kos + rest)[:n], sum(prize(h) for h in kos[:n])
+
+
 def tick_attack_locks(spot):
     """End of the owner's turn: every "during your next turn" lock counts down."""
     for k in _LOCKS:
@@ -1329,20 +1359,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if act.target in (IR.Target.OPP_ALL, IR.Target.BOTH_ALL) or act.filter.get("each"):
             chosen = hits
         else:
-            # "choose N of your opponent's Pokemon and put X on each"
+            # "choose N of your opponent's Pokemon and put X on each": a
+            # Knock Out first; otherwise focus fire toward a cash-in total
+            # (Mega Absol ex's Terminal Period wants exactly 60) rather than
+            # sprinkling.
             n = act.filter.get("targets", 1)
-            # Focus fire toward a cash-in total rather than sprinkling.
-            # A counter-placement deck is building one target up to an
-            # exact threshold (Mega Absol ex's Terminal Period wants
-            # exactly 60), so top up whoever is closest to it from below
-            # and only spread once nobody is a candidate.
-            step = (act.amount or 0) * 10
-            def _priority(h):
-                room = KO_THRESHOLD - h.damage
-                if 0 < room and room >= step:
-                    return (0, room)          # can still climb toward it
-                return (1, -(pl.POKEMON.get(h.name, {}).get("hp", 0) - h.damage))
-            chosen = sorted(hits, key=_priority)[:n]
+            chosen, _ = pick_counter_targets(act, pl, opp, hits, n)
         # Mega Zygarde ex's Nullifying Zero flips a separate coin for each
         # of the opponent's Pokemon. Without this the attack either always
         # landed on everything or (as compiled) did nothing at all.
@@ -1606,6 +1628,32 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if nm:
             dst.energy_names.append(nm)
         log.append(f"    move {nm} {a.name} -> {dst.name}")
+        return True
+
+    if op == O.MOVE_ENERGY and act.filter.get("from") == IR.Target.SELF \
+            and act.target == IR.Target.YOUR_BENCHED:
+        # "Move an Energy from this Pokemon to 1 of your Benched Pokemon"
+        # (Mega Gengar ex's Void Gale, Iron Thorns ex, Volcanion ex, Yanmega
+        # ex, Keldeo; 12 attacks). The branch below only moves Bench ->
+        # Active, so these moved nothing -- the attacker kept every Energy
+        # and swung again next turn for free.
+        if source is None or not source.energy or not pl.bench:
+            return False
+        want = act.filter.get("type")
+        idxs = [i for i, e in enumerate(source.energy) if not want or want in e]
+        n = min(act.amount or 1, len(idxs))
+        if n <= 0:
+            return False
+        dst = BENCH_ENERGY_TARGET(pl, list(pl.bench))
+        moved = []
+        for i in sorted(idxs[:n], reverse=True):
+            prov = source.energy[i]
+            nm = pop_energy(source, i)
+            dst.energy.append(prov)
+            if nm:
+                dst.energy_names.append(nm)
+            moved.append(nm or "Energy")
+        log.append(f"    move {', '.join(moved)} {source.name} -> {dst.name}")
         return True
 
     if op == O.MOVE_ENERGY:
