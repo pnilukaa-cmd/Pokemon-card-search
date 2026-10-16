@@ -105,7 +105,11 @@ GREEDY = {
     "counter_potential": int(__import__("os").environ.get("COUNTER_POTENTIAL", 1)),
     # Rank what an evolve-from-deck effect evolves (Dark Awakening: a
     # Haunter into Gengar ex before a Nidoran into Nidorina). 0 takes the
-    # first Pokemon in play with the first card found.
+    # first Pokemon in play with the first card found. Off: it measured
+    # noise on every deck it touches (2026-10-16, 200 games a matchup: the
+    # submitted Gengar list -0.25 +/- 0.48, Grand Tree / Dark Awakening /
+    # Ascension field decks -0.0 to +0.68), because the choice seldom has
+    # more than one sensible answer.
     "evolve_pick": int(__import__("os").environ.get("EVOLVE_PICK", 0)),
 }
 
