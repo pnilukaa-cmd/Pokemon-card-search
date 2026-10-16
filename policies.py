@@ -99,6 +99,14 @@ GREEDY = {
     # (0.5x -1.05, 2x -1.28 against 1x), Diggersby / Munkidori +3.44 +/- 0.57.
     # Earthquake is the only such attack in the field.
     "self_bench_ko_cost": float(__import__("os").environ.get("SELF_BENCH_KO_COST", 1)),
+    # Count an attack's damage counters ("Place 13 damage counters on 1 of
+    # your opponent's Pokemon") toward what it would hit for, when ranking
+    # who gets Energy. 0 ranks it at its printed damage (often none).
+    "counter_potential": int(__import__("os").environ.get("COUNTER_POTENTIAL", 1)),
+    # Rank what an evolve-from-deck effect evolves (Dark Awakening: a
+    # Haunter into Gengar ex before a Nidoran into Nidorina). 0 takes the
+    # first Pokemon in play with the first card found.
+    "evolve_pick": int(__import__("os").environ.get("EVOLVE_PICK", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

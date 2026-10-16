@@ -805,6 +805,9 @@ TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
 TOOL_FROM_DECK_PICK = lambda pl, spot, names: names[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
+# Which (Pokemon in play, card it becomes) an evolve-from-deck effect takes
+# next, out of every legal pair; set by the simulator.
+EVOLVE_PICK = lambda pl, opp, cands: cands[0]
 
 _BOOMERANG_RE = re.compile(r"if this card is discarded by an effect of an attack used by "
                            r"the pok[eé]mon this card is attached to, attach this card", re.I)
@@ -2680,19 +2683,24 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if f.get("type"):
                 spots = [p for p in spots
                          if f["type"] in ((pl.POKEMON.get(p.name) or {}).get("types") or [])]
+            # Every Pokemon it may evolve, into every card it may become.
+            # Taking the first in play order with the first card found spent
+            # Dark Awakening on a Nidoran -> Nidorina while a Haunter sat
+            # under a Gengar ex in the deck; the choice is the player's.
+            cands = []
             for spot in spots:
-                nxt = next((n for n, i in pl.POKEMON.items()
-                            if i.get("evolves_from") == _printed(pl, spot.name)
-                            and not (f.get("no_ability") and pl.EFFECTS.get(n))
-                            and any(k == "Pokemon" and x == n
-                                    for k, x in (pl.hand if from_hand else pl.deck))),
-                           None)
                 ok = spot is chained or (
                     not getattr(spot, "evolved_this_turn", False)
                     and (source is not None or anytime or getattr(spot, "entered_turn", 0) < rnd))
-                if nxt and ok:
-                    base = (spot, nxt)
-                    break
+                if not ok:
+                    continue
+                cands += [(spot, n) for n, i in pl.POKEMON.items()
+                          if i.get("evolves_from") == _printed(pl, spot.name)
+                          and not (f.get("no_ability") and pl.EFFECTS.get(n))
+                          and any(k == "Pokemon" and x == n
+                                  for k, x in (pl.hand if from_hand else pl.deck))]
+            if cands:
+                base = EVOLVE_PICK(pl, opp, cands)
             if not base:
                 break
             spot, nxt = base
@@ -3484,6 +3492,17 @@ def query_prize_modifier(taker, loser, spot=None, attacker=None, by_attack=None)
     once = set()
     for side, sign in ((taker, 1), (loser, 1)):
         for holder, eff, act in _passive_actions(side, IR.Op.MODIFY_PRIZE):
+            # Whose Knock Out it covers. "Your opponent takes 1 fewer Prize"
+            # protects its OWNER's Pokemon; "take 1 more Prize" pays its
+            # owner's own Knock Outs. Both were read from either side, so
+            # Mega Gengar ex's Shadowy Concealment ("if 1 of your Darkness
+            # Pokemon is Knocked Out ... that player takes 1 fewer") also
+            # cut the Prizes its OWNER took for Knocking Out a Darkness
+            # Pokemon with an ex.
+            if act.target == IR.Target.OPPONENT and side is not loser:
+                continue
+            if act.target == IR.Target.SELF and side is not taker:
+                continue
             if not conditions_met(eff, side, taker if side is loser else loser,
                                   holder):
                 continue

@@ -3018,6 +3018,26 @@ AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
 AE.BENCH_ENERGY_TARGET = lambda pl, bench: max(
     bench, key=lambda p: (energy_shortfall(pl, p) > 0, _potential_damage(pl, p),
                           -p.energy_count()))
+
+
+def _evolve_pick(pl, opp, cands):
+    """Which Pokemon an evolve-from-deck effect (Dark Awakening, Grand
+    Tree) evolves next, and into what: a Stage 2 before a Stage 1, then the
+    line that hits hardest once it is all the way up, then HP."""
+    if not POL.knob(pl, "evolve_pick"):
+        return cands[0]
+
+    def score(c):
+        spot, nxt = c
+        info = pl.POKEMON.get(nxt) or {}
+        line = {nxt} | _evolutions_of(pl, nxt)
+        hits = max(_potential_damage(pl, InPlay(n, 0)) for n in line if n in pl.POKEMON)
+        return ({"Stage 2": 2, "Stage 1": 1}.get(info.get("stage"), 0), hits,
+                info.get("hp") or 0, spot is pl.active)
+    return max(cands, key=score)
+
+
+AE.EVOLVE_PICK = _evolve_pick
 AE.TRAINER_IR = trainer_effect_ir
 AE.ON_BENCH_ENTRY = lambda pl, spot, log=None: on_bench_entry(pl, spot, log)
 # A lambda, not the function object: the hooks are wired well above
@@ -5706,7 +5726,18 @@ def _potential_damage(pl, spot):
         # Energy to the Bench toolbox and starved the actual attacker.
         m = _COPY_OWN_BENCH_RE.search(a.get("text") or "")
         if not m:
-            return a["damage"] or 0
+            # An attack whose damage is all counters (Gengar ex's Chaotic
+            # Pain, 13; Haunter's Haunt, 3) printed nothing and ranked at 0,
+            # so Void Gale handed its Energy to a Toxtricity instead of the
+            # Gengar ex that needed it.
+            placed = 0 if not POL.knob(pl, "counter_potential") else sum(
+                         (x.amount or 0) * 10 * (x.filter or {}).get("targets", 1)
+                         for x in _attack_ir(a).actions
+                         if x.op == IR.Op.PLACE_COUNTERS
+                         and x.target in (IR.Target.OPP_ANY, IR.Target.OPP_ACTIVE,
+                                          IR.Target.OPP_BENCHED)
+                         and not (x.filter or {}).get("per_hand_card"))
+            return (a["damage"] or 0) + placed
         fam = (m.group(1) or "").strip().lower()
         best = 0
         for p in pl.in_play():

@@ -6061,5 +6061,49 @@ def test_chaotic_pain_takes_the_knock_out_and_void_gale_gives_the_energy_away():
           pl.active.energy_count() == 1 and pl.bench[0].energy_count() == 1,
           (pl.active.energy_count(), pl.bench[0].energy_count()))
 
+def test_prize_modifiers_count_on_the_side_they_name():
+    """Mega Gengar ex's Shadowy Concealment ("If any of your Darkness
+    Pokemon is Knocked Out by damage from an attack from your opponent's
+    Pokemon ex, your opponent takes 1 fewer Prize card") also cut its OWNER's
+    Prizes: Mega Gengar ex Knocking Out a Darkness Pokemon ex took 1, not 2.
+    A "take 1 more Prize" holder had the mirror problem. And Void Gale gave
+    its Energy to Toxtricity over a Benched Gengar ex, because Chaotic Pain's
+    13 damage counters were estimated at 0 damage."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 7\n1 Gengar ex 30C 90\n1 Mega Gengar ex ASC 125\n1 Haunter ASC 124\n"
+                "1 Okidogi ex SFA 36\n1 Dreepy PRE 71\n1 Fezandipiti ex ASC 142\n1 Toxtricity PFL 68\n\n"
+                "Energy: 53\n53 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    def board(mine, mine_bench, theirs):
+        pl, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        pl.round_no = op.round_no = 5
+        pl._opp_ref, op._opp_ref = op, pl
+        pl.hand, op.hand, op.bench = [], [], []
+        pl.active = V.InPlay(mine, 1)
+        pl.bench = [V.InPlay(n, 1) for n in mine_bench]
+        op.active = V.InPlay(theirs, 1)
+        return pl, op
+    pl, op = board("Mega Gengar ex", [], "Fezandipiti ex")
+    check("Mega Gengar ex Knocking Out their Darkness Pokemon ex takes 2",
+          V._ko_prizes(op, op.active, pl, by_attack=True) == 2,
+          V._ko_prizes(op, op.active, pl, by_attack=True))
+    pl, op = board("Haunter", ["Mega Gengar ex"], "Okidogi ex")
+    check("their ex Knocking Out my Darkness Pokemon still takes 1 fewer",
+          V._ko_prizes(pl, pl.active, op, by_attack=True) == 0,
+          V._ko_prizes(pl, pl.active, op, by_attack=True))
+    pl, op = board("Mega Gengar ex", ["Toxtricity", "Gengar ex"], "Okidogi ex")
+    pl.active.energy, pl.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+    pl.energy_types = {"Darkness"}
+    pl._forced_attack = next(a for a in D[1]["Mega Gengar ex"]["attacks"]
+                             if a["name"] == "Void Gale")
+    V.do_attack(pl, op, [])
+    check("Void Gale's Energy goes to the Benched Gengar ex, not Toxtricity",
+          pl.bench[1].energy_count() == 1 and pl.bench[0].energy_count() == 0,
+          [(b.name, b.energy_count()) for b in pl.bench])
+
 if __name__ == "__main__":
     sys.exit(main())
