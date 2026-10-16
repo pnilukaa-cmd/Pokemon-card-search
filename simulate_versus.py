@@ -2976,6 +2976,23 @@ def _attach_rank(pl, opp, cands):
     return sorted(short, key=lambda p: -_potential_damage(pl, p))
 
 
+def _each_attach_order(pl, opp, pool, costly):
+    """Who gets "one each to up to N of your Benched <type> Pokemon". The
+    emptiest first spread Sinister Surge's one Energy a turn over Gengar ex,
+    Pecharunt ex, Toxtricity and a second Gengar ex, so nothing on the
+    Bench ever reached the two its attack costs. Neediest (hardest hitter
+    still short) first instead; when the Energy costs the recipient damage
+    counters, nobody short means nobody."""
+    emptiest = sorted(pool, key=lambda p: p.energy_count())
+    if not POL.knob(pl, "each_attach_rank"):
+        return emptiest
+    ranked = _attach_rank(pl, opp, pool)
+    return ranked if costly else ranked + [p for p in emptiest if p not in ranked]
+
+
+AE.EACH_ATTACH_ORDER = _each_attach_order
+
+
 AE.ATTACH_RANK = _attach_rank
 
 

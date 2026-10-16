@@ -111,6 +111,12 @@ GREEDY = {
     # Ascension field decks -0.0 to +0.68), because the choice seldom has
     # more than one sensible answer.
     "evolve_pick": int(__import__("os").environ.get("EVOLVE_PICK", 0)),
+    # Rank "one each to N of your Benched Pokemon" recipients neediest
+    # first (Sinister Surge, Glass Trumpet). 0 is the emptiest first.
+    # Measured 2026-10-16, 200 games a matchup: the submitted Gengar list
+    # +10.46 +/- 0.53, its tuned Toxtricity list +3.78; the Glass Trumpet
+    # field decks +0.27 (Raging Bolt) and +0.64 (Tauros).
+    "each_attach_rank": int(__import__("os").environ.get("EACH_ATTACH_RANK", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

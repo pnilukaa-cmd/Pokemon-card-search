@@ -805,6 +805,11 @@ TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
 TOOL_FROM_DECK_PICK = lambda pl, spot, names: names[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
+# Recipients, in order, for "attach one each to up to N of your Benched
+# <type> Pokemon" (Glass Trumpet, Sinister Surge, Send Flowers); `costly`
+# when the recipient pays for it (Sinister Surge's 2 damage counters). Set
+# by the simulator; this default is the emptiest first.
+EACH_ATTACH_ORDER = lambda pl, opp, pool, costly: sorted(pool, key=lambda p: p.energy_count())
 # Which (Pokemon in play, card it becomes) an evolve-from-deck effect takes
 # next, out of every legal pair; set by the simulator.
 EVOLVE_PICK = lambda pl, opp, cands: cands[0]
@@ -1558,7 +1563,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     if not rt or rt in (pl.POKEMON.get(p.name, {}).get("types") or [])]
             got = 0
             ctr = act.filter.get("counters_on_recipient")
-            for tgt in sorted(pool, key=lambda p: p.energy_count())[:each]:
+            for tgt in EACH_ATTACH_ORDER(pl, opp, pool, bool(ctr))[:each]:
                 card = _take()
                 if not card:
                     break

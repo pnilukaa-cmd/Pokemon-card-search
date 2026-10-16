@@ -6105,5 +6105,36 @@ def test_prize_modifiers_count_on_the_side_they_name():
           pl.bench[1].energy_count() == 1 and pl.bench[0].energy_count() == 0,
           [(b.name, b.energy_count()) for b in pl.bench])
 
+def test_sinister_surge_stacks_on_the_attacker_that_needs_it():
+    """Toxtricity's Sinister Surge ("attach [a Basic Darkness Energy] to 1
+    of your Benched Darkness Pokemon ... place 2 damage counters on that
+    Pokemon") always went to the emptiest Benched Pokemon. One a turn
+    spread over Gengar ex, Pecharunt ex, Toxtricity and a second Gengar ex,
+    so none ever reached its two-Energy attack and the Active sat with
+    nothing to switch to."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Gengar ex 30C 90\n1 Toxtricity PFL 68\n1 Gastly POR 48\n"
+                "1 Okidogi ex SFA 36\n\nEnergy: 56\n56 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand, op.bench = [], [], []
+    me.energy_types = {"Darkness"}
+    me.active = V.InPlay("Gastly", 1)
+    me.bench = [V.InPlay("Toxtricity", 1), V.InPlay("Gastly", 1), V.InPlay("Gengar ex", 1)]
+    gengar = me.bench[2]
+    gengar.energy, gengar.energy_names = [["Darkness"]], ["Darkness Energy"]
+    me.deck = [("Energy", "Darkness Energy")] * 20
+    op.active = V.InPlay("Okidogi ex", 1)
+    V.use_abilities(me, op, 5, [])
+    check("Sinister Surge gives the Benched Gengar ex its second Energy",
+          gengar.energy_count() == 2 and gengar.damage == 20,
+          [(b.name, b.energy_count(), b.damage) for b in me.bench])
+
 if __name__ == "__main__":
     sys.exit(main())
