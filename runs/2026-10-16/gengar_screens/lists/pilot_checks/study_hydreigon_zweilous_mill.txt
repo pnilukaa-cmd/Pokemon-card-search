@@ -1,0 +1,38 @@
+Pokémon: 12
+3 Zweilous SSP 118
+2 N's Zoroark ex JTG 185
+3 Deino SSP 117
+3 Hydreigon ex SSP 240
+2 Mega Gengar ex ASC 284
+1 N's Zekrom ASC 155
+1 Haunter MEP 27
+1 N's Zorua ASC 136
+1 N's Zorua ASC 136
+1 Relicanth TEF 173
+2 Gastly TEF 177
+1 Pecharunt ex SFA 85
+
+Trainer: 17
+2 N's PP Up ASC 262
+3 Lillie's Determination MEG 169
+2 Air Balloon MEG 166
+3 Buddy-Buddy Poffin MEG 167
+2 Handheld Fan TWM 150
+2 Boss's Orders PAL 265
+2 Night Stretcher MEG 173
+1 Energy Switch SIT 212
+3 Rare Candy MEG 175
+1 Hilda WHT 171
+2 Ultra Ball BRS 186
+3 Poké Pad POR 113
+1 Sacred Ash POR 115
+1 Xerosic's Machinations SFA 89
+1 Team Rocket's Petrel DRI 226
+1 Cyrano SSP 230
+2 Battle Cage PFL 116
+
+Energy: 2
+1 Legacy Energy TWM 167
+6 Basic {D} Energy MEE 15
+
+Total Cards: 60

@@ -1,0 +1,6 @@
+G_user: K_G_user_gg1_200.json - G_user_gg1_200.json: -0.25 +/- 0.48 over 93 opponents; better on 40, worse on 50
+chandelure_centiskorch_deck_out: K_chandelure_centiskorch_deck_out_gg1_200.json - chandelure_centiskorch_deck_out_gg1_200.json: +0.44 +/- 0.48 over 93 opponents; better on 49, worse on 40
+decidueye_ex_judge_sniper_lock: K_decidueye_ex_judge_sniper_lock_gg1_200.json - decidueye_ex_judge_sniper_lock_gg1_200.json: +0.68 +/- 0.48 over 93 opponents; better on 51, worse on 39
+team_rocket_nidoking_nidoqueen: K_team_rocket_nidoking_nidoqueen_gg1_200.json - team_rocket_nidoking_nidoqueen_gg1_200.json: +0.30 +/- 0.44 over 93 opponents; better on 41, worse on 44
+mega_chandelure_ex_retreat_tax: K_mega_chandelure_ex_retreat_tax_gg1_200.json - mega_chandelure_ex_retreat_tax_gg1_200.json: +0.05 +/- 0.09 over 93 opponents; better on 1, worse on 1
+team_rocket_hypno_exeggutor: K_team_rocket_hypno_exeggutor_gg1_200.json - team_rocket_hypno_exeggutor_gg1_200.json: +0.01 +/- 0.02 over 93 opponents; better on 1, worse on 1

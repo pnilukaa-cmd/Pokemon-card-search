@@ -1,0 +1,9 @@
+meta_dragapult_pure: meta_dragapult_pure_gg1_200.json - K_meta_dragapult_pure_gg1_200.json: -0.02 +/- 0.49 over 93 opponents; better on 43, worse on 43
+meta_slowking: meta_slowking_gg1_200.json - K_meta_slowking_gg1_200.json: -0.62 +/- 0.32 over 93 opponents; better on 28, worse on 43
+meta_mega_excadrill: meta_mega_excadrill_gg1_200.json - K_meta_mega_excadrill_gg1_200.json: -0.80 +/- 0.44 over 93 opponents; better on 35, worse on 55
+stevens_carbink_damage_wall: stevens_carbink_damage_wall_gg1_200.json - K_stevens_carbink_damage_wall_gg1_200.json: +0.75 +/- 0.51 over 93 opponents; better on 49, worse on 39
+study_hydreigon_zweilous_mill: study_hydreigon_zweilous_mill_gg1_200.json - K_study_hydreigon_zweilous_mill_gg1_200.json: +4.59 +/- 0.51 over 93 opponents; better on 74, worse on 16
+wugtrio_paralysis_pin: wugtrio_paralysis_pin_gg1_200.json - K_wugtrio_paralysis_pin_gg1_200.json: +0.00 +/- 0.00 over 93 opponents; better on 0, worse on 0
+arboliva_ogerpon_oil_salvo: arboliva_ogerpon_oil_salvo_gg1_200.json - K_arboliva_ogerpon_oil_salvo_gg1_200.json: +0.20 +/- 0.36 over 93 opponents; better on 47, worse on 41
+meta_raging_bolt: meta_raging_bolt_gg1_200.json - K_meta_raging_bolt_gg1_200.json: +0.43 +/- 0.56 over 93 opponents; better on 53, worse on 40
+ditto_tyranitar_gengar_hydreigon: ditto_tyranitar_gengar_hydreigon_gg1_200.json - K_ditto_tyranitar_gengar_hydreigon_gg1_200.json: -0.54 +/- 0.37 over 93 opponents; better on 39, worse on 44

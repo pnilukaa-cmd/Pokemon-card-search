@@ -1,0 +1,4 @@
+g5_toxel3: g5_toxel3_gg3_200.json - g3_base_gg3_200.json: -0.75 +/- 0.33 over 93 opponents; better on 38, worse on 51
+g5_pech3: g5_pech3_gg3_200.json - g3_base_gg3_200.json: -1.12 +/- 0.40 over 93 opponents; better on 35, worse on 53
+g5_basics2: g5_basics2_gg3_200.json - g3_base_gg3_200.json: -1.29 +/- 0.37 over 93 opponents; better on 30, worse on 54
+g5_dawn3cape: g5_dawn3cape_gg3_200.json - g3_base_gg3_200.json: +1.53 +/- 0.43 over 93 opponents; better on 62, worse on 29

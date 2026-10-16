@@ -1,0 +1,1 @@
+dawn3cape-base: g5_dawn3cape_gg3_1000.json - g3_base_gg3_1000.json: +1.34 +/- 0.21 over 93 opponents; better on 68, worse on 23

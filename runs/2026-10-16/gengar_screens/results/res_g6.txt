@@ -1,0 +1,6 @@
+g6_waitress2: g6_waitress2_gg3_200.json - g5_dawn3cape_gg3_200.json: -0.89 +/- 0.49 over 93 opponents; better on 41, worse on 48
+g6_waitress_ll: g6_waitress_ll_gg3_200.json - g5_dawn3cape_gg3_200.json: -2.52 +/- 0.37 over 93 opponents; better on 19, worse on 67
+g6_rosa2: g6_rosa2_gg3_200.json - g5_dawn3cape_gg3_200.json: -1.38 +/- 0.43 over 93 opponents; better on 35, worse on 56
+g6_powerglass: g6_powerglass_gg3_200.json - g5_dawn3cape_gg3_200.json: -1.66 +/- 0.49 over 93 opponents; better on 29, worse on 60
+g6_esearch2: g6_esearch2_gg3_200.json - g5_dawn3cape_gg3_200.json: -0.29 +/- 0.45 over 93 opponents; better on 42, worse on 44
+g6_eretr: g6_eretr_gg3_200.json - g5_dawn3cape_gg3_200.json: -1.14 +/- 0.47 over 93 opponents; better on 40, worse on 48

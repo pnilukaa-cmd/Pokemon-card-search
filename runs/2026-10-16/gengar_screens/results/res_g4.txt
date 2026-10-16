@@ -1,0 +1,14 @@
+G_user: g3_base_gg3_200.json - G_user_gg3_200.json: +22.26 +/- 0.89 over 93 opponents; better on 93, worse on 0
+nido0e: g3_base_gg3_200.json - g1_nido0e_gg3_200.json: +3.19 +/- 0.47 over 93 opponents; better on 68, worse on 24
+g4_pad2: g4_pad2_gg3_200.json - g3_base_gg3_200.json: -0.99 +/- 0.36 over 93 opponents; better on 33, worse on 54
+g4_tox0: g4_tox0_gg3_200.json - g3_base_gg3_200.json: -0.60 +/- 0.50 over 93 opponents; better on 38, worse on 49
+g4_legacy: g4_legacy_gg3_200.json - g3_base_gg3_200.json: -0.13 +/- 0.36 over 93 opponents; better on 43, worse on 45
+g4_cape: g4_cape_gg3_200.json - g3_base_gg3_200.json: +0.18 +/- 0.37 over 93 opponents; better on 50, worse on 41
+g4_pech1: g4_pech1_gg3_200.json - g3_base_gg3_200.json: -0.57 +/- 0.34 over 93 opponents; better on 39, worse on 49
+g4_munk1: g4_munk1_gg3_200.json - g3_base_gg3_200.json: -0.71 +/- 0.44 over 93 opponents; better on 34, worse on 51
+g4_boss3: g4_boss3_gg3_200.json - g3_base_gg3_200.json: -1.30 +/- 0.38 over 93 opponents; better on 36, worse on 54
+g4_candy3: g4_candy3_gg3_200.json - g3_base_gg3_200.json: -0.75 +/- 0.42 over 93 opponents; better on 36, worse on 55
+g4_night2: g4_night2_gg3_200.json - g3_base_gg3_200.json: -0.55 +/- 0.31 over 93 opponents; better on 35, worse on 49
+g4_dawn3: g4_dawn3_gg3_200.json - g3_base_gg3_200.json: +0.41 +/- 0.37 over 93 opponents; better on 49, worse on 38
+g4_lillie3: g4_lillie3_gg3_200.json - g3_base_gg3_200.json: -1.40 +/- 0.36 over 93 opponents; better on 31, worse on 59
+g4_nido: g4_nido_gg3_200.json - g3_base_gg3_200.json: -9.68 +/- 0.54 over 93 opponents; better on 1, worse on 91

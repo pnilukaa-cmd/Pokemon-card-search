@@ -1,0 +1,4 @@
+EA_G_user: EA_G_user_gg1_200.json - G_user_gg1_200.json: +10.46 +/- 0.53 over 93 opponents; better on 89, worse on 2
+EA_nido0e: EA_nido0e_gg1_200.json - g1_nido0e_gg1_200.json: +3.78 +/- 0.50 over 93 opponents; better on 74, worse on 16
+EA_meta_raging_bolt: EA_meta_raging_bolt_gg1_200.json - meta_raging_bolt_gg1_200.json: +0.27 +/- 0.40 over 93 opponents; better on 44, worse on 42
+EA_tauros_risky_ruins: EA_tauros_risky_ruins_gg1_200.json - tauros_risky_ruins_gg1_200.json: +0.64 +/- 0.38 over 93 opponents; better on 52, worse on 34

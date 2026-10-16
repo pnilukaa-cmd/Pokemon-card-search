@@ -1,0 +1,23 @@
+g2_candy4: g2_candy4_gg1_200.json - g1_nido0e_gg1_200.json: -0.13 +/- 0.46 over 93 opponents; better on 47, worse on 44
+g2_cape: g2_cape_gg1_200.json - g1_nido0e_gg1_200.json: +0.03 +/- 0.47 over 93 opponents; better on 47, worse on 44
+g2_e2: g2_e2_gg1_200.json - g1_nido0e_gg1_200.json: +3.17 +/- 0.53 over 93 opponents; better on 66, worse on 24
+g2_gen4: g2_gen4_gg1_200.json - g1_nido0e_gg1_200.json: -2.27 +/- 0.46 over 93 opponents; better on 23, worse on 64
+g2_haunt: g2_haunt_gg1_200.json - g1_nido0e_gg1_200.json: -0.51 +/- 0.45 over 93 opponents; better on 40, worse on 49
+g2_helmet: g2_helmet_gg1_200.json - g1_nido0e_gg1_200.json: -0.10 +/- 0.44 over 93 opponents; better on 48, worse on 38
+g2_janine: g2_janine_gg1_200.json - g1_nido0e_gg1_200.json: +1.31 +/- 0.47 over 93 opponents; better on 56, worse on 35
+g2_legacy: g2_legacy_gg1_200.json - g1_nido0e_gg1_200.json: +1.12 +/- 0.48 over 93 opponents; better on 52, worse on 38
+g2_mega3: g2_mega3_gg1_200.json - g1_nido0e_gg1_200.json: -3.35 +/- 0.43 over 93 opponents; better on 18, worse on 73
+g2_munk0: g2_munk0_gg1_200.json - g1_nido0e_gg1_200.json: +3.19 +/- 0.52 over 93 opponents; better on 69, worse on 21
+g2_pad2: g2_pad2_gg1_200.json - g1_nido0e_gg1_200.json: +2.65 +/- 0.48 over 93 opponents; better on 67, worse on 25
+g2_pech1: g2_pech1_gg1_200.json - g1_nido0e_gg1_200.json: +2.22 +/- 0.46 over 93 opponents; better on 62, worse on 29
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/tr/paired.py", line 3, in <module>
+    a, b = json.load(open(sys.argv[1])), json.load(open(sys.argv[2]))
+                                                   ^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/tr/out/g2_result_gg1_200.json'
+g2_result: 
+g2_ruins: g2_ruins_gg1_200.json - g1_nido0e_gg1_200.json: -1.81 +/- 0.49 over 93 opponents; better on 30, worse on 60
+g2_shadow: g2_shadow_gg1_200.json - g1_nido0e_gg1_200.json: +0.22 +/- 0.27 over 93 opponents; better on 24, worse on 29
+g2_tef1: g2_tef1_gg1_200.json - g1_nido0e_gg1_200.json: -0.46 +/- 0.53 over 93 opponents; better on 40, worse on 50
+g2_tef3: g2_tef3_gg1_200.json - g1_nido0e_gg1_200.json: -0.30 +/- 0.66 over 93 opponents; better on 51, worse on 39
+g2_tox0: g2_tox0_gg1_200.json - g1_nido0e_gg1_200.json: +6.22 +/- 0.75 over 93 opponents; better on 77, worse on 10

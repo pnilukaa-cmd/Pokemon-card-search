@@ -1,0 +1,13 @@
+G_user gg1->gg2 check: G_user_gg2_200.json - EA_G_user_gg1_200.json: +0.27 +/- 0.48 over 93 opponents; better on 46, worse on 43
+g2_tox0: g2_tox0_gg2_200.json - g1_nido0e_gg2_200.json: +1.97 +/- 0.60 over 93 opponents; better on 57, worse on 32
+g2_munk0: g2_munk0_gg2_200.json - g1_nido0e_gg2_200.json: +2.48 +/- 0.45 over 93 opponents; better on 66, worse on 23
+g2_e2: g2_e2_gg2_200.json - g1_nido0e_gg2_200.json: +1.75 +/- 0.47 over 93 opponents; better on 55, worse on 33
+g2_pad2: g2_pad2_gg2_200.json - g1_nido0e_gg2_200.json: +1.88 +/- 0.46 over 93 opponents; better on 60, worse on 30
+g2_pech1: g2_pech1_gg2_200.json - g1_nido0e_gg2_200.json: +0.84 +/- 0.49 over 93 opponents; better on 47, worse on 41
+g2_janine: g2_janine_gg2_200.json - g1_nido0e_gg2_200.json: -0.05 +/- 0.46 over 93 opponents; better on 44, worse on 46
+g2_legacy: g2_legacy_gg2_200.json - g1_nido0e_gg2_200.json: +1.37 +/- 0.43 over 93 opponents; better on 59, worse on 31
+g2_shadow: g2_shadow_gg2_200.json - g1_nido0e_gg2_200.json: +0.01 +/- 0.30 over 93 opponents; better on 26, worse on 30
+g2_cape: g2_cape_gg2_200.json - g1_nido0e_gg2_200.json: +1.21 +/- 0.42 over 93 opponents; better on 57, worse on 32
+g2_tox3: g2_tox3_gg2_200.json - g1_nido0e_gg2_200.json: -1.52 +/- 0.49 over 93 opponents; better on 34, worse on 59
+g2_e2pad: g2_e2pad_gg2_200.json - g1_nido0e_gg2_200.json: +2.56 +/- 0.53 over 93 opponents; better on 65, worse on 26
+g2_e2munk: g2_e2munk_gg2_200.json - g1_nido0e_gg2_200.json: +3.00 +/- 0.53 over 93 opponents; better on 71, worse on 19
