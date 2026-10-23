@@ -17,7 +17,8 @@ see the same dice.
 Usage:  python3 energy_curve.py <deck.txt> <field_dir> <games> [turns] [tag]
 
 JOBS=<n> plays the opponents on n processes. PILOT=<name> runs the deck
-under that pilot, as in vs_field.py.
+under that pilot, as in vs_field.py. TRACK="Meganium,Chesnaught" adds a
+column per name: how often it is in play at the end of that turn.
 """
 import glob
 import hashlib
@@ -37,6 +38,7 @@ A = SV.load_model(deck, me)[0]
 if os.environ.get("PILOT"):
     SV.PILOT_BY_NAME[me] = os.environ["PILOT"]
 
+track = [t.strip() for t in os.environ.get("TRACK", "").split(",") if t.strip()]
 _finish = SV.finish_turn
 
 
@@ -57,7 +59,8 @@ def _record(pl, opp, log):
                          sum(len(SV.provided(pl, s)) for s in pl.in_play()),
                          len(SV.provided(pl, pl.active)) if pl.active else 0,
                          bool(pl.active) and _can_pay(pl, pl.active, opp),
-                         sum(1 for c, _ in pl.hand if c == "Energy")))
+                         sum(1 for c, _ in pl.hand if c == "Energy"),
+                         tuple(any(s.name == t for s in pl.in_play()) for t in track)))
     return _finish(pl, opp, log)
 
 
@@ -103,11 +106,13 @@ else:
 
 print(f"{me}: {games} games against each of {len(todo)} decks, "
       f"at the end of each of its own turns")
-print(f"{'turn':>4} {'games':>6} {'in play':>8} {'Active':>7} {'can attack':>11} {'in hand':>8}")
+print(f"{'turn':>4} {'games':>6} {'in play':>8} {'Active':>7} {'can attack':>11} {'in hand':>8}"
+      + "".join(f" {t[:18]:>18}" for t in track))
 for k in range(1, turns + 1):
     rs = [r for r in rows if r[0] == k]
     if not rs:
         break
     n = len(rs)
     print(f"{k:>4} {n:>6} {sum(r[1] for r in rs) / n:>8.2f} {sum(r[2] for r in rs) / n:>7.2f}"
-          f" {100.0 * sum(r[3] for r in rs) / n:>10.1f}% {sum(r[4] for r in rs) / n:>8.2f}")
+          f" {100.0 * sum(r[3] for r in rs) / n:>10.1f}% {sum(r[4] for r in rs) / n:>8.2f}"
+          + "".join(f" {100.0 * sum(r[5][i] for r in rs) / n:>17.1f}%" for i in range(len(track))))
