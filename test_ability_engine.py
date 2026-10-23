@@ -6575,5 +6575,71 @@ def test_hp_abilities_count_what_they_name():
     got = V.attack_damage(me, op, me.active, atk, record=False)
     check("Frozen Wood's 2 Grass Energy: one Basic Grass under Wild Growth", got == 240, got)
 
+def test_switch_waits_for_a_better_attacker():
+    """Switch was played on sight, into the healthiest body: a Snorlax
+    with three Energy, awake and attacking, was swapped for a Munkidori
+    with none. It now waits until a Benched Pokemon does more this turn
+    than the Active, and an Asleep Active does nothing."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Snorlax 30C 119\n1 Bouffalant SCR 119\n1 Munkidori ASC 99\n1 Okidogi ex SFA 36\n\n"
+                "Trainer: 1\n1 Switch MEG 130\n\nEnergy: 55\n45 Basic Psychic Energy\n10 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board(asleep):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        op.hand, op.bench = [], []
+        me.energy_types = {"Psychic", "Darkness"}
+        me.active = V.InPlay("Snorlax", 1)
+        me.active.energy, me.active.energy_names = [["Psychic"]] * 3, ["Psychic Energy"] * 3
+        if asleep:
+            me.active.conditions.add("asleep")
+        b = V.InPlay("Bouffalant", 1)
+        b.energy, b.energy_names = [["Psychic"]] * 3, ["Psychic Energy"] * 3
+        me.bench = [V.InPlay("Munkidori", 1), b]
+        me.hand = [("Item", "Switch")]
+        op.active = V.InPlay("Okidogi ex", 1)
+        V.play_items(me, op, 5, [], False)
+        return me.active.name, len(me.hand)
+    got = [board(False), board(True)]
+    check("Switch kept while Snorlax attacks; Asleep, it goes to the loaded Bouffalant",
+          got == [("Snorlax", 1), ("Bouffalant", 0)], got)
+
+def test_sky_transport_moves_an_asleep_attacker():
+    """Sky Transport (and the switch-in Abilities) compare the Benched
+    Pokemon against what the Active does this turn. An Asleep Mega
+    Kangaskhan ex was rated at its full Rapid-Fire Combo, so a loaded
+    Salazzle ex on the Bench never came in while Kangaskhan slept."""
+    V, D, E = _real("decks/field/mega_dragonite_kangaskhan_salazzle_wall.txt", "d")
+    import ability_engine as AE
+    O = V.load_model("decks/field/water_aggro.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+
+    def board(asleep):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        me.energy_types = {"Fire"}
+        me.active = V.InPlay("Mega Kangaskhan ex", 1)
+        me.active.energy, me.active.energy_names = [["Fire"]] * 3, ["Fire Energy"] * 3
+        if asleep:
+            me.active.conditions.add("asleep")
+        sal = V.InPlay("Salazzle ex", 1)
+        sal.energy, sal.energy_names = [["Fire"]] * 2, ["Fire Energy"] * 2
+        me.bench = [V.InPlay("Mega Dragonite ex", 1), sal]
+        op.active = V.InPlay(next(n for n in O[1] if O[1][n]["stage"] == "Basic"), 1)
+        eff = next(e for e in me.EFFECTS["Mega Dragonite ex"] if e.name == "Sky Transport")
+        AE.activate(eff, me, op, me.bench[0], [])
+        return me.active.name
+    got = [board(False), board(True)]
+    check("Sky Transport keeps an awake Kangaskhan, swaps an Asleep one for Salazzle ex",
+          got == ["Mega Kangaskhan ex", "Salazzle ex"], got)
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -3080,7 +3080,17 @@ def _payable_damage(owner, spot, energy, foe=None):
                    provided(owner, spot, energy)):
             best = max(best, atk.get("damage") or 0, 1)
     return best
-AE.SWITCH_RANK = lambda pl, opp, spot: _ready_damage(pl, opp, spot)
+def _switch_rank(pl, opp, spot):
+    """What `spot` does this turn if it holds the Active Spot. An Asleep or
+    Paralyzed Active does nothing, so Sky Transport and the switch-in
+    Abilities compared a Benched attacker against damage the Active could
+    not deal."""
+    if spot is pl.active and spot.conditions & CANNOT_ATTACK:
+        return 0
+    return _ready_damage(pl, opp, spot)
+
+
+AE.SWITCH_RANK = _switch_rank
 # An Energy moved off the attacker (Void Gale) goes to the Benched Pokemon
 # that most needs it: one still short of its attack, the hardest hitter first.
 AE.BENCH_ENERGY_TARGET = lambda pl, bench: max(
@@ -5747,14 +5757,6 @@ def attach_energy(pl, cards_by_name, log):
                   and energy_shortfall(pl, p) > 0 and _helpful_energy(pl, p) is not None]
         if helped:
             target = max(helped, key=lambda p: _potential_damage(pl, p))
-    overflow = POL.knob(pl, "overflow_attach")
-    if overflow and (target is None or (overflow > 1 and target is not pl.active)):
-        # Nobody is short of an attack (or, at 2, only a Benched Pokemon
-        # is): the attachment went nowhere. Put it where one more Energy
-        # still does something.
-        best = _overflow_target(pl, hp_only=target is not None and overflow == 2)
-        if best is not None:
-            target = best
     if target is None:
         return
     idx = _energy_for(pl, target)
@@ -5766,55 +5768,6 @@ def attach_energy(pl, cards_by_name, log):
     target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
     energy_on_attach(pl, target, name, log)
-
-
-def _attach_gain(pl, opp, spot, name):
-    """(damage, HP) one more `name` on `spot` adds: its best payable attack
-    against their Active (Giant Bouquet, Powerful Needles), its HP (Alolan
-    Exeggutor's Scale Up at 6 Grass Energy), and, on the Active, the damage
-    retaliation that counts Energy puts back (Chesnaught's Needly Armor)."""
-    info = pl.POKEMON.get(spot.name) or {}
-
-    def snap():
-        hit = ret = 0
-        if opp is not None and opp.active is not None:
-            for a in info.get("attacks") or []:
-                if can_pay(effective_cost(pl, spot, a["cost"], opp, a.get("name")),
-                           provided(pl, spot)):
-                    random.setstate(state)
-                    hit = max(hit, attack_damage(pl, opp, spot, a, record=False))
-            if spot is pl.active:
-                ret = 10 * AE.query_retaliation(pl, opp.active, opp)
-        return hit + ret, effective_hp(pl, spot)
-    state = random.getstate()
-    n_e, n_names = len(spot.energy), len(spot.energy_names)
-    try:
-        dmg0, hp0 = snap()
-        spot.energy.extend(energy_provisions(name, _CARDS_BY_NAME, info.get("stage")))
-        spot.energy_names.append(name)
-        dmg1, hp1 = snap()
-    finally:
-        del spot.energy[n_e:], spot.energy_names[n_names:]
-        random.setstate(state)
-    return dmg1 - dmg0, hp1 - hp0
-
-
-def _overflow_target(pl, hp_only=False):
-    """The Pokemon one more Energy from hand does the most for, or None.
-    hp_only: only an HP threshold one attachment away counts."""
-    opp = getattr(pl, "_opp_ref", None)
-    best, best_gain = None, 0
-    for spot in pl.in_play():
-        if getattr(spot, "attach_locked", 0):
-            continue
-        idx = _energy_for(pl, spot)
-        if idx is None:
-            continue
-        dmg, hp = _attach_gain(pl, opp, spot, pl.hand[idx][1])
-        gain = hp if hp_only else dmg + hp
-        if gain > best_gain:
-            best, best_gain = spot, gain
-    return best
 
 
 _ON_ATTACH_RE = _re.compile(r"when you attach this card from your hand to (?:a |an )?"
