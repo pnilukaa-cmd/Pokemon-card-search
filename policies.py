@@ -124,6 +124,13 @@ GREEDY = {
     # ex / Kangaskhan ex list +2.43 +/- 0.52, its 12-Energy version +2.54;
     # the two field decks with such a heal +0.93 and -0.28.
     "heal_cost_aware": int(__import__("os").environ.get("HEAL_COST_AWARE", 1)),
+    # A manual attachment goes where the Energy in hand pays part of an
+    # attack, not just to whoever is short a number of Energy (Fire on a
+    # Pokemon that needs Water and Lightning). 0: count only.
+    # Measured 2026-10-23, 200 games a matchup, on all 12 field decks with
+    # two or more Energy types: +0.23 to +14.99, none worse (the Dragapult
+    # lists +7.4 to +9.9, Salazzle ex / Muk +14.99, Raging Bolt +5.06).
+    "typed_attach": int(__import__("os").environ.get("TYPED_ATTACH", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -406,6 +406,12 @@ def parse_conditions(text):
     m = re.search(r"[Ii]f you have ([A-Z][\w'’ -]+?) in play", t)
     if m:
         out.append({"kind": "named_in_play", "name": m.group(1).strip()})
+    # Bouffalant's Curly Wall: "As long as you have at least 1 other
+    # Bouffalant in play". Dropped, one Bouffalant switched it on.
+    m = re.search(r"[Aa]s long as you have at least (\d+) other ([A-Z][\w'’ -]+?) in play", t)
+    if m:
+        out.append({"kind": "other_named_in_play", "name": m.group(2).strip(),
+                    "count": int(m.group(1))})
     m = re.search(r"if you played ([A-Z][\w'’ -]+?) from your hand this turn", t)
     if m:
         out.append({"kind": "played_this_turn", "name": m.group(1).strip()})
@@ -1212,9 +1218,12 @@ def _r(m, text):
     return [Action(Op.FROM_DISCARD_TO_HAND, _num(m.group(1)), Target.SELF, f)]
 
 
+# Tatsugiri's Attract Customers says "...look at the top 6 cards of your
+# deck, reveal a Supporter card you find there, and put it into your hand":
+# no "you may", and a comma. It took the top card of any kind.
 _LOOK_REVEAL_RE = re.compile(
-    r"you may reveal (up to (\d+)|an?|any number of) (?:in any combination of )?(.+?)"
-    r" (?:cards? )?you find there and put (?:it|them) into your hand", re.I)
+    r"(?:you may )?reveal (up to (\d+)|an?|any number of) (?:in any combination of )?(.+?)"
+    r" (?:cards? )?you find there,? and put (?:it|them) into your hand", re.I)
 
 
 def _look_selector(item):
@@ -1606,6 +1615,32 @@ def _r(m, text):
     return [Action(Op.PREVENT_DAMAGE, None, tgt, filt)]
 
 
+def _qualifier_filter(words):
+    """Filter for the words before "Pokemon" in "all of your Basic Colorless
+    Pokemon": a stage, a type, and whatever is left as a name family
+    ("Team Rocket's"). The whole phrase read as a family, and no Pokemon is
+    named "Basic Colorless", so Curly Wall protected nothing."""
+    filt, rest = {}, []
+    ws = words.split()
+    i = 0
+    while i < len(ws):
+        w = ws[i]
+        if w.lower() == "stage" and i + 1 < len(ws) and ws[i + 1] in ("1", "2"):
+            filt["stage"] = f"Stage {ws[i + 1]}"
+            i += 2
+            continue
+        if w.lower() == "basic":
+            filt["stage"] = "Basic"
+        elif re.fullmatch(TYPES, w, re.I):
+            filt["type"] = w.capitalize()
+        else:
+            rest.append(w)
+        i += 1
+    if rest:
+        filt["family"] = " ".join(rest)
+    return filt
+
+
 @rule("reduce_damage", r"takes? (\d+) less damage from attacks")
 def _r(m, text):
     tgt = Target.SELF
@@ -1613,9 +1648,7 @@ def _r(m, text):
     filt = {}
     if mm:
         tgt = Target.YOUR_ALL
-        fam = (mm.group(1) or "").strip()
-        if fam:
-            filt["family"] = fam
+        filt = _qualifier_filter((mm.group(1) or "").strip())
     mm2 = re.search(r"([\w'’]+) pok[eé]mon \(both yours and your opponent", text, re.I)
     if mm2:
         tgt = Target.BOTH_ALL
@@ -1625,6 +1658,14 @@ def _r(m, text):
 
 @rule("modify_hp", r"gets? \+(\d+) hp")
 def _r(m, text):
+    # Lively Stadium: "Each Basic Pokemon in play (both yours and your
+    # opponent's) gets +30 HP" -- read as +30 to the card itself, which for
+    # a Stadium is nothing at all.
+    mm = re.search(r"each ([\w'’ -]*?)pok[eé]mon in play \(both yours and your opponent'?s\)",
+                   text, re.I)
+    if mm:
+        return [Action(Op.MODIFY_HP, int(m.group(1)), Target.BOTH_ALL,
+                       _qualifier_filter((mm.group(1) or "").strip()))]
     return [Action(Op.MODIFY_HP, int(m.group(1)), Target.SELF)]
 
 

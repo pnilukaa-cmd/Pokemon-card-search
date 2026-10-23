@@ -523,6 +523,9 @@ def conditions_met(effect, pl, opp, source, atk=None):
                 return False
         if k == "named_in_play" and c["name"] not in pl.in_play_names():
             return False
+        if k == "other_named_in_play" and sum(
+                1 for p in pl.in_play() if p.name == c["name"] and p is not source) < c["count"]:
+            return False
         if k == "played_this_turn" and c["name"] not in getattr(pl, "played_supporters_this_turn", set()):
             return False
         if k == "self_has_energy_type":
@@ -3347,6 +3350,7 @@ def _passive_actions(pl, op):
 def query_damage_reduction(pl, spot, opp=None):
     """Flat damage reduction applying to `spot` right now."""
     total = 0
+    once = set()
     for holder, eff, act in _passive_actions(pl, IR.Op.REDUCE_DAMAGE):
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
@@ -3355,6 +3359,12 @@ def query_damage_reduction(pl, spot, opp=None):
         if act.target in (IR.Target.YOUR_ALL, IR.Target.BOTH_ALL):
             if not matches_filter(pl, spot, act.filter):
                 continue
+        # "The effect of Curly Wall doesn't stack": two Bouffalant are -60,
+        # not -120.
+        if "doesn't stack" in (eff.text or "").lower() or "doesn’t stack" in (eff.text or "").lower():
+            if eff.name in once:
+                continue
+            once.add(eff.name)
         total += act.amount or 0
     return total
 
@@ -3538,7 +3548,11 @@ def query_hp_modifier(pl, spot, opp=None):
     """Extra HP granted by an Ability, e.g. Okidogi's Adrena-Power (+100)."""
     total = 0
     for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_HP):
-        if holder is not spot:
+        # Lively Stadium (holder None): every Pokemon it names, both sides.
+        if act.target in (IR.Target.BOTH_ALL, IR.Target.YOUR_ALL):
+            if not matches_filter(pl, spot, act.filter):
+                continue
+        elif holder is not spot:
             continue
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
@@ -4025,21 +4039,32 @@ def salvage_energy_on_ko(pl, spot, log):
         if act.op is not IR.Op.SALVAGE_ENERGY_ON_KO:
             continue
         need = (act.filter or {}).get("retreat_exactly")
-        printed = len((pl.POKEMON.get(spot.name) or {}).get("retreat") or [])
+        # The card model stores the Retreat Cost as a count; len() of it
+        # crashed the game the first time a Heavy Baton Snorlax was
+        # Knocked Out.
+        r = (pl.POKEMON.get(spot.name) or {}).get("retreat") or 0
+        printed = r if isinstance(r, int) else len(r)
         if need is not None and printed != need:
             continue
-        moved = 0
-        target = max(pl.bench, key=lambda p: len(p.energy))
+        # "Move up to 3 Basic Energy cards from that Pokemon to your Benched
+        # Pokemon in any way you like": Basic only, each to the Benched
+        # Pokemon that needs it most.
+        opp = getattr(pl, "_opp_ref", None)
+        moved, to = 0, []
         for _ in range(act.amount or 1):
-            if not spot.energy:
+            names = getattr(spot, "energy_names", None) or []
+            i = next((j for j in range(len(names) - 1, -1, -1)
+                      if _is_basic_energy_name(names[j]) and j < len(spot.energy)), None)
+            if i is None:
                 break
-            target.energy.append(spot.energy.pop())
-            if getattr(spot, "energy_names", None):
-                target.energy_names.append(spot.energy_names.pop())
+            ranked = ATTACH_RANK(pl, opp, list(pl.bench)) if opp is not None else []
+            target = ranked[0] if ranked else max(pl.bench, key=lambda p: len(p.energy))
+            target.energy.append(spot.energy.pop(i))
+            target.energy_names.append(names.pop(i))
+            to.append(target.name)
             moved += 1
         if moved:
-            log.append(f"  {pl.name}: {tool} salvages {moved} Energy to "
-                       f"{target.name}")
+            log.append(f"  {pl.name}: {tool} salvages {moved} Energy to {', '.join(to)}")
         return moved
     return 0
 

@@ -6317,5 +6317,134 @@ def test_wallys_compassion_spares_the_attackers_energy():
           me.bench[0].damage == 0 and me.active.energy_count() == 3 and me.active.damage == 200,
           [(p.name, p.damage, p.energy_count()) for p in me.in_play()])
 
+def test_curly_wall_lively_stadium_and_attract_customers():
+    """Bouffalant's Curly Wall ("As long as you have at least 1 other
+    Bouffalant in play, all of your Basic Colorless Pokemon take 60 less
+    damage ... doesn't stack") read "Basic Colorless" as a card name, so it
+    protected nothing; its condition and its no-stacking were dropped too.
+    Lively Stadium's "+30 HP to each Basic Pokemon in play" went on the
+    Stadium itself. Tatsugiri's Attract Customers ("reveal a Supporter card
+    you find there") took the top card, whatever it was."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Snorlax 30C 119\n1 Bouffalant SCR 119\n1 Tatsugiri TWM 186\n"
+                "1 Okidogi ex SFA 36\n\nTrainer: 2\n1 Lively Stadium SSP 180\n1 Kofu SCR 165\n\n"
+                "Energy: 54\n54 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board(bench):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        me.active = V.InPlay("Snorlax", 1)
+        me.bench = [V.InPlay(n, 1) for n in bench]
+        op.active = V.InPlay("Okidogi ex", 1)
+        op.active.energy, op.active.energy_names = [["Darkness"]] * 3, ["Darkness Energy"] * 3
+        op.energy_types = {"Darkness"}
+        return me, op
+
+    def hit(me, op):
+        op._forced_attack = next(a for a in D[1]["Okidogi ex"]["attacks"] if a["name"] == "Chain-Crazed")
+        V.do_attack(op, me, [])
+        return me.active.damage if me.active else None
+    taken = [hit(*board(b)) for b in ([], ["Bouffalant"], ["Bouffalant", "Bouffalant"])]
+    check("Curly Wall: 60 less with two Bouffalant, not with one, and not 120",
+          taken == [130, 130, 70], taken)
+    me, op = board([])
+    me.stadium = op._opp_stadium = "Lively Stadium"
+    check("Lively Stadium gives every Basic in play +30 HP, both sides",
+          V.effective_hp(me, me.active) == 190 and V.effective_hp(op, op.active) == 280,
+          (V.effective_hp(me, me.active), V.effective_hp(op, op.active)))
+    me, op = board([])
+    me.active = V.InPlay("Tatsugiri", 1)
+    me.deck = [("Supporter", "Kofu")] + [("Energy", "Darkness Energy")] * 5
+    V.use_abilities(me, op, 5, [])
+    check("Attract Customers takes the Supporter from the top 6",
+          ("Supporter", "Kofu") in me.hand, me.hand)
+
+def test_unshaped_tools_get_attached_and_heavy_baton_moves_energy():
+    """Eighteen Tools fell outside every shape attach_tools knew (Sacred
+    Charm, Heavy Baton, Powerglass, the type Berries, ...) and were never
+    put on a Pokemon. Heavy Baton, once attached, crashed the game when its
+    Snorlax was Knocked Out: len() of a Retreat Cost stored as a number."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Snorlax 30C 119\n1 Bouffalant SCR 119\n1 Okidogi ex SFA 36\n\n"
+                "Trainer: 3\n1 Heavy Baton TEF 151\n1 Sacred Charm PFL 122\n1 Occa Berry SCR 140\n\n"
+                "Energy: 54\n54 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board(active):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        me.active = V.InPlay(active, 1)
+        me.bench = [V.InPlay("Bouffalant", 1)]
+        op.active = V.InPlay("Okidogi ex", 1)
+        return me, op
+    me, op = board("Snorlax")
+    me.hand = [("Tool", "Heavy Baton")]
+    V.attach_tools(me, [])
+    check("Heavy Baton goes on the Retreat-4 Snorlax", me.active.tool == "Heavy Baton", me.active.tool)
+    me, op = board("Bouffalant")
+    me.hand = [("Tool", "Heavy Baton"), ("Tool", "Occa Berry")]
+    V.attach_tools(me, [])
+    check("...but not on a Retreat-2 Bouffalant, and a Fire Berry not against a Darkness attacker",
+          me.active.tool is None, me.active.tool)
+    me.hand = [("Tool", "Sacred Charm")]
+    V.attach_tools(me, [])
+    check("Sacred Charm gets attached", me.active.tool == "Sacred Charm", me.active.tool)
+    me, op = board("Snorlax")
+    me.active.tool = "Heavy Baton"
+    me.active.energy, me.active.energy_names = [["Psychic"]] * 3, ["Psychic Energy"] * 3
+    me.active.damage = 150
+    op.active.energy, op.active.energy_names = [["Darkness"]] * 3, ["Darkness Energy"] * 3
+    op.energy_types = {"Darkness"}
+    op._forced_attack = next(a for a in D[1]["Okidogi ex"]["attacks"] if a["name"] == "Chain-Crazed")
+    try:
+        V.do_attack(op, me, [])
+        V.finish_turn(op, me, [])
+        moved = sum(p.energy_count() for p in me.in_play())
+        err = None
+    except Exception as e:
+        moved, err = 0, repr(e)
+    check("Heavy Baton's Knock Out moves its 3 Energy to the Bench", moved == 3, (moved, err))
+
+def test_manual_attach_goes_where_the_energy_pays():
+    """The manual attachment went to the hardest hitter short a NUMBER of
+    Energy. With Fire in hand, a Mega Dragonite ex whose Ryuno Glide costs
+    Water and Lightning took it (and could never use it) while a Mega
+    Kangaskhan ex one Colorless short sat beside it."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Mega Dragonite ex ASC 152\n1 Mega Kangaskhan ex MEG 104\n1 Dreepy PRE 71\n\n"
+                "Energy: 57\n50 Basic Fire Energy\n4 Basic Lightning Energy\n3 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    op.hand, op.bench = [], []
+    me.energy_types = {"Fire", "Lightning", "Water"}
+    me.active = V.InPlay("Mega Dragonite ex", 1)
+    me.bench = [V.InPlay("Mega Kangaskhan ex", 1)]
+    me.bench[0].energy, me.bench[0].energy_names = [["Fire"]] * 2, ["Fire Energy"] * 2
+    me.hand = [("Energy", "Fire Energy")]
+    op.active = V.InPlay("Dreepy", 1)
+    V.attach_energy(me, V._CARDS_BY_NAME, [])
+    check("The Fire Energy goes to the Kangaskhan it pays for, not the Dragonite",
+          me.bench[0].energy_count() == 3 and me.active.energy_count() == 0,
+          [(p.name, p.energy_count()) for p in me.in_play()])
+
 if __name__ == "__main__":
     sys.exit(main())

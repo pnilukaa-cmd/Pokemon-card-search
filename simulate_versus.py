@@ -5568,7 +5568,26 @@ def _energy_for(pl, target):
     """Index in hand of an Energy that may be attached to `target`: a card
     the target can use first, then any that fits."""
     fits = [i for i, (k, n) in enumerate(pl.hand) if k == "Energy" and _energy_fits(pl, target, n)]
+    if POL.knob(pl, "typed_attach"):
+        useful = _helpful_energy(pl, target)
+        if useful is not None:
+            return useful
     return fits[0] if fits else None
+
+
+def _helpful_energy(pl, spot):
+    """Index in hand of an Energy that pays part of `spot`'s biggest attack:
+    a type it still needs, or any Energy while a Colorless slot is open.
+    None when no Energy in hand does."""
+    need = _energy_need_types(pl, spot)
+    open_colorless = energy_shortfall(pl, spot) - len(need) > 0
+    for i, (k, n) in enumerate(pl.hand):
+        if k != "Energy" or not _energy_fits(pl, spot, n):
+            continue
+        prov = energy_provisions(n, _CARDS_BY_NAME)[0] or []
+        if open_colorless or any(t in prov for t in need):
+            return i
+    return None
 
 
 _ABILITY_ENERGY_RE = _re.compile(
@@ -5675,6 +5694,16 @@ def attach_energy(pl, cards_by_name, log):
         others = [p for p in pl.in_play() if p is not target
                   and not getattr(p, "attach_locked", 0) and energy_shortfall(pl, p) > 0]
         target = max(others, key=lambda p: _potential_damage(pl, p)) if others else None
+    if POL.knob(pl, "typed_attach") and target is not None \
+            and energy_shortfall(pl, target) > 0 and _helpful_energy(pl, target) is None:
+        # The Energy in hand pays nothing on the chosen Pokemon (a Fire
+        # Energy on a Mega Dragonite ex whose Ryuno Glide costs Water and
+        # Lightning). Feed the hardest hitter it does pay for instead.
+        helped = [p for p in pl.in_play() if p is not target
+                  and not getattr(p, "attach_locked", 0)
+                  and energy_shortfall(pl, p) > 0 and _helpful_energy(pl, p) is not None]
+        if helped:
+            target = max(helped, key=lambda p: _potential_damage(pl, p))
     if target is None:
         return
     idx = _energy_for(pl, target)
@@ -6022,6 +6051,8 @@ def attach_tools(pl, log):
                            if _is_reflip_tool(pl, name, p)
                            and (not p.tool or AE.query_extra_tool_slots(pl, p))),
                           None)
+            if holder is None:
+                holder = _generic_tool_holder(pl, name)
             if holder is not None:
                 pl.remove_from_hand(kind, name)
                 holder.tool = name
@@ -6052,6 +6083,51 @@ def attach_tools(pl, log):
         pl.remove_from_hand(kind, name)
         pl.active.tool = name
         log.append(f"  {pl.name}: attaches {name} to {pl.active.name}")
+
+
+_TOOL_VS_TYPE_RE = _re.compile(r"by an attack from your opponent'?s (\w+) pok[eé]mon", _re.I)
+_TOOL_RETREAT_EXACT_RE = _re.compile(r"has a retreat cost of exactly (\d+)", _re.I)
+
+
+def _generic_tool_holder(pl, name):
+    """The Active, for a Tool none of the shapes above covers, when the
+    Tool's own text says it would do something there.
+
+    Eighteen Tools in the pool were never attached by anything: Sacred
+    Charm, Heavy Baton, Powerglass, the type Berries, Thick Scale, Lillie's
+    Pearl, Amulet of Hope, Survival Brace, Adversity Policy, Tremendous
+    Bomb, Future Booster Energy Capsule. Their effects were read once
+    attached, so each sat in hand doing nothing. Technical Machines and the
+    re-flip Tool keep their own handling above."""
+    if name.lower().startswith("technical machine"):
+        return None
+    a = pl.active
+    if a is None or (a.tool and not AE.query_extra_tool_slots(pl, a)):
+        return None
+    text = _card_text(name)
+    if not _tool_holder_ok(pl, a, text):
+        return None
+    opp = getattr(pl, "_opp_ref", None)
+    info = pl.POKEMON.get(a.name) or {}
+    m = _TOOL_VS_TYPE_RE.search(text)
+    # A Berry for one attacking type: only against that type.
+    if m and m.group(1).capitalize() in M.REAL_TYPES:
+        if opp is None or opp.active is None or \
+                m.group(1).capitalize() not in _types_of(opp, opp.active):
+            return None
+    m = _TOOL_RETREAT_EXACT_RE.search(text)
+    if m:
+        r = info.get("retreat") or 0
+        if (r if isinstance(r, int) else len(r)) != int(m.group(1)):
+            return None
+    if _re.search(r"isn'?t a mega evolution pok[eé]mon ex", text, _re.I) and \
+            "MEGA" in (info.get("subtypes") or []):
+        return None
+    if _re.search(r"has weakness to your opponent'?s active pok[eé]mon'?s type", text, _re.I):
+        weak = info.get("weakness")
+        if opp is None or opp.active is None or weak not in _types_of(opp, opp.active):
+            return None
+    return a
 
 
 _ON_DAMAGED_TOOLS = None
