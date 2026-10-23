@@ -412,6 +412,10 @@ def parse_conditions(text):
     m = re.search(r"if this pok[eé]mon has any (" + TYPES + r") energy attached", t, re.I)
     if m:
         out.append({"kind": "self_has_energy_type", "type": m.group(1).capitalize()})
+    # Untyped: Dragonair's Evolutionary Guidance and Regirock's Rock Armor
+    # were usable with nothing attached.
+    if re.search(r"if this pok[eé]mon has any energy attached", t, re.I):
+        out.append({"kind": "self_has_energy"})
     if re.search(r"if this pok[eé]mon remains asleep", t, re.I):
         out.append({"kind": "self_asleep"})
     if re.search(r"if this pok[eé]mon has full hp", t, re.I):
@@ -1482,9 +1486,52 @@ def _r(m, text):
                    {"from": parse_target(m.group(1)), "any_number": True})]
 
 
-@rule("heal", r"heal (\d+) damage from ([^.]{0,50})")
+def _heal_spec(phrase, text):
+    """Target and filter for "heal ... damage from <phrase>".
+
+    "1 of your Pokemon" is ONE Pokemon: it read as any of your Pokemon and
+    the executor healed every one of them, so Super Potion, Jacinthe and
+    Wally's Compassion each healed the whole board. The recipient's
+    qualifiers ("Mega Evolution Pokemon ex", "Psychic", "Basic", "Benched
+    Ancient", "that has 30 HP or less remaining") were dropped with it, and
+    so was what the heal costs ("put all Energy attached to that Pokemon
+    into your hand", "discard all Energy from those Pokemon")."""
+    f = {}
+    low = phrase.strip().lower()
+    if low.startswith("1 of your"):
+        f["one"] = True
+    q = re.search(r"your (?:active |benched )?((?:[a-z']+ )*?)pok[eé]mon( ex)?", low)
+    words = (q.group(1) if q else "").split()
+    if "mega" in words:
+        f["mega"] = True
+    elif "evolution" in words:
+        f["evolution"] = True
+    elif "basic" in words:
+        f["stage"] = "Basic"
+    for w in words:
+        if re.fullmatch(TYPES, w, re.I):
+            f["type"] = w.capitalize()
+        elif w in ("ancient", "future", "tera"):
+            f["subtype"] = w.capitalize()
+    mh = re.search(r"that has (\d+) hp or less remaining", low)
+    if mh:
+        f["max_hp_left"] = int(mh.group(1))
+    if re.search(r"if you healed any damage in this way, put all energy attached to"
+                 r" that pok[eé]mon into your hand", text, re.I):
+        f["then"] = "energy_to_hand"
+    elif re.search(r"if you healed any damage in this way, discard all energy from"
+                   r" th(?:at|ose) pok[eé]mon", text, re.I):
+        f["then"] = "discard_all_energy"
+    elif re.search(r"if you healed any damage in this way, discard an energy from"
+                   r" that pok[eé]mon", text, re.I):
+        f["then"] = "discard_an_energy"
+    return parse_target(phrase), f
+
+
+@rule("heal", r"heal (\d+) damage from ([^.]{0,70})")
 def _r(m, text):
-    return [Action(Op.HEAL, int(m.group(1)), parse_target(m.group(2)))]
+    tgt, f = _heal_spec(m.group(2), text)
+    return [Action(Op.HEAL, int(m.group(1)), tgt, f or None)]
 
 
 # Window widened from 80 to 140: Cornerstone Stance's restriction ("by
@@ -2028,9 +2075,11 @@ def _r(m, text):
 
 # ---- second pass: shapes found by auditing what the first pass missed ----
 
-@rule("heal_all", r"heal all damage from ([^.]{0,50})")
+@rule("heal_all", r"heal all damage from ([^.]{0,70})")
 def _r(m, text):
-    return [Action(Op.HEAL, None, parse_target(m.group(1)), {"all": True})]
+    tgt, f = _heal_spec(m.group(1), text)
+    f["all"] = True
+    return [Action(Op.HEAL, None, tgt, f)]
 
 
 @rule("search_bench_loose",

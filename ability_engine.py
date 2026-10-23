@@ -132,6 +132,54 @@ def PITCH_RANK(pl, kind, name):
 # Target resolution
 # --------------------------------------------------------------------------
 
+def _heal_qualifies(pl, spot, f):
+    """Is `spot` one of the Pokemon a heal names ("1 of your Mega Evolution
+    Pokemon ex", "each of your Basic Pokemon", "that has 30 HP or less
+    remaining")? Only your own Pokemon carry a qualifier."""
+    if not any(f.get(k) is not None for k in ("mega", "evolution", "stage", "type",
+                                              "subtype", "max_hp_left")):
+        return True
+    info = pl.POKEMON.get(spot.name)
+    if info is None:
+        return False
+    subtypes = info.get("subtypes") or []
+    if f.get("mega") and "MEGA" not in subtypes:
+        return False
+    if f.get("evolution") and info.get("stage") == "Basic":
+        return False
+    if f.get("stage") and info.get("stage") != f["stage"]:
+        return False
+    if f.get("type") and f["type"] not in (info.get("types") or []):
+        return False
+    if f.get("subtype") and f["subtype"] not in subtypes:
+        return False
+    if f.get("max_hp_left") is not None and \
+            EFFECTIVE_HP(pl, spot) - spot.damage > f["max_hp_left"]:
+        return False
+    return True
+
+
+def _heal_rider(pl, spot, then, log):
+    """What a heal costs: Wally's Compassion returns the Energy to the hand,
+    Whimsicott and Dachsbun ex discard it all, Super Potion discards one."""
+    if not then or not spot.energy:
+        return
+    n = 1 if then == "discard_an_energy" else len(spot.energy)
+    moved = []
+    for _ in range(n):
+        nm = pop_energy(spot)
+        if nm is None:
+            continue
+        if then == "energy_to_hand":
+            pl.hand.append(("Energy", nm))
+        else:
+            pl.discard.append(nm)
+        moved.append(nm)
+    if moved:
+        log.append(f"    {spot.name}: {len(moved)} Energy to "
+                   f"{'hand' if then == 'energy_to_hand' else 'the discard pile'}")
+
+
 def resolve_targets(target, pl, opp, source, attacker=None):
     """Map an IR Target onto concrete in-play Pokemon."""
     T = IR.Target
@@ -480,6 +528,8 @@ def conditions_met(effect, pl, opp, source, atk=None):
         if k == "self_has_energy_type":
             if not any(c["type"] in e for e in source.energy):
                 return False
+        if k == "self_has_energy" and (source is None or not source.energy):
+            return False
         if k == "energy_in_play_at_least":
             typ = c.get("type")
             have = sum(1 for p in pl.in_play() for e in p.energy
@@ -1458,12 +1508,20 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.HEAL:
+        f = act.filter or {}
         hits = resolve_targets(act.target, pl, opp, source, attacker)
         hits = [h for h in hits if not heal_blocked(pl if h in pl.in_play() else opp, h,
                                                     opp if h in pl.in_play() else pl)]
+        hits = [h for h in hits if _heal_qualifies(pl, h, f)]
+
+        def _amount(h):
+            return h.damage if f.get("all") else min(h.damage, (act.amount or 0))
+        if f.get("one"):
+            # "1 of your Pokemon": the one it heals most.
+            hits = sorted((h for h in hits if _amount(h) > 0), key=_amount, reverse=True)[:1]
         healed = 0
         for h in hits:
-            amt = h.damage if act.filter.get("all") else min(h.damage, (act.amount or 0))
+            amt = _amount(h)
             h.damage -= amt
             healed += amt
             if amt:
@@ -1471,6 +1529,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 # this Pokemon was healed during this turn", and nothing
                 # recorded that it had been.
                 h.healed_this_turn = True
+                _heal_rider(pl, h, f.get("then"), log)
         if healed:
             log.append(f"    heal {healed}")
         return healed > 0
