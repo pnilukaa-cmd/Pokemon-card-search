@@ -1462,6 +1462,13 @@ def _r(m, text):
     # Rocket's Articuno) cannot stop and Weakness can double.
     if re.search(r"damage counters? on [^.]{0,60}for each card in your hand", text, re.I):
         filt["per_hand_card"] = True
+    # Chesnaught's Needly Armor: "place 3 damage counters on the Attacking
+    # Pokemon for each Grass Energy attached to this Pokemon". The count was
+    # dropped, so it placed 3 whatever was attached.
+    me = re.search(r"damage counters? on [^.]{0,60}for each (" + TYPES + r")? ?energy attached"
+                   r" to this pok[eé]mon", text, re.I)
+    if me:
+        filt["per_self_energy"] = (me.group(1) or "any").capitalize()
     tgt = parse_target(m.group(2))
     # Sand Stream: "each of your opponent's BASIC Pokemon".
     if re.match(r"\s*each of your opponent'?s basic pok", m.group(2), re.I):

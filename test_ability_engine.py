@@ -6446,5 +6446,44 @@ def test_manual_attach_goes_where_the_energy_pays():
           me.bench[0].energy_count() == 3 and me.active.energy_count() == 0,
           [(p.name, p.energy_count()) for p in me.in_play()])
 
+def test_retaliation_counts_the_energy_and_only_the_pokemon_hit():
+    """Chesnaught's Needly Armor ("place 3 damage counters on the Attacking
+    Pokemon for each Grass Energy attached to this Pokemon") placed 3 flat;
+    under Meganium's Wild Growth each Basic Grass Energy is two Grass.
+    Orthworm ex's Pummeling Payback (2 per Metal Energy, "if this Pokemon
+    is damaged") also placed a flat 2, and did so from the Bench whenever
+    the Active was hit."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 5\n1 Chesnaught CRI 7\n1 Meganium MEG 10\n1 Orthworm ex SCR 110\n"
+                "1 Snorlax 30C 119\n1 Okidogi ex SFA 36\n\nEnergy: 55\n25 Basic Grass Energy\n"
+                "15 Basic Metal Energy\n15 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def payback(active, bench, etype):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        spots = {n: V.InPlay(n, 1) for n in [active] + bench}
+        for n in (active, "Orthworm ex"):
+            if n in spots:
+                spots[n].energy = [[etype if n == active else "Metal"]] * 3
+                spots[n].energy_names = [f"{etype if n == active else 'Metal'} Energy"] * 3
+        me.active, me.bench = spots[active], [spots[n] for n in bench]
+        op.active = V.InPlay("Okidogi ex", 1)
+        op.active.energy, op.active.energy_names = [["Darkness"]] * 3, ["Darkness Energy"] * 3
+        op.energy_types = {"Darkness"}
+        op._forced_attack = next(a for a in D[1]["Okidogi ex"]["attacks"] if a["name"] == "Chain-Crazed")
+        V.do_attack(op, me, [])
+        return op.active.damage
+    got = [payback("Chesnaught", [], "Grass"), payback("Chesnaught", ["Meganium"], "Grass"),
+           payback("Orthworm ex", [], "Metal"), payback("Snorlax", ["Orthworm ex"], "Metal")]
+    check("Needly Armor 90 / 180 with Wild Growth; Pummeling Payback 60 Active, 0 Benched",
+          got == [90, 180, 60, 0], got)
+
 if __name__ == "__main__":
     sys.exit(main())

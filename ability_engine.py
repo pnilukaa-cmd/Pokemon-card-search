@@ -297,6 +297,23 @@ def query_energy_bonus(pl, spot, typ):
     return extra
 
 
+def _typed_energy_units(pl, spot, typ):
+    """Energy of `typ` ("Any" for all) `spot` provides, counting the extra a
+    Basic Energy provides under an Ability like Wild Growth."""
+    if spot is None:
+        return 0
+    names = getattr(spot, "energy_names", None) or []
+    n = 0
+    for i, e in enumerate(spot.energy):
+        if typ != "Any" and typ not in e:
+            continue
+        n += 1
+        nm = names[i] if i < len(names) else None
+        if nm is None or _is_basic_energy_name(nm):
+            n += query_energy_bonus(pl, spot, e[0] if typ == "Any" else typ)
+    return n
+
+
 def query_extra_tool_slots(pl, spot):
     """How many MORE Tools than the usual one this Pokemon may hold."""
     n = 0
@@ -1291,6 +1308,14 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         return True
 
     if op == O.PLACE_COUNTERS:
+        if act.filter.get("per_self_energy"):
+            # Counted when it resolves, as Energy PROVIDED: under Meganium's
+            # Wild Growth a Basic Grass Energy is two Grass Energy.
+            n = _typed_energy_units(pl, source, act.filter["per_self_energy"])
+            act = IR.Action(act.op, (act.amount or 0) * n, act.target,
+                            {k: v for k, v in act.filter.items() if k != "per_self_energy"})
+            if not act.amount:
+                return False
         if act.filter.get("per_hand_card"):
             # Counted when it resolves: Powerful Hand reads the hand you
             # attack with.
@@ -3670,6 +3695,9 @@ def query_ko_attacker_on_ko(owner, spot, attacker_player):
     return False
 
 
+_THIS_DAMAGED_RE = re.compile(r"if this pok[eé]mon (?:is in the active spot and )?is damaged", re.I)
+
+
 def query_retaliation(defender, attacker_spot, attacker_player=None):
     """Damage counters the defender puts back onto the attacking Pokemon."""
     total = 0
@@ -3680,12 +3708,25 @@ def query_retaliation(defender, attacker_spot, attacker_player=None):
                 continue
             if not conditions_met(eff, defender, attacker_player or defender, holder):
                 continue
+            # "If THIS Pokemon is damaged" is the Pokemon hit, the Active.
+            # Orthworm ex's Pummeling Payback says nothing about the Active
+            # Spot, so a Benched Orthworm ex paid back every hit on the
+            # Active. (Spiritomb's "your Active Darkness Pokemon" is a
+            # Bench holder's, and stays.)
+            if holder is not defender.active and \
+                    _THIS_DAMAGED_RE.search(eff.text or ""):
+                continue
             for act in eff.actions:
                 if act.op != IR.Op.PLACE_COUNTERS:
                     continue
                 if act.target != IR.Target.ATTACKING_POKEMON:
                     continue
-                total += (act.amount or 0) * 10
+                n = act.amount or 0
+                per = (act.filter or {}).get("per_self_energy")
+                if per:
+                    # Needly Armor, Pummeling Payback: per Energy attached.
+                    n *= _typed_energy_units(defender, holder, per)
+                total += n * 10
     return total
 
 
