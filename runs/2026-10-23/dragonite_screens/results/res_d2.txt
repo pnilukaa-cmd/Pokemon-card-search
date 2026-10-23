@@ -1,0 +1,13 @@
+d2_budew0: d2_budew0_dn1_200.json - d1_e6_dn1_200.json: +1.39 +/- 0.48 over 94 opponents; better on 55, worse on 35
+d2_fan0: d2_fan0_dn1_200.json - d1_e6_dn1_200.json: +2.19 +/- 0.49 over 94 opponents; better on 63, worse on 30
+d2_gear0: d2_gear0_dn1_200.json - d1_e6_dn1_200.json: +1.29 +/- 0.55 over 94 opponents; better on 52, worse on 39
+d2_gem0: d2_gem0_dn1_200.json - d1_e6_dn1_200.json: +2.23 +/- 0.50 over 94 opponents; better on 64, worse on 27
+d2_hammer0: d2_hammer0_dn1_200.json - d1_e6_dn1_200.json: +2.09 +/- 0.47 over 94 opponents; better on 61, worse on 31
+d2_hammer2: d2_hammer2_dn1_200.json - d1_e6_dn1_200.json: +1.54 +/- 0.48 over 94 opponents; better on 57, worse on 34
+d2_kang2: d2_kang2_dn1_200.json - d1_e6_dn1_200.json: +1.95 +/- 0.55 over 94 opponents; better on 53, worse on 39
+d2_mine0: d2_mine0_dn1_200.json - d1_e6_dn1_200.json: +0.26 +/- 0.55 over 94 opponents; better on 45, worse on 47
+d2_nodragon: d2_nodragon_dn1_200.json - d1_e6_dn1_200.json: -1.06 +/- 0.80 over 94 opponents; better on 44, worse on 45
+d2_salaz3: d2_salaz3_dn1_200.json - d1_e6_dn1_200.json: -0.28 +/- 0.47 over 94 opponents; better on 36, worse on 52
+d2_wally2: d2_wally2_dn1_200.json - d1_e6_dn1_200.json: +4.17 +/- 0.57 over 94 opponents; better on 74, worse on 17
+K_user_heal: K_user_heal_dn1_200.json - D_user_dn1_200.json: +2.43 +/- 0.52 over 94 opponents; better on 64, worse on 27
+K_e6_heal: K_e6_heal_dn1_200.json - d1_e6_dn1_200.json: +2.54 +/- 0.51 over 94 opponents; better on 66, worse on 26

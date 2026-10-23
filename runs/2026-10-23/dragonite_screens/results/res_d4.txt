@@ -1,0 +1,12 @@
+d4_boss1: d4_boss1_dn2_200.json - d3_gemfanwal_dn2_200.json: +1.51 +/- 0.45 over 94 opponents; better on 59, worse on 31
+d4_budew0: d4_budew0_dn2_200.json - d3_gemfanwal_dn2_200.json: +0.41 +/- 0.46 over 94 opponents; better on 43, worse on 47
+d4_gear0: d4_gear0_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.20 +/- 0.49 over 94 opponents; better on 41, worse on 43
+d4_gear4: d4_gear4_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.01 +/- 0.41 over 94 opponents; better on 40, worse on 48
+d4_glide: d4_glide_dn2_200.json - d3_gemfanwal_dn2_200.json: -22.80 +/- 0.75 over 94 opponents; better on 0, worse on 94
+d4_ham0: d4_ham0_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.10 +/- 0.45 over 94 opponents; better on 48, worse on 39
+d4_ham2: d4_ham2_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.47 +/- 0.48 over 94 opponents; better on 45, worse on 42
+d4_kang2: d4_kang2_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.21 +/- 0.48 over 94 opponents; better on 43, worse on 46
+d4_mine0: d4_mine0_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.05 +/- 0.44 over 94 opponents; better on 47, worse on 41
+d4_signal: d4_signal_dn2_200.json - d3_gemfanwal_dn2_200.json: +0.00 +/- 0.48 over 94 opponents; better on 41, worse on 47
+d4_wally1: d4_wally1_dn2_200.json - d3_gemfanwal_dn2_200.json: +0.77 +/- 0.41 over 94 opponents; better on 56, worse on 36
+d4_wally3: d4_wally3_dn2_200.json - d3_gemfanwal_dn2_200.json: -0.03 +/- 0.42 over 94 opponents; better on 49, worse on 41

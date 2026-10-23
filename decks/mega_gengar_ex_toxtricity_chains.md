@@ -164,7 +164,10 @@ notes still carry their older numbers until the next full field run.
 Darkness Energy in the same slot:
 - Energy Search for 2 Poké Pad −0.29, 2 Waitress for 2 Energy −0.89 (for
   a Lillie's and a Poké Pad −2.52), Energy Retrieval −1.14, 2 Rosa's
-  Encouragement −1.38, Powerglass −1.66.
+  Encouragement −1.38.
+- Powerglass first measured −1.66, but the AI never attached it then, so
+  that run tested a dead card. Re-measured 2026-10-23 once the Tool was
+  actually attached: −0.47 ± 0.39, still no better than the Energy.
 - Earlier rounds: Janine's Secret Art, Legacy Energy, Shadowy Darkness
   Energy, Risky Ruins, Punk Helmet, Gengar ex TEF 104, Haunter POR 49 (see
   the table).
@@ -205,7 +208,7 @@ own base. Lists and results are in `runs/2026-10-16/gengar_screens/`.
 | 4 | Nidoran / Nidorina back in, −4 Energy | 65.54% | −9.68 ± 0.54 |
 | 5 | +1 Toxel / +1 Pecharunt ex / both, for Energy | 73.9-74.5% | −1.29 to −0.75 |
 | 5 | **3rd Dawn and Hero's Cape, −1 Energy and Unfair Stamp** | **76.74%** | **+1.53 ± 0.43** |
-| 6 | Energy Search, Waitress, Rosa's Encouragement, Powerglass, Energy Retrieval | 74.3-76.5% | −2.52 to −0.29 |
+| 6 | Energy Search, Waitress, Rosa's Encouragement, Energy Retrieval (and Powerglass, never attached in that run) | 74.3-76.5% | −2.52 to −0.29 |
 | 1000 games | Submitted / round-3 best / Nidorina back / **this list** | 52.82% / 75.02% / 65.64% / **76.35%** | **+1.34 ± 0.21** over the round-3 best |
 
 Earlier screens, on the engine before fixes 5-7, also had −2 for a 4th

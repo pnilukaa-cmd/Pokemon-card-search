@@ -1,0 +1,2 @@
+final-user: d5_boss0_dn2_1000.json - D_user_dn2_1000.json: +25.46 +/- 1.30 over 94 opponents; better on 93, worse on 1
+final-round3: d5_boss0_dn2_1000.json - d3_gemfanwal_dn2_1000.json: +2.26 +/- 0.29 over 94 opponents; better on 75, worse on 17

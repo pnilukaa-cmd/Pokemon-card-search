@@ -1,0 +1,3 @@
+glide: d4_glide_dn3_200.json - d3_gemfanwal_dn3_200.json: -4.66 +/- 0.49 over 94 opponents; better on 11, worse on 78
+powerglass: G_powerglass_dn3_200.json - G_final_dn3_200.json: -0.47 +/- 0.39 over 94 opponents; better on 46, worse on 45
+dragonite final-user 1000: d5_boss0_dn3_1000.json - D_user_dn3_1000.json: +26.21 +/- 1.32 over 94 opponents; better on 93, worse on 1

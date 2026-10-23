@@ -1,0 +1,13 @@
+glide: K_d4_glide_dn2_200.json - d4_glide_dn2_200.json: +18.99 +/- 0.63 over 94 opponents; better on 94, worse on 0
+alakazam_munkidori_strange_hacking: K_alakazam_munkidori_strange_hacking_dn2_200.json - alakazam_munkidori_strange_hacking_dn2_200.json: +4.22 +/- 0.47 over 94 opponents; better on 75, worse on 13
+chandelure_centiskorch_deck_out: K_chandelure_centiskorch_deck_out_dn2_200.json - chandelure_centiskorch_deck_out_dn2_200.json: +0.77 +/- 0.47 over 94 opponents; better on 52, worse on 37
+ditto_transform_hydreigon: K_ditto_transform_hydreigon_dn2_200.json - ditto_transform_hydreigon_dn2_200.json: +0.34 +/- 0.17 over 94 opponents; better on 21, worse on 8
+ditto_tyranitar_gengar_hydreigon: K_ditto_tyranitar_gengar_hydreigon_dn2_200.json - ditto_tyranitar_gengar_hydreigon_dn2_200.json: +1.31 +/- 0.43 over 94 opponents; better on 55, worse on 31
+feraligatr_munkidori_damage_transfer: K_feraligatr_munkidori_damage_transfer_dn2_200.json - feraligatr_munkidori_damage_transfer_dn2_200.json: +1.99 +/- 0.42 over 94 opponents; better on 63, worse on 28
+mega_emboar_oricorio_munkidori: K_mega_emboar_oricorio_munkidori_dn2_200.json - mega_emboar_oricorio_munkidori_dn2_200.json: +6.22 +/- 0.46 over 94 opponents; better on 87, worse on 7
+meta_dragapult_blaziken: K_meta_dragapult_blaziken_dn2_200.json - meta_dragapult_blaziken_dn2_200.json: +7.91 +/- 0.55 over 94 opponents; better on 88, worse on 4
+meta_dragapult_dusknoir: K_meta_dragapult_dusknoir_dn2_200.json - meta_dragapult_dusknoir_dn2_200.json: +7.41 +/- 0.55 over 94 opponents; better on 86, worse on 7
+meta_dragapult_pure: K_meta_dragapult_pure_dn2_200.json - meta_dragapult_pure_dn2_200.json: +9.88 +/- 0.51 over 94 opponents; better on 93, worse on 1
+meta_raging_bolt: K_meta_raging_bolt_dn2_200.json - meta_raging_bolt_dn2_200.json: +5.06 +/- 0.46 over 94 opponents; better on 81, worse on 11
+salazzle_ex_team_rockets_muk_condition_stack: K_salazzle_ex_team_rockets_muk_condition_stack_dn2_200.json - salazzle_ex_team_rockets_muk_condition_stack_dn2_200.json: +14.99 +/- 0.76 over 94 opponents; better on 93, worse on 1
+stevens_carbink_damage_wall: K_stevens_carbink_damage_wall_dn2_200.json - stevens_carbink_damage_wall_dn2_200.json: +0.23 +/- 0.53 over 94 opponents; better on 47, worse on 41

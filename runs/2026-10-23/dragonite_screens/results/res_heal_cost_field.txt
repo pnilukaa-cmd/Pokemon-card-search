@@ -1,0 +1,2 @@
+mega_zygarde_cinderace_turbo_flare: K_mega_zygarde_cinderace_turbo_flare_dn1_200.json - mega_zygarde_cinderace_turbo_flare_dn1_200.json: +0.93 +/- 0.46 over 94 opponents; better on 54, worse on 36
+study_mega_excadrill_drill_mill: K_study_mega_excadrill_drill_mill_dn1_200.json - study_mega_excadrill_drill_mill_dn1_200.json: -0.28 +/- 0.54 over 94 opponents; better on 45, worse on 46

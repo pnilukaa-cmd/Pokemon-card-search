@@ -1,0 +1,4 @@
+d5_boss0: d5_boss0_dn2_200.json - d4_boss1_dn2_200.json: +1.38 +/- 0.37 over 94 opponents; better on 63, worse on 30
+d5_budew0: d5_budew0_dn2_200.json - d4_boss1_dn2_200.json: +0.67 +/- 0.43 over 94 opponents; better on 49, worse on 40
+d5_e_1: d5_e_1_dn2_200.json - d4_boss1_dn2_200.json: +0.37 +/- 0.45 over 94 opponents; better on 45, worse on 45
+d5_wally1: d5_wally1_dn2_200.json - d4_boss1_dn2_200.json: -0.05 +/- 0.42 over 94 opponents; better on 49, worse on 42
