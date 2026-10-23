@@ -6485,5 +6485,95 @@ def test_retaliation_counts_the_energy_and_only_the_pokemon_hit():
     check("Needly Armor 90 / 180 with Wild Growth; Pummeling Payback 60 Active, 0 Benched",
           got == [90, 180, 60, 0], got)
 
+def test_teal_dance_attaches_before_it_draws():
+    """Teal Mask Ogerpon ex's Teal Dance: attach a Basic Grass Energy from
+    your hand to this Pokemon; "if you attached Energy to a Pokemon in this
+    way, draw a card". The draw compiled first and ran regardless, so with
+    no Grass Energy in hand it still drew -- and attached what it drew."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Chespin CRI 5\n1 Teal Mask Ogerpon ex TWM 190\n1 Okidogi ex SFA 36\n\n"
+                "Trainer: 1\n1 Ultra Ball MEG 131\n\nEnergy: 56\n56 Basic Grass Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    import ability_engine as AE
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    op.hand, op.bench = [], []
+    me.energy_types = {"Grass"}
+    me.active = V.InPlay("Chespin", 1)
+    me.bench = [V.InPlay("Teal Mask Ogerpon ex", 1)]
+    me.hand = [("Item", "Ultra Ball")]
+    me.deck = [("Energy", "Grass Energy")] * 30
+    op.active = V.InPlay("Okidogi ex", 1)
+    eff = me.EFFECTS["Teal Mask Ogerpon ex"][0]
+    AE.activate(eff, me, op, me.bench[0], [])
+    check("Teal Dance with no Grass Energy in hand neither draws nor attaches",
+          me.hand == [("Item", "Ultra Ball")] and me.bench[0].energy_count() == 0,
+          (me.hand, me.bench[0].energy_count()))
+    me.hand = [("Energy", "Grass Energy")]
+    AE.activate(eff, me, op, me.bench[0], [])
+    check("...and with one, attaches it and then draws",
+          me.bench[0].energy_count() == 1 and len(me.hand) == 1, (me.bench[0].energy_count(), me.hand))
+
+def test_hp_abilities_count_what_they_name():
+    """Alolan Exeggutor's Scale Up (+250 HP "if this Pokemon has 6 or more
+    Grass Energy attached") was +250 with nothing attached. Brambleghast's
+    Resilient Soul (+50 "for each Prize card your opponent has taken") and
+    Conkeldurr's Craftsmanship (+40 "for each Fighting Energy attached")
+    were a flat +50 / +40. Ludicolo's Vibrant Dance ("All of your Pokemon
+    in play get +40 HP") went to Ludicolo alone. Cynthia's Power Weight
+    (+70 to "the Cynthia's Pokemon this card is attached to") went on
+    anything. And "N or more Grass Energy attached" counted cards, so
+    under Wild Growth three Basic Grass were three, not six."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 8\n1 Alolan Exeggutor 30C 129\n1 Meganium MEG 10\n1 Brambleghast TEF 21\n"
+                "1 Conkeldurr BLK 127\n2 Ludicolo JTG 37\n1 Abomasnow DRI 60\n1 Cynthia's Garchomp ex ASC 111\n\n"
+                "Trainer: 1\n1 Cynthia's Power Weight DRI 162\n\n"
+                "Energy: 51\n20 Basic Grass Energy\n16 Basic Fighting Energy\n15 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board(active, bench=(), energy=(), prizes_taken=0):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        me.active = V.InPlay(active, 1)
+        me.active.energy = [[t] for t in energy]
+        me.active.energy_names = [f"{t} Energy" for t in energy]
+        me.bench = [V.InPlay(n, 1) for n in bench]
+        op.active = V.InPlay("Ludicolo", 1)
+        op.prizes = 6 - prizes_taken
+        return me, op
+
+    hp = lambda me, spot=None: V.effective_hp(me, spot or me.active)
+    got = [hp(board("Alolan Exeggutor", energy=["Grass"] * 2)[0]),
+           hp(board("Alolan Exeggutor", energy=["Grass"] * 6)[0]),
+           hp(board("Alolan Exeggutor", ["Meganium"], ["Grass"] * 3)[0])]
+    check("Scale Up: 150 on 2 Grass, 400 on 6, 400 on 3 under Wild Growth",
+          got == [150, 400, 400], got)
+    got = [hp(board("Brambleghast", prizes_taken=n)[0]) for n in (0, 2, 5)]
+    check("Resilient Soul: +50 per Prize the opponent has taken", got == [100, 200, 350], got)
+    got = [hp(board("Conkeldurr", energy=["Fighting"] * n)[0]) for n in (0, 3)]
+    check("Craftsmanship: +40 per Fighting Energy", got == [140, 260], got)
+    me, _ = board("Abomasnow", ["Ludicolo", "Ludicolo"])
+    got = [hp(me), hp(me, me.bench[0])]
+    check("Vibrant Dance: +40 to every Pokemon, once for two Ludicolo", got == [190, 180], got)
+    me, _ = board("Conkeldurr", ["Cynthia's Garchomp ex"])
+    me.active.tool = me.bench[0].tool = "Cynthia's Power Weight"
+    got = [hp(me), hp(me, me.bench[0])]
+    check("Cynthia's Power Weight: +70 on Cynthia's Pokemon only", got == [140, 400], got)
+    me, op = board("Abomasnow", ["Meganium"], ["Water"] * 3 + ["Grass"])
+    atk = next(a for a in D[1]["Abomasnow"]["attacks"] if a["name"] == "Frozen Wood")
+    got = V.attack_damage(me, op, me.active, atk, record=False)
+    check("Frozen Wood's 2 Grass Energy: one Basic Grass under Wild Growth", got == 240, got)
+
 if __name__ == "__main__":
     sys.exit(main())

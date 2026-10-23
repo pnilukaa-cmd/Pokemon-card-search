@@ -431,8 +431,15 @@ def parse_conditions(text):
     # unconditional Heal 80 for one Item -- strictly better than the card,
     # and exactly the kind of free upgrade a deck gets built around.
     m = re.search(r"(\d+) or more energy (?:cards? )?attached", t, re.I)
-    if m:
+    if m and not re.search(r"this pok[eé]mon has \d+ or more energy", t, re.I):
         out.append({"kind": "active_energy_at_least", "count": int(m.group(1))})
+    # Alolan Exeggutor's Scale Up: "If this Pokemon has 6 or more Grass
+    # Energy attached, it gets +250 HP." The type between "more" and
+    # "Energy" hid it from the clause above, so the +250 was always on.
+    m = re.search(r"if this pok[eé]mon has (\d+) or more (?:(" + TYPES + r") )?energy attached", t, re.I)
+    if m:
+        out.append({"kind": "self_energy_at_least", "count": int(m.group(1)),
+                    "type": (m.group(2) or "Any").capitalize()})
     m = re.search(r"if your opponent has any cards? in their discard pile"
                   r" that have \"([^\"]+)\" in the name", t, re.I)
     if m:
@@ -1673,7 +1680,29 @@ def _r(m, text):
     if mm:
         return [Action(Op.MODIFY_HP, int(m.group(1)), Target.BOTH_ALL,
                        _qualifier_filter((mm.group(1) or "").strip()))]
-    return [Action(Op.MODIFY_HP, int(m.group(1)), Target.SELF)]
+    # Ange Floette: "Each Mega Floette ex in play (both yours and your
+    # opponent's)" names a card, not "... Pokemon".
+    mm = re.search(r"[Ee]ach ([A-Z][\w'’ -]+?) in play \(both yours and your opponent'?s\)", text)
+    if mm:
+        return [Action(Op.MODIFY_HP, int(m.group(1)), Target.BOTH_ALL,
+                       {"family": mm.group(1).strip()})]
+    # Ludicolo's Vibrant Dance: "All of your Pokemon in play get +40 HP"
+    # went to Ludicolo alone.
+    mm = re.search(r"all of your ([\w'’ -]*?)pok[eé]mon (?:in play )?get", text, re.I)
+    if mm:
+        return [Action(Op.MODIFY_HP, int(m.group(1)), Target.YOUR_ALL,
+                       _qualifier_filter((mm.group(1) or "").strip()))]
+    filt = {}
+    # Brambleghast's Resilient Soul: +50 "for each Prize card your opponent
+    # has taken" was a flat +50 from the start of the game.
+    if re.search(r"for each prize card your opponent has taken", text, re.I):
+        filt["per_prize_taken"] = True
+    # Conkeldurr's Craftsmanship: +40 "for each Fighting Energy attached to
+    # it" was a flat +40.
+    mm = re.search(r"for each (?:(" + TYPES + r") )?energy attached to (?:it|this pok[eé]mon)", text, re.I)
+    if mm:
+        filt["per_self_energy"] = (mm.group(1) or "Any").capitalize()
+    return [Action(Op.MODIFY_HP, int(m.group(1)), Target.SELF, filt)]
 
 
 # ---- combat modifiers ----------------------------------------------------
@@ -3846,6 +3875,7 @@ def compile_effect(source, name, text):
     eff.actions = _collapse_duplicate_attachments(eff, spans)
     _stamp_target_restrictions(eff)
     _stamp_coin_repeats(eff, text)
+    _order_draw_after_its_condition(eff, text)
 
     if not eff.actions:
         for pat, reason in _KNOWN_UNSUPPORTED:
@@ -3854,6 +3884,29 @@ def compile_effect(source, name, text):
                 return eff
         eff.unsupported = "no rule matched"
     return eff
+
+
+_DRAW_IF_DONE_RE = re.compile(
+    r"if you (?:attached energy to a pok[eé]mon in this way|do), draw", re.I)
+
+
+def _order_draw_after_its_condition(eff, text):
+    """"Attach a Basic Grass Energy from your hand to this Pokemon. If you
+    attached Energy in this way, draw a card" (Teal Dance); "Switch your
+    Active Pokemon ... If you do, draw cards until you have 5" (Surfer).
+    The rules emit in table order, so the draw ran FIRST and regardless:
+    Teal Dance with no Grass Energy in hand drew a card and then attached
+    the Energy it drew. The draw now follows the step it depends on and
+    runs only if that step did something."""
+    if not _DRAW_IF_DONE_RE.search(text or ""):
+        return
+    draws = [a for a in eff.actions if a.op == Op.DRAW]
+    rest = [a for a in eff.actions if a.op != Op.DRAW]
+    if not draws or not rest:
+        return
+    for a in draws:
+        a.filter = dict(a.filter or {}, if_prev=True)
+    eff.actions = rest + draws
 
 
 def compile_card_abilities(card):

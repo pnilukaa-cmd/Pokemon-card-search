@@ -131,6 +131,17 @@ GREEDY = {
     # two or more Energy types: +0.23 to +14.99, none worse (the Dragapult
     # lists +7.4 to +9.9, Salazzle ex / Muk +14.99, Raging Bolt +5.06).
     "typed_attach": int(__import__("os").environ.get("TYPED_ATTACH", 1)),
+    # With no Pokemon short of an attack, the manual attachment stayed in
+    # hand. 1: put it where one more Energy adds damage, HP (Alolan
+    # Exeggutor's Scale Up) or Energy-counted retaliation (Needly Armor).
+    # 2: also an HP threshold one attachment away over a Benched Pokemon
+    # still short; 3: any such gain over it. 0: keep it.
+    "overflow_attach": int(__import__("os").environ.get("OVERFLOW_ATTACH", 0)),
+    # Switch (the Item whose only text is the switch) is played when a
+    # Benched Pokemon does more this turn than the Active -- an Asleep or
+    # Paralyzed Active does nothing -- and goes to that Pokemon. 0: played
+    # on sight, to the healthiest body.
+    "switch_pick": int(__import__("os").environ.get("SWITCH_PICK", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

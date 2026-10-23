@@ -550,6 +550,11 @@ def conditions_met(effect, pl, opp, source, atk=None):
                 return False
         if k == "self_has_energy" and (source is None or not source.energy):
             return False
+        # Scale Up's "6 or more Grass Energy attached" counts Energy, so
+        # under Wild Growth three Basic Grass cards are six.
+        if k == "self_energy_at_least" and \
+                _typed_energy_units(pl, source, c.get("type") or "Any") < c["count"]:
+            return False
         if k == "energy_in_play_at_least":
             typ = c.get("type")
             have = sum(1 for p in pl.in_play() for e in p.energy
@@ -3300,8 +3305,13 @@ def activate(effect, pl, opp, source, log, attacker=None, make_inplay=None):
     if not pay_costs(effect, pl, source, log):
         return False
     did = False
+    last = True
     for act in effect.actions:
-        if apply_action(act, pl, opp, source, log, attacker, make_inplay):
+        # "If you do, draw": only when the step before it happened.
+        if (act.filter or {}).get("if_prev") and not last:
+            continue
+        last = apply_action(act, pl, opp, source, log, attacker, make_inplay)
+        if last:
             did = True
     if not did:
         pl.hand[:], pl.discard[:] = snapshot[0], snapshot[1]
@@ -3572,6 +3582,8 @@ def query_ignores_opponent_effects(pl, spot, opp=None):
 def query_hp_modifier(pl, spot, opp=None):
     """Extra HP granted by an Ability, e.g. Okidogi's Adrena-Power (+100)."""
     total = 0
+    opp = opp or getattr(pl, "_opp_ref", None)
+    once = set()
     for holder, eff, act in _passive_actions(pl, IR.Op.MODIFY_HP):
         # Lively Stadium (holder None): every Pokemon it names, both sides.
         if act.target in (IR.Target.BOTH_ALL, IR.Target.YOUR_ALL):
@@ -3581,10 +3593,19 @@ def query_hp_modifier(pl, spot, opp=None):
             continue
         if not conditions_met(eff, pl, opp or pl, holder):
             continue
+        # "The effect of Vibrant Dance doesn't stack."
+        if re.search(r"doesn['’]t stack", eff.text or ""):
+            if eff.name in once:
+                continue
+            once.add(eff.name)
         amount = act.amount or 0
-        per = act.filter.get("per_prize_taken")
-        if per:
+        # Resilient Soul: per Prize the opponent has taken. effective_hp
+        # passes no opponent, which read as none taken all game.
+        if act.filter.get("per_prize_taken"):
             amount *= (STARTING_PRIZES - (opp.prizes if opp else STARTING_PRIZES))
+        per_e = act.filter.get("per_self_energy")
+        if per_e:
+            amount *= _typed_energy_units(pl, spot, per_e)
         total += amount
     return total
 

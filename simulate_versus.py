@@ -3190,6 +3190,16 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     if any(a.op == IR.Op.FILL_OPPONENT_BENCH for a in eff.actions) \
             and not _flute_worth_it(pl, opp):
         return False
+    if POL.knob(pl, "switch_pick") and len(actions) == 1 \
+            and actions[0].op == IR.Op.SWITCH and actions[0].target == IR.Target.YOUR_ACTIVE \
+            and not (actions[0].filter or {}).get("gust") \
+            and getattr(pl, "_forced_self_switch", "unset") == "unset":
+        # Switch went to the healthiest body every time it was drawn: into
+        # a Munkidori with no Energy while a loaded Snorlax was attacking.
+        pick = _trainer_switch_pick(pl, opp, actions[0].filter or {})
+        if pick is None:
+            return False
+        pl._forced_self_switch = pick
     # A Trainer whose text is a coin flip has to actually flip. Crushing
     # Hammer is "Flip a coin. If heads, discard an Energy" and was resolving
     # unconditionally once it resolved at all.
@@ -3234,6 +3244,39 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         pl.played_supporters_this_turn.add(name)
     log.append(f"  {pl.name}: {name} (from card text)")
     return True
+
+
+def _trainer_switch_pick(pl, opp, f):
+    """Index into pl.bench for a Switch played from hand, or None to keep
+    the card: the Benched Pokemon that does the most this turn, counting
+    the attachment still to come, and only when that beats the Active. An
+    Asleep or Paralyzed Active does nothing."""
+    if pl.active is None:
+        return None
+
+    def worth(p):
+        v = _ready_damage(pl, opp, p)
+        if v or energy_shortfall(pl, p) != 1:
+            return v
+        idx = _helpful_energy(pl, p)
+        if idx is None:
+            return 0
+        n_e, n_names = len(p.energy), len(p.energy_names)
+        name = pl.hand[idx][1]
+        p.energy.extend(energy_provisions(name, _CARDS_BY_NAME,
+                                          (pl.POKEMON.get(p.name) or {}).get("stage")))
+        p.energy_names.append(name)
+        try:
+            return _ready_damage(pl, opp, p)
+        finally:
+            del p.energy[n_e:], p.energy_names[n_names:]
+    here = 0 if pl.active.conditions & CANNOT_ATTACK else worth(pl.active)
+    cands = [i for i, p in enumerate(pl.bench)
+             if not f.get("type") or f["type"] in (pl.POKEMON.get(p.name, {}).get("types") or [])]
+    if not cands:
+        return None
+    best = max(cands, key=lambda i: worth(pl.bench[i]))
+    return best if worth(pl.bench[best]) > here else None
 
 
 _PRIZE_BONUS_RE = _re.compile(
@@ -4582,8 +4625,8 @@ def _attack_condition(cond, pl, opp, spot):
     oinfo = (opp.POKEMON.get(oa.name) or {}) if oa else {}
     m = _re.fullmatch(r"this pokemon has (\d+) or more (\w+) energy attached", c)
     if m:
-        t = m.group(2).capitalize()
-        return sum(1 for e in spot.energy if t in e) >= int(m.group(1))
+        # Energy, not cards: under Wild Growth one Basic Grass is two.
+        return AE._typed_energy_units(pl, spot, m.group(2).capitalize()) >= int(m.group(1))
     m = _re.fullmatch(r"this pokemon has any (\w+) energy attach(?:ed|es)", c)
     if m:
         return any(m.group(1).capitalize() in e for e in spot.energy)
@@ -5704,6 +5747,14 @@ def attach_energy(pl, cards_by_name, log):
                   and energy_shortfall(pl, p) > 0 and _helpful_energy(pl, p) is not None]
         if helped:
             target = max(helped, key=lambda p: _potential_damage(pl, p))
+    overflow = POL.knob(pl, "overflow_attach")
+    if overflow and (target is None or (overflow > 1 and target is not pl.active)):
+        # Nobody is short of an attack (or, at 2, only a Benched Pokemon
+        # is): the attachment went nowhere. Put it where one more Energy
+        # still does something.
+        best = _overflow_target(pl, hp_only=target is not None and overflow == 2)
+        if best is not None:
+            target = best
     if target is None:
         return
     idx = _energy_for(pl, target)
@@ -5715,6 +5766,55 @@ def attach_energy(pl, cards_by_name, log):
     target.energy_names.append(name)
     log.append(f"  {pl.name}: attaches {name} to {target.name}")
     energy_on_attach(pl, target, name, log)
+
+
+def _attach_gain(pl, opp, spot, name):
+    """(damage, HP) one more `name` on `spot` adds: its best payable attack
+    against their Active (Giant Bouquet, Powerful Needles), its HP (Alolan
+    Exeggutor's Scale Up at 6 Grass Energy), and, on the Active, the damage
+    retaliation that counts Energy puts back (Chesnaught's Needly Armor)."""
+    info = pl.POKEMON.get(spot.name) or {}
+
+    def snap():
+        hit = ret = 0
+        if opp is not None and opp.active is not None:
+            for a in info.get("attacks") or []:
+                if can_pay(effective_cost(pl, spot, a["cost"], opp, a.get("name")),
+                           provided(pl, spot)):
+                    random.setstate(state)
+                    hit = max(hit, attack_damage(pl, opp, spot, a, record=False))
+            if spot is pl.active:
+                ret = 10 * AE.query_retaliation(pl, opp.active, opp)
+        return hit + ret, effective_hp(pl, spot)
+    state = random.getstate()
+    n_e, n_names = len(spot.energy), len(spot.energy_names)
+    try:
+        dmg0, hp0 = snap()
+        spot.energy.extend(energy_provisions(name, _CARDS_BY_NAME, info.get("stage")))
+        spot.energy_names.append(name)
+        dmg1, hp1 = snap()
+    finally:
+        del spot.energy[n_e:], spot.energy_names[n_names:]
+        random.setstate(state)
+    return dmg1 - dmg0, hp1 - hp0
+
+
+def _overflow_target(pl, hp_only=False):
+    """The Pokemon one more Energy from hand does the most for, or None.
+    hp_only: only an HP threshold one attachment away counts."""
+    opp = getattr(pl, "_opp_ref", None)
+    best, best_gain = None, 0
+    for spot in pl.in_play():
+        if getattr(spot, "attach_locked", 0):
+            continue
+        idx = _energy_for(pl, spot)
+        if idx is None:
+            continue
+        dmg, hp = _attach_gain(pl, opp, spot, pl.hand[idx][1])
+        gain = hp if hp_only else dmg + hp
+        if gain > best_gain:
+            best, best_gain = spot, gain
+    return best
 
 
 _ON_ATTACH_RE = _re.compile(r"when you attach this card from your hand to (?:a |an )?"
@@ -5877,10 +5977,41 @@ def hp_tools():
                 continue
             if "Pokémon Tool" not in (card.get("subtypes") or []):
                 continue
-            m = _re.search(r"gets \+(\d+) HP", " ".join(card.get("rules") or []))
+            text = " ".join(card.get("rules") or [])
+            m = _re.search(r"gets \+(\d+) HP", text)
             if m:
+                # "The Cynthia's Pokemon this card is attached to" / "The
+                # Ancient Pokemon ...": +70 and +60 went on anything.
+                q = _re.search(r"[Tt]he ([\w'’ ]+?) Pok[eé]mon this card is attached to", text)
                 _HP_TOOLS[name] = int(m.group(1))
+                if q:
+                    _HP_TOOL_WHO[name] = q.group(1)
     return _HP_TOOLS
+
+
+_HP_TOOL_WHO = {}
+
+
+def tool_hp(pl, spot, name=None):
+    """HP the Tool on `spot` (or `name`, were it attached) adds, if `spot`
+    is a Pokemon it names."""
+    name = name or getattr(spot, "tool", None)
+    amount = hp_tools().get(name, 0)
+    who = _HP_TOOL_WHO.get(name)
+    if amount and who and not _tool_names_holder(pl, spot, who):
+        return 0
+    return amount
+
+
+def _tool_names_holder(pl, spot, who):
+    """Is `spot` one of "the <who> Pokemon"? A type, a subtype (Ancient,
+    Future, Tera) or a name prefix (Cynthia's)."""
+    info = pl.POKEMON.get(spot.name) or {}
+    if who.capitalize() in M.REAL_TYPES:
+        return who.capitalize() in (AE.query_types(pl, spot, None) or info.get("types") or [])
+    if who.capitalize() in (info.get("subtypes") or []):
+        return True
+    return spot.name.lower().startswith(who.lower())
 
 
 _HOLDER_TYPE_RE = _re.compile(r"the (\w+) pok[eé]mon this card is attached to", _re.I)
@@ -5945,7 +6076,7 @@ def effective_hp(pl, spot):
     through here -- reading printed HP directly meant an HP Tool was worth
     nothing, and the Tool was never even attached."""
     base = pl.POKEMON[spot.name]["hp"]
-    return (base + hp_tools().get(getattr(spot, "tool", None), 0)
+    return (base + tool_hp(pl, spot)
             + AE.query_hp_modifier(pl, spot)
             + sum(a.amount or 0 for _, a in energy_passives(pl, spot, IR.Op.MODIFY_HP)))
 
@@ -5992,6 +6123,8 @@ def attach_tools(pl, log):
             # Rotom ex's Multi Adapter allows a second Tool; without it a
             # Pokemon holds exactly one.
             if not pl.active:
+                continue
+            if name in hp_tools() and not tool_hp(pl, pl.active, name):
                 continue
             if pl.active.tool and not AE.query_extra_tool_slots(pl, pl.active):
                 continue
