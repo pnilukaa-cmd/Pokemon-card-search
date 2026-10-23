@@ -2124,6 +2124,19 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 log.append(f"    gust up {tgt.name}")
                 return True
             return False
+        if act.filter.get("promote_self"):
+            # This Pokemon, from the Bench, when it beats the Active.
+            if source is None or source not in pl.bench or pl.active is None:
+                return False
+            if SWITCH_RANK(pl, opp, source) <= SWITCH_RANK(pl, opp, pl.active):
+                return False
+            pl.bench.remove(source)
+            leaving_active(pl.active, log)
+            pl.bench.append(pl.active)
+            pl.active = source
+            log.append(f"    switch in {source.name}")
+            opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
+            return True
         if pl.bench and pl.active and act.filter.get("choose"):
             # "Switch 1 of your Benched <type> Pokemon" is a choice, and is
             # only worth making when the Pokemon coming up is better than

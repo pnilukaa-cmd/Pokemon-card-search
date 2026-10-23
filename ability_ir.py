@@ -1731,6 +1731,13 @@ def _r(m, text):
     f = {"gust": False}
     if re.search(r"you may switch (?:this pok[eé]mon|your active pok[eé]mon) with", text, re.I):
         f["optional"] = True
+    # Mega Dragonite ex's Sky Transport: a free pivot before the attack, so
+    # it picks the Benched Pokemon that does the most and only switches if
+    # that beats the Active. Read as "switch out the Active", it brought up
+    # the healthiest body, and two Dragonite switched back and forth.
+    if re.search(r"once during your turn, you may use this ability\. switch your active"
+                 r" pok[eé]mon with 1 of your benched", text, re.I):
+        f["choose"] = True
     if m.group(1):
         f["type"] = m.group(1).capitalize()
     return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
@@ -2207,6 +2214,12 @@ def _r(m, text):
     # played, not a Benched Pokemon of your choice.
     if re.search(r"when you play this pok[eé]mon from your hand", text, re.I):
         f["self_in"] = True
+    # Meowscarada's Showtime, Linoone's Excited Dash: "if this Pokemon is on
+    # your Bench, ... you may switch it with your Active Pokemon" is THIS
+    # Pokemon coming up, not a Benched Pokemon of your choice.
+    elif re.search(r"if this pok[eé]mon is on your bench,[^.]*?you may switch it with your active",
+                   text, re.I):
+        f["promote_self"] = True
     return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE, f)]
 
 

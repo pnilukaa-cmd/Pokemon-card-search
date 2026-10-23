@@ -6253,5 +6253,34 @@ def test_heals_reach_the_one_pokemon_they_name():
     check("Evolutionary Guidance needs an Energy on Dragonair",
           not me.hand, me.hand)
 
+def test_sky_transport_brings_up_the_attacker_once():
+    """Mega Dragonite ex's Sky Transport ("Once during your turn, you may
+    use this Ability. Switch your Active Pokemon with 1 of your Benched
+    Pokemon") compiled as a forced switch-out, which brings up the
+    healthiest body. With two Dragonite they switched back and forth (13
+    times a game) and the loaded Salazzle ex never came up to attack."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Salazzle ex POR 16\n1 Mega Dragonite ex ASC 152\n"
+                "1 Mega Kangaskhan ex MEG 104\n1 Okidogi ex SFA 36\n\nEnergy: 56\n56 Basic Fire Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand, op.bench = [], [], []
+    me.energy_types = {"Fire"}
+    me.active = V.InPlay("Mega Dragonite ex", 1)
+    me.bench = [V.InPlay("Mega Kangaskhan ex", 1), V.InPlay("Mega Dragonite ex", 1),
+                V.InPlay("Salazzle ex", 1)]
+    me.bench[2].energy, me.bench[2].energy_names = [["Fire"]] * 2, ["Fire Energy"] * 2
+    me.deck = [("Energy", "Fire Energy")] * 10
+    op.active = V.InPlay("Okidogi ex", 1)
+    V.use_abilities(me, op, 5, [])
+    check("Sky Transport switches the loaded Salazzle ex in and leaves it there",
+          me.active.name == "Salazzle ex", me.active.name)
+
 if __name__ == "__main__":
     sys.exit(main())
