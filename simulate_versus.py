@@ -2993,6 +2993,57 @@ def _each_attach_order(pl, opp, pool, costly):
 AE.EACH_ATTACH_ORDER = _each_attach_order
 
 
+def _threat_to(pl, opp, spot):
+    """The most the opponent's Active could do to `spot` next turn, with
+    one more Energy than it has now."""
+    a = opp.active
+    if a is None or spot is None:
+        return 0
+    best = 0
+    for atk in (opp.POKEMON.get(a.name) or {}).get("attacks") or []:
+        if len(atk.get("cost") or []) > a.energy_count() + 1:
+            continue
+        try:
+            best = max(best, attack_damage(opp, pl, a, atk, record=False))
+        except Exception:
+            continue
+    return best
+
+
+def _heal_pick(pl, opp, cands, f, amount):
+    """Which Pokemon "heal ... from 1 of your Pokemon" heals. A heal that
+    costs the Pokemon its Energy (Wally's Compassion returns it all to the
+    hand; Super Potion discards one) went on whatever was most damaged:
+    a Mega Kangaskhan ex with three Energy, healed 100, could not attack
+    again for three turns. With heal_cost_aware, a Pokemon carrying Energy
+    is healed only when it is Active, the opponent can Knock it Out next
+    turn, and the heal means it can't; one with no Energy to lose is
+    always fine. Nobody qualifying keeps the card in hand."""
+    most = sorted(cands, key=amount, reverse=True)
+    if not f.get("then") or not POL.knob(pl, "heal_cost_aware"):
+        return most[:1]
+    def needs_energy(h):
+        # Energy matters only to a Pokemon with an attack this deck can pay
+        # for: Mega Dragonite ex's Ryuno Glide costs Water and Lightning,
+        # so in a Fire deck its Energy coming back to the hand is a gain.
+        return any(all(c == "Colorless" or c in pl.energy_types for c in a["cost"])
+                   for a in (pl.POKEMON.get(h.name) or {}).get("attacks") or [])
+    free = [h for h in most if not h.energy or not needs_energy(h)]
+    if free:
+        return free[:1]
+    for h in most:
+        if h is not pl.active:
+            continue
+        left = effective_hp(pl, h) - h.damage
+        threat = _threat_to(pl, opp, h)
+        if left <= threat < effective_hp(pl, h):
+            return [h]
+    return []
+
+
+AE.HEAL_PICK = _heal_pick
+
+
 AE.ATTACH_RANK = _attach_rank
 
 

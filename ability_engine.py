@@ -860,6 +860,10 @@ BENCH_LIMIT = lambda pl: 5
 # when the recipient pays for it (Sinister Surge's 2 damage counters). Set
 # by the simulator; this default is the emptiest first.
 EACH_ATTACH_ORDER = lambda pl, opp, pool, costly: sorted(pool, key=lambda p: p.energy_count())
+# The one Pokemon "heal ... from 1 of your Pokemon" heals, as a list of at
+# most one ([] declines); `amount(spot)` is what it would heal. Set by the
+# simulator; this default is the one it heals most.
+HEAL_PICK = lambda pl, opp, cands, f, amount: sorted(cands, key=amount, reverse=True)[:1]
 # Which (Pokemon in play, card it becomes) an evolve-from-deck effect takes
 # next, out of every legal pair; set by the simulator.
 EVOLVE_PICK = lambda pl, opp, cands: cands[0]
@@ -1517,8 +1521,9 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         def _amount(h):
             return h.damage if f.get("all") else min(h.damage, (act.amount or 0))
         if f.get("one"):
-            # "1 of your Pokemon": the one it heals most.
-            hits = sorted((h for h in hits if _amount(h) > 0), key=_amount, reverse=True)[:1]
+            # "1 of your Pokemon": the player's pick (default: the one it
+            # heals most).
+            hits = HEAL_PICK(pl, opp, [h for h in hits if _amount(h) > 0], f, _amount)
         healed = 0
         for h in hits:
             amt = _amount(h)

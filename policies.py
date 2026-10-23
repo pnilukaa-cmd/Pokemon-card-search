@@ -117,6 +117,13 @@ GREEDY = {
     # +10.46 +/- 0.53, its tuned Toxtricity list +3.78; the Glass Trumpet
     # field decks +0.27 (Raging Bolt) and +0.64 (Tauros).
     "each_attach_rank": int(__import__("os").environ.get("EACH_ATTACH_RANK", 1)),
+    # A heal that costs the healed Pokemon its Energy (Wally's Compassion,
+    # Super Potion) goes on a Pokemon with no Energy first, and on one with
+    # Energy only when it would otherwise be Knocked Out next turn.
+    # Measured 2026-10-23, 200 games a matchup: the submitted Mega Dragonite
+    # ex / Kangaskhan ex list +2.43 +/- 0.52, its 12-Energy version +2.54;
+    # the two field decks with such a heal +0.93 and -0.28.
+    "heal_cost_aware": int(__import__("os").environ.get("HEAL_COST_AWARE", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -6216,34 +6216,37 @@ def test_heals_reach_the_one_pokemon_they_name():
         me._opp_ref, op._opp_ref = op, me
         me.hand, op.hand, op.bench = [], [], []
         me.energy_types = {"Fire"}
+        # Their Okidogi ex can Chain-Crazed (130) next turn: the Mega at 100
+        # HP left is in range, so even a cost-aware pick heals it.
         op.active = V.InPlay("Okidogi ex", 1)
-        me.active = V.InPlay("Okidogi ex", 1)
+        op.active.energy, op.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+        me.active = V.InPlay("Mega Kangaskhan ex", 1)
         me.active.damage = 200
-        me.active.energy, me.active.energy_names = [["Fire"]] * 2, ["Fire Energy"] * 2
-        me.bench = [V.InPlay("Mega Kangaskhan ex", 1), V.InPlay("Munkidori", 1)]
-        me.bench[0].damage = 100
-        me.bench[0].energy, me.bench[0].energy_names = [["Fire"]] * 3, ["Fire Energy"] * 3
+        me.active.energy, me.active.energy_names = [["Fire"]] * 3, ["Fire Energy"] * 3
+        me.bench = [V.InPlay("Okidogi ex", 1), V.InPlay("Munkidori", 1)]
+        me.bench[0].damage = 200
+        me.bench[0].energy, me.bench[0].energy_names = [["Fire"]] * 2, ["Fire Energy"] * 2
         me.bench[1].damage = 50
         return me, op
     me, op = board()
     me.hand = [("Supporter", "Wally's Compassion")]
     V.play_supporter(me, op, 5, [])
     check("Wally's Compassion heals only the Mega and returns its Energy to hand",
-          me.active.damage == 200 and me.bench[0].damage == 0 and me.bench[0].energy_count() == 0
+          me.active.damage == 0 and me.active.energy_count() == 0 and me.bench[0].damage == 200
           and me.bench[1].damage == 50 and sum(1 for k, _ in me.hand if k == "Energy") == 3,
           ([(p.name, p.damage, p.energy_count()) for p in me.in_play()], me.hand))
     me, op = board()
     me.hand = [("Supporter", "Jacinthe")]
     V.play_supporter(me, op, 5, [])
     check("Jacinthe heals the Psychic Pokemon only",
-          me.active.damage == 200 and me.bench[0].damage == 100 and me.bench[1].damage == 0,
+          me.active.damage == 200 and me.bench[0].damage == 200 and me.bench[1].damage == 0,
           [(p.name, p.damage) for p in me.in_play()])
     me, op = board()
     me.hand = [("Item", "Potion")]
     V.play_items(me, op, 5, [], False)
     check("Potion heals one Pokemon, not all of them",
           sorted([me.active.damage, me.bench[0].damage, me.bench[1].damage]) in
-          ([50, 70, 200], [20, 100, 200], [50, 100, 170]),
+          ([50, 170, 200], [20, 200, 200]),
           [(p.name, p.damage) for p in me.in_play()])
     me, op = board()
     me.active = V.InPlay("Okidogi ex", 1)
@@ -6281,6 +6284,38 @@ def test_sky_transport_brings_up_the_attacker_once():
     V.use_abilities(me, op, 5, [])
     check("Sky Transport switches the loaded Salazzle ex in and leaves it there",
           me.active.name == "Salazzle ex", me.active.name)
+
+def test_wallys_compassion_spares_the_attackers_energy():
+    """Wally's Compassion heals a Mega Evolution Pokemon ex and puts all its
+    Energy into your hand. It went on whatever was most damaged: a Mega
+    Kangaskhan ex with three Energy and 200 damage, safe from the Dreepy
+    in front of it, gave up three turns of attacks while a Mega Dragonite
+    ex, whose Energy it can never use, sat on the Bench with 100."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Mega Kangaskhan ex MEG 104\n1 Mega Dragonite ex ASC 152\n1 Dreepy PRE 71\n\n"
+                "Trainer: 1\n1 Wally's Compassion MEG 132\n\nEnergy: 56\n56 Basic Fire Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand, op.bench = [], [], []
+    me.energy_types = {"Fire"}
+    me.active = V.InPlay("Mega Kangaskhan ex", 1)
+    me.active.damage = 200
+    me.active.energy, me.active.energy_names = [["Fire"]] * 3, ["Fire Energy"] * 3
+    me.bench = [V.InPlay("Mega Dragonite ex", 1)]
+    me.bench[0].damage = 100
+    me.bench[0].energy, me.bench[0].energy_names = [["Fire"]], ["Fire Energy"]
+    op.active = V.InPlay("Dreepy", 1)
+    me.hand = [("Supporter", "Wally's Compassion")]
+    V.play_supporter(me, op, 5, [])
+    check("Wally's Compassion heals the Dragonite and leaves the Kangaskhan's Energy",
+          me.bench[0].damage == 0 and me.active.energy_count() == 3 and me.active.damage == 200,
+          [(p.name, p.damage, p.energy_count()) for p in me.in_play()])
 
 if __name__ == "__main__":
     sys.exit(main())
