@@ -1940,8 +1940,40 @@ def on_bench_entry(pl, spot, log=None):
                    f"on {spot.name}")
 
 
+def _engine_line(pl):
+    """Names on the way to an engine not yet in play: a Pokemon whose
+    passive Ability works for your whole side (Meganium's Wild Growth,
+    Ludicolo's Vibrant Dance), and what it evolves from. Rare Candy took the
+    first Stage 2 in hand and a search the first match, so a Chesnaught /
+    Meganium deck had Wild Growth up in a quarter of its games by turn 4."""
+    if not POL.knob(pl, "engine_first"):
+        return set()
+    cache = getattr(pl, "_engine_names", None)
+    if cache is None:
+        # Evolved engines only: a Basic one (Latias ex's Skyliner) goes
+        # straight to the Bench, and ranking it ahead in searches measured
+        # -1.50 on the Raging Bolt list.
+        cache = {n for n in pl.POKEMON
+                 if (pl.POKEMON.get(n) or {}).get("stage") != "Basic"
+                 and any(e.trigger == IR.Trigger.PASSIVE and not e.unsupported
+                        and any(a.target == IR.Target.YOUR_ALL for a in e.actions)
+                        for e in pl.EFFECTS.get(n, []))}
+        pl._engine_names = cache
+    here = set(pl.in_play_names())
+    out = set()
+    for n in cache - here:
+        while n and n not in out:
+            out.add(n)
+            n = (pl.POKEMON.get(n) or {}).get("evolves_from")
+    return out
+
+
 def try_evolve(pl, opp, turn, log, first_turn):
-    for kind, name in list(pl.hand):
+    line = _engine_line(pl)
+    hand = list(pl.hand)
+    if line:
+        hand.sort(key=lambda c: c[1] not in line)
+    for kind, name in hand:
         if kind != "Pokemon":
             continue
         pre = pl.POKEMON[name]["evolves_from"]
@@ -2002,34 +2034,37 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
     if first_turn or turn <= 1:
         return False
     s2 = [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Stage 2"]
-    for spot in pl.in_play():
-        if turn <= spot.entered_turn or pl.POKEMON[spot.name]["stage"] != "Basic":
-            continue
-        for name in s2:
-            s1 = pl.POKEMON[name]["evolves_from"]
-            # Rare Candy says "skipping the Stage 1", so the middle card
-            # only has to exist in the CARD POOL -- not in this deck. Reading
-            # it out of pl.POKEMON (which is built from the decklist) made
-            # Rare Candy silently refuse in every deck that runs the Basic
-            # and the Stage 2 without the Stage 1, which is the normal way
-            # to build a Rare Candy line.
-            mid = M.info_named(pl.POKEMON, s1)
-            if mid:
-                s1_from = mid["evolves_from"]
-            else:
-                s1_from = _evolves_from_in_pool(s1)
-            if s1_from == M.base_of(pl.POKEMON, spot.name):
-                pl.remove_from_hand("Item", "Rare Candy")
-                pl.discard.append("Rare Candy")
-                pl.remove_from_hand("Pokemon", name)
-                spot.under.append(spot.name)
-                spot.name = name
-                spot.evolved_this_turn = True
-                AE.clear_attack_locks(spot)
-                log.append(f"  {pl.name}: Rare Candy -> {name}")
-                AE.opponent_event(pl, opp, "evolve_from_hand", spot, log)
-                use_abilities(pl, opp, turn, log, just_evolved=spot)
-                return True
+    pairs = [(spot, name) for spot in pl.in_play()
+             if turn > spot.entered_turn and pl.POKEMON[spot.name]["stage"] == "Basic"
+             for name in s2]
+    line = _engine_line(pl)
+    if line:
+        pairs.sort(key=lambda p: p[1] not in line)
+    for spot, name in pairs:
+        s1 = pl.POKEMON[name]["evolves_from"]
+        # Rare Candy says "skipping the Stage 1", so the middle card
+        # only has to exist in the CARD POOL -- not in this deck. Reading
+        # it out of pl.POKEMON (which is built from the decklist) made
+        # Rare Candy silently refuse in every deck that runs the Basic
+        # and the Stage 2 without the Stage 1, which is the normal way
+        # to build a Rare Candy line.
+        mid = M.info_named(pl.POKEMON, s1)
+        if mid:
+            s1_from = mid["evolves_from"]
+        else:
+            s1_from = _evolves_from_in_pool(s1)
+        if s1_from == M.base_of(pl.POKEMON, spot.name):
+            pl.remove_from_hand("Item", "Rare Candy")
+            pl.discard.append("Rare Candy")
+            pl.remove_from_hand("Pokemon", name)
+            spot.under.append(spot.name)
+            spot.name = name
+            spot.evolved_this_turn = True
+            AE.clear_attack_locks(spot)
+            log.append(f"  {pl.name}: Rare Candy -> {name}")
+            AE.opponent_event(pl, opp, "evolve_from_hand", spot, log)
+            use_abilities(pl, opp, turn, log, just_evolved=spot)
+            return True
     return False
 
 
@@ -2061,11 +2096,17 @@ def _search_ranker(pl):
     held = {n for k, n in pl.hand if k == "Pokemon"}
     candy = any(n == "Rare Candy" for _, n in pl.hand)
     room = len(pl.bench) < bench_cap(pl)
+    line = _engine_line(pl)
 
     def stage1_of(name):
         return (pl.POKEMON.get(name) or {}).get("evolves_from")
 
     def rank(card):
+        r = _rank(card)
+        # Ahead of anything else in the same tier, never past a better one.
+        return r - 0.5 if card[1] in line and r < 9 else r
+
+    def _rank(card):
         kind, name = card
         if kind != "Pokemon":
             return 9

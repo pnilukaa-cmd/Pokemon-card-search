@@ -140,6 +140,14 @@ GREEDY = {
     # 8 field decks with Switch +0.28 to +5.83, none worse (Crabominable
     # +5.83, Festival Lead +5.62, Trevenant +3.65).
     "switch_pick": int(__import__("os").environ.get("SWITCH_PICK", 1)),
+    # Rare Candy, evolution and Pokemon searches go first to the line of an
+    # evolved Pokemon whose passive Ability works for your whole side (Wild
+    # Growth, Archaludon's Metal Bridge) while none is in play. 0: first match.
+    # Measured 2026-10-23, 200 games a matchup: a Meganium / Alolan
+    # Exeggutor list +2.27 +/- 0.44, its Chesnaught version +0.03; the
+    # field decks it touches +0.92, +0.82, +0.20. With Basic engines
+    # included as well, the Raging Bolt list (Latias ex) measured -1.50.
+    "engine_first": int(__import__("os").environ.get("ENGINE_FIRST", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

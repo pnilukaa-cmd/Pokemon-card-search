@@ -6641,5 +6641,42 @@ def test_sky_transport_moves_an_asleep_attacker():
     check("Sky Transport keeps an awake Kangaskhan, swaps an Asleep one for Salazzle ex",
           got == ["Mega Kangaskhan ex", "Salazzle ex"], got)
 
+def test_rare_candy_and_evolution_go_to_the_engine_first():
+    """Rare Candy took the first Stage 2 in hand and evolution the first
+    match, so with Chesnaught ahead of Meganium in hand the Candy went to
+    Chesnaught and Wild Growth -- which doubles every Basic Grass Energy
+    the deck attaches -- stayed off. A Chesnaught / Meganium list had it in
+    play in under a quarter of its games by turn 4."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 6\n1 Chespin CRI 5\n1 Chesnaught CRI 7\n1 Chikorita ASC 8\n1 Bayleef MEG 9\n"
+                "1 Meganium MEG 10\n1 Mega Meganium ex ASC 10\n\nTrainer: 1\n1 Rare Candy MEG 125\n\n"
+                "Energy: 53\n53 Basic Grass Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def board(hand, active="Chespin", bench=("Chikorita",)):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        op.hand, op.bench = [], []
+        me.active = V.InPlay(active, 1)
+        me.bench = [V.InPlay(n, 1) for n in bench]
+        me.hand = list(hand)
+        op.active = V.InPlay("Chespin", 1)
+        return me, op
+    me, op = board([("Pokemon", "Chesnaught"), ("Pokemon", "Meganium"), ("Item", "Rare Candy")])
+    V.effect_rare_candy(me, op, 5, [], False)
+    got = [p.name for p in me.in_play()]
+    check("Rare Candy: Meganium before Chesnaught while no Meganium is in play",
+          got == ["Chespin", "Meganium"], got)
+    me, op = board([("Pokemon", "Mega Meganium ex"), ("Pokemon", "Meganium")],
+                   active="Bayleef", bench=())
+    V.try_evolve(me, op, 5, [], False)
+    check("Bayleef evolves into Meganium before Mega Meganium ex",
+          me.active.name == "Meganium", me.active.name)
+
 if __name__ == "__main__":
     sys.exit(main())
