@@ -1,0 +1,24 @@
+Pokémon: 14
+4 Orthworm ex SCR 110
+4 Duraludon SCR 106
+3 Archaludon SCR 107
+3 Cobalion ex CRI 103
+
+Trainer: 31
+4 Ultra Ball MEG 131
+4 Boss's Orders MEG 114
+4 Lillie's Determination MEG 119
+2 Judge POR 76
+2 Switch MEG 130
+2 Air Balloon BLK 79
+3 Rescue Board TEF 159
+4 Night Stretcher MEG 173
+1 Deluxe Bomb SCR 134
+2 Poké Pad ASC 198
+3 Philippe CRI 110
+
+Energy: 15
+13 Basic Metal Energy
+2 Spiky Energy JTG 159
+
+Total Cards: 60

@@ -1,0 +1,26 @@
+Pokémon: 14
+4 Fomantis PBL 3
+4 Lurantis ex PBL 4
+3 Maractus BLK 8
+1 Erika's Oddish ASC 1
+1 Erika's Gloom ASC 2
+1 Erika's Vileplume ex ASC 3
+
+Trainer: 31
+4 Potion POR 83
+3 Arven's Sandwich DRI 161
+2 Lumiose Galette POR 78
+1 Poké Vital A SFA 62
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin TEF 144
+2 Rare Candy MEG 125
+3 Boss's Orders MEG 114
+2 Drayton SSP 174
+2 Lillie's Determination MEG 119
+2 Night Stretcher SFA 61
+2 Switch MEG 130
+
+Energy: 15
+15 Basic Grass Energy
+
+Total Cards: 60

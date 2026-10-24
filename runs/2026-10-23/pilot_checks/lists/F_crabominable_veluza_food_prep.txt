@@ -1,0 +1,33 @@
+Pokémon: 17
+4 Veluza SCR 45
+2 Crabrawler SCR 87
+2 Crabominable SCR 42
+3 Dunsparce JTG 120
+3 Dudunsparce PRE 80
+1 Fezandipiti ex ASC 142
+1 Meowth ex POR 62
+1 Shaymin DRI 10
+
+Trainer: 36
+4 Kofu SCR 138
+4 Team Rocket's Petrel ASC 207
+4 Poké Pad ASC 198
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin ASC 184
+3 Team Rocket's Factory ASC 203
+2 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Switch MEG 130
+1 Brilliant Blender SSP 164
+1 Special Red Card CRI 82
+1 Night Stretcher ASC 196
+1 Sacred Ash DRI 168
+1 Black Belt's Training PRE 96
+1 Redeemable Ticket JTG 156
+1 Brave Bangle WHT 80
+
+Energy: 7
+6 Basic Water Energy
+1 Bubbly Water Energy CRI 84
+
+Total Cards: 60

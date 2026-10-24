@@ -1,0 +1,25 @@
+Pokémon: 15
+3 Chien-Pao SSP 56
+2 Arrokuda DRI 62
+2 Barraskewda DRI 63
+3 Finizen TWM 59
+3 Palafin TWM 60
+2 Palafin ex TWM 61
+
+Trainer: 33
+4 Boss's Orders MEG 114
+4 Crispin SCR 133
+4 Lacey SCR 139
+4 Ultra Ball MEG 131
+4 Buddy-Buddy Poffin MEG 167
+3 Switch MEG 130
+3 Night Stretcher MEG 173
+2 Great Haul Net CRI 78
+2 Rescue Board TEF 159
+2 Air Balloon ASC 181
+1 Prime Catcher TEF 157
+
+Energy: 12
+12 Basic Water Energy
+
+Total Cards: 60

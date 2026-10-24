@@ -1,0 +1,27 @@
+Pokémon: 21
+4 Chespin CRI 5
+2 Quilladin CRI 6
+3 Chesnaught CRI 7
+3 Chikorita ASC 8
+2 Bayleef MEG 9
+2 Meganium MEG 10
+1 Mega Meganium ex ASC 10
+2 Teal Mask Ogerpon ex TWM 190
+2 Shaymin POR 3
+
+Trainer: 22
+3 Rare Candy MEG 125
+4 Ultra Ball MEG 131
+2 Buddy-Buddy Poffin ASC 184
+2 Forest of Vitality MEG 117
+1 Deluxe Bomb SCR 134
+4 Lillie's Determination MEG 119
+1 Night Stretcher MEG 173
+2 Switch MEG 130
+2 Bug Catching Set TWM 143
+1 Pokégear 3.0 BLK 84
+
+Energy: 17
+17 Basic Grass Energy
+
+Total Cards: 60

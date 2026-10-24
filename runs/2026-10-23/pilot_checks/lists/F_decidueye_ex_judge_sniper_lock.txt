@@ -1,0 +1,28 @@
+Pokémon: 19
+4 Rowlet SFA 3
+2 Dartrix SFA 4
+3 Decidueye ex POR 100
+4 Scatterbug POR 7
+1 Spewpa POR 8
+3 Vivillon POR 9
+2 Budew ASC 16
+
+Trainer: 32
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+4 Rare Candy MEG 125
+2 Pokégear 3.0 BLK 84
+2 Switch MEG 130
+1 Night Stretcher MEG 173
+1 Grand Tree SCR 136
+4 Judge POR 76
+3 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Black Belt's Training ASC 255
+2 Dawn PFL 118
+1 Carmine TWM 145
+
+Energy: 9
+9 Basic Grass Energy
+
+Total Cards: 60
