@@ -58,3 +58,20 @@ Every deck can move. The changes most likely to move a deck:
 - **Tried and removed** (measured neutral or negative): coin_expectation,
   denial_weight, gust_needs_attacker, painting_value, hand_cost_hold,
   bench_after_abilities, selfshuffle_keep_bench, overflow_attach.
+
+**What moved.** Twenty strong new decks pull every returning deck's mean
+down, so the fair comparison is against the same 76 opponents as the
+2026-10-08 table. On that basis 45 of the 77 returning decks are within 3
+points (mean shift 3.6). The big movers:
+- **Up:**
+  - `metal_metang_excadrill` and `meta_mega_excadrill`: +20.8 and +19.1.
+  - `salazzle_ex_team_rockets_muk_condition_stack`: +16.7.
+  - `kyurem_vanilluxe_blizzard`: +12.1.
+  - The three Dragapult meta lists: +7.4 to +10.4.
+- **Down:**
+  - `orthworm_ex_metal_retaliation`: −10.4.
+  - `feraligatr_munkidori_damage_transfer`: −6.7.
+  - `study_mega_excadrill_drill_mill`: −6.1.
+  - Team Rocket's Porygon-Z, Tyranitar and Honchkrow lists: −4.7 to −5.4.
+
+Which engine change moved which deck was not measured one change at a time.
