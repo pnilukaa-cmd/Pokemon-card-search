@@ -498,10 +498,11 @@ def _is_special_energy(name):
     name and never appears as a card -- so a name that resolves to a card
     here IS special, and "Basic X Energy" never is.
     """
-    if name.lower().startswith("basic "):
-        return False
-    eff = TRAINER_IR(name)
-    return eff is not None or not name.lower().startswith("basic")
+    # In play a Basic Energy is "Darkness Energy", not "Basic Darkness
+    # Energy", so the old test ("doesn't start with Basic") called every
+    # Basic Energy Special: Enhanced Hammer discarded Basic Energy and
+    # Tyrantrum's +150 HP for Special Energy came on with any Energy.
+    return not _is_basic_energy_name(name)
 
 
 def conditions_met(effect, pl, opp, source, atk=None):
@@ -3394,6 +3395,13 @@ def query_damage_reduction(pl, spot, opp=None):
         if act.target in (IR.Target.YOUR_ALL, IR.Target.BOTH_ALL):
             if not matches_filter(pl, spot, act.filter):
                 continue
+        # Thick Fat: only against the types it names. `opp` is the
+        # attacking player; its Active is the attacker.
+        want = act.filter.get("attacker_types")
+        if want:
+            attacker = getattr(opp, "active", None) if opp is not None and opp is not pl else None
+            if attacker is None or not set(want) & set(query_types(opp, attacker) or []):
+                continue
         # "The effect of Curly Wall doesn't stack": two Bouffalant are -60,
         # not -120.
         if "doesn't stack" in (eff.text or "").lower() or "doesn’t stack" in (eff.text or "").lower():
@@ -3497,7 +3505,7 @@ def query_bench_counters_blocked(owner, spot, placer=None):
     return any(a.filter.get("bench_counters") for a in _stadium_prevents(owner, placer))
 
 
-def query_prevented(pl, spot, opp=None, attacker=None):
+def query_prevented(pl, spot, opp=None, attacker=None, amount=None):
     """Is all damage to `spot` prevented outright?
 
     `attacker` is the Pokemon actually swinging. Several of these walls
@@ -3516,6 +3524,16 @@ def query_prevented(pl, spot, opp=None, attacker=None):
         if act.target == IR.Target.YOUR_BENCHED and spot not in pl.bench:
             continue
         if act.filter.get("no_rule_box") and pl.POKEMON[spot.name]["rule_box"]:
+            continue
+        # Impervious Shell: only a hit of 200 or more. With the amount
+        # unknown the wall is not assumed.
+        floor = act.filter.get("min_damage")
+        if floor is not None and (amount is None or amount < floor):
+            continue
+        # Mighty Shell: only an attacker with Special Energy attached.
+        if act.filter.get("attacker_special_energy") and (
+                attacker is None or not any(_is_special_energy(n) for n in
+                                            (getattr(attacker, "energy_names", None) or []))):
             continue
         cap = act.filter.get("attacker_energy_at_most")
         if cap is not None:

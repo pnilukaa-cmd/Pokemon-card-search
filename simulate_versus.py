@@ -6642,7 +6642,7 @@ def do_attack(pl, opp, log):
     # do_attack's "the game ended" -- so every fully prevented attack WON
     # THE GAME for the attacker: every wall that worked lost on the spot.
     shield = None if ignores else AE.query_attack_shield(opp, opp.active, pl, pl.active)
-    if not ignores and (AE.query_prevented(opp, opp.active, pl, pl.active)
+    if not ignores and (AE.query_prevented(opp, opp.active, pl, pl.active, dmg)
                         or (shield and shield[0] == "prevent")):
         log.append(f"  {pl.name}: {pl.active.name} uses {atk['name']} -- "
                    f"all damage to {opp.active.name} prevented")

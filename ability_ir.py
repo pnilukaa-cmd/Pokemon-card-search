@@ -1598,6 +1598,14 @@ def _r(m, text):
     # alongside, which is the exact opposite of how the card plays.
     if re.search(r"don'?t have a rule box", seg, re.I):
         filt["no_rule_box"] = True
+    # Drednaw's Impervious Shell ("if that damage is 200 or more") and
+    # Carracosta's Mighty Shell ("by your opponent's Pokemon that have any
+    # Special Energy attached") both read as total immunity.
+    mm = re.search(r"if that damage is (\d+) or more", seg, re.I)
+    if mm:
+        filt["min_damage"] = int(mm.group(1))
+    if re.search(r"pok[eé]mon that have any special energy attached", seg, re.I):
+        filt["attacker_special_energy"] = True
     # Terapagos ex's Crown Opal: "by attacks from Basic non-Colorless
     # Pokemon". Dropped, it read as total immunity.
     mm = re.search(r"by attacks from (basic )?(?:non-(\w+) )?pok[eé]mon", seg, re.I)
@@ -1658,15 +1666,32 @@ def _qualifier_filter(words):
 @rule("reduce_damage", r"takes? (\d+) less damage from attacks")
 def _r(m, text):
     tgt = Target.SELF
-    mm = re.search(r"all of your ([\w'’ -]*?)pok[eé]mon take", text, re.I)
+    # Aurorus's Tundra Wall and Klinklang's Gear Coating: "All of your
+    # Pokemon that have any Water Energy attached take 50 less". The
+    # trailing clause hid the "all of your", and both shielded themselves.
+    mm = re.search(r"all of your ([\w'’ -]*?)pok[eé]mon (?:that have any (" + TYPES
+                   + r") energy attached )?take", text, re.I)
     filt = {}
     if mm:
         tgt = Target.YOUR_ALL
         filt = _qualifier_filter((mm.group(1) or "").strip())
+        if mm.group(2):
+            filt["has_energy_type"] = mm.group(2).capitalize()
     mm2 = re.search(r"([\w'’]+) pok[eé]mon \(both yours and your opponent", text, re.I)
     if mm2:
         tgt = Target.BOTH_ALL
-        filt["type"] = mm2.group(1).capitalize()
+        # Granite Cave's "Steven's Pokemon" is a name, not a type: as a type
+        # it matched nothing.
+        if re.fullmatch(TYPES, mm2.group(1), re.I):
+            filt["type"] = mm2.group(1).capitalize()
+        else:
+            filt["family"] = mm2.group(1)
+    # Dewgong's Thick Fat: "from your opponent's Fire or Water Pokemon".
+    # Dropped, it took 30 off every attack.
+    mm3 = re.search(r"less damage from attacks from your opponent's ((?:" + TYPES
+                    + r")(?: or (?:" + TYPES + r"))*) pok[eé]mon", text, re.I)
+    if mm3:
+        filt["attacker_types"] = [t.capitalize() for t in re.findall(TYPES, mm3.group(1), re.I)]
     return [Action(Op.REDUCE_DAMAGE, int(m.group(1)), tgt, filt)]
 
 

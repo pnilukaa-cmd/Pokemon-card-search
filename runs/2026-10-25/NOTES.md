@@ -75,3 +75,18 @@ points (mean shift 3.6). The big movers:
   - Team Rocket's Porygon-Z, Tyranitar and Honchkrow lists: −4.7 to −5.4.
 
 Which engine change moved which deck was not measured one change at a time.
+
+**Stale since the run.** A fix committed after this table (Basic Energy was
+read as Special Energy) changes the 11 field decks that care about Special
+Energy, and every pairing against them:
+- Enhanced Hammer had been discarding Basic Energy. That's 8 decks:
+  `alakazam_dudunsparce_powerful_hand`, `hydreigon_grafaiai_energy_denial`,
+  `hydreigon_relicanth_hammer_denial`, `mew_alex_centiskorch_mill`,
+  `mew_baby_box`, `mew_dbc_bastiodon`, `mew_dbc_hypno`,
+  `trevenant_rapidash_uxie`.
+- Tyrantrum's +150 HP had come on with any Energy:
+  `kangaskhan_tyrantrum_flip_mill`.
+- Farfetch'd and Ruffian also check for Special Energy:
+  `ditto_transform_hydreigon`, `mew_pikachu_box`.
+
+Their rows here overstate the Hammer decks and Tyrantrum until the next run.

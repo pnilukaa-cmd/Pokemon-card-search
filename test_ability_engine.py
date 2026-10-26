@@ -2584,6 +2584,12 @@ def test_no_card_in_any_decklist_is_silently_inert():
             if (nm in V.hp_tools() or nm in V.RETREAT_TOOLS
                     or nm in V.RETALIATE_CARDS or nm in V.DAMAGE_TOOLS):
                 return True
+            # Heavy Baton: read off the Knocked Out Pokemon's Tool by
+            # AE.salvage_energy_on_ko, where Knock Outs are resolved.
+            _tir = V.trainer_effect_ir(nm)
+            if _tir is not None and any(a.op is IR.Op.SALVAGE_ENERGY_ON_KO
+                                        for a in _tir.actions):
+                return True
             pl = V.Player("x", {"P": {"hp": 60, "retreat": 1, "stage": "Basic",
                                       "types": ["Colorless"],
                                       "attacks": [{"name": "F", "cost": [], "damage": 0,
@@ -6677,6 +6683,96 @@ def test_rare_candy_and_evolution_go_to_the_engine_first():
     V.try_evolve(me, op, 5, [], False)
     check("Bayleef evolves into Meganium before Mega Meganium ex",
           me.active.name == "Meganium", me.active.name)
+
+def test_damage_walls_keep_their_conditions():
+    """Aurorus's Tundra Wall and Klinklang's Gear Coating ("All of your
+    Pokemon that have any Water / Metal Energy attached take N less")
+    protected only themselves. Dewgong's Thick Fat took 30 off every attack,
+    not just Fire and Water ones. Drednaw's Impervious Shell ("if that
+    damage is 200 or more") and Carracosta's Mighty Shell (attackers with
+    Special Energy) were total immunity. Granite Cave read "Steven's" as a
+    type and protected nobody."""
+    import tempfile, os
+    import ability_engine as AE
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 9\n1 Aurorus POR 24\n1 Cetitan SSP 201\n1 Klinklang BLK 141\n1 Dewgong PFL 22\n"
+                "1 Drednaw SCR 44\n1 Carracosta BLK 107\n1 Steven's Metang DRI 144\n1 Okidogi ex SFA 36\n"
+                "1 Salazzle ex POR 101\n\nTrainer: 1\n1 Granite Cave DRI 166\n\n"
+                "Energy: 50\n20 Basic Water Energy\n15 Basic Metal Energy\n15 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "w")
+    finally:
+        os.unlink(f.name)
+
+    def board(active, bench=(), energy=None, attacker="Okidogi ex", stadium=None):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, op.bench = [], [], []
+        me.active = V.InPlay(active, 1)
+        me.bench = [V.InPlay(n, 1) for n in bench]
+        if energy:
+            me.active.energy, me.active.energy_names = [[energy]], [f"{energy} Energy"]
+        op.active = V.InPlay(attacker, 1)
+        me.stadium = stadium
+        return me, op
+
+    red = lambda me, op: AE.query_damage_reduction(me, me.active, op)
+    got = [red(*board("Cetitan", ["Aurorus"], "Water")), red(*board("Cetitan", ["Aurorus"])),
+           red(*board("Okidogi ex", ["Klinklang"], "Metal"))]
+    check("Tundra Wall -50 on a Water-Energy Pokemon (+Solid Body), none without; Gear Coating -20",
+          got == [80, 30, 20], got)
+    got = [red(*board("Dewgong", attacker="Okidogi ex")), red(*board("Dewgong", attacker="Salazzle ex"))]
+    check("Thick Fat: nothing against Darkness, -30 against Fire", got == [0, 30], got)
+    def hit(defender, poisoned=False, special=False):
+        """Okidogi ex's Chain-Crazed: 130, or 260 while it is Poisoned."""
+        me, op = board(defender)
+        op.active.energy = [["Darkness"]] * 3
+        op.active.energy_names = ["Darkness Energy"] * 2 + (["Luminous Energy"] if special else ["Darkness Energy"])
+        if poisoned:
+            op.active.conditions.add("poisoned")
+        op.energy_types = {"Darkness"}
+        op._forced_attack = next(a for a in D[1]["Okidogi ex"]["attacks"] if a["name"] == "Chain-Crazed")
+        V.do_attack(op, me, [])
+        return me.active.damage
+    got = [hit("Drednaw"), hit("Drednaw", poisoned=True)]
+    check("Impervious Shell: 130 goes through, 260 is prevented", got == [130, 0], got)
+    got = [hit("Carracosta"), hit("Carracosta", special=True)]
+    check("Mighty Shell: prevented only from an attacker with Special Energy", got == [130, 0], got)
+    got = red(*board("Steven's Metang", stadium="Granite Cave"))
+    check("Granite Cave: -30 on a Steven's Pokemon", got == 30, got)
+
+
+def test_basic_energy_is_not_special():
+    """In play a Basic Energy is named "Darkness Energy", and the Special
+    test ("doesn't start with Basic") called it Special. Enhanced Hammer
+    discarded Basic Energy, Tyrantrum's +150 HP for Special Energy came on
+    with any Energy, and Carracosta's Mighty Shell blocked every attacker."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Tyrantrum POR 45\n1 Okidogi ex SFA 36\n\nTrainer: 1\n1 Enhanced Hammer TWM 148\n\n"
+                "Energy: 56\n56 Basic Darkness Energy\n")
+    try:
+        V, D, E = _real(f.name, "w")
+    finally:
+        os.unlink(f.name)
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    me.hand, op.hand, op.bench, me.bench = [("Item", "Enhanced Hammer")], [], [], []
+    me.active = V.InPlay("Tyrantrum", 1)
+    me.active.energy, me.active.energy_names = [["Darkness"]], ["Darkness Energy"]
+    op.active = V.InPlay("Okidogi ex", 1)
+    op.active.energy, op.active.energy_names = [["Darkness"]] * 2, ["Darkness Energy"] * 2
+    hp_basic = V.effective_hp(me, me.active)
+    V.play_trainer_from_ir(me, op, "Item", "Enhanced Hammer", [], 5)
+    check("Enhanced Hammer leaves Basic Energy alone (and stays in hand)",
+          op.active.energy_count() == 2 and ("Item", "Enhanced Hammer") in me.hand,
+          (op.active.energy_count(), me.hand))
+    me.active.energy_names = ["Luminous Energy"]
+    check("Tyrannically Gutsy: +150 only with Special Energy",
+          (hp_basic, V.effective_hp(me, me.active)) == (180, 330),
+          (hp_basic, V.effective_hp(me, me.active)))
 
 if __name__ == "__main__":
     sys.exit(main())
