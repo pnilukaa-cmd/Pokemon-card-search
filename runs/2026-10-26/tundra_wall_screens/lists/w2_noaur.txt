@@ -1,0 +1,24 @@
+Pokémon: 22
+4 Cetoddle SSP 53
+3 Cetitan SSP 201
+4 Snover MEG 140
+2 Mega Abomasnow ex MEG 157
+3 Articuno JTG 161
+2 Mega Kangaskhan ex MEG 104
+2 Regice ex ASC 48
+2 Black Kyurem ex SSP 218
+
+Trainer: 17
+4 Ultra Ball MEG 131
+4 Lillie's Determination MEG 119
+2 Night Stretcher MEG 173
+2 Switch MEG 130
+1 Hero's Cape TEF 152
+1 Boss's Orders MEG 114
+2 Poké Pad POR 113
+1 Jasmine's Gaze SSP 178
+
+Energy: 21
+21 Basic Water Energy
+
+Total Cards: 60

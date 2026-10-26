@@ -1,0 +1,25 @@
+Pokémon: 21
+4 Cetoddle SSP 53
+3 Cetitan SSP 201
+3 Snover MEG 140
+2 Mega Abomasnow ex MEG 157
+2 Amaura POR 23
+3 Aurorus POR 24
+2 Articuno JTG 161
+2 Mega Kangaskhan ex MEG 104
+
+Trainer: 23
+4 Antique Sail Fossil POR 69
+1 Fossil Quarry PBL 76
+4 Rare Candy MEG 125
+4 Ultra Ball MEG 131
+4 Lillie's Determination MEG 119
+1 Night Stretcher MEG 173
+2 Switch MEG 130
+1 Hero's Cape TEF 152
+2 Lively Stadium SSP 180
+
+Energy: 16
+16 Basic Water Energy
+
+Total Cards: 60
