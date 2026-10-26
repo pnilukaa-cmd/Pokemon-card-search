@@ -148,6 +148,12 @@ GREEDY = {
     # field decks it touches +0.92, +0.82, +0.20. With Basic engines
     # included as well, the Raging Bolt list (Latias ex) measured -1.50.
     "engine_first": int(__import__("os").environ.get("ENGINE_FIRST", 1)),
+    # Damage per card milled off your own deck (Hammer-lanche): each card
+    # costs this much, scaled up as the deck runs down. 0: free.
+    # Measured 2026-10-26, 200 games a matchup, on the two Mega Abomasnow
+    # ex lists it touches: +9.84 +/- 0.65 and +7.35 +/- 0.64 (10 per card:
+    # +9.23, +7.24). No field deck has such an attack.
+    "self_mill_cost": float(__import__("os").environ.get("SELF_MILL_COST", 5)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -5529,11 +5529,31 @@ def _active_counter_damage(pl, opp, act):
     return 10 * n
 
 
+def _self_mill_cost(pl, atk):
+    """What discarding the top N of your own deck costs, for the attacks
+    that do it to scale their damage (Mega Abomasnow ex's Hammer-lanche).
+    Priced at nothing, Hammer-lanche tied Frost Barrier at 200 and was
+    used every turn: a Water wall list decked itself out in 12% of its
+    games. Each card milled costs more as the deck runs down."""
+    k = POL.knob(pl, "self_mill_cost")
+    text = atk.get("text") or ""
+    if not k or not (_DISCARDED_THIS_WAY_RE.search(text) and _MILL_DMG_RE.search(text)):
+        return 0
+    m = _MILL_SCALER_RE.search(text)
+    if not m or "each player" in m.group(0).lower():
+        return 0
+    n = int(m.group(1)) if m.group(1) else 1
+    left = len(pl.deck) - n
+    if left <= 0:
+        return 10 ** 5             # this attack loses the game next turn
+    return k * n * (1 + 20 / left)
+
+
 def attack_value(pl, opp, spot, atk):
     if opp is not None and attack_wins_game(pl, opp, spot, atk):
         return 10 ** 6            # nothing outranks winning on the spot
     dmg = attack_damage(pl, opp, spot, atk) if opp is not None else atk["damage"]
-    value = dmg + attack_rider_value(pl, opp, atk, spot)
+    value = dmg + attack_rider_value(pl, opp, atk, spot) - _self_mill_cost(pl, atk)
     if opp is not None and opp.active is not None:
         remaining = effective_hp(opp, opp.active) - opp.active.damage
         # Counters a rider puts on the Active count toward the Knock Out.

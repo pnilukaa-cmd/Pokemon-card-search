@@ -6774,5 +6774,34 @@ def test_basic_energy_is_not_special():
           (hp_basic, V.effective_hp(me, me.active)) == (180, 330),
           (hp_basic, V.effective_hp(me, me.active)))
 
+def test_self_mill_attacks_price_the_cards_they_mill():
+    """Mega Abomasnow ex's Hammer-lanche discards the top 6 of your own
+    deck. Priced at nothing, the AI took it over Frost Barrier with seven
+    cards left and decked itself out the next turn; a Water wall list lost
+    12% of its games that way."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Mega Abomasnow ex MEG 157\n1 Okidogi ex SFA 36\n\n"
+                "Energy: 58\n58 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "w")
+    finally:
+        os.unlink(f.name)
+
+    def pick(deck_size):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, me.bench, op.bench = [], [], [], []
+        me.energy_types = {"Water"}
+        me.active = V.InPlay("Mega Abomasnow ex", 1)
+        me.active.energy, me.active.energy_names = [["Water"]] * 3, ["Water Energy"] * 3
+        me.deck = [("Energy", "Water Energy")] * deck_size
+        op.active = V.InPlay("Okidogi ex", 1)
+        return V.best_attack(me, me.active, opp=op)["name"]
+    got = [pick(40), pick(7)]
+    check("Hammer-lanche with a deck to spare, Frost Barrier with seven cards left",
+          got == ["Hammer-lanche", "Frost Barrier"], got)
+
 if __name__ == "__main__":
     sys.exit(main())
