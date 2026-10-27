@@ -1418,6 +1418,33 @@ def test_the_baseline_sim_treats_fossils_as_items_too():
            sorted(b["name"] for b in st.bench))
     check("no mulligan stop, no Active, no search for a Fossil; Fossil Quarry benches two",
           got == (False, "Articuno", False, True, [fossil] * 3), got)
+def test_the_baseline_sim_plays_the_psychic_setup_cards():
+    """simulate_baseline ignored three setup cards a Psychic deck is built
+    on: Telepathic Psychic Energy's Bench search on attach, Mystery
+    Garden's draw, and Wondrous Patch's Energy from the discard. A Mega
+    Chandelure ex list read 24.5% Mega Chandelure in play by turn 6 without
+    them and 30% with them."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model("Pokémon: 3\n1 Mew ex 30C 152\n2 Litwick PBL 36\n1 Lampent PBL 37\n\n"
+                            "Trainer: 2\n1 Mystery Garden MEG 122\n1 Wondrous Patch PFL 94\n\n"
+                            "Energy: 55\n4 Telepathic Psychic Energy POR 88\n51 Basic Psychic Energy\n")[0]
+    st = SB.GameState([("Pokemon", "Litwick")] * 2 + [("Energy", "Psychic Energy")] * 20)
+    st.active, st.active_energy, st.turn = "Mew ex", 0, 2
+    st.hand = [("Energy", "Telepathic Psychic Energy")]
+    SB.attach_energy(st, P, set(), [])
+    benched = sorted(b["name"] for b in st.bench)
+    st.hand = [("Energy", "Psychic Energy")]
+    st.stadium_in_play = "Mystery Garden"
+    if hasattr(SB, "effect_mystery_garden"):
+        SB.effect_mystery_garden(st, P, 2, [])
+    hand = len(st.hand)
+    st.discard = ["Psychic Energy"]
+    st.hand = [("Item", "Wondrous Patch")]
+    SB.play_items(st, P, SB.search_priority(P), 2, [])
+    patched = sum(b["energy"] for b in st.bench)
+    check("Telepathic benches 2 Litwick; Garden draws to 3; Patch attaches 1",
+          (benched, hand, patched) == (["Litwick", "Litwick"], 3, 1), (benched, hand, patched))
+
 
 def test_coin_flips_are_actually_flipped():
     """Every coin flip in the pool was a guaranteed success.

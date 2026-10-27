@@ -327,6 +327,30 @@ def effect_grand_tree(state, POKEMON, turn, log):
     return True
 
 
+def turn_of(state):
+    return getattr(state, "turn", 0)
+
+
+def effect_mystery_garden(state, POKEMON, turn, log):
+    """Mystery Garden (Stadium): once during each player's turn, discard an
+    Energy card from hand to draw until the hand holds as many cards as
+    you have Psychic Pokemon in play. Used only when it draws 2 or more."""
+    if state.stadium_in_play != "Mystery Garden":
+        return False
+    psychic = sum(1 for n in state.in_play_names()
+                  if "Psychic" in POKEMON.get(n, {}).get("types", []))
+    energy = next((c for c in state.hand if c[0] == "Energy"), None)
+    if energy is None or psychic - (len(state.hand) - 1) < 2:
+        return False
+    state.remove_from_hand(*energy)
+    state.discard.append(energy[1])
+    before = len(state.hand)
+    while len(state.hand) < psychic and state.deck:
+        state.draw(1)
+    log.append(f"Mystery Garden: discard {energy[1]}, draw {len(state.hand) - before}")
+    return True
+
+
 def effect_fossil_quarry(state, POKEMON, turn, log):
     """Fossil Quarry (Stadium): once during each player's turn, search the
     deck for up to 2 Item cards with "Antique" in their name and put them
@@ -395,6 +419,26 @@ def attach_energy(state, POKEMON, pre_evolutions, log):
     if energy_card[1] == "Enriching Energy":
         state.draw(4)
         log.append("Enriching Energy attached from hand -> draw 4")
+    # Telepathic Psychic Energy: attached from hand to a Psychic Pokemon, it
+    # also benches up to 2 Basic Psychic Pokemon from the deck.
+    holder = state.active if target == "active" else target["name"]
+    if (energy_card[1] == "Telepathic Psychic Energy"
+            and "Psychic" in POKEMON.get(holder, {}).get("types", [])):
+        got = []
+        for card in list(state.deck):
+            if len(got) == 2 or len(state.bench) >= 5:
+                break
+            info = POKEMON.get(card[1]) or {}
+            if (card[0] == "Pokemon" and info.get("stage") == "Basic"
+                    and "Psychic" in info.get("types", []) and not info.get("is_fossil")):
+                state.deck.remove(card)
+                state.bench.append({"name": card[1], "energy": 0, "entered_turn": turn_of(state),
+                                    "evolved_this_turn": False})
+                state.note_online(card[1], turn_of(state))
+                got.append(card[1])
+        if got:
+            random.shuffle(state.deck)
+            log.append(f"Telepathic Psychic Energy -> bench {', '.join(got)}")
 
 
 def try_attack(state, POKEMON, turn, log):
@@ -769,6 +813,22 @@ def play_items(state, POKEMON, priority, turn, log):
         state.hand.append(pick)
         log.append(f"Play Pokégear 3.0 -> reveal {pick[1]}")
 
+    # Wondrous Patch: a Basic Psychic Energy from the discard pile onto a
+    # Benched Psychic Pokemon, the one still short of its attack first.
+    while ("Item", "Wondrous Patch") in state.hand:
+        if "Psychic Energy" not in state.discard and "Basic Psychic Energy" not in state.discard:
+            break
+        bench = [b for b in state.bench if "Psychic" in POKEMON.get(b["name"], {}).get("types", [])]
+        if not bench:
+            break
+        bench.sort(key=lambda b: -energy_need(POKEMON, b["name"], b["energy"]))
+        e = "Psychic Energy" if "Psychic Energy" in state.discard else "Basic Psychic Energy"
+        state.discard.remove(e)
+        state.remove_from_hand("Item", "Wondrous Patch")
+        state.discard.append("Wondrous Patch")
+        bench[0]["energy"] += 1
+        log.append(f"Play Wondrous Patch -> {e} onto {bench[0]['name']}")
+
     while ("Item", "Night Stretcher") in state.hand:
         pkmn_in_discard = next((n for n in state.discard
                                 if n in POKEMON and not is_fossil(POKEMON, n)), None)
@@ -1063,8 +1123,11 @@ SUPPORTER_EFFECTS = {
 # Prize-count condition we don't track) -- correctly left unplayed rather
 # than misrepresented as "unmodeled gap," since they have zero effect on
 # any metric this simulator reports.
+# Morty's Conviction draws one card per Pokemon on the OPPONENT's Bench,
+# and there is no opponent here: it would draw nothing.
 NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement",
-                             "Team Rocket's Giovanni", "Black Belt's Training"}
+                             "Team Rocket's Giovanni", "Black Belt's Training",
+                             "Morty's Conviction"}
 
 
 def play_supporter(state, POKEMON, log):
@@ -1079,7 +1142,7 @@ def play_supporter(state, POKEMON, log):
 
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
-                      "Energy Search", "Team Rocket's Transceiver", "Pokégear 3.0",
+                      "Energy Search", "Wondrous Patch", "Team Rocket's Transceiver", "Pokégear 3.0",
                       "Brilliant Blender"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
@@ -1093,7 +1156,9 @@ KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pa
 # Crushing Hammer only touches the opponent's Energy and Jumbo Ice Cream
 # only heals, and this simulator has neither an opponent nor damage.
 NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card",
-                        "Crushing Hammer", "Jumbo Ice Cream"}
+                        "Crushing Hammer", "Jumbo Ice Cream",
+                        # opponent-only, or a switch (no retreat is modelled)
+                        "Enhanced Hammer", "Tool Scrapper", "Prime Catcher"}
 
 
 def collect_unmodeled(DECKLIST):
@@ -1119,9 +1184,11 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
     state.played_supporters_this_turn = set()
     play_basics(state, POKEMON, turn_num, log)
     try_evolve(state, POKEMON, turn_num, log)
+    state.turn = turn_num
     play_stadium(state, log)
     effect_grand_tree(state, POKEMON, turn_num, log)
     effect_fossil_quarry(state, POKEMON, turn_num, log)
+    effect_mystery_garden(state, POKEMON, turn_num, log)
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
     use_draw_abilities(state, POKEMON, log)
