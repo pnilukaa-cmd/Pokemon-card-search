@@ -6803,5 +6803,58 @@ def test_self_mill_attacks_price_the_cards_they_mill():
     check("Hammer-lanche with a deck to spare, Frost Barrier with seven cards left",
           got == ["Hammer-lanche", "Frost Barrier"], got)
 
+def test_a_fossil_is_an_item_outside_play():
+    """Antique Sail Fossil is an Item card played "as if it were" a Basic
+    Pokemon. The deck model files Fossils as Pokemon so they can go onto
+    the Bench, and every search and recovery for a Pokemon took that at
+    its word: Poke Pad and Buddy-Buddy Poffin fetched Fossils, Night
+    Stretcher returned one, and setup put one down as the opening Active,
+    where it can't attack or retreat. Outside play a Fossil is an Item;
+    only Fossil Quarry, which names it, benches it from the deck."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Articuno JTG 161\n1 Amaura POR 23\n\n"
+                "Trainer: 8\n4 Antique Sail Fossil POR 69\n1 Poké Pad POR 113\n"
+                "1 Buddy-Buddy Poffin TWM 223\n1 Night Stretcher MEG 173\n1 Fossil Quarry PBL 76\n\n"
+                "Energy: 50\n50 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "w")
+    finally:
+        os.unlink(f.name)
+    fossil = "Antique Sail Fossil"
+
+    def board(hand):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        op.hand, op.bench, me.bench = [], [], []
+        me.energy_types = {"Water"}
+        me.active, op.active = V.InPlay("Articuno", 1), V.InPlay("Articuno", 1)
+        me.deck = [("Pokemon", fossil)] * 4 + [("Energy", "Water Energy")] * 20
+        me.hand = list(hand)
+        return me, op
+    got = {}
+    for item in ("Poké Pad", "Buddy-Buddy Poffin"):
+        me, op = board([("Item", item)])
+        V.play_items(me, op, 5, [], False)
+        got[item] = (("Item", item) in me.hand, [b.name for b in me.bench],
+                     [n for k, n in me.hand if k == "Pokemon"])
+    me, op = board([("Item", "Night Stretcher")])
+    me.discard = [fossil, "Water Energy"]
+    V.play_items(me, op, 5, [], False)
+    got["Night Stretcher"] = [n for k, n in me.hand]
+    me, op = board([])
+    me.stadium = "Fossil Quarry"
+    V.use_stadium(me, [])
+    got["Fossil Quarry"] = [b.name for b in me.bench]
+    me, op = board([("Pokemon", fossil), ("Pokemon", "Articuno")])
+    me.active = None
+    V.play_basics(me, 0, [])
+    got["setup"] = (me.active.name, [b.name for b in me.bench], ("Pokemon", fossil) in me.hand)
+    check("no Pokemon search or recovery finds a Fossil; Fossil Quarry does; setup skips it",
+          got == {"Poké Pad": (True, [], []), "Buddy-Buddy Poffin": (True, [], []),
+                  "Night Stretcher": ["Water Energy"], "Fossil Quarry": [fossil, fossil],
+                  "setup": ("Articuno", [], True)}, got)
+
 if __name__ == "__main__":
     sys.exit(main())

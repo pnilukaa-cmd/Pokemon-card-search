@@ -765,6 +765,18 @@ def pay_costs(effect, pl, source, log):
 # Action handlers
 # --------------------------------------------------------------------------
 
+def card_kind_out_of_play(pl, k, n):
+    """What a card IS outside play. A Fossil is an Item card that is played
+    "as if it were" a Basic Pokemon, so in the deck, the hand and the
+    discard pile it is an Item: a search or recovery for a Pokemon (Ultra
+    Ball, Poke Pad, Buddy-Buddy Poffin, Night Stretcher) can't find it, and
+    one for an Item can. The deck model files it as "Pokemon" so that it
+    can be played onto the Bench."""
+    if k == "Pokemon" and (pl.POKEMON.get(n) or {}).get("is_fossil"):
+        return "Item"
+    return k
+
+
 def _find_in_deck(pl, pred):
     for i, (k, n) in enumerate(pl.deck):
         if pred(k, n):
@@ -1833,6 +1845,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if k != "Pokemon":
                     return False
                 info = pl.POKEMON.get(n, {})
+                # A Fossil is an Item in the deck: only a search that names
+                # it (Fossil Quarry's "Antique") puts it on the Bench.
+                if info.get("is_fossil") and not want:
+                    return False
                 # Only a Basic goes onto the Bench -- unless the card NAMES
                 # what it benches: Lampent's Spreading Light ("up to 3
                 # Lampent") and Maushold's Familial March ("Maushold and
@@ -1879,6 +1895,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             subtype = sub.get("subtype")
             def pred(k, n, want=want, kind=kind, cap=cap, nobox=nobox,
                      exonly=exonly, ptype=ptype, stage=stage):
+                k = card_kind_out_of_play(pl, k, n)
                 if kind.startswith("pok") and k != "Pokemon":
                     return False
                 if subtype and (k != "Pokemon" or subtype not in (
@@ -2094,7 +2111,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         etype = act.filter.get("energy_type")
 
         def fits(n):
-            k = CARD_KIND(pl, n)
+            k = card_kind_out_of_play(pl, CARD_KIND(pl, n), n)
             if k not in kinds:
                 return False
             if k == "Pokemon":

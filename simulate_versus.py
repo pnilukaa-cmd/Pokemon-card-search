@@ -1767,6 +1767,11 @@ def play_basics(pl, turn, log):
             log.append(f"  {pl.name}: {lead} to Active (face down)")
     if pl.active is None:
         bs = basics_in_hand(pl)
+        # A Fossil is an Item: it is played during your turn, and setup is
+        # not one. It went down as the opening Active, where it can't
+        # attack or retreat.
+        if turn == 0:
+            bs = [n for n in bs if not pl.POKEMON[n].get("is_fossil")]
         if bs:
             best = max(bs, key=lambda n: _lead_score(pl, n))
             pl.remove_from_hand("Pokemon", best)
@@ -1775,6 +1780,8 @@ def play_basics(pl, turn, log):
     core, reserve = _bench_plan(pl)
     hand = sorted(pl.hand, key=lambda c: c[1] not in core)   # key pieces first
     for kind, name in hand:
+        if turn == 0 and pl.POKEMON.get(name, {}).get("is_fossil"):
+            continue
         if kind == "Pokemon" and pl.POKEMON[name]["stage"] == "Basic" and len(pl.bench) < bench_cap(pl):
             # Keep room for the pieces the deck is built around (see
             # _bench_plan): a support Basic does not take the last slots.
@@ -2081,7 +2088,7 @@ def search_pokemon_from_deck(pl, pred):
         order = sorted(range(len(pl.deck)), key=lambda i: first.get(pl.deck[i][1], 9))
     for i in order:
         k, n = pl.deck[i]
-        if k == "Pokemon" and pred(n):
+        if AE.card_kind_out_of_play(pl, k, n) == "Pokemon" and pred(n):
             pl.deck.pop(i)
             random.shuffle(pl.deck)
             return n
@@ -2386,8 +2393,10 @@ def play_items(pl, opp, turn, log, first_turn):
 
     while ("Item", "Night Stretcher") in pl.hand:
         first = _missing_pieces(pl)
-        pick = min((n for n in pl.discard if n in first), key=first.get, default=None) or \
-            next((n for n in pl.discard if n in pl.POKEMON), None)
+        mon = [n for n in pl.discard
+               if n in pl.POKEMON and not pl.POKEMON[n].get("is_fossil")]
+        pick = min((n for n in mon if n in first), key=first.get, default=None) or \
+            next(iter(mon), None)
         kind = "Pokemon"
         if pick is None:
             pick = next((n for n in pl.discard if M.BASIC_ENERGY_RE.match(n)), None)
