@@ -136,6 +136,27 @@ What stayed, and why:
   none (−0.58 to cut all three with the Heavy Batons). Good Sleep still
   heals all damage, but Kangaskhan and Bouffalant do the attacking.
 
+**Checked 2026-10-27: heals, disruption, the Water wall** (engine 2ee4fb9,
+98-deck field, where this list measures 86.34% at 1000 games). Each
+against this list, 200 games a matchup unless noted:
+
+| Change | Measured |
+|---|---|
+| 3 Jumbo Ice Cream for 2 Psychic Energy and a Kofu | +0.67 ± 0.34; **at 1000 games +0.35 ± 0.23** |
+| 2 Jumbo Ice Cream for 2 Psychic Energy | +0.47 ± 0.33 |
+| 4 Jumbo Ice Cream for 4 Psychic Energy | +0.11 ± 0.36 |
+| 2 Jumbo Ice Cream for 2 Kofu | −0.02 ± 0.37 |
+| 2 Jumbo Ice Cream, 2 Crushing Hammer for 2 Kofu, Energy Recycler, a Night Stretcher | −0.13 ± 0.35 |
+| 2 Xerosic's Machinations for 2 Kofu | −0.32 ± 0.32 |
+| 2 Cook for 2 Kofu | −0.60 ± 0.32 |
+| 2 Crushing Hammer for 2 Kofu | −0.72 ± 0.26 |
+| Aurorus's Tundra Wall: Water for Psychic, Articuno for Smoochum and Clefairy ex, an Aurorus line | **−8.60 ± 0.56** |
+
+Jumbo Ice Cream is at most a small gain here, not enough to change the
+list. In play, Good Sleep heals 0.20 times a game (91 HP each), and the
+three Ice Creams lift the total healed from 15 to 58 HP a game
+(`runs/2026-10-27/tundra_mix_screens`).
+
 ## What the simulator found
 
 Engine fixes, each with a regression test that fails on the commit

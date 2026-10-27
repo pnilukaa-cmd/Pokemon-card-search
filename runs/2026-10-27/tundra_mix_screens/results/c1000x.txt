@@ -1,0 +1,3 @@
+x2_icekofu 611s x2_icekofu: 86.80% (±0.10) over 98 decks at 1000 games, winning 96
+X0 571s X0: 86.34% (±0.10) over 98 decks at 1000 games, winning 95
+DONE

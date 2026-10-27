@@ -140,7 +140,8 @@ Energy, 2 Jumbo Ice Cream, 2 Crushing Hammer), which is itself +2.43 ±
 - **Heals and disruption into the Snorlax deck,** for its 2 Kofu: Jumbo Ice
   Cream −0.02, Xerosic's −0.32, Cook −0.60, Crushing Hammer −0.72 (each
   about ± 0.3). Jumbo Ice Cream for Psychic Energy instead: +0.47 ± 0.33
-  for two, +0.67 ± 0.34 for three (with one Kofu); see that deck's page.
+  for two, +0.67 ± 0.34 for three (with one Kofu). At 1000 games the three
+  measured +0.35 ± 0.23, not enough to change that list (see its page).
 - **The Snorlax deck is still the stronger deck:** +3.47 ± 0.49 over this
   list, 200 games a matchup.
 
