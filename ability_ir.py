@@ -715,6 +715,11 @@ def parse_costs(text):
                   r" from your hand", t, re.I)
     if m:
         out.append({"kind": "discard_hand", "amount": _num(m.group(1))})
+    # "...only if you discard ANOTHER card from your hand" (Morty's
+    # Conviction, Canari, Iris's Fighting Spirit) has no number, so the
+    # pattern above missed it and all three were free.
+    elif re.search(r"only if you discard another card from your hand", t, re.I):
+        out.append({"kind": "discard_hand", "amount": 1})
     m = re.search(r"discard a basic (" + TYPES + r") energy card from your hand", t, re.I)
     if m:
         out.append({"kind": "discard_energy_from_hand", "type": m.group(1).capitalize()})
@@ -977,10 +982,19 @@ def _r(m, text):
     return [Action(Op.WIN_GAME, None, Target.SELF)]
 
 
+@rule("draw_per_opponent_bench",
+      r"draw a card for each of your opponent'?s benched pok[eé]mon")
+def _r(m, text):
+    """Morty's Conviction: read as "draw a card", one whatever their Bench."""
+    return [Action(Op.DRAW, 1, Target.SELF, {"per_opp_bench": True})]
+
+
 @rule("draw_one", r"\bdraw a card")
 def _r(m, text):
     if re.search(r"draw a card for each card in your opponent", text, re.I):
         return []          # draw_per_opponent_hand owns it
+    if re.search(r"draw a card for each of your opponent'?s benched", text, re.I):
+        return []          # draw_per_opponent_bench owns it
     # "each player draws a card" belongs to each_player_draws below. Both
     # rules used to fire on Chandelure's Alluring Light, emitting the draw
     # twice -- which doubled the rate of the one engine a deck-out deck

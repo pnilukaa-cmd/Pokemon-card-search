@@ -1522,6 +1522,8 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
             amt = sum(f["coin"]) / 2          # expected: plan on the average
         if f.get("per_opp_hand"):
             amt = len(opp.hand)
+        if f.get("per_opp_bench"):
+            amt = len(opp.bench)
         ii = f.get("instead_if")
         if ii:
             who = pl if ii["who"] == "self" else opp
@@ -1529,6 +1531,11 @@ def _draw_trainer_worth_it(pl, opp, eff, n_cards):
             if have == ii["count"] if ii["cmp"] == "==" else have <= ii["count"]:
                 amt = f["instead"]
         amount += amt
+    # A card whose only effect is a draw that draws nothing (Morty's
+    # Conviction against an empty Bench) just costs the card and its cost.
+    if amount <= 0 and all(a.op in (IR.Op.DRAW, IR.Op.SHUFFLE_HAND_INTO_DECK,
+                                    IR.Op.DISCARD_FROM_SELF) for a in eff.actions):
+        return False
     shuffles = any(a.op == IR.Op.SHUFFLE_HAND_INTO_DECK for a in eff.actions)
     dumps = any(a.op == IR.Op.DISCARD_FROM_SELF and (a.amount or 0) >= 99
                 for a in eff.actions)

@@ -1313,6 +1313,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             amount = heads if random.random() < 0.5 else tails
         if act.filter.get("per_opp_hand"):
             amount = len(opp.hand)
+        if act.filter.get("per_opp_bench"):
+            amount = len(opp.bench)
         ii = act.filter.get("instead_if")
         if ii:
             who = pl if ii["who"] == "self" else opp

@@ -6945,5 +6945,39 @@ def test_tar_cannon_needs_ten_fighting_energy_in_the_discard():
     got = [fire(9), fire(10)]
     check("nothing with 9 Fighting Energy in the discard, 140 with 10", got == [0, 140], got)
 
+def test_discard_another_card_is_a_cost():
+    """Morty's Conviction, Canari and Iris's Fighting Spirit: "You can use
+    this card only if you discard another card from your hand." The cost
+    had no number, so it didn't compile and all three were free; Morty's
+    "draw a card for each of your opponent's Benched Pokemon" also read as
+    one card. Ten field decks run one of the three. Played through the
+    real Supporter path."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Mew ex 30C 152\n1 Okidogi ex SFA 36\n\n"
+                "Trainer: 1\n1 Morty's Conviction TEF 155\n\nEnergy: 57\n57 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "m")
+    finally:
+        os.unlink(f.name)
+
+    def play(others, benched):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.active, op.active = V.InPlay("Mew ex", 1), V.InPlay("Okidogi ex", 1)
+        me.bench, op.hand = [], []
+        op.bench = [V.InPlay("Okidogi ex", 1) for _ in range(benched)]
+        me.hand = [("Supporter", "Morty's Conviction")] + [("Energy", "Psychic Energy")] * others
+        me.deck = [("Energy", "Psychic Energy")] * 30
+        V.play_supporter(me, op, 5, [])
+        return me.supporter_played, len(me.hand), len(me.discard)
+    got = [play(1, 3), play(0, 3), play(2, 0)]
+    costs = [V.trainer_effect_ir(n).costs for n in ("Canari", "Iris's Fighting Spirit")]
+    check("Morty's: discard 1, draw 3 against 3 Benched; not with no other card or no Bench",
+          got == [(True, 3, 2), (False, 1, 0), (False, 3, 0)], got)
+    check("Canari and Iris's Fighting Spirit cost a card from hand",
+          costs == [[{"kind": "discard_hand", "amount": 1}]] * 2, costs)
+
 if __name__ == "__main__":
     sys.exit(main())
