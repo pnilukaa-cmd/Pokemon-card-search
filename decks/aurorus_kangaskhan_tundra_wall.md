@@ -464,6 +464,10 @@ cut it and Night Stretcher for 2 Poké Pad (+1.31, rounds 5-6 above):
 - [pokemoncard.io: Aurorus (Perfect Order) decks](https://pokemoncard.io/category/pokemon/aurorus-me3-24)
 - [pokemoncard.io: Aurorus (Perfect Order 92) decks](https://pokemoncard.io/category/pokemon/aurorus-me3-92)
 
+**Precedent** (`references/current_meta_staples.md`): two wall decks there
+stack heals with Jumbo Ice Cream, a Mega Slowbro ex wall and a Crustle /
+Kangaskhan ex wall that also runs Hero's Cape on Kangaskhan.
+
 **The Fossil rule:** no published ruling on Antique Fossils at setup or
 with Pokémon searches was found. The Rulings Compendium answers a related
 question for Antique Dome / Helix Fossil: in hand it is an Item, and can't
