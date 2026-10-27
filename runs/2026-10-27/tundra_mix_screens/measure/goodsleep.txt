@@ -1,0 +1,8 @@
+m1_snor4b: 196 games
+  Snorlax attacks per game     2.56
+  Good Sleep heals per game    0.41  (67 HP each)
+  Snorlax Knocked Out per game 0.33
+X0: 196 games
+  Snorlax attacks per game     1.49
+  Good Sleep heals per game    0.20  (91 HP each)
+  Snorlax Knocked Out per game 0.12

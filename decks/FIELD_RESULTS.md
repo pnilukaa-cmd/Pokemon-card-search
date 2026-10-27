@@ -97,6 +97,14 @@ Energy, and every pairing against them:
 
 Their rows here overstate the Hammer decks and Tyrantrum until the next run.
 
+A second fix after this table (2ee4fb9): a Fossil is an Item outside play,
+so Pokémon searches, Night Stretcher and setup no longer treat one as a
+Basic Pokémon. It changes the field decks with Fossils:
+`cradily_accelgor_conditions`, `cradily_amoonguss_conditions`,
+`kangaskhan_tyrantrum_flip_mill`, `mew_dbc_bastiodon`,
+`study_centiskorch_bastiodon_mill` (and `aurorus_kangaskhan_tundra_wall`,
+added to the field after this run).
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

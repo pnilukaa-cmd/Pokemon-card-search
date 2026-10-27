@@ -1,0 +1,10 @@
+m4_cook 95s m4_cook: 83.08% (±0.24) over 98 decks at 200 games, winning 94
+m4_cook1 93s m4_cook1: 83.22% (±0.24) over 98 decks at 200 games, winning 92
+m4_cookE 94s m4_cookE: 83.16% (±0.24) over 98 decks at 200 games, winning 92
+m4_cx 89s m4_cx: 83.11% (±0.25) over 98 decks at 200 games, winning 93
+m4_e23 90s m4_e23: 82.55% (±0.25) over 98 decks at 200 games, winning 92
+m4_ice 91s m4_ice: 82.85% (±0.25) over 98 decks at 200 games, winning 91
+m4_lil 91s m4_lil: 82.06% (±0.25) over 98 decks at 200 games, winning 91
+m4_sw 88s m4_sw: 82.07% (±0.25) over 98 decks at 200 games, winning 92
+m4_xero 88s m4_xero: 82.83% (±0.24) over 98 decks at 200 games, winning 92
+DONE

@@ -1,0 +1,24 @@
+m1_mix 95s m1_mix: 82.04% (±0.25) over 98 decks at 200 games, winning 92
+T0 88s T0: 79.61% (±0.26) over 98 decks at 200 games, winning 91
+m3_cook 92s m3_cook: 82.85% (±0.25) over 98 decks at 200 games, winning 92
+m3_cx 92s m3_cx: 82.92% (±0.24) over 98 decks at 200 games, winning 92
+m3_e21 93s m3_e21: 82.16% (±0.25) over 98 decks at 200 games, winning 91
+m3_e25 89s m3_e25: 81.72% (±0.25) over 98 decks at 200 games, winning 91
+m3_eret 91s m3_eret: 81.79% (±0.25) over 98 decks at 200 games, winning 92
+m3_esearch 90s m3_esearch: 82.31% (±0.25) over 98 decks at 200 games, winning 92
+m3_ham4 91s m3_ham4: 83.03% (±0.24) over 98 decks at 200 games, winning 92
+m3_ice4 92s m3_ice4: 82.69% (±0.25) over 98 decks at 200 games, winning 93
+m3_padcook 89s m3_padcook: 82.73% (±0.25) over 98 decks at 200 games, winning 93
+m3_padxero 86s m3_padxero: 82.08% (±0.25) over 98 decks at 200 games, winning 91
+m3_stretch 91s m3_stretch: 81.57% (±0.25) over 98 decks at 200 games, winning 91
+m3_xero 89s m3_xero: 82.41% (±0.25) over 98 decks at 200 games, winning 92
+X0 116s X0: 86.51% (±0.22) over 98 decks at 200 games, winning 96
+x1_cook 115s x1_cook: 85.91% (±0.23) over 98 decks at 200 games, winning 95
+x1_ham 117s x1_ham: 85.78% (±0.23) over 98 decks at 200 games, winning 96
+x1_ice 115s x1_ice: 86.49% (±0.22) over 98 decks at 200 games, winning 95
+x1_icee 117s x1_icee: 86.97% (±0.22) over 98 decks at 200 games, winning 95
+x1_mix 117s x1_mix: 86.37% (±0.22) over 98 decks at 200 games, winning 95
+x1_tundra 117s x1_tundra: 77.90% (±0.27) over 98 decks at 200 games, winning 88
+x1_tundraq 117s x1_tundraq: 77.25% (±0.27) over 98 decks at 200 games, winning 88
+x1_xero 116s x1_xero: 86.19% (±0.22) over 98 decks at 200 games, winning 94
+DONE

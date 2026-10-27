@@ -1,0 +1,27 @@
+Pokémon: 18
+3 Snorlax 30C 119
+2 Munkidori SFA 72
+4 Bouffalant SCR 119
+4 Mega Kangaskhan ex MEG 104
+2 Articuno JTG 161
+2 Aurorus POR 24
+1 Amaura POR 23
+
+Trainer: 24
+2 Heavy Baton TEF 151
+2 Night Stretcher MEG 173
+2 Buddy-Buddy Poffin TWM 223
+2 Crispin PRE 171
+1 Precious Trolley SSP 185
+4 Lillie's Determination MEG 184
+4 Switch MEG 130
+2 Lively Stadium SSP 180
+2 Antique Sail Fossil POR 69
+2 Rare Candy MEG 125
+1 Fossil Quarry PBL 76
+
+Energy: 18
+5 Basic Darkness Energy
+13 Basic Water Energy
+
+Total Cards: 60

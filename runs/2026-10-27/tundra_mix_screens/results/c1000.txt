@@ -1,0 +1,3 @@
+m3_ham4 473s m3_ham4: 82.86% (±0.11) over 98 decks at 1000 games, winning 92
+T0 438s T0: 80.01% (±0.12) over 98 decks at 1000 games, winning 91
+DONE

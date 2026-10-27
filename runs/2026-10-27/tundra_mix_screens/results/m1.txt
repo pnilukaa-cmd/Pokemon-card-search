@@ -1,0 +1,17 @@
+T0 95s T0: 78.48% (±0.26) over 98 decks at 200 games, winning 88
+m1_az 97s m1_az: 77.36% (±0.27) over 98 decks at 200 games, winning 87
+m1_budew 92s m1_budew: 77.63% (±0.27) over 98 decks at 200 games, winning 88
+m1_catch 93s m1_catch: 77.94% (±0.27) over 98 decks at 200 games, winning 91
+m1_cook 92s m1_cook: 79.94% (±0.26) over 98 decks at 200 games, winning 91
+m1_fennel 93s m1_fennel: 79.41% (±0.26) over 98 decks at 200 games, winning 88
+m1_frosl 91s m1_frosl: 78.56% (±0.27) over 98 decks at 200 games, winning 93
+m1_hammer 92s m1_hammer: 78.96% (±0.26) over 98 decks at 200 games, winning 89
+m1_ice 94s m1_ice: 79.79% (±0.26) over 98 decks at 200 games, winning 91
+m1_judge 102s m1_judge: 78.22% (±0.26) over 98 decks at 200 games, winning 88
+m1_mix 99s m1_mix: 80.47% (±0.26) over 98 decks at 200 games, winning 90
+m1_snor2 99s m1_snor2: 77.36% (±0.27) over 98 decks at 200 games, winning 88
+m1_snor3b 99s m1_snor3b: 75.92% (±0.28) over 98 decks at 200 games, winning 87
+m1_snor4b 96s m1_snor4b: 77.98% (±0.27) over 98 decks at 200 games, winning 89
+m1_vital 89s m1_vital: 77.88% (±0.27) over 98 decks at 200 games, winning 89
+m1_xero 91s m1_xero: 79.43% (±0.26) over 98 decks at 200 games, winning 90
+DONE

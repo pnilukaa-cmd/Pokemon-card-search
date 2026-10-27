@@ -1,0 +1,28 @@
+m3_ham4: 1530 damaging attacks on the Active, 5 games against each field deck
+  average hit before mitigation     85.0
+  prevented outright                0.0% of hits
+  average damage taken              70.2 per hit
+  share of damage mitigated        17.4%
+  HP healed per game                37.2
+  opponent's Energy removed/game    0.90
+T0: 1620 damaging attacks on the Active, 5 games against each field deck
+  average hit before mitigation     85.3
+  prevented outright                0.0% of hits
+  average damage taken              70.5 per hit
+  share of damage mitigated        17.3%
+  HP healed per game                 0.0
+  opponent's Energy removed/game    0.00
+X0: 1452 damaging attacks on the Active, 5 games against each field deck
+  average hit before mitigation     82.8
+  prevented outright                0.0% of hits
+  average damage taken              71.7 per hit
+  share of damage mitigated        13.4%
+  HP healed per game                15.3
+  opponent's Energy removed/game    0.00
+x2_icekofu: 1560 damaging attacks on the Active, 5 games against each field deck
+  average hit before mitigation     81.2
+  prevented outright                0.0% of hits
+  average damage taken              68.6 per hit
+  share of damage mitigated        15.6%
+  HP healed per game                58.2
+  opponent's Energy removed/game    0.00

@@ -90,3 +90,11 @@ Energy, and every pairing against them:
   `ditto_transform_hydreigon`, `mew_pikachu_box`.
 
 Their rows here overstate the Hammer decks and Tyrantrum until the next run.
+
+A second fix after this table (2ee4fb9): a Fossil is an Item outside play,
+so Pokémon searches, Night Stretcher and setup no longer treat one as a
+Basic Pokémon. It changes the field decks with Fossils:
+`cradily_accelgor_conditions`, `cradily_amoonguss_conditions`,
+`kangaskhan_tyrantrum_flip_mill`, `mew_dbc_bastiodon`,
+`study_centiskorch_bastiodon_mill` (and `aurorus_kangaskhan_tundra_wall`,
+added to the field after this run).

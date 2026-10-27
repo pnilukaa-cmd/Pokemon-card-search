@@ -1,0 +1,4 @@
+x2_ice3 120s x2_ice3: 86.88% (±0.22) over 98 decks at 200 games, winning 95
+x2_ice4 136s x2_ice4: 86.62% (±0.22) over 98 decks at 200 games, winning 95
+x2_icekofu 117s x2_icekofu: 87.18% (±0.22) over 98 decks at 200 games, winning 95
+DONE

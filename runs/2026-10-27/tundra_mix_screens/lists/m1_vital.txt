@@ -1,0 +1,20 @@
+Pokémon: 14
+2 Amaura POR 23
+3 Aurorus POR 24
+3 Articuno JTG 161
+4 Mega Kangaskhan ex MEG 104
+2 Bouffalant ex WHT 162
+
+Trainer: 19
+4 Antique Sail Fossil POR 69
+2 Fossil Quarry PBL 76
+4 Rare Candy MEG 125
+4 Lillie's Determination MEG 119
+2 Switch MEG 130
+2 Poké Pad POR 113
+1 Poké Vital A SFA 62
+
+Energy: 27
+27 Basic Water Energy
+
+Total Cards: 60

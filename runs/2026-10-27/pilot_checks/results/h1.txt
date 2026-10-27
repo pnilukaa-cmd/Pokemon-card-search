@@ -1,0 +1,3 @@
+m1_fennel_h 94s m1_fennel: 78.93% (±0.26) over 98 decks at 200 games, winning 89
+m1_cook_h 97s m1_cook: 79.52% (±0.26) over 98 decks at 200 games, winning 90
+m1_az_h 94s m1_az: 77.60% (±0.27) over 98 decks at 200 games, winning 89

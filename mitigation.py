@@ -9,6 +9,11 @@ Active actually took. Each hit counts up to the HP the Active had left. A
 list of "takes N less damage" cards says what could happen; this says what
 did.
 
+Two things a wall does besides taking less, per game: the HP its heals
+took back off its Pokemon (Jumbo Ice Cream, Cook, Good Sleep), and the
+Energy its disruption took off the opponent's (Crushing Hammer). Both are
+read off the board around each effect this deck resolves.
+
 Usage:  python3 mitigation.py <deck.txt> <field_dir> <games per opponent> [tag]
 
 Same per-opponent seeding as vs_field.py.
@@ -22,6 +27,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import simulate_versus as SV
 import ability_engine as AE
+import ability_ir as IR
 
 deck, field, games = sys.argv[1], sys.argv[2], int(sys.argv[3])
 tag = sys.argv[4] if len(sys.argv) > 4 else "mt1"
@@ -72,6 +78,28 @@ def do_attack(pl, opp, log, *a, **k):
 
 SV.do_attack = do_attack
 
+healed = [0]           # HP healed off this deck's Pokemon
+stripped = [0]         # Energy removed from the opponent's Pokemon
+_apply = AE.apply_action
+
+
+def apply_action(act, pl, opp, *a, **k):
+    if getattr(pl, "name", None) != me or SV._LOOKAHEAD[0] or act.op not in (
+            IR.Op.HEAL, IR.Op.DISCARD_ENERGY_FROM_OPPONENT):
+        return _apply(act, pl, opp, *a, **k)
+    dmg = sum(p.damage for p in pl.in_play())
+    energy = sum(p.energy_count() for p in opp.in_play()) if opp is not pl else 0
+    out = _apply(act, pl, opp, *a, **k)
+    if act.op == IR.Op.HEAL:
+        healed[0] += max(0, dmg - sum(p.damage for p in pl.in_play()))
+    elif opp is not pl:
+        stripped[0] += max(0, energy - sum(p.energy_count() for p in opp.in_play()))
+    return out
+
+
+AE.apply_action = apply_action
+played = [0]
+
 for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
     opp = os.path.splitext(os.path.basename(f))[0]
     if os.path.abspath(f) == os.path.abspath(deck):
@@ -83,6 +111,7 @@ for f in sorted(glob.glob(os.path.join(field, "*.txt"))):
     SV._LOOKAHEAD_SEQ[0] = 0
     for _ in range(games):
         SV.run_game(A, B)
+        played[0] += 1
 
 n = len(hits)
 if not n:
@@ -96,3 +125,5 @@ print(f"  average hit before mitigation   {raw / n:6.1f}")
 print(f"  prevented outright              {100.0 * prev / n:5.1f}% of hits")
 print(f"  average damage taken            {taken / n:6.1f} per hit")
 print(f"  share of damage mitigated       {100.0 * (raw - taken) / max(raw, 1):5.1f}%")
+print(f"  HP healed per game              {healed[0] / played[0]:6.1f}")
+print(f"  opponent's Energy removed/game  {stripped[0] / played[0]:6.2f}")
