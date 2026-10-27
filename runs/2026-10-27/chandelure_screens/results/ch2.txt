@@ -1,0 +1,9 @@
+c2_boss2 108s c2_boss2: 50.77% (±0.33) over 98 decks at 200 games, winning 51
+c2_e4 102s c2_e4: 56.35% (±0.33) over 98 decks at 200 games, winning 69
+c2_fan 106s c2_fan: 51.65% (±0.33) over 98 decks at 200 games, winning 54
+c2_garden 107s c2_garden: 53.18% (±0.33) over 98 decks at 200 games, winning 59
+c2_ham 113s c2_ham: 52.41% (±0.33) over 98 decks at 200 games, winning 57
+c2_legacy 114s c2_legacy: 51.33% (±0.33) over 98 decks at 200 games, winning 53
+c2_mix 101s c2_mix: 59.33% (±0.33) over 98 decks at 200 games, winning 69
+c2_notrev 102s c2_notrev: 57.41% (±0.33) over 98 decks at 200 games, winning 67
+DONE

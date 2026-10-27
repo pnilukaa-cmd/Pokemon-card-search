@@ -1,0 +1,12 @@
+c3_boss2 109s c3_boss2: 60.70% (±0.32) over 98 decks at 200 games, winning 69
+c3_chand 105s c3_chand: 53.69% (±0.34) over 98 decks at 200 games, winning 60
+c3_e17 98s c3_e17: 60.00% (±0.32) over 98 decks at 200 games, winning 71
+c3_hilda 93s c3_hilda: 62.83% (±0.32) over 98 decks at 200 games, winning 78
+c3_lamp4 102s c3_lamp4: 58.21% (±0.33) over 98 decks at 200 games, winning 69
+c3_mew0 87s c3_mew0: 62.03% (±0.32) over 98 decks at 200 games, winning 76
+c3_mew3 107s c3_mew3: 57.64% (±0.33) over 98 decks at 200 games, winning 70
+c3_neo 98s c3_neo: 57.54% (±0.33) over 98 decks at 200 games, winning 65
+c3_notrevE 91s c3_notrevE: 63.34% (±0.32) over 98 decks at 200 games, winning 77
+c3_notrevH 90s c3_notrevH: 67.19% (±0.31) over 98 decks at 200 games, winning 82
+c3_switch0 98s c3_switch0: 59.90% (±0.33) over 98 decks at 200 games, winning 73
+DONE

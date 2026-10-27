@@ -1,0 +1,8 @@
+c6_boss2 73s c6_boss2: 72.96% (±0.30) over 98 decks at 200 games, winning 89
+c6_garden1 73s c6_garden1: 72.38% (±0.30) over 98 decks at 200 games, winning 87
+c6_lillie3 73s c6_lillie3: 71.18% (±0.30) over 98 decks at 200 games, winning 86
+c6_mew1 82s c6_mew1: 72.27% (±0.30) over 98 decks at 200 games, winning 88
+c6_morty1e 73s c6_morty1e: 72.35% (±0.30) over 98 decks at 200 games, winning 88
+c6_patch0 74s c6_patch0: 72.11% (±0.30) over 98 decks at 200 games, winning 88
+c6_stretch1 74s c6_stretch1: 72.56% (±0.30) over 98 decks at 200 games, winning 87
+DONE

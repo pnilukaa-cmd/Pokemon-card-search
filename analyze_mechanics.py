@@ -428,7 +428,11 @@ FAMILIES = [
     ("damage_scales_with_tools_attached", "consume",
      r"damage for each Pok[eé]mon Tool attached"),
     ("damage_scales_with_retreat_cost", "consume",
-     r"damage for each Colorless in your opponent'?s Active Pok[eé]mon'?s Retreat Cost|less damage for each Colorless in your opponent'?s Active Pok[eé]mon'?s Retreat Cost"),
+     # Talonflame's Aero Chase is the threshold form: "If the Retreat Cost
+     # of your opponent's Active Pokemon is ColorlessColorless or more,
+     # this attack does 110 more damage."
+     r"damage for each Colorless in your opponent'?s Active Pok[eé]mon'?s Retreat Cost|less damage for each Colorless in your opponent'?s Active Pok[eé]mon'?s Retreat Cost"
+     r"|if the Retreat Cost of your opponent'?s Active Pok[eé]mon is (?:Colorless)+ or more, this attack does \d+ more damage"),
     ("damage_ignores_weakness_resistance_or_effects", "consume",
      r"isn'?t affected by (Weakness|Resistance|any effects)"),
     ("attack_cost_reduction_scaling", "consume",

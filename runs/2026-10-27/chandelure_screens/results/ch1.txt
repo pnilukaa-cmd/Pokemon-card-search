@@ -1,0 +1,13 @@
+c1_candy 133s c1_candy: 42.16% (±0.33) over 98 decks at 200 games, winning 33
+c1_e12 134s c1_e12: 45.44% (±0.33) over 98 decks at 200 games, winning 39
+c1_garden2 143s c1_garden2: 39.16% (±0.32) over 98 decks at 200 games, winning 24
+c1_gem 112s c1_gem: 34.30% (±0.32) over 98 decks at 200 games, winning 12
+c1_legacy 117s c1_legacy: 39.76% (±0.32) over 98 decks at 200 games, winning 25
+c1_line 109s c1_line: 46.49% (±0.33) over 98 decks at 200 games, winning 44
+c1_morty0 114s c1_morty0: 33.27% (±0.31) over 98 decks at 200 games, winning 12
+c1_nomew 104s c1_nomew: 37.01% (±0.32) over 98 decks at 200 games, winning 17
+c1_notrev 110s c1_notrev: 41.08% (±0.33) over 98 decks at 200 games, winning 27
+c1_patrat0 111s c1_patrat0: 39.62% (±0.32) over 98 decks at 200 games, winning 24
+c1_tech0 109s c1_tech0: 41.08% (±0.33) over 98 decks at 200 games, winning 25
+c1_unown0 119s c1_unown0: 37.42% (±0.32) over 98 decks at 200 games, winning 20
+DONE

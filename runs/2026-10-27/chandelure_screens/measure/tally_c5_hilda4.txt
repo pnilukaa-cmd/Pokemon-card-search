@@ -1,0 +1,71 @@
+wins 43 / 60
+   3.78 Mega Chandelure ex uses Phantom Maze
+   2.17 Lampent
+   2.17 attaches Psychic Energy to Mega Chandelure ex
+   1.60 attaches Psychic Energy to Litwick
+   1.52 Hilda
+   1.52 Litwick
+   1.28 Ultra Ball
+   1.08 Lillie's Determination
+   1.03 Lampent uses Spreading Light
+   1.03 Boss's Orders
+   1.00 Litwick to Active
+   0.97 Litwick uses Will-O-Wisp
+   0.87 Mystery Garden
+   0.80 plays Stadium Mystery Garden
+   0.77 benches Litwick
+   0.68 Rare Candy
+   0.67 Buddy-Buddy Poffin
+   0.58 Morty's Conviction
+   0.58 Night Stretcher
+   0.58 attaches Telepathic Psychic Energy to Mega Chandelure ex
+   0.57 Wondrous Patch
+   0.52 attaches Psychic Energy to Lampent
+   0.42 promotes Litwick
+   0.40 attaches Telepathic Psychic Energy to Litwick
+   0.35 promotes Mega Chandelure ex
+   0.35 promotes Lampent
+   0.28 attaches Telepathic Psychic Energy to Lampent
+   0.25 retreats into Mega Chandelure ex
+   0.23 KO on Mega Kangaskhan ex
+   0.23 KO on Dipplin
+   0.23 KO on Thwackey
+   0.22 Switch
+   0.20 can't play Item cards this turn
+   0.20 KO on N's Zoroark ex
+   0.18 Risky Ruins puts N counters on Litwick
+   0.17 KO on Dragapult ex
+   0.15 KO on Smoochum
+   0.15 KO on Snorlax
+   0.13 attaches Legacy Energy to Mega Chandelure ex
+   0.13 KO on Fezandipiti ex
+   0.13 attaches Legacy Energy to Litwick
+   0.13 KO on Mega Excadrill ex
+   0.10 KO on Budew
+   0.10 KO on Meowth ex
+   0.10 KO on Drakloak
+   0.10 KO on Munkidori
+   0.10 Litwick KO'd at checkup
+   0.10 KO on Applin
+   0.10 KO on Bouffalant
+   0.08 KO on Seaking
+   0.08 Mega Chandelure ex is Confused -- attack fails, N to itself
+   0.07 KO on Dreepy
+   0.07 KO on Teal Mask Ogerpon ex
+   0.07 Lampent KO'd at checkup
+   0.07 KO on Yveltal
+   0.05 KO on Moltres
+   0.05 attaches Legacy Energy to Lampent
+   0.05 KO on Raging Bolt ex
+   0.05 Mega Chandelure ex can't retreat this turn
+   0.05 KO on Shaymin
+   0.05 KO on Goldeen
+   0.05 KO on N's Zorua
+   0.05 KO on N's Zekrom
+   0.03 KO on Dunsparce
+   0.03 KO on Passimian
+   0.03 KO on Iron Leaves ex
+   0.03 KO on Rabsca
+   0.03 retreats into Lampent
+   0.03 KO on Pecharunt ex
+   0.03 KO on N's Darmanitan

@@ -1,0 +1,9 @@
+c5_boss2 72s c5_boss2: 72.19% (±0.30) over 98 decks at 200 games, winning 88
+c5_ching2 73s c5_ching2: 69.92% (±0.31) over 98 decks at 200 games, winning 89
+c5_ded2 78s c5_ded2: 70.43% (±0.31) over 98 decks at 200 games, winning 86
+c5_elg2 81s c5_elg2: 66.06% (±0.32) over 98 decks at 200 games, winning 82
+c5_hilda4 73s c5_hilda4: 72.93% (±0.30) over 98 decks at 200 games, winning 90
+c5_mew1 82s c5_mew1: 71.21% (±0.30) over 98 decks at 200 games, winning 86
+c5_morty1h 74s c5_morty1h: 72.86% (±0.30) over 98 decks at 200 games, winning 90
+c5_uxun 75s c5_uxun: 70.49% (±0.30) over 98 decks at 200 games, winning 85
+DONE

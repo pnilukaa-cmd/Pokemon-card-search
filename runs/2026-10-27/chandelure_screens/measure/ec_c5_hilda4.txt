@@ -1,0 +1,8 @@
+c5_hilda4: 10 games against each of 98 decks, at the end of each of its own turns
+turn  games  in play  Active  can attack  in hand Mega Chandelure ex
+   1    980     0.93    0.92       92.1%     1.27               0.1%
+   2    945     1.59    1.08       90.2%     1.41              21.7%
+   3    925     2.23    1.34       76.2%     1.51              72.4%
+   4    890     2.88    1.54       81.9%     1.66              82.6%
+   5    827     3.45    1.61       79.7%     1.76              89.0%
+   6    696     3.96    1.68       83.9%     1.78              90.7%

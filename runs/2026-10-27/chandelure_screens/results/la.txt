@@ -1,0 +1,3 @@
+c3_notrevH_la 711s c3_notrevH: 75.24% (±0.57) over 98 decks at 50 games, winning 88
+c4_mew0h_la 545s c4_mew0h: 77.76% (±0.55) over 98 decks at 50 games, winning 92
+DONE

@@ -1,0 +1,10 @@
+c4_boss2 93s c4_boss2: 68.06% (±0.31) over 98 decks at 200 games, winning 85
+c4_e2 88s c4_e2: 67.12% (±0.31) over 98 decks at 200 games, winning 83
+c4_garden2 92s c4_garden2: 66.49% (±0.32) over 98 decks at 200 games, winning 84
+c4_hilda4 86s c4_hilda4: 70.23% (±0.30) over 98 decks at 200 games, winning 85
+c4_mew0 73s c4_mew0: 69.56% (±0.31) over 98 decks at 200 games, winning 85
+c4_mew0h 77s c4_mew0h: 71.43% (±0.30) over 98 decks at 200 games, winning 88
+c4_mew1 82s c4_mew1: 68.25% (±0.31) over 98 decks at 200 games, winning 83
+c4_morty1 88s c4_morty1: 68.31% (±0.31) over 98 decks at 200 games, winning 85
+c4_patch1 87s c4_patch1: 67.19% (±0.31) over 98 decks at 200 games, winning 82
+DONE

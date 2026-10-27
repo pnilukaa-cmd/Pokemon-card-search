@@ -628,7 +628,7 @@
     {
       "tag": "damage_scales_with_retreat_cost",
       "role": "consume",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "damage_ignores_weakness_resistance_or_effects",
@@ -13277,7 +13277,8 @@
       ],
       "hp": "140",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "damage_scales_with_retreat_cost"
       ]
     },
     {

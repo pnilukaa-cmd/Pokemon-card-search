@@ -1,0 +1,71 @@
+wins 19 / 60
+   1.47 Lillie's Determination
+   1.43 Boss's Orders
+   1.35 Ultra Ball
+   1.20 Mystery Garden
+   1.08 Litwick
+   1.02 plays Stadium Mystery Garden
+   0.95 Mega Chandelure ex uses Phantom Maze
+   0.83 benches Litwick
+   0.83 Buddy-Buddy Poffin
+   0.77 Lampent
+   0.75 Night Stretcher
+   0.72 Wondrous Patch
+   0.70 benches Elgyem
+   0.67 Morty's Conviction
+   0.67 Mew ex uses Teleportation Burst
+   0.65 Trevenant uses Overwhelming Pain
+   0.60 benches Phantump
+   0.60 attaches Psychic Energy to Mega Chandelure ex
+   0.55 promotes Mega Chandelure ex
+   0.53 benches Mew ex
+   0.53 Prime Catcher
+   0.48 Litwick uses Will-O-Wisp
+   0.45 Uxie uses Painful Memories
+   0.43 Trevenant uses Spiteful Evolution
+   0.42 attaches Psychic Energy to Elgyem
+   0.40 promotes Mew ex
+   0.40 benches Patrat
+   0.37 Trevenant uses Cursed Roots
+   0.35 Phantump
+   0.35 benches Unown
+   0.33 benches Uxie
+   0.28 attaches Psychic Energy to Mew ex
+   0.28 Switch
+   0.28 attaches Psychic Energy to Trevenant
+   0.28 attaches Telepathic Psychic Energy to Elgyem
+   0.28 attaches Telepathic Psychic Energy to Mega Chandelure ex
+   0.27 promotes Trevenant
+   0.27 can't play Item cards this turn
+   0.25 Litwick to Active
+   0.25 attaches Psychic Energy to Litwick
+   0.25 Elgyem KO'd at checkup
+   0.25 Rare Candy
+   0.25 promotes Litwick
+   0.23 attaches Telepathic Psychic Energy to Trevenant
+   0.23 attaches Psychic Energy to Unown
+   0.23 Phantump uses Mumble
+   0.23 Patrat uses Bite
+   0.20 attaches Telepathic Psychic Energy to Unown
+   0.18 retreats into Mega Chandelure ex
+   0.18 promotes Phantump
+   0.17 Lampent uses Spreading Light
+   0.17 Mew ex uses Painful Memories
+   0.17 Unown to Active
+   0.15 Phantump to Active
+   0.13 Mew ex to Active
+   0.13 attaches Handheld Fan to Trevenant
+   0.13 promotes Lampent
+   0.13 promotes Uxie
+   0.13 Patrat to Active
+   0.13 attaches Psychic Energy to Phantump
+   0.13 Unown uses Mysterious Signal
+   0.12 attaches Telepathic Psychic Energy to Litwick
+   0.12 attaches Handheld Fan to Litwick
+   0.12 Elgyem to Active
+   0.12 attaches Psychic Energy to Patrat
+   0.12 promotes Elgyem
+   0.12 Tool Scrapper
+   0.12 Enhanced Hammer
+   0.10 retreats into Mew ex
+   0.10 Patrat KO'd at checkup

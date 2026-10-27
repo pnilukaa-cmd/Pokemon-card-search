@@ -1,0 +1,5 @@
+c7_ariados 76s c7_ariados: 69.25% (±0.31) over 98 decks at 200 games, winning 87
+c7_marsh1 73s c7_marsh1: 73.86% (±0.29) over 98 decks at 200 games, winning 90
+c7_marsh2 74s c7_marsh2: 73.24% (±0.29) over 98 decks at 200 games, winning 89
+c7_marsh2e 79s c7_marsh2e: 72.41% (±0.30) over 98 decks at 200 games, winning 89
+DONE

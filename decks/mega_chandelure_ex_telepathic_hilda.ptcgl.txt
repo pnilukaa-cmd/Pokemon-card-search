@@ -1,0 +1,24 @@
+Pokémon: 12
+4 Litwick PBL 36
+4 Lampent PBL 37
+4 Mega Chandelure ex PBL 38
+
+Trainer: 30
+4 Hilda WHT 164
+4 Lillie's Determination MEG 119
+2 Morty's Conviction TEF 201
+3 Boss's Orders MEG 114
+4 Rare Candy MEG 125
+3 Ultra Ball MEG 131
+3 Buddy-Buddy Poffin ASC 184
+2 Night Stretcher ASC 196
+2 Wondrous Patch PFL 94
+1 Switch MEG 130
+2 Mystery Garden MEG 122
+
+Energy: 18
+4 Telepathic Psychic Energy POR 88
+1 Legacy Energy TWM 167
+13 Basic Psychic Energy
+
+Total Cards: 60

@@ -1,0 +1,3 @@
+c5_hilda4 372s c5_hilda4: 72.82% (±0.13) over 98 decks at 1000 games, winning 89
+X_user 600s X_user: 35.65% (±0.14) over 98 decks at 1000 games, winning 17
+DONE
