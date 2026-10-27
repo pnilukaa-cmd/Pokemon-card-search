@@ -3498,6 +3498,7 @@ UNSCORED_ATTACKS = set()
 
 _FOR_EACH_RE = _re.compile(r"for each ([^.]+)", _re.I)
 _MORE_DMG_RE = _re.compile(r"(\d+) more damage for each", _re.I)
+_LESS_DMG_RE = _re.compile(r"(\d+) less damage for each", _re.I)
 _DOES_DMG_RE = _re.compile(r"does (\d+) damage for each", _re.I)
 _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
@@ -4599,6 +4600,12 @@ def _attack_damage_core(pl, opp, spot, atk, record=True):
             m = _MORE_DMG_RE.search(text)
             if m:                      # "does N more damage for each X"
                 return base + int(m.group(1)) * count
+            # "does N LESS damage for each X" (Tinkaton's Windup Swing, 240
+            # less 60 per Energy on their Active) fell to base * count
+            # below: 0 against no Energy and 960 against four.
+            m = _LESS_DMG_RE.search(text)
+            if m:
+                return max(0, base - int(m.group(1)) * count)
             # _DOES_DMG_RE wants "does N damage for each" adjacent. Cards
             # that name their target in between ("does 30 damage to 1 of
             # your opponent's Pokemon for each damage counter") broke the

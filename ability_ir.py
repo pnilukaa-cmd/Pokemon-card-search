@@ -641,6 +641,14 @@ def parse_conditions(text):
     m = re.search(r"when you have exactly (\d+) prize cards? remaining", t, re.I)
     if m:
         out.append({"kind": "own_prizes_equal", "count": int(m.group(1))})
+    # Coalossal's Tar Cannon: "If you don't have 10 or more Basic Fighting
+    # Energy cards in your discard pile, this attack does nothing." Dropped,
+    # it sniped for 140 from an empty discard pile.
+    m = re.search(r"if you don't have (\d+) or more basic (" + TYPES + r") energy cards?"
+                  r" in your discard pile", t, re.I)
+    if m:
+        out.append({"kind": "discard_basic_energy_at_least",
+                    "type": m.group(2).capitalize(), "count": int(m.group(1))})
     m = re.search(r"if your opponent has (?:exactly )?(\d+) (?:or (more|fewer) )?cards?"
                   r" in (?:their|your opponent'?s) hand", t, re.I)
     if m:

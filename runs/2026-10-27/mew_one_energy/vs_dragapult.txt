@@ -1,0 +1,41 @@
+1163 attacks costing 1 scored as Mew ex against Dragapult ex
+ 300 +    0  Stage 1 MEGA ex  Mega Froslass ex ASC 265     Water Resentful Refrain
+  50 +  230  Stage 1          Claydol CRI 47               Fighting Devolution Ray
+ 250 +    0  Stage 1 ex       Palafin ex TWM 193           Water Giga Impact
+ 180 +   60  Stage 1 ex       Wugtrio ex TEF 190           Water Tricolor Pump
+   0 +  240  Stage 2 ex       Arboliva ex DRI 207          Grass Oil Salvo
+   0 +  230  Stage 1          Espathra SSP 95              Colorless Mystical Eyes
+ 200 +    0  Stage 2 MEGA ex  Mega Gallade ex CRI 48       Fighting Gale Slash
+ 170 +   25  Stage 2 ex       Greninja ex TWM 106          Water Shinobi Blade
+ 130 +   60  Stage 1 MEGA ex  Mega Lucario ex MEG 160      Fighting Aura Jab
+   0 +  190  Stage 1          Mandibuzz PBL 50             Darkness Bone Sniper
+ 130 +   60  Stage 1 MEGA ex  Mega Lucario ex ASC 113      Fighting Aura Jab
+ 180 +    0  Stage 2          Chandelure TWM 38            Fire Mind Ruler
+ 180 +    0  Stage 2          Toucannon PBL 68             Colorless Feather Rondo
+ 120 +   50  Stage 1 MEGA ex  Mega Starmie ex POR 102      Water Jetting Blow
+ 160 +    0  Stage 2          Alakazam TWM 82              Psychic Psychic
+ 160 +    0  Stage 1          Armarouge PBL 12             Fire Flame Legion
+ 130 +   25  Stage 2          Annihilape SSP 100           Fighting Tantrum
+ 150 +    0  Stage 1 ex       Whimsicott ex WHT 157        Grass Wondrous Cotton
+ 150 +    0  Stage 1 ex       Arven's Mabosstiff ex DRI 139 Colorless Vigorous Tackle
+ 110 +   40  Stage 2          Butterfree JTG 3             Grass Scale Hurricane
+ 130 +   15  Stage 2 ex       Flygon ex SSP 106            Fighting Reversing Storm
+ 140 +    0  Stage 1          Diggersby POR 65             Colorless Earthquake
+ 120 +   15  Stage 1          Malamar SFA 34               Darkness Colluding Tentacles
+  80 +   55  Stage 2          Crobat CRI 51                Darkness Poison Sound Wave
+ 130 +    0  Stage 1          Palafin TEF 49               Water Vanguard Punch
+ 130 +    0  Stage 1          Centiskorch SSP 28           Fire Billowing Heat Wave
+   0 +  125  Stage 1          Alcremie SCR 65              Colorless Colorful Confection
+   0 +  125  Stage 1          Frosmoth MEG 43              Water Chilling Wings
+ 120 +    0  Stage 1          Mightyena TWM 114            Darkness Hunting Pack
+ 120 +    0  Basic            Diancie SCR 86               Colorless Diffuse Reflection
+ 120 +    0  Basic            Hop's Cramorant ASC 177      Colorless Fickle Spitting
+ 120 +    0  Stage 1          Meowstic POR 34              Psychic Psychic
+   0 +  120  Stage 2          Alakazam MEG 56              Psychic Powerful Hand
+ 100 +   15  Stage 2 ex       Cynthia's Garchomp ex ASC 111 Fighting Corkscrew Dive
+ 110 +    0  Stage 1          Swanna TWM 140               Colorless Fighting Wings
+ 110 +    0  Stage 1          Exeggutor SSP 3              Grass Barrage O'Clock
+ 110 +    0  Stage 2          Inteleon MEG 142             Water Water Shot
+  50 +   60  Stage 2          Cinderace MEG 28             Colorless Turbo Flare
+ 110 +    0  Basic            Moltres PFL 14               Fire Fighting Wings
+ 110 +    0  Stage 2 ex       Beedrill ex CRI 3            Grass Rumbling Bees

@@ -6879,5 +6879,71 @@ def test_a_fossil_is_an_item_outside_play():
                   "Night Stretcher": ["Water Energy"], "Fossil Quarry": [fossil, fossil],
                   "setup": ("Articuno", [], True)}, got)
 
+def test_less_damage_for_each_subtracts():
+    """Six attacks print a base and "does N less damage for each X":
+    Tinkaton's Windup Swing (240, less 60 per Energy on their Active),
+    Mega Pyroar ex's Fiery Big Bang and Tangrowth's Loom Over (less 10 per
+    counter on themselves), Iron Bundle and Throh (less per Colorless in
+    their Active's Retreat Cost). The generic for-each rule multiplied
+    instead: Windup Swing did 0 against a bare Active and 960 against four
+    Energy, Fiery Big Bang 2900 with 100 damage on Pyroar."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 5\n1 Tinkaton MEG 98\n1 Mega Pyroar ex CRI 15\n1 Tangrowth TWM 2\n"
+                "1 Iron Bundle SSP 55\n1 Okidogi ex SFA 36\n\nEnergy: 55\n55 Basic Metal Energy\n")
+    try:
+        V, D, E = _real(f.name, "t")
+    finally:
+        os.unlink(f.name)
+
+    def hit(name, attack, damage=0, their_energy=0):
+        atk = next(a for a in D[1][name]["attacks"] if a["name"] == attack)
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, me.bench, op.bench = [], [], [], []
+        me.active = V.InPlay(name, 1)
+        me.active.damage = damage
+        op.active = V.InPlay("Okidogi ex", 1)
+        op.active.energy = [["Darkness"]] * their_energy
+        op.active.energy_names = ["Darkness Energy"] * their_energy
+        return V.attack_damage(me, op, me.active, atk, record=False)
+    got = [hit("Tinkaton", "Windup Swing", their_energy=n) for n in (0, 1, 3, 4)] + [
+        hit("Mega Pyroar ex", "Fiery Big Bang", damage=100),
+        hit("Tangrowth", "Loom Over", damage=50),
+        hit("Iron Bundle", "Gusting Collision")]          # Okidogi ex: Retreat 3
+    check("240 less 60 per Energy; 290 less 100; 150 less 50; 200 less 150",
+          got == [240, 180, 60, 0, 190, 100, 50], got)
+
+def test_tar_cannon_needs_ten_fighting_energy_in_the_discard():
+    """Coalossal's Tar Cannon: 140 to 1 of your opponent's Pokemon, and
+    "if you don't have 10 or more Basic Fighting Energy cards in your
+    discard pile, this attack does nothing." The gate didn't compile, so
+    it sniped for 140 from an empty discard pile. Played through do_attack."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Coalossal ASC 120\n1 Okidogi ex SFA 36\n\n"
+                "Energy: 58\n58 Basic Fighting Energy\n")
+    try:
+        V, D, E = _real(f.name, "c")
+    finally:
+        os.unlink(f.name)
+
+    def fire(in_discard):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.hand, op.hand, me.bench, op.bench = [], [], [], []
+        me.active = V.InPlay("Coalossal", 1)
+        me.active.energy, me.active.energy_names = [["Fighting"]], ["Fighting Energy"]
+        op.active = V.InPlay("Okidogi ex", 1)
+        me.discard = ["Fighting Energy"] * in_discard
+        me.deck = [("Energy", "Fighting Energy")] * 20
+        op.deck = [("Energy", "Fighting Energy")] * 20
+        V.do_attack(me, op, [])
+        return op.active.damage
+    got = [fire(9), fire(10)]
+    check("nothing with 9 Fighting Energy in the discard, 140 with 10", got == [0, 140], got)
+
 if __name__ == "__main__":
     sys.exit(main())

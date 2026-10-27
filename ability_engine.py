@@ -704,6 +704,11 @@ def conditions_met(effect, pl, opp, source, atk=None):
                         break
             if n < c["count"]:
                 return False
+        if k == "discard_basic_energy_at_least":
+            n = sum(1 for name in pl.discard if re.fullmatch(
+                rf"(basic )?{c['type']} energy", str(name), re.I))
+            if n < c["count"]:
+                return False
         if k == "opponent_active_is_ex":
             if opp is pl or not opp.active:
                 return False
