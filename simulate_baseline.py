@@ -31,8 +31,8 @@ Stated simplifications
   * Energy is counted, not type-checked (that is check_energy_support.py's
     job), so an Ability whose cost is "discard a Basic <Type> Energy from
     this Pokemon" is skipped rather than guessed at.
-  * Pokemon Tools are never attached; Stadiums other than Grand Tree do
-    nothing.
+  * Pokemon Tools are never attached; Stadiums other than Grand Tree and
+    Fossil Quarry do nothing.
 
 Usage:
   python3 simulate_baseline.py decklist.txt          # 1000-trial baseline
@@ -88,7 +88,10 @@ class GameState:
                 self.hand.append(self.deck.pop())
 
     def has_basic_in_hand(self, POKEMON):
-        return any(k == "Pokemon" and (POKEMON[n]["stage"] == "Basic"
+        # A Fossil is an Item played "as if" it were a Basic: it can't be
+        # put down during setup, so it doesn't stop a mulligan.
+        return any(k == "Pokemon" and ((POKEMON[n]["stage"] == "Basic"
+                                        and not is_fossil(POKEMON, n))
                                        or POKEMON[n].get("opens_active"))
                    for k, n in self.hand)
 
@@ -110,6 +113,14 @@ class GameState:
 
 
 PRIZE_COUNT = 6
+
+
+def is_fossil(POKEMON, name):
+    """Antique Sail Fossil and friends: Item cards played as Basic Pokemon.
+    The deck model files them as Pokemon so they can be benched from hand,
+    but in the deck, the hand and the discard pile they are Items -- no
+    search or recovery for a Pokemon finds one, and setup can't use one."""
+    return bool((POKEMON.get(name) or {}).get("is_fossil"))
 
 
 def opening_hand(deck, POKEMON):
@@ -136,7 +147,8 @@ def opening_hand(deck, POKEMON):
 
 def play_basics(state, POKEMON, turn, log):
     if state.active is None:
-        basics_in_hand = [n for k, n in state.hand if k == "Pokemon" and POKEMON[n]["stage"] == "Basic"]
+        basics_in_hand = [n for k, n in state.hand if k == "Pokemon" and POKEMON[n]["stage"] == "Basic"
+                          and not is_fossil(POKEMON, n)]
         # Explosiveness (Cinderace MEG 28): it may open face down instead.
         # This tool has no setup step; the first Active goes down on turn 1.
         if turn <= 1:
@@ -312,6 +324,29 @@ def effect_grand_tree(state, POKEMON, turn, log):
                 log.append(f"Grand Tree chains -> {s1name} evolves into {s2name}")
             break
     random.shuffle(state.deck)
+    return True
+
+
+def effect_fossil_quarry(state, POKEMON, turn, log):
+    """Fossil Quarry (Stadium): once during each player's turn, search the
+    deck for up to 2 Item cards with "Antique" in their name and put them
+    onto the Bench. The Fossils are those Items."""
+    if state.stadium_in_play != "Fossil Quarry":
+        return False
+    got = []
+    for card in list(state.deck):
+        if len(got) == 2 or len(state.bench) >= 5:
+            break
+        if card[0] == "Pokemon" and is_fossil(POKEMON, card[1]) and "Antique" in card[1]:
+            state.deck.remove(card)
+            state.bench.append({"name": card[1], "energy": 0, "entered_turn": turn,
+                                "evolved_this_turn": False})
+            state.note_online(card[1], turn)
+            got.append(card[1])
+    if not got:
+        return False
+    random.shuffle(state.deck)
+    log.append(f"Fossil Quarry -> bench {', '.join(got)}")
     return True
 
 
@@ -559,7 +594,8 @@ def stage_rank(POKEMON, name):
 
 
 def search_priority(POKEMON):
-    return sorted(POKEMON.keys(), key=lambda n: (stage_rank(POKEMON, n), POKEMON[n]["rule_box"]))
+    return sorted((n for n in POKEMON if not is_fossil(POKEMON, n)),
+                  key=lambda n: (stage_rank(POKEMON, n), POKEMON[n]["rule_box"]))
 
 
 def choose_search_target(state, POKEMON, priority, allow_rule_box):
@@ -579,7 +615,8 @@ def choose_search_target(state, POKEMON, priority, allow_rule_box):
 
 
 def buddy_poffin_eligible(POKEMON):
-    return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and info["hp"] <= 70]
+    return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and info["hp"] <= 70
+            and not info.get("is_fossil")]
 
 
 # Cards shaped like "search up to N Basic <Family> Pokemon and put them onto
@@ -596,7 +633,8 @@ FAMILY_BENCH_SEARCH_ITEMS = {
 
 
 def family_bench_eligible(POKEMON, family_substring):
-    return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and family_substring in n]
+    return [n for n, info in POKEMON.items() if info["stage"] == "Basic" and family_substring in n
+            and not info.get("is_fossil")]
 
 
 def play_items(state, POKEMON, priority, turn, log):
@@ -732,7 +770,8 @@ def play_items(state, POKEMON, priority, turn, log):
         log.append(f"Play Pokégear 3.0 -> reveal {pick[1]}")
 
     while ("Item", "Night Stretcher") in state.hand:
-        pkmn_in_discard = next((n for n in state.discard if n in POKEMON), None)
+        pkmn_in_discard = next((n for n in state.discard
+                                if n in POKEMON and not is_fossil(POKEMON, n)), None)
         basic_energy_in_discard = next((n for n in state.discard if BASIC_ENERGY_RE.match(n)), None)
         pick = pkmn_in_discard or basic_energy_in_discard
         if pick is None:
@@ -897,7 +936,7 @@ def effect_ariana(state, POKEMON, log):
 
 def _search_pokemon_to_hand(state, POKEMON, pred):
     for i, (k, n) in enumerate(state.deck):
-        if k == "Pokemon" and pred(n):
+        if k == "Pokemon" and not is_fossil(POKEMON, n) and pred(n):
             state.deck.pop(i)
             random.shuffle(state.deck)
             state.hand.append(("Pokemon", n))
@@ -1051,7 +1090,10 @@ KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pa
 # apply them to, so they correctly score as having zero effect on any
 # metric reported here. That's a real limit on what this tool can tell
 # you about those cards specifically, not evidence they're weak.
-NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card"}
+# Crushing Hammer only touches the opponent's Energy and Jumbo Ice Cream
+# only heals, and this simulator has neither an opponent nor damage.
+NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card",
+                        "Crushing Hammer", "Jumbo Ice Cream"}
 
 
 def collect_unmodeled(DECKLIST):
@@ -1079,6 +1121,7 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
     try_evolve(state, POKEMON, turn_num, log)
     play_stadium(state, log)
     effect_grand_tree(state, POKEMON, turn_num, log)
+    effect_fossil_quarry(state, POKEMON, turn_num, log)
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
     use_draw_abilities(state, POKEMON, log)

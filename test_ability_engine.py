@@ -1396,6 +1396,29 @@ def test_rare_candy_bridges_in_the_baseline_sim_too():
 
 
 
+def test_the_baseline_sim_treats_fossils_as_items_too():
+    """simulate_baseline had the Fossil bug as well, and no Fossil Quarry:
+    a Fossil stopped a mulligan, went down as the turn-1 Active (where, with
+    no retreat in that simulator, nothing ever attacked), and Poke Pad and
+    Night Stretcher took Fossils. The Tundra Wall list's first attack by
+    turn 6 read 81% and is 99%."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model("Pokémon: 1\n1 Articuno JTG 161\n\n"
+                            "Trainer: 5\n4 Antique Sail Fossil POR 69\n1 Fossil Quarry PBL 76\n\n"
+                            "Energy: 54\n54 Basic Water Energy\n")[0]
+    fossil = "Antique Sail Fossil"
+    st = SB.GameState([("Pokemon", fossil)] * 3 + [("Energy", "Water Energy")] * 20)
+    st.hand = [("Pokemon", fossil)]
+    mull = st.has_basic_in_hand(P)
+    st.hand = [("Pokemon", fossil), ("Pokemon", "Articuno")]
+    SB.play_basics(st, P, 1, [])
+    st.stadium_in_play = "Fossil Quarry"
+    quarry = SB.effect_fossil_quarry(st, P, 1, []) if hasattr(SB, "effect_fossil_quarry") else False
+    got = (mull, st.active, fossil in SB.search_priority(P), quarry,
+           sorted(b["name"] for b in st.bench))
+    check("no mulligan stop, no Active, no search for a Fossil; Fossil Quarry benches two",
+          got == (False, "Articuno", False, True, [fossil] * 3), got)
+
 def test_coin_flips_are_actually_flipped():
     """Every coin flip in the pool was a guaranteed success.
 
