@@ -7178,5 +7178,73 @@ def test_boss_orders_strands_what_can_neither_attack_nor_retreat():
           got == ["Dudunsparce", "Dragapult ex", "Dragapult ex"], got)
 
 
+def test_gust_audit_says_why_boss_was_held():
+    """gust_audit.py sorts each turn with Boss's Orders in hand by what
+    stood in the way. Four boards: a Jellicent ex with no Energy (no
+    attacker), one with 2 that Knocks Out the Benched Dreepy (a target),
+    the same with Dreepy Active and only a Dragapult ex on the Bench (the
+    Active is the Knock Out), and a full-HP Dragapult ex Active and
+    Benched (no Knock Out)."""
+    import tempfile, os
+    import gust_audit as GA
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n4 Frillish WHT 44\n4 Jellicent ex WHT 45\n\n"
+                "Trainer: 1\n1 Boss's Orders MEG 114\n\n"
+                "Energy: 51\n51 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "b")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+
+    def why(energy, active, bench):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.energy_types = {"Psychic"}
+        me.active = V.InPlay("Jellicent ex", 1)
+        me.active.energy, me.active.energy_names = [["Psychic"]] * energy, ["Psychic Energy"] * energy
+        op.active = V.InPlay(active, 1)
+        op.bench = [V.InPlay(n, 1) for n in bench]
+        me.hand = [("Supporter", "Boss's Orders")]
+        me.deck, op.deck, op.hand = list(D[2]), list(O[2]), []
+        return GA.classify(me, op)
+    got = [why(0, "Dragapult ex", ["Dragapult ex"]), why(2, "Dragapult ex", ["Dreepy"]),
+           why(2, "Dreepy", ["Dragapult ex"]), why(2, "Dragapult ex", ["Dragapult ex"])]
+    check("gust_audit: no attacker / a target / the Active is the Knock Out / no Knock Out",
+          got == ["no attacker", "target", "Active is the KO", "no Knock Out"], got)
+
+
+def test_a_gust_with_no_active_to_switch_with_is_held():
+    """Between a Knock Out and the promotion after it, the opponent has no
+    Active. A gust played from card text there (Prime Catcher, or Boss's
+    Orders falling through to its text) checked each Benched Pokemon for a
+    Knock Out by swapping it with the Active, put None on their Bench, and
+    raised AttributeError, ending a field run. Now it is held."""
+    V, D, E = _real("decks/field/meta_dragapult_dusknoir.txt", "me")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+    got = []
+    for kind, name in (("Item", "Prime Catcher"), ("Supporter", "Boss's Orders")):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.energy_types = {"Psychic", "Fire"}
+        me.active = V.InPlay("Dragapult ex", 1)
+        me.active.energy, me.active.energy_names = [["Fire"], ["Psychic"]], ["Fire Energy", "Psychic Energy"]
+        op.active = None
+        op.bench = [V.InPlay("Dreepy", 1), V.InPlay("Drakloak", 1)]
+        me.hand = [(kind, name)]
+        me.deck, op.deck, op.hand = list(D[2]), list(O[2]), []
+        try:
+            played = V.play_trainer_from_ir(me, op, kind, name, [], 5)
+            got.append((played, [p.name for p in op.bench if p is not None], op.active))
+        except Exception as e:
+            got.append(type(e).__name__)
+    check("Prime Catcher and Boss's Orders held with no Active to switch with",
+          got == [(False, ["Dreepy", "Drakloak"], None)] * 2, got)
+
+
 if __name__ == "__main__":
     sys.exit(main())

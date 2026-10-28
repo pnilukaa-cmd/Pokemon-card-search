@@ -7954,6 +7954,10 @@ def _gust_for_ko(pl, opp, attacker=None):
     this turn, the most Prizes first, and not when the current Active is as
     good a Knock Out; with none, a Pokemon to strand (gust_strand);
     otherwise the card is held."""
+    # Between a Knock Out and the promotion that follows it there is no
+    # Active to switch with; swapping the target in put None on their Bench.
+    if opp.active is None:
+        return None
     prize = lambda p: (opp.POKEMON.get(p.name) or {}).get("prize_value", 1)
     ko = [p for p in opp.bench if _ko_this_turn(pl, opp, p, attacker)]
     if not ko:
