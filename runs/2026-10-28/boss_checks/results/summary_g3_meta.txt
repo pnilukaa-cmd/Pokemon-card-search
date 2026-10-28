@@ -1,0 +1,11 @@
+meta_dragapult_pure_g 153s meta_dragapult_pure: 57.87% (±0.32) over 99 decks at 200 games, winning 67
+dp_b0_g 132s dp_b0: 65.83% (±0.31) over 100 decks at 200 games, winning 81
+dp_h0_g 155s dp_h0: 63.21% (±0.31) over 100 decks at 200 games, winning 76
+meta_ns_zoroark_g 229s meta_ns_zoroark: 39.72% (±0.33) over 99 decks at 200 games, winning 31
+nz_b0_g 163s nz_b0: 49.92% (±0.33) over 100 decks at 200 games, winning 51
+nz_t0_g 191s nz_t0: 49.16% (±0.33) over 100 decks at 200 games, winning 49
+meta_raging_bolt_g 168s meta_raging_bolt: 52.89% (±0.34) over 99 decks at 200 games, winning 60
+rb_b0_g 147s rb_b0: 57.49% (±0.33) over 100 decks at 200 games, winning 74
+meta_dragapult_dusknoir_g 68s 
+dd_b0_g 98s dd_b0: 56.63% (±0.32) over 100 decks at 200 games, winning 67
+DONE

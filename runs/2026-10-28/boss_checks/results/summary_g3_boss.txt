@@ -1,0 +1,10 @@
+jb1_g 82s jb1: 67.72% (±0.29) over 100 decks at 200 games, winning 81
+jb0_g 97s jb0: 67.99% (±0.29) over 100 decks at 200 games, winning 76
+jb2_g 89s jb2: 67.39% (±0.29) over 100 decks at 200 games, winning 79
+jb3_g 91s jb3: 66.61% (±0.29) over 100 decks at 200 games, winning 77
+jb4_g 96s jb4: 66.08% (±0.29) over 100 decks at 200 games, winning 79
+cb3_g 101s cb3: 73.53% (±0.29) over 100 decks at 200 games, winning 90
+cb1_g 92s cb1: 73.61% (±0.29) over 100 decks at 200 games, winning 89
+cb2_g 94s cb2: 73.97% (±0.29) over 100 decks at 200 games, winning 91
+cb4_g 106s cb4: 73.70% (±0.29) over 100 decks at 200 games, winning 92
+DONE

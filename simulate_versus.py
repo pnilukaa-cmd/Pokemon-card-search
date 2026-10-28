@@ -7880,6 +7880,9 @@ def choose_gust_target(pl, opp, attacker=None):
     # and the draw Supporters, which were always tried first (+0.09 on
     # average over 7 decks), and a second look just before the attack, once
     # the turn's retreat, evolutions and Energy are done (+0.03 over 8).
+    # A third, with gust_strand on: when the Active is a Knock Out for as
+    # many Prizes, gust a Benched one with more invested in it (Energy, an
+    # Ability, an evolution) -- +0.15 over 8.
     if POL.knob(pl, "gust_for_ko"):
         return _gust_for_ko(pl, opp, attacker)
     return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))

@@ -115,6 +115,18 @@ and Prism / Neo Upper Energy kept what they gave a Pokemon before it
 evolved. Field decks with those Energy: `mew_baby_box`, `mew_pikachu_box`,
 `study_flygon_sandy_flapping_mill`, `study_maushold_gnaw_latias`.
 
+A fifth and sixth (243a582, 27be9e3): Boss's Orders and the other gust
+cards had dragged up the Benched Pokémon with the least HP left, Knock Out
+or not, so the target was Knocked Out that turn in 29% to 52% of gusts.
+They are now played for a Knock Out (+0.97 on average over 11 decks), and
+with none, to strand a Pokémon that can neither attack nor retreat (+0.86
+over 7). That changes the 91 field decks with a gust card, which is every
+deck but `arbok_muk_laser_darkbell`, `arbok_muk_trolley_darkbell`,
+`arbok_team_rockets_muk_condition_stack`, `aurorus_kangaskhan_tundra_wall`,
+`chesnaught_meganium_wild_growth`, `maushold_gnaw_together_mill`,
+`mega_dragonite_kangaskhan_salazzle_wall`, `meta_slowking` and
+`snorlax_bouffalant_kangaskhan_curly_wall`; and every pairing.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

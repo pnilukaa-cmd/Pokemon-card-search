@@ -1,0 +1,14 @@
+# gusts_wt.py <deck> 10 <6 meta opponents>: Boss's Orders a game, and the share Knocked Out that turn
+# strand rule, the first version (only under an Item lock), on 243a582, Jellicent ex with 4 Boss:
+GUST_STRAND=0 jb4.txt: 0.60 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 100%
+GUST_STRAND=1 jb4.txt: 0.67 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 92%
+# second look before the attack (late_gust, removed):
+late=0 cb3.txt: 0.27 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 94%
+late=1 cb3.txt: 0.35 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 95%
+late=0 meta_dragapult_pure.txt: 0.58 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 97%
+late=1 meta_dragapult_pure.txt: 0.62 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 95%
+# Boss before Hilda and the draw Supporters (gust_first, removed):
+first=0 cb3.txt: 0.27 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 94%
+first=1 cb3.txt: 0.43 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 96%
+first=0 meta_dragapult_pure.txt: 0.58 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 97%
+first=1 meta_dragapult_pure.txt: 0.53 Boss's Orders a game; the dragged-up Pokemon Knocked Out that turn in 94%

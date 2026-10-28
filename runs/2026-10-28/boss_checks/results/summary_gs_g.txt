@@ -1,0 +1,5 @@
+meta_dragapult_pure_g 127s meta_dragapult_pure: 56.85% (±0.33) over 99 decks at 200 games, winning 63
+meta_raging_bolt_g 159s meta_raging_bolt: 52.75% (±0.34) over 99 decks at 200 games, winning 57
+meta_ns_zoroark_g 178s meta_ns_zoroark: 40.35% (±0.33) over 99 decks at 200 games, winning 30
+meta_slowking_g 150s meta_slowking: 45.76% (±0.32) over 99 decks at 200 games, winning 38
+DONE

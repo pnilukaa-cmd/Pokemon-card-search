@@ -1,0 +1,5 @@
+jbh_g 85s jbh: 66.50% (±0.29) over 100 decks at 200 games, winning 78
+jbf_g 81s jbf: 66.93% (±0.29) over 100 decks at 200 games, winning 78
+cbn_g 95s cbn: 73.30% (±0.29) over 100 decks at 200 games, winning 91
+cbu_g 94s cbu: 72.58% (±0.29) over 100 decks at 200 games, winning 88
+DONE

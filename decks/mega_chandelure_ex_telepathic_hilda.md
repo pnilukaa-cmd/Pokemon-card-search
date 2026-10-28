@@ -95,7 +95,12 @@ matchup, on aa450cf:
   Chandelure ex was in play by turn 4 in 39% of games. This list: 2.88
   Energy, and 83% (`energy_curve.py`, 10 games against each field deck).
   Every change that added Energy measured up, about 2.5 points per card
-  until the count reached 17.
+  until the count reached 17. Part of that is this simulator's AI, which
+  runs short of Energy where a player wouldn't. Meta decks measure better
+  here with 3 Energy in place of their 3 Boss's Orders (+4.59 to +10.15)
+  or their Crushing Hammers (+5.45), and no player plays them that way.
+  How many of the 18 a player needs isn't measured; the submitted list ran
+  10.
 - **Mew ex costs this deck points.** It can use Phantom Maze from a Benched
   Mega Chandelure ex for the same damage. But in play it rarely had two
   Energy for it, and its 160 HP gives up 2 Prizes. Under the lookahead
@@ -131,6 +136,37 @@ deck, end of your turn):
 | 4 | 1.78 / 60.4% / 38.6% | 2.88 / 81.9% / 82.6% |
 | 6 | 2.17 / 58.7% / 56.6% | 3.96 / 83.9% / 90.7% |
 
+**Boss's Orders, re-measured.** After this review, two fixes changed how
+the AI plays it. It had dragged up the Benched Pokémon with the least HP
+left, Knock Out or not (243a582, `gust_for_ko`). With no Knock Out it never
+stranded a Pokémon that can't attack or retreat (27be9e3, `gust_strand`).
+The count, on 27be9e3 against this list's 3:
+
+| Change | Measured |
+|---|---|
+| 1 Boss's Orders (2 Energy) | +0.08 ± 0.37 |
+| 2 (an Energy) | +0.45 ± 0.40 |
+| 4 (an Energy fewer) | +0.17 ± 0.44 |
+| 2, for a 3rd Night Stretcher | −0.23 ± 0.43 |
+| 2, for a 4th Ultra Ball | −0.94 ± 0.43 |
+
+Even against Energy, every count from 1 to 4 is even, and the third copy
+beats a fourth Ultra Ball. **3 stays**, as in the published lists. It is
+played less than in most decks because Phantom Maze usually Knocks Out
+whatever is Active. Of the 2.62 turns a game with Boss's Orders in hand
+(`gust_audit.py`, 200 games):
+
+| | Share of those turns |
+|---|---|
+| Played | 11.8% |
+| Another Supporter went first | 4.8% |
+| The Active was already the Knock Out | 48.3% |
+| Nothing on their Bench to Knock Out or strand | 23.7% |
+| No attacker ready | 11.5% |
+
+Runs: `runs/2026-10-28/boss_checks`; the meta-deck checks are written up
+in `jellicent_ex_oceanic_curse.md`.
+
 ## How to play it
 
 1. **Turn 1.**
@@ -149,7 +185,7 @@ deck, end of your turn):
      +50 to Phantom Maze.
    - Legacy Energy on the first Mega Chandelure ex likely to be Knocked Out.
    - Boss's Orders on a high-Retreat Benched Pokémon, which Binding Flame
-     makes higher.
+     makes higher: a bigger Phantom Maze, and one it can't retreat from.
 
 **The opponent's outs:**
 - **Darkness.** Mega Chandelure ex, Litwick and Lampent are all weak to it.
@@ -211,6 +247,9 @@ Each fix has a regression test that fails on the commit before.
 3. **The retreat-cost tag missed Talonflame's Aero Chase** ("if the
    Retreat Cost of your opponent's Active Pokémon is 2 or more, +110").
    Fixed in `analyze_mechanics.py`; both mechanic audits still read 0.
+4. **Boss's Orders was played for nothing** (243a582) **and never
+   stranded** (27be9e3), above. **A gust with no Active to switch with
+   crashed** (9d7eb51).
 
 ## Cards searched
 

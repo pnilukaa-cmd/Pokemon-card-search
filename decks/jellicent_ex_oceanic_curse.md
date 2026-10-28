@@ -16,6 +16,10 @@ seeds it is **+4.67 ± 0.43** over the submitted list (62.16%), better on
 **The changes:** −4 Ignition Energy, −3 Boss's Orders, +7 Basic Psychic
 Energy. Everything else is the submitted list.
 
+The Boss's Orders count holds after two later fixes to how the AI plays
+it. The extra Energy partly reflects this simulator's AI, which needs more
+Energy than a player does (*Boss's Orders, re-measured*).
+
 ## The strategy, card by card
 
 - **Jellicent ex** (WHT 45, Stage 1 Psychic, 270 HP, Retreat 3, weak to
@@ -95,8 +99,79 @@ the two (73.3% to this list's 66.8%) and wins the matchup 75.6% to 24.4%.
   can't pay Oceanic Gloom. With the AI playing it only where it's spent
   that turn, 2 Ignition measured even with 2 Basic Psychic, and 4 lost.
 - **Boss's Orders measured worse than Energy here,** one copy at a time,
-  down to one (and the last one about even). Under the lock their Active
-  can't play Switch or Air Balloon to leave either.
+  down to one (and the last one about even). Those rounds ran while the AI
+  still misplayed it. Re-measured after the fixes (below), the count still
+  lands at 0–2, and a second copy also loses to a Crushing Hammer or a
+  Handheld Fan.
+
+## Boss's Orders, re-measured
+
+Asked after this review: Boss's Orders is a mainstay in almost every meta
+deck, so why did it measure worse than an Energy here? Three things turned
+up.
+
+1. **The AI misplayed it** (243a582, `gust_for_ko`). It dragged up the
+   Benched Pokémon with the least HP left, Knock Out or not, and spent the
+   turn's Supporter on it. The target was Knocked Out that turn in 29% to
+   52% of gusts. Now it is played for a Knock Out the Active can make this
+   turn, the most Prizes first: 94–100% of gusts take one, and +0.97 on
+   average over 11 decks.
+2. **It never stranded anything** (27be9e3, `gust_strand`). With no Knock
+   Out it was held. Now it drags up a Benched Pokémon that can neither
+   attack nor retreat next turn, even with one more Energy, in place of an
+   Active that can attack. +0.86 over 7 decks; +1.49 on this list with 4
+   Boss's Orders. Requiring an Item lock as well measured +0.74 instead.
+3. **This simulator's AI runs short of Energy, so almost anything measures
+   worse than an Energy.** The meta decks below run 3 Boss's Orders and 8
+   Energy. On 27be9e3, at 200 games a matchup:
+
+   | Deck | 3 Boss's Orders → 3 Energy | Something else → 3 Energy |
+   |---|---|---|
+   | Dragapult ex | +8.12 ± 0.59 | 3 Crushing Hammer: +5.45 ± 0.54 |
+   | N's Zoroark ex | +10.15 ± 0.56 | 2 Binding Mochi, Venture Bomb: +9.43 ± 0.55 |
+   | Dragapult ex / Dusknoir | +7.49 ± 0.51 | |
+   | Raging Bolt ex | +4.59 ± 0.54 | |
+
+   No player makes that trade, so the bias is the AI's, not the cards'.
+   With 8 Energy, the Dragapult ex list's Active could attack at the end of
+   turn 4 in 63.5% of games, and 3.49 of its Energy were still in the deck.
+   With 11 it was 75.8% (`energy_curve.py`). **Read every "Energy for X"
+   row in this document with that in mind.** The Energy count here is
+   probably higher than a player needs, and a card measured against Energy
+   is probably worth more than it shows.
+
+**The count, after the fixes** (27be9e3, against this list's 1):
+
+| Change | Measured |
+|---|---|
+| 0 Boss's Orders (an Energy) | +0.27 ± 0.47 |
+| 2 (one Energy fewer) | −0.33 ± 0.47 |
+| 3 | −1.11 ± 0.49 |
+| 4 | −1.64 ± 0.56 |
+| 2, for a Crushing Hammer | −1.23 ± 0.40 |
+| 2, for a Handheld Fan | −0.79 ± 0.40 |
+
+The last two rows compare Boss's Orders with other non-Energy cards, so
+the Energy bias doesn't apply to them. A second copy still loses. That
+part is this deck: Power Press does 80–160, so there is rarely a Benched
+Pokémon to Knock Out, and the Hammers and Fans feed the lock.
+
+**Why it sat in hand** (`gust_audit.py`, the list with 4, 200 games; 4.21
+turns a game with Boss's Orders in hand):
+
+| | Share of those turns |
+|---|---|
+| Played | 17.2% |
+| Another Supporter went first | 8.6% |
+| The Active was already the Knock Out | 34.7% |
+| Nothing on their Bench to Knock Out or strand | 18.2% |
+| No attacker ready | 21.3% |
+
+Three other changes to how it is played measured even and were removed
+(each over 7–8 decks): Boss's Orders ahead of Hilda and the draw
+Supporters (+0.09), a second look just before the attack (+0.03), and
+gusting a Benched Pokémon with more Energy or an Ability when the Active
+is as good a Knock Out (+0.15). Runs: `runs/2026-10-28/boss_checks`.
 
 ## How to play it
 
@@ -183,6 +258,11 @@ Each fix has a regression test that fails on the commit before.
    put down once two Psychic Pokémon are in play), and the setup baseline
    listed Eri, Ruffian, Rust Syndicate Grunt, Jacinthe and Poké Vital A as
    unmodelled; they have no effect on development there.
+5. **Boss's Orders was played for nothing** (243a582) and **never
+   stranded** (27be9e3). See *Boss's Orders, re-measured*.
+6. **A gust with no Active to switch with crashed** (9d7eb51). Between a
+   Knock Out and the promotion after it, Prime Catcher or Boss's Orders
+   from card text put None on the opponent's Bench and ended the run.
 
 ## Cards searched
 

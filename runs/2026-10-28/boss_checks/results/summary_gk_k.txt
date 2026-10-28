@@ -1,0 +1,13 @@
+J_user_k 118s J_user: 63.34% (±0.30) over 100 decks at 200 games, winning 74
+j_ign0_k 106s j_ign0: 64.17% (±0.29) over 100 decks at 200 games, winning 74
+j5_boss1_k 81s j5_boss1: 66.83% (±0.29) over 100 decks at 200 games, winning 77
+C0_k 91s C0: 74.01% (±0.29) over 100 decks at 200 games, winning 93
+meta_dragapult_pure_k 119s meta_dragapult_pure: 58.27% (±0.33) over 99 decks at 200 games, winning 73
+meta_raging_bolt_k 146s meta_raging_bolt: 52.29% (±0.34) over 99 decks at 200 games, winning 62
+meta_festival_lead_k 133s meta_festival_lead: 29.46% (±0.30) over 99 decks at 200 games, winning 14
+meta_ns_zoroark_k 183s meta_ns_zoroark: 39.73% (±0.33) over 99 decks at 200 games, winning 26
+meta_mega_excadrill_k 118s meta_mega_excadrill: 71.32% (±0.30) over 99 decks at 200 games, winning 88
+meta_slowking_k 156s meta_slowking: 43.38% (±0.33) over 99 decks at 200 games, winning 36
+meta_dragapult_dusknoir_k 103s meta_dragapult_dusknoir: 48.92% (±0.33) over 99 decks at 200 games, winning 47
+meta_dragapult_blaziken_k 125s meta_dragapult_blaziken: 57.51% (±0.33) over 99 decks at 200 games, winning 68
+DONE

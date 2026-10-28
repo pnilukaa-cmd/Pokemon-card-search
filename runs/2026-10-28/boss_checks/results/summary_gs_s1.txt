@@ -1,0 +1,3 @@
+jb1_s1 86s jb1: 67.65% (±0.29) over 100 decks at 200 games, winning 77
+jb4_s1 95s jb4: 66.17% (±0.29) over 100 decks at 200 games, winning 79
+DONE
