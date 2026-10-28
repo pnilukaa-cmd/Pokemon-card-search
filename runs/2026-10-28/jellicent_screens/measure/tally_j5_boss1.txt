@@ -1,0 +1,71 @@
+wins 38 / 60
+   5.12 Jellicent ex uses Power Press
+   3.05 attaches Psychic Energy to Jellicent ex
+   2.48 Frillish
+   2.22 Hilda
+   1.45 Pokégear N.N
+   1.40 Lillie's Determination
+   1.33 Crushing Hammer -- flipped tails
+   1.22 attaches Telepathic Psychic Energy to Jellicent ex
+   1.07 attaches Psychic Energy to Frillish
+   1.00 Frillish to Active
+   0.85 Frillish uses Oceanic Gloom
+   0.77 attaches Mist Energy to Jellicent ex
+   0.73 attaches Handheld Fan to Jellicent ex
+   0.70 benches Frillish
+   0.67 Jacinthe
+   0.63 plays Stadium Team Rocket's Watchtower
+   0.60 Crushing Hammer
+   0.47 promotes Jellicent ex
+   0.43 Boss's Orders
+   0.37 Xerosic's Machinations
+   0.35 Poké Vital A
+   0.35 attaches Handheld Fan to Frillish
+   0.35 attaches Telepathic Psychic Energy to Frillish
+   0.28 promotes Frillish
+   0.23 Eri
+   0.23 KO on Dipplin
+   0.20 can't play Item cards this turn
+   0.20 Enhanced Hammer
+   0.18 KO on Fezandipiti ex
+   0.18 KO on Thwackey
+   0.17 KO on Grookey
+   0.15 KO on Dragapult ex
+   0.15 KO on Litwick
+   0.13 Rust Syndicate Grunt
+   0.13 KO on N's Zoroark ex
+   0.12 KO on Dreepy
+   0.12 Frillish KO'd at checkup
+   0.10 Special Red Card
+   0.10 KO on Mega Kangaskhan ex
+   0.10 Handheld Fan -- moves an Energy off Wellspring Mask Ogerpon ex onto Fe
+   0.10 KO on Beldum
+   0.10 KO on Lampent
+   0.08 KO on Munkidori
+   0.08 KO on Applin
+   0.08 KO on Drilbur
+   0.07 Risky Ruins puts N counters on Frillish
+   0.07 KO on Drakloak
+   0.07 Jellicent ex can't retreat this turn
+   0.07 KO on Shaymin
+   0.07 Handheld Fan -- moves an Energy off N's Zoroark ex onto N's Zoroark ex
+   0.07 KO on N's Zorua
+   0.07 Mystery Garden
+   0.07 KO on Mega Chandelure ex
+   0.05 attaches Mist Energy to Frillish
+   0.05 KO on Raging Bolt ex
+   0.05 Handheld Fan -- moves an Energy off Mega Kangaskhan ex onto Raging Bol
+   0.05 KO on Iron Leaves ex
+   0.05 KO on Rabsca
+   0.05 KO on N's Zekrom
+   0.05 KO on Metang
+   0.05 Handheld Fan -- moves an Energy off Mega Excadrill ex onto Fezandipiti
+   0.05 KO on Genesect ex
+   0.05 Handheld Fan -- moves an Energy off Beldum onto Beldum
+   0.05 Handheld Fan -- moves an Energy off Mega Chandelure ex onto Mega Chand
+   0.03 KO on Budew
+   0.03 Handheld Fan -- moves an Energy off Dragapult ex onto Dreepy
+   0.03 KO on Moltres
+   0.03 Handheld Fan -- moves an Energy off Dragapult ex onto Fezandipiti ex
+   0.03 Handheld Fan -- moves an Energy off Dragapult ex onto Budew
+   0.03 KO on Dudunsparce

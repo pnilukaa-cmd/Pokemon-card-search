@@ -1,0 +1,18 @@
+J_user 129s J_user: 60.35% (±0.30) over 99 decks at 200 games, winning 70
+C0 119s C0: 73.31% (±0.30) over 99 decks at 200 games, winning 90
+j_budew2 106s j_budew2: 51.84% (±0.32) over 99 decks at 200 games, winning 53
+j_chand 125s j_chand: 57.94% (±0.32) over 99 decks at 200 games, winning 67
+j_fan2 110s j_fan2: 61.41% (±0.30) over 99 decks at 200 games, winning 71
+j_gear2 116s j_gear2: 61.46% (±0.30) over 99 decks at 200 games, winning 70
+j_ham2 120s j_ham2: 60.67% (±0.30) over 99 decks at 200 games, winning 66
+j_ign0 116s j_ign0: 63.39% (±0.30) over 99 decks at 200 games, winning 72
+j_jac2 117s j_jac2: 61.11% (±0.30) over 99 decks at 200 games, winning 70
+j_mist0 120s j_mist0: 59.93% (±0.30) over 99 decks at 200 games, winning 67
+j_tower0 114s j_tower0: 61.26% (±0.30) over 99 decks at 200 games, winning 70
+m_bud2 108s m_bud2: 68.54% (±0.31) over 99 decks at 200 games, winning 88
+m_fr2 116s m_fr2: 67.94% (±0.31) over 99 decks at 200 games, winning 82
+m_fr2eri 115s m_fr2eri: 68.23% (±0.31) over 99 decks at 200 games, winning 86
+m_fr2j2 116s m_fr2j2: 69.37% (±0.31) over 99 decks at 200 games, winning 87
+m_fr3j2 121s m_fr3j2: 68.31% (±0.31) over 99 decks at 200 games, winning 84
+m_fr4 128s m_fr4: 64.04% (±0.32) over 99 decks at 200 games, winning 82
+DONE

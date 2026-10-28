@@ -1,0 +1,11 @@
+j3_boss3 137s j3_boss3: 64.91% (±0.29) over 99 decks at 200 games, winning 74
+j3_e4 98s j3_e4: 62.69% (±0.30) over 99 decks at 200 games, winning 72
+j3_fan2 100s j3_fan2: 63.36% (±0.30) over 99 decks at 200 games, winning 74
+j3_garden 105s j3_garden: 62.88% (±0.30) over 99 decks at 200 games, winning 73
+j3_gear2 100s j3_gear2: 63.57% (±0.30) over 99 decks at 200 games, winning 74
+j3_ham2 99s j3_ham2: 62.86% (±0.30) over 99 decks at 200 games, winning 71
+j3_ign2 115s j3_ign2: 62.00% (±0.30) over 99 decks at 200 games, winning 74
+j3_jac2 112s j3_jac2: 63.21% (±0.30) over 99 decks at 200 games, winning 73
+j3_mist0 114s j3_mist0: 62.54% (±0.30) over 99 decks at 200 games, winning 70
+j3_tower0 105s j3_tower0: 63.18% (±0.30) over 99 decks at 200 games, winning 74
+DONE

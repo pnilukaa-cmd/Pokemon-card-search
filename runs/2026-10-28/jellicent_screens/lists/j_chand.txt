@@ -1,0 +1,27 @@
+Pokémon: 17
+4 Jellicent ex WHT 45
+4 Frillish WHT 44
+3 Litwick PBL 36
+3 Lampent PBL 37
+3 Mega Chandelure ex PBL 38
+
+Trainer: 29
+1 Xerosic's Machinations SFA 64
+1 Eri TEF 146
+4 Lillie's Determination MEG 119
+4 Boss's Orders MEG 114
+4 Crushing Hammer POR 71
+1 Poké Vital A SFA 62
+2 Pokégear 3.0 BLK 84
+2 Team Rocket's Watchtower DRI 180
+4 Hilda WHT 84
+4 Jacinthe POR 75
+2 Rare Candy MEG 125
+
+Energy: 14
+2 Mist Energy TEF 161
+4 Ignition Energy WHT 86
+4 Telepathic Psychic Energy POR 88
+4 Basic Psychic Energy
+
+Total Cards: 60

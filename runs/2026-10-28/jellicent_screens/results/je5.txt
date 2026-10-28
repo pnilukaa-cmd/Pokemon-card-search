@@ -1,0 +1,6 @@
+j5_boss1 95s j5_boss1: 67.01% (±0.29) over 99 decks at 200 games, winning 77
+j5_both 98s j5_both: 66.04% (±0.29) over 99 decks at 200 games, winning 77
+j5_lil 96s j5_lil: 65.89% (±0.29) over 99 decks at 200 games, winning 75
+j5_red0 98s j5_red0: 66.34% (±0.29) over 99 decks at 200 games, winning 77
+j5_ruff0 104s j5_ruff0: 66.24% (±0.29) over 99 decks at 200 games, winning 76
+DONE

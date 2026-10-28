@@ -1,0 +1,71 @@
+wins 34 / 60
+   4.90 Jellicent ex uses Power Press
+   2.53 Frillish
+   2.07 Boss's Orders
+   2.03 Hilda
+   1.75 Pokégear N.N
+   1.60 Lillie's Determination
+   1.42 attaches Telepathic Psychic Energy to Jellicent ex
+   1.40 attaches Psychic Energy to Jellicent ex
+   1.37 Frillish uses Oceanic Gloom
+   1.37 attaches Ignition Energy to Jellicent ex
+   1.37 discards Ignition Energy from Jellicent ex
+   1.17 Crushing Hammer -- flipped tails
+   1.00 Frillish to Active
+   0.88 attaches Mist Energy to Jellicent ex
+   0.88 Crushing Hammer
+   0.87 plays Stadium Team Rocket's Watchtower
+   0.83 attaches Handheld Fan to Frillish
+   0.82 attaches Psychic Energy to Frillish
+   0.78 attaches Handheld Fan to Jellicent ex
+   0.72 Jacinthe
+   0.72 promotes Jellicent ex
+   0.67 attaches Telepathic Psychic Energy to Frillish
+   0.63 benches Frillish
+   0.42 Xerosic's Machinations
+   0.42 promotes Frillish
+   0.37 can't play Item cards this turn
+   0.35 Poké Vital A
+   0.35 Eri
+   0.25 KO on Dipplin
+   0.20 Handheld Fan -- moves an Energy off Mega Excadrill ex onto Fezandipiti
+   0.18 Enhanced Hammer
+   0.17 attaches Mist Energy to Frillish
+   0.17 KO on Thwackey
+   0.17 KO on Litwick
+   0.17 Handheld Fan -- moves an Energy off Mega Chandelure ex onto Mega Chand
+   0.15 KO on Munkidori
+   0.15 KO on Dragapult ex
+   0.15 Frillish KO'd at checkup
+   0.15 Special Red Card
+   0.15 Rust Syndicate Grunt
+   0.13 Handheld Fan -- moves an Energy off Dragapult ex onto Moltres
+   0.10 KO on Budew
+   0.10 Handheld Fan -- moves an Energy off Mega Kangaskhan ex onto Teal Mask 
+   0.10 KO on Chien-Pao
+   0.10 KO on Applin
+   0.10 Handheld Fan -- moves an Energy off N's Zoroark ex onto N's Zoroark ex
+   0.10 KO on N's Zoroark ex
+   0.10 KO on Lampent
+   0.08 Risky Ruins puts N counters on Frillish
+   0.08 KO on Dreepy
+   0.08 KO on Meowth ex
+   0.08 KO on Mega Kangaskhan ex
+   0.08 KO on Passimian
+   0.08 KO on Grookey
+   0.08 KO on N's Zorua
+   0.08 KO on Beldum
+   0.07 KO on Fezandipiti ex
+   0.07 Handheld Fan -- moves an Energy off Dragapult ex onto Budew
+   0.07 Frillish is Confused -- attack fails, N to itself
+   0.07 Handheld Fan -- moves an Energy off Teal Mask Ogerpon ex onto Raging B
+   0.07 KO on Seaking
+   0.07 KO on Shaymin
+   0.07 Handheld Fan -- moves an Energy off N's Zoroark ex onto N's Zorua
+   0.07 KO on Metang
+   0.07 Handheld Fan -- moves an Energy off Mega Excadrill ex onto Mega Skarmo
+   0.07 KO on Mega Excadrill ex
+   0.07 KO on Drilbur
+   0.07 Mystery Garden
+   0.05 KO on Drakloak
+   0.05 Jellicent ex clears confused

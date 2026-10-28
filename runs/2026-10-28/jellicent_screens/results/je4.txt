@@ -1,0 +1,11 @@
+j4_base 100s j4_base: 64.43% (±0.29) over 99 decks at 200 games, winning 72
+j4_boss2 98s j4_boss2: 65.53% (±0.29) over 99 decks at 200 games, winning 75
+j4_catcher 98s j4_catcher: 63.32% (±0.30) over 99 decks at 200 games, winning 74
+j4_eri0 94s j4_eri0: 64.68% (±0.30) over 99 decks at 200 games, winning 76
+j4_grunt0 95s j4_grunt0: 64.63% (±0.30) over 99 decks at 200 games, winning 72
+j4_ign2 109s j4_ign2: 64.35% (±0.30) over 99 decks at 200 games, winning 73
+j4_ign4 120s j4_ign4: 63.71% (±0.30) over 99 decks at 200 games, winning 74
+j4_red0 89s j4_red0: 65.10% (±0.30) over 99 decks at 200 games, winning 73
+j4_ruff0 90s j4_ruff0: 65.27% (±0.29) over 99 decks at 200 games, winning 75
+j4_xero0 96s j4_xero0: 64.50% (±0.29) over 99 decks at 200 games, winning 72
+DONE

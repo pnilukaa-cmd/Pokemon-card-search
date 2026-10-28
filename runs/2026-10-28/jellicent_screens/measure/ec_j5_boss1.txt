@@ -1,0 +1,8 @@
+j5_boss1: 10 games against each of 99 decks, at the end of each of its own turns
+turn  games  in play  Active  can attack  in hand       Jellicent ex
+   1    990     0.94    0.93       89.6%     1.31               0.1%
+   2    941     1.67    1.41       61.0%     1.55              80.0%
+   3    895     2.46    2.04       80.9%     1.49              89.5%
+   4    830     3.16    2.53       83.9%     1.47              92.8%
+   5    759     3.76    2.71       82.5%     1.38              94.3%
+   6    695     4.25    2.76       83.5%     1.37              94.8%

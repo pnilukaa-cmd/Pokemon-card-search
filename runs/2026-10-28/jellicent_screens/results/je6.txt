@@ -1,0 +1,5 @@
+j6_boss0 97s j6_boss0: 67.73% (±0.29) over 99 decks at 200 games, winning 78
+j6_e2 94s j6_e2: 67.20% (±0.29) over 99 decks at 200 games, winning 77
+j6_red0 99s j6_red0: 66.86% (±0.29) over 99 decks at 200 games, winning 76
+j6_ruff0 96s j6_ruff0: 66.91% (±0.29) over 99 decks at 200 games, winning 76
+DONE
