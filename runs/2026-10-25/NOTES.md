@@ -103,3 +103,8 @@ A third (aa450cf): "You can use this card only if you discard another card
 from your hand" was free, so Morty's Conviction, Canari and Iris's
 Fighting Spirit cost nothing, and Morty's drew one card. Ten field decks
 run one of them: `aggron_diggersby_angry_slam`, `arboliva_ogerpon_oil_salvo`, `gourgeist_diggersby_horrifying_rondo`, `mega_absol_ex_hand_lock`, `mega_zeraora_cinderace_thunderous_fist`, `mega_zygarde_cinderace_gaia_wave`, `mega_zygarde_cinderace_turbo_flare`, `mew_dbc_bastiodon`, `munkidori_ex_pecharunt_chains`, `wugtrio_paralysis_pin`.
+
+A fourth (4bdff48): Ignition Energy was never discarded at end of turn,
+and Prism / Neo Upper Energy kept what they gave a Pokemon before it
+evolved. Field decks with those Energy: `mew_baby_box`, `mew_pikachu_box`,
+`study_flygon_sandy_flapping_mill`, `study_maushold_gnaw_latias`.
