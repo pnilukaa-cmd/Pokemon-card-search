@@ -1444,6 +1444,11 @@ def test_the_baseline_sim_plays_the_psychic_setup_cards():
     patched = sum(b["energy"] for b in st.bench)
     check("Telepathic benches 2 Litwick; Garden draws to 3; Patch attaches 1",
           (benched, hand, patched) == (["Litwick", "Litwick"], 3, 1), (benched, hand, patched))
+    deck = SB.build_deck_model("Pokémon: 1\n4 Frillish WHT 44\n\nTrainer: 5\n1 Eri TEF 146\n"
+                               "1 Ruffian JTG 157\n1 Rust Syndicate Grunt PBL 81\n1 Jacinthe POR 75\n"
+                               "1 Poké Vital A SFA 62\n\nEnergy: 51\n51 Basic Psychic Energy\n")[1]
+    left = sorted(SB.collect_unmodeled(deck))
+    check("opponent-only and heal-only Trainers aren't reported as unmodelled", left == [], left)
 
 
 def test_coin_flips_are_actually_flipped():
@@ -2661,6 +2666,11 @@ def test_no_card_in_any_decklist_is_silently_inert():
                 return True
             probe = V.Player("x", {}, [])
             if V._stadium_has_effect(nm, probe):
+                return True
+            # Mystery Garden and Surfing Beach are put down once two Pokemon
+            # of their type are in play, which the empty probe board never has.
+            text = V._card_text(nm)
+            if V._GARDEN_RE.search(text) or V._BEACH_RE.search(text):
                 return True
             # Conditional on a Pokemon subtype in play (Tera): played when
             # the condition holds, so live -- the probe board has none.
@@ -7005,6 +7015,48 @@ def test_discard_another_card_is_a_cost():
           got == [(True, 3, 2), (False, 1, 0), (False, 3, 0)], got)
     check("Canari and Iris's Fighting Spirit cost a card from hand",
           costs == [[{"kind": "discard_hand", "amount": 1}]] * 2, costs)
+
+def test_stage_energy_follows_its_holder_and_ignition_leaves():
+    """Ignition Energy: one Colorless on a Basic, three on an Evolution
+    Pokemon, and "discard it at the end of your turn". Nothing discarded it,
+    so it was three permanent Energy; and Energy that depends on the
+    holder's Stage kept what it gave the Pokemon it was attached to, so
+    Ignition on a Frillish stayed one Colorless on the Jellicent ex it
+    became, and Neo Upper Energy on a Lampent stayed Colorless on the Mega
+    Chandelure ex. Played through try_evolve and end_of_turn."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 4\n1 Frillish WHT 44\n1 Jellicent ex WHT 45\n1 Lampent PBL 37\n"
+                "1 Mega Chandelure ex PBL 38\n\nEnergy: 56\n2 Ignition Energy WHT 86\n"
+                "1 Neo Upper Energy TEF 162\n53 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "i")
+    finally:
+        os.unlink(f.name)
+
+    def evolve(basic, into, energy, names):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.active = V.InPlay(basic, 1)
+        me.active.energy, me.active.energy_names = energy, names
+        me.bench, op.bench = [], []
+        op.active = V.InPlay("Frillish", 1)
+        me.hand = [("Pokemon", into)]
+        V.try_evolve(me, op, 5, [], False)
+        return me
+    me = evolve("Frillish", "Jellicent ex", [["Psychic"], ["Colorless"]],
+                ["Psychic Energy", "Ignition Energy"])
+    on_evolve = me.active.energy_count()
+    V.end_of_turn(me, [])
+    after_turn = (me.active.energy_count(), me.active.energy_names, me.discard)
+    neo = evolve("Lampent", "Mega Chandelure ex", [["Colorless"]], ["Neo Upper Energy"])
+    pays = V.can_pay(["Psychic", "Psychic"], neo.active.energy)
+    check("Ignition is 3 once Frillish is Jellicent ex, and gone at the end of the turn",
+          (on_evolve, after_turn) == (4, (1, ["Psychic Energy"], ["Ignition Energy"])),
+          (on_evolve, after_turn))
+    check("Neo Upper Energy on a Lampent pays Phantom Maze once it is Mega Chandelure ex",
+          pays, neo.active.energy)
 
 if __name__ == "__main__":
     sys.exit(main())

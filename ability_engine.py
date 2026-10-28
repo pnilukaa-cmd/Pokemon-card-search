@@ -1041,6 +1041,10 @@ NAMED_ATTACK_PICK = lambda owner, foe, spot: max(
     key=lambda a: a.get("damage") or 0)["name"]
 
 
+# Recomputes Stage-dependent Energy after a Pokemon's name changes; set by
+# simulate_versus, which owns the Energy provision rules.
+RESTAGE_ENERGY = lambda pl, spot, old_name: None
+
 # Which Benched Pokemon an Energy moved off the attacker goes to. The engine
 # swaps in its own (the one that most needs Energy); this default is the
 # one with the least.
@@ -2055,7 +2059,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         pl.deck.append(("Pokemon", source.name))
         source.under = []
         log.append(f"    {source.name} transforms into {pick}")
-        source.name = pick
+        old, source.name = source.name, pick
+        RESTAGE_ENERGY(pl, source, old)
         random.shuffle(pl.deck)
         return True
 
@@ -2108,7 +2113,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         pl.discard.append(spot.name)
         log.append(f"    swap {spot.name} -> {best} (keeps "
                    f"{spot.energy_count()} Energy, {spot.damage} damage)")
-        spot.name = best
+        old, spot.name = spot.name, best
+        RESTAGE_ENERGY(pl, spot, old)
         return True
 
     if op == O.FROM_DISCARD_TO_HAND:
@@ -2888,7 +2894,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             # The Pokemon it evolves from stays UNDER it -- discarding it
             # put a card in the discard pile that was still in play.
             _stack(spot).append(spot.name)
-            spot.name = nxt
+            old, spot.name = spot.name, nxt
+            RESTAGE_ENERGY(pl, spot, old)
             chained = spot if f.get("chain") else None
             spot.evolved_this_turn = True
             clear_attack_locks(spot)
@@ -2991,7 +2998,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             st = _stack(spot)
             if st and st[-1] == prev:
                 st.pop()
-            spot.name = prev
+            old, spot.name = spot.name, prev
+            RESTAGE_ENERGY(owner, spot, old)
             # Devolving clears damage above the lower stage's HP the same
             # way any HP change does, and Special Conditions stay.
             hit += 1

@@ -2010,7 +2010,8 @@ def try_evolve(pl, opp, turn, log, first_turn):
             if normal or AE.query_evolves_early(pl, spot, opp, into=name):
                 pl.remove_from_hand(kind, name)
                 spot.under.append(spot.name)
-                spot.name = name
+                old, spot.name = spot.name, name
+                restage_energy(pl, spot, old)
                 spot.evolved_this_turn = True
                 AE.clear_attack_locks(spot)
                 clear_conditions(spot, "evolved", log, pl.name)
@@ -2072,7 +2073,8 @@ def effect_rare_candy(pl, opp, turn, log, first_turn):
             pl.discard.append("Rare Candy")
             pl.remove_from_hand("Pokemon", name)
             spot.under.append(spot.name)
-            spot.name = name
+            old, spot.name = spot.name, name
+            restage_energy(pl, spot, old)
             spot.evolved_this_turn = True
             AE.clear_attack_locks(spot)
             log.append(f"  {pl.name}: Rare Candy -> {name}")
@@ -2943,6 +2945,66 @@ def _energy_provides(pl, name, spot):
 
 
 AE.ENERGY_PROVIDES = _energy_provides
+
+
+def _provisions_on(pl, name, who):
+    """Every Energy `name` provides on the Pokemon called `who`."""
+    nm = _re.sub(r"^basic\s+", "", str(name), flags=_re.I)
+    return energy_provisions(nm, _CARDS_BY_NAME, (pl.POKEMON.get(who) or {}).get("stage"))
+
+
+def _same_energy(a, b):
+    return sorted(tuple(x) for x in a) == sorted(tuple(x) for x in b)
+
+
+def restage_energy(pl, spot, old_name):
+    """Energy that depends on the Stage of its holder, recomputed when the
+    holder evolves or devolves. Ignition Energy is three Colorless on an
+    Evolution Pokemon and one on a Basic; Neo Upper Energy is two of every
+    type on a Stage 2; Prism Energy every type on a Basic. Each kept what it
+    gave the Pokemon it was attached to: Ignition on a Frillish stayed one
+    Colorless on the Jellicent ex it became. Only rebuilt when the Energy on
+    record is exactly what the attached cards give the old Pokemon."""
+    names = list(getattr(spot, "energy_names", None) or [])
+    if not names or old_name == spot.name:
+        return
+    before = [p for n in names for p in _provisions_on(pl, n, old_name)]
+    if not _same_energy(before, spot.energy):
+        return
+    after = [p for n in names for p in _provisions_on(pl, n, spot.name)]
+    if not _same_energy(before, after):
+        spot.energy = after
+
+
+AE.RESTAGE_ENERGY = restage_energy
+
+_EOT_ENERGY_RE = _re.compile(r"if this card is attached to 1 of your pok[eé]mon, discard it"
+                             r" at the end of your turn", _re.I)
+
+
+def discard_temporary_energy(pl, log):
+    """Ignition Energy: "If this card is attached to 1 of your Pokemon,
+    discard it at the end of your turn." Nothing discarded it, so its three
+    Colorless on an Evolution Pokemon stayed for the rest of the game."""
+    for spot in pl.in_play():
+        names = list(getattr(spot, "energy_names", None) or [])
+        temp = [n for n in names if _EOT_ENERGY_RE.search(_card_text(n))]
+        if not temp:
+            continue
+        whole = _same_energy([p for n in names for p in _provisions_on(pl, n, spot.name)],
+                             spot.energy)
+        for n in temp:
+            spot.energy_names.remove(n)
+            pl.discard.append(n)
+        if whole:
+            spot.energy = [p for n in spot.energy_names
+                           for p in _provisions_on(pl, n, spot.name)]
+        else:
+            for n in temp:
+                for p in _provisions_on(pl, n, spot.name):
+                    if p in spot.energy:
+                        spot.energy.remove(p)
+        log.append(f"  {pl.name}: discards {', '.join(temp)} from {spot.name} (end of turn)")
 
 
 def _evolutions_of(owner, name):
@@ -7833,6 +7895,7 @@ def promote_from_bench(side, opp=None):
 def end_of_turn(pl, log):
     """Everything that ends with the turn of the player who just moved."""
     tool_end_of_turn(pl, log)
+    discard_temporary_energy(pl, log)
     # A next-turn play lock lasted exactly this turn.
     pl.item_locked = False
     pl.turn_play_lock = set()

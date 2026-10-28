@@ -1125,9 +1125,12 @@ SUPPORTER_EFFECTS = {
 # any metric this simulator reports.
 # Morty's Conviction draws one card per Pokemon on the OPPONENT's Bench,
 # and there is no opponent here: it would draw nothing.
+# Eri, Ruffian and Rust Syndicate Grunt only touch the opponent's hand,
+# Tools or Energy; Jacinthe only heals, and nothing here deals damage.
 NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement",
                              "Team Rocket's Giovanni", "Black Belt's Training",
-                             "Morty's Conviction"}
+                             "Morty's Conviction", "Eri", "Ruffian", "Rust Syndicate Grunt",
+                             "Jacinthe"}
 
 
 def play_supporter(state, POKEMON, log):
@@ -1158,7 +1161,8 @@ KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pa
 NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card",
                         "Crushing Hammer", "Jumbo Ice Cream",
                         # opponent-only, or a switch (no retreat is modelled)
-                        "Enhanced Hammer", "Tool Scrapper", "Prime Catcher"}
+                        "Enhanced Hammer", "Tool Scrapper", "Prime Catcher",
+                        "Poké Vital A"}
 
 
 def collect_unmodeled(DECKLIST):
