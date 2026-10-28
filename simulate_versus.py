@@ -7874,6 +7874,12 @@ def choose_gust_target(pl, opp, attacker=None):
     # decisions and bought nothing measurable, and a rule that fires that
     # often with no demonstrated benefit is exactly the kind of complexity
     # that rots in this codebase.
+    #
+    # Two more were tried with gust_for_ko on and removed (2026-10-28, 200
+    # games a matchup): trying Boss's Orders for a Knock Out before Hilda
+    # and the draw Supporters, which were always tried first (+0.09 on
+    # average over 7 decks), and a second look just before the attack, once
+    # the turn's retreat, evolutions and Energy are done (+0.03 over 8).
     if POL.knob(pl, "gust_for_ko"):
         return _gust_for_ko(pl, opp, attacker)
     return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
@@ -7913,17 +7919,45 @@ def _ko_this_turn(pl, opp, target, attacker=None):
             opp.bench[i], opp.active = target, was_active
 
 
+def _stranded(pl, opp, spot):
+    """As their Active next turn, could `spot` neither attack nor retreat,
+    even with the one Energy they will attach?"""
+    n_e, n_names = len(spot.energy), len(spot.energy_names)
+    spot.energy.append(list(M.REAL_TYPES))
+    spot.energy_names.append("Energy")
+    try:
+        return (_ready_damage(opp, pl, spot) <= 0
+                and spot.energy_count() < retreat_of(opp, spot, pl))
+    finally:
+        del spot.energy[n_e:], spot.energy_names[n_names:]
+
+
+def _gust_strand(pl, opp):
+    """With no Knock Out to take, Boss's Orders was held. It can still buy
+    a turn: drag up a Benched Pokemon that can neither attack nor retreat
+    next turn, in place of an Active that can attack. The highest Retreat
+    Cost first. Asking also that their Items be locked (Oceanic Curse), so
+    no Switch gets it out, measured worse than not asking."""
+    if opp.active is None or _ready_damage(opp, pl, opp.active) <= 0:
+        return None
+    stuck = [p for p in opp.bench if _stranded(pl, opp, p)]
+    if not stuck:
+        return None
+    return max(stuck, key=lambda p: (retreat_of(opp, p, pl), -p.energy_count()))
+
+
 def _gust_for_ko(pl, opp, attacker=None):
     """Boss's Orders only for a Knock Out. The AI dragged up the Benched
     Pokemon with the least HP left whether or not it could be Knocked Out,
     and spent its Supporter for the turn on it: the target was Knocked Out
     that turn in 29% to 52% of gusts. Now a target the Active can Knock Out
     this turn, the most Prizes first, and not when the current Active is as
-    good a Knock Out; otherwise the card is held."""
+    good a Knock Out; with none, a Pokemon to strand (gust_strand);
+    otherwise the card is held."""
     prize = lambda p: (opp.POKEMON.get(p.name) or {}).get("prize_value", 1)
     ko = [p for p in opp.bench if _ko_this_turn(pl, opp, p, attacker)]
     if not ko:
-        return None
+        return _gust_strand(pl, opp) if POL.knob(pl, "gust_strand") else None
     best = max(ko, key=lambda p: (prize(p), -(effective_hp(opp, p) - p.damage)))
     if _ko_this_turn(pl, opp, opp.active, attacker) and prize(opp.active) >= prize(best):
         return None

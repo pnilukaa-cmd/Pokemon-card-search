@@ -169,6 +169,14 @@ GREEDY = {
     # Dragapult / Blaziken +1.07; Mega Excadrill -0.36 and Dragapult /
     # Dusknoir -0.44 (each about +/- 0.45). Slowking, with no gust, 0.
     "gust_for_ko": int(__import__("os").environ.get("GUST_FOR_KO", 1)),
+    # With no Knock Out, gust up a Pokemon that can neither attack nor
+    # retreat next turn. 0: hold. Measured 2026-10-28, 200 games a matchup
+    # on the seven decks it touches: +0.86 on average, none worse beyond
+    # noise (Jellicent ex with 4 Boss's Orders +1.49, Mega Chandelure ex
+    # +1.11 / +1.05, Dragapult ex +1.64, N's Zoroark ex +0.68, Raging Bolt
+    # ex +0.05, Jellicent ex with 1 Boss +0.01); Slowking, with no gust, 0.
+    # Only under an Item lock: +0.74 where always gave +1.49.
+    "gust_strand": int(__import__("os").environ.get("GUST_STRAND", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

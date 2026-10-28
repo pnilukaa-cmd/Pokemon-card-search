@@ -7137,5 +7137,46 @@ def test_boss_orders_is_for_a_knock_out():
     check("Boss's Orders for the Dreepy Knock Out; held for a full-HP ex, and when the Active is the Knock Out",
           got == [("Boss's Orders", "Dreepy"), ("Jacinthe", "Dragapult ex"), ("Jacinthe", "Dragapult ex")], got)
 
+def test_boss_orders_strands_what_can_neither_attack_nor_retreat():
+    """With no Knock Out to take, Boss's Orders was held. It can still buy
+    a turn: a Benched Pokemon that can neither attack nor retreat next
+    turn, even with one more Energy, is stuck in the Active Spot while the
+    Active it replaces could attack. Dudunsparce (Retreat 3, no Energy) is
+    dragged up in place of a ready Dragapult ex. Held when the Bench has
+    only a Dreepy (Retreat 1: one Energy gets it out), and when their
+    Active has no Energy to attack with anyway."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n4 Frillish WHT 44\n4 Jellicent ex WHT 45\n\n"
+                "Trainer: 1\n1 Boss's Orders MEG 114\n\n"
+                "Energy: 51\n51 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "b")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+
+    def supporter(bench, ready=True):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.energy_types = {"Psychic"}
+        me.active = V.InPlay("Frillish", 1)
+        me.bench = [V.InPlay("Frillish", 1)]
+        op.active = V.InPlay("Dragapult ex", 1)
+        if ready:
+            op.active.energy, op.active.energy_names = [["Fire"], ["Psychic"]], ["Fire Energy", "Psychic Energy"]
+        op.bench = [V.InPlay(n, 1) for n in bench]
+        me.hand = [("Supporter", "Boss's Orders")]
+        me.deck, op.deck, op.hand = list(D[2]), list(O[2]), []
+        V.play_supporter(me, op, 5, [])
+        return op.active.name
+    got = [supporter(["Dragapult ex", "Dudunsparce"]), supporter(["Dragapult ex", "Dreepy"]),
+           supporter(["Dragapult ex", "Dudunsparce"], ready=False)]
+    check("Boss's Orders strands Dudunsparce; held for a Dreepy, and when their Active can't attack",
+          got == ["Dudunsparce", "Dragapult ex", "Dragapult ex"], got)
+
+
 if __name__ == "__main__":
     sys.exit(main())
