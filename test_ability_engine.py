@@ -7058,5 +7058,38 @@ def test_stage_energy_follows_its_holder_and_ignition_leaves():
     check("Neo Upper Energy on a Lampent pays Phantom Maze once it is Mega Chandelure ex",
           pays, neo.active.energy)
 
+def test_ignition_goes_where_it_is_spent_this_turn():
+    """Ignition Energy is discarded at the end of your turn, and on a Basic
+    it gives one Colorless. The AI attached it like any other Energy: to a
+    bare Frillish whose only attack costs Psychic, or to a Benched Pokemon,
+    and threw the card away. It now goes only to the Active, and only when
+    it raises what the Active can do this turn."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n1 Frillish WHT 44\n1 Jellicent ex WHT 45\n1 Okidogi ex SFA 36\n\n"
+                "Energy: 57\n4 Ignition Energy WHT 86\n53 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "g")
+    finally:
+        os.unlink(f.name)
+
+    def attach(active, energy, bench):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", D[1], list(D[2]), E)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.energy_types = {"Psychic", "Colorless"}
+        me.active = V.InPlay(active, 1)
+        me.active.energy = [["Psychic"]] * energy
+        me.active.energy_names = ["Psychic Energy"] * energy
+        me.bench, op.bench = [V.InPlay(b, 1) for b in bench], []
+        op.active = V.InPlay("Okidogi ex", 1)
+        me.hand = [("Energy", "Ignition Energy")]
+        log = []
+        V.attach_energy(me, V._CARDS_BY_NAME, log)
+        return bool(log)
+    got = [attach("Frillish", 0, []), attach("Jellicent ex", 1, []), attach("Frillish", 1, ["Jellicent ex"])]
+    check("not to a bare Frillish or a Benched Jellicent ex; yes to the Active Jellicent ex",
+          got == [False, True, False], got)
+
 if __name__ == "__main__":
     sys.exit(main())

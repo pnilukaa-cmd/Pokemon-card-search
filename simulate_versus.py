@@ -5763,13 +5763,35 @@ def _energy_fits(pl, spot, name):
     return not m or _qualifies(pl, spot, m.group(1))
 
 
+def _temp_energy_ok(pl, target, name):
+    """An Energy that is discarded at the end of your turn (Ignition) is
+    worth attaching only to the Active, and only when it raises what the
+    Active can do this turn. Attached to a Benched Frillish, or to a Basic
+    it gives one Colorless that pays nothing, it was just a card thrown
+    away. With temp_energy_now off, any Energy is attached as before."""
+    if not POL.knob(pl, "temp_energy_now") or not _EOT_ENERGY_RE.search(_card_text(name)):
+        return True
+    opp = getattr(pl, "_opp_ref", None)
+    if target is not pl.active or opp is None or opp.active is None:
+        return False
+    before = _ready_damage(pl, opp, target)
+    n_e, n_names = len(target.energy), len(target.energy_names)
+    target.energy.extend(_provisions_on(pl, name, target.name))
+    target.energy_names.append(name)
+    try:
+        return _ready_damage(pl, opp, target) > before
+    finally:
+        del target.energy[n_e:], target.energy_names[n_names:]
+
+
 def _energy_for(pl, target):
     """Index in hand of an Energy that may be attached to `target`: a card
     the target can use first, then any that fits."""
-    fits = [i for i, (k, n) in enumerate(pl.hand) if k == "Energy" and _energy_fits(pl, target, n)]
+    fits = [i for i, (k, n) in enumerate(pl.hand) if k == "Energy" and _energy_fits(pl, target, n)
+            and _temp_energy_ok(pl, target, n)]
     if POL.knob(pl, "typed_attach"):
         useful = _helpful_energy(pl, target)
-        if useful is not None:
+        if useful is not None and _temp_energy_ok(pl, target, pl.hand[useful][1]):
             return useful
     return fits[0] if fits else None
 

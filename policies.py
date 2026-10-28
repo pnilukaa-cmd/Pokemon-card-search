@@ -154,6 +154,12 @@ GREEDY = {
     # ex lists it touches: +9.84 +/- 0.65 and +7.35 +/- 0.64 (10 per card:
     # +9.23, +7.24). No field deck has such an attack.
     "self_mill_cost": float(__import__("os").environ.get("SELF_MILL_COST", 5)),
+    # An Energy discarded at the end of your turn (Ignition) is attached
+    # only to the Active, and only when it raises the Active's damage this
+    # turn. 0: attached like any other Energy.
+    # Measured 2026-10-28, 200 games a matchup: a submitted Jellicent ex
+    # list with 4 Ignition Energy +1.37 +/- 0.41. No field deck runs it.
+    "temp_energy_now": int(__import__("os").environ.get("TEMP_ENERGY_NOW", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
