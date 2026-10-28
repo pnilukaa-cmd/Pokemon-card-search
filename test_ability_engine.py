@@ -1584,13 +1584,12 @@ def test_gust_targeting_prefers_prizes_and_is_otherwise_identical():
     check("it drags up the same-effort target worth three times as much",
           SV.choose_gust_target(me, op) is ex)
 
-    # ... and when nothing can be Knocked Out it collapses to the old rule
-    # exactly, which is why it is safe to apply unconditionally: every
-    # score is (0, 0, -left), so the max IS "lowest HP left".
+    # ... and when nothing can be Knocked Out the card is held (gust_for_ko,
+    # 2026-10-28); with it off, the old rule: every score is (0, 0, -left),
+    # so the max IS "lowest HP left".
     a.energy = []                          # now it cannot KO anything
-    check("with no Knock Out available it picks the lowest HP left",
-          SV.choose_gust_target(me, op) is
-          min(op.bench, key=lambda p: SV.effective_hp(op, p) - p.damage))
+    check("with no Knock Out available it holds the card",
+          SV.choose_gust_target(me, op) is None)
 
 
 
@@ -5117,6 +5116,11 @@ def test_team_rocket_trainers_do_what_they_print():
           op.active.name == "Mega Kangaskhan ex" and len(me.hand) == 1, op.active.name)
     V, me, op = _tr_board("Team Rocket's Zubat", bench=["Team Rocket's Golbat"],
                           opp_bench=["Raging Bolt ex"])
+    # A gust is for a Knock Out (gust_for_ko), so leave the Raging Bolt ex
+    # one hit from it -- by the Golbat Giovanni brings in (Confuse Ray, D).
+    op.bench[0].damage = V.effective_hp(op, op.bench[0]) - 10
+    me.bench[0].energy, me.bench[0].energy_names = [["Darkness"]], ["Darkness Energy"]
+    me.energy_types = {"Darkness"}
     me.hand = [("Supporter", "Team Rocket's Giovanni")]
     V.play_supporter(me, op, 3, [])
     check("and with one, switches it in before the gust",
@@ -7090,6 +7094,48 @@ def test_ignition_goes_where_it_is_spent_this_turn():
     got = [attach("Frillish", 0, []), attach("Jellicent ex", 1, []), attach("Frillish", 1, ["Jellicent ex"])]
     check("not to a bare Frillish or a Benched Jellicent ex; yes to the Active Jellicent ex",
           got == [False, True, False], got)
+
+def test_boss_orders_is_for_a_knock_out():
+    """Boss's Orders dragged up the Benched Pokemon with the least HP left
+    whether or not it could be Knocked Out, and took the turn's Supporter
+    to do it: the target was Knocked Out that turn in 29% to 52% of gusts,
+    so a deck measured better with Energy than with Boss's Orders. Now it
+    is played for a Knock Out the Active can make this turn (counting the
+    attachment still to come, damage worked out against the target), and
+    held otherwise. Played through play_supporter with a heal in hand."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n4 Frillish WHT 44\n4 Jellicent ex WHT 45\n\n"
+                "Trainer: 2\n1 Boss's Orders MEG 114\n1 Jacinthe POR 75\n\n"
+                "Energy: 50\n50 Basic Psychic Energy\n")
+    try:
+        V, D, E = _real(f.name, "b")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+
+    def supporter(bench, their_damage=0):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me.energy_types = {"Psychic"}
+        me.active = V.InPlay("Jellicent ex", 1)
+        me.active.energy, me.active.energy_names = [["Psychic"]] * 2, ["Psychic Energy"] * 2
+        me.active.damage = 100
+        me.bench = [V.InPlay("Frillish", 1)]
+        op.active = V.InPlay("Dragapult ex", 1)
+        op.active.damage = their_damage
+        op.bench = [V.InPlay(n, 1) for n in bench]
+        me.hand = [("Supporter", "Boss's Orders"), ("Supporter", "Jacinthe"),
+                   ("Energy", "Psychic Energy")] + [("Item", "Crushing Hammer")] * 3
+        me.deck, op.deck, op.hand = list(D[2]), list(O[2]), []
+        V.play_supporter(me, op, 5, [])
+        return next(iter(me.played_supporters_this_turn), None), op.active.name
+    got = [supporter(["Dreepy", "Drakloak"]), supporter(["Dragapult ex"]),
+           supporter(["Dreepy"], their_damage=260)]
+    check("Boss's Orders for the Dreepy Knock Out; held for a full-HP ex, and when the Active is the Knock Out",
+          got == [("Boss's Orders", "Dreepy"), ("Jacinthe", "Dragapult ex"), ("Jacinthe", "Dragapult ex")], got)
 
 if __name__ == "__main__":
     sys.exit(main())

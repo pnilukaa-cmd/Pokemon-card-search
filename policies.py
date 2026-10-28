@@ -160,6 +160,15 @@ GREEDY = {
     # Measured 2026-10-28, 200 games a matchup: a submitted Jellicent ex
     # list with 4 Ignition Energy +1.37 +/- 0.41. No field deck runs it.
     "temp_energy_now": int(__import__("os").environ.get("TEMP_ENERGY_NOW", 1)),
+    # Boss's Orders and the gust Trainers only for a Knock Out this turn,
+    # worked out against the target itself; otherwise held. 0: the Benched
+    # Pokemon with the least HP left, every time.
+    # Measured 2026-10-28, 200 games a matchup, on the 11 decks it touches
+    # out of 12: +0.97 on average, 9 better. Jellicent ex (4 Boss) +1.75,
+    # Mega Chandelure ex +1.30, N's Zoroark +2.39, Raging Bolt +2.19,
+    # Dragapult / Blaziken +1.07; Mega Excadrill -0.36 and Dragapult /
+    # Dusknoir -0.44 (each about +/- 0.45). Slowking, with no gust, 0.
+    "gust_for_ko": int(__import__("os").environ.get("GUST_FOR_KO", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

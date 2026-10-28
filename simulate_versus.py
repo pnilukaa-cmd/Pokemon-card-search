@@ -2755,7 +2755,8 @@ def play_supporter(pl, opp, turn, log):
         if name in hand_names and opp.bench and opp.active is not None:
             if name == "Team Rocket's Giovanni" and _giovanni_partner(pl, opp) is None:
                 continue
-            target = choose_gust_target(pl, opp)
+            target = choose_gust_target(
+                pl, opp, _giovanni_partner(pl, opp) if name == "Team Rocket's Giovanni" else None)
             if target is None:
                 continue          # nothing on the Bench beats the Active
             if POL.knob(pl, "lookahead_samples"):
@@ -3319,6 +3320,16 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     if any(a.op == IR.Op.FILL_OPPONENT_BENCH for a in eff.actions) \
             and not _flute_worth_it(pl, opp):
         return False
+    # A gust Trainer (Boss's Orders through this path, Prime Catcher,
+    # Pokemon Catcher, Counter Catcher) aimed at the lowest-HP Pokemon on
+    # the Bench whatever it bought. With gust_for_ko, only for a Knock Out
+    # this turn, and at that target.
+    if POL.knob(pl, "gust_for_ko") and opp is not None and any(
+            a.op == IR.Op.SWITCH and (a.filter or {}).get("gust") for a in actions):
+        pick = _gust_for_ko(pl, opp)
+        if pick is None:
+            return False
+        opp._forced_gust = opp.bench.index(pick)
     if POL.knob(pl, "switch_pick") and len(actions) == 1 \
             and actions[0].op == IR.Op.SWITCH and actions[0].target == IR.Target.YOUR_ACTIVE \
             and not (actions[0].filter or {}).get("gust") \
@@ -7828,8 +7839,10 @@ def _stuck(pl, opp, spot):
     return spot.energy_count() < retreat_of(opp, spot, pl) + tax
 
 
-def choose_gust_target(pl, opp):
-    """The Benched Pokemon worth dragging up, or None to hold the card."""
+def choose_gust_target(pl, opp, attacker=None):
+    """The Benched Pokemon worth dragging up, or None to hold the card.
+    `attacker`: who attacks after the gust, when the card switches first
+    (Team Rocket's Giovanni); the Active otherwise."""
     if not opp.bench or opp.active is None:
         return None
     # A mill deck does not need Prizes; it needs turns the opponent cannot
@@ -7861,7 +7874,61 @@ def choose_gust_target(pl, opp):
     # decisions and bought nothing measurable, and a rule that fires that
     # often with no demonstrated benefit is exactly the kind of complexity
     # that rots in this codebase.
+    if POL.knob(pl, "gust_for_ko"):
+        return _gust_for_ko(pl, opp, attacker)
     return max(opp.bench, key=lambda p: _gust_score(pl, opp, p))
+
+
+def _ko_this_turn(pl, opp, target, attacker=None):
+    """Could the Active (or `attacker`, the Pokemon a switch-and-gust card
+    brings in) Knock Out `target` this turn if it were their Active,
+    counting the one Energy still to be attached from hand? The damage is
+    worked out against the target itself: Phantom Maze reads its Retreat
+    Cost, Weakness and Resistance are its own."""
+    a = attacker or pl.active
+    if a is None:
+        return False
+    was_active, i = opp.active, (opp.bench.index(target) if target in opp.bench else None)
+    if i is not None:
+        opp.active, opp.bench[i] = target, was_active
+    n_e, n_names = len(a.energy), len(a.energy_names)
+    extra = _helpful_energy(pl, a)
+    if extra is not None:
+        name = pl.hand[extra][1]
+        a.energy.extend(_provisions_on(pl, name, a.name))
+        a.energy_names.append(name)
+    state = random.getstate()
+    try:
+        if not AE.query_attack_gate(pl, a) or a.attack_locked or a.attack_locked_by_opponent:
+            return False
+        atk = best_attack(pl, a, True, opp)
+        if atk is None:
+            return False
+        dmg = attack_damage(pl, opp, a, atk, record=False)
+        return dmg >= effective_hp(opp, target) - target.damage
+    finally:
+        random.setstate(state)
+        del a.energy[n_e:], a.energy_names[n_names:]
+        if i is not None:
+            opp.bench[i], opp.active = target, was_active
+
+
+def _gust_for_ko(pl, opp, attacker=None):
+    """Boss's Orders only for a Knock Out. The AI dragged up the Benched
+    Pokemon with the least HP left whether or not it could be Knocked Out,
+    and spent its Supporter for the turn on it: the target was Knocked Out
+    that turn in 29% to 52% of gusts. Now a target the Active can Knock Out
+    this turn, the most Prizes first, and not when the current Active is as
+    good a Knock Out; otherwise the card is held."""
+    prize = lambda p: (opp.POKEMON.get(p.name) or {}).get("prize_value", 1)
+    ko = [p for p in opp.bench if _ko_this_turn(pl, opp, p, attacker)]
+    if not ko:
+        return None
+    best = max(ko, key=lambda p: (prize(p), -(effective_hp(opp, p) - p.damage)))
+    if _ko_this_turn(pl, opp, opp.active, attacker) and prize(opp.active) >= prize(best):
+        return None
+    return best
+
 
 def _promote_after_ko(owner, taker, log):
     """The new Active after an attack's Knock Out, chosen by `owner`.
