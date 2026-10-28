@@ -853,6 +853,20 @@ def play_items(state, POKEMON, priority, turn, log):
             state.hand.append(basic_e)
             log.append(f"Play Energy Search -> get {basic_e[1]}")
 
+    # Energy Coin: flip 2 coins; both heads, a Basic Energy from the deck
+    # attached to one of your Pokemon (the Active here, the attacker).
+    while ("Item", "Energy Coin") in state.hand and state.active:
+        state.remove_from_hand("Item", "Energy Coin")
+        state.discard.append("Energy Coin")
+        basic_e = next((c for c in state.deck if c[0] == "Energy" and BASIC_ENERGY_RE.match(c[1])), None)
+        if random.random() < 0.25 and basic_e:
+            state.deck.remove(basic_e)
+            random.shuffle(state.deck)
+            state.active_energy += 1
+            log.append(f"Play Energy Coin -> heads, heads: {basic_e[1]} attached")
+        else:
+            log.append("Play Energy Coin -> no")
+
     # Team Rocket's Transceiver: search the deck for a Supporter whose name
     # contains "Team Rocket" and put it into hand. Only fetches Supporters
     # the registry can actually play, so the simulated value stays honest.
@@ -1088,6 +1102,29 @@ def effect_crispin(state, POKEMON, log):
     return True
 
 
+def effect_gwynn(state, POKEMON, log):
+    """Gwynn: discard up to 2 Pokemon without a Rule Box from hand, draw 3
+    for each. The ones that can't be played go first: a Stage 2 with
+    nothing in play or in the deck to evolve from."""
+    def stuck(n):
+        pre = POKEMON.get(n, {}).get("evolves_from")
+        return pre is not None and pre not in state.in_play_names() and \
+            not any(c[1] == pre for c in state.deck + state.hand)
+    fuel = sorted((c for c in state.hand if c[0] == "Pokemon" and c[1] in POKEMON
+                   and not POKEMON[c[1]]["rule_box"]),
+                  key=lambda c: (not stuck(c[1]), POKEMON[c[1]]["stage"] == "Basic"))[:2]
+    if not fuel:
+        return False
+    state.remove_from_hand("Supporter", "Gwynn")
+    state.discard.append("Gwynn")
+    for c in fuel:
+        state.remove_from_hand(*c)
+        state.discard.append(c[1])
+    state.draw(3 * len(fuel))
+    log.append(f"Play Gwynn (discard {', '.join(c[1] for c in fuel)}, draw {3 * len(fuel)})")
+    return True
+
+
 def effect_carmine(state, POKEMON, log):
     """Carmine: discard your hand and draw 5."""
     rest = [c for c in state.hand if c != ("Supporter", "Carmine")]
@@ -1104,7 +1141,7 @@ def effect_carmine(state, POKEMON, log):
 
 
 SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn", "Hilda",
-                      "Lillie's Determination", "Carmine", "Judge",
+                      "Lillie's Determination", "Gwynn", "Carmine", "Judge",
                       "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
@@ -1118,6 +1155,7 @@ SUPPORTER_EFFECTS = {
     "Judge": effect_judge,
     "Carmine": effect_carmine,
     "Crispin": effect_crispin,
+    "Gwynn": effect_gwynn,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -1146,7 +1184,7 @@ def play_supporter(state, POKEMON, log):
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
                       "Energy Search", "Wondrous Patch", "Team Rocket's Transceiver", "Pokégear 3.0",
-                      "Brilliant Blender"}
+                      "Brilliant Blender", "Energy Coin"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).

@@ -177,6 +177,18 @@ GREEDY = {
     # ex +0.05, Jellicent ex with 1 Boss +0.01); Slowking, with no gust, 0.
     # Only under an Item lock: +0.74 where always gave +1.49.
     "gust_strand": int(__import__("os").environ.get("GUST_STRAND", 1)),
+    # Price "put Pokemon from your discard pile onto your Bench" attacks
+    # (King's Order, Come and Get You). 0: no price, never chosen -- 0 uses
+    # in 60 games of a Kingdra ex list built on King's Order. On because an
+    # attack the AI never picks is an inert card, not because it measured:
+    # the submitted Kingdra ex list -0.23 +/- 0.32 at 1000 games a matchup;
+    # at 200, the three Duskull decks +0.31 / +0.03 / -0.02.
+    "recover_price": int(__import__("os").environ.get("RECOVER_PRICE", 1)),
+    # Gwynn, Prism Tower and Brilliant Blender discard what King's Order
+    # can bench from the discard (and Energy for Seething Spirit). 0: off,
+    # and Brilliant Blender is never played in such a deck. On top of
+    # recover_price: +0.33 +/- 0.36 at 1000 games on the same list.
+    "recover_fuel": int(__import__("os").environ.get("RECOVER_FUEL", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

@@ -1758,9 +1758,32 @@ def _r(m, text):
 def _r(m, text):
     tgt = Target.YOUR_ALL if re.search(r"attacks used by your", text, re.I) else Target.SELF
     filt = {}
-    mm = re.search(r"attacks used by your ([\w'’ -]+?) pok[eé]mon", text, re.I)
+    # The words between "your" and "Pokemon do N more damage". The lazy
+    # match ran on to the LAST "Pokemon": "your Pokemon do 30 more damage to
+    # your opponent's Active Evolution Pokemon" read as a family named
+    # "Pokemon do 30 more damage to ... Evolution", and no Pokemon is named
+    # that, so Carracosta's Primal Knowledge and Serperior ex's Regal Cheer
+    # did nothing. Types and "Evolution" read as a family as well (Garganacl,
+    # Lilligant, Victini), and "Future" is a tag, not a name (Iron Crown ex).
+    mm = re.search(r"attacks used by your (.*?)pok[eé]mon(?:,? except any ([^,]+?),)?"
+                   r" do \d+ more damage", text, re.I)
     if mm:
-        filt["family"] = mm.group(1).strip()
+        words = re.sub(r"pok[eé]mon and ", "", mm.group(1), flags=re.I).split()
+        types = [w.capitalize() for w in words if re.fullmatch(TYPES, w, re.I)]
+        if len(types) > 1:
+            filt["types_any"] = types
+            words = [w for w in words if not re.fullmatch(TYPES, w, re.I)]
+        if any(w.lower() == "evolution" for w in words):
+            filt["stage_not"] = "Basic"
+        for tag in ("Future", "Ancient"):
+            if any(w.lower() == tag.lower() for w in words):
+                filt["subtype"] = tag
+        words = [w for w in words if w.lower() not in ("evolution", "future", "ancient")]
+        filt.update(_qualifier_filter(" ".join(words)))
+        if mm.group(2):
+            filt["name_not"] = mm.group(2).strip()
+    if re.search(r"to your opponent'?s active evolution pok[eé]mon", text, re.I):
+        filt["vs_evolution"] = True
     return [Action(Op.BUFF_DAMAGE, int(m.group(1)), tgt, filt)]
 
 
@@ -1937,23 +1960,30 @@ def _r(m, text):
 
 
 @rule("attack_bench_spread",
-      r"this attack also does (\d+) damage to (each|\d+) of your opponent'?s "
-      r"benched pok[eé]mon")
+      r"this attack (?:also )?does (\d+) damage to (each|\d+) of your opponent'?s "
+      r"benched pok[eé]mon(?! for each damage counter)")
 def _r(m, text):
     """17 attacks carry a Bench spread rider and none of them compiled --
     Dragapult ex aside, every "also does 30 to a Benched Pokemon" in the
     pool was doing nothing. Modelled as counters, not attack damage,
     because the printed reminder says Weakness and Resistance do not
-    apply on the Bench."""
+    apply on the Bench.
+
+    Without "also" the Bench is the attack's only target: Prinplup's
+    Targeted Dive, Lopunny's Dashing Kick, Turtonator's Spit-Out Shot,
+    Shaymin's Pinpoint Dive, Salamence ex's Wide Blast. Nothing matched
+    them, and the damage went to the Active."""
     amt = int(m.group(1)) // 10
     who = m.group(2).lower()
+    f = {"attack_damage": True}
+    # Shaymin: "...Benched Pokemon ex or Benched Pokemon V".
+    if re.match(r"\s+ex\b(?:\s+or\s+benched\s+pok[eé]mon\s+v\b)?", text[m.end():], re.I):
+        f["subtypes_any"] = ["ex", "V"]
     if who == "each":
         # EACH Benched Pokemon: with no count the executor read it as
         # "choose 1", so Regice's Blizzard hit one Benched Pokemon.
-        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
-                       {"attack_damage": True, "each": True})]
-    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED,
-                   {"targets": int(who), "attack_damage": True})]
+        return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED, dict(f, each=True))]
+    return [Action(Op.PLACE_COUNTERS, amt, Target.OPP_BENCHED, dict(f, targets=int(who)))]
 
 
 @rule("attack_snipe_any",
@@ -2789,7 +2819,9 @@ def _r(m, text):
 def _r(m, text):
     f = {}
     what = (m.group(2) or "").strip()
-    if what and what.lower() not in ("basic", ""):
+    if what.lower() == "basic":
+        f["basic"] = True
+    elif what:
         if re.fullmatch(TYPES, what, re.I):
             f["type"] = what.capitalize()
         else:

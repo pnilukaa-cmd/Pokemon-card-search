@@ -1663,8 +1663,46 @@ def _discard_payoffs(pl):
     return out
 
 
+def _recover_targets(pl):
+    """Evolved Pokemon this deck can put onto its Bench straight from the
+    discard (Kingdra ex's King's Order takes any Water Pokemon): Ludicolo,
+    Aurorus and Carracosta with no line under them get into play no other
+    way, so they are worth more discarded than in hand."""
+    cached = getattr(pl, "_recover_targets_cache", None)
+    if cached is not None:
+        return cached
+    filters = [a.filter or {}
+               for info in pl.POKEMON.values() for atk in info.get("attacks") or []
+               for a in _attack_ir(atk).actions if a.op == IR.Op.RECOVER_TO_BENCH]
+    pl._recover_targets_cache = {
+        n for n, info in pl.POKEMON.items()
+        if info.get("stage") != "Basic"
+        and any(AE.recover_to_bench_fits(pl, n, f) for f in filters)}
+    return pl._recover_targets_cache
+
+
+def _attaches_from_discard(pl):
+    """Does anything in this deck attach Energy from the discard (Blaziken
+    ex's Seething Spirit, Powerglass)?"""
+    effs = [e for n in pl.POKEMON for e in pl.EFFECTS.get(n, [])]
+    effs += [e for n in {n for k, n in pl.deck + pl.hand if k == "Tool"}
+             for e in [trainer_effect_ir(n)] if e is not None]
+    return any(a.op == IR.Op.ATTACH_ENERGY and (a.filter or {}).get("from") == "discard"
+               for e in effs for a in e.actions)
+
+
+def _is_recover_fuel(pl, name):
+    """A recover target with nothing in play to evolve it from."""
+    if not POL.knob(pl, "recover_fuel") or name not in _recover_targets(pl):
+        return False
+    pre = (pl.POKEMON.get(name) or {}).get("evolves_from")
+    return pre not in [M.base_of(pl.POKEMON, n) for n in pl.in_play_names()]
+
+
 def _is_discard_fuel(pl, name):
     """Is this Pokemon worth more in the discard than on the Bench?"""
+    if _is_recover_fuel(pl, name):
+        return True
     payoffs = _discard_payoffs(pl)
     if not payoffs:
         return False
@@ -2267,6 +2305,19 @@ def play_items(pl, opp, turn, log, first_turn):
                 for a in e.actions):
             wanted += [c for c in pl.deck
                        if c[0] == "Energy" and "Grass" in c[1]][:5 - len(wanted)]
+        if not wanted and POL.knob(pl, "recover_fuel"):
+            # King's Order's targets, one of each first (their Abilities
+            # don't stack), then Basic Energy for whatever attaches it back
+            # from the discard (Blaziken ex's Seething Spirit).
+            seen = set()
+            for c in pl.deck:
+                if c[0] == "Pokemon" and c[1] not in seen and _is_recover_fuel(pl, c[1]):
+                    wanted.append(c)
+                    seen.add(c[1])
+            wanted = wanted[:3]
+            if _attaches_from_discard(pl):
+                wanted += [c for c in pl.deck if c[0] == "Energy"
+                           and M.BASIC_ENERGY_RE.match(c[1])][:5 - len(wanted)]
         if not wanted:
             break
         pl.remove_from_hand("Item", "Brilliant Blender")
@@ -2276,7 +2327,7 @@ def play_items(pl, opp, turn, log, first_turn):
             pl.discard.append(card[1])
         random.shuffle(pl.deck)
         log.append(f"  {pl.name}: Brilliant Blender -> discards "
-                   f"{len(wanted)} Kofu")
+                   + ", ".join(c[1] for c in wanted))
 
     # Pokegear 3.0: top 7, take a Supporter this engine can actually play,
     # so the fetch is worth what the sim scores it at and no more.
@@ -2430,7 +2481,7 @@ def play_items(pl, opp, turn, log, first_turn):
             if play_trainer_from_ir(pl, opp, kind, name, log, turn):
                 played = True
                 break
-        if not played:
+        if not played or getattr(pl, "_turn_ended", False):
             break
 
 
@@ -2500,7 +2551,7 @@ def _gust_supporter(pl, opp, name, target, log):
 
 
 def play_supporter(pl, opp, turn, log):
-    if pl.supporter_played:
+    if pl.supporter_played or getattr(pl, "_turn_ended", False):
         return
     hand_names = [n for k, n in pl.hand if k == "Supporter"]
     # A "discard down to N" Supporter (Xerosic's Machinations) goes first
@@ -2548,7 +2599,13 @@ def play_supporter(pl, opp, turn, log):
     if "Gwynn" in hand_names:
         fuel = [c for c in pl.hand
                 if c[0] == "Pokemon"
-                and pl.POKEMON.get(c[1], {}).get("prize_value") == 1][:2]
+                and pl.POKEMON.get(c[1], {}).get("prize_value") == 1]
+        if POL.knob(pl, "recover_fuel"):
+            # The first two in hand went, a Seadra the line needed ahead
+            # of the Ludicolo that King's Order would bench from the
+            # discard. Fuel first, then what the hand can best spare.
+            fuel.sort(key=lambda c: (not _is_recover_fuel(pl, c[1]), pitch_rank(pl, *c)))
+        fuel = fuel[:2]
         if fuel:
             use("Gwynn")
             for c in fuel:
@@ -3320,6 +3377,12 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
     if any(a.op == IR.Op.FILL_OPPONENT_BENCH for a in eff.actions) \
             and not _flute_worth_it(pl, opp):
         return False
+    # Misty's Vitality and Boxed Order end your turn. Nothing ended it, so
+    # four Water Energy came with that turn's attack for free. Played only
+    # on a turn the Active couldn't attack anyway.
+    ends_turn = bool(_ENDS_TURN_RE.search(_card_text(name)))
+    if ends_turn and opp is not None and _active_can_attack_now(pl, opp):
+        return False
     # A gust Trainer (Boss's Orders through this path, Prime Catcher,
     # Pokemon Catcher, Counter Catcher) aimed at the lowest-HP Pokemon on
     # the Bench whatever it bought. With gust_for_ko, only for a Knock Out
@@ -3383,7 +3446,31 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         pl.supporter_played = True
         pl.played_supporters_this_turn.add(name)
     log.append(f"  {pl.name}: {name} (from card text)")
+    if ends_turn:
+        pl._turn_ended = True
+        log.append(f"  {pl.name}: {name} -- the turn ends")
     return True
+
+
+_ENDS_TURN_RE = _re.compile(r"your turn ends", _re.I)
+
+
+def _active_can_attack_now(pl, opp):
+    """Could the Active attack this turn, counting the Energy still to be
+    attached from hand?"""
+    a = pl.active
+    if a is None:
+        return False
+    n_e, n_names = len(a.energy), len(a.energy_names)
+    extra = _helpful_energy(pl, a)
+    if extra is not None:
+        name = pl.hand[extra][1]
+        a.energy.extend(_provisions_on(pl, name, a.name))
+        a.energy_names.append(name)
+    try:
+        return _ready_damage(pl, opp, a) > 0
+    finally:
+        del a.energy[n_e:], a.energy_names[n_names:]
 
 
 def _trainer_switch_pick(pl, opp, f):
@@ -3514,7 +3601,7 @@ def _situational_trainer(pl, opp, kind, name, eff, log):
         return _spend(pl, kind, name, log, f" (shields {a.name} from ex)")
     if ops == {IR.Op.BUFF_DAMAGE}:
         # Premium Power Pro: this turn's attackers of the type named.
-        t = (eff.actions[0].filter or {}).get("family") or ""
+        t = (eff.actions[0].filter or {}).get("type") or ""
         a = pl.active
         if a is None or t.capitalize() not in (_types_of(pl, a) or ()) \
                 or not best_attack(pl, a, opp=opp):
@@ -5366,6 +5453,18 @@ def attack_rider_value(pl, opp, atk, spot=None):
             # Worth something only while there is Bench room to fill.
             room = max(0, 5 - len(pl.bench))
             value += 35 * min(act.amount or 1, room)
+        elif act.op == IR.Op.RECOVER_TO_BENCH and POL.knob(pl, "recover_price"):
+            # King's Order and Come and Get You had no price, so the AI
+            # never spent a turn on one: 0 uses in 60 games of a Kingdra ex
+            # list built on it. Priced for what the discard holds, while
+            # there is Bench room; an evolved Pokemon skips its whole line.
+            room = max(0, AE.BENCH_LIMIT(pl) - len(pl.bench))
+            pool = sorted((pl.POKEMON[n] for n in pl.discard if isinstance(n, str)
+                           and AE.recover_to_bench_fits(pl, n, act.filter or {})),
+                          key=lambda i: (i.get("stage") != "Basic", i.get("hp") or 0),
+                          reverse=True)
+            for info in pool[:min(act.amount or 1, room)]:
+                value += 35 if info.get("stage") == "Basic" else 50 + (info.get("hp") or 0) // 4
         # A3. The setup riders had no price at all, so a 0-damage attack
         # that accelerated Energy or dug for a piece scored zero and the
         # AI would never spend a turn on it -- the single clearest reason
@@ -7237,6 +7336,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     for _s in ([pl.active] if pl.active else []) + list(pl.bench):
         _s.healed_this_turn = False
     pl.supporter_played = False
+    pl._turn_ended = False
     pl.turn_buff_vs_ex = 0
     pl.turn_buff_any = 0
     pl.turn_buff_typed = {}
@@ -7370,6 +7470,8 @@ PHASES = ("items", "bench", "abilities", "stadium", "sweep", "attach", "tools",
 def run_phases(pl, opp, log, start):
     turn, first_turn = pl.round_no, pl._first_turn
     for ph in PHASES[start:]:
+        if getattr(pl, "_turn_ended", False):
+            break
         if ph == "items":
             # Items that reached the hand through the Supporter (Petrel's
             # search, a draw) waited a whole turn: play_items ran only

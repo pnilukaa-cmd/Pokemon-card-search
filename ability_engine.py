@@ -204,6 +204,40 @@ def resolve_targets(target, pl, opp, source, attacker=None):
     return []
 
 
+def recover_to_bench_fits(pl, name, f):
+    """Could "put up to N <kind> Pokemon from your discard pile onto your
+    Bench" take this card? Only Ho-Oh's Flames of Revival says Basic.
+    Kingdra ex's King's Order ("Water Pokemon") and Salamence ex's Booming
+    Call ("Dragon Pokemon") take any Stage, and the executor took Basics
+    only, so King's Order could never bench a Stage 2."""
+    info = pl.POKEMON.get(name)
+    if info is None:
+        return False
+    if f.get("basic") and info.get("stage") != "Basic":
+        return False
+    if f.get("type") and f["type"] not in (info.get("types") or []):
+        return False
+    if f.get("name_contains") and f["name_contains"].lower() not in name.lower():
+        return False
+    return True
+
+
+def recover_to_bench_pick(pl, f):
+    """The best card in the discard for recover_to_bench: a Pokemon with
+    an Ability not already in play first (Ludicolo's Vibrant Dance and
+    Aurorus's Tundra Wall don't stack), then an evolved one (it skips its
+    whole line), then the most HP."""
+    have = set(pl.in_play_names())
+    pool = [n for n in pl.discard if isinstance(n, str) and recover_to_bench_fits(pl, n, f)]
+    if not pool:
+        return None
+    def worth(n):
+        info = pl.POKEMON[n]
+        return (n not in have and bool(info.get("abilities")),
+                info.get("stage") != "Basic", info.get("hp") or 0)
+    return max(pool, key=worth)
+
+
 def matches_filter(pl, spot, filt):
     """Does this Pokemon satisfy an Action's filter (type / family)?"""
     if not filt:
@@ -214,6 +248,12 @@ def matches_filter(pl, spot, filt):
         return False
     typ = filt.get("type")
     if typ and typ not in (info.get("types") or []):
+        return False
+    if filt.get("types_any") and not set(filt["types_any"]) & set(info.get("types") or []):
+        return False
+    if filt.get("subtype") and filt["subtype"] not in (info.get("subtypes") or []):
+        return False
+    if filt.get("name_not") and spot.name == filt["name_not"]:
         return False
     not_typ = filt.get("type_not")
     if not_typ and not_typ in (info.get("types") or []):
@@ -2625,13 +2665,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         for _ in range(act.amount or 1):
             if len(pl.bench) >= BENCH_LIMIT(pl):
                 break
-            nm = next((n for n in pl.discard
-                       if n in pl.POKEMON
-                       and (pl.POKEMON[n].get("stage") == "Basic")
-                       and (not f.get("type")
-                            or f["type"] in (pl.POKEMON[n].get("types") or []))
-                       and (not f.get("name_contains")
-                            or f["name_contains"].lower() in n.lower())), None)
+            nm = recover_to_bench_pick(pl, f)
             if not nm or make_inplay is None:
                 break
             pl.discard.remove(nm)
@@ -3453,6 +3487,11 @@ def query_damage_buff(pl, spot, opp=None):
             continue
         if act.target == IR.Target.YOUR_ALL and not matches_filter(pl, spot, act.filter):
             continue
+        # Primal Knowledge: only against an Active Evolution Pokemon.
+        if (act.filter or {}).get("vs_evolution"):
+            target = getattr(opp, "active", None) if opp is not None else None
+            if target is None or (opp.POKEMON.get(target.name) or {}).get("stage") == "Basic":
+                continue
         total += act.amount or 0
     return total
 

@@ -7246,5 +7246,185 @@ def test_a_gust_with_no_active_to_switch_with_is_held():
           got == [(False, ["Dreepy", "Drakloak"], None)] * 2, got)
 
 
+def test_kings_order_benches_a_stage_2_from_the_discard():
+    """Kingdra ex's King's Order: "Put up to 3 Water Pokemon from your
+    discard pile onto your Bench." The executor took Basic Pokemon only,
+    so the Ludicolo, Aurorus and Carracosta a King's Order list discards
+    with Gwynn never reached play. Any Stage now, best first: Abilities not
+    already in play, then evolved, then HP. Ho-Oh's "Basic Pokemon" still
+    takes Basics only."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 6\n3 Horsea SFA 10\n2 Seadra SFA 11\n3 Kingdra ex SFA 12\n"
+                "2 Ludicolo JTG 37\n2 Aurorus POR 24\n1 Carracosta SCR 38\n\n"
+                "Energy: 47\n47 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "k")
+    finally:
+        os.unlink(f.name)
+    import ability_ir as IR, ability_engine as AE
+    me = V.Player("me", D[1], list(D[2]), E)
+    me.active = V.InPlay("Kingdra ex", 1)
+    me.bench = [V.InPlay("Horsea", 1)]
+    me.discard = ["Horsea", "Ludicolo", "Water Energy", "Aurorus", "Ludicolo", "Carracosta"]
+    eff = IR.compile_effect("attack", "King's Order",
+                            "Put up to 3 Water Pokémon from your discard pile onto your Bench.")
+    for act in eff.actions:
+        AE.apply_action(act, me, None, me.active, [], make_inplay=lambda n: V.InPlay(n, 1))
+    got = sorted(p.name for p in me.bench)
+    ho = IR.compile_effect("attack", "Flames of Revival",
+                           "Put up to 3 Basic Pokémon from your discard pile onto your Bench.")
+    check("King's Order benches Ludicolo, Aurorus and Carracosta; Flames of Revival stays Basic",
+          got == ["Aurorus", "Carracosta", "Horsea", "Ludicolo"]
+          and ho.actions[0].filter.get("basic") is True, (got, ho.actions[0].filter))
+
+
+def test_team_damage_buffs_read_who_they_buff():
+    """"Attacks used by your Pokemon do 30 more damage to your opponent's
+    Active Evolution Pokemon" (Carracosta's Primal Knowledge) read as a
+    family named "Pokemon do 30 more damage to your opponent's Active
+    Evolution", so no attacker matched and it did nothing; Serperior ex's
+    Regal Cheer the same. Garganacl's "Fighting Pokemon", Lilligant's
+    "Grass Pokemon and Fire Pokemon", Victini's "Evolution Fire Pokemon"
+    and Iron Crown ex's "Future Pokemon" read as name families too."""
+    import ability_ir as IR, json
+    cards = json.load(open("pokemon_standard_cards.json"))
+    got = {}
+    for c in cards:
+        for a in c.get("abilities") or []:
+            if c["name"] in ("Carracosta", "Serperior ex", "Garganacl", "Lilligant",
+                             "Victini", "Iron Crown ex", "Hop's Snorlax") \
+                    and "more damage" in (a.get("text") or ""):
+                got[c["name"]] = IR.compile_effect("ability", a["name"], a["text"]).actions[0].filter
+    want = {"Carracosta": {"vs_evolution": True}, "Serperior ex": {},
+            "Garganacl": {"type": "Fighting"}, "Lilligant": {"types_any": ["Grass", "Fire"]},
+            "Victini": {"stage_not": "Basic", "type": "Fire"},
+            "Iron Crown ex": {"subtype": "Future", "name_not": "Iron Crown ex"},
+            "Hop's Snorlax": {"family": "Hop's"}}
+    check("team damage buffs compile to who they buff", got == want, got)
+    # and Primal Knowledge is +30 against an Evolution Active, 0 against a Basic
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n4 Horsea SFA 10\n1 Carracosta SCR 38\n\nEnergy: 55\n55 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "k")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+    import ability_engine as AE
+    me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+    me.active, me.bench = V.InPlay("Horsea", 1), [V.InPlay("Carracosta", 1)]
+    buff = []
+    for name in ("Drakloak", "Dreepy"):
+        op.active = V.InPlay(name, 1)
+        buff.append(AE.query_damage_buff(me, me.active, op))
+    check("Primal Knowledge: +30 against Drakloak, 0 against Dreepy", buff == [30, 0], buff)
+
+
+def test_mistys_vitality_ends_the_turn():
+    """Misty's Vitality: "Search your deck for up to 4 Basic Water Energy
+    cards and attach them to 1 of your Pokemon. ... Your turn ends." Nothing
+    ended the turn, so the four Energy came with that turn's attack. Now the
+    turn ends, and the card is played only when the Active couldn't attack
+    anyway: a bare Horsea plays it and doesn't attack; a Kingdra ex with
+    two Water Energy holds it and attacks."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 3\n4 Horsea SFA 10\n4 Seadra SFA 11\n4 Kingdra ex SFA 12\n\n"
+                "Trainer: 1\n4 Misty's Vitality PBL 111\n\n"
+                "Energy: 44\n44 Basic Water Energy\n")
+    try:
+        V, D, E = _real(f.name, "k")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+
+    def turn(active, energy):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me._first_turn, me._cards_by_name = False, V._CARDS_BY_NAME
+        me.energy_types = {"Water"}
+        me.active = V.InPlay(active, 1)
+        me.active.energy, me.active.energy_names = [["Water"]] * energy, ["Water Energy"] * energy
+        me.bench = [V.InPlay("Kingdra ex", 1)]
+        op.active, op.bench = V.InPlay("Dragapult ex", 1), [V.InPlay("Dreepy", 1)]
+        me.hand = [("Supporter", "Misty's Vitality")]
+        me.deck, op.deck, op.hand = list(D[2]), list(O[2]), []
+        log = []
+        V.play_supporter(me, op, 5, log)
+        V.run_phases(me, op, log, 0)
+        return ("Misty's Vitality" in me.played_supporters_this_turn,
+                any(" uses " in l for l in log))
+    got = [turn("Horsea", 0), turn("Kingdra ex", 2)]
+    check("Misty's Vitality: played by a bare Horsea, then no attack; held by a ready Kingdra ex",
+          got == [(True, False), (False, True)], got)
+
+
+def test_bench_only_attacks_hit_the_bench():
+    """"This attack does 70 damage to 1 of your opponent's Benched Pokemon"
+    (no "also") matched neither the Bench-rider rule nor the any-target
+    snipe, and the printed number went to the Active: Prinplup's Targeted
+    Dive did 70 to a Dragapult ex, Salamence ex's Wide Blast 50 to it
+    instead of 50 to each Benched Pokemon. Now the Active takes nothing and
+    the Bench takes the damage."""
+    import tempfile, os
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("Pokémon: 2\n1 Prinplup PFL 28\n1 Salamence ex JTG 114\n\n"
+                "Energy: 58\n58 Basic Fire Energy\n")
+    try:
+        V, D, E = _real(f.name, "b")
+    finally:
+        os.unlink(f.name)
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    EO = V.compile_effects_for(O[1], O[3])
+    got = []
+    for name in ("Prinplup", "Salamence ex"):
+        me, op = V.Player("me", D[1], list(D[2]), E), V.Player("o", O[1], list(O[2]), EO)
+        me.round_no = op.round_no = 5
+        me._opp_ref, op._opp_ref = op, me
+        me._first_turn, me._cards_by_name = False, V._CARDS_BY_NAME
+        me.energy_types = {"Fire"}
+        me.active = V.InPlay(name, 1)
+        me.active.energy, me.active.energy_names = [["Fire"]] * 3, ["Fire Energy"] * 3
+        op.active = V.InPlay("Dragapult ex", 1)
+        op.bench = [V.InPlay("Drakloak", 1), V.InPlay("Dreepy", 1)]   # not a Tera ex: its Bench is shielded
+        V.do_attack(me, op, [])
+        got.append((op.active.damage, sorted(p.damage for p in op.bench)))
+    check("Targeted Dive: 70 to one Benched; Wide Blast: 50 to each Benched; the Active untouched",
+          got == [(0, [0, 70]), (0, [50, 50])], got)
+
+
+def test_the_baseline_sim_plays_gwynn_and_energy_coin():
+    """simulate_baseline held Gwynn and Energy Coin in hand. A Kingdra ex
+    list with 4 of each read Kingdra ex in play by turn 6 in 39.3% of
+    trials; with them played, 52.0%. Gwynn discards the Pokemon that can't
+    be played first (a Ludicolo with no Lombre) and draws 3 for each;
+    Energy Coin attaches on two heads."""
+    import random, simulate_baseline as SB
+    P = SB.build_deck_model("Pokémon: 3\n2 Horsea SFA 10\n1 Ludicolo JTG 37\n1 Kingdra ex SFA 12\n\n"
+                            "Trainer: 2\n1 Gwynn PBL 109\n1 Energy Coin BLK 81\n\n"
+                            "Energy: 55\n55 Basic Water Energy\n")[0]
+    st = SB.GameState([("Energy", "Water Energy")] * 30)
+    st.active, st.active_energy, st.turn = "Horsea", 0, 2
+    st.hand = [("Supporter", "Gwynn"), ("Pokemon", "Horsea"), ("Pokemon", "Ludicolo"),
+               ("Pokemon", "Kingdra ex")]
+    played = SB.SUPPORTER_EFFECTS.get("Gwynn", lambda *a: False)(st, P, [])
+    gone = sorted(n for n in st.discard if n != "Gwynn")
+    drew = 30 - len(st.deck)
+    coins = 0
+    random.seed(7)
+    for _ in range(400):
+        st.hand, st.active_energy = [("Item", "Energy Coin")], 0
+        st.deck = [("Energy", "Water Energy")] * 10
+        SB.play_items(st, P, SB.search_priority(P), 2, [])
+        coins += st.active_energy
+    check("Gwynn discards Ludicolo and Horsea (not Kingdra ex) for 6; Energy Coin hits about 1 in 4",
+          played and gone == ["Horsea", "Ludicolo"] and drew == 6 and 70 <= coins <= 130,
+          (played, gone, drew, coins))
+
+
 if __name__ == "__main__":
     sys.exit(main())
