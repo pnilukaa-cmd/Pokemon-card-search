@@ -1619,8 +1619,9 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if not _hand_reset_ok(pl, opp, eff):
                 continue
-            if not _opp_draw_ok(pl, opp, eff):
-                continue
+            # Chandelure's Alluring Light (each player draws a card) goes
+            # every turn. Only on a turn Resentful Refrain fires measured
+            # -3.23 +/- 0.52 on the Mega Froslass ex list, never -4.43.
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
                 log.append(f"  {pl.name}: {p.name} uses {eff.name}")
@@ -1639,21 +1640,6 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
 # --------------------------------------------------------------------------
 # Trainer effects (compact registry; unknown Trainers are never played)
 # --------------------------------------------------------------------------
-
-def _opp_draw_ok(pl, opp, eff):
-    """Chandelure's Alluring Light ("each player draw a card"): the
-    opponent's card is 50 damage for Resentful Refrain on a turn it
-    attacks, and a free card for them on any other. opp_draw_gate 1: only
-    on a turn the Active can attack with an attack that counts their hand;
-    2: never, to measure what the Ability is worth. 0: always."""
-    gate = POL.knob(pl, "opp_draw_gate")
-    if not gate or not any(a.op == IR.Op.DRAW and a.target == IR.Target.BOTH_ALL
-                           for a in eff.actions):
-        return True
-    if gate == 2:
-        return False
-    return _hand_scaler(pl, pl.active and pl.active.name) and _active_can_attack_now(pl, opp)
-
 
 def basics_in_hand(pl):
     return [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Basic"]
@@ -2591,16 +2577,15 @@ def _lucian_worth_it(pl, opp):
     attack counts the opponent's hand (Mega Froslass ex's Resentful
     Refrain, Chandelure's Mind Ruler) that is how a small hand gets big
     again: played while they hold 3 or fewer and the attacker can swing.
-    Never to cut their hand while such an attacker waits on the Bench. For
-    any other deck it is disruption against a hand of 7 or more, from a
-    hand of 4 or fewer."""
+    For any other deck it is disruption against a hand of 7 or more, from
+    a hand of 4 or fewer."""
     if _deck_left_after(pl, 6) < DRAW_FLOOR:
         return False
     mine, theirs = len(pl.hand) - 1, len(opp.hand)
+    # Keeping it off a big hand while such an attacker waits on the Bench
+    # measured +0.42 +/- 0.49 on that list, and was taken out.
     if _hand_scaler(pl, pl.active and pl.active.name):
         return theirs <= 3 and mine <= 6 and _active_can_attack_now(pl, opp)
-    if any(_hand_scaler(pl, n) for n in pl.POKEMON):
-        return False             # their big hand is this deck's damage
     return theirs >= 7 and mine <= 4
 
 

@@ -192,9 +192,6 @@ GREEDY = {
     # A heal that hands the Energy back (Wally's Compassion) is free on an
     # Active whose one-Energy attack that Energy re-pays this turn. 0: off.
     "heal_refuel": int(__import__("os").environ.get("HEAL_REFUEL", 0)),
-    # "Each player draws a card" Abilities (Alluring Light): 1 only on a
-    # turn the Active attacks with a hand-counting attack, 2 never. 0: always.
-    "opp_draw_gate": int(__import__("os").environ.get("OPP_DRAW_GATE", 0)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far
