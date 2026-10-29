@@ -1172,6 +1172,10 @@ def _r(m, text):
     alt = re.match(r"(?: cards?)? or an? basic (" + TYPES + r") pok[eé]mon", text[m.end(3):], re.I)
     if kind == "energy" and alt:
         f["or_pokemon"] = {"stage": "Basic", "type": alt.group(1).capitalize()}
+    # Brock's Scouting's other half, "or 1 Evolution Pokemon", is not read:
+    # taking a Metang or Metagross with it once three Pokemon were down
+    # measured -0.68 / -0.28 / -0.34 on the three Metal decks running it
+    # (2026-10-29, 200 games a matchup), against 2 Basics every time.
     return [Action(Op.SEARCH_TO_HAND, 4 if many else _num(m.group(1)), Target.SELF, f)]
 
 

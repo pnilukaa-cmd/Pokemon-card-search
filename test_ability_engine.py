@@ -7429,5 +7429,36 @@ def test_the_baseline_sim_plays_gwynn_and_energy_coin():
           (played, gone, drew, coins))
 
 
+
+def test_the_baseline_sim_plays_metal_maker_and_brocks_scouting():
+    """simulate_baseline ran only draw Abilities, and held Brock's Scouting
+    and Energy Recycler in hand. A Metang / Orthworm ex list read a first
+    attack by turn 6 in 72.7% of trials; with Metal Maker attaching off the
+    top, the Scouting and the Recycler played, 93.7%. The Scouting
+    takes its Evolution only once no Basic is left in the deck."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model("Pokémon: 3\n4 Beldum CRI 59\n3 Metang TEF 114\n3 Orthworm ex SCR 110\n\n"
+                            "Trainer: 2\n1 Brock's Scouting JTG 146\n1 Energy Recycler POR 108\n\n"
+                            "Energy: 48\n48 Basic Metal Energy\n")[0]
+    st = SB.GameState([("Pokemon", "Metang")] + [("Energy", "Metal Energy")] * 2
+                      + [("Pokemon", "Beldum")] * 2 + [("Energy", "Metal Energy")] * 2)
+    st.active, st.active_energy, st.turn = "Orthworm ex", 0, 3
+    st.bench = [{"name": "Metang", "energy": 0, "entered_turn": 1}]
+    if hasattr(SB, "use_energy_abilities"):
+        SB.use_energy_abilities(st, P, [])
+    attached = st.active_energy                   # the top 4: 2 Energy, 2 Beldum
+    st.bench += [{"name": "Beldum", "energy": 0, "entered_turn": 1}]
+    st.deck = [c for c in st.deck if c[1] != "Beldum"]   # no Basic left to find
+    st.hand = [("Supporter", "Brock's Scouting")]
+    SB.SUPPORTER_EFFECTS.get("Brock's Scouting", lambda *a: False)(st, P, [])
+    scouted = sorted(n for k, n in st.hand)
+    st.discard = ["Metal Energy"] * 3
+    st.hand = [("Item", "Energy Recycler")]
+    SB.play_items(st, P, SB.search_priority(P), 3, [])
+    check("Metal Maker attaches the 2 Metal in the top 4; Scouting takes the Metang; Recycler shuffles 3 back",
+          (attached, scouted, st.discard.count("Metal Energy")) == (2, ["Metang"], 0),
+          (attached, scouted, st.discard))
+
+
 if __name__ == "__main__":
     sys.exit(main())

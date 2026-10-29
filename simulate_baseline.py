@@ -539,6 +539,35 @@ def _slots(state):
     return out
 
 
+def use_energy_abilities(state, POKEMON, log):
+    """Once-per-turn Abilities that attach Energy off the top of the deck
+    (Metang's Metal Maker: look at the top 4, attach every Basic Metal
+    Energy there). They were not modelled, so a deck whose attackers are
+    powered by them read a first attack far later than it gets one. The
+    Energy goes to the Active, the one Pokemon whose Energy is counted
+    here; the rest of the look goes to the bottom."""
+    for key, name in _slots(state):
+        for ab in POKEMON.get(name, {}).get("abilities", []):
+            eff = IR.compile_effect("ability", ab["name"], ab.get("text") or "")
+            if eff is None or str(eff.trigger) != "once_per_turn":
+                continue
+            act = next((a for a in eff.actions if a.op == IR.Op.ATTACH_ENERGY
+                        and (a.filter or {}).get("from") == "top"), None)
+            if act is None or (key, ab["name"]) in state.abilities_used or not state.active:
+                continue
+            state.abilities_used.add((key, ab["name"]))
+            f = act.filter or {}
+            look = [state.deck.pop() for _ in range(min(f.get("look") or 1, len(state.deck)))]
+            want = f.get("type")
+            hit = [c for c in look if c[0] == "Energy" and BASIC_ENERGY_RE.match(c[1])
+                   and (not want or c[1].startswith(want))][:act.amount or 1]
+            for c in hit:
+                look.remove(c)
+            state.active_energy += len(hit)
+            state.deck[:0] = look              # the bottom of the deck
+            log.append(f"{name}'s {ab['name']} -> attach {len(hit)} Energy")
+
+
 def use_draw_abilities(state, POKEMON, log, evolved_name=None):
     """Fire every legal draw Ability once per turn.
 
@@ -853,6 +882,19 @@ def play_items(state, POKEMON, priority, turn, log):
             state.hand.append(basic_e)
             log.append(f"Play Energy Search -> get {basic_e[1]}")
 
+    # Energy Recycler: up to 5 Basic Energy from the discard shuffled back
+    # into the deck, for Metal Maker and the draws to find again.
+    if ("Item", "Energy Recycler") in state.hand:
+        back = [n for n in state.discard if BASIC_ENERGY_RE.match(n)][:5]
+        if len(back) >= 2:
+            state.remove_from_hand("Item", "Energy Recycler")
+            state.discard.append("Energy Recycler")
+            for n in back:
+                state.discard.remove(n)
+                state.deck.append(("Energy", n))
+            random.shuffle(state.deck)
+            log.append(f"Play Energy Recycler -> {len(back)} Energy back")
+
     # Energy Coin: flip 2 coins; both heads, a Basic Energy from the deck
     # attached to one of your Pokemon (the Active here, the attacker).
     while ("Item", "Energy Coin") in state.hand and state.active:
@@ -1102,6 +1144,38 @@ def effect_crispin(state, POKEMON, log):
     return True
 
 
+def effect_brocks_scouting(state, POKEMON, log):
+    """Brock's Scouting: up to 2 Basic Pokemon, or 1 Evolution Pokemon --
+    the Evolution only once no Basic is left to find, as simulate_versus
+    plays it (taking it with three Pokemon down measured worse there)."""
+    in_play = set(state.in_play_names())
+    held = set(state.hand_names())
+    basics = [c for c in state.deck if c[0] == "Pokemon" and POKEMON[c[1]]["stage"] == "Basic"
+              and not is_fossil(POKEMON, c[1])]
+    evos = [c for c in state.deck if c[0] == "Pokemon" and c[1] not in held
+            and POKEMON[c[1]]["evolves_from"] in in_play]
+    if evos and not basics:
+        got = [max(evos, key=lambda c: POKEMON[c[1]]["hp"])]
+    else:
+        got, seen = [], set()
+        for c in basics:
+            if c[1] not in seen or len(basics) <= 2:
+                got.append(c)
+                seen.add(c[1])
+            if len(got) == 2:
+                break
+    if not got:
+        return False
+    state.remove_from_hand("Supporter", "Brock's Scouting")
+    state.discard.append("Brock's Scouting")
+    for c in got:
+        state.deck.remove(c)
+        state.hand.append(c)
+    random.shuffle(state.deck)
+    log.append(f"Play Brock's Scouting -> {', '.join(c[1] for c in got)}")
+    return True
+
+
 def effect_gwynn(state, POKEMON, log):
     """Gwynn: discard up to 2 Pokemon without a Rule Box from hand, draw 3
     for each. The ones that can't be played go first: a Stage 2 with
@@ -1141,7 +1215,7 @@ def effect_carmine(state, POKEMON, log):
 
 
 SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn", "Hilda",
-                      "Lillie's Determination", "Gwynn", "Carmine", "Judge",
+                      "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine", "Judge",
                       "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
@@ -1156,6 +1230,7 @@ SUPPORTER_EFFECTS = {
     "Carmine": effect_carmine,
     "Crispin": effect_crispin,
     "Gwynn": effect_gwynn,
+    "Brock's Scouting": effect_brocks_scouting,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -1184,7 +1259,7 @@ def play_supporter(state, POKEMON, log):
 
 KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pad", "Night Stretcher",
                       "Energy Search", "Wondrous Patch", "Team Rocket's Transceiver", "Pokégear 3.0",
-                      "Brilliant Blender", "Energy Coin"}
+                      "Brilliant Blender", "Energy Coin", "Energy Recycler"}
                      | set(FAMILY_BENCH_SEARCH_ITEMS))
 # "Switch" repositions Active/Bench with no other effect (retreating isn't
 # modeled at all, so this can't move any tracked metric either way).
@@ -1234,6 +1309,7 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
     use_draw_abilities(state, POKEMON, log)
+    use_energy_abilities(state, POKEMON, log)
     attach_energy(state, POKEMON, pre_evolutions, log)
     try_evolve(state, POKEMON, turn_num, log)
     if turn_num > 1 or not going_first:
