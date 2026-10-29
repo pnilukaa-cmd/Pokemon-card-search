@@ -658,6 +658,12 @@ def tool_attacks(pl, spot):
 AE.TOOL_ATTACKS = tool_attacks
 
 
+_EOT_ACTIVE_ATTACH_RE = _re.compile(
+    r"at the end of your turn \(after your attack\), if the pok[eé]mon this card is"
+    r" attached to is in the active spot, you may attach a basic energy card from"
+    r" your discard pile", _re.I)
+
+
 def tool_end_of_turn(pl, log):
     """Powerglass (a Basic Energy from the discard onto the Active) and the
     Technical Machines that are discarded at the end of the turn."""
@@ -665,9 +671,7 @@ def tool_end_of_turn(pl, log):
         text = _tool_text(pl, spot, getattr(pl, "_opp_ref", None))
         if not text:
             continue
-        if spot is pl.active and _re.search(r"at the end of your turn \(after your attack\), if the"
-                                            r" pok[eé]mon this card is attached to is in the active spot,"
-                                            r" you may attach a basic energy card from your discard pile", text, _re.I):
+        if spot is pl.active and _EOT_ACTIVE_ATTACH_RE.search(text):
             nm = next((n for n in pl.discard if AE._is_basic_energy_name(n)), None)
             if nm:
                 pl.discard.remove(nm)

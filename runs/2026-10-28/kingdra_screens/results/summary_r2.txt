@@ -1,0 +1,9 @@
+B2_g 119s B2: 61.92% (±0.31) over 100 decks at 200 games, winning 77
+r2_lud0_g 107s r2_lud0: 61.88% (±0.31) over 100 decks at 200 games, winning 75
+r2_aur0_g 105s r2_aur0: 60.83% (±0.30) over 100 decks at 200 games, winning 74
+r2_car0_g 114s r2_car0: 62.67% (±0.31) over 100 decks at 200 games, winning 77
+r2_kd4_g 115s r2_kd4: 63.52% (±0.31) over 100 decks at 200 games, winning 75
+r2_candy4_g 116s r2_candy4: 62.38% (±0.31) over 100 decks at 200 games, winning 74
+r2_misty2_g 115s r2_misty2: 61.35% (±0.31) over 100 decks at 200 games, winning 76
+r2_rosa1_g 111s r2_rosa1: 62.09% (±0.31) over 100 decks at 200 games, winning 77
+r2_dew2_g 111s r2_dew2: 60.58% (±0.31) over 100 decks at 200 games, winning 74

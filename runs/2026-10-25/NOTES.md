@@ -120,3 +120,13 @@ deck but `arbok_muk_laser_darkbell`, `arbok_muk_trolley_darkbell`,
 `chesnaught_meganium_wild_growth`, `maushold_gnaw_together_mill`,
 `mega_dragonite_kangaskhan_salazzle_wall`, `meta_slowking` and
 `snorlax_bouffalant_kangaskhan_curly_wall`; and every pairing.
+
+A seventh (e84da63): King's Order now benches any Stage and is chosen at
+all, Gwynn, Prism Tower and Brilliant Blender feed it, and Misty's
+Vitality ends the turn. Field decks it changes: `kyurem_vanilluxe_blizzard`
+(Misty's Vitality) and the three with Duskull's Come and Get You, now
+priced (`alakazam_dudunsparce_powerful_hand`,
+`mega_lopunny_dusknoir_snipe_finisher`, `meta_dragapult_dusknoir`:
++0.03, +0.31, −0.02 at 200 games). The team damage-buff and Bench-only
+attack fixes touch no field deck. `kingdra_ex_kings_order` was added to
+the field after this run.

@@ -1,0 +1,5 @@
+K_user_pf 128s K_user: 46.16% (±0.32) over 100 decks at 200 games, winning 44
+alakazam_dudunsparce_powerful_hand_pf 164s alakazam_dudunsparce_powerful_hand: 51.48% (±0.33) over 99 decks at 200 games, winning 54
+mega_lopunny_dusknoir_snipe_finisher_pf 92s mega_lopunny_dusknoir_snipe_finisher: 55.44% (±0.33) over 99 decks at 200 games, winning 64
+meta_dragapult_dusknoir_pf 125s meta_dragapult_dusknoir: 49.01% (±0.33) over 99 decks at 200 games, winning 45
+DONE

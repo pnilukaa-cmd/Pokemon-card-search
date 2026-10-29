@@ -1,0 +1,4 @@
+B3_la 757s B3: 64.48% (±0.61) over 100 decks at 50 games, winning 75
+r3_gre_car_la 759s r3_gre_car: 64.98% (±0.61) over 100 decks at 50 games, winning 76
+r3_fg_la 767s r3_fg: 63.43% (±0.62) over 101 decks at 50 games, winning 77
+DONE

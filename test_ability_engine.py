@@ -2638,6 +2638,9 @@ def test_no_card_in_any_decklist_is_silently_inert():
             if (nm in V.hp_tools() or nm in V.RETREAT_TOOLS
                     or nm in V.RETALIATE_CARDS or nm in V.DAMAGE_TOOLS):
                 return True
+            # Powerglass: read off its text by tool_end_of_turn.
+            if V._EOT_ACTIVE_ATTACH_RE.search(V._card_text(nm)):
+                return True
             # Heavy Baton: read off the Knocked Out Pokemon's Tool by
             # AE.salvage_energy_on_ko, where Knock Outs are resolved.
             _tir = V.trainer_effect_ir(nm)

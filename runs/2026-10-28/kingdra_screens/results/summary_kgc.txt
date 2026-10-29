@@ -1,0 +1,3 @@
+K_user_g 738s K_user: 46.42% (±0.15) over 101 decks at 1000 games, winning 44
+kingdra_ex_kings_order_g 708s kingdra_ex_kings_order: 64.11% (±0.14) over 100 decks at 1000 games, winning 76
+DONE

@@ -1,0 +1,19 @@
+K_user_g 140s K_user: 46.31% (±0.33) over 100 decks at 200 games, winning 42
+k1_fac_g 118s k1_fac: 47.75% (±0.33) over 100 decks at 200 games, winning 48
+k1_coin4_g 119s k1_coin4: 51.04% (±0.32) over 100 decks at 200 games, winning 54
+k1_coin2_g 118s k1_coin2: 50.02% (±0.32) over 100 decks at 200 games, winning 50
+k1_beach_g 119s k1_beach: 47.09% (±0.33) over 100 decks at 200 games, winning 45
+k1_lud0_g 113s k1_lud0: 50.59% (±0.32) over 100 decks at 200 games, winning 57
+k1_aur0_g 109s k1_aur0: 49.07% (±0.32) over 100 decks at 200 games, winning 48
+k1_car0_g 115s k1_car0: 48.58% (±0.32) over 100 decks at 200 games, winning 47
+k1_blz0_g 119s k1_blz0: 58.85% (±0.31) over 100 decks at 200 games, winning 72
+k1_candy_g 119s k1_candy: 47.16% (±0.33) over 100 decks at 200 games, winning 45
+s_fro2_g 124s s_fro2: 44.69% (±0.33) over 100 decks at 200 games, winning 39
+s_sea2_g 125s s_sea2: 44.20% (±0.32) over 100 decks at 200 games, winning 40
+s_gre1_g 123s s_gre1: 45.95% (±0.33) over 100 decks at 200 games, winning 43
+s_vap2_g 121s s_vap2: 44.77% (±0.32) over 100 decks at 200 games, winning 39
+s_sta1_g 120s s_sta1: 46.92% (±0.33) over 100 decks at 200 games, winning 46
+s_mil2_g 120s s_mil2: 43.66% (±0.33) over 100 decks at 200 games, winning 40
+s_art2_g 138s s_art2: 43.82% (±0.32) over 100 decks at 200 games, winning 37
+s_fg_g 122s s_fg: 43.73% (±0.33) over 100 decks at 200 games, winning 38
+DONE

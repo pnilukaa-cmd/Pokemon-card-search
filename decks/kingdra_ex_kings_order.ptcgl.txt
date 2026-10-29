@@ -1,0 +1,29 @@
+Pokémon: 15
+4 Kingdra ex PR-SV 131
+3 Seadra SFA 11
+4 Horsea SFA 10
+2 Aurorus POR 24
+1 Ludicolo JTG 37
+1 Carracosta SCR 38
+
+Trainer: 27
+4 Lillie's Determination MEG 119
+4 Gwynn PBL 78
+1 Boss's Orders MEG 114
+3 Poké Pad POR 81
+3 Rare Candy MEG 125
+2 Ultra Ball ASC 213
+2 Buddy-Buddy Poffin ASC 184
+2 Powerglass SFA 63
+1 Night Stretcher ASC 196
+1 Brilliant Blender SSP 164
+1 Air Balloon BLK 79
+1 Switch MEG 130
+1 Prism Tower CRI 80
+1 Surfing Beach MEG 129
+
+Energy: 18
+4 Bubbly Water Energy CRI 84
+14 Basic Water Energy
+
+Total Cards: 60

@@ -1,0 +1,10 @@
+r2_oger2_g 153s r2_oger2: 59.95% (±0.31) over 100 decks at 200 games, winning 68
+r2_maxrod_g 140s r2_maxrod: 61.45% (±0.31) over 100 decks at 200 games, winning 74
+r2_boss2_g 156s r2_boss2: 61.54% (±0.31) over 100 decks at 200 games, winning 74
+r2_sta_car_g 144s r2_sta_car: 62.16% (±0.31) over 100 decks at 200 games, winning 74
+r2_gre_car_g 146s r2_gre_car: 62.51% (±0.31) over 100 decks at 200 games, winning 78
+r2_fro_aur_g 138s r2_fro_aur: 58.38% (±0.31) over 100 decks at 200 games, winning 69
+r2_sea_aur_g 136s r2_sea_aur: 58.45% (±0.31) over 100 decks at 200 games, winning 68
+r2_vap_lud_g 140s r2_vap_lud: 59.66% (±0.31) over 100 decks at 200 games, winning 72
+r2_fg_aur_g 142s r2_fg_aur: 58.88% (±0.31) over 100 decks at 200 games, winning 71
+DONE
