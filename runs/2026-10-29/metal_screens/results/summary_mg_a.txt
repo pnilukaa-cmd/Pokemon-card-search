@@ -1,0 +1,16 @@
+c_rec_e_g 152s c_rec_e: 57.59% (±0.32) over 101 decks at 200 games, winning 67
+a_gen2_g 163s a_gen2: 62.41% (±0.32) over 101 decks at 200 games, winning 80
+a_hopz2_g 165s a_hopz2: 56.60% (±0.32) over 101 decks at 200 games, winning 66
+a_zac2_g 164s a_zac2: 58.21% (±0.32) over 101 decks at 200 games, winning 66
+a_dia2_g 153s a_dia2: 58.39% (±0.32) over 101 decks at 200 games, winning 68
+a_exc_g 148s a_exc: 62.45% (±0.32) over 101 decks at 200 games, winning 73
+a_sci_g 163s a_sci: 50.74% (±0.33) over 101 decks at 200 games, winning 54
+a_arch_g 158s a_arch: 59.06% (±0.31) over 101 decks at 200 games, winning 69
+a_archex_g 183s a_archex: 63.63% (±0.31) over 101 decks at 200 games, winning 77
+a_cob2_g 156s a_cob2: 53.94% (±0.32) over 101 decks at 200 games, winning 61
+a_maw1_g 152s a_maw1: 61.92% (±0.32) over 101 decks at 200 games, winning 76
+a_heat2_g 177s a_heat2: 48.38% (±0.33) over 101 decks at 200 games, winning 52
+a_sk1_g 150s a_sk1: 60.68% (±0.32) over 101 decks at 200 games, winning 72
+a_orth4_g 150s a_orth4: 57.52% (±0.32) over 101 decks at 200 games, winning 64
+a_meta2_g 156s a_meta2: 54.26% (±0.32) over 101 decks at 200 games, winning 63
+DONE

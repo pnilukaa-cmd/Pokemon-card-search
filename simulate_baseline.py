@@ -568,6 +568,46 @@ def use_energy_abilities(state, POKEMON, log):
             log.append(f"{name}'s {ab['name']} -> attach {len(hit)} Energy")
 
 
+def use_search_abilities(state, POKEMON, log):
+    """Once-per-turn Abilities that search the deck for Pokemon (Genesect
+    ex's Metallic Signal: up to 2 Evolution Metal Pokemon). Not modelled,
+    so a list that finds its Metang this way read Metang late. Takes what
+    evolves something in play, the highest Stage first, one of each."""
+    for key, name in _slots(state):
+        for ab in POKEMON.get(name, {}).get("abilities", []):
+            eff = IR.compile_effect("ability", ab["name"], ab.get("text") or "")
+            if eff is None or str(eff.trigger) != "once_per_turn":
+                continue
+            act = next((a for a in eff.actions if a.op == IR.Op.SEARCH_TO_HAND
+                        and str((a.filter or {}).get("kind", "")).startswith("pok")), None)
+            if act is None or (key, ab["name"]) in state.abilities_used:
+                continue
+            f = act.filter or {}
+            in_play = set(state.in_play_names())
+            held = set(state.hand_names())
+            def fits(n):
+                info = POKEMON.get(n) or {}
+                if f.get("type") and f["type"] not in (info.get("types") or []):
+                    return False
+                st = info.get("stage")
+                if f.get("stage") == "Evolution" and st == "Basic":
+                    return False
+                if f.get("stage") not in (None, "Evolution") and st != f["stage"]:
+                    return False
+                return n not in held and (info.get("evolves_from") in in_play
+                                          or info.get("evolves_from") is None)
+            pool = sorted({n for k, n in state.deck if k == "Pokemon" and fits(n)},
+                          key=lambda n: -stage_rank(POKEMON, n))[:act.amount or 1]
+            if not pool:
+                continue
+            state.abilities_used.add((key, ab["name"]))
+            for n in pool:
+                state.deck.remove(("Pokemon", n))
+                state.hand.append(("Pokemon", n))
+            random.shuffle(state.deck)
+            log.append(f"{name}'s {ab['name']} -> {', '.join(pool)}")
+
+
 def use_draw_abilities(state, POKEMON, log, evolved_name=None):
     """Fire every legal draw Ability once per turn.
 
@@ -1306,6 +1346,7 @@ def play_turn(turn_num, state, going_first, POKEMON, priority, pre_evolutions, l
     effect_grand_tree(state, POKEMON, turn_num, log)
     effect_fossil_quarry(state, POKEMON, turn_num, log)
     effect_mystery_garden(state, POKEMON, turn_num, log)
+    use_search_abilities(state, POKEMON, log)
     play_items(state, POKEMON, priority, turn_num, log)
     play_supporter(state, POKEMON, log)
     use_draw_abilities(state, POKEMON, log)

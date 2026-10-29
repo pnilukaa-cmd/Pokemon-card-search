@@ -1,0 +1,26 @@
+Pokémon: 17
+3 Orthworm ex SCR 110
+4 Beldum CRI 59
+3 Metang TEF 114
+2 Duraludon SCR 106
+2 Archaludon ex SSP 130
+2 Genesect ex BLK 161
+1 Fezandipiti ex ASC 288
+
+Trainer: 24
+4 Lillie's Determination ASC 192
+3 Brock's Scouting JTG 179
+2 Boss's Orders MEG 114
+3 Buddy-Buddy Poffin ASC 184
+3 Poké Pad POR 81
+2 Ultra Ball ASC 213
+2 Night Stretcher ASC 196
+1 Jumbo Ice Cream CRI 109
+1 Jumbo Ice Cream PFL 91
+1 Hero's Cape TEF 152
+2 Full Metal Lab TEF 148
+
+Energy: 19
+19 Basic Metal Energy
+
+Total Cards: 60

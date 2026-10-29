@@ -1,0 +1,6 @@
+t_mag2_g 164s t_mag2: 57.54% (±0.32) over 101 decks at 200 games, winning 66
+t_mag4_g 160s t_mag4: 57.01% (±0.31) over 101 decks at 200 games, winning 66
+t_phil1_g 153s t_phil1: 57.65% (±0.32) over 101 decks at 200 games, winning 65
+t_idef2_g 160s t_idef2: 54.52% (±0.32) over 101 decks at 200 games, winning 60
+t_hb0_g 150s t_hb0: 60.07% (±0.31) over 101 decks at 200 games, winning 71
+DONE

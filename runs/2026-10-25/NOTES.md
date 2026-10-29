@@ -130,3 +130,6 @@ priced (`alakazam_dudunsparce_powerful_hand`,
 +0.03, +0.31, −0.02 at 200 games). The team damage-buff and Bench-only
 attack fixes touch no field deck. `kingdra_ex_kings_order` was added to
 the field after this run.
+
+`orthworm_ex_metang_archaludon` was added to the field after this run too
+(2026-10-29); b6759de changes only the setup baseline.

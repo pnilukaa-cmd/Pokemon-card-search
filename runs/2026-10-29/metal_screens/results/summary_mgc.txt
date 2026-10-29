@@ -1,0 +1,4 @@
+M_user_g 814s M_user: 58.28% (±0.14) over 101 decks at 1000 games, winning 67
+F1_g 835s F1: 76.45% (±0.12) over 101 decks at 1000 games, winning 94
+F2_g 823s F2: 78.00% (±0.12) over 101 decks at 1000 games, winning 94
+DONE

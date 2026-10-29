@@ -1,0 +1,11 @@
+M3_g 162s M3: 75.46% (±0.28) over 101 decks at 200 games, winning 92
+r3_maw_g 153s r3_maw: 76.22% (±0.28) over 101 decks at 200 games, winning 95
+r3_arx2_g 157s r3_arx2: 76.32% (±0.28) over 101 decks at 200 games, winning 93
+r3_sk_g 155s r3_sk: 75.13% (±0.29) over 101 decks at 200 games, winning 94
+r3_hb0_g 155s r3_hb0: 76.49% (±0.28) over 101 decks at 200 games, winning 93
+r3_nojumbo_g 153s r3_nojumbo: 77.56% (±0.27) over 101 decks at 200 games, winning 95
+r3_nobrock_g 152s r3_nobrock: 76.14% (±0.28) over 101 decks at 200 games, winning 93
+r3_exc_g 152s r3_exc: 75.71% (±0.28) over 101 decks at 200 games, winning 95
+r3_metang4_g 155s r3_metang4: 74.86% (±0.29) over 101 decks at 200 games, winning 91
+r3_orth2_g 154s r3_orth2: 76.87% (±0.27) over 101 decks at 200 games, winning 93
+r3_fez0_g 149s r3_fez0: 76.13% (±0.28) over 101 decks at 200 games, winning 93

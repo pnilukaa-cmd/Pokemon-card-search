@@ -137,6 +137,9 @@ priced (`alakazam_dudunsparce_powerful_hand`,
 attack fixes touch no field deck. `kingdra_ex_kings_order` was added to
 the field after this run.
 
+`orthworm_ex_metang_archaludon` was added to the field after this run too
+(2026-10-29); b6759de changes only the setup baseline.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

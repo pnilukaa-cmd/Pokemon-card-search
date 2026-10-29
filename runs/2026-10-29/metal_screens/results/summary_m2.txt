@@ -1,0 +1,11 @@
+r2_maw_g 161s r2_maw: 65.79% (±0.31) over 101 decks at 200 games, winning 85
+r2_gen_g 168s r2_gen: 69.76% (±0.30) over 101 decks at 200 games, winning 86
+r2_exc_g 159s r2_exc: 64.99% (±0.31) over 101 decks at 200 games, winning 83
+r2_sk_g 157s r2_sk: 65.33% (±0.31) over 101 decks at 200 games, winning 82
+r2_arx2_g 162s r2_arx2: 65.60% (±0.31) over 101 decks at 200 games, winning 83
+r2_dur3_g 159s r2_dur3: 65.16% (±0.31) over 101 decks at 200 games, winning 81
+r2_nobrock_g 152s r2_nobrock: 65.03% (±0.31) over 101 decks at 200 games, winning 80
+r2_nojumbo_g 153s r2_nojumbo: 65.90% (±0.31) over 101 decks at 200 games, winning 81
+r2_nometa_g 149s r2_nometa: 68.90% (±0.30) over 101 decks at 200 games, winning 87
+r2_mg_g 171s r2_mg: 70.43% (±0.30) over 101 decks at 200 games, winning 87
+DONE

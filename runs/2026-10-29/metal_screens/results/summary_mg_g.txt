@@ -1,0 +1,5 @@
+M_user_g 155s M_user: 57.88% (±0.32) over 101 decks at 200 games, winning 66
+metal_metang_excadrill_g 134s metal_metang_excadrill: 64.02% (±0.32) over 100 decks at 200 games, winning 82
+meta_mega_excadrill_g 132s meta_mega_excadrill: 70.27% (±0.30) over 100 decks at 200 games, winning 88
+munkidori_ex_pecharunt_chains_g 144s munkidori_ex_pecharunt_chains: 79.06% (±0.26) over 100 decks at 200 games, winning 90
+DONE
