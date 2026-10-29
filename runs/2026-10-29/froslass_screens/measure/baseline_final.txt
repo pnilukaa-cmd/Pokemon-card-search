@@ -1,0 +1,18 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Snorunt                       94.3%   avg turn 1.59
+  Litwick                       87.0%   avg turn 1.71
+  Dunsparce                     53.9%   avg turn 2.21
+  Dudunsparce                   34.8%   avg turn 3.64
+  Lampent                       33.7%   avg turn 3.26
+  Meowth ex                     27.5%   avg turn 2.24
+  Mega Froslass ex              76.5%   avg turn 2.92
+  Dunsparce (JTG 120)           44.8%   avg turn 2.31
+  Chandelure                    38.1%   avg turn 3.96
+  Budew                         44.1%   avg turn 2.39
+
+First attack landed by turn 6: 93.0% of trials (avg turn 2.61)
+Average final hand size (turn 6): 5.50
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

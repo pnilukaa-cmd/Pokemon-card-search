@@ -133,3 +133,7 @@ the field after this run.
 
 `orthworm_ex_metang_archaludon` was added to the field after this run too
 (2026-10-29); b6759de changes only the setup baseline.
+
+`mega_froslass_ex_resentful_refrain` was added to the field after this run
+too (2026-10-29). 743873b (Lucian as printed) and 51ff3d5 change no field
+deck, since none plays Lucian; the rest of 743873b is the setup baseline.

@@ -1,0 +1,12 @@
+G4_g 150s G4: 71.04% (±0.30) over 102 decks at 200 games, winning 91
+j_e10b_g 149s j_e10b: 72.69% (±0.30) over 102 decks at 200 games, winning 96
+j_e10c_g 147s j_e10c: 72.24% (±0.30) over 102 decks at 200 games, winning 94
+j_e10o_g 145s j_e10o: 72.90% (±0.30) over 102 decks at 200 games, winning 95
+j_e10s_g 153s j_e10s: 70.90% (±0.30) over 102 decks at 200 games, winning 91
+j_e10w_g 149s j_e10w: 72.25% (±0.30) over 102 decks at 200 games, winning 94
+j_e8u_g 148s j_e8u: 69.49% (±0.31) over 102 decks at 200 games, winning 90
+j_e8l_g 152s j_e8l: 69.50% (±0.31) over 102 decks at 200 games, winning 89
+j_e9f_g 144s j_e9f: 69.89% (±0.31) over 102 decks at 200 games, winning 91
+DONE
+G4_hr 146s G4: 71.70% (±0.30) over 102 decks at 200 games, winning 95
+DONE

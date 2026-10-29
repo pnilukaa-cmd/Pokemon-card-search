@@ -1,0 +1,17 @@
+F_user_g 145s F_user: 57.94% (±0.33) over 102 decks at 200 games, winning 72
+DONE
+F_user_od1 158s F_user: 54.71% (±0.33) over 102 decks at 200 games, winning 63
+DONE
+F_user_od2 155s F_user: 53.50% (±0.33) over 102 decks at 200 games, winning 62
+DONE
+l0_g 151s l0: 55.83% (±0.33) over 102 decks at 200 games, winning 68
+w1_g 150s w1: 55.21% (±0.33) over 102 decks at 200 games, winning 68
+w1n_g 152s w1n: 57.64% (±0.33) over 102 decks at 200 games, winning 70
+G1_g 151s G1: 58.32% (±0.33) over 102 decks at 200 games, winning 70
+g_sn4_g 150s g_sn4: 62.30% (±0.33) over 102 decks at 200 games, winning 79
+g_w4_g 150s g_w4: 59.08% (±0.33) over 102 decks at 200 games, winning 73
+g_e7_g 140s g_e7: 61.94% (±0.33) over 102 decks at 200 games, winning 79
+g_l3_g 151s g_l3: 58.98% (±0.33) over 102 decks at 200 games, winning 74
+g_bc3_g 148s g_bc3: 58.34% (±0.33) over 102 decks at 200 games, winning 68
+g_ub3_g 142s g_ub3: 58.52% (±0.33) over 102 decks at 200 games, winning 74
+DONE

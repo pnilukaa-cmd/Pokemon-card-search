@@ -1,0 +1,14 @@
+== G2
+games 80
+  Froslass Active turns             3.08 a game
+  no attack                         1.04 a game
+  no attack, no Water on it         1.00 a game
+    ...and no Energy in hand        0.94 a game
+  attachments a game: Water->Mega Froslass ex 1.49, Fire->Mega Froslass ex 0.61, Water->Dunsparce 0.34, Hero's->Mega Froslass ex 0.31, Water->Meowth ex 0.31, Water->Snorunt 0.25, Fire->Dunsparce 0.17, Fire->Chandelure 0.16, Fire->Meowth ex 0.12, Fire->Snorunt 0.06
+== G4
+games 80
+  Froslass Active turns             2.84 a game
+  no attack                         0.20 a game
+  no attack, no Water on it         0.19 a game
+    ...and no Energy in hand        0.11 a game
+  attachments a game: Water->Mega Froslass ex 2.17, Water->Snorunt 0.80, Fire->Mega Froslass ex 0.61, Water->Dunsparce 0.46, Water->Meowth ex 0.36, Hero's->Mega Froslass ex 0.19, Fire->Dunsparce 0.14, Hero's->Snorunt 0.12, Fire->Chandelure 0.10, Water->Lampent 0.07

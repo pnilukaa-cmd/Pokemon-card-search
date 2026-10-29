@@ -3266,19 +3266,10 @@ def _heal_pick(pl, opp, cands, f, amount):
         # so in a Fire deck its Energy coming back to the hand is a gain.
         return any(all(c == "Colorless" or c in pl.energy_types for c in a["cost"])
                    for a in (pl.POKEMON.get(h.name) or {}).get("attacks") or [])
-    def refuels(h):
-        # Mega Froslass ex's Resentful Refrain costs one Water: the Energy
-        # Wally's Compassion hands back is re-attached this turn (the
-        # Supporter comes before the attachment) and it attacks anyway, so
-        # the heal costs it nothing. Not a heal that discards the Energy.
-        if (not POL.knob(pl, "heal_refuel") or h is not pl.active
-                or f.get("then") != "energy_to_hand"):
-            return False
-        own = [energy_provisions(n, _CARDS_BY_NAME)[0] or [] for n in h.energy_names]
-        return any(len(a["cost"]) == 1 and (a["cost"][0] == "Colorless"
-                                            or any(a["cost"][0] in e for e in own))
-                   for a in (pl.POKEMON.get(h.name) or {}).get("attacks") or [])
-    free = [h for h in most if not h.energy or not needs_energy(h) or refuels(h)]
+    # Counting it free on an Active whose one-Energy attack the returned
+    # Energy re-pays the same turn (Mega Froslass ex's Resentful Refrain)
+    # measured +0.21 +/- 0.22 on that list at 1000 games, and was taken out.
+    free = [h for h in most if not h.energy or not needs_energy(h)]
     if free:
         return free[:1]
     for h in most:

@@ -1,0 +1,11 @@
+G3_g 140s G3: 65.24% (±0.32) over 102 decks at 200 games, winning 85
+i_u0_g 146s i_u0: 67.73% (±0.31) over 102 decks at 200 games, winning 87
+i_l0_g 136s i_l0: 66.25% (±0.32) over 102 decks at 200 games, winning 87
+i_e8l_g 135s i_e8l: 68.20% (±0.31) over 102 decks at 200 games, winning 92
+i_e8u_g 140s i_e8u: 68.06% (±0.31) over 102 decks at 200 games, winning 90
+i_l0w_g 141s i_l0w: 69.87% (±0.31) over 102 decks at 200 games, winning 94
+i_comb_g 146s i_comb: 70.96% (±0.31) over 102 decks at 200 games, winning 95
+i_u0l1_g 151s i_u0l1: 68.97% (±0.31) over 102 decks at 200 games, winning 90
+DONE
+G3_hr 142s G3: 66.00% (±0.32) over 102 decks at 200 games, winning 86
+DONE

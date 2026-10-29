@@ -1,0 +1,35 @@
+Pokémon: 20
+3 Snorunt ASC 46
+3 Litwick PBL 36
+1 Dunsparce TEF 128
+2 Dudunsparce PRE 80
+1 Lampent WHT 17
+1 Meowth ex POR 121
+2 Mega Froslass ex ASC 275
+1 Dunsparce JTG 120
+3 Chandelure TWM 38
+1 Budew ASC 221
+2 Mega Froslass ex ASC 265
+
+Trainer: 34
+2 Boss's Orders MEG 114
+2 Lucian TWM 208
+3 Wally's Compassion MEG 186
+3 Lillie's Determination MEG 169
+4 Buddy-Buddy Poffin MEG 167
+1 Salvatore TEF 202
+3 Rare Candy MEG 125
+1 Energy Search POR 72
+1 Hero's Cape TEF 152
+3 Ultra Ball MEG 131
+2 Night Stretcher MEG 173
+2 Hilda WHT 171
+4 Poké Pad POR 113
+1 Team Rocket's Petrel DRI 226
+2 Battle Cage PFL 116
+
+Energy: 6
+2 Basic Fire Energy
+4 Basic Water Energy
+
+Total Cards: 60

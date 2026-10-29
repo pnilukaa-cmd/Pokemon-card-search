@@ -1,0 +1,17 @@
+G2_g 150s G2: 61.91% (±0.32) over 102 decks at 200 games, winning 76
+DONE
+G2_hr 146s G2: 62.58% (±0.32) over 102 decks at 200 games, winning 79
+DONE
+h_e7_g 148s h_e7: 66.53% (±0.32) over 102 decks at 200 games, winning 84
+h_e7f_g 152s h_e7f: 63.10% (±0.32) over 102 decks at 200 games, winning 81
+h_lw4_g 144s h_lw4: 62.40% (±0.32) over 102 decks at 200 games, winning 78
+h_u0_g 145s h_u0: 63.54% (±0.32) over 102 decks at 200 games, winning 80
+h_l0_g 138s h_l0: 63.25% (±0.32) over 102 decks at 200 games, winning 80
+h_l1_g 136s h_l1: 62.34% (±0.32) over 102 decks at 200 games, winning 80
+h_b0_g 137s h_b0: 61.93% (±0.32) over 102 decks at 200 games, winning 77
+h_c2_g 142s h_c2: 61.30% (±0.33) over 102 decks at 200 games, winning 76
+h_w1_g 138s h_w1: 61.35% (±0.33) over 102 decks at 200 games, winning 76
+h_bc1_g 139s h_bc1: 62.00% (±0.32) over 102 decks at 200 games, winning 79
+h_s0_g 140s h_s0: 61.79% (±0.32) over 102 decks at 200 games, winning 76
+h_bo1_g 135s h_bo1: 61.93% (±0.32) over 102 decks at 200 games, winning 77
+DONE

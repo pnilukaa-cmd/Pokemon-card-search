@@ -1,0 +1,14 @@
+== G1
+wins 44/80, 4.4 own turns from turn 3 a game, Resentful Refrain 1.89 a game
+  Mega Froslass ex               in play  77.4% of those turns
+  Snorunt                        in play  38.7% of those turns
+  Chandelure                     in play  51.4% of those turns
+  Snorunt or Mega Froslass ex    in play  89.5% of those turns
+  Mega Froslass ex Knocked Out 0.38 a game
+== G2
+wins 49/80, 4.5 own turns from turn 3 a game, Resentful Refrain 2.44 a game
+  Mega Froslass ex               in play  80.7% of those turns
+  Snorunt                        in play  56.9% of those turns
+  Chandelure                     in play  44.2% of those turns
+  Snorunt or Mega Froslass ex    in play  95.9% of those turns
+  Mega Froslass ex Knocked Out 0.34 a game

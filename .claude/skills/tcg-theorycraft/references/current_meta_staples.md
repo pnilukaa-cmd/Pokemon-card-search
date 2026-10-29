@@ -665,3 +665,21 @@ specific 60 can only ever find `Team Rocket's Petrel` — the only
 "Team Rocket"-named Supporter in the list — still a real 2-card loop
 (Transceiver → Petrel → any Trainer, including another Transceiver), just
 narrower than the six-Supporter Team Rocket's package logged above.
+
+### Mega Froslass ex + Chandelure (user-provided, 2026-10-29)
+
+`Mega Froslass ex`'s Resentful Refrain (Water: 50 per card in the
+opponent's hand) and `Chandelure` TWM 38's Mind Ruler (Fire: 30 per card)
+are the pool's only two attacks that count the opponent's hand
+(`damage_scales_with_opponent_hand_size`). The cards that grow that hand
+without spending the attack are the `mutual_draw` family (Chandelure's
+Alluring Light, `Frosmoth` ASC 53's Alluring Wings from the Active Spot
+only, `Comfey`'s Flower Shower, an attack) and Item lock (`Budew`).
+Measured in `decks/mega_froslass_ex_resentful_refrain.md`: the hand
+Resentful Refrain hits is mostly the opponent's own (6.8 cards, 0.8 added
+that turn), Alluring Light is worth more as card flow than as damage, and
+`Lucian` only refills a hand of 3 or fewer (each player draws 3 or 6 after
+both hands go to the bottom). What the list was short of was Snorunt and
+Water: one Water a turn pays Resentful Refrain, and `Wally's Compassion`
+(full heal on a Mega ex, its Energy back to hand) re-pays it the same
+turn. Mega Froslass ex gives up 3 Prizes and is weak to Metal.

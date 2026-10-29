@@ -1,0 +1,39 @@
+wins 73/120
+  meta_dragapult_pure                       73.3%
+  meta_raging_bolt                          53.3%
+  meta_ns_zoroark                           86.7%
+  meta_mega_excadrill                       66.7%
+  meta_festival_lead                        73.3%
+  meta_slowking                             53.3%
+  krookodile_ex_relicanth_hand_disruption   60.0%
+  mega_absol_ex_hand_lock                   20.0%
+game ends: {'prizes': 60, 'lost': 47, 'no Pokémon left after a KO': 5, 'opponent decked out': 8}
+
+attacks per game 3.78, Prizes from attacks 3.97 a game
+  Mega Froslass ex   Resentful Refrain     2.29/game  KO   85%  Prizes 3.29/game ( 83%)  hand avg  6.8  added that turn +0.8
+  Chandelure         Mind Ruler            0.36/game  KO   67%  Prizes 0.38/game (  9%)  hand avg  5.9  added that turn +1.4
+  Mega Froslass ex   Absolute Snow         0.27/game  KO   81%  Prizes 0.28/game (  7%)  hand avg  2.6  added that turn +0.8
+  Dunsparce          Ram                   0.02/game  KO   50%  Prizes 0.01/game (  0%)  hand avg 11.5  added that turn +0.0
+  Lampent            Fire Blast            0.08/game  KO   10%  Prizes 0.01/game (  0%)  hand avg  4.6  added that turn +0.0
+  Meowth ex          Tuck Tail             0.04/game  KO   20%  Prizes 0.01/game (  0%)  hand avg  4.6  added that turn +0.4
+  Snorunt            Chilly                0.30/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  4.1  added that turn +0.0
+  Dunsparce          Trading Places        0.10/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  5.2  added that turn +0.1
+  Budew              Itchy Pollen          0.23/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  7.0  added that turn +0.2
+  Dunsparce          Dig                   0.07/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  5.1  added that turn +0.5
+  Dunsparce          Gnaw                  0.03/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  6.7  added that turn +0.0
+  Chandelure         Mind Ruler -- all damage to Dunsparce prevented  0.01/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  7.0  added that turn +1.0
+
+Resentful Refrain by opposing hand size: n  KO%  share of its Prizes
+   1      8    50%     1%
+   2     19    42%     2%
+   3     22    77%     5%
+   4     34    65%     7%
+   5     31    81%     9%
+   6     30    93%    13%
+   7     32   100%    16%
+   8     22   100%    11%
+   9     12   100%     5%
+  10     17   100%     8%
+  11     12   100%     7%
+  12+    36   100%    16%
+  cards the deck itself added that turn (Alluring Light, Lucian): {0: 128, 1: 101, 2: 37, 3: 5, 4: 4}

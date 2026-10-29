@@ -1,0 +1,38 @@
+wins 90/120
+  meta_dragapult_pure                       86.7%
+  meta_raging_bolt                          80.0%
+  meta_ns_zoroark                           86.7%
+  meta_mega_excadrill                       53.3%
+  meta_festival_lead                        73.3%
+  meta_slowking                             93.3%
+  krookodile_ex_relicanth_hand_disruption   80.0%
+  mega_absol_ex_hand_lock                   46.7%
+game ends: {'no Pokémon left after a KO': 9, 'prizes': 72, 'lost': 30, 'opponent decked out': 9}
+
+attacks per game 4.44, Prizes from attacks 4.55 a game
+  Mega Froslass ex   Resentful Refrain     2.52/game  KO   78%  Prizes 3.58/game ( 79%)  hand avg  6.3  added that turn +0.6
+  Mega Froslass ex   Absolute Snow         0.49/game  KO   71%  Prizes 0.51/game ( 11%)  hand avg  2.2  added that turn +0.3
+  Chandelure         Mind Ruler            0.40/game  KO   71%  Prizes 0.42/game (  9%)  hand avg  6.8  added that turn +1.2
+  Meowth ex          Tuck Tail             0.07/game  KO   22%  Prizes 0.02/game (  0%)  hand avg  6.1  added that turn +0.6
+  Lampent            Fire Blast            0.07/game  KO   22%  Prizes 0.02/game (  0%)  hand avg  4.2  added that turn +0.0
+  Budew              Itchy Pollen          0.24/game  KO    3%  Prizes 0.01/game (  0%)  hand avg  5.5  added that turn +0.1
+  Snorunt            Chilly                0.42/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  5.3  added that turn +0.0
+  Dunsparce          Gnaw                  0.05/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  5.7  added that turn +0.0
+  Dunsparce          Dig                   0.05/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  4.7  added that turn +0.8
+  Dunsparce          Trading Places        0.05/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  3.0  added that turn +0.0
+  Dunsparce          Ram                   0.07/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  9.1  added that turn +0.3
+
+Resentful Refrain by opposing hand size: n  KO%  share of its Prizes
+   1     20    10%     0%
+   2     20    55%     3%
+   3     24    54%     4%
+   4     36    64%     8%
+   5     49    82%    17%
+   6     42    88%    15%
+   7     22    95%    10%
+   8     24   100%    11%
+   9     13   100%     6%
+  10     17   100%    10%
+  11     10   100%     4%
+  12+    25   100%    11%
+  cards the deck itself added that turn (Alluring Light, Lucian): {0: 162, 1: 112, 2: 28}

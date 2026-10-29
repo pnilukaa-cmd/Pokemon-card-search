@@ -1,0 +1,75 @@
+wins 38 / 64
+   3.45 Chandelure uses Alluring Light
+   2.28 Mega Froslass ex uses Resentful Refrain
+   1.86 Poké Pad
+   1.83 Dunsparce
+   1.47 Buddy-Buddy Poffin
+   1.38 Snorunt
+   1.34 Dudunsparce uses Run Away Draw
+   1.30 attaches Water Energy to Mega Froslass ex
+   1.11 benches Litwick
+   1.05 benches Dunsparce
+   1.00 benches Snorunt
+   0.98 Lillie's Determination
+   0.95 Ultra Ball
+   0.92 Petrel
+   0.86 plays Stadium Battle Cage
+   0.84 Hilda
+   0.69 attaches Fire Energy to Mega Froslass ex
+   0.66 Litwick
+   0.58 Rare Candy
+   0.58 Night Stretcher
+   0.58 promotes Mega Froslass ex
+   0.53 benches Budew
+   0.53 can't play Item cards this turn
+   0.53 Budew uses Itchy Pollen
+   0.53 Lampent
+   0.48 attaches Water Energy to Dunsparce
+   0.47 attaches Water Energy to Snorunt
+   0.45 Snorunt to Active
+   0.41 Snorunt uses Chilly
+   0.41 Energy Search
+   0.41 Pokégear N.N
+   0.34 Chandelure uses Mind Ruler
+   0.33 Boss's Orders
+   0.33 promotes Budew
+   0.33 benches Meowth ex
+   0.27 attaches Hero's Cape to Mega Froslass ex
+   0.27 attaches Water Energy to Meowth ex
+   0.25 Salvatore
+   0.25 attaches Fire Energy to Dunsparce
+   0.23 Litwick to Active
+   0.20 Meowth ex uses Last-Ditch Catch
+   0.19 promotes Dunsparce
+   0.19 KO on Mega Kangaskhan ex
+   0.17 Wally's Compassion
+   0.17 promotes Snorunt
+   0.16 attaches Fire Energy to Chandelure
+   0.16 Lucian
+   0.16 KO on N's Zoroark ex
+   0.14 Risky Ruins puts N counters on Dunsparce
+   0.12 KO on Fezandipiti ex
+   0.12 Mega Froslass ex uses Absolute Snow
+   0.11 KO on Budew
+   0.11 retreats into Mega Froslass ex
+   0.11 KO on Dragapult ex
+   0.11 promotes Meowth ex
+   0.11 attaches Hero's Cape to Snorunt
+   0.11 KO on Dipplin
+   0.09 Risky Ruins puts N counters on Snorunt
+   0.09 promotes Litwick
+   0.08 Dunsparce KO'd at checkup
+   0.08 Mega Froslass ex is Confused -- attack fails, N to itself
+   0.08 KO on Raging Bolt ex
+   0.08 Meowth ex to Active
+   0.08 attaches Fire Energy to Meowth ex
+   0.08 KO on Thwackey
+   0.06 Dunsparce to Active
+   0.06 KO on Drakloak
+   0.06 KO on Munkidori
+   0.06 Risky Ruins puts N counters on Budew
+   0.06 Risky Ruins puts N counters on Litwick
+   0.06 KO on Meowth ex
+   0.06 Budew KO'd at checkup
+   0.06 attaches Hero's Cape to Litwick
+   0.06 KO on Latias ex

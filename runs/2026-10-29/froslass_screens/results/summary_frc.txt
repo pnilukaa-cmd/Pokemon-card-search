@@ -1,0 +1,5 @@
+F_user_g 741s F_user: 56.93% (±0.15) over 102 decks at 1000 games, winning 70
+G4_g 743s G4: 70.80% (±0.14) over 103 decks at 1000 games, winning 94
+DONE
+G4_hr 731s G4: 71.02% (±0.14) over 103 decks at 1000 games, winning 96
+DONE
