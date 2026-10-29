@@ -7483,5 +7483,99 @@ def test_the_baseline_sim_plays_search_abilities():
           got == ["Archaludon ex", "Metang"], got)
 
 
+
+def _lucian_board(opp_hand):
+    V, D, E = _real("test_fixtures/froslass_chandelure.txt", "me")
+    O = V.load_model("decks/field/meta_dragapult_pure.txt", "o")[0]
+    me = V.Player("me", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    me.round_no = op.round_no = 5
+    me._opp_ref, op._opp_ref = op, me
+    me.energy_types = {"Water", "Fire"}
+    me.active = V.InPlay("Mega Froslass ex", 1)
+    me.active.energy, me.active.energy_names = [["Water"]], ["Water Energy"]
+    op.active = V.InPlay("Dragapult ex", 1)
+    op.hand = [("Item", "Rare Candy")] * opp_hand
+    me.hand = [("Supporter", "Lucian"), ("Pokemon", "Snorunt"), ("Pokemon", "Snorunt")]
+    return V, me, op
+
+
+def test_lucian_sends_both_hands_to_the_bottom():
+    """Lucian compiled as "each player draws 3": three free cards for the
+    opponent and nothing taken away, which fed Mega Froslass ex's Resentful
+    Refrain (50 for each card in the opponent's hand) at no cost. Each
+    player puts their hand on the bottom of their deck and draws 6 on heads,
+    3 on tails. With a hand-scaling Active it is played to refill a small
+    opposing hand, and kept when the opponent's hand is already big."""
+    import random as _r
+    sizes = set()
+    for seed in range(12):
+        _r.seed(seed)
+        V, me, op = _lucian_board(2)
+        V.play_supporter(me, op, 5, [])
+        sizes.add(len(op.hand))
+        ok = (op.deck[:2] == [("Item", "Rare Candy")] * 2
+              and sorted(me.deck[:2]) == [("Pokemon", "Snorunt")] * 2
+              and len(me.hand) in (3, 6) and "Lucian" in me.discard)
+        if not ok:
+            break
+    check("both hands go to the bottom; each player draws 3 or 6",
+          ok and sizes == {3, 6}, (len(op.hand), op.deck[:2], me.deck[:2], sizes))
+    V, me, op = _lucian_board(6)
+    V.play_supporter(me, op, 5, [])
+    check("a 6-card opposing hand is left alone (Resentful Refrain does 300)",
+          len(op.hand) == 6 and ("Supporter", "Lucian") in me.hand,
+          (len(op.hand), me.hand))
+
+
+
+def test_the_baseline_sim_evolves_a_second_printing():
+    """simulate_baseline matched "evolves from" against the POKEMON key, and
+    a second printing is kept as "Dunsparce (JTG 120)": Dudunsparce never
+    evolved from it. In the Mega Froslass ex list (one of its two Dunsparce
+    is JTG 120) Dudunsparce in play by turn 6 went from 31.6% to 43.8%."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model(open("test_fixtures/froslass_chandelure.txt").read())[0]
+    st = SB.GameState([("Energy", "Water Energy")] * 10)
+    st.active, st.active_entered_turn, st.turn = "Dunsparce (JTG 120)", 1, 2
+    st.bench = [{"name": "Dunsparce (JTG 120)", "energy": 0, "entered_turn": 1}]
+    st.hand = [("Pokemon", "Dudunsparce")] * 2
+    SB.try_evolve(st, P, 2, [])
+    check("Dudunsparce evolves from Dunsparce JTG 120, Active and Benched",
+          (st.active, st.bench[0]["name"]) == ("Dudunsparce", "Dudunsparce"),
+          (st.active, st.bench[0]["name"]))
+
+
+def test_the_baseline_sim_plays_salvatore_and_lucian():
+    """Neither was modeled, so they sat in hand. Salvatore evolves one of
+    your Pokemon from the deck into a card with no Abilities, even one put
+    down this turn: Mega Froslass ex in play by turn 6 went from 66.0% to
+    78.4% of trials in the submitted list. Not into Chandelure (Alluring
+    Light). Lucian puts your hand on the bottom and draws 3 or 6."""
+    import random as _r
+    import simulate_baseline as SB
+    P = SB.build_deck_model(open("test_fixtures/froslass_chandelure.txt").read())[0]
+    st = SB.GameState([("Pokemon", "Chandelure"), ("Pokemon", "Mega Froslass ex")]
+                      + [("Energy", "Water Energy")] * 10)
+    st.active, st.active_entered_turn, st.turn = "Lampent", 1, 3
+    st.bench = [{"name": "Snorunt", "energy": 0, "entered_turn": 3}]
+    st.hand = [("Supporter", "Salvatore")]
+    SB.play_supporter(st, P, [])
+    check("Salvatore: the Snorunt benched this turn becomes Mega Froslass ex, not Chandelure",
+          (st.active, st.bench[0]["name"]) == ("Lampent", "Mega Froslass ex"),
+          (st.active, st.bench[0]["name"], st.hand))
+    sizes = set()
+    for seed in range(12):
+        _r.seed(seed)
+        st = SB.GameState([("Energy", "Water Energy")] * 20)
+        st.hand = [("Supporter", "Lucian"), ("Pokemon", "Budew"), ("Pokemon", "Budew")]
+        SB.play_supporter(st, P, [])
+        sizes.add(len(st.hand))
+        if st.deck[:2] != [("Pokemon", "Budew")] * 2:
+            break
+    check("Lucian: the hand goes to the bottom, then draw 3 or 6",
+          sizes == {3, 6} and st.deck[:2] == [("Pokemon", "Budew")] * 2, (sizes, st.deck[:2]))
+
+
 if __name__ == "__main__":
     sys.exit(main())

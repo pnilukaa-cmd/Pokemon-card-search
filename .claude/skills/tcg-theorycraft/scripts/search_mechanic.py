@@ -28,9 +28,11 @@ Modes (pick one or more):
                               completeness cross-check, not a final answer.
 
   --sweep-phrase "exact phrase"
-                              Same as --sweep but for a literal multi-word
-                              phrase (e.g. an exact Ability name like
-                              "Hide 'n' Sneak") -- use this to find cards
+                              Same as --sweep (also case-insensitive) but
+                              for a literal multi-word phrase (e.g. an exact
+                              Ability name like "Hide 'n' Sneak", or "each
+                              player draws", which opens a sentence as
+                              "Each player draws") -- use this to find cards
                               that reference a *named* mechanic elsewhere in
                               their own text without owning it themselves.
 
@@ -151,11 +153,15 @@ def print_tags(tags, kind, stage, ptype):
 
 
 def sweep(keyword_or_phrase, kind, stage, ptype, exact_phrase=False):
+    # exact_phrase only names the mode now; both modes match the same way.
     cards = load_cards()
     by_name = build_name_index(cards)
     hits = []
     seen = set()
-    needle = keyword_or_phrase if exact_phrase else keyword_or_phrase.lower()
+    # Case never matters: the phrase mode matched case-sensitively, so
+    # "each player draws" missed Frosmoth's "Each player draws a card." --
+    # a phrase that opens a sentence is capitalized in the card text.
+    needle = keyword_or_phrase.lower()
     for c in cards:
         blobs = []
         if c["supertype"] == "Pokémon":
@@ -170,7 +176,7 @@ def sweep(keyword_or_phrase, kind, stage, ptype, exact_phrase=False):
             # a card that just IS the named mechanic (e.g. an Ability whose
             # own name is the phrase) won't repeat that name in its body text.
             combined = f"{effect} {text}"
-            haystack = combined if exact_phrase else combined.lower()
+            haystack = combined.lower()
             if needle not in haystack:
                 continue
             fake_entry = {"name": c["name"], "kind": kind_, "effect": effect, "text": text}

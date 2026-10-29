@@ -104,6 +104,11 @@ class GameState:
             names.append(self.active)
         return names
 
+    def in_play_bases(self, POKEMON):
+        """The printed names in play, what an evolution's "evolves from"
+        names: a second printing is kept as "Dunsparce (JTG 120)"."""
+        return {_base(POKEMON, n) for n in self.in_play_names()}
+
     def hand_names(self):
         return [n for k, n in self.hand if k == "Pokemon"]
 
@@ -177,7 +182,7 @@ def try_evolve(state, POKEMON, turn, log):
         target = POKEMON[name]["evolves_from"]
         if target is None:
             continue
-        if (state.active == target and turn > state.active_entered_turn
+        if (_base(POKEMON, state.active) == target and turn > state.active_entered_turn
                 and not state.active_evolved_this_turn):
             state.remove_from_hand(kind, name)
             state.active = name
@@ -187,7 +192,7 @@ def try_evolve(state, POKEMON, turn, log):
             use_draw_abilities(state, POKEMON, log, evolved_name=name)
             continue
         slot = next((s for s in state.bench
-                     if s["name"] == target and turn > s["entered_turn"]
+                     if _base(POKEMON, s["name"]) == target and turn > s["entered_turn"]
                      and not s.get("evolved_this_turn")), None)
         if slot is not None:
             state.remove_from_hand(kind, name)
@@ -196,6 +201,13 @@ def try_evolve(state, POKEMON, turn, log):
             state.note_online(name, turn)
             log.append(f"Evolve {target} -> {name} (Bench)")
             use_draw_abilities(state, POKEMON, log, evolved_name=name)
+
+
+def _base(POKEMON, name):
+    """The printed name behind a POKEMON key. A second printing is kept as
+    "Dunsparce (JTG 120)", and matching it by key meant Dudunsparce never
+    evolved from it."""
+    return M.base_of(POKEMON, name) if name else name
 
 
 _POOL_EVOLVES_FROM = None
@@ -236,7 +248,7 @@ def rare_candy_targets(state, POKEMON, turn):
             s1info = POKEMON.get(s1name) if s1name else None
             s1_from = (s1info.get("evolves_from") if s1info
                        else _pool_evolves_from(s1name))
-            if s1_from == basic_name:
+            if s1_from == _base(POKEMON, basic_name):
                 results.append((loc, basic_name, s2name))
     return results
 
@@ -285,7 +297,7 @@ def grand_tree_targets(state, POKEMON, turn):
         if not info or info["stage"] != "Basic":
             continue
         for s1name, s1info in POKEMON.items():
-            if s1info.get("evolves_from") == name and s1info["stage"] == "Stage 1":
+            if s1info.get("evolves_from") == _base(POKEMON, name) and s1info["stage"] == "Stage 1":
                 if any(c == ("Pokemon", s1name) for c in state.deck):
                     results.append((loc, name, s1name))
     return results
@@ -313,7 +325,7 @@ def effect_grand_tree(state, POKEMON, turn, log):
     state.note_online(s1name, turn)
     log.append(f"Grand Tree -> {basic_name} evolves into {s1name} (searched from deck)")
     for s2name, s2info in POKEMON.items():
-        if s2info.get("evolves_from") == s1name and s2info["stage"] == "Stage 2":
+        if s2info.get("evolves_from") == _base(POKEMON, s1name) and s2info["stage"] == "Stage 2":
             if any(c == ("Pokemon", s2name) for c in state.deck):
                 state.deck.remove(("Pokemon", s2name))
                 if loc == "active":
@@ -398,7 +410,7 @@ def attach_energy(state, POKEMON, pre_evolutions, log):
         target = "active"
     else:
         for slot in state.bench:
-            if slot["name"] in pre_evolutions:
+            if _base(POKEMON, slot["name"]) in pre_evolutions:
                 target = slot
                 break
         if target is None:
@@ -583,7 +595,7 @@ def use_search_abilities(state, POKEMON, log):
             if act is None or (key, ab["name"]) in state.abilities_used:
                 continue
             f = act.filter or {}
-            in_play = set(state.in_play_names())
+            in_play = state.in_play_bases(POKEMON)
             held = set(state.hand_names())
             def fits(n):
                 info = POKEMON.get(n) or {}
@@ -721,7 +733,7 @@ def choose_search_target(state, POKEMON, priority, allow_rule_box):
         if name in in_play or name in in_hand or name not in in_deck:
             continue
         pre = POKEMON[name]["evolves_from"]
-        if pre is not None and pre not in in_play:
+        if pre is not None and pre not in state.in_play_bases(POKEMON):
             continue
         return name
     return None
@@ -844,7 +856,7 @@ def play_items(state, POKEMON, priority, turn, log):
     # already in play or in hand, so the measured value is a real
     # evolution rather than three dead cards.
     while ("Item", "Hyper Aroma") in state.hand:
-        have = set(state.in_play_names()) | set(state.hand_names())
+        have = state.in_play_bases(POKEMON) | {_base(POKEMON, n) for n in state.hand_names()}
         want = []
         for kind, name in state.deck:
             if kind != "Pokemon" or len(want) >= 3:
@@ -1160,6 +1172,68 @@ def effect_judge(state, POKEMON, log):
     return True
 
 
+def effect_lucian(state, POKEMON, log):
+    """Lucian: each player puts their hand on the bottom of their deck and
+    draws 6 on heads, 3 on tails. Only the player's own half is modeled
+    (there is no opponent here): a refill from a hand of 3 or fewer."""
+    rest = [c for c in state.hand if c != ("Supporter", "Lucian")]
+    if len(rest) >= 4:
+        return False
+    state.remove_from_hand("Supporter", "Lucian")
+    state.discard.append("Lucian")
+    random.shuffle(rest)
+    state.deck[:0] = rest                  # deck[-1] is the top
+    state.hand = []
+    n = 6 if random.random() < 0.5 else 3
+    state.draw(n)
+    log.append(f"Play Lucian ({len(rest)} to the bottom, draw {n}; opponent side not modeled)")
+    return True
+
+
+def effect_salvatore(state, POKEMON, log):
+    """Salvatore: evolve one of your Pokemon with a card from the deck that
+    has no Abilities, even one put into play this turn or during setup.
+    Mega Froslass ex off a Snorunt benched the same turn."""
+    turn = getattr(state, "turn", 2)
+    held = set(state.hand_names())
+    slots = []
+    if state.active and not state.active_evolved_this_turn:
+        slots.append(("active", state.active))
+    slots += [(s, s["name"]) for s in state.bench if not s.get("evolved_this_turn")]
+    best = None
+    for loc, name in slots:
+        for k, n in state.deck:
+            info = POKEMON.get(n) or {}
+            if (k != "Pokemon" or info.get("evolves_from") != _base(POKEMON, name)
+                    or info.get("abilities")):
+                continue
+            # One the hand already holds evolves this way anyway, unless
+            # this Pokemon can't evolve normally yet.
+            entered = state.active_entered_turn if loc == "active" else loc["entered_turn"]
+            if n in held and turn > max(1, entered):
+                continue
+            key = (info.get("rule_box", False), info.get("hp") or 0)
+            if best is None or key > best[0]:
+                best = (key, loc, name, n)
+    if best is None:
+        return False
+    _, loc, name, n = best
+    state.remove_from_hand("Supporter", "Salvatore")
+    state.discard.append("Salvatore")
+    state.deck.remove(("Pokemon", n))
+    random.shuffle(state.deck)
+    if loc == "active":
+        state.active = n
+        state.active_evolved_this_turn = True
+    else:
+        loc["name"] = n
+        loc["evolved_this_turn"] = True
+    state.note_online(n, turn)
+    log.append(f"Play Salvatore -> {name} evolves into {n} (from the deck)")
+    use_draw_abilities(state, POKEMON, log, evolved_name=n)
+    return True
+
+
 def effect_crispin(state, POKEMON, log):
     """Crispin: two Basic Energy of different types; one to hand, one
     attached (to the Active, the attacker in these decks)."""
@@ -1188,7 +1262,7 @@ def effect_brocks_scouting(state, POKEMON, log):
     """Brock's Scouting: up to 2 Basic Pokemon, or 1 Evolution Pokemon --
     the Evolution only once no Basic is left to find, as simulate_versus
     plays it (taking it with three Pokemon down measured worse there)."""
-    in_play = set(state.in_play_names())
+    in_play = state.in_play_bases(POKEMON)
     held = set(state.hand_names())
     basics = [c for c in state.deck if c[0] == "Pokemon" and POKEMON[c[1]]["stage"] == "Basic"
               and not is_fossil(POKEMON, c[1])]
@@ -1222,8 +1296,8 @@ def effect_gwynn(state, POKEMON, log):
     nothing in play or in the deck to evolve from."""
     def stuck(n):
         pre = POKEMON.get(n, {}).get("evolves_from")
-        return pre is not None and pre not in state.in_play_names() and \
-            not any(c[1] == pre for c in state.deck + state.hand)
+        return pre is not None and pre not in state.in_play_bases(POKEMON) and \
+            not any(_base(POKEMON, c[1]) == pre for c in state.deck + state.hand)
     fuel = sorted((c for c in state.hand if c[0] == "Pokemon" and c[1] in POKEMON
                    and not POKEMON[c[1]]["rule_box"]),
                   key=lambda c: (not stuck(c[1]), POKEMON[c[1]]["stage"] == "Basic"))[:2]
@@ -1254,9 +1328,9 @@ def effect_carmine(state, POKEMON, log):
     return True
 
 
-SUPPORTER_PRIORITY = ["Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn", "Hilda",
-                      "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine", "Judge",
-                      "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
+SUPPORTER_PRIORITY = ["Salvatore", "Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn",
+                      "Hilda", "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine",
+                      "Judge", "Lucian", "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Kofu": effect_kofu,
@@ -1271,6 +1345,8 @@ SUPPORTER_EFFECTS = {
     "Crispin": effect_crispin,
     "Gwynn": effect_gwynn,
     "Brock's Scouting": effect_brocks_scouting,
+    "Lucian": effect_lucian,
+    "Salvatore": effect_salvatore,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -1279,11 +1355,12 @@ SUPPORTER_EFFECTS = {
 # Morty's Conviction draws one card per Pokemon on the OPPONENT's Bench,
 # and there is no opponent here: it would draw nothing.
 # Eri, Ruffian and Rust Syndicate Grunt only touch the opponent's hand,
-# Tools or Energy; Jacinthe only heals, and nothing here deals damage.
+# Tools or Energy; Jacinthe and Wally's Compassion only heal, and nothing
+# here deals damage.
 NO_SELF_EFFECT_SUPPORTERS = {"Boss's Orders", "Xerosic's Machinations", "Rosa's Encouragement",
                              "Team Rocket's Giovanni", "Black Belt's Training",
                              "Morty's Conviction", "Eri", "Ruffian", "Rust Syndicate Grunt",
-                             "Jacinthe"}
+                             "Jacinthe", "Wally's Compassion"}
 
 
 def play_supporter(state, POKEMON, log):

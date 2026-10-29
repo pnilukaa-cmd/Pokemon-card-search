@@ -1619,6 +1619,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if not _hand_reset_ok(pl, opp, eff):
                 continue
+            if not _opp_draw_ok(pl, opp, eff):
+                continue
             if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
                 pl.abilities_used.add(key)
                 log.append(f"  {pl.name}: {p.name} uses {eff.name}")
@@ -1637,6 +1639,21 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
 # --------------------------------------------------------------------------
 # Trainer effects (compact registry; unknown Trainers are never played)
 # --------------------------------------------------------------------------
+
+def _opp_draw_ok(pl, opp, eff):
+    """Chandelure's Alluring Light ("each player draw a card"): the
+    opponent's card is 50 damage for Resentful Refrain on a turn it
+    attacks, and a free card for them on any other. opp_draw_gate 1: only
+    on a turn the Active can attack with an attack that counts their hand;
+    2: never, to measure what the Ability is worth. 0: always."""
+    gate = POL.knob(pl, "opp_draw_gate")
+    if not gate or not any(a.op == IR.Op.DRAW and a.target == IR.Target.BOTH_ALL
+                           for a in eff.actions):
+        return True
+    if gate == 2:
+        return False
+    return _hand_scaler(pl, pl.active and pl.active.name) and _active_can_attack_now(pl, opp)
+
 
 def basics_in_hand(pl):
     return [n for k, n in pl.hand if k == "Pokemon" and pl.POKEMON[n]["stage"] == "Basic"]
@@ -2554,6 +2571,39 @@ def _gust_supporter(pl, opp, name, target, log):
     log.append(f"  {pl.name}: {name} -> drags up {target.name}")
 
 
+# Supporters whose text compiles to something else than the card does, so
+# the card-text fallback must not play them when their own rule passes on
+# them. Lucian's compiles as "draw 3" without the hands going to the bottom.
+_TEXT_FALLBACK_WRONG = {"Lucian"}
+_OPP_HAND_SCALER_RE = _re.compile(r"for each card in your opponent'?s hand", _re.I)
+
+
+def _hand_scaler(pl, name):
+    """Does `name` have an attack that counts the opponent's hand (Mega
+    Froslass ex's Resentful Refrain, Chandelure's Mind Ruler)?"""
+    return name is not None and any(
+        _OPP_HAND_SCALER_RE.search(atk.get("text") or "")
+        for atk in (pl.POKEMON.get(name) or {}).get("attacks") or [])
+
+
+def _lucian_worth_it(pl, opp):
+    """Lucian leaves each player 4.5 cards on average. For a deck whose
+    attack counts the opponent's hand (Mega Froslass ex's Resentful
+    Refrain, Chandelure's Mind Ruler) that is how a small hand gets big
+    again: played while they hold 3 or fewer and the attacker can swing.
+    Never to cut their hand while such an attacker waits on the Bench. For
+    any other deck it is disruption against a hand of 7 or more, from a
+    hand of 4 or fewer."""
+    if _deck_left_after(pl, 6) < DRAW_FLOOR:
+        return False
+    mine, theirs = len(pl.hand) - 1, len(opp.hand)
+    if _hand_scaler(pl, pl.active and pl.active.name):
+        return theirs <= 3 and mine <= 6 and _active_can_attack_now(pl, opp)
+    if any(_hand_scaler(pl, n) for n in pl.POKEMON):
+        return False             # their big hand is this deck's damage
+    return theirs >= 7 and mine <= 4
+
+
 def play_supporter(pl, opp, turn, log):
     if pl.supporter_played or getattr(pl, "_turn_ended", False):
         return
@@ -2595,6 +2645,26 @@ def play_supporter(pl, opp, turn, log):
         random.shuffle(pl.deck)
         pl.draw(4)
         log.append(f"  {pl.name}: Judge (both hands to 4)")
+        return
+
+    # Lucian: each player puts their hand on the bottom of their deck, then
+    # flips a coin -- heads draws 6, tails 3. It compiled as "each player
+    # draws 3": three free cards for the opponent and nothing taken away.
+    if "Lucian" in hand_names and _lucian_worth_it(pl, opp):
+        use("Lucian")
+        moved = bool(pl.hand or opp.hand)
+        for side in (pl, opp):
+            cards = list(side.hand)
+            random.shuffle(cards)
+            side.hand = []
+            side.deck[:0] = cards              # the bottom of the deck
+        drew = []
+        for side in (pl, opp):
+            n = (6 if random.random() < 0.5 else 3) if moved else 0
+            side.draw(n)
+            drew.append(n)
+        log.append(f"  {pl.name}: Lucian (hands to the bottom; draws {drew[0]}, "
+                   f"opponent {drew[1]})")
         return
 
     # Gwynn: discard up to 2 Pokemon WITHOUT a Rule Box from hand, and
@@ -2834,6 +2904,8 @@ def play_supporter(pl, opp, turn, log):
     # one that only disrupts, which matches how the hand-written cases are
     # ordered and keeps the AI developing before it interferes.
     for name in sorted(hand_names, key=lambda n: -_ir_supporter_rank(n)):
+        if name in _TEXT_FALLBACK_WRONG:
+            continue
         if play_trainer_from_ir(pl, opp, "Supporter", name, log, turn):
             return
 
@@ -3209,7 +3281,19 @@ def _heal_pick(pl, opp, cands, f, amount):
         # so in a Fire deck its Energy coming back to the hand is a gain.
         return any(all(c == "Colorless" or c in pl.energy_types for c in a["cost"])
                    for a in (pl.POKEMON.get(h.name) or {}).get("attacks") or [])
-    free = [h for h in most if not h.energy or not needs_energy(h)]
+    def refuels(h):
+        # Mega Froslass ex's Resentful Refrain costs one Water: the Energy
+        # Wally's Compassion hands back is re-attached this turn (the
+        # Supporter comes before the attachment) and it attacks anyway, so
+        # the heal costs it nothing. Not a heal that discards the Energy.
+        if (not POL.knob(pl, "heal_refuel") or h is not pl.active
+                or f.get("then") != "energy_to_hand"):
+            return False
+        own = [energy_provisions(n, _CARDS_BY_NAME)[0] or [] for n in h.energy_names]
+        return any(len(a["cost"]) == 1 and (a["cost"][0] == "Colorless"
+                                            or any(a["cost"][0] in e for e in own))
+                   for a in (pl.POKEMON.get(h.name) or {}).get("attacks") or [])
+    free = [h for h in most if not h.energy or not needs_energy(h) or refuels(h)]
     if free:
         return free[:1]
     for h in most:
@@ -3653,7 +3737,7 @@ KNOWN_TRAINERS = {
     "Team Rocket's Giovanni", "Judge", "Carmine", "Black Belt's Training",
     "Pokégear 3.0", "Janine's Secret Art", "N's PP Up",
     "Kofu", "Brilliant Blender", "Gladion's Final Battle", "Naveen", "Gwynn", "Raifort",
-    "Hole-Digging Shovel",
+    "Hole-Digging Shovel", "Lucian",
 }
 
 
