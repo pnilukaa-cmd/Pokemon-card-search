@@ -421,6 +421,14 @@ FAMILIES = [
      r"damage for each card in your opponent'?s hand"),
     ("damage_scales_with_own_hand_size", "consume",
      r"damage.*for each card in your hand"),
+    # Payoffs for the SIZE of a hand rather than per card. These sat under
+    # unrelated generic tags (damage_boost_conditional_generic,
+    # conditional_no_effect_attack, attack_cost_free_conditional), so a
+    # Gothitelle build searching "hand" never saw Iron Boulder or Noivern.
+    ("hand_size_match_payoff", "consume",
+     r"same number of cards in your hand as your opponent"),
+    ("opponent_small_hand_payoff", "consume",
+     r"if your opponent has (?:exactly )?\d+ (?:or fewer )?cards? in their hand"),
     ("damage_scales_with_prizes_taken_opponent", "consume",
      r"damage.{0,45}for each Prize card your opponent (has taken|took during their last turn)"),
     ("damage_scales_with_prizes_taken_self", "consume",

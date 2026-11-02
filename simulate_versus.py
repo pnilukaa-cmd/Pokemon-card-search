@@ -1586,6 +1586,166 @@ def _hand_reset_ok(pl, opp, eff):
     return True
 
 
+_HAND_SHAPER_OPS = (IR.Op.SET_OPPONENT_HAND, IR.Op.DISCARD_FROM_OPPONENT)
+
+
+def _matches_hands(pl):
+    """Does this deck have a payoff for holding as many cards as the
+    opponent (Gothitelle's Synchro Shot, Iron Boulder's Adjusted Horn,
+    Noivern's Tuning Echo, Ampharos's Synchro Pulse)?"""
+    got = getattr(pl, "_matches_hands_cache", None)
+    if got is None:
+        got = pl._matches_hands_cache = any(
+            _SAME_HAND_RE.search(x.get("text") or "") for info in pl.POKEMON.values()
+            for x in (info.get("attacks") or []) + (info.get("abilities") or []))
+    return got
+
+
+def _is_hand_shaper(eff):
+    return any(a.op in _HAND_SHAPER_OPS and a.target == IR.Target.OPPONENT
+               for a in eff.actions)
+
+
+def _defer_hand_shaper(pl, eff):
+    """With hand_match, an Ability that sets or cuts the opponent's hand
+    (Distorted Future, Sky Hunt) waits for _match_hands: used in the
+    Ability phase it fires before the attachment, Tools and evolutions
+    have taken cards out of your own hand, so the two hands can't be
+    lined up."""
+    return bool(POL.knob(pl, "hand_match")) and _matches_hands(pl) and _is_hand_shaper(eff)
+
+
+def _ability_key(p, eff):
+    return (("named", eff.name) if _NAME_LIMIT_RE.search(eff.text or "")
+            else (id(p), eff.name))
+
+
+def _hand_match_now(pl, opp):
+    """Would the Active's attack this turn gain from equal hands? An
+    Ability that pays for it (Noivern's Tuning Echo: Frightening Howl
+    costs nothing) counts even when the Active can't attack yet, since
+    the match is what lets it."""
+    a = pl.active
+    if a is None:
+        return False
+    info = pl.POKEMON.get(a.name) or {}
+    if any(_SAME_HAND_RE.search(x.get("text") or "") for x in info.get("abilities") or []):
+        return True
+    return _active_can_attack_now(pl, opp) and any(
+        _SAME_HAND_RE.search(x.get("text") or "") for x in info.get("attacks") or [])
+
+
+def _shed_options(pl):
+    """Cards the hand can lose before the attack: a Basic benched (1 card)
+    and Ultra Ball (it and the 2 it discards go, one Pokemon comes back: 2
+    cards, counted only while the deck still holds a Pokemon to find)."""
+    room = bench_cap(pl) - len(pl.bench)
+    basics = [n for k, n in pl.hand if k == "Pokemon"
+              and (pl.POKEMON.get(n) or {}).get("stage") == "Basic"][:max(0, room)]
+    balls = pl.hand.count(("Item", "Ultra Ball")) \
+        if any(k == "Pokemon" for k, _ in pl.deck) else 0
+    return basics, balls
+
+
+def _shed(pl, k, turn, log):
+    """Take exactly k cards out of the hand: Basics to the Bench first,
+    then Ultra Balls. Does nothing and returns False if k can't be met."""
+    basics, balls = _shed_options(pl)
+    for b in range(min(balls, k // 2) + 1):
+        nb = k - 2 * b
+        # After benching nb Basics, each Ultra Ball needs 2 cards to
+        # discard that are not themselves the Ultra Balls still to play.
+        others = len(pl.hand) - nb - pl.hand.count(("Item", "Ultra Ball"))
+        if nb <= len(basics) and others >= 2 * b:
+            break
+    else:
+        return False
+    for name in basics[:nb]:
+        pl.remove_from_hand("Pokemon", name)
+        pl.bench.append(InPlay(name, turn))
+        log.append(f"  {pl.name}: benches {name} (to match hands)")
+        on_bench_entry(pl, pl.bench[-1], log)
+        on_play_from_hand(pl, pl.bench[-1], turn, log)
+    for _ in range(b):
+        pl.remove_from_hand("Item", "Ultra Ball")
+        pitched = [pl.hand.pop(i) for i in cards_to_pitch(pl, 2, exclude=("Item", "Ultra Ball"))]
+        pl.discard.append("Ultra Ball")
+        pl.discard.extend(c[1] for c in pitched)
+        n = (search_pokemon_from_deck(pl, lambda x: want_pokemon(pl, x))
+             or search_pokemon_from_deck(pl, lambda x: True))
+        if n is not None:
+            pl.hand.append(("Pokemon", n))
+        log.append(f"  {pl.name}: Ultra Ball -> {n} (to match hands)")
+    return True
+
+
+def _match_hands(pl, opp, log):
+    """Gothitelle's Synchro Shot does 90 more, and Iron Boulder's Adjusted
+    Horn anything at all, only while both hands hold the same number of
+    cards. Fired in the Ability phase, Distorted Future and Sky Hunt set
+    the opponent's hand before the attachment, Tools and evolutions had
+    shrunk yours, and the hands matched on 18% of Synchro Shots. Here,
+    just before the attack: pick the reachable count (their hand as it
+    is, Distorted Future's 3, one fewer for each Sky Hunt heads), shed
+    cards to it (a Basic to the Bench, Ultra Ball), then fire what it
+    takes. A sure match beats a coin flip; among sure ones, the smaller
+    hand for them. With nothing reachable, the Abilities are plain
+    disruption, as before."""
+    turn = pl.round_no
+    shapers = []
+    for p in pl.in_play():
+        for eff in pl.EFFECTS.get(p.name, []):
+            if (eff.unsupported or eff.trigger not in ACTIVATED or not _is_hand_shaper(eff)
+                    or AE.ability_disabled(pl, p, eff.name)
+                    or _ability_key(p, eff) in pl.abilities_used):
+                continue
+            if eff.conditions and not AE.conditions_met(eff, pl, opp, p):
+                continue
+            shapers.append((p, eff))
+    if not shapers:
+        return
+
+    def make_inplay(name):
+        return InPlay(name, turn)
+
+    def fire(p, eff):
+        pl.abilities_used.add(_ability_key(p, eff))       # tails spends it too
+        if AE.activate(eff, pl, opp, p, log, make_inplay=make_inplay):
+            log.append(f"  {pl.name}: {p.name} uses {eff.name}")
+
+    resets = [(p, e) for p, e in shapers
+              if any(a.op == IR.Op.SET_OPPONENT_HAND for a in e.actions)]
+    hunts = [(p, e) for p, e in shapers if (p, e) not in resets]
+    if _hand_match_now(pl, opp):
+        m, t = len(pl.hand), len(opp.hand)
+        basics, balls = _shed_options(pl)
+        cap = len(basics) + 2 * balls
+        reset_to = next((a.amount for a in resets[0][1].actions
+                         if a.op == IR.Op.SET_OPPONENT_HAND), None) if resets else None
+        plans = []                      # (coin flips needed, their final hand, reset?)
+        for use_reset in ([False, True] if reset_to is not None else [False]):
+            base = reset_to if use_reset else t
+            for flips in range(len(hunts) + 1):
+                target = base - flips
+                if target >= 0 and 0 <= m - target <= cap:
+                    plans.append((flips, target, use_reset))
+        if plans:
+            flips, target, use_reset = min(plans)
+            if _shed(pl, m - target, turn, log):
+                if use_reset:
+                    fire(*resets[0])
+                for p, e in hunts:
+                    if len(opp.hand) <= len(pl.hand):
+                        break
+                    fire(p, e)
+                return
+    for p, e in resets:
+        if _hand_reset_ok(pl, opp, e):
+            fire(p, e)
+    for p, e in hunts:
+        fire(p, e)
+
+
 def use_abilities(pl, opp, turn, log, just_evolved=None):
     """Fire every activated Ability whose conditions and costs are met.
 
@@ -1619,6 +1779,8 @@ def use_abilities(pl, opp, turn, log, just_evolved=None):
                 continue
             if not _hand_reset_ok(pl, opp, eff):
                 continue
+            if just_evolved is None and _defer_hand_shaper(pl, eff):
+                continue                # used by _match_hands, before the attack
             # Chandelure's Alluring Light (each player draws a card) goes
             # every turn. Only on a turn Resentful Refrain fires measured
             # -3.23 +/- 0.52 on the Mega Froslass ex list, never -4.43.
@@ -7574,6 +7736,8 @@ def run_phases(pl, opp, log, start):
                 # used last, when the Seek attacker is already Active,
                 # rather than stacking a card nobody attacks with.
                 _stadium_hand_to_top(pl, log)
+                if POL.knob(pl, "hand_match") and _matches_hands(pl):
+                    _match_hands(pl, opp, log)
                 if POL.knob(pl, "counter_mover"):
                     _plan_counter_moves(pl, opp, log)
                 if do_attack(pl, opp, log):

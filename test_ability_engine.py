@@ -5800,10 +5800,19 @@ def test_hand_disruption_does_what_the_card_says():
           [(a.op, a.filter) for a in eff.actions])
     pl.active = V.InPlay("Gothitelle", 1)
     op.hand, op.deck, pl.hand = [("Item", "Ultra Ball")], [("Item", "x")] * 20, []
-    V.use_abilities(pl, op, 3, [])
+
+    def abilities():
+        # With hand_match (on by default) a hand-setting Ability waits for
+        # _match_hands, just before the attack; this Gothitelle can't
+        # attack, so there it is plain disruption under the same guard.
+        pl.abilities_used = set()
+        V.use_abilities(pl, op, 3, [])
+        if hasattr(V, "_match_hands"):
+            V._match_hands(pl, op, [])
+    abilities()
     check("it is not used on a 1-card hand", len(op.hand) == 1, len(op.hand))
     op.hand = [("Item", "Ultra Ball")] * 7
-    V.use_abilities(pl, op, 3, [])
+    abilities()
     check("it is used on a 7-card hand", len(op.hand) == 3, len(op.hand))
 
 
@@ -7575,6 +7584,105 @@ def test_the_baseline_sim_plays_salvatore_and_lucian():
             break
     check("Lucian: the hand goes to the bottom, then draw 3 or 6",
           sizes == {3, 6} and st.deck[:2] == [("Pokemon", "Budew")] * 2, (sizes, st.deck[:2]))
+
+
+
+def _goth_board(my_hand, opp_hand, bench=()):
+    import policies as POL
+    V, D, E = _real("test_fixtures/gothitelle_talonflame.txt", "me")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me = V.Player("me", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    POL.POLICIES["t_hand_match"] = dict(POL.GREEDY, name="t_hand_match", hand_match=1)
+    me.policy = "t_hand_match"
+    me.round_no = op.round_no = 4
+    me._opp_ref, op._opp_ref = op, me
+    me.energy_types = {"Psychic"}
+    me.active = V.InPlay("Gothitelle", 1)
+    me.active.energy = [["Psychic"], ["Psychic"]]
+    me.active.energy_names = ["Psychic Energy"] * 2
+    me.bench = [V.InPlay(b, 1) for b in bench]
+    op.active = V.InPlay("Raging Bolt ex", 1)
+    me.hand, op.hand = list(my_hand), [("Item", "Rare Candy")] * opp_hand
+    me.abilities_used = set()
+    return V, me, op
+
+
+def test_hand_match_lines_up_synchro_shot():
+    """Gothitelle's Synchro Shot does 90 more while both hands hold the
+    same number of cards. Distorted Future (their hand to 3) fired in the
+    Ability phase, before the attachment, Tools and evolutions shrank the
+    deck's own hand, and the hands matched on 18% of Synchro Shots. With
+    hand_match it waits until just before the attack: 3 cards against 6
+    fires it; 3 against 2 benches a Basic instead of handing them a card."""
+    V, me, op = _goth_board([("Pokemon", "Gothita")] * 3, 6)
+    if not hasattr(V, "_match_hands"):
+        check("hand_match exists", False, "no _match_hands")
+        return
+    V._match_hands(me, op, [])
+    check("3 cards against 6: Distorted Future sets them to 3",
+          (len(me.hand), len(op.hand)) == (3, 3), (len(me.hand), len(op.hand)))
+    V, me, op = _goth_board([("Pokemon", "Gothita"), ("Energy", "Psychic Energy"),
+                             ("Energy", "Psychic Energy")], 2)
+    V._match_hands(me, op, [])
+    check("3 cards against 2: a Gothita goes to the Bench, no reset",
+          (len(me.hand), len(op.hand), len(me.bench)) == (2, 2, 1),
+          (len(me.hand), len(op.hand), len(me.bench)))
+
+
+
+def test_tuning_echo_needs_equal_hands():
+    """Noivern's Tuning Echo ("If you have the same number of cards in your
+    hand as your opponent, ignore all Energy in the cost of Frightening
+    Howl") compiled with no condition: a Noivern with no Energy attacked
+    for 110 every turn. Ampharos's Synchro Pulse (+80) had the same gap."""
+    V, D, E = _real("test_fixtures/gothitelle_talonflame.txt", "me")
+    import ability_ir as IR
+    pulse = IR.compile_effect("Ampharos", "Synchro Pulse",
+                              "If you have the same number of cards in your hand as your "
+                              "opponent, attacks used by this Pokémon do 80 more damage to "
+                              "your opponent's Active Pokémon (before applying Weakness and "
+                              "Resistance).")
+    check("Synchro Pulse is gated on equal hands",
+          {"kind": "hand_size_matches_opponent"} in pulse.conditions, pulse.conditions)
+    noivern = IR.compile_effect("Noivern", "Tuning Echo",
+                                "If you have the same number of cards in your hand as your "
+                                "opponent, ignore all Energy in the cost of Frightening Howl "
+                                "used by this Pokémon.")
+    check("Tuning Echo is gated on equal hands",
+          {"kind": "hand_size_matches_opponent"} in noivern.conditions, noivern.conditions)
+    shot = IR.compile_effect("attack", "Synchro Shot",
+                             "If you have the same number of cards in your hand as your "
+                             "opponent, this attack does 90 more damage.")
+    check("and Synchro Shot (an attack's bonus) is not",
+          not shot.conditions, shot.conditions)
+
+
+
+def test_chirp_finds_only_fighting_resistance():
+    """Fletchling's Chirp: "Search your deck for up to 2 Pokemon with
+    Fighting Resistance". The Resistance was dropped and it fetched any 2
+    Pokemon; with a Krookodile line (no Fighting Resistance) in the deck it
+    took Sandile and Krookodile as often as anything."""
+    import random as _r
+    import ability_engine as AE
+    V, D, E = _real("test_fixtures/gothitelle_talonflame.txt", "me")
+    D[1]["Sandile"] = dict(D[1]["Gothita"], base_name="Sandile", resistance=None,
+                           types=["Darkness"])
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    atk = next(a for a in D[1]["Fletchling"]["attacks"] if a["name"] == "Chirp")
+    eff = V._attack_ir(atk)
+    got = set()
+    for seed in range(20):
+        _r.seed(seed)
+        me = V.Player("me", D[1], [("Pokemon", "Sandile")] * 20 + [("Pokemon", "Gothita")] * 2, E)
+        op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+        me.active, op.active = V.InPlay("Fletchling", 1), V.InPlay("Raging Bolt ex", 1)
+        me._opp_ref, me.hand = op, []
+        for a in eff.actions:
+            AE.apply_action(a, me, op, me.active, [])
+        got |= {n for _, n in me.hand}
+    check("Chirp takes the 2 Gothita, never a Sandile", got == {"Gothita"}, got)
 
 
 if __name__ == "__main__":

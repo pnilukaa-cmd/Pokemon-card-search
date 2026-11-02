@@ -3887,7 +3887,10 @@ def _stamp_target_restrictions(eff):
     # one-Prize support Pokemon instead, which is a different and better
     # card -- verified by execution against a deck holding no ex at all.
     ex_only = _EX_ONLY_RE.search(eff.text or "")
-    if not cap and not no_box and not ex_only:
+    # Fletchling's Chirp: "up to 2 Pokemon with Fighting Resistance". The
+    # Resistance was dropped, so it fetched any 2 Pokemon.
+    res = _RESISTANCE_RE.search(eff.text or "")
+    if not cap and not no_box and not ex_only and not res:
         return
     for a in eff.actions:
         if a.op not in _RESTRICTED_OPS:
@@ -3899,6 +3902,15 @@ def _stamp_target_restrictions(eff):
             a.filter["no_rule_box"] = True
         if ex_only:
             a.filter["ex_only"] = True
+        if res:
+            a.filter["resistance"] = res.group(1).capitalize()
+
+
+_RESISTANCE_RE = re.compile(r"pok[eé]mon with (\w+) resistance", re.I)
+
+
+_SAME_HAND_GATE_RE = re.compile(
+    r"if you have the same number of cards in your hand as your opponent", re.I)
 
 
 def compile_effect(source, name, text):
@@ -3909,6 +3921,14 @@ def compile_effect(source, name, text):
 
     eff.trigger = parse_trigger(text)
     eff.conditions = parse_conditions(text)
+    # Noivern's Tuning Echo and Ampharos's Synchro Pulse: "If you have the
+    # same number of cards in your hand as your opponent, ..." gates the
+    # whole Ability. It compiled to nothing, so Frightening Howl was free and
+    # Synchro Pulse +80 on any hand. On an attack the clause is only a
+    # damage bonus (Synchro Shot), read by the damage path.
+    if (source not in ("attack", "trainer") and _SAME_HAND_GATE_RE.search(text)
+            and not any(c["kind"] == "hand_size_matches_opponent" for c in eff.conditions)):
+        eff.conditions.append({"kind": "hand_size_matches_opponent"})
     eff.costs = parse_costs(text)
     eff.chance = parse_chance(text)
 

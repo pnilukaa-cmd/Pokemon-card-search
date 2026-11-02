@@ -189,6 +189,12 @@ GREEDY = {
     # and Brilliant Blender is never played in such a deck. On top of
     # recover_price: +0.33 +/- 0.36 at 1000 games on the same list.
     "recover_fuel": int(__import__("os").environ.get("RECOVER_FUEL", 1)),
+    # A deck paid for equal hands (Synchro Shot, Adjusted Horn) holds its
+    # hand-setting Abilities (Distorted Future, Sky Hunt) until just before
+    # the attack and lines the hands up then: +1.17 +/- 0.36 and +1.80 +/-
+    # 0.45 on a Gothitelle / Talonflame list (2026-11-02, 200 games against
+    # the 103-deck field). No field deck has such a payoff. 0: off.
+    "hand_match": int(__import__("os").environ.get("HAND_MATCH", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

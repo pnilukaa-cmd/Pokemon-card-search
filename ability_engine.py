@@ -1977,6 +1977,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if exonly and (k != "Pokemon"
                                or pl.POKEMON.get(n, {}).get("prize_value", 1) < 2):
                     return False
+                res = act.filter.get("resistance")
+                if res and (k != "Pokemon"
+                            or (pl.POKEMON.get(n, {}).get("resistance") or (None,))[0] != res):
+                    return False
                 if kind == "energy" and k != "Energy":
                     return False
                 # "a Basic Fighting Energy card": the type and Basic were

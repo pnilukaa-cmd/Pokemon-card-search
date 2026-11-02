@@ -611,6 +611,16 @@
       "card_count": 2
     },
     {
+      "tag": "hand_size_match_payoff",
+      "role": "consume",
+      "card_count": 4
+    },
+    {
+      "tag": "opponent_small_hand_payoff",
+      "role": "consume",
+      "card_count": 3
+    },
+    {
       "tag": "damage_scales_with_prizes_taken_opponent",
       "role": "consume",
       "card_count": 7
@@ -15025,7 +15035,8 @@
       ],
       "hp": "140",
       "tags": [
-        "conditional_no_effect_attack"
+        "conditional_no_effect_attack",
+        "hand_size_match_payoff"
       ]
     },
     {
@@ -15280,7 +15291,8 @@
       ],
       "hp": "90",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "opponent_small_hand_payoff"
       ]
     },
     {
@@ -35055,7 +35067,8 @@
       ],
       "hp": "150",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "hand_size_match_payoff"
       ]
     },
     {
@@ -39794,7 +39807,8 @@
       ],
       "hp": "110",
       "tags": [
-        "attack_cost_free_conditional"
+        "attack_cost_free_conditional",
+        "hand_size_match_payoff"
       ]
     },
     {
@@ -42554,7 +42568,8 @@
       ],
       "hp": "170",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "opponent_small_hand_payoff"
       ]
     },
     {
@@ -45151,7 +45166,8 @@
       ],
       "hp": "320",
       "tags": [
-        "attack_cost_free_conditional"
+        "attack_cost_free_conditional",
+        "opponent_small_hand_payoff"
       ]
     },
     {
@@ -48033,7 +48049,8 @@
       ],
       "hp": "160",
       "tags": [
-        "damage_boost_conditional_generic"
+        "damage_boost_conditional_generic",
+        "hand_size_match_payoff"
       ]
     },
     {
