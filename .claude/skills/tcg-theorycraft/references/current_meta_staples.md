@@ -683,3 +683,15 @@ both hands go to the bottom). What the list was short of was Snorunt and
 Water: one Water a turn pays Resentful Refrain, and `Wally's Compassion`
 (full heal on a Mega ex, its Energy back to hand) re-pays it the same
 turn. Mega Froslass ex gives up 3 Prizes and is weak to Metal.
+
+### Gothitelle hand cut (user request, 2026-11-02)
+
+`Gothitelle` WHT 43's Distorted Future (Active only: their hand to 3) pays
+off with its own Synchro Shot (180 when both hands match) and the rest of
+`hand_size_match_payoff`: `Noivern` JTG 128 (Tuning Echo, free Frightening
+Howl on matched hands, no Retreat Cost), `Iron Boulder`, `Ampharos` CRI 29.
+Measured in `decks/gothitelle_noivern_distorted_future.md`: Talonflame's
+Sky Hunt and Fletchling's Chirp (every piece has Fighting Resistance) both
+lost their slots to more of the Gothitelle and Noibat / Noivern lines, and
+the deck tops out near 39% against the field: 180 on a 150 HP Stage 2 is
+two hits on most ex.

@@ -1,0 +1,27 @@
+wins 25/80
+  meta_dragapult_pure                       50.0%
+  meta_raging_bolt                          40.0%
+  meta_ns_zoroark                           30.0%
+  meta_mega_excadrill                       10.0%
+  meta_festival_lead                        70.0%
+  meta_slowking                             30.0%
+  krookodile_ex_relicanth_hand_disruption   20.0%
+  mega_absol_ex_hand_lock                    0.0%
+game ends: {'lost': 55, 'prizes': 19, 'no Pokémon left after a KO': 3, 'opponent decked out': 3}
+
+attacks per game 5.60, Prizes from attacks 2.30 a game
+  Gothitelle         Synchro Shot          2.02/game  KO   54%  Prizes 1.35/game ( 59%)  hand avg  2.6  added that turn -1.0
+  Noivern            Frightening Howl      1.14/game  KO   46%  Prizes 0.82/game ( 36%)  hand avg  3.7  added that turn -0.1
+  Gothorita          Psyshot               0.54/game  KO   21%  Prizes 0.11/game (  5%)  hand avg  3.7  added that turn -0.3
+  Gothita            Super Psy Bolt        0.81/game  KO    2%  Prizes 0.01/game (  1%)  hand avg  4.1  added that turn -0.3
+  Fletchling         Chirp                 0.68/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  3.7  added that turn -0.2
+  Noibat             Rapid Draw            0.40/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  4.7  added that turn -0.1
+  Gothitelle         Synchro Shot -- all damage to Dunsparce prevented  0.01/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  2.0  added that turn +0.0
+
+Synchro Shot: 2.02 a game, hands matched 37/162 (23%), KO 54%
+  mine - theirs at the attack: {-3: 10, -2: 26, -1: 31, 0: 37, 1: 18, 2: 20, 3: 9, 4: 11}
+  their hand at the attack: {0: 5, 1: 17, 2: 22, 3: 111, 4: 4, 5: 2, 6: 1}
+
+Frightening Howl: 1.14 a game, hands matched 22/91 (24%), KO 46%
+  mine - theirs at the attack: {-4: 16, -3: 6, -2: 7, -1: 9, 0: 22, 1: 5, 2: 11, 3: 5, 4: 10}
+  their hand at the attack: {0: 5, 1: 9, 2: 13, 3: 27, 4: 12, 5: 8, 6: 7, 7: 2, 8: 8}

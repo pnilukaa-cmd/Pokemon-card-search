@@ -144,6 +144,11 @@ the field after this run.
 too (2026-10-29). 743873b (Lucian as printed) and 51ff3d5 change no field
 deck, since none plays Lucian; the rest of 743873b is the setup baseline.
 
+`gothitelle_noivern_distorted_future` was added to the field after this run
+too (2026-11-03). bfb7a80 (matching hands for Synchro Shot, Tuning Echo and
+Synchro Pulse gated, Chirp's Resistance filter) changes no field deck: none
+runs Gothitelle, Iron Boulder, Noivern, the CRI Ampharos or Fletchling.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

@@ -1,0 +1,6 @@
+I_g 111s I: 39.43% (±0.30) over 103 decks at 200 games, winning 30
+i_ch2_g 116s i_ch2: 39.34% (±0.30) over 103 decks at 200 games, winning 31
+i_bd1_g 113s i_bd1: 39.28% (±0.30) over 103 decks at 200 games, winning 29
+i_fl2_g 121s i_fl2: 34.67% (±0.30) over 103 decks at 200 games, winning 21
+i_e16_g 103s i_e16: 39.13% (±0.30) over 103 decks at 200 games, winning 26
+DONE

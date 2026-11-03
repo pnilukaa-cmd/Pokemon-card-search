@@ -1,0 +1,26 @@
+wins 23/80
+  meta_dragapult_pure                       20.0%
+  meta_raging_bolt                          40.0%
+  meta_ns_zoroark                           30.0%
+  meta_mega_excadrill                       20.0%
+  meta_festival_lead                        60.0%
+  meta_slowking                             20.0%
+  krookodile_ex_relicanth_hand_disruption   30.0%
+  mega_absol_ex_hand_lock                   10.0%
+game ends: {'lost': 57, 'prizes': 20, 'no Pokémon left after a KO': 3}
+
+attacks per game 5.97, Prizes from attacks 2.46 a game
+  Gothitelle         Synchro Shot          2.08/game  KO   45%  Prizes 1.25/game ( 51%)  hand avg  2.6  added that turn -1.2
+  Noivern            Frightening Howl      1.59/game  KO   56%  Prizes 1.18/game ( 48%)  hand avg  3.6  added that turn -0.0
+  Gothorita          Psyshot               0.26/game  KO   14%  Prizes 0.04/game (  2%)  hand avg  3.7  added that turn -0.4
+  Gothita            Super Psy Bolt        0.49/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  3.8  added that turn -0.2
+  Team Rocket's Chingling Chiming Commotion     1.02/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  4.8  added that turn -0.1
+  Noibat             Rapid Draw            0.54/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  4.2  added that turn -0.2
+
+Synchro Shot: 2.08 a game, hands matched 42/166 (25%), KO 45%
+  mine - theirs at the attack: {-3: 19, -2: 37, -1: 26, 0: 42, 1: 10, 2: 15, 3: 9, 4: 8}
+  their hand at the attack: {0: 5, 1: 21, 2: 22, 3: 113, 4: 4, 5: 1}
+
+Frightening Howl: 1.59 a game, hands matched 27/127 (21%), KO 56%
+  mine - theirs at the attack: {-4: 27, -3: 7, -2: 13, -1: 17, 0: 27, 1: 12, 2: 5, 3: 12, 4: 7}
+  their hand at the attack: {0: 9, 1: 20, 2: 28, 3: 24, 4: 10, 5: 8, 6: 8, 7: 5, 8: 15}

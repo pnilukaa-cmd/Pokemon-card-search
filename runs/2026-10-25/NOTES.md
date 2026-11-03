@@ -137,3 +137,8 @@ the field after this run.
 `mega_froslass_ex_resentful_refrain` was added to the field after this run
 too (2026-10-29). 743873b (Lucian as printed) and 51ff3d5 change no field
 deck, since none plays Lucian; the rest of 743873b is the setup baseline.
+
+`gothitelle_noivern_distorted_future` was added to the field after this run
+too (2026-11-03). bfb7a80 (matching hands for Synchro Shot, Tuning Echo and
+Synchro Pulse gated, Chirp's Resistance filter) changes no field deck: none
+runs Gothitelle, Iron Boulder, Noivern, the CRI Ampharos or Fletchling.

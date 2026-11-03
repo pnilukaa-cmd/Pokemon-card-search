@@ -1,0 +1,7 @@
+F4_g 150s F4: 31.57% (±0.29) over 103 decks at 200 games, winning 17
+k_tf1_g 127s k_tf1: 29.35% (±0.29) over 103 decks at 200 games, winning 11
+k_xe3_g 126s k_xe3: 29.98% (±0.29) over 103 decks at 200 games, winning 13
+k_sw2_g 132s k_sw2: 30.68% (±0.29) over 103 decks at 200 games, winning 16
+k_e12_g 129s k_e12: 28.36% (±0.29) over 103 decks at 200 games, winning 12
+k_nb4_g 120s k_nb4: 34.75% (±0.30) over 103 decks at 200 games, winning 22
+DONE

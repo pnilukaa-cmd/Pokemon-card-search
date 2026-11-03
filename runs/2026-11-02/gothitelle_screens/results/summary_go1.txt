@@ -1,0 +1,8 @@
+V0_g 117s V0: 23.35% (±0.27) over 103 decks at 200 games, winning 9
+DONE
+DONE
+V0_hm 126s V0: 24.51% (±0.27) over 103 decks at 200 games, winning 10
+nv2_hm 126s nv2: 42.50% (±0.31) over 103 decks at 200 games, winning 34
+ib2_hm 128s ib2: 20.42% (±0.26) over 103 decks at 200 games, winning 7
+ht2_hm 131s ht2: 24.91% (±0.27) over 103 decks at 200 games, winning 11
+DONE

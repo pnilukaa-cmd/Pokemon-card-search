@@ -1,0 +1,3 @@
+V0_g 555s V0: 24.56% (±0.12) over 103 decks at 1000 games, winning 10
+i_ch2_g 665s i_ch2: 39.19% (±0.14) over 103 decks at 1000 games, winning 31
+DONE

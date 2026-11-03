@@ -1,0 +1,1 @@
+decks/field/meta_dragapult_pure.txt decks/field/meta_raging_bolt.txt decks/field/meta_ns_zoroark.txt decks/field/meta_mega_excadrill.txt decks/field/meta_festival_lead.txt decks/field/meta_slowking.txt decks/field/krookodile_ex_relicanth_hand_disruption.txt decks/field/mega_absol_ex_hand_lock.txt

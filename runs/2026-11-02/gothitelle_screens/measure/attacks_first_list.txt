@@ -1,0 +1,21 @@
+wins 17/80
+  meta_dragapult_pure                       10.0%
+  meta_raging_bolt                          10.0%
+  meta_ns_zoroark                           30.0%
+  meta_mega_excadrill                       30.0%
+  meta_festival_lead                        50.0%
+  meta_slowking                              0.0%
+  krookodile_ex_relicanth_hand_disruption   20.0%
+  mega_absol_ex_hand_lock                   20.0%
+game ends: {'prizes': 12, 'lost': 63, 'opponent decked out': 4, 'no Pokémon left after a KO': 1}
+
+attacks per game 4.59, Prizes from attacks 1.77 a game
+  Gothitelle         Synchro Shot          2.50/game  KO   52%  Prizes 1.62/game ( 92%)  hand avg  2.0  added that turn -0.9
+  Gothorita          Psyshot               0.38/game  KO   20%  Prizes 0.07/game (  4%)  hand avg  3.6  added that turn -0.5
+  Gothita            Super Psy Bolt        1.15/game  KO    4%  Prizes 0.05/game (  3%)  hand avg  3.7  added that turn -0.4
+  Fletchling         Peck                  0.01/game  KO  100%  Prizes 0.03/game (  1%)  hand avg  2.0  added that turn +0.0
+  Fletchling         Chirp                 0.55/game  KO    0%  Prizes 0.00/game (  0%)  hand avg  3.5  added that turn -0.3
+
+Synchro Shot: 2.50 a game, hands matched 65/200 (32%), KO 52%
+  mine - theirs at the attack: {-3: 7, -2: 17, -1: 26, 0: 65, 1: 18, 2: 21, 3: 12, 4: 34}
+  their hand at the attack: {0: 35, 1: 36, 2: 45, 3: 71, 4: 6, 5: 5, 6: 2}

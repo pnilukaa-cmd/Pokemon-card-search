@@ -1,0 +1,14 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Gothita                       93.7%   avg turn 1.60
+  Gothorita                     68.0%   avg turn 3.19
+  Gothitelle                    56.7%   avg turn 3.79
+  Noibat                        92.8%   avg turn 1.52
+  Noivern                       61.0%   avg turn 3.22
+  Team Rocket's Chingling       77.0%   avg turn 1.93
+
+First attack landed by turn 6: 93.2% of trials (avg turn 2.67)
+Average final hand size (turn 6): 3.97
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

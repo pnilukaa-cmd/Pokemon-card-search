@@ -1,0 +1,6 @@
+H_g 123s H: 34.13% (±0.30) over 103 decks at 200 games, winning 21
+h_nv3_g 122s h_nv3: 33.40% (±0.30) over 103 decks at 200 games, winning 20
+h_nv4_g 123s h_nv4: 31.49% (±0.29) over 103 decks at 200 games, winning 18
+h_fl0_g 108s h_fl0: 38.74% (±0.30) over 103 decks at 200 games, winning 29
+h_e16_g 118s h_e16: 35.45% (±0.30) over 103 decks at 200 games, winning 25
+DONE

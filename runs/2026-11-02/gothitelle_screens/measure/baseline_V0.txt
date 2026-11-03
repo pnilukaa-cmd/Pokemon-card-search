@@ -1,0 +1,14 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Gothita                       98.5%   avg turn 1.39
+  Gothorita                     82.6%   avg turn 2.87
+  Gothitelle                    66.7%   avg turn 3.73
+  Fletchling                    98.3%   avg turn 1.38
+  Fletchinder                   72.8%   avg turn 3.04
+  Talonflame                    50.3%   avg turn 3.91
+
+First attack landed by turn 6: 88.0% of trials (avg turn 3.10)
+Average final hand size (turn 6): 3.46
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.
