@@ -223857,5 +223857,224 @@
                 "99"
             ]
         ]
+    },
+    {
+        "id": "me6-60",
+        "name": "Sableye",
+        "supertype": "Pok\u00e9mon",
+        "subtypes": [
+            "Basic"
+        ],
+        "hp": "80",
+        "types": [
+            "Darkness"
+        ],
+        "attacks": [
+            {
+                "name": "Lure Out",
+                "cost": [
+                    "Darkness"
+                ],
+                "convertedEnergyCost": 1,
+                "damage": "",
+                "text": "Reveal the top 5 cards of your opponent's deck. You may choose any number of Basic Pok\u00e9mon you find there and put those Pok\u00e9mon onto their Bench. Your opponent shuffles the other cards back into their deck."
+            },
+            {
+                "name": "Ominous Lick (name unconfirmed)",
+                "cost": [
+                    "Darkness",
+                    "Colorless"
+                ],
+                "convertedEnergyCost": 2,
+                "damage": "",
+                "text": "Put 5 damage counters on 1 of your opponent's Pok\u00e9mon."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "\u00d72"
+            }
+        ],
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "set": {
+            "id": "me6",
+            "name": "Delta Reign",
+            "series": "Mega Evolution",
+            "printedTotal": 103,
+            "total": 141,
+            "legalities": {
+                "unlimited": "Legal",
+                "standard": "Legal",
+                "expanded": "Legal"
+            },
+            "ptcgoCode": "DLR",
+            "releaseDate": "2026/11/06"
+        },
+        "number": "60",
+        "rarity": "Common",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "regulationMark": "J",
+        "printings": [
+            [
+                "DLR",
+                "60"
+            ]
+        ],
+        "provisional": "PROVISIONAL: not yet in api.pokemontcg.io. Stats, costs and damage from TCGdex's Japanese Storm Emeralda (M6-046); English text written in the pool's own template for the same effect (Accompanying Flute; place-counters attacks). English name and number from retailer listings. Replace when the card API carries Delta Reign."
+    },
+    {
+        "id": "me6-68",
+        "name": "Inkay",
+        "supertype": "Pok\u00e9mon",
+        "subtypes": [
+            "Basic"
+        ],
+        "hp": "60",
+        "types": [
+            "Darkness"
+        ],
+        "attacks": [
+            {
+                "name": "Knock Off",
+                "cost": [
+                    "Darkness"
+                ],
+                "convertedEnergyCost": 1,
+                "damage": "10",
+                "text": "Discard a random card from your opponent's hand."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "\u00d72"
+            }
+        ],
+        "retreatCost": [
+            "Colorless"
+        ],
+        "convertedRetreatCost": 1,
+        "set": {
+            "id": "me6",
+            "name": "Delta Reign",
+            "series": "Mega Evolution",
+            "printedTotal": 103,
+            "total": 141,
+            "legalities": {
+                "unlimited": "Legal",
+                "standard": "Legal",
+                "expanded": "Legal"
+            },
+            "ptcgoCode": "DLR",
+            "releaseDate": "2026/11/06"
+        },
+        "number": "68",
+        "rarity": "Common",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "regulationMark": "J",
+        "printings": [
+            [
+                "DLR",
+                "68"
+            ]
+        ],
+        "provisional": "PROVISIONAL: not yet in api.pokemontcg.io. Stats, costs and damage from TCGdex's Japanese Storm Emeralda (M6-047); English text written in the pool's own template for the same effect (Mienfoo's Knock Off). English name and number from retailer listings. Replace when the card API carries Delta Reign.",
+        "evolvesTo": [
+            "Mega Malamar ex"
+        ]
+    },
+    {
+        "id": "me6-69",
+        "name": "Mega Malamar ex",
+        "supertype": "Pok\u00e9mon",
+        "subtypes": [
+            "Stage 1",
+            "MEGA",
+            "ex"
+        ],
+        "hp": "320",
+        "types": [
+            "Darkness"
+        ],
+        "attacks": [
+            {
+                "name": "Psychic Marionette",
+                "cost": [
+                    "Darkness",
+                    "Darkness"
+                ],
+                "convertedEnergyCost": 2,
+                "damage": "70\u00d7",
+                "text": "This attack does 70 damage for each of your opponent's Benched Pok\u00e9mon."
+            },
+            {
+                "name": "Eerie Wave (name unconfirmed)",
+                "cost": [
+                    "Darkness",
+                    "Darkness",
+                    "Darkness"
+                ],
+                "convertedEnergyCost": 3,
+                "damage": "200",
+                "text": "Your opponent's Active Pok\u00e9mon is now Confused."
+            }
+        ],
+        "weaknesses": [
+            {
+                "type": "Grass",
+                "value": "\u00d72"
+            }
+        ],
+        "retreatCost": [
+            "Colorless",
+            "Colorless"
+        ],
+        "convertedRetreatCost": 2,
+        "set": {
+            "id": "me6",
+            "name": "Delta Reign",
+            "series": "Mega Evolution",
+            "printedTotal": 103,
+            "total": 141,
+            "legalities": {
+                "unlimited": "Legal",
+                "standard": "Legal",
+                "expanded": "Legal"
+            },
+            "ptcgoCode": "DLR",
+            "releaseDate": "2026/11/06"
+        },
+        "number": "69",
+        "rarity": "Double Rare",
+        "legalities": {
+            "unlimited": "Legal",
+            "standard": "Legal",
+            "expanded": "Legal"
+        },
+        "regulationMark": "J",
+        "printings": [
+            [
+                "DLR",
+                "69"
+            ]
+        ],
+        "provisional": "PROVISIONAL: not yet in api.pokemontcg.io. Stats, costs and damage from TCGdex's Japanese Storm Emeralda (M6-048); English text written in the pool's own template for the same effect (Zoroark's Mind Jack; Confusion riders). English name and number from retailer listings. Replace when the card API carries Delta Reign.",
+        "evolvesFrom": "Inkay",
+        "rules": [
+            "Pok\u00e9mon ex rule: When your Pok\u00e9mon ex is Knocked Out, your opponent takes 2 Prize cards.",
+            "Mega Evolution ex Rule: When your Mega Evolution Pok\u00e9mon ex is Knocked Out, your opponent takes 3 Prize cards."
+        ]
     }
 ]

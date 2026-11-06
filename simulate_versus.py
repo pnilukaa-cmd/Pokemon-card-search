@@ -1485,7 +1485,10 @@ def _self_condition_ok(pl, opp, eff, turn):
 def _flute_worth_it(pl, opp):
     """Accompanying Flute hands the opponent free Basics. That is only a
     plan if you can then drag one up: a gust in hand, or a gust attack on
-    something in play that can use it."""
+    something in play that can use it. Also playing it for an attack that
+    counts their Bench (Mega Malamar ex's Psychic Marionette, 70 each), and
+    pricing Lure Out the same way, measured -0.27 +/- 0.46 and was taken
+    out (2026-11-06)."""
     if len(opp.bench) >= 5:
         return False
     if any(n in ("Boss's Orders", "Team Rocket's Giovanni", "Prime Catcher")
@@ -7234,6 +7237,9 @@ ATTACK_RIDER_OPS = {
     IR.Op.COPY_TOP_SUPPORTER, IR.Op.PRIZES_IF_HAND_SIZE, IR.Op.DISCARD_TO_DECK,
     IR.Op.SET_OPPONENT_HAND,
     IR.Op.FORCE_BENCH_OPPONENT,   # Lickitung's Tongue Pull
+    # Sableye's Lure Out (Accompanying Flute's effect on an attack): it
+    # compiled, and as an attack it did nothing.
+    IR.Op.FILL_OPPONENT_BENCH,
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,

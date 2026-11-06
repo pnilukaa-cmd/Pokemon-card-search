@@ -7685,5 +7685,36 @@ def test_chirp_finds_only_fighting_resistance():
     check("Chirp takes the 2 Gothita, never a Sandile", got == {"Gothita"}, got)
 
 
+
+def test_lure_out_fills_the_opponents_bench():
+    """Sableye's Lure Out (Delta Reign) is Accompanying Flute's effect on an
+    attack: "Reveal the top 5 cards of your opponent's deck. You may choose
+    any number of Basic Pokemon you find there and put those Pokemon onto
+    their Bench." It compiled to fill_opponent_bench, which was not an
+    attack rider, so the attack did nothing."""
+    import random as _r
+    _r.seed(0)
+    V, D, E = _real("test_fixtures/gothitelle_talonflame.txt", "me")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    lure = dict(D[1]["Gothita"]["attacks"][0], name="Lure Out", cost=["Colorless"], damage=0,
+                text="Reveal the top 5 cards of your opponent's deck. You may choose any number "
+                    "of Basic Pokémon you find there and put those Pokémon onto their Bench. "
+                    "Your opponent shuffles the other cards back into their deck.")
+    D[1]["Gothita"] = dict(D[1]["Gothita"], attacks=[lure])
+    me = V.Player("me", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], [("Pokemon", "Raging Bolt ex")] * 5 + [("Item", "x")] * 20,
+                  V.compile_effects_for(O[1], O[3]))
+    me.round_no = op.round_no = 3
+    me._opp_ref, op._opp_ref = op, me
+    me.active = V.InPlay("Gothita", 1)
+    me.active.energy, me.active.energy_names = [["Psychic"]], ["Psychic Energy"]
+    op.active, op.bench = V.InPlay("Teal Mask Ogerpon ex", 1), []
+    op.deck = [("Item", "x")] * 20 + [("Pokemon", "Raging Bolt ex")] * 2 + [("Item", "x")] * 3
+    me._forced_attack = lure
+    V.do_attack(me, op, [])
+    check("Lure Out puts the 2 Basics in the top 5 onto their Bench",
+          [b.name for b in op.bench] == ["Raging Bolt ex"] * 2, [b.name for b in op.bench])
+
+
 if __name__ == "__main__":
     sys.exit(main())

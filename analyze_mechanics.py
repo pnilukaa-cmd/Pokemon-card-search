@@ -425,6 +425,12 @@ FAMILIES = [
     # unrelated generic tags (damage_boost_conditional_generic,
     # conditional_no_effect_attack, attack_cost_free_conditional), so a
     # Gothitelle build searching "hand" never saw Iron Boulder or Noivern.
+    # Put the opponent's Basic Pokemon onto THEIR Bench, from their hand
+    # or the top of their deck: fuel for the opponent-Bench scalers
+    # (damage_scales_with_opponent_pokemon_count). They sat under
+    # search_to_bench_generic (your own Bench) and hand_reveal_opponent.
+    ("fill_opponent_bench", "produce",
+     r"you find there (?:and put those pok[eé]mon )?onto (?:their|your opponent'?s) bench"),
     ("hand_size_match_payoff", "consume",
      r"same number of cards in your hand as your opponent"),
     ("opponent_small_hand_payoff", "consume",
