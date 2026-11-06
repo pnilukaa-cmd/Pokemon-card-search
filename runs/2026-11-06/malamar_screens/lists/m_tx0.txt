@@ -1,0 +1,25 @@
+Pokémon: 13
+4 Inkay DLR 68
+3 Mega Malamar ex DLR 69
+2 Sableye DLR 60
+2 Vullaby WHT 63
+2 Mandibuzz WHT 64
+
+Trainer: 32
+4 Accompanying Flute TWM 142
+2 Xerosic's Machinations SFA 64
+4 Lillie's Determination MEG 119
+2 Boss's Orders MEG 114
+2 Janine's Secret Art SFA 59
+3 Hilda WHT 164
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+2 Night Stretcher MEG 173
+1 Hero's Cape TEF 152
+1 Switch MEG 130
+3 Poké Pad ASC 198
+
+Energy: 15
+15 Basic Darkness Energy
+
+Total Cards: 60

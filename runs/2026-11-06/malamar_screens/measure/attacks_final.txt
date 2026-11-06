@@ -1,0 +1,30 @@
+wins 60/80
+  meta_dragapult_pure                       80.0%
+  meta_raging_bolt                          80.0%
+  meta_ns_zoroark                           90.0%
+  meta_mega_excadrill                       40.0%
+  meta_festival_lead                        80.0%
+  meta_slowking                            100.0%
+  krookodile_ex_relicanth_hand_disruption   90.0%
+  mega_absol_ex_hand_lock                   40.0%
+game ends: {'no Pokémon left after a KO': 8, 'prizes': 51, 'lost': 20, 'opponent decked out': 1}
+
+attacks per game 4.62, Prizes from attacks 4.97 a game
+  Mega Malamar ex    Psychic Marionette    2.38/game  KO   88%  Prizes 3.69/game ( 74%)  their Bench avg  4.3  added that turn -0.2
+  Mega Malamar ex    Eerie Wave (name unconfirmed)  1.20/game  KO   81%  Prizes 1.18/game ( 24%)  their Bench avg  1.8  added that turn -1.4
+  Pecharunt ex       Irritated Outburst    0.09/game  KO   43%  Prizes 0.07/game (  2%)  their Bench avg  4.4  added that turn -2.6
+  Fezandipiti ex     Cruel Arrow           0.16/game  KO    8%  Prizes 0.01/game (  0%)  their Bench avg  4.3  added that turn +0.5
+  Sableye            Ominous Lick (name unconfirmed)  0.17/game  KO    7%  Prizes 0.01/game (  0%)  their Bench avg  2.9  added that turn -1.0
+  Fezandipiti ex     Cruel Arrow -- all damage to Dunsparce prevented  0.01/game  KO  100%  Prizes 0.01/game (  0%)  their Bench avg  5.0  added that turn -5.0
+  Inkay              Knock Off             0.54/game  KO    0%  Prizes 0.00/game (  0%)  their Bench avg  2.5  added that turn -1.6
+  Mega Malamar ex    Psychic Marionette -- all damage to Dunsparce prevented  0.04/game  KO    0%  Prizes 0.00/game (  0%)  their Bench avg  1.7  added that turn -2.0
+  Mega Malamar ex    Eerie Wave (name unconfirmed) -- all damage to Dunsparce prevented  0.03/game  KO    0%  Prizes 0.00/game (  0%)  their Bench avg  1.0  added that turn -5.0
+  Mega Malamar ex    Psychic Marionette -- all damage to Dudunsparce prevented  0.01/game  KO    0%  Prizes 0.00/game (  0%)  their Bench avg  5.0  added that turn +3.0
+
+Psychic Marionette: 2.38 a game, KO 88%
+  their Bench at the attack: n, KO%
+    1:    4    50%
+    2:   15    60%
+    3:   23    74%
+    4:   47    85%
+    5:   88    99%

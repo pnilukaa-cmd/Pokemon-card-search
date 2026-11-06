@@ -1,0 +1,17 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Inkay                         96.2%   avg turn 1.46
+  Mega Malamar ex               67.7%   avg turn 2.97
+  Sableye                       72.7%   avg turn 2.00
+  Toxel                         79.2%   avg turn 2.05
+  Toxtricity                    49.5%   avg turn 3.51
+  Vullaby                       73.4%   avg turn 2.01
+  Mandibuzz                     41.7%   avg turn 3.41
+
+First attack landed by turn 6: 94.1% of trials (avg turn 2.62)
+Average final hand size (turn 6): 4.30
+
+No modeled play effect (held in hand only, doesn't affect these numbers -- review before trusting a deck that leans on these): Accompanying Flute
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

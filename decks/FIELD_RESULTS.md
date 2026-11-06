@@ -149,6 +149,11 @@ too (2026-11-03). bfb7a80 (matching hands for Synchro Shot, Tuning Echo and
 Synchro Pulse gated, Chirp's Resistance filter) changes no field deck: none
 runs Gothitelle, Iron Boulder, Noivern, the CRI Ampharos or Fletchling.
 
+`mega_malamar_ex_psychic_marionette` was added to the field after this run
+too (2026-11-06), with three provisional Delta Reign cards in the pool
+(Sableye, Inkay, Mega Malamar ex). b2d5545 makes Lure Out (fill the
+opponent's Bench) run as an attack; no field deck has such an attack.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

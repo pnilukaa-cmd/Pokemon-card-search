@@ -1,0 +1,10 @@
+M1_g 94s M1: 68.35% (±0.30) over 104 decks at 200 games, winning 88
+n_tx0_g 79s n_tx0: 72.25% (±0.29) over 104 decks at 200 games, winning 92
+n_sb1_g 76s n_sb1: 72.70% (±0.29) over 104 decks at 200 games, winning 93
+n_fl0_g 77s n_fl0: 71.66% (±0.29) over 104 decks at 200 games, winning 91
+n_xe0_g 82s n_xe0: 69.72% (±0.30) over 104 decks at 200 games, winning 91
+n_pe_g 85s n_pe: 69.89% (±0.30) over 104 decks at 200 games, winning 89
+n_fz_g 84s n_fz: 69.46% (±0.30) over 104 decks at 200 games, winning 90
+n_mw_g 86s n_mw: 67.67% (±0.30) over 104 decks at 200 games, winning 88
+n_e15_g 77s n_e15: 70.53% (±0.29) over 104 decks at 200 games, winning 93
+DONE

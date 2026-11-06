@@ -1,0 +1,3 @@
+M0_g 411s M0: 61.68% (±0.14) over 104 decks at 1000 games, winning 83
+M2d_g 369s M2d: 77.50% (±0.12) over 104 decks at 1000 games, winning 97
+DONE

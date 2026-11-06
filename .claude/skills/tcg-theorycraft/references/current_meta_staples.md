@@ -695,3 +695,16 @@ Sky Hunt and Fletchling's Chirp (every piece has Fighting Resistance) both
 lost their slots to more of the Gothitelle and Noibat / Noivern lines, and
 the deck tops out near 39% against the field: 180 on a 150 HP Stage 2 is
 two hits on most ex.
+
+### Mega Malamar ex (Delta Reign, provisional text, 2026-11-06)
+
+`Mega Malamar ex` DLR 69's Psychic Marionette (Darkness, Darkness: 70 for
+each of the opponent's Benched Pokémon) needs no help filling their Bench:
+measured in `decks/mega_malamar_ex_psychic_marionette.md`, opponents sat
+at 4.3 Benched Pokémon on average when it fired, and every Bench-filler
+tried (`fill_opponent_bench`: Accompanying Flute, Sableye's Lure Out,
+Mandibuzz's Look for Prey) lost its slot, as did Toxtricity PFL 68's
+Sinister Surge. The best list is Mega Malamar ex, Inkay (Knock Off), and
+Pecharunt ex / Fezandipiti ex / Janine's Secret Art, near 77% against the
+field; it is weak to Grass. Its Delta Reign text is provisional until the
+card API carries the set.

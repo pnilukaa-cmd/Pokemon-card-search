@@ -1,0 +1,6 @@
+M1_g 81s M1: 68.83% (±0.30) over 104 decks at 200 games, winning 91
+M2a_g 74s M2a: 74.90% (±0.28) over 104 decks at 200 games, winning 95
+M2b_g 71s M2b: 77.19% (±0.27) over 104 decks at 200 games, winning 96
+M2c_g 74s M2c: 75.71% (±0.27) over 104 decks at 200 games, winning 96
+M2d_g 74s M2d: 77.64% (±0.26) over 104 decks at 200 games, winning 97
+DONE

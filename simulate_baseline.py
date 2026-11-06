@@ -1392,7 +1392,9 @@ NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red C
                         "Crushing Hammer", "Jumbo Ice Cream",
                         # opponent-only, or a switch (no retreat is modelled)
                         "Enhanced Hammer", "Tool Scrapper", "Prime Catcher",
-                        "Poké Vital A"}
+                        "Poké Vital A",
+                        # fills the OPPONENT's Bench from their deck
+                        "Accompanying Flute"}
 
 
 def collect_unmodeled(DECKLIST):

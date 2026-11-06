@@ -1,0 +1,8 @@
+M2d_g 76s M2d: 77.64% (±0.26) over 104 decks at 200 games, winning 97
+p_e16_g 74s p_e16: 75.88% (±0.27) over 104 decks at 200 games, winning 96
+p_e14_g 81s p_e14: 75.36% (±0.27) over 104 decks at 200 games, winning 95
+p_mk_g 79s p_mk: 77.45% (±0.26) over 104 decks at 200 games, winning 96
+p_sb0_g 70s p_sb0: 79.62% (±0.26) over 104 decks at 200 games, winning 97
+p_ja0_g 73s p_ja0: 75.68% (±0.27) over 104 decks at 200 games, winning 94
+p_tx_g 85s p_tx: 75.64% (±0.28) over 104 decks at 200 games, winning 95
+DONE

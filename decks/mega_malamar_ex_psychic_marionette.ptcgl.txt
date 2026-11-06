@@ -1,0 +1,23 @@
+Pokémon: 11
+4 Inkay DLR 68
+4 Mega Malamar ex DLR 69
+1 Sableye DLR 60
+1 Pecharunt ex SFA 39
+1 Fezandipiti ex ASC 142
+
+Trainer: 31
+4 Lillie's Determination MEG 119
+4 Hilda WHT 164
+3 Boss's Orders MEG 114
+2 Janine's Secret Art SFA 59
+4 Buddy-Buddy Poffin MEG 167
+4 Ultra Ball MEG 131
+4 Night Stretcher MEG 173
+4 Poké Pad ASC 198
+1 Switch MEG 130
+1 Hero's Cape TEF 152
+
+Energy: 18
+18 Basic Darkness Energy
+
+Total Cards: 60

@@ -1,0 +1,13 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Inkay                         98.5%   avg turn 1.25
+  Mega Malamar ex               89.1%   avg turn 2.63
+  Sableye                       76.9%   avg turn 2.32
+  Pecharunt ex                  49.8%   avg turn 2.73
+  Fezandipiti ex                41.1%   avg turn 2.45
+
+First attack landed by turn 6: 98.0% of trials (avg turn 2.76)
+Average final hand size (turn 6): 3.86
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.
