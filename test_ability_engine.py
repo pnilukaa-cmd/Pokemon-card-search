@@ -7637,6 +7637,90 @@ def test_lucian_stacks_a_bug_out_hand():
           V.attack_damage(me, op, me.active, bug) == 150, V.attack_damage(me, op, me.active, bug))
 
 
+def _mill_board(seed=0):
+    """The Maushold mill fixture (a submitted list) against Raging Bolt ex."""
+    import random as _r
+    _r.seed(seed)
+    V, D, E = _real("test_fixtures/maushold_mill.txt", "me")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me = V.Player("me", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    me.round_no = op.round_no = 3
+    me._opp_ref, op._opp_ref = op, me
+    me.active, me.bench = V.InPlay("Maushold", 1), [V.InPlay("Maushold", 1)]
+    op.active, op.bench = V.InPlay("Raging Bolt ex", 1), []
+    me.stadium = me._opp_stadium = op.stadium = op._opp_stadium = None
+    return V, D, E, me, op
+
+
+def test_any_combination_searches_find_both_kinds():
+    """Aarune, Celebi, Heatmor and Ethan's Adventure: "search your deck for
+    up to 3 in any combination of <a> and <b> cards". The search read "in
+    any combination of" as part of a card NAME and found nothing."""
+    import ability_engine as AE
+    V, D, E, me, op = _mill_board()
+    log = []
+    for a in V.trainer_effect_ir("Aarune").actions:
+        AE.apply_action(a, me, op, None, log)
+    kinds = sorted(k for k, _ in me.hand)
+    check("Aarune takes 3: a Stadium and Supporters", len(me.hand) == 3 and "Stadium" in kinds
+          and "Supporter" in kinds, me.hand)
+    import ability_ir as IR
+    eff = IR.compile_effect("trainer", "Ethan's Adventure",
+                            "Search your deck for up to 3 in any combination of Ethan's Pokémon and "
+                            "Basic Fire Energy cards, reveal them, and put them into your hand. Then, "
+                            "shuffle your deck.")
+    check("Ethan's Adventure: Ethan's Pokemon or Basic Fire Energy",
+          eff.actions and eff.actions[0].filter.get("any_of") == [
+              {"kind": "pokémon", "name_contains": "Ethan's"},
+              {"kind": "energy", "type": "Fire", "basic": True}], eff.actions)
+
+
+def test_legendary_summit_is_for_colorless_pokemon_and_gets_played():
+    """Legendary Summit: "Whenever a Colorless Pokemon (yours or your
+    opponent's) is Knocked Out by damage from an attack ..., that player
+    takes 1 fewer Prize card." It cut a Prize on every Knock Out, and the
+    pilot never put it down."""
+    import ability_engine as AE
+    V, D, E, me, op = _mill_board()
+    check("worth putting down with two Colorless Maushold against a Dragon",
+          V._stadium_has_effect("Legendary Summit", me), None)
+    me.stadium = op._opp_stadium = "Legendary Summit"
+    check("a Knocked Out Maushold gives 1 fewer",
+          AE.query_prize_modifier(op, me, V.InPlay("Maushold", 1), op.active, True) == -1, None)
+    check("a Knocked Out Comfey (Psychic) does not",
+          AE.query_prize_modifier(op, me, V.InPlay("Comfey", 1), op.active, True) == 0,
+          AE.query_prize_modifier(op, me, V.InPlay("Comfey", 1), op.active, True))
+
+
+def test_delta_reign_stall_cards_read_their_conditions():
+    """Custom Vest takes 60 off attacks from Mega Evolution Pokemon ex only,
+    and not on a Mega; Legendary Pyroduct switches off Evolution Pokemon's
+    Abilities only; Tasty Rice Ball heals 30 more for each copy already in
+    the discard. All three compiled without the clause."""
+    import ability_engine as AE
+    V, D, E, me, op = _mill_board()
+    M = V.load_model("decks/field/mega_malamar_ex_psychic_marionette.txt", "m")[0]
+    mp = V.Player("m", M[1], list(M[2]), V.compile_effects_for(M[1], M[3]))
+    me.active.tool = "Custom Vest"
+    check("Custom Vest: 60 off a Mega Malamar ex's attack",
+          V.tool_damage_reduction(me, me.active, mp, V.InPlay("Mega Malamar ex", 1))[0] == 60, None)
+    check("and nothing off Raging Bolt ex's",
+          V.tool_damage_reduction(me, me.active, op, op.active)[0] == 0,
+          V.tool_damage_reduction(me, me.active, op, op.active))
+    me.stadium = op._opp_stadium = "Legendary Pyroduct"
+    dud = V.InPlay("Dudunsparce", 1)
+    me.bench.append(dud)
+    check("Pyroduct: Dudunsparce (Stage 1) has no Ability", AE.ability_disabled(me, dud), None)
+    check("but a Basic keeps its own", not AE.ability_disabled(op, op.active), None)
+    me.stadium = op._opp_stadium = None
+    me.active.damage = 150
+    me.discard = ["Tasty Rice Ball"] * 2
+    for a in V.trainer_effect_ir("Tasty Rice Ball").actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("Tasty Rice Ball with 2 in the discard heals 90", me.active.damage == 60, me.active.damage)
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL

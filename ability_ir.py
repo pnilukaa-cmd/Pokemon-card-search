@@ -1164,6 +1164,9 @@ def _r(m, text):
         return []
     if re.search(r"a number of cards up to the number of your benched", text, re.I):
         return []                       # search_per_benched owns it
+    if re.search(r"in any combination of [^.]+ cards?,? (?:reveal them, and )?put them"
+                 r" into your hand", text, re.I):
+        return []                       # search_any_combination owns it
     if re.search(r"flip a coin\. if heads, search your deck for[^.]+\. if tails, "
                  r"search your deck for", text, re.I):
         return []                       # search_by_coin owns it
@@ -1913,6 +1916,38 @@ def _r(m, text):
     return [Action(Op.HEAL_MULTIPLIER, 2, Target.BOTH_ALL)]
 
 
+def _search_part(part):
+    """One half of "in any combination of <part> and <part> cards"."""
+    p = part.strip()
+    low = p.lower()
+    for kind in ("supporter", "stadium", "item"):
+        if low.rstrip("s") == kind:
+            return {"kind": kind}
+    m = re.fullmatch(r"(basic )?(?:(" + TYPES + r") )?energy", low, re.I)
+    if m:
+        return {"kind": "energy", "type": (m.group(2) or "").capitalize() or None,
+                "basic": bool(m.group(1))}
+    m = re.fullmatch(r"(.+?) pok[eé]mon", p, re.I)
+    if m:
+        q = m.group(1).strip()
+        if q.capitalize() in [t.capitalize() for t in TYPES.strip("()").split("|")]:
+            return {"kind": "pokémon", "type": q.capitalize()}
+        return {"kind": "pokémon", "name_contains": q}
+    return {"name_contains": p}
+
+
+@rule("search_any_combination",
+      r"search your deck for up to (\d+) in any combination of ([^.]+?) and ([^.]+?)"
+      r" cards?,? (?:reveal them, and )?put them into your hand")
+def _r(m, text):
+    """Aarune (Supporter and Stadium), Celebi (Grass Pokemon and Stadium),
+    Heatmor and Ethan's Adventure (Fire / Ethan's Pokemon and Basic Fire
+    Energy). The plain search rule read the "in any combination of" as part
+    of a card NAME, so all four searched for nothing."""
+    return [Action(Op.SEARCH_TO_HAND, int(m.group(1)), Target.SELF,
+                   {"any_of": [_search_part(m.group(2)), _search_part(m.group(3))]})]
+
+
 @rule("hand_to_bottom",
       r"you may put a card from your hand on the bottom of your deck")
 def _r(m, text):
@@ -2374,6 +2409,10 @@ def _r(m, text):
         filt["type"] = mm.group(1).capitalize()
     if "rule box" in seg:
         filt["rule_box_only"] = True
+    # Legendary Pyroduct: "Evolution Pokemon in play (both yours and your
+    # opponent's) have no Abilities". Read as every Pokemon in play.
+    if re.search(r"evolution pok[eé]mon in play", seg):
+        filt["evolution_only"] = True
     # Gastrodon's Sticky Bind: "Benched Stage 2 Pokemon".
     if re.search(r"benched stage 2 pok[eé]mon", seg):
         filt["bench_only"], filt["stage"] = True, "Stage 2"
@@ -4008,6 +4047,23 @@ _SAME_HAND_GATE_RE = re.compile(
     r"if you have the same number of cards in your hand as your opponent", re.I)
 
 
+_HEAL_PER_DISCARD_RE = re.compile(
+    r"for each ([\w'’ -]+?) cards? \(not including this card\) in your discard pile,"
+    r" heal (\d+) more damage", re.I)
+
+
+def _stamp_heal_per_discard(eff, text):
+    """Tasty Rice Ball: "Heal 30 damage ... For each Tasty Rice Ball card
+    (not including this card) in your discard pile, heal 30 more damage."
+    The second sentence was dropped, so the fourth copy healed 30."""
+    m = _HEAL_PER_DISCARD_RE.search(text)
+    if not m:
+        return
+    for a in eff.actions:
+        if a.op is Op.HEAL:
+            a.filter = dict(a.filter or {}, more_per_discard=[m.group(1).strip(), int(m.group(2))])
+
+
 def compile_effect(source, name, text):
     eff = Effect(source, name, text)
     if not text.strip():
@@ -4073,6 +4129,7 @@ def compile_effect(source, name, text):
     eff.actions = _collapse_duplicate_attachments(eff, spans)
     _stamp_target_restrictions(eff)
     _stamp_coin_repeats(eff, text)
+    _stamp_heal_per_discard(eff, text)
     _order_draw_after_its_condition(eff, text)
 
     if not eff.actions:

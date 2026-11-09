@@ -837,6 +837,32 @@ def card_kind_out_of_play(pl, k, n):
     return k
 
 
+def _search_spec_ok(pl, k, n, spec):
+    """Does a deck card match one part of an "any combination of" search?"""
+    k = card_kind_out_of_play(pl, k, n)
+    kind = (spec.get("kind") or "").lower()
+    if kind.startswith("pok"):
+        if k != "Pokemon":
+            return False
+        if spec.get("type") and spec["type"] not in (pl.POKEMON.get(n, {}).get("types") or []):
+            return False
+    elif kind == "energy":
+        if k != "Energy":
+            return False
+        if spec.get("basic") and not IR_BASIC_ENERGY_RE.match(n):
+            return False
+        if spec.get("type") and spec["type"].lower() not in n.lower():
+            return False
+    elif kind and k.lower() != kind:
+        return False
+    want = spec.get("name_contains")
+    return not want or want.lower() in n.lower()
+
+
+IR_BASIC_ENERGY_RE = re.compile(r"^(?:Basic )?(Grass|Fire|Water|Lightning|Psychic|Fighting|"
+                                r"Darkness|Metal|Fairy) Energy$")
+
+
 def _find_in_deck(pl, pred):
     for i, (k, n) in enumerate(pl.deck):
         if pred(k, n):
@@ -1658,9 +1684,15 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         hits = [h for h in hits if _heal_qualifies(pl, h, f)]
 
         mult = heal_multiplier(pl)
+        base = act.amount or 0
+        if f.get("more_per_discard"):
+            # The card is discarded after it resolves, so every copy in the
+            # discard pile is "not this card".
+            what, per = f["more_per_discard"]
+            base += per * sum(1 for n in pl.discard if n == what)
 
         def _amount(h):
-            return h.damage if f.get("all") else min(h.damage, (act.amount or 0) * mult)
+            return h.damage if f.get("all") else min(h.damage, base * mult)
         if f.get("one"):
             # "1 of your Pokemon": the player's pick (default: the one it
             # heals most).
@@ -2042,6 +2074,29 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 if act.filter.get("distinct") and n in got:
                     return False
                 return not want or want.lower() in n.lower()
+            any_of = act.filter.get("any_of")
+            if any_of:
+                # Aarune / Celebi / Heatmor / Ethan's Adventure: "up to 3 in
+                # any combination of <a> and <b>". A different card each
+                # time while there is one -- three Lillie's is not a pick.
+                # Each part once first (Aarune: a Supporter AND a Stadium).
+                covered = [i for i, sp in enumerate(any_of)
+                           if any(_search_spec_ok(pl, k, n, sp) for k, n in
+                                  [c for c in pl.hand[len(pl.hand) - len(got):]])]
+                def any_pred(k, n, fresh, parts):
+                    if fresh and n in got:
+                        return False
+                    return any(_search_spec_ok(pl, k, n, any_of[i]) for i in parts)
+                every = range(len(any_of))
+                todo = [i for i in every if i not in covered]
+                card = (_find_in_deck(pl, lambda k, n: any_pred(k, n, True, todo))
+                        or _find_in_deck(pl, lambda k, n: any_pred(k, n, True, every))
+                        or _find_in_deck(pl, lambda k, n: any_pred(k, n, False, every)))
+                if not card:
+                    break
+                pl.hand.append(card)
+                got.append(card[1])
+                continue
             alt = act.filter.get("or_pokemon")
             if alt:
                 # Fighting Gong: the Energy or a Basic Pokemon of the type.
@@ -3822,6 +3877,14 @@ def _prize_clause_ok(eff, side, holder, taker, loser, spot, attacker,
         if m and m.group(1).capitalize() in _REAL_TYPES and \
                 m.group(1).capitalize() not in query_types(loser, spot):
             return False
+        # Legendary Summit: "Whenever a Colorless Pokemon (yours or your
+        # opponent's) is Knocked Out". Unread, it cut a Prize on EVERY
+        # Knock Out by an attack, the opponent's ex included.
+        m = re.search(r"whenever an? (\w+) pokemon (?:\(yours or your opponent'?s\) )?"
+                      r"is knocked out", t)
+        if m and m.group(1).capitalize() in _REAL_TYPES and \
+                m.group(1).capitalize() not in query_types(loser, spot):
+            return False
         if "opponent's active pokemon is knocked out" in t and spot is not loser.active:
             return False
         if "opponent's basic pokemon is knocked out" in t and \
@@ -4043,6 +4106,8 @@ def ability_disabled(owner, spot, ability_name=None):
         if f.get("bench_only") and spot not in owner.bench:
             continue
         if f.get("stage") and info.get("stage") != f["stage"]:
+            continue
+        if f.get("evolution_only") and info.get("stage") in (None, "Basic"):
             continue
         ex = f.get("except")
         if ex and (ex == ability_name or ex in (info.get("subtypes") or [])):

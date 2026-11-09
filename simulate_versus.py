@@ -541,6 +541,15 @@ def tool_damage_reduction(owner, spot, attacker_owner, attacker):
     m = _re.search(r"takes (\d+) less damage from attacks from your opponent's ([^.(]+?) ?\(", text, _re.I)
     if m:
         who = m.group(2).lower()
+        # Custom Vest: "If the Pokemon this card is attached to isn't a Mega
+        # Evolution Pokemon ex, it takes 60 less damage from attacks from
+        # your opponent's Mega Evolution Pokemon ex". No type named, so it
+        # took 60 off EVERY attack, on any holder.
+        if "mega evolution" in who:
+            mega = lambda pl_, p_: "MEGA" in ((pl_.POKEMON.get(p_.name) or {}).get("subtypes") or [])
+            if "isn't a mega evolution" in text.lower() and mega(owner, spot):
+                return 0, False
+            return (int(m.group(1)), False) if mega(attacker_owner, attacker) else (0, False)
         if "that have an ability" in who:
             ok = bool(attacker_owner.EFFECTS.get(attacker.name))
         else:
@@ -1006,6 +1015,20 @@ def _stadium_has_effect(name, pl):
             if poisons and opp is not None and opp.active is not None \
                     and "Darkness" not in _types_of(opp, opp.active):
                 return True
+        # Legendary Summit: "Whenever a Colorless Pokemon (yours or your
+        # opponent's) is Knocked Out by damage from an attack ..., that
+        # player takes 1 fewer Prize card." It covers both sides: worth it
+        # while at least as many of mine as theirs are that type. Without
+        # this it was never put down.
+        if a.op is IR.Op.MODIFY_PRIZE:
+            mt = _re.search(r"whenever an? (\w+) pok[eé]mon", eff0.text or "", _re.I)
+            opp = getattr(pl, "_opp_ref", None)
+            if mt and opp is not None:
+                typ = mt.group(1).capitalize()
+                mine = sum(1 for p in pl.in_play() if typ in _types_of(pl, p))
+                theirs = sum(1 for p in opp.in_play() if typ in _types_of(opp, p))
+                if mine and mine >= theirs:
+                    return True
         # Legendary Trench: worth it to a deck that heals (it doubles the
         # opponent's heals too, so not otherwise).
         if a.op is IR.Op.HEAL_MULTIPLIER:
