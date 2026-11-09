@@ -141,6 +141,13 @@ class Op:
     # Accompanying Flute: the opponent's Basics from their top 5 onto their
     # Bench -- fresh bodies with no Energy for a gust-and-lock deck.
     FILL_OPPONENT_BENCH = "fill_opponent_bench"
+    # Bug Out (Masquerain, Spinarak, Combee, Sizzlipede) and Iron Thorns'
+    # Destructo-Press: what happens to the cards an attack revealed from
+    # its own deck (the damage itself is counted by the simulator).
+    REVEAL_OWN_DECK = "reveal_own_deck"
+    # Jellicent's Deep Sea Draw: "you may put a card from your hand on the
+    # bottom of your deck" -- the card Bug Out wants to find there.
+    HAND_TO_BOTTOM = "hand_to_bottom"
     SET_OPPONENT_HAND = "set_opponent_hand"
     # Discard down to a hand size -- the symmetric half of
     # DISCARD_FROM_OPPONENT, for Hand Trimmer.
@@ -167,6 +174,8 @@ class Op:
     WEAKEN_DEFENDER = "weaken_defender"
     # "Heal from this Pokemon the same amount of damage you did."
     HEAL_AS_DEALT = "heal_as_dealt"
+    # Legendary Trench: "double the amount of damage healed" (both sides).
+    HEAL_MULTIPLIER = "heal_multiplier"
     # Bounce / recall shapes.
     SELF_TO_HAND = "self_to_hand"
     SELF_TO_DECK = "self_to_deck"
@@ -600,6 +609,14 @@ def parse_conditions(text):
     m = re.search(r"\b[Ii]f ([A-Z][\w'’ -]+?) is in play", t)
     if m:
         out.append({"kind": "stadium_in_play", "name": m.group(1).strip()})
+    # Delta Reign's Groudon and Kyogre: "If a Stadium that has "Legendary"
+    # in its name is in play, this attack ...". Only where it gates the
+    # attack itself: Tate & Liza's Training draws either way and only its
+    # return-to-hand clause reads the Stadium.
+    m = re.search(r"\b[Ii]f a Stadium that has [\"“']([^\"”']+)[\"”'] in its name is in"
+                  r" play, this (?:attack|pok[eé]mon)", t)
+    if m:
+        out.append({"kind": "stadium_name_contains", "name": m.group(1).strip()})
     # Lurantis ex's Lively Cutter is 60 that becomes 260 "if this Pokemon
     # was healed during this turn" -- the payoff the whole heal-punish
     # archetype is built on, and the clause had no condition kind, so
@@ -706,8 +723,11 @@ def parse_costs(text):
     m = re.search(r"discard (\d+|a|an|two|three) cards? from your hand in order to use", t, re.I)
     if m:
         out.append({"kind": "discard_hand", "amount": _num(m.group(1))})
+    # Quaquaval's Up-Tempo: the card goes to the BOTTOM of the deck, not
+    # the discard. It was paid as a discard, which lost the card -- and a
+    # Bug Out deck stacks its bottom with exactly this.
     if re.search(r"put a card from your hand on the bottom of your deck in order to use", t, re.I):
-        out.append({"kind": "discard_hand", "amount": 1})
+        out.append({"kind": "bottom_hand", "amount": 1})
     # The Item phrasing of the same cost. "You can use this card only if you
     # discard 3 other cards from your hand" is Secret Box, and it parsed as
     # free -- the card matched no rule at all, so nothing noticed.
@@ -1827,6 +1847,79 @@ def _r(m, text):
 
 
 # ---- board control -------------------------------------------------------
+
+def reveal_spec(what, attack=None):
+    """What "for each <what> you find there [that has the <attack> attack]"
+    counts, as a spec the simulator's matcher reads.
+
+    "Pokémon ... that has the Bug Out attack" -> {"pokemon", "attack"};
+    "Future card" -> {"subtype": "Future"}; "Energy card" -> {"kind"}."""
+    w = (what or "").strip().lower()
+    if attack:
+        return {"pokemon": True, "attack": attack.strip()}
+    if w in ("pokémon", "pokemon"):
+        return {"pokemon": True}
+    m = re.match(r"(?:basic )?(\w+) energy cards?$|energy cards?$", w)
+    if m:
+        return {"kind": "Energy"}
+    m = re.match(r"([\w'’-]+) cards?$", w)
+    if m:
+        return {"subtype": m.group(1).capitalize()}
+    return {"name_contains": w}
+
+
+# "Reveal the bottom 7 cards of your deck, and this attack does 50 damage
+# for each Pokémon you find there that has the Bug Out attack. Then, shuffle
+# any revealed Pokémon back into your deck. Discard the other cards."
+# "Reveal the top 5 cards of your deck. This attack does 70 damage for each
+# Future card you find there. Then, discard those Future cards and shuffle
+# the other cards back into your deck."  The damage is the simulator's
+# (it knows which cards are where); this is what happens to the cards.
+OWN_REVEAL_RE = re.compile(
+    r"reveal the (top|bottom) (\d+) cards of your deck[.,] (?:and )?this attack"
+    r" does (\d+) damage for each ([^.]+?) you find there"
+    r"(?: that has the ([\w'’ -]+?) attack)?\.", re.I)
+
+
+@rule("reveal_own_deck_scaler",
+      r"reveal the (top|bottom) (\d+) cards of your deck[.,] (?:and )?this attack"
+      r" does \d+ damage for each ([^.]+?) you find there(?: that has the"
+      r" ([\w'’ -]+?) attack)?\. then, (shuffle any revealed pok[eé]mon back into"
+      r" your deck\. discard the other cards|discard those [\w'’ -]+? cards and"
+      r" shuffle the other cards back into your deck)")
+def _r(m, text):
+    end, n = m.group(1).lower(), int(m.group(2))
+    if m.group(5).lower().startswith("shuffle any revealed"):
+        f = {"end": end, "split": {"pokemon": True}, "split_to": "deck"}
+    else:
+        f = {"end": end, "split": reveal_spec(m.group(3), m.group(4)),
+             "split_to": "discard"}
+    return [Action(Op.REVEAL_OWN_DECK, n, Target.SELF, f)]
+
+
+@rule("each_player_shuffle_draw",
+      r"each player shuffles their hand into their deck and draws (\d+) cards?")
+def _r(m, text):
+    """Mantine's Make Waves (Judge's text on an attack)."""
+    n = int(m.group(1))
+    return [Action(Op.SHUFFLE_HAND_INTO_DECK, None, Target.SELF),
+            Action(Op.DRAW, n, Target.SELF),
+            Action(Op.SET_OPPONENT_HAND, n, Target.OPPONENT,
+                   {"shuffle": True, "always": True})]
+
+
+@rule("heal_multiplier", r"double the amount of damage healed")
+def _r(m, text):
+    return [Action(Op.HEAL_MULTIPLIER, 2, Target.BOTH_ALL)]
+
+
+@rule("hand_to_bottom",
+      r"you may put a card from your hand on the bottom of your deck")
+def _r(m, text):
+    if re.search(r"in order to use", text, re.I):
+        return []                       # a cost (Up-Tempo), parse_costs owns it
+    return [Action(Op.HAND_TO_BOTTOM, 1, Target.SELF, {"optional": True})]
+
 
 @rule("fill_opponent_bench",
       r"reveal the top (\d+) cards of your opponent'?s deck\. you may choose any"
@@ -3749,7 +3842,9 @@ def _r(m, text):
 
 
 @rule("put_self_onto_bench_from_hand",
-      r"you may put this pok[eé]mon onto your bench")
+      # Talonflame ex's Excited Dive: "...you may use this Ability. Put this
+      # Pokémon onto your Bench."
+      r"you may (?:use this ability\. )?put this pok[eé]mon onto your bench")
 def _r(m, text):
     return [Action(Op.SEARCH_TO_BENCH, 1, Target.YOUR_BENCHED, {"from": "hand", "self": True})]
 

@@ -29,6 +29,9 @@ BOILERPLATE = [
     r"You can'?t have more than 1 ACE SPEC card in your deck\.?",
     r"You may play (any number of Item|only 1 Supporter) cards? during your turn\.?",
     r"Any attached cards, damage counters, Special Conditions, turns in play, and any other effects remain on the new Pok[eé]mon\.?",
+    # The rule-box reminder, which Mega Rayquaza Cap (a Tool) prints too.
+    r"(Mega Evolution )?(Pok[eé]mon )?ex [Rr]ule: When your (Mega Evolution )?Pok[eé]mon ex is Knocked Out,"
+    r" your opponent takes \d Prize cards?\.?",
 ]
 
 

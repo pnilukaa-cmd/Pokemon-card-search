@@ -11,15 +11,13 @@ a Toxel / Toxtricity line, a Vullaby / Mandibuzz line, 4 Accompanying
 Flute) reads 61.68% (median 63.2%, 83 winning). On the same seeds this list
 is **+15.82 ± 0.58** over it, better on all 104.
 
-**Read this first: the Delta Reign cards are provisional.** The English set
-came out today and neither card API this project reads (pokemontcg.io,
-TCGdex) carries it yet. Sableye, Inkay and Mega Malamar ex are in the pool
-from the Japanese Storm Emeralda (TCGdex, M6-046 to 048): HP, costs and
-damage as printed, English text written in the template of the pool's card
-with the same effect, names and numbers (DLR 60, 68, 69) from retailers.
-Two attack names (Ominous Lick, Eerie Wave) are placeholders. Check the
-cards in PTCGL; when the card API carries the set, they are replaced (a
-copy is in `provisional_cards_delta_reign.json`).
+**The Delta Reign cards were provisional when this was built** (the
+English set was not in any card API yet): Sableye, Inkay and Mega Malamar
+ex came from the Japanese Storm Emeralda (TCGdex, M6-046 to 048). On
+2026-11-09 pokemontcg.io carried the English set and it replaced them. The
+official text matches what was measured here; the one difference is the
+name of Sableye's second attack, Ominous Eyes, which compiles the same.
+DLR 60 / 68 / 69 and the set code DLR are official.
 
 ## The cards
 
@@ -27,14 +25,14 @@ copy is in `provisional_cards_delta_reign.json`).
   2, **weak to Grass**, 3 Prizes):
   - **Psychic Marionette** (Darkness, Darkness): 70 damage for each of
     the opponent's Benched Pokémon. A full Bench is 350.
-  - **(Eerie Wave)** (Darkness ×3): 200, and the opponent's Active is
+  - **Eerie Wave** (Darkness ×3): 200, and the opponent's Active is
     Confused.
 - **Inkay** (DLR 68, Basic, 60 HP): **Knock Off** (Darkness), 10, and
   discard a random card from the opponent's hand. This, not Sableye, is
   the set's hand disruption.
 - **Sableye** (DLR 60, Basic, 80 HP): **Lure Out** (Darkness), reveal the
   top 5 of the opponent's deck and put any Basic Pokémon there onto their
-  Bench; **(Ominous Lick)** (Darkness, Colorless), 5 damage counters on
+  Bench; **Ominous Eyes** (Darkness, Colorless), 5 damage counters on
   any of their Pokémon.
 - **Pecharunt ex** (SFA 39): Subjugating Chains, switch a Benched Darkness
   Pokémon into the Active Spot (it is Poisoned): a free way to bring a
@@ -151,7 +149,8 @@ Stadiums) is untested here.
 
 ## Engine changes made for this deck
 
-- **Provisional Delta Reign cards** in the pool (above).
+- **Provisional Delta Reign cards** in the pool (above), replaced by the
+  official set on 2026-11-09.
 - **Lure Out did nothing as an attack:** fill_opponent_bench (Accompanying
   Flute's effect) was not an attack rider. It is now.
 - **Tried and taken out:** playing Accompanying Flute for, and pricing
@@ -172,8 +171,7 @@ Stadiums) is untested here.
 
 ## Import
 
-The Delta Reign set code is written DLR, as retailers list it; check it
-imports.
+DLR is Delta Reign's official PTCGL set code.
 
 ```
 Pokémon: 11

@@ -239,7 +239,10 @@ FAMILIES = [
      r"[Ss]huffle (up to \d+ )?(Basic )?[A-Za-z]* ?Energy cards? from your discard pile into your deck"),
     ("energy_attach_bonus", "produce",
      r"attach (up to \d+ |a |an |any number of )?(Basic )?[A-Za-z]* ?Energy cards? (from your (hand|discard pile)|you find there)|"
-     r"attach .*Energy card.*from your hand to your Pok[eé]mon"),
+     r"attach .*Energy card.*from your hand to your Pok[eé]mon|"
+     # Magmortar's Buddy Boost names its targets: "...or 1 of each from your
+     # hand to your Electivire and Magmortar in any way you like."
+     r"attach a Basic [A-Za-z]+ Energy card, .{0,80}from your hand to your [A-Z]"),
     ("energy_attach_to_opponent", "produce",
      r"[Ee]nergy cards? from your opponent'?s discard pile to their"),
     ("energy_move_between_own", "produce",
@@ -260,6 +263,9 @@ FAMILIES = [
      r"more damage for each [A-Za-z]* ?Energy attached|"
      r"damage for each type of Basic Energy attached|"
      r"damage for each [A-Za-z]* ?Energy( card)? attached to (this Pok[eé]mon|all)|"
+     # Mega Rayquaza ex's Storm Emerald: "for each Fire Energy and each
+     # Lightning Energy attached to all of your Pokémon."
+     r"damage for each [A-Za-z]+ Energy and each [A-Za-z]+ Energy attached to|"
      r"damage for each [A-Za-z]* ?Energy attached to your opponent'?s Active"),
     ("damage_scales_with_energy_in_discard", "consume",
      r"damage for each (Basic )?[A-Za-z]* ?Energy card in your (opponent'?s )?discard pile"),
@@ -299,7 +305,8 @@ FAMILIES = [
     # "Pokemon" appears later as the attach target, not the search target.
     ("deck_search_pokemon", "produce",
      r"search (your|their) deck for (a |an |up to \d+ )?[A-Za-z][\w' ]{0,36}Pok[eé]mon"),
-    ("deck_search_trainer", "produce", r"search (your|their) deck for (a |an |up to \d+ )?(Supporter|Item|Stadium|Trainer)"),
+    ("deck_search_trainer", "produce",
+     r"search (your|their) deck for (a |an |up to \d+ (in any combination of )?)?(Supporter|Item|Stadium|Trainer)"),
     ("deck_search_generic", "produce",
      r"search (your|their) deck for (a |an |up to \d+ |any number of )?[\w' ]{0,25}cards?\b"),
     ("search_to_bench_generic", "produce", r"put (them|it|those Pok[eé]mon) onto (your|their) Bench"),
@@ -361,7 +368,7 @@ FAMILIES = [
      r"Defending Pok[eé]mon is a [\w' ]+, it can'?t attack|"
      r"opponent'?s next turn,? Pok[eé]mon.*can'?t (attack|use attacks)"),
     ("attack_locked_by_condition_self", "produce",
-     r"this Pok[eé]mon can'?t attack (unless|if)|"
+     r"this Pok[eé]mon can'?t (use )?attacks? (unless|if)|"
      r"^If [\w' ,]+, this Pok[eé]mon can'?t attack"),
     ("attack_lock_specific_opponent", "produce",
      r"that Pok[eé]mon can'?t use that attack|can'?t use [A-Za-z' ]+ during your opponent'?s next turn"),
@@ -429,6 +436,19 @@ FAMILIES = [
     # or the top of their deck: fuel for the opponent-Bench scalers
     # (damage_scales_with_opponent_pokemon_count). They sat under
     # search_to_bench_generic (your own Bench) and hand_reveal_opponent.
+    # Bug Out (Delta Reign Masquerain, Spinarak, Combee; Pitch Black
+    # Sizzlipede): 50 for each Bug Out Pokémon in the bottom 7 of your deck.
+    # Its fuel is anything that puts chosen cards on the bottom: Kofu,
+    # Jellicent's Deep Sea Draw.
+    ("damage_scales_with_deck_bottom", "consume",
+     r"reveal the bottom \d+ cards of your deck, and this attack does \d+ damage for each"),
+    ("deck_bottom_stack_self", "produce",
+     r"put (a card|\d+ cards?) from your hand on the bottom of your deck"),
+    # Talonflame ex's Excited Dive: benches itself from the hand.
+    ("bench_self_from_hand", "produce",
+     r"if this Pok[eé]mon is in your hand.{0,120}put this Pok[eé]mon onto your Bench"),
+    # Legendary Trench: "double the amount of damage healed".
+    ("heal_amplify", "consume", r"double the amount of damage healed"),
     ("fill_opponent_bench", "produce",
      r"you find there (?:and put those pok[eé]mon )?onto (?:their|your opponent'?s) bench"),
     ("hand_size_match_payoff", "consume",
@@ -541,7 +561,8 @@ FAMILIES = [
     ("energy_salvage_on_ko", "produce",
      r"Knocked Out by damage from an attack from your opponent'?s Pok[eé]mon,?.*(move|put) .*Energy.*(to (1 of )?your Benched|into your hand instead of the discard pile)"),
     ("damage_scales_with_revealed_subtype", "consume", r"damage for each [A-Za-z]+ card you find there"),
-    ("damage_scales_with_revealed_count", "consume", r"damage for each card you revealed in this way"),
+    ("damage_scales_with_revealed_count", "consume",
+     r"damage for each (card|different type of Pok[eé]mon) you revealed in this way"),
     ("grants_attack_via_tool", "produce", r"can use the attack on this card"),
     ("hand_deck_top_swap", "produce", r"[Ss]witch a card from your hand with the top card of your deck"),
     ("ability_pokemon_play_lock", "produce",
@@ -593,7 +614,10 @@ FAMILIES = [
     ("tool_attached_conditional_trigger", "consume",
      r"if (this Pok[eé]mon|your opponent'?s Active Pok[eé]mon) has a Pok[eé]mon Tool attached"),
     ("damage_boost_if_stadium_in_play", "consume",
-     r"if (a Stadium is in play|you have a Stadium in play)"),
+     r"if (a Stadium is in play|you have a Stadium in play)|"
+     # Delta Reign's Groudon and Kyogre: "If a Stadium that has "Legendary"
+     # in its name is in play".
+     r"if a Stadium that has [\"“'][^\"”']+[\"”'] in its name is in play"),
     ("status_checkup_damage_multiplier", "produce",
      r"(put|place) \d+ damage counters? instead of \d+ on (that Pok[eé]mon|1 of)|"
      r"during Pok[eé]mon Checkup, (put|place) \d+ damage counters? on that Pok[eé]mon instead of 1"),
@@ -672,6 +696,8 @@ def main():
         ("bench_damage_spread", "damage_reduction_team"),
         ("self_ko_for_effect", "prize_reduction_opponent"),
         ("weakness_modify", "damage_boost_conditional_generic"),
+        ("deck_bottom_stack_self", "damage_scales_with_deck_bottom"),
+        ("heal_team", "heal_amplify"),
     ]
 
     results = []

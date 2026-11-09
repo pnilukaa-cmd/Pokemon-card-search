@@ -151,7 +151,8 @@ runs Gothitelle, Iron Boulder, Noivern, the CRI Ampharos or Fletchling.
 
 `mega_malamar_ex_psychic_marionette` was added to the field after this run
 too (2026-11-06), with three provisional Delta Reign cards in the pool
-(Sableye, Inkay, Mega Malamar ex). b2d5545 makes Lure Out (fill the
+(Sableye, Inkay, Mega Malamar ex; the official set replaced them on
+2026-11-09 with the same text). b2d5545 makes Lure Out (fill the
 opponent's Bench) run as an attack; no field deck has such an attack.
 
 | # | deck | mean | median | winning | best matchup | worst |

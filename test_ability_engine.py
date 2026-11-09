@@ -7586,6 +7586,21 @@ def test_the_baseline_sim_plays_salvatore_and_lucian():
           sizes == {3, 6} and st.deck[:2] == [("Pokemon", "Budew")] * 2, (sizes, st.deck[:2]))
 
 
+def test_the_baseline_sim_plays_lanas_aid():
+    """Lana's Aid sat in hand in the baseline (listed as unmodeled for the
+    submitted Bug Out list): up to 3 in any combination of Pokemon without
+    a Rule Box and Basic Energy from the discard into the hand."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model(open("test_fixtures/bug_out_masquerain.txt").read())[0]
+    st = SB.GameState([("Energy", "Grass Energy")] * 20)
+    st.hand = [("Supporter", "Lana's Aid")]
+    st.discard = ["Latias ex", "Spinarak", "Grass Energy", "Kofu", "Combee", "Masquerain"]
+    SB.play_supporter(st, P, [])
+    got = sorted(n for _, n in st.hand)
+    check("Lana's Aid takes 3, never Latias ex (Rule Box) or Kofu",
+          got == ["Combee", "Grass Energy", "Spinarak"], (got, st.discard))
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL
@@ -7714,6 +7729,165 @@ def test_lure_out_fills_the_opponents_bench():
     V.do_attack(me, op, [])
     check("Lure Out puts the 2 Basics in the top 5 onto their Bench",
           [b.name for b in op.bench] == ["Raging Bolt ex"] * 2, [b.name for b in op.bench])
+
+
+def _bug_out_board(seed=0):
+    """The Bug Out fixture (a submitted Delta Reign list) against Raging
+    Bolt ex, Masquerain Active with a Grass Energy."""
+    import random as _r
+    _r.seed(seed)
+    V, D, E = _real("test_fixtures/bug_out_masquerain.txt", "me")
+    O = V.load_model("decks/field/meta_raging_bolt.txt", "o")[0]
+    me = V.Player("me", D[1], list(D[2]), E)
+    op = V.Player("o", O[1], list(O[2]), V.compile_effects_for(O[1], O[3]))
+    me.round_no = op.round_no = 3
+    me._opp_ref, op._opp_ref = op, me
+    me.active = V.InPlay("Masquerain", 1)
+    me.active.energy, me.active.energy_names = [["Grass"]], ["Grass Energy"]
+    op.active, op.bench = V.InPlay("Raging Bolt ex", 1), []
+    me.stadium = me._opp_stadium = op.stadium = op._opp_stadium = None
+    return V, D, E, me, op
+
+
+def test_bug_out_counts_the_bottom_of_its_own_deck():
+    """Bug Out (Delta Reign Masquerain, Spinarak, Combee; Pitch Black
+    Sizzlipede): "Reveal the bottom 7 cards of your deck, and this attack
+    does 50 damage for each Pokemon you find there that has the Bug Out
+    attack. Then, shuffle any revealed Pokemon back into your deck. Discard
+    the other cards." "You find there" was read as the opponent's revealed
+    hand: it did 50 for each Pokemon in THEIR hand, and the revealed cards
+    stayed put."""
+    V, D, E, me, op = _bug_out_board()
+    op.hand = [("Pokemon", "Raging Bolt ex")] * 2 + [("Item", "x")] * 3   # read as 100
+    me.deck = ([("Pokemon", "Spinarak"), ("Pokemon", "Combee"), ("Pokemon", "Sizzlipede"),
+                ("Pokemon", "Surskit")] + [("Item", "Poké Pad")] * 3
+               + [("Supporter", "Hilda")] * 10)                   # index 0 = bottom
+    bug = next(a for a in D[1]["Masquerain"]["attacks"] if a["name"] == "Bug Out")
+    me._forced_attack = bug
+    V.do_attack(me, op, [])
+    check("Bug Out: 50 for each of the 3 Bug Out Pokemon in its bottom 7 (Surskit has none)",
+          op.active.damage == 150, op.active.damage)
+    check("the 4 revealed Pokemon are shuffled back, the 3 Items discarded",
+          len(me.deck) == 14 and me.discard.count("Poké Pad") == 3, (len(me.deck), me.discard))
+
+
+def test_bug_out_decks_stack_their_bottom():
+    """Jellicent's Deep Sea Draw ("Draw a card. If you do, you may put a
+    card from your hand on the bottom of your deck") compiled as a bare
+    draw, and Kofu bottomed the two least useful cards. A Bug Out deck puts
+    Bug Out Pokemon there, and counts the ones it knows are there before it
+    attacks."""
+    import ability_engine as AE
+    V, D, E, me, op = _bug_out_board()
+    me.bench = [V.InPlay("Surskit", 1), V.InPlay("Jellicent", 1)]
+    me.deck = [("Item", "Poké Pad")] * 20
+    me.hand = [("Pokemon", "Spinarak"), ("Supporter", "Hilda")]
+    for a in E["Jellicent"][0].actions:
+        AE.apply_action(a, me, op, me.bench[1], [])
+    check("Deep Sea Draw draws, then puts Spinarak on the bottom",
+          me.deck[0] == ("Pokemon", "Spinarak") and ("Pokemon", "Spinarak") not in me.hand,
+          (me.deck[:2], me.hand))
+    me.hand = [("Supporter", "Kofu"), ("Pokemon", "Combee"), ("Item", "Poké Pad"),
+               ("Pokemon", "Sizzlipede"), ("Energy", "Basic Grass Energy")]
+    V.play_supporter(me, op, 3, [])
+    check("Kofu puts Combee and Sizzlipede under Spinarak",
+          sorted(c[1] for c in me.deck[:2]) == ["Combee", "Sizzlipede"]
+          and me.deck[2] == ("Pokemon", "Spinarak"), me.deck[:3])
+    bug = next(a for a in D[1]["Masquerain"]["attacks"] if a["name"] == "Bug Out")
+    check("before the attack, it counts the 3 it knows are on the bottom",
+          V.attack_damage(me, op, me.active, bug) == 150, V.attack_damage(me, op, me.active, bug))
+
+
+def test_legendary_stadium_gates_groudon_and_kyogre():
+    """Delta Reign's Groudon (Brutal Lands, +170) and Kyogre (Brutal
+    Whirlpool, 50 to each Benched) only with "a Stadium that has
+    "Legendary" in its name" in play. Groudon's bonus was never paid and
+    Kyogre's spread fired with no Stadium at all."""
+    V, D, E, me, op = _bug_out_board()
+    lands = dict(D[1]["Masquerain"]["attacks"][0], name="Brutal Lands", cost=["Colorless"],
+                 damage=100, text='If a Stadium that has "Legendary" in its name is in play, '
+                                  'this attack does 170 more damage.')
+    check("Brutal Lands with no Stadium: 100", V.attack_damage(me, op, me.active, lands) == 100,
+          V.attack_damage(me, op, me.active, lands))
+    me.stadium = op._opp_stadium = "Legendary Trench"
+    check("Brutal Lands with Legendary Trench: 270",
+          V.attack_damage(me, op, me.active, lands) == 270, V.attack_damage(me, op, me.active, lands))
+    pool = dict(lands, name="Brutal Whirlpool",
+                text='If a Stadium that has "Legendary" in its name is in play, this attack also '
+                     "does 50 damage to each of your opponent's Benched Pokémon. (Don't apply "
+                     "Weakness and Resistance for Benched Pokémon.)")
+    for stadium, want in ((None, 0), ("Legendary Trench", 50)):
+        me.stadium = op._opp_stadium = stadium
+        op.active, op.bench = V.InPlay("Raging Bolt ex", 1), [V.InPlay("Raging Bolt ex", 1)]
+        D[1]["Masquerain"] = dict(D[1]["Masquerain"], attacks=[pool])
+        me._forced_attack = pool
+        V.do_attack(me, op, [])
+        check(f"Brutal Whirlpool with Stadium {stadium}: {want} on the Bench",
+              op.bench[0].damage == want, op.bench[0].damage)
+
+
+def test_make_waves_and_legendary_trench():
+    """Mantine's Make Waves ("Each player shuffles their hand into their
+    deck and draws 4 cards") and Legendary Trench ("double the amount of
+    damage healed") compiled to nothing."""
+    import ability_engine as AE
+    import ability_ir as IR
+    V, D, E, me, op = _bug_out_board()
+    waves = IR.compile_effect("attack", "Make Waves",
+                              "Each player shuffles their hand into their deck and draws 4 cards.")
+    me.hand, op.hand = [("Item", "x")] * 9, []
+    me.deck, op.deck = [("Item", "y")] * 20, [("Item", "y")] * 20
+    for a in waves.actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("Make Waves: both hands are 4, an empty one included",
+          len(me.hand) == 4 and len(op.hand) == 4, (len(me.hand), len(op.hand)))
+    heal = IR.compile_effect("trainer", "Potion", "Heal 30 damage from your Active Pokémon.")
+    for stadium, want in ((None, 70), ("Legendary Trench", 40)):
+        me.stadium = op._opp_stadium = stadium
+        me.active.damage = 100
+        for a in heal.actions:
+            AE.apply_action(a, me, op, me.active, [])
+        check(f"Heal 30 with Stadium {stadium}: {100 - want} healed", me.active.damage == want,
+              me.active.damage)
+    dive = IR.compile_effect("ability", "Talonflame ex",
+                             "Once during your turn, if this Pokémon is in your hand, and if you have "
+                             "any Colorless Mega Evolution Pokémon ex in play, you may use this "
+                             "Ability. Put this Pokémon onto your Bench.")
+    check("Excited Dive benches Talonflame ex from the hand",
+          [(a.op, (a.filter or {}).get("from")) for a in dive.actions]
+          == [(IR.Op.SEARCH_TO_BENCH, "hand")], dive.actions)
+
+
+def test_merge_set_joins_reprints_and_replaces_provisional_cards():
+    """fetch_pokemon_cards --merge-set: a just-released set comes back
+    thinner than an old one (no Item reminder line, no Energy subtypes), and
+    matched exactly its reprints became second records under the same
+    name. A provisional record of the set is replaced by the API's."""
+    import copy
+    import fetch_pokemon_cards as F
+    old = {"id": "me3-82", "name": "Pokémon Catcher", "supertype": "Trainer",
+           "subtypes": ["Item"], "set": {"id": "me3", "ptcgoCode": "POR"}, "number": "82",
+           "rules": ["Flip a coin. If heads, switch in 1 of your opponent's Benched Pokémon "
+                     "to the Active Spot.", "You may play any number of Item cards during your turn."],
+           "printings": [["POR", "82"]]}
+    prov = {"id": "me6-60", "name": "Sableye", "supertype": "Pokémon", "hp": "80",
+            "set": {"id": "me6", "ptcgoCode": "DLR"}, "number": "60", "provisional": "x",
+            "attacks": [{"name": "Ominous Lick", "cost": ["Darkness"], "text": ""}],
+            "printings": [["DLR", "60"]]}
+    new = copy.deepcopy(old)
+    new.update(id="me6-129", number="129", set={"id": "me6", "ptcgoCode": "DLR"},
+               rules=old["rules"][:1], regulationMark="J")
+    new.pop("printings")
+    sab = dict(prov, attacks=[{"name": "Ominous Eyes", "cost": ["Darkness"], "text": ""}],
+               regulationMark="J")
+    sab.pop("provisional"); sab.pop("printings")
+    pool, added, reprints, dropped = F.merge_set([copy.deepcopy(old), prov], [new, sab], "me6")
+    catcher = [c for c in pool if c["name"] == "Pokémon Catcher"]
+    check("the reprint is a printing of the old record, not a second one",
+          len(catcher) == 1 and ["DLR", "129"] in catcher[0]["printings"], catcher)
+    check("the provisional Sableye is replaced by the API's",
+          [c["attacks"][0]["name"] for c in pool if c["name"] == "Sableye"] == ["Ominous Eyes"]
+          and [c["name"] for c in dropped] == ["Sableye"], pool)
 
 
 if __name__ == "__main__":

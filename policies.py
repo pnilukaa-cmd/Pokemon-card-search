@@ -195,6 +195,12 @@ GREEDY = {
     # 0.45 on a Gothitelle / Talonflame list (2026-11-02, 200 games against
     # the 103-deck field). No field deck has such a payoff. 0: off.
     "hand_match": int(__import__("os").environ.get("HAND_MATCH", 1)),
+    # A deck whose attack counts its own bottom cards (Bug Out) puts those
+    # cards there with Kofu, Deep Sea Draw and Up-Tempo (0: the least
+    # useful card, as any other deck does).
+    "stack_bottom": int(__import__("os").environ.get("STACK_BOTTOM", 1)),
+    # ...and, once two are Benched, keeps the rest of them in hand for it.
+    "hold_bottom_fuel": int(__import__("os").environ.get("HOLD_BOTTOM_FUEL", 1)),
 }
 
 # Prizes are the win condition, so chase them: a Knock Out is worth far

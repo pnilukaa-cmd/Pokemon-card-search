@@ -1006,6 +1006,19 @@ def _stadium_has_effect(name, pl):
             if poisons and opp is not None and opp.active is not None \
                     and "Darkness" not in _types_of(opp, opp.active):
                 return True
+        # Legendary Trench: worth it to a deck that heals (it doubles the
+        # opponent's heals too, so not otherwise).
+        if a.op is IR.Op.HEAL_MULTIPLIER:
+            heal_ops = (IR.Op.HEAL, IR.Op.HEAL_AS_DEALT)
+            mine = [x for effs in pl.EFFECTS.values() for e in effs for x in e.actions]
+            mine += [x for info in pl.POKEMON.values() for atk in info.get("attacks") or []
+                     for x in _attack_ir(atk).actions]
+            for _k, n in set(pl.deck + pl.hand):
+                if _k in ("Item", "Supporter"):
+                    te = trainer_effect_ir(n)
+                    mine += te.actions if te and not te.unsupported else []
+            if any(x.op in heal_ops for x in mine):
+                return True
         # Forest of Vitality: worth it with a Grass evolution in hand.
         if a.op is IR.Op.EVOLVE_EARLY:
             if any(k == "Pokemon" and pl.POKEMON[n].get("evolves_from")
@@ -2012,6 +2025,13 @@ def play_basics(pl, turn, log):
             # attacks on. Only holds back once there is a board already.
             if len(pl.bench) >= 2 and _is_discard_fuel(pl, name):
                 continue
+            # The same for a Pokemon whose job is to sit at the BOTTOM of the
+            # deck: Bug Out counts Bug Out Pokemon there, and one on the
+            # Bench is one it can never find.
+            if (len(pl.bench) >= 2 and POL.knob(pl, "hold_bottom_fuel")
+                    and _bottom_scaler_spec(pl)
+                    and _reveal_match(pl, (kind, name), _bottom_scaler_spec(pl))):
+                continue
             pl.remove_from_hand(kind, name)
             pl.bench.append(InPlay(name, turn))
             log.append(f"  {pl.name}: benches {name}")
@@ -2879,9 +2899,14 @@ def play_supporter(pl, opp, turn, log):
     if "Kofu" in hand_names and len(pl.hand) >= 3:
         use("Kofu")
         # Bottoming a card is not discarding it, but it is still the two
-        # cards you least want, not the two at the front of the list.
-        for i in cards_to_pitch(pl, 2):
-            pl.deck.insert(0, pl.hand.pop(i))
+        # cards you least want, not the two at the front of the list -- or,
+        # in a Bug Out deck, two Bug Out Pokémon for the bottom 7 to find.
+        if _bottom_scaler_spec(pl):
+            for _ in range(2):
+                AE.put_on_bottom(pl, pl.hand.pop(_bottom_pick(pl, True)))
+        else:
+            for i in cards_to_pitch(pl, 2):
+                pl.deck.insert(0, pl.hand.pop(i))
         pl.draw(4)
         log.append(f"  {pl.name}: Kofu (bottom 2, draw 4)")
         return
@@ -3188,6 +3213,85 @@ def cards_to_pitch(pl, n, exclude=None):
 
 
 AE.PITCH_RANK = pitch_rank
+
+
+def _reveal_match(pl, card, spec):
+    """Does a card match an IR.reveal_spec? Bug Out counts Pokémon that
+    have the Bug Out attack; Destructo-Press counts Future cards."""
+    kind, name = card
+    if spec.get("pokemon") and kind != "Pokemon":
+        return False
+    if spec.get("attack"):
+        want = spec["attack"].lower()
+        return any((a.get("name") or "").lower() == want
+                   for a in (pl.POKEMON.get(name) or {}).get("attacks") or [])
+    if spec.get("subtype"):
+        data = _CARDS_BY_NAME.get(M.base_of(pl.POKEMON, name) if kind == "Pokemon" else name)
+        data = data[0] if isinstance(data, list) and data else (data or {})
+        return spec["subtype"] in (data.get("subtypes") or [])
+    if spec.get("kind"):
+        return kind == spec["kind"]
+    if spec.get("name_contains"):
+        return spec["name_contains"] in str(name).lower()
+    return bool(spec.get("pokemon"))
+
+
+AE.REVEAL_MATCH = _reveal_match
+
+
+def _bottom_scaler_spec(pl):
+    """What this deck's "reveal the bottom N of your deck" attack counts
+    (Bug Out: Pokémon with the Bug Out attack), or None. Cached per deck."""
+    cache = getattr(pl, "_bottom_spec", 0)
+    if cache != 0:
+        return cache
+    spec = None
+    for info in pl.POKEMON.values():
+        for atk in info.get("attacks") or []:
+            m = IR.OWN_REVEAL_RE.search(atk.get("text") or "")
+            if m and m.group(1).lower() == "bottom":
+                spec = IR.reveal_spec(m.group(4), m.group(5))
+    pl._bottom_spec = spec
+    return spec
+
+
+def _needed_in_hand(pl, card):
+    """Would putting this Pokémon on the bottom cost the player something
+    it needs from the hand: its next Active, or the Evolution for a
+    Pokémon in play that no other copy in hand already covers?"""
+    kind, name = card
+    if kind != "Pokemon":
+        return False
+    info = pl.POKEMON.get(name) or {}
+    if info.get("stage") == "Basic":
+        return not pl.bench                 # the next Active, with no Bench
+    pre = info.get("evolves_from")
+    targets = sum(1 for p in pl.in_play() if M.base_of(pl.POKEMON, p.name) == pre)
+    copies = sum(1 for c in pl.hand if c == card)
+    return copies <= targets
+
+
+def _bottom_pick(pl, forced):
+    """Which card in hand goes on the bottom of the deck (Deep Sea Draw,
+    Kofu, Up-Tempo), or None to keep them all.
+
+    A deck whose attack counts its bottom cards (Bug Out: 50 for each Bug
+    Out Pokémon in the bottom 7) puts one of those there, Basics before
+    Evolutions, and never the one it needs from the hand. Any other deck
+    only does it when it must, and then with its least useful card."""
+    spec = _bottom_scaler_spec(pl)
+    if spec and POL.knob(pl, "stack_bottom"):
+        fits = [i for i, c in enumerate(pl.hand)
+                if _reveal_match(pl, c, spec) and not _needed_in_hand(pl, c)]
+        if fits:
+            return min(fits, key=lambda i: (
+                (pl.POKEMON.get(pl.hand[i][1]) or {}).get("stage") != "Basic", i))
+    if forced and pl.hand:
+        return min(range(len(pl.hand)), key=lambda i: (pitch_rank(pl, *pl.hand[i]), i))
+    return None
+
+
+AE.BOTTOM_PICK = _bottom_pick
 
 
 def _card_kind(pl, name):
@@ -4594,6 +4698,44 @@ def hand_name_scaler_damage(pl, atk):
     return (base + int(dm.group(1)) * n) if dm.group(2) else int(dm.group(1)) * n
 
 
+def _known_top_cards(pl):
+    """The top cards of pl's deck it put there itself (_note_known_top),
+    top card first, while they are still there."""
+    kt = getattr(pl, "_known_top", None)
+    if not kt or kt[0] != len(pl.deck) or not kt[1] or pl.deck[-len(kt[1]):] != kt[1]:
+        return []
+    return list(reversed(kt[1]))
+
+
+def own_reveal_damage(pl, atk):
+    """Damage from "reveal the top/bottom N of your deck, X for each <card>
+    you find there": Bug Out (bottom 7, Pokémon with the Bug Out attack) and
+    Destructo-Press (top 5, Future cards).
+
+    Both read "you find there" as the opponent's revealed hand, so Bug Out
+    did 50 for each Pokémon in the opponent's hand. Resolving, it counts
+    the real cards. Before that, the pilot counts what it knows is there
+    (what Kofu and Deep Sea Draw stacked, AE.known_bottom) and expects the
+    rest at the deck's density -- unless the deck is down to N cards or
+    fewer, when it is all of them."""
+    m = IR.OWN_REVEAL_RE.search(atk.get("text") or "")
+    if not m:
+        return None
+    end, n, per = m.group(1).lower(), int(m.group(2)), int(m.group(3))
+    spec = IR.reveal_spec(m.group(4), m.group(5))
+    hit = lambda c: 1 if _reveal_match(pl, c, spec) else 0
+    if _RESOLVING[0] or len(pl.deck) <= n:
+        shown = pl.deck[:n] if end == "bottom" else pl.deck[len(pl.deck) - n:]
+        return per * sum(hit(c) for c in shown)
+    known = (AE.known_bottom(pl) if end == "bottom" else _known_top_cards(pl))[:n]
+    unseen = _unseen_own(pl)
+    for c in known:
+        if c in unseen:
+            unseen.remove(c)
+    hits = sum(hit(c) for c in known) + (n - len(known)) * _expected_over(unseen, hit)
+    return per * round(hits)
+
+
 def mill_scaler_damage(pl, atk):
     """Damage from "discard the top N of your deck, X per <card> found".
 
@@ -4870,6 +5012,9 @@ def _attack_damage_core(pl, opp, spot, atk, record=True):
     milled = mill_scaler_damage(pl, atk)
     if milled is not None:
         return milled
+    revealed = own_reveal_damage(pl, atk)
+    if revealed is not None:
+        return revealed
     handed = hand_name_scaler_damage(pl, atk)
     if handed is not None:
         return handed
@@ -5103,6 +5248,12 @@ def _attack_condition(cond, pl, opp, spot):
     m = _re.fullmatch(r"this pokemon is (\w+)(?: or (\w+))?", c)
     if m and m.group(1) in ("burned", "poisoned", "asleep", "confused", "paralyzed"):
         return bool(spot.conditions & {m.group(1), m.group(2) or m.group(1)})
+    # Delta Reign's Groudon: "If a Stadium that has "Legendary" in its
+    # name is in play, this attack does 170 more damage."
+    m = _re.fullmatch(r"a stadium that has [\"“']([^\"”']+)[\"”'] in its name is in play", c)
+    if m:
+        return any(st and m.group(1) in st.lower() for st in
+                   (getattr(pl, "stadium", None), getattr(opp, "stadium", None)))
     if c == "this pokemon has more energy attached than your opponent's active pokemon":
         return oa is not None and spot.energy_count() > oa.energy_count()
     m = _re.fullmatch(r"this pokemon evolved from ([\w' ]+?) during this turn", c)
@@ -7240,6 +7391,9 @@ ATTACK_RIDER_OPS = {
     # Sableye's Lure Out (Accompanying Flute's effect on an attack): it
     # compiled, and as an attack it did nothing.
     IR.Op.FILL_OPPONENT_BENCH,
+    # Bug Out / Destructo-Press: the revealed cards are shuffled back or
+    # discarded after the damage counts them.
+    IR.Op.REVEAL_OWN_DECK,
     # "Switch this Pokemon with 1 of your Benched Pokemon" after the hit;
     # the gust half is resolved before the damage (see do_attack).
     IR.Op.SWITCH,

@@ -8,7 +8,7 @@
     {
       "tag": "self_damage_from_attack",
       "role": "produce",
-      "card_count": 78
+      "card_count": 81
     },
     {
       "tag": "direct_damage_no_attack",
@@ -53,17 +53,17 @@
     {
       "tag": "counterattack_on_hit",
       "role": "consume",
-      "card_count": 18
+      "card_count": 19
     },
     {
       "tag": "damage_scales_with_counters_on_opponent",
       "role": "consume",
-      "card_count": 19
+      "card_count": 21
     },
     {
       "tag": "damage_scales_with_own_damage_counters",
       "role": "consume",
-      "card_count": 23
+      "card_count": 24
     },
     {
       "tag": "damage_reduces_with_own_damage_counters",
@@ -93,7 +93,7 @@
     {
       "tag": "heal_self",
       "role": "produce",
-      "card_count": 48
+      "card_count": 53
     },
     {
       "tag": "heal_team",
@@ -123,7 +123,7 @@
     {
       "tag": "heal_both_players",
       "role": "produce",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "energy_self_discard_cost",
@@ -133,22 +133,22 @@
     {
       "tag": "energy_discard_self_all",
       "role": "produce",
-      "card_count": 35
+      "card_count": 37
     },
     {
       "tag": "energy_discard_on_attack",
       "role": "produce",
-      "card_count": 117
+      "card_count": 120
     },
     {
       "tag": "energy_discard_opponent",
       "role": "produce",
-      "card_count": 36
+      "card_count": 38
     },
     {
       "tag": "energy_search",
       "role": "produce",
-      "card_count": 27
+      "card_count": 30
     },
     {
       "tag": "energy_recursion",
@@ -163,7 +163,7 @@
     {
       "tag": "energy_attach_bonus",
       "role": "produce",
-      "card_count": 54
+      "card_count": 58
     },
     {
       "tag": "energy_attach_to_opponent",
@@ -173,7 +173,7 @@
     {
       "tag": "energy_move_between_own",
       "role": "produce",
-      "card_count": 24
+      "card_count": 25
     },
     {
       "tag": "energy_bounce_self_to_hand",
@@ -208,27 +208,27 @@
     {
       "tag": "damage_scales_with_energy_attached",
       "role": "consume",
-      "card_count": 49
+      "card_count": 51
     },
     {
       "tag": "damage_scales_with_energy_in_discard",
       "role": "consume",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "damage_scales_with_discard_count",
       "role": "consume",
-      "card_count": 14
+      "card_count": 15
     },
     {
       "tag": "attack_cost_free_conditional",
       "role": "consume",
-      "card_count": 3
+      "card_count": 7
     },
     {
       "tag": "status_inflict",
       "role": "produce",
-      "card_count": 173
+      "card_count": 178
     },
     {
       "tag": "double_attack_conditional",
@@ -263,17 +263,17 @@
     {
       "tag": "conditional_no_effect_attack",
       "role": "consume",
-      "card_count": 43
+      "card_count": 44
     },
     {
       "tag": "coin_flip_effect",
       "role": "produce",
-      "card_count": 255
+      "card_count": 265
     },
     {
       "tag": "attack_whiff_on_coin",
       "role": "consume",
-      "card_count": 31
+      "card_count": 33
     },
     {
       "tag": "hand_discard_opponent",
@@ -288,12 +288,12 @@
     {
       "tag": "hand_shuffle_into_deck_opponent",
       "role": "produce",
-      "card_count": 12
+      "card_count": 13
     },
     {
       "tag": "deck_mill_opponent",
       "role": "produce",
-      "card_count": 26
+      "card_count": 27
     },
     {
       "tag": "deck_discard_self_top",
@@ -303,27 +303,27 @@
     {
       "tag": "deck_search_pokemon",
       "role": "produce",
-      "card_count": 91
+      "card_count": 96
     },
     {
       "tag": "deck_search_trainer",
       "role": "produce",
-      "card_count": 21
+      "card_count": 22
     },
     {
       "tag": "deck_search_generic",
       "role": "produce",
-      "card_count": 107
+      "card_count": 114
     },
     {
       "tag": "search_to_bench_generic",
       "role": "produce",
-      "card_count": 45
+      "card_count": 48
     },
     {
       "tag": "recruit_species_to_bench",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "bench_recruit_from_discard",
@@ -343,7 +343,7 @@
     {
       "tag": "deck_peek_keep_any",
       "role": "produce",
-      "card_count": 13
+      "card_count": 14
     },
     {
       "tag": "deck_peek_reorder",
@@ -358,7 +358,7 @@
     {
       "tag": "draw_power",
       "role": "produce",
-      "card_count": 121
+      "card_count": 126
     },
     {
       "tag": "draw_scales_with_count",
@@ -393,7 +393,7 @@
     {
       "tag": "self_bounce_to_hand",
       "role": "produce",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "self_shuffle_into_deck",
@@ -413,17 +413,17 @@
     {
       "tag": "forced_switch_opponent",
       "role": "produce",
-      "card_count": 18
+      "card_count": 20
     },
     {
       "tag": "force_active_to_bench_opponent",
       "role": "produce",
-      "card_count": 17
+      "card_count": 19
     },
     {
       "tag": "self_switch_optional",
       "role": "produce",
-      "card_count": 35
+      "card_count": 37
     },
     {
       "tag": "on_play_switch_to_active",
@@ -433,7 +433,7 @@
     {
       "tag": "free_or_reduced_retreat_self",
       "role": "produce",
-      "card_count": 13
+      "card_count": 15
     },
     {
       "tag": "retreat_cost_increase_opponent",
@@ -443,17 +443,17 @@
     {
       "tag": "retreat_prevent_opponent",
       "role": "produce",
-      "card_count": 31
+      "card_count": 33
     },
     {
       "tag": "attack_lock_opponent",
       "role": "produce",
-      "card_count": 9
+      "card_count": 10
     },
     {
       "tag": "attack_locked_by_condition_self",
       "role": "produce",
-      "card_count": 2
+      "card_count": 3
     },
     {
       "tag": "attack_lock_specific_opponent",
@@ -463,12 +463,12 @@
     {
       "tag": "self_attack_lock_next_turn",
       "role": "produce",
-      "card_count": 70
+      "card_count": 76
     },
     {
       "tag": "ability_lock",
       "role": "produce",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "item_lock",
@@ -503,7 +503,7 @@
     {
       "tag": "stadium_discard_effect",
       "role": "produce",
-      "card_count": 14
+      "card_count": 15
     },
     {
       "tag": "tool_discard_opponent",
@@ -528,7 +528,7 @@
     {
       "tag": "damage_reduction_self",
       "role": "consume",
-      "card_count": 48
+      "card_count": 52
     },
     {
       "tag": "self_damage_increase_next_turn",
@@ -553,7 +553,7 @@
     {
       "tag": "damage_prevention_conditional",
       "role": "consume",
-      "card_count": 57
+      "card_count": 60
     },
     {
       "tag": "effect_prevention_conditional",
@@ -573,12 +573,12 @@
     {
       "tag": "damage_boost_conditional_generic",
       "role": "consume",
-      "card_count": 294
+      "card_count": 302
     },
     {
       "tag": "damage_scales_with_pokemon_count",
       "role": "consume",
-      "card_count": 29
+      "card_count": 31
     },
     {
       "tag": "damage_on_opponent_energy_attach",
@@ -598,17 +598,37 @@
     {
       "tag": "damage_scales_with_opponent_pokemon_count",
       "role": "consume",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "damage_scales_with_opponent_hand_size",
       "role": "consume",
-      "card_count": 2
+      "card_count": 3
     },
     {
       "tag": "damage_scales_with_own_hand_size",
       "role": "consume",
       "card_count": 2
+    },
+    {
+      "tag": "damage_scales_with_deck_bottom",
+      "role": "consume",
+      "card_count": 4
+    },
+    {
+      "tag": "deck_bottom_stack_self",
+      "role": "produce",
+      "card_count": 3
+    },
+    {
+      "tag": "bench_self_from_hand",
+      "role": "produce",
+      "card_count": 2
+    },
+    {
+      "tag": "heal_amplify",
+      "role": "consume",
+      "card_count": 1
     },
     {
       "tag": "fill_opponent_bench",
@@ -648,7 +668,7 @@
     {
       "tag": "damage_ignores_weakness_resistance_or_effects",
       "role": "consume",
-      "card_count": 36
+      "card_count": 38
     },
     {
       "tag": "attack_cost_reduction_scaling",
@@ -713,7 +733,7 @@
     {
       "tag": "prize_reduction_opponent",
       "role": "produce",
-      "card_count": 5
+      "card_count": 6
     },
     {
       "tag": "prize_peek",
@@ -733,7 +753,7 @@
     {
       "tag": "self_evolve_ability",
       "role": "produce",
-      "card_count": 6
+      "card_count": 7
     },
     {
       "tag": "type_change_self",
@@ -743,12 +763,12 @@
     {
       "tag": "bench_snipe_opponent",
       "role": "produce",
-      "card_count": 73
+      "card_count": 77
     },
     {
       "tag": "bench_snipe_opponent_all",
       "role": "produce",
-      "card_count": 12
+      "card_count": 13
     },
     {
       "tag": "own_bench_splash",
@@ -783,7 +803,7 @@
     {
       "tag": "damage_scales_with_named_attack_in_discard",
       "role": "consume",
-      "card_count": 2
+      "card_count": 5
     },
     {
       "tag": "attack_access_previous_evolution",
@@ -923,12 +943,12 @@
     {
       "tag": "damage_scales_with_revealed_count",
       "role": "consume",
-      "card_count": 1
+      "card_count": 2
     },
     {
       "tag": "grants_attack_via_tool",
       "role": "produce",
-      "card_count": 2
+      "card_count": 3
     },
     {
       "tag": "hand_deck_top_swap",
@@ -1008,12 +1028,12 @@
     {
       "tag": "damage_boost_if_damage_counters_present",
       "role": "consume",
-      "card_count": 32
+      "card_count": 34
     },
     {
       "tag": "prize_count_threshold_conditional",
       "role": "consume",
-      "card_count": 17
+      "card_count": 18
     },
     {
       "tag": "tool_attached_conditional_trigger",
@@ -1023,12 +1043,12 @@
     {
       "tag": "damage_boost_if_stadium_in_play",
       "role": "consume",
-      "card_count": 7
+      "card_count": 10
     },
     {
       "tag": "status_checkup_damage_multiplier",
       "role": "produce",
-      "card_count": 4
+      "card_count": 5
     },
     {
       "tag": "tool_discard_self",
@@ -12698,6 +12718,7 @@
       ],
       "hp": "140",
       "tags": [
+        "bench_self_from_hand",
         "stage2_conditional_bench_play"
       ]
     },
@@ -13542,7 +13563,8 @@
       "types": [],
       "hp": null,
       "tags": [
-        "draw_power"
+        "draw_power",
+        "deck_bottom_stack_self"
       ]
     },
     {
@@ -19425,7 +19447,8 @@
       ],
       "hp": "170",
       "tags": [
-        "draw_power"
+        "draw_power",
+        "deck_bottom_stack_self"
       ]
     },
     {
@@ -51388,6 +51411,7 @@
       ],
       "hp": "80",
       "tags": [
+        "damage_scales_with_deck_bottom",
         "damage_scales_with_named_attack_in_discard"
       ]
     },
@@ -54583,29 +54607,402 @@
       "tags": []
     },
     {
-      "name": "Sableye",
+      "name": "Heracross",
       "kind": "attack",
-      "effect": "Lure Out",
-      "text": "Reveal the top 5 cards of your opponent's deck. You may choose any number of Basic Pokémon you find there and put those Pokémon onto their Bench. Your opponent shuffles the other cards back into their deck.",
-      "damage": "",
+      "effect": "Spike Draw",
+      "text": "Draw 2 cards.",
+      "damage": "20",
       "cost": [
-        "Darkness"
+        "Grass"
       ],
       "types": [
-        "Darkness"
+        "Grass"
       ],
-      "hp": "80",
+      "hp": "130",
       "tags": [
-        "search_to_bench_generic",
-        "fill_opponent_bench"
+        "draw_power"
       ]
     },
     {
-      "name": "Sableye",
+      "name": "Heracross",
       "kind": "attack",
-      "effect": "Ominous Lick (name unconfirmed)",
-      "text": "Put 5 damage counters on 1 of your opponent's Pokémon.",
-      "damage": "",
+      "effect": "High Horsepower",
+      "text": "This Pokémon also does 30 damage to itself.",
+      "damage": "130",
+      "cost": [
+        "Grass",
+        "Grass",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "130",
+      "tags": [
+        "self_damage_from_attack"
+      ]
+    },
+    {
+      "name": "Wimpod",
+      "kind": "ability",
+      "effect": "Punk Out",
+      "text": "If your opponent has any Pokémon ex in play, this Pokémon has no Retreat Cost.",
+      "types": [
+        "Grass"
+      ],
+      "hp": "70",
+      "tags": [
+        "free_or_reduced_retreat_self"
+      ]
+    },
+    {
+      "name": "Wimpod",
+      "kind": "attack",
+      "effect": "Ram",
+      "text": "",
+      "damage": "10",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "70",
+      "tags": []
+    },
+    {
+      "name": "Mega Rayquaza Cap",
+      "kind": "trainer",
+      "effect": "Mega Rayquaza Cap",
+      "text": "The Pokémon this card is attached to can use the attack on this card. (You still need the necessary Energy to use this attack.) Mega Evolution ex Rule: When your Mega Evolution Pokémon ex is Knocked Out, your opponent takes 3 Prize cards.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "grants_attack_via_tool"
+      ]
+    },
+    {
+      "name": "Tasty Rice Ball",
+      "kind": "trainer",
+      "effect": "Tasty Rice Ball",
+      "text": "Heal 30 damage from your Active Pokémon. For each Tasty Rice Ball card (not including this card) in your discard pile, heal 30 more damage.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "heal_self"
+      ]
+    },
+    {
+      "name": "Tate & Liza's Training",
+      "kind": "trainer",
+      "effect": "Tate & Liza's Training",
+      "text": "Draw 2 cards. If you drew any cards in this way, and if a Stadium that has \"Legendary\" in its name is in play, put this Tate & Liza's Training into your hand instead of the discard pile.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "draw_power",
+        "damage_boost_if_stadium_in_play"
+      ]
+    },
+    {
+      "name": "Zinnia's Trust",
+      "kind": "trainer",
+      "effect": "Zinnia's Trust",
+      "text": "Switch your Active Pokémon with 1 of your Benched Pokémon. If you do, move an Energy from the Pokémon you moved to your Bench to the new Active Pokémon.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "energy_move_between_own",
+        "self_switch_optional"
+      ]
+    },
+    {
+      "name": "Masquerain",
+      "kind": "attack",
+      "effect": "Frightening Pattern",
+      "text": "During your opponent's next turn, the Defending Pokémon can't use attacks.",
+      "damage": "30",
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "110",
+      "tags": [
+        "attack_lock_opponent"
+      ]
+    },
+    {
+      "name": "Masquerain",
+      "kind": "attack",
+      "effect": "Bug Out",
+      "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards.",
+      "damage": "50×",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "110",
+      "tags": [
+        "damage_scales_with_deck_bottom",
+        "damage_scales_with_named_attack_in_discard"
+      ]
+    },
+    {
+      "name": "Sprigatito",
+      "kind": "attack",
+      "effect": "Play Rough",
+      "text": "Flip a coin. If heads, this attack does 20 more damage.",
+      "damage": "10+",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "70",
+      "tags": [
+        "coin_flip_effect",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Growlithe",
+      "kind": "attack",
+      "effect": "Roar",
+      "text": "Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "80",
+      "tags": [
+        "force_active_to_bench_opponent"
+      ]
+    },
+    {
+      "name": "Growlithe",
+      "kind": "attack",
+      "effect": "Rear Kick",
+      "text": "",
+      "damage": "50",
+      "cost": [
+        "Fire",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "80",
+      "tags": []
+    },
+    {
+      "name": "Magmortar",
+      "kind": "ability",
+      "effect": "Buddy Boost",
+      "text": "Once during your turn, you may use this Ability. Attach a Basic Fire Energy card, a Basic Lightning Energy card, or 1 of each from your hand to your Electivire and Magmortar in any way you like.",
+      "types": [
+        "Fire"
+      ],
+      "hp": "140",
+      "tags": [
+        "energy_attach_bonus"
+      ]
+    },
+    {
+      "name": "Magmortar",
+      "kind": "attack",
+      "effect": "Heat Crash",
+      "text": "",
+      "damage": "80",
+      "cost": [
+        "Fire",
+        "Fire",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "140",
+      "tags": []
+    },
+    {
+      "name": "Electivire",
+      "kind": "attack",
+      "effect": "Body Slam",
+      "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed.",
+      "damage": "30",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "140",
+      "tags": [
+        "status_inflict",
+        "coin_flip_effect"
+      ]
+    },
+    {
+      "name": "Electivire",
+      "kind": "attack",
+      "effect": "Voltaic Hammer",
+      "text": "Discard any amount of Basic Energy from this Pokémon, and this attack does 60 damage for each card you discarded in this way.",
+      "damage": "60×",
+      "cost": [
+        "Lightning",
+        "Lightning",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "140",
+      "tags": [
+        "energy_discard_self_all",
+        "damage_scales_with_discard_count"
+      ]
+    },
+    {
+      "name": "Pincurchin",
+      "kind": "attack",
+      "effect": "Energy Crush",
+      "text": "This attack does 20 damage for each Energy attached to all of your opponent's Pokémon.",
+      "damage": "20×",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "80",
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
+    },
+    {
+      "name": "Mega Golisopod ex",
+      "kind": "attack",
+      "effect": "Finishing Blow",
+      "text": "If your opponent's Active Pokémon already has any damage counters on it, this attack does 160 more damage.",
+      "damage": "60+",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "340",
+      "tags": [
+        "damage_boost_conditional_generic",
+        "damage_boost_if_damage_counters_present"
+      ]
+    },
+    {
+      "name": "Mega Golisopod ex",
+      "kind": "attack",
+      "effect": "Quadruple Hold",
+      "text": "During your opponent's next turn, the Defending Pokémon can't retreat.",
+      "damage": "160",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "340",
+      "tags": [
+        "retreat_prevent_opponent"
+      ]
+    },
+    {
+      "name": "Enamorus",
+      "kind": "ability",
+      "effect": "Incarnate Solidarity",
+      "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all Colorless Energy in the costs of attacks used by this Pokémon.",
+      "types": [
+        "Psychic"
+      ],
+      "hp": "120",
+      "tags": [
+        "attack_cost_free_conditional"
+      ]
+    },
+    {
+      "name": "Enamorus",
+      "kind": "attack",
+      "effect": "Rising Heart",
+      "text": "If your opponent's Active Pokémon is a Pokémon ex, this attack does 100 more damage.",
+      "damage": "100+",
+      "cost": [
+        "Psychic",
+        "Psychic",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Groudon",
+      "kind": "attack",
+      "effect": "Strength",
+      "text": "",
+      "damage": "40",
+      "cost": [
+        "Fighting",
+        "Colorless"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "150",
+      "tags": []
+    },
+    {
+      "name": "Groudon",
+      "kind": "attack",
+      "effect": "Brutal Lands",
+      "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack does 170 more damage.",
+      "damage": "100+",
+      "cost": [
+        "Fighting",
+        "Fighting",
+        "Colorless"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "150",
+      "tags": [
+        "damage_boost_conditional_generic",
+        "damage_boost_if_stadium_in_play"
+      ]
+    },
+    {
+      "name": "Zorua",
+      "kind": "attack",
+      "effect": "Scratch",
+      "text": "",
+      "damage": "30",
       "cost": [
         "Darkness",
         "Colorless"
@@ -54613,10 +55010,8 @@
       "types": [
         "Darkness"
       ],
-      "hp": "80",
-      "tags": [
-        "direct_damage_no_attack"
-      ]
+      "hp": "70",
+      "tags": []
     },
     {
       "name": "Inkay",
@@ -54633,6 +55028,226 @@
       "hp": "60",
       "tags": [
         "hand_discard_opponent"
+      ]
+    },
+    {
+      "name": "Eevee",
+      "kind": "attack",
+      "effect": "Nap",
+      "text": "Heal 20 damage from this Pokémon.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "70",
+      "tags": [
+        "heal_self"
+      ]
+    },
+    {
+      "name": "Azurill",
+      "kind": "attack",
+      "effect": "Bouncy-Bounce Charge",
+      "text": "Search your deck for an Energy card and attach it to 1 of your Benched Pokémon. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "30",
+      "tags": [
+        "energy_search",
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Altaria",
+      "kind": "ability",
+      "effect": "Cottony Carrier",
+      "text": "Your Basic Pokémon in play have no Retreat Cost.",
+      "types": [
+        "Colorless"
+      ],
+      "hp": "110",
+      "tags": [
+        "free_or_reduced_retreat_self"
+      ]
+    },
+    {
+      "name": "Altaria",
+      "kind": "attack",
+      "effect": "Flap",
+      "text": "",
+      "damage": "80",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "110",
+      "tags": []
+    },
+    {
+      "name": "Kecleon",
+      "kind": "attack",
+      "effect": "Colorful Whip",
+      "text": "Reveal any number of Pokémon from your hand, and this attack does 30 damage for each different type of Pokémon you revealed in this way.",
+      "damage": "30×",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "90",
+      "tags": [
+        "damage_scales_with_revealed_count"
+      ]
+    },
+    {
+      "name": "Heat Rotom ex",
+      "kind": "attack",
+      "effect": "Rewarm",
+      "text": "This attack does 30 damage for each Basic Fire Energy card in your discard pile. Then, shuffle those cards into your deck.",
+      "damage": "30×",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "190",
+      "tags": [
+        "damage_scales_with_energy_in_discard"
+      ]
+    },
+    {
+      "name": "Heat Rotom ex",
+      "kind": "attack",
+      "effect": "Strong Flare",
+      "text": "Discard 2 Energy from this Pokémon.",
+      "damage": "170",
+      "cost": [
+        "Fire",
+        "Fire",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "190",
+      "tags": [
+        "energy_discard_on_attack"
+      ]
+    },
+    {
+      "name": "Wishiwashi ex",
+      "kind": "ability",
+      "effect": "Oceanic Gain",
+      "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Heal 50 damage from this Pokémon.",
+      "types": [
+        "Water"
+      ],
+      "hp": "260",
+      "tags": [
+        "heal_self"
+      ]
+    },
+    {
+      "name": "Wishiwashi ex",
+      "kind": "attack",
+      "effect": "Hydro Splash",
+      "text": "",
+      "damage": "220",
+      "cost": [
+        "Water",
+        "Water",
+        "Water",
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "260",
+      "tags": []
+    },
+    {
+      "name": "Raikou ex",
+      "kind": "attack",
+      "effect": "Thunder-Clad",
+      "text": "If you go first, you can use this attack during your first turn. Search your deck for an Energy card and attach it to this Pokémon. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "200",
+      "tags": [
+        "energy_search",
+        "deck_search_pokemon",
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Raikou ex",
+      "kind": "attack",
+      "effect": "Power Rush",
+      "text": "Flip a coin. If tails, during your next turn, this Pokémon can't use attacks.",
+      "damage": "200",
+      "cost": [
+        "Lightning",
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "200",
+      "tags": [
+        "coin_flip_effect",
+        "attack_whiff_on_coin",
+        "self_attack_lock_next_turn"
+      ]
+    },
+    {
+      "name": "Mega Golurk ex",
+      "kind": "ability",
+      "effect": "Restricted Activation",
+      "text": "This Pokémon can't use attacks unless you have 10 or more cards in your hand.",
+      "types": [
+        "Psychic"
+      ],
+      "hp": "350",
+      "tags": [
+        "attack_locked_by_condition_self"
+      ]
+    },
+    {
+      "name": "Mega Golurk ex",
+      "kind": "attack",
+      "effect": "Goliath's Punch",
+      "text": "This Pokémon also does 30 damage to itself.",
+      "damage": "300",
+      "cost": [
+        "Psychic",
+        "Psychic"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "350",
+      "tags": [
+        "self_damage_from_attack"
       ]
     },
     {
@@ -54656,7 +55271,7 @@
     {
       "name": "Mega Malamar ex",
       "kind": "attack",
-      "effect": "Eerie Wave (name unconfirmed)",
+      "effect": "Eerie Wave",
       "text": "Your opponent's Active Pokémon is now Confused.",
       "damage": "200",
       "cost": [
@@ -54670,6 +55285,1874 @@
       "hp": "320",
       "tags": [
         "status_inflict"
+      ]
+    },
+    {
+      "name": "Talonflame ex",
+      "kind": "ability",
+      "effect": "Excited Dive",
+      "text": "Once during your turn, if this Pokémon is in your hand, and if you have any Colorless Mega Evolution Pokémon ex in play, you may use this Ability. Put this Pokémon onto your Bench.",
+      "types": [
+        "Colorless"
+      ],
+      "hp": "280",
+      "tags": [
+        "bench_self_from_hand"
+      ]
+    },
+    {
+      "name": "Talonflame ex",
+      "kind": "attack",
+      "effect": "Talon Hunt",
+      "text": "You may search your deck for up to 2 cards and put them into your hand. Then, shuffle your deck.",
+      "damage": "150",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "280",
+      "tags": [
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Aarune",
+      "kind": "trainer",
+      "effect": "Aarune",
+      "text": "Search your deck for up to 3 in any combination of Supporter and Stadium cards, reveal them, and put them into your hand. Then, shuffle your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "deck_search_trainer"
+      ]
+    },
+    {
+      "name": "Adventure Lantern",
+      "kind": "trainer",
+      "effect": "Adventure Lantern",
+      "text": "Search your deck for a Basic Fire Energy card and a Basic Lightning Energy card, reveal them, and put them into your hand. Then, shuffle your deck.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Custom Vest",
+      "kind": "trainer",
+      "effect": "Custom Vest",
+      "text": "If the Pokémon this card is attached to isn't a Mega Evolution Pokémon ex, it takes 60 less damage from attacks from your opponent's Mega Evolution Pokémon ex (after applying Weakness and Resistance).",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "damage_reduction_self"
+      ]
+    },
+    {
+      "name": "Floragato",
+      "kind": "attack",
+      "effect": "Slash",
+      "text": "",
+      "damage": "60",
+      "cost": [
+        "Grass",
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Mega Rayquaza ex",
+      "kind": "ability",
+      "effect": "Ruler's Roar",
+      "text": "Once during your turn, when you play this Pokémon from your hand onto your Bench, you may use this Ability. Look at the top 4 cards of your deck and attach a Basic Energy card you find there to this Pokémon. Shuffle the other cards and put them on the bottom of your deck.",
+      "types": [
+        "Colorless"
+      ],
+      "hp": "280",
+      "tags": [
+        "energy_attach_bonus"
+      ]
+    },
+    {
+      "name": "Mega Rayquaza ex",
+      "kind": "attack",
+      "effect": "Storm Emerald",
+      "text": "This attack does 50 damage for each Fire Energy and each Lightning Energy attached to all of your Pokémon.",
+      "damage": "50×",
+      "cost": [
+        "Fire",
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "280",
+      "tags": [
+        "damage_scales_with_energy_attached"
+      ]
+    },
+    {
+      "name": "Meowscarada ex",
+      "kind": "attack",
+      "effect": "Magical Bullet",
+      "text": "This attack also does 120 damage to 1 of your opponent's Benched Pokémon that has any damage counters on it. (Don't apply Weakness and Resistance for Benched Pokémon.)",
+      "damage": "120",
+      "cost": [
+        "Grass",
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "320",
+      "tags": [
+        "bench_snipe_opponent",
+        "damage_boost_if_damage_counters_present"
+      ]
+    },
+    {
+      "name": "Smoliv",
+      "kind": "attack",
+      "effect": "Spray Fluid",
+      "text": "",
+      "damage": "20",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "60",
+      "tags": []
+    },
+    {
+      "name": "Dolliv",
+      "kind": "attack",
+      "effect": "Leaf Step",
+      "text": "",
+      "damage": "40",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Arboliva",
+      "kind": "ability",
+      "effect": "Slippery Oil",
+      "text": "Once during your turn, you may use this Ability. Switch out your opponent's Active Pokémon to the Bench. (Your opponent chooses the new Active Pokémon.)",
+      "types": [
+        "Grass"
+      ],
+      "hp": "150",
+      "tags": [
+        "force_active_to_bench_opponent"
+      ]
+    },
+    {
+      "name": "Arboliva",
+      "kind": "attack",
+      "effect": "Mega Drain",
+      "text": "Heal 30 damage from this Pokémon.",
+      "damage": "100",
+      "cost": [
+        "Grass",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "150",
+      "tags": [
+        "heal_self"
+      ]
+    },
+    {
+      "name": "Arcanine",
+      "kind": "attack",
+      "effect": "Fervent Fang",
+      "text": "If your opponent has 4 or fewer Prize cards remaining, this attack does 90 more damage.",
+      "damage": "90+",
+      "cost": [
+        "Fire",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "150",
+      "tags": [
+        "damage_boost_conditional_generic",
+        "prize_count_threshold_conditional"
+      ]
+    },
+    {
+      "name": "Arcanine",
+      "kind": "attack",
+      "effect": "Heat Tackle",
+      "text": "This Pokémon also does 50 damage to itself.",
+      "damage": "200",
+      "cost": [
+        "Fire",
+        "Fire",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "150",
+      "tags": [
+        "self_damage_from_attack"
+      ]
+    },
+    {
+      "name": "Surskit",
+      "kind": "attack",
+      "effect": "Multiply",
+      "text": "Search your deck for up to 2 Surskit and put them onto your Bench. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "50",
+      "tags": [
+        "search_to_bench_generic",
+        "recruit_species_to_bench"
+      ]
+    },
+    {
+      "name": "Surskit",
+      "kind": "attack",
+      "effect": "Bug Bite",
+      "text": "",
+      "damage": "10",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "50",
+      "tags": []
+    },
+    {
+      "name": "Magmar",
+      "kind": "attack",
+      "effect": "Gather Strength",
+      "text": "Search your deck for up to 2 Basic Energy cards, reveal them, and put them into your hand. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "90",
+      "tags": [
+        "energy_search",
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Magmar",
+      "kind": "attack",
+      "effect": "Combustion",
+      "text": "",
+      "damage": "30",
+      "cost": [
+        "Fire",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Torkoal",
+      "kind": "attack",
+      "effect": "Searing Flame",
+      "text": "Your opponent's Active Pokémon is now Burned.",
+      "damage": "30",
+      "cost": [
+        "Fire",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "130",
+      "tags": [
+        "status_inflict"
+      ]
+    },
+    {
+      "name": "Torkoal",
+      "kind": "attack",
+      "effect": "Combustion Blast",
+      "text": "During your next turn, this Pokémon can't use Combustion Blast.",
+      "damage": "120",
+      "cost": [
+        "Fire",
+        "Fire",
+        "Colorless"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "130",
+      "tags": [
+        "self_attack_lock_next_turn"
+      ]
+    },
+    {
+      "name": "Heatmor",
+      "kind": "attack",
+      "effect": "Destructive Flame",
+      "text": "Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon.",
+      "damage": "30",
+      "cost": [
+        "Fire"
+      ],
+      "types": [
+        "Fire"
+      ],
+      "hp": "110",
+      "tags": [
+        "energy_discard_on_attack",
+        "energy_discard_opponent",
+        "coin_flip_effect"
+      ]
+    },
+    {
+      "name": "Mantine",
+      "kind": "attack",
+      "effect": "Make Waves",
+      "text": "Each player shuffles their hand into their deck and draws 4 cards.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "110",
+      "tags": [
+        "hand_shuffle_into_deck_opponent"
+      ]
+    },
+    {
+      "name": "Mantine",
+      "kind": "attack",
+      "effect": "Bubble Drain",
+      "text": "Heal 30 damage from this Pokémon.",
+      "damage": "30",
+      "cost": [
+        "Water",
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "110",
+      "tags": [
+        "heal_self"
+      ]
+    },
+    {
+      "name": "Kyogre",
+      "kind": "attack",
+      "effect": "Waterfall",
+      "text": "",
+      "damage": "40",
+      "cost": [
+        "Water",
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "150",
+      "tags": []
+    },
+    {
+      "name": "Kyogre",
+      "kind": "attack",
+      "effect": "Brutal Whirlpool",
+      "text": "If a Stadium that has \"Legendary\" in its name is in play, this attack also does 50 damage to each of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)",
+      "damage": "100",
+      "cost": [
+        "Water",
+        "Water",
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "150",
+      "tags": [
+        "bench_snipe_opponent",
+        "bench_snipe_opponent_all",
+        "damage_boost_if_stadium_in_play"
+      ]
+    },
+    {
+      "name": "Frillish",
+      "kind": "attack",
+      "effect": "Hook",
+      "text": "",
+      "damage": "10",
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "80",
+      "tags": []
+    },
+    {
+      "name": "Jellicent",
+      "kind": "ability",
+      "effect": "Deep Sea Draw",
+      "text": "Once during your turn, you may use this Ability. Draw a card. If you do, you may put a card from your hand on the bottom of your deck.",
+      "types": [
+        "Water"
+      ],
+      "hp": "120",
+      "tags": [
+        "draw_power",
+        "deck_bottom_stack_self"
+      ]
+    },
+    {
+      "name": "Jellicent",
+      "kind": "attack",
+      "effect": "Gentle Slap",
+      "text": "",
+      "damage": "100",
+      "cost": [
+        "Water",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Water"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Electabuzz",
+      "kind": "attack",
+      "effect": "Call for Family",
+      "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "90",
+      "tags": [
+        "deck_search_pokemon",
+        "search_to_bench_generic"
+      ]
+    },
+    {
+      "name": "Electabuzz",
+      "kind": "attack",
+      "effect": "Headbutt",
+      "text": "",
+      "damage": "60",
+      "cost": [
+        "Lightning",
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Jolteon",
+      "kind": "attack",
+      "effect": "Tackle",
+      "text": "",
+      "damage": "30",
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "110",
+      "tags": []
+    },
+    {
+      "name": "Jolteon",
+      "kind": "attack",
+      "effect": "Thunderbolt",
+      "text": "Discard all Energy from this Pokémon.",
+      "damage": "220",
+      "cost": [
+        "Lightning",
+        "Lightning",
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "110",
+      "tags": [
+        "energy_discard_self_all",
+        "energy_discard_on_attack"
+      ]
+    },
+    {
+      "name": "Rotom",
+      "kind": "attack",
+      "effect": "Thunder Shock",
+      "text": "Flip a coin. If heads, your opponent's Active Pokémon is now Paralyzed.",
+      "damage": "50",
+      "cost": [
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "80",
+      "tags": [
+        "status_inflict",
+        "coin_flip_effect"
+      ]
+    },
+    {
+      "name": "Thundurus",
+      "kind": "ability",
+      "effect": "Incarnate Solidarity",
+      "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all Colorless Energy in the costs of attacks used by this Pokémon.",
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": [
+        "attack_cost_free_conditional"
+      ]
+    },
+    {
+      "name": "Thundurus",
+      "kind": "attack",
+      "effect": "Thunderous Edge",
+      "text": "This attack's damage isn't affected by any effects on your opponent's Active Pokémon.",
+      "damage": "90",
+      "cost": [
+        "Lightning",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_ignores_weakness_resistance_or_effects"
+      ]
+    },
+    {
+      "name": "Pawmi",
+      "kind": "attack",
+      "effect": "Quick Attack",
+      "text": "Flip a coin. If heads, this attack does 20 more damage.",
+      "damage": "10+",
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "60",
+      "tags": [
+        "coin_flip_effect",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Pawmo",
+      "kind": "attack",
+      "effect": "Electro Ball",
+      "text": "",
+      "damage": "40",
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Pawmot",
+      "kind": "ability",
+      "effect": "Generator's Touch",
+      "text": "Once during your turn, you may use this Ability. Attach a Basic Lightning Energy card from your discard pile to 1 of your Pokémon.",
+      "types": [
+        "Lightning"
+      ],
+      "hp": "150",
+      "tags": [
+        "energy_attach_bonus"
+      ]
+    },
+    {
+      "name": "Pawmot",
+      "kind": "attack",
+      "effect": "Electric Punch",
+      "text": "",
+      "damage": "100",
+      "cost": [
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "150",
+      "tags": []
+    },
+    {
+      "name": "Cacnea",
+      "kind": "attack",
+      "effect": "Knock Away",
+      "text": "Flip a coin. If heads, this attack does 10 more damage.",
+      "damage": "10+",
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "70",
+      "tags": [
+        "coin_flip_effect",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Wattrel",
+      "kind": "attack",
+      "effect": "Agility",
+      "text": "Flip a coin. If heads, during your opponent's next turn, prevent all damage from and effects of attacks done to this Pokémon.",
+      "damage": "10",
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "60",
+      "tags": [
+        "coin_flip_effect",
+        "damage_prevention_conditional"
+      ]
+    },
+    {
+      "name": "Kilowattrel",
+      "kind": "attack",
+      "effect": "Raid",
+      "text": "If this Pokémon evolved from Wattrel during this turn, this attack does 90 more damage.",
+      "damage": "30+",
+      "cost": [
+        "Lightning"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Kilowattrel",
+      "kind": "attack",
+      "effect": "Speed Dive",
+      "text": "",
+      "damage": "70",
+      "cost": [
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Miraidon",
+      "kind": "attack",
+      "effect": "Claw Slash",
+      "text": "",
+      "damage": "50",
+      "cost": [
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Miraidon",
+      "kind": "attack",
+      "effect": "Flashing Bolt",
+      "text": "During your next turn, this Pokémon can't use Flashing Bolt.",
+      "damage": "120",
+      "cost": [
+        "Lightning",
+        "Lightning",
+        "Colorless"
+      ],
+      "types": [
+        "Lightning"
+      ],
+      "hp": "120",
+      "tags": [
+        "self_attack_lock_next_turn"
+      ]
+    },
+    {
+      "name": "Drowzee",
+      "kind": "attack",
+      "effect": "Pound",
+      "text": "",
+      "damage": "20",
+      "cost": [
+        "Psychic"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "80",
+      "tags": []
+    },
+    {
+      "name": "Hypno",
+      "kind": "attack",
+      "effect": "Mind Ruler",
+      "text": "This attack does 20 damage for each card in your opponent's hand.",
+      "damage": "20×",
+      "cost": [
+        "Psychic"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_scales_with_opponent_hand_size"
+      ]
+    },
+    {
+      "name": "Hypno",
+      "kind": "attack",
+      "effect": "Hypnoblast",
+      "text": "Your opponent's Active Pokémon is now Asleep.",
+      "damage": "50",
+      "cost": [
+        "Psychic",
+        "Colorless"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "120",
+      "tags": [
+        "status_inflict"
+      ]
+    },
+    {
+      "name": "Giratina",
+      "kind": "attack",
+      "effect": "Chaos Crawler",
+      "text": "During your opponent's next turn, prevent all damage from attacks done to this Pokémon. If 1 of your Pokémon used Chaos Crawler during your last turn, this attack can't be used.",
+      "damage": "120",
+      "cost": [
+        "Psychic",
+        "Psychic",
+        "Colorless"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "130",
+      "tags": [
+        "self_attack_lock_next_turn",
+        "damage_prevention_conditional"
+      ]
+    },
+    {
+      "name": "Golett",
+      "kind": "attack",
+      "effect": "Light Punch",
+      "text": "",
+      "damage": "50",
+      "cost": [
+        "Psychic",
+        "Psychic"
+      ],
+      "types": [
+        "Psychic"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Sandshrew",
+      "kind": "attack",
+      "effect": "Ascension",
+      "text": "Search your deck for a card that evolves from this Pokémon and put it onto this Pokémon to evolve it. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Fighting"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "60",
+      "tags": [
+        "deck_search_pokemon",
+        "deck_search_generic",
+        "self_evolve_ability"
+      ]
+    },
+    {
+      "name": "Cacturne",
+      "kind": "attack",
+      "effect": "Linear Attack",
+      "text": "This attack does 30 damage to 1 of your opponent's Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "130",
+      "tags": [
+        "bench_snipe_opponent"
+      ]
+    },
+    {
+      "name": "Cacturne",
+      "kind": "attack",
+      "effect": "Punishing Needles",
+      "text": "This attack does 50 more damage for each of your opponent's Pokémon in play that has an Ability.",
+      "damage": "10+",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "130",
+      "tags": [
+        "damage_boost_conditional_generic",
+        "damage_scales_with_pokemon_count",
+        "damage_scales_with_opponent_pokemon_count"
+      ]
+    },
+    {
+      "name": "Sandslash",
+      "kind": "ability",
+      "effect": "Counterattack Quills",
+      "text": "If this Pokémon is in the Active Spot and is damaged by an attack from your opponent's Pokémon (even if this Pokémon is Knocked Out), place 3 damage counters on the Attacking Pokémon.",
+      "types": [
+        "Fighting"
+      ],
+      "hp": "110",
+      "tags": [
+        "counterattack_on_hit"
+      ]
+    },
+    {
+      "name": "Sandslash",
+      "kind": "attack",
+      "effect": "Digging Claw",
+      "text": "Discard the top card of your opponent's deck.",
+      "damage": "60",
+      "cost": [
+        "Fighting"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "110",
+      "tags": [
+        "deck_mill_opponent"
+      ]
+    },
+    {
+      "name": "Onix",
+      "kind": "attack",
+      "effect": "Guard Press",
+      "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance).",
+      "damage": "80",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_reduction_self"
+      ]
+    },
+    {
+      "name": "Steelix",
+      "kind": "ability",
+      "effect": "High Density Armor",
+      "text": "If this Pokémon has full HP, it takes 60 less damage from attacks from your opponent's Pokémon (after applying Weakness and Resistance).",
+      "types": [
+        "Fighting"
+      ],
+      "hp": "190",
+      "tags": [
+        "damage_reduction_self"
+      ]
+    },
+    {
+      "name": "Steelix",
+      "kind": "attack",
+      "effect": "Tough Swing",
+      "text": "This attack's damage isn't affected by Resistance.",
+      "damage": "150",
+      "cost": [
+        "Fighting",
+        "Fighting",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "190",
+      "tags": [
+        "damage_ignores_weakness_resistance_or_effects"
+      ]
+    },
+    {
+      "name": "Landorus",
+      "kind": "ability",
+      "effect": "Incarnate Solidarity",
+      "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all Colorless Energy in the costs of attacks used by this Pokémon.",
+      "types": [
+        "Fighting"
+      ],
+      "hp": "130",
+      "tags": [
+        "attack_cost_free_conditional"
+      ]
+    },
+    {
+      "name": "Landorus",
+      "kind": "attack",
+      "effect": "Gaia Crush",
+      "text": "Discard a Stadium in play.",
+      "damage": "110",
+      "cost": [
+        "Fighting",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Fighting"
+      ],
+      "hp": "130",
+      "tags": [
+        "stadium_discard_effect"
+      ]
+    },
+    {
+      "name": "Nidoran♀",
+      "kind": "attack",
+      "effect": "Find a Friend",
+      "text": "Search your deck for a Pokémon, reveal it, and put it into your hand. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "60",
+      "tags": [
+        "deck_search_pokemon"
+      ]
+    },
+    {
+      "name": "Nidoran♀",
+      "kind": "attack",
+      "effect": "Gnaw",
+      "text": "",
+      "damage": "10",
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "60",
+      "tags": []
+    },
+    {
+      "name": "Nidorina",
+      "kind": "attack",
+      "effect": "Tackle",
+      "text": "",
+      "damage": "60",
+      "cost": [
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Nidoqueen",
+      "kind": "ability",
+      "effect": "Maternal Call",
+      "text": "Once during your turn, you may use this Ability. Flip a coin. If heads, switch in 1 of your opponent's Benched Pokémon to the Active Spot.",
+      "types": [
+        "Darkness"
+      ],
+      "hp": "170",
+      "tags": [
+        "coin_flip_effect",
+        "forced_switch_opponent"
+      ]
+    },
+    {
+      "name": "Nidoqueen",
+      "kind": "attack",
+      "effect": "Giga Impact",
+      "text": "During your next turn, this Pokémon can't use attacks.",
+      "damage": "150",
+      "cost": [
+        "Darkness",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "170",
+      "tags": [
+        "self_attack_lock_next_turn"
+      ]
+    },
+    {
+      "name": "Spinarak",
+      "kind": "attack",
+      "effect": "Poison Sting",
+      "text": "Your opponent's Active Pokémon is now Poisoned.",
+      "damage": null,
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "60",
+      "tags": [
+        "status_inflict"
+      ]
+    },
+    {
+      "name": "Spinarak",
+      "kind": "attack",
+      "effect": "Bug Out",
+      "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards.",
+      "damage": "50×",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "60",
+      "tags": [
+        "damage_scales_with_deck_bottom",
+        "damage_scales_with_named_attack_in_discard"
+      ]
+    },
+    {
+      "name": "Ariados",
+      "kind": "attack",
+      "effect": "Tormenting Poison",
+      "text": "Your opponent's Active Pokémon is now Poisoned. During Pokémon Checkup, place 4 damage counters on that Pokémon instead of 1.",
+      "damage": null,
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "100",
+      "tags": [
+        "status_inflict",
+        "status_checkup_damage_multiplier"
+      ]
+    },
+    {
+      "name": "Ariados",
+      "kind": "attack",
+      "effect": "Stealthy Sting",
+      "text": "During your opponent's next turn, prevent all damage done to this Pokémon by attacks from Basic Pokémon.",
+      "damage": "80",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "100",
+      "tags": [
+        "damage_prevention_conditional"
+      ]
+    },
+    {
+      "name": "Combee",
+      "kind": "attack",
+      "effect": "Fade Out",
+      "text": "Put this Pokémon and all attached cards into your hand.",
+      "damage": "10",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "50",
+      "tags": [
+        "self_bounce_to_hand"
+      ]
+    },
+    {
+      "name": "Combee",
+      "kind": "attack",
+      "effect": "Bug Out",
+      "text": "Reveal the bottom 7 cards of your deck, and this attack does 50 damage for each Pokémon you find there that has the Bug Out attack. Then, shuffle any revealed Pokémon back into your deck. Discard the other cards.",
+      "damage": "50×",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "50",
+      "tags": [
+        "damage_scales_with_deck_bottom",
+        "damage_scales_with_named_attack_in_discard"
+      ]
+    },
+    {
+      "name": "Sableye",
+      "kind": "attack",
+      "effect": "Lure Out",
+      "text": "Reveal the top 5 cards of your opponent's deck. You may choose any number of Basic Pokémon you find there and put those Pokémon onto their Bench. Your opponent shuffles the other cards back into their deck.",
+      "damage": null,
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "80",
+      "tags": [
+        "search_to_bench_generic",
+        "fill_opponent_bench"
+      ]
+    },
+    {
+      "name": "Sableye",
+      "kind": "attack",
+      "effect": "Ominous Eyes",
+      "text": "Place 5 damage counters on 1 of your opponent's Pokémon.",
+      "damage": null,
+      "cost": [
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "80",
+      "tags": [
+        "direct_damage_no_attack"
+      ]
+    },
+    {
+      "name": "Carvanha",
+      "kind": "attack",
+      "effect": "Ambush",
+      "text": "Flip a coin. If heads, this attack does 20 more damage.",
+      "damage": "20+",
+      "cost": [
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "70",
+      "tags": [
+        "coin_flip_effect",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Sharpedo",
+      "kind": "attack",
+      "effect": "Crunch",
+      "text": "Flip a coin. If heads, discard an Energy from your opponent's Active Pokémon.",
+      "damage": "60",
+      "cost": [
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "120",
+      "tags": [
+        "energy_discard_on_attack",
+        "energy_discard_opponent",
+        "coin_flip_effect"
+      ]
+    },
+    {
+      "name": "Darkrai",
+      "kind": "attack",
+      "effect": "Shadow-Clad",
+      "text": "Search your deck for up to 2 Basic Darkness Energy cards and attach them to this Pokémon. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "120",
+      "tags": [
+        "deck_search_generic"
+      ]
+    },
+    {
+      "name": "Darkrai",
+      "kind": "attack",
+      "effect": "Dark Cutter",
+      "text": "",
+      "damage": "110",
+      "cost": [
+        "Darkness",
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Purrloin",
+      "kind": "attack",
+      "effect": "Dig Claws",
+      "text": "",
+      "damage": "20",
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "60",
+      "tags": []
+    },
+    {
+      "name": "Liepard",
+      "kind": "attack",
+      "effect": "Follow-Up Claw",
+      "text": "This attack does 20 damage for each damage counter on your opponent's Active Pokémon.",
+      "damage": "20×",
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "110",
+      "tags": [
+        "damage_scales_with_counters_on_opponent"
+      ]
+    },
+    {
+      "name": "Liepard",
+      "kind": "attack",
+      "effect": "Slash",
+      "text": "",
+      "damage": "90",
+      "cost": [
+        "Darkness",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "110",
+      "tags": []
+    },
+    {
+      "name": "Zoroark ex",
+      "kind": "attack",
+      "effect": "Riotous Beating",
+      "text": "This attack does 20 damage for each of your Pokémon in play.",
+      "damage": "20×",
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "270",
+      "tags": [
+        "damage_scales_with_pokemon_count"
+      ]
+    },
+    {
+      "name": "Zoroark ex",
+      "kind": "attack",
+      "effect": "Slashing Strike",
+      "text": "During your next turn, this Pokémon can't use Slashing Strike.",
+      "damage": "210",
+      "cost": [
+        "Darkness",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "270",
+      "tags": [
+        "self_attack_lock_next_turn"
+      ]
+    },
+    {
+      "name": "Vespiquen",
+      "kind": "attack",
+      "effect": "Pierce",
+      "text": "",
+      "damage": "40",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Vespiquen",
+      "kind": "attack",
+      "effect": "Clean Hit",
+      "text": "If your opponent's Active Pokémon is an Evolution Pokémon, this attack does 80 more damage.",
+      "damage": "80+",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "120",
+      "tags": [
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Morpeko",
+      "kind": "attack",
+      "effect": "Call for Family",
+      "text": "Search your deck for up to 2 Basic Pokémon and put them onto your Bench. Then, shuffle your deck.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "80",
+      "tags": [
+        "deck_search_pokemon",
+        "search_to_bench_generic"
+      ]
+    },
+    {
+      "name": "Zarude",
+      "kind": "attack",
+      "effect": "Corkscrew Punch",
+      "text": "",
+      "damage": "20",
+      "cost": [
+        "Darkness"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "130",
+      "tags": []
+    },
+    {
+      "name": "Zarude",
+      "kind": "attack",
+      "effect": "Deadly Whip",
+      "text": "Flip 2 coins. If both of them are heads, this attack does 150 more damage.",
+      "damage": "50+",
+      "cost": [
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Darkness"
+      ],
+      "hp": "130",
+      "tags": [
+        "coin_flip_effect",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Druddigon",
+      "kind": "attack",
+      "effect": "Drag Off",
+      "text": "Switch in 1 of your opponent's Benched Pokémon to the Active Spot. This attack does 40 damage to the new Active Pokémon.",
+      "damage": null,
+      "cost": [
+        "Fire",
+        "Water"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "120",
+      "tags": [
+        "forced_switch_opponent"
+      ]
+    },
+    {
+      "name": "Druddigon",
+      "kind": "attack",
+      "effect": "Claw Slash",
+      "text": "",
+      "damage": "80",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Jangmo-o",
+      "kind": "attack",
+      "effect": "Hard Head",
+      "text": "During your opponent's next turn, this Pokémon takes 30 less damage from attacks (after applying Weakness and Resistance).",
+      "damage": "30",
+      "cost": [
+        "Lightning",
+        "Fighting"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "70",
+      "tags": [
+        "damage_reduction_self"
+      ]
+    },
+    {
+      "name": "Hakamo-o",
+      "kind": "attack",
+      "effect": "Double Smash",
+      "text": "Flip 2 coins. This attack does 70 damage for each heads.",
+      "damage": "70×",
+      "cost": [
+        "Lightning",
+        "Fighting"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "100",
+      "tags": [
+        "coin_flip_effect"
+      ]
+    },
+    {
+      "name": "Kommo-o",
+      "kind": "ability",
+      "effect": "Beat Scales",
+      "text": "Once during your turn, you may use this Ability. Look at the top 6 cards of your deck and attach any number of Basic Energy cards you find there to your Dragon Pokémon in any way you like. Shuffle the other cards back into your deck.",
+      "types": [
+        "Dragon"
+      ],
+      "hp": "160",
+      "tags": [
+        "energy_attach_bonus"
+      ]
+    },
+    {
+      "name": "Kommo-o",
+      "kind": "attack",
+      "effect": "Hammer In",
+      "text": "",
+      "damage": "170",
+      "cost": [
+        "Lightning",
+        "Fighting",
+        "Colorless"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "160",
+      "tags": []
+    },
+    {
+      "name": "Cyclizar",
+      "kind": "attack",
+      "effect": "Bite",
+      "text": "",
+      "damage": "30",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Cyclizar",
+      "kind": "attack",
+      "effect": "Break Through",
+      "text": "This attack also does 30 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)",
+      "damage": "110",
+      "cost": [
+        "Grass",
+        "Darkness",
+        "Colorless"
+      ],
+      "types": [
+        "Dragon"
+      ],
+      "hp": "120",
+      "tags": [
+        "bench_snipe_opponent"
+      ]
+    },
+    {
+      "name": "Tauros",
+      "kind": "attack",
+      "effect": "Raging Horns",
+      "text": "This attack does 10 more damage for each damage counter on this Pokémon.",
+      "damage": "50+",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "130",
+      "tags": [
+        "damage_scales_with_counters_on_opponent",
+        "damage_scales_with_own_damage_counters",
+        "damage_boost_conditional_generic"
+      ]
+    },
+    {
+      "name": "Delibird",
+      "kind": "ability",
+      "effect": "Energizing Present",
+      "text": "Once during your turn, if this Pokémon is in the Active Spot, you may use this Ability. Look at the top 6 cards of your deck, reveal an Energy card you find there, and put it into your hand. Shuffle the other cards and put them on the bottom of your deck.",
+      "types": [
+        "Colorless"
+      ],
+      "hp": "90",
+      "tags": [
+        "deck_peek_keep_any"
+      ]
+    },
+    {
+      "name": "Delibird",
+      "kind": "attack",
+      "effect": "Beat",
+      "text": "",
+      "damage": "10",
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "90",
+      "tags": []
+    },
+    {
+      "name": "Shaymin",
+      "kind": "attack",
+      "effect": "Overrun",
+      "text": "This attack also does 20 damage to 1 of your opponent's Benched Pokémon. (Don't apply Weakness and Resistance for Benched Pokémon.)",
+      "damage": "20",
+      "cost": [
+        "Grass"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "80",
+      "tags": [
+        "bench_snipe_opponent"
+      ]
+    },
+    {
+      "name": "Swablu",
+      "kind": "attack",
+      "effect": "Run Around",
+      "text": "Switch this Pokémon with 1 of your Benched Pokémon.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "50",
+      "tags": [
+        "self_switch_optional"
+      ]
+    },
+    {
+      "name": "Swablu",
+      "kind": "attack",
+      "effect": "Peck",
+      "text": "",
+      "damage": "20",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "50",
+      "tags": []
+    },
+    {
+      "name": "Tornadus",
+      "kind": "ability",
+      "effect": "Incarnate Solidarity",
+      "text": "If you have Tornadus, Thundurus, Landorus, and Enamorus in play, ignore all Colorless Energy in the costs of attacks used by this Pokémon.",
+      "types": [
+        "Colorless"
+      ],
+      "hp": "110",
+      "tags": [
+        "attack_cost_free_conditional"
+      ]
+    },
+    {
+      "name": "Tornadus",
+      "kind": "attack",
+      "effect": "Corkscrew Dive",
+      "text": "You may draw cards until you have 6 cards in your hand.",
+      "damage": "70",
+      "cost": [
+        "Colorless",
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "110",
+      "tags": [
+        "draw_power"
+      ]
+    },
+    {
+      "name": "Fletchling",
+      "kind": "attack",
+      "effect": "Surprise Attack",
+      "text": "Flip a coin. If tails, this attack does nothing.",
+      "damage": "30",
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "60",
+      "tags": [
+        "conditional_no_effect_attack",
+        "coin_flip_effect",
+        "attack_whiff_on_coin"
+      ]
+    },
+    {
+      "name": "Fletchinder",
+      "kind": "attack",
+      "effect": "Clutch",
+      "text": "During your opponent's next turn, the Defending Pokémon can't retreat.",
+      "damage": "40",
+      "cost": [
+        "Colorless",
+        "Colorless"
+      ],
+      "types": [
+        "Colorless"
+      ],
+      "hp": "80",
+      "tags": [
+        "retreat_prevent_opponent"
+      ]
+    },
+    {
+      "name": "Virizion",
+      "kind": "attack",
+      "effect": "Double Draw",
+      "text": "Draw 2 cards.",
+      "damage": null,
+      "cost": [
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "120",
+      "tags": [
+        "draw_power"
+      ]
+    },
+    {
+      "name": "Virizion",
+      "kind": "attack",
+      "effect": "Solar Beam",
+      "text": "",
+      "damage": "110",
+      "cost": [
+        "Grass",
+        "Grass",
+        "Colorless"
+      ],
+      "types": [
+        "Grass"
+      ],
+      "hp": "120",
+      "tags": []
+    },
+    {
+      "name": "Grisham",
+      "kind": "trainer",
+      "effect": "Grisham",
+      "text": "Heal 50 damage from each Pokémon (both yours and your opponent's).",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "heal_both_players"
+      ]
+    },
+    {
+      "name": "Legendary Pyroduct",
+      "kind": "trainer",
+      "effect": "Legendary Pyroduct",
+      "text": "Evolution Pokémon in play (both yours and your opponent's) have no Abilities.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "ability_lock"
+      ]
+    },
+    {
+      "name": "Legendary Summit",
+      "kind": "trainer",
+      "effect": "Legendary Summit",
+      "text": "Whenever a Colorless Pokémon (yours or your opponent's) is Knocked Out by damage from an attack from the opponent's Pokémon, that player takes 1 fewer Prize card.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "prize_reduction_opponent"
+      ]
+    },
+    {
+      "name": "Legendary Trench",
+      "kind": "trainer",
+      "effect": "Legendary Trench",
+      "text": "Whenever a Pokémon (yours or your opponent's) is healed, double the amount of damage healed.",
+      "types": [],
+      "hp": null,
+      "tags": [
+        "heal_amplify"
       ]
     }
   ]

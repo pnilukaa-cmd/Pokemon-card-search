@@ -988,6 +988,24 @@ def effect_lillies_determination(state, POKEMON, log):
     return True
 
 
+def effect_lanas_aid(state, POKEMON, log):
+    """Lana's Aid: up to 3 in any combination of Pokémon without a Rule Box
+    and Basic Energy from the discard into the hand. Played last of the
+    Supporters, and only with something to take back."""
+    picks = [n for n in state.discard
+             if (n in POKEMON and POKEMON[n].get("prize_value", 1) == 1
+                 and not is_fossil(POKEMON, n)) or BASIC_ENERGY_RE.match(n)][:3]
+    if not picks:
+        return False
+    state.remove_from_hand("Supporter", "Lana's Aid")
+    state.discard.append("Lana's Aid")
+    for n in picks:
+        state.discard.remove(n)
+        state.hand.append(("Pokemon" if n in POKEMON else "Energy", n))
+    log.append(f"Play Lana's Aid -> {', '.join(picks)}")
+    return True
+
+
 def effect_kofu(state, POKEMON, log):
     """Kofu: bottom 2 cards of your hand, draw 4. In a Food Prep deck each
     copy played is also one Colorless off Haymaker and Sonic Edge, so it
@@ -1330,7 +1348,8 @@ def effect_carmine(state, POKEMON, log):
 
 SUPPORTER_PRIORITY = ["Salvatore", "Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn",
                       "Hilda", "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine",
-                      "Judge", "Lucian", "Janine's Secret Art", "Crispin", "Team Rocket's Petrel"]
+                      "Judge", "Lucian", "Janine's Secret Art", "Crispin", "Team Rocket's Petrel",
+                      "Lana's Aid"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Kofu": effect_kofu,
@@ -1347,6 +1366,7 @@ SUPPORTER_EFFECTS = {
     "Brock's Scouting": effect_brocks_scouting,
     "Lucian": effect_lucian,
     "Salvatore": effect_salvatore,
+    "Lana's Aid": effect_lanas_aid,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather

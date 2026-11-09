@@ -707,6 +707,11 @@ def conditions_met(effect, pl, opp, source, atk=None):
             if want not in (getattr(pl, "stadium", None),
                             getattr(opp, "stadium", None)):
                 return False
+        if k == "stadium_name_contains":
+            want = c["name"].lower()
+            if not any(st and want in st.lower() for st in
+                       (getattr(pl, "stadium", None), getattr(opp, "stadium", None))):
+                return False
         if k == "healed_this_turn" and not getattr(source, "healed_this_turn", False):
             return False
         if k == "self_full_hp":
@@ -772,7 +777,7 @@ def pay_costs(effect, pl, source, log):
     # Check affordability first so a partial payment never happens.
     for c in effect.costs:
         k = c["kind"]
-        if k == "discard_hand" and len(pl.hand) < c["amount"]:
+        if k in ("discard_hand", "bottom_hand") and len(pl.hand) < c["amount"]:
             return False
         if k == "discard_energy_from_hand":
             if not any(kind == "Energy" and c["type"] in name
@@ -794,6 +799,16 @@ def pay_costs(effect, pl, source, log):
                            key=lambda i: (PITCH_RANK(pl, *pl.hand[i]), i))
             for i in sorted(order[:c["amount"]], reverse=True):
                 pl.discard.append(pl.hand.pop(i)[1])
+        elif k == "bottom_hand":
+            # Quaquaval's Up-Tempo: "put a card from your hand on the bottom
+            # of your deck". The pick is the simulator's (a Bug Out deck
+            # puts a Bug Out Pokemon there); otherwise the least useful.
+            for _ in range(c["amount"]):
+                i = BOTTOM_PICK(pl, True)
+                if i is None:
+                    i = min(range(len(pl.hand)),
+                            key=lambda j: (PITCH_RANK(pl, *pl.hand[j]), j))
+                put_on_bottom(pl, pl.hand.pop(i))
         elif k == "discard_energy_from_hand":
             i = next(i for i, (kind, name) in enumerate(pl.hand)
                      if kind == "Energy" and c["type"] in name)
@@ -938,6 +953,33 @@ TRANSFORM_PICK = lambda pl, opp, spot, cands: cands[0]
 TOOL_FROM_DECK_PICK = lambda pl, spot, names: names[0]
 # The simulator sets this to its bench_cap (Area Zero Underdepths: 8).
 BENCH_LIMIT = lambda pl: 5
+# The simulator sets these. BOTTOM_PICK: the index in pl.hand of the card to
+# put on the bottom of the deck, or None to keep them all (`forced`: a cost
+# that must be paid, so some card has to go). REVEAL_MATCH: does a card
+# match an IR.reveal_spec (Bug Out's "Pokémon that has the Bug Out attack").
+BOTTOM_PICK = lambda pl, forced: None
+REVEAL_MATCH = lambda pl, card, spec: bool(spec.get("pokemon")) and card[0] == "Pokemon"
+
+
+def known_bottom(pl):
+    """The cards at the bottom of pl's deck that pl put there itself and has
+    not shuffled since, bottom card first.
+
+    A Bug Out deck knows what Kofu and Deep Sea Draw stacked under its deck;
+    everything else down there is a guess. The memory is checked against the
+    deck rather than cleared at every shuffle: once those cards are not the
+    bottom of the deck any more, only the part still in place is known."""
+    kb = getattr(pl, "_known_bottom", None) or []
+    # Drawn down into them: the deck IS the bottom of that stack.
+    k = min(len(kb), len(pl.deck))
+    return list(kb[:k]) if k and pl.deck[:k] == kb[:k] else []
+
+
+def put_on_bottom(pl, card):
+    """Put `card` on the bottom of pl's deck, and remember it is there."""
+    known = known_bottom(pl)
+    pl.deck.insert(0, card)               # index 0 is the BOTTOM of the deck
+    pl._known_bottom = [card] + known
 # Recipients, in order, for "attach one each to up to N of your Benched
 # <type> Pokemon" (Glass Trumpet, Sinister Surge, Send Flowers); `costly`
 # when the recipient pays for it (Sinister Surge's 2 damage counters). Set
@@ -1615,8 +1657,10 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                                                     opp if h in pl.in_play() else pl)]
         hits = [h for h in hits if _heal_qualifies(pl, h, f)]
 
+        mult = heal_multiplier(pl)
+
         def _amount(h):
-            return h.damage if f.get("all") else min(h.damage, (act.amount or 0))
+            return h.damage if f.get("all") else min(h.damage, (act.amount or 0) * mult)
         if f.get("one"):
             # "1 of your Pokemon": the player's pick (default: the one it
             # heals most).
@@ -2541,7 +2585,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             return False
         if heal_blocked(pl, source, opp):
             return False
-        healed = min(dealt, source.damage)
+        healed = min(dealt * heal_multiplier(pl), source.damage)
         source.damage -= healed
         log.append(f"    heals {healed} from {source.name}")
         return True
@@ -2816,6 +2860,46 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         if moved:
             log.append(f"    opponent gets {moved} Energy back")
         return moved > 0
+
+    if op == O.HAND_TO_BOTTOM:
+        # Deep Sea Draw's "you may put a card from your hand on the bottom".
+        put = 0
+        for _ in range(act.amount or 1):
+            if not pl.hand:
+                break
+            i = BOTTOM_PICK(pl, not (act.filter or {}).get("optional"))
+            if i is None:
+                break
+            card = pl.hand.pop(i)
+            put_on_bottom(pl, card)
+            put += 1
+            log.append(f"    {card[1]} to the bottom of the deck")
+        return bool(put)
+
+    if op == O.REVEAL_OWN_DECK:
+        # The revealed cards' fate, after the damage counted them. Bug Out:
+        # the Pokemon are shuffled back, the rest discarded. Destructo-Press:
+        # the Future cards discarded, the rest shuffled back.
+        f = act.filter or {}
+        n = min(act.amount or 0, len(pl.deck))
+        if n <= 0:
+            return False
+        if f.get("end") == "bottom":
+            shown, pl.deck = pl.deck[:n], pl.deck[n:]
+        else:
+            shown, pl.deck = pl.deck[len(pl.deck) - n:], pl.deck[:len(pl.deck) - n]
+        split = [c for c in shown if REVEAL_MATCH(pl, c, f.get("split") or {})]
+        rest = list(shown)
+        for c in split:
+            rest.remove(c)
+        to_deck, to_discard = (split, rest) if f.get("split_to") == "deck" else (rest, split)
+        if to_deck:                       # "shuffle any revealed Pokemon back"
+            pl.deck.extend(to_deck)
+            random.shuffle(pl.deck)
+        pl.discard.extend(c[1] for c in to_discard)
+        log.append(f"    revealed {n} from the {f.get('end', 'top')}: "
+                   f"{len(to_deck)} shuffled back, {len(to_discard)} discarded")
+        return True
 
     if op == O.FILL_OPPONENT_BENCH:
         top = opp.deck[-(act.amount or 5):]
@@ -3116,8 +3200,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # Their whole hand goes to the bottom of the deck, then they draw a
         # fixed number back. Vivillon's wording only redraws if they had
         # cards to put down, so an empty hand stays empty.
-        if not opp.hand:
-            return False
+        if not opp.hand and not (act.filter or {}).get("always"):
+            return False                 # Grand Wing: nothing put down, nothing drawn
         if (act.filter or {}).get("shuffle"):
             opp.deck.extend(opp.hand)    # "shuffles their hand into their deck"
             random.shuffle(opp.deck)
@@ -3965,6 +4049,15 @@ def ability_disabled(owner, spot, ability_name=None):
             continue
         return True
     return False
+
+
+def heal_multiplier(pl):
+    """Legendary Trench: "double the amount of damage healed", for both
+    players while it is in play."""
+    m = 1
+    for _holder, _eff, act in _passive_actions(pl, IR.Op.HEAL_MULTIPLIER):
+        m = max(m, act.amount or 1)
+    return m
 
 
 def heal_blocked(owner, spot, other):

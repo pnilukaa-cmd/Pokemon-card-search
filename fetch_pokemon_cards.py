@@ -1,6 +1,7 @@
 """Fetch all Standard-legal Pokemon TCG cards and save them to a local JSON file."""
 
 import json
+import re
 import sys
 import time
 
@@ -111,6 +112,45 @@ def card_signature(card):
 SET_CODE_FALLBACK = {"svp": "PR-SV"}
 
 
+def fill_set_codes(cards):
+    """Give every card its set's ptcgoCode when the card itself lacks it.
+
+    A just-released set can come back with no ptcgoCode on its cards even
+    though the set record has one: Delta Reign's /v2/sets entry says DLR,
+    its cards' own set objects say nothing. Every card then had no printing
+    to record, so no decklist line could ever name it."""
+    codes = {}
+    for card in cards:
+        s = card.get("set") or {}
+        if s.get("ptcgoCode") or s.get("id") in SET_CODE_FALLBACK or not s.get("id"):
+            continue
+        if s["id"] not in codes:
+            codes[s["id"]] = None
+            # The single-set endpoint 500s more often than the search one
+            # (it did on every try once), so ask the search endpoint too.
+            for attempt in range(1, MAX_RETRIES + 1):
+                for url, params in (("https://api.pokemontcg.io/v2/sets", {"q": f"id:{s['id']}"}),
+                                    (f"https://api.pokemontcg.io/v2/sets/{s['id']}", None)):
+                    try:
+                        r = requests.get(url, params=params, timeout=60)
+                        data = r.json().get("data") if r.ok else None
+                    except (requests.RequestException, ValueError):
+                        data = None
+                    if isinstance(data, list):
+                        data = next((x for x in data if x.get("id") == s["id"]), None)
+                    if data and data.get("ptcgoCode"):
+                        codes[s["id"]] = data["ptcgoCode"]
+                        break
+                if codes[s["id"]]:
+                    break
+                time.sleep(min(2 ** attempt, MAX_WAIT_SECONDS))
+            print(f"  set {s['id']}: cards carry no ptcgoCode, the set record "
+                  f"says {codes[s['id']]}")
+        if codes[s["id"]]:
+            s["ptcgoCode"] = codes[s["id"]]
+    return cards
+
+
 def set_code_of(card):
     s = card.get("set") or {}
     return s.get("ptcgoCode") or SET_CODE_FALLBACK.get(s.get("id"))
@@ -217,11 +257,112 @@ def fetch_all_standard_cards():
         all_cards.extend(fetch_all_for_mark(mark))
     print("Checking for regulation marks outside the active set...")
     warn_about_new_marks()
-    return all_cards
+    return fill_set_codes(all_cards)
+
+
+def fetch_set(set_id):
+    """Every card of one set, paged with the same retries and ordering."""
+    cards, page = [], 1
+    while True:
+        page_cards = fetch_page(f"set.id:{set_id}", page)
+        if not page_cards:
+            return cards
+        cards.extend(page_cards)
+        print(f"  set.id:{set_id} page {page}: fetched {len(page_cards)} cards")
+        page += 1
+
+
+_REMINDER_RE = re.compile(
+    r"^(?:you may play (?:only 1|any number of) [^.]*during your turn\."
+    r"|you may play only 1 stadium card during your turn\..*)$", re.I | re.S)
+
+
+def reprint_key(card):
+    """card_signature, minus what a new set's data is often missing.
+
+    A just-released set comes back thinner than an old one: Delta Reign's
+    Pokémon Catcher and Emcee's Hype had no "You may play any number of
+    Item cards" reminder line, and its Bubbly Water / Growing Grass / Nitro
+    Fire Energy had no subtypes and a different paragraph break. Matched on
+    card_signature they became second records under the same name, which a
+    decklist line then resolves to by set number. Rules text here drops the
+    play-rule reminders and collapses whitespace; subtypes are compared
+    separately, and only when both cards have them."""
+    sig = list(card_signature(card))
+    sig[4] = None
+    sig[5] = tuple(" ".join(r.split()) for r in sig[5]
+                   if not _REMINDER_RE.match(" ".join(r.split())))
+    return tuple(sig)
+
+
+def merge_set(pool, fetched, set_id):
+    """Merge one set's cards into an existing pool without re-fetching the
+    rest of it.
+
+    A full re-fetch re-reads every card, so any text the API corrected in
+    another set lands in the same commit as the new set, and a field result
+    from before can no longer be told apart from a change in the pool. This
+    adds only the new set: a card with the same gameplay as a pool record
+    becomes another printing of it, the rest become new records (deduped
+    among themselves the same way).
+
+    Records marked `provisional` for this set (cards typed in from another
+    source before the API carried them) are dropped: the API's own version
+    replaces them. Returns (pool, added, reprints, dropped).
+    """
+    dropped = [c for c in pool
+               if c.get("provisional") and (c.get("set") or {}).get("id") == set_id]
+    pool = [c for c in pool if c not in dropped]
+    by_sig = {reprint_key(c): c for c in pool}
+    old_sigs = set(by_sig)
+    added = reprints = 0
+    for card in fetched:
+        if card.get("regulationMark") not in ACTIVE_REGULATION_MARKS:
+            continue
+        entry = [set_code_of(card), str(card.get("number"))]
+        sig = reprint_key(card)
+        kept = by_sig.get(sig)
+        if kept is not None and card.get("subtypes") and kept.get("subtypes") \
+                and card["subtypes"] != kept["subtypes"]:
+            kept = None                  # same text, different card kind
+        if kept is None:
+            card["printings"] = []
+            by_sig[sig] = kept = card
+            pool.append(card)
+            added += 1
+        elif sig in old_sigs:
+            reprints += 1
+        if entry[0] and entry not in [list(p) for p in kept["printings"]]:
+            kept["printings"].append(entry)
+            kept["printings"].sort()
+    return pool, added, reprints, dropped
 
 
 def main():
     check_only = "--check" in sys.argv
+    if "--merge-set" in sys.argv:
+        set_id = sys.argv[sys.argv.index("--merge-set") + 1]
+        with open(OUTPUT_FILE) as f:
+            pool = json.load(f)
+        fetched = fill_set_codes(fetch_set(set_id))
+        missing = sorted({c["number"] for c in fetched if not set_code_of(c)})
+        if missing:
+            # Without a set code a card has no printing, and no decklist line
+            # can name it: a pool written now would look complete and not be.
+            sys.exit(f"{set_id}: {len(missing)} cards have no set code "
+                     f"(the API's set record could not be read); nothing written")
+        pool, added, reprints, dropped = merge_set(pool, fetched, set_id)
+        print(f"{set_id}: {len(fetched)} fetched, {added} new records, "
+              f"{reprints} reprints of pool cards, "
+              f"{len(dropped)} provisional records replaced"
+              + (f" ({', '.join(c['name'] for c in dropped)})" if dropped else ""))
+        if check_only:
+            print("  nothing written")
+            return
+        with open(OUTPUT_FILE, "w") as f:
+            json.dump(pool, f, indent=4)
+        print(f"Saved {len(pool)} cards to {OUTPUT_FILE}")
+        return
     cards = fetch_all_standard_cards()
 
     # Each card was already fetched by an exact regulationMark:X query, so no
