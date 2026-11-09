@@ -7721,6 +7721,22 @@ def test_delta_reign_stall_cards_read_their_conditions():
     check("Tasty Rice Ball with 2 in the discard heals 90", me.active.damage == 60, me.active.damage)
 
 
+def test_the_baseline_sim_plays_aarune():
+    """Aarune sat in hand in the baseline (listed as unmodeled for the
+    submitted Maushold mill list): a Supporter, a Stadium and another
+    Supporter from the deck, never another Aarune."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model(open("test_fixtures/maushold_mill.txt").read())[0]
+    st = SB.GameState([("Supporter", "Aarune")] * 3 + [("Supporter", "Lillie's Determination")] * 2
+                      + [("Stadium", "Legendary Summit")] * 2 + [("Supporter", "Lana's Aid")]
+                      + [("Energy", "Psychic Energy")] * 10)
+    st.hand = [("Supporter", "Aarune")]
+    SB.play_supporter(st, P, [])
+    got = sorted(n for _, n in st.hand)
+    check("Aarune: Lillie's, Legendary Summit and Lana's Aid",
+          got == ["Lana's Aid", "Legendary Summit", "Lillie's Determination"], got)
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL

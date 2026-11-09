@@ -1167,6 +1167,35 @@ def effect_hilda(state, POKEMON, log):
     return True
 
 
+def effect_aarune(state, POKEMON, log):
+    """Aarune: up to 3 in any combination of Supporter and Stadium cards
+    from the deck into the hand. Next turns' Supporters (the best this sim
+    plays first) and a Stadium; never another Aarune."""
+    got = []
+
+    def take(pred):
+        i = next((i for i, c in enumerate(state.deck) if pred(c)), None)
+        if i is None:
+            return False
+        got.append(state.deck.pop(i))
+        return True
+    for name in SUPPORTER_PRIORITY:
+        if name != "Aarune" and len(got) < 1:
+            take(lambda c, name=name: c == ("Supporter", name))
+    take(lambda c: c[0] == "Stadium")
+    for name in SUPPORTER_PRIORITY:
+        if name != "Aarune" and len(got) < 3 and ("Supporter", name) not in got:
+            take(lambda c, name=name: c == ("Supporter", name))
+    if not got:
+        return False
+    random.shuffle(state.deck)
+    state.remove_from_hand("Supporter", "Aarune")
+    state.discard.append("Aarune")
+    state.hand.extend(got)
+    log.append(f"Play Aarune -> search {', '.join(n for _, n in got)}")
+    return True
+
+
 def effect_judge(state, POKEMON, log):
     """Judge: each player shuffles their hand into their deck and draws 4.
 
@@ -1349,7 +1378,7 @@ def effect_carmine(state, POKEMON, log):
 SUPPORTER_PRIORITY = ["Salvatore", "Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn",
                       "Hilda", "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine",
                       "Judge", "Lucian", "Janine's Secret Art", "Crispin", "Team Rocket's Petrel",
-                      "Lana's Aid"]
+                      "Lana's Aid", "Aarune"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Kofu": effect_kofu,
@@ -1367,6 +1396,7 @@ SUPPORTER_EFFECTS = {
     "Lucian": effect_lucian,
     "Salvatore": effect_salvatore,
     "Lana's Aid": effect_lanas_aid,
+    "Aarune": effect_aarune,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -1414,7 +1444,9 @@ NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red C
                         "Enhanced Hammer", "Tool Scrapper", "Prime Catcher",
                         "Poké Vital A",
                         # fills the OPPONENT's Bench from their deck
-                        "Accompanying Flute"}
+                        "Accompanying Flute",
+                        # a coin-flip gust: the opponent's Bench only
+                        "Pokémon Catcher"}
 
 
 def collect_unmodeled(DECKLIST):
