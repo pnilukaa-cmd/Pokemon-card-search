@@ -2030,7 +2030,8 @@ def play_basics(pl, turn, log):
             # Bench is one it can never find.
             if (len(pl.bench) >= 2 and POL.knob(pl, "hold_bottom_fuel")
                     and _bottom_scaler_spec(pl)
-                    and _reveal_match(pl, (kind, name), _bottom_scaler_spec(pl))):
+                    and _reveal_match(pl, (kind, name), _bottom_scaler_spec(pl))
+                    and not _feeds_an_evolution(pl, name)):
                 continue
             pl.remove_from_hand(kind, name)
             pl.bench.append(InPlay(name, turn))
@@ -3255,6 +3256,14 @@ def _bottom_scaler_spec(pl):
     return spec
 
 
+def _feeds_an_evolution(pl, name):
+    """Does an Evolution in this deck evolve from this Basic? Then it is a
+    line to build, not Bug Out ammo: the Centiskorch decks' Sizzlipede has
+    Bug Out too."""
+    base = M.base_of(pl.POKEMON, name)
+    return any(info.get("evolves_from") == base for info in pl.POKEMON.values())
+
+
 def _needed_in_hand(pl, card):
     """Would putting this Pokémon on the bottom cost the player something
     it needs from the hand: its next Active, or the Evolution for a
@@ -3264,7 +3273,8 @@ def _needed_in_hand(pl, card):
         return False
     info = pl.POKEMON.get(name) or {}
     if info.get("stage") == "Basic":
-        return not pl.bench                 # the next Active, with no Bench
+        # The next Active (no Bench yet), or the start of an Evolution line.
+        return not pl.bench or _feeds_an_evolution(pl, name)
     pre = info.get("evolves_from")
     targets = sum(1 for p in pl.in_play() if M.base_of(pl.POKEMON, p.name) == pre)
     copies = sum(1 for c in pl.hand if c == card)

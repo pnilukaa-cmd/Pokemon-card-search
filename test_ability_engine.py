@@ -7601,6 +7601,25 @@ def test_the_baseline_sim_plays_lanas_aid():
           got == ["Combee", "Grass Energy", "Spinarak"], (got, st.discard))
 
 
+def test_bug_out_ammo_is_never_an_evolution_base():
+    """The Centiskorch decks' Sizzlipede PBL 9 has Bug Out too, so the
+    Bug Out logic held it in hand and Kofu bottomed it -- the Basic those
+    decks have to Bench to evolve. A Basic an Evolution in the deck evolves
+    from is a line to build, not ammo."""
+    import ability_engine as AE
+    V, D, E = _real("decks/field/mew_alex_centiskorch_mill.txt", "me")
+    me = V.Player("me", D[1], list(D[2]), E)
+    me.active = V.InPlay("Mew ex", 1)
+    me.bench = [V.InPlay("Shaymin", 1), V.InPlay("Shaymin", 1)]
+    me.hand = [("Pokemon", "Sizzlipede"), ("Item", "x")]
+    check("Kofu's pick in a Centiskorch deck is not the Sizzlipede",
+          me.hand[V._bottom_pick(me, True)] != ("Pokemon", "Sizzlipede"),
+          me.hand[V._bottom_pick(me, True)])
+    V.play_basics(me, 3, [])
+    check("and it is still Benched with two down", any(b.name == "Sizzlipede" for b in me.bench),
+          [b.name for b in me.bench])
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL
