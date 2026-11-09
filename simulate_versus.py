@@ -2772,6 +2772,14 @@ def _lucian_worth_it(pl, opp):
     # measured +0.42 +/- 0.49 on that list, and was taken out.
     if _hand_scaler(pl, pl.active and pl.active.name):
         return theirs <= 3 and mine <= 6 and _active_can_attack_now(pl, opp)
+    # A Bug Out deck: a hand of 7 or fewer holding 3 spare Bug Out Pokémon
+    # goes under the deck whole, all of it inside the bottom 7.
+    spec = _bottom_scaler_spec(pl)
+    if spec and POL.knob(pl, "stack_bottom") and mine <= 7:
+        spare = sum(1 for c in pl.hand
+                    if _reveal_match(pl, c, spec) and not _needed_in_hand(pl, c))
+        if spare >= 3:
+            return True
     return theirs >= 7 and mine <= 4
 
 
@@ -2828,7 +2836,11 @@ def play_supporter(pl, opp, turn, log):
             cards = list(side.hand)
             random.shuffle(cards)
             side.hand = []
+            known = AE.known_bottom(side)
             side.deck[:0] = cards              # the bottom of the deck
+            # The player knows what it put there. With 7 or fewer that is
+            # every card in its bottom 7, whatever order they went in.
+            side._known_bottom = cards + known if len(cards) <= 7 else []
         drew = []
         for side in (pl, opp):
             n = (6 if random.random() < 0.5 else 3) if moved else 0
