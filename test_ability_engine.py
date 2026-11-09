@@ -7621,18 +7621,17 @@ def test_bug_out_ammo_is_never_an_evolution_base():
 
 
 def test_lucian_stacks_a_bug_out_hand():
-    """Lucian puts each player's hand on the bottom of their deck. A Bug
-    Out deck holding three spare Bug Out Pokemon plays it to put them in
-    its bottom 7, and knows they are there: the hand went down whole."""
+    """Lucian puts each player's hand on the bottom of their deck. A hand
+    of 7 or fewer is then all inside the bottom 7, and the player knows it:
+    Bug Out counts those cards rather than guessing at the deck."""
     V, D, E, me, op = _bug_out_board()
     me.bench = [V.InPlay("Surskit", 1), V.InPlay("Jellicent", 1)]
     me.deck = [("Item", "Poké Pad")] * 20
     me.hand = [("Supporter", "Lucian"), ("Pokemon", "Spinarak"), ("Pokemon", "Combee"),
                ("Pokemon", "Sizzlipede"), ("Item", "Poké Pad")]
-    op.hand, op.deck = [("Item", "x")] * 2, [("Item", "y")] * 20
+    op.hand, op.deck = [("Item", "x")] * 7, [("Item", "y")] * 20
     V.play_supporter(me, op, 3, [])
-    check("a Bug Out hand of 4 with 3 spare Bug Out Pokemon plays Lucian",
-          "Lucian" in me.discard, me.discard)
+    check("Lucian is played (their 7 against my 4)", "Lucian" in me.discard, me.discard)
     bug = next(a for a in D[1]["Masquerain"]["attacks"] if a["name"] == "Bug Out")
     check("and Bug Out counts the 3 it put under the deck",
           V.attack_damage(me, op, me.active, bug) == 150, V.attack_damage(me, op, me.active, bug))

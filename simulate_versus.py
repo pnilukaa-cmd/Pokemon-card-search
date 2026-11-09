@@ -2772,14 +2772,10 @@ def _lucian_worth_it(pl, opp):
     # measured +0.42 +/- 0.49 on that list, and was taken out.
     if _hand_scaler(pl, pl.active and pl.active.name):
         return theirs <= 3 and mine <= 6 and _active_can_attack_now(pl, opp)
-    # A Bug Out deck: a hand of 7 or fewer holding 3 spare Bug Out Pokémon
-    # goes under the deck whole, all of it inside the bottom 7.
-    spec = _bottom_scaler_spec(pl)
-    if spec and POL.knob(pl, "stack_bottom") and mine <= 7:
-        spare = sum(1 for c in pl.hand
-                    if _reveal_match(pl, c, spec) and not _needed_in_hand(pl, c))
-        if spare >= 3:
-            return True
+    # Played by a Bug Out deck for a hand of 3+ spare Bug Out Pokémon (all of
+    # it then inside the bottom 7) it measured -0.27 +/- 0.49 for Boss's
+    # Orders and +0.56 +/- 0.46 as two copies for Poffin, against Lillie's
+    # Determination's +1.50 in the same slot; taken out (2026-11-09).
     return theirs >= 7 and mine <= 4
 
 
