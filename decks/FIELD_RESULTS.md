@@ -165,6 +165,13 @@ chandelure_centiskorch_deck_out -0.73 +/- 0.34, mew_alex_centiskorch_mill
 Thorns' Destructo-Press, Make Waves, the Legendary Stadiums and Talonflame
 ex's Excited Dive are in no field deck.
 
+`maushold_mill_legendary_summit` was added to the field after this run too
+(2026-11-09). dabfb36 makes Aarune (and Celebi, Heatmor, Ethan's
+Adventure) search both kinds it names, Legendary Summit cover Colorless
+Pokémon only and get played, Custom Vest work against Mega ex only,
+Legendary Pyroduct switch off Evolution Pokémon's Abilities only, and
+Tasty Rice Ball scale; no field deck runs any of them.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

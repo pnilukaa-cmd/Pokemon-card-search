@@ -1,0 +1,13 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Maushold                      75.9%   avg turn 2.89
+  Dunsparce                     89.3%   avg turn 1.85
+  Dudunsparce                   48.6%   avg turn 3.28
+  Tandemaus                     94.9%   avg turn 1.44
+  Comfey                        82.2%   avg turn 1.94
+
+First attack landed by turn 6: 94.5% of trials (avg turn 2.60)
+Average final hand size (turn 6): 7.66
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

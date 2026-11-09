@@ -1,0 +1,6 @@
+Q_g 105s Q: 66.40% (±0.30) over 106 decks at 200 games, winning 82
+q_comfey3_g 109s q_comfey3: 66.61% (±0.30) over 106 decks at 200 games, winning 85
+q_mist_g 109s q_mist: 66.89% (±0.30) over 106 decks at 200 games, winning 84
+q_cm_g 113s q_cm: 67.25% (±0.29) over 106 decks at 200 games, winning 81
+q_aar1_g 108s q_aar1: 66.65% (±0.30) over 106 decks at 200 games, winning 82
+DONE

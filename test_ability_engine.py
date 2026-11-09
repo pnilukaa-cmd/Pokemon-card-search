@@ -2674,6 +2674,13 @@ def test_no_card_in_any_decklist_is_silently_inert():
             text = V._card_text(nm)
             if V._GARDEN_RE.search(text) or V._BEACH_RE.search(text):
                 return True
+            # Legendary Summit: put down while as many of the player's
+            # Pokemon as the opponent's are the type it names, a board the
+            # empty probe never has.
+            _sir = V.trainer_effect_ir(nm)
+            if (_sir is not None and any(a.op is IR.Op.MODIFY_PRIZE for a in _sir.actions)
+                    and V._re.search(r"whenever an? \w+ pok[eé]mon", text, V._re.I)):
+                return True
             # Conditional on a Pokemon subtype in play (Tera): played when
             # the condition holds, so live -- the probe board has none.
             ir = V.trainer_effect_ir(nm)

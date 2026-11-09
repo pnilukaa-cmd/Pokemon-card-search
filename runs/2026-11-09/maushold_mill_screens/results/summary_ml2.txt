@@ -1,0 +1,9 @@
+M0_g 134s M0: 58.71% (±0.31) over 106 decks at 200 games, winning 76
+m_alt_g 113s m_alt: 54.96% (±0.32) over 106 decks at 200 games, winning 65
+m_gri_g 107s m_gri: 55.72% (±0.31) over 106 decks at 200 games, winning 73
+m_rice_g 94s m_rice: 55.48% (±0.31) over 106 decks at 200 games, winning 69
+m_vest_g 105s m_vest: 56.35% (±0.31) over 106 decks at 200 games, winning 71
+m_tau_g 109s m_tau: 61.80% (±0.31) over 106 decks at 200 games, winning 76
+m_pyro_g 131s m_pyro: 55.98% (±0.32) over 106 decks at 200 games, winning 74
+m_noc_g 90s m_noc: 57.43% (±0.31) over 106 decks at 200 games, winning 71
+DONE

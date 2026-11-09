@@ -1,0 +1,8 @@
+P_g 112s P: 63.92% (±0.30) over 106 decks at 200 games, winning 79
+p_dud0_g 105s p_dud0: 66.88% (±0.30) over 106 decks at 200 games, winning 83
+p_mist_g 113s p_mist: 64.67% (±0.30) over 106 decks at 200 games, winning 79
+p_comfey3_g 113s p_comfey3: 64.64% (±0.30) over 106 decks at 200 games, winning 78
+p_xer3_g 110s p_xer3: 63.47% (±0.30) over 106 decks at 200 games, winning 75
+p_badge4_g 108s p_badge4: 62.90% (±0.30) over 106 decks at 200 games, winning 75
+p_sum0_g 105s p_sum0: 51.27% (±0.31) over 106 decks at 200 games, winning 51
+DONE

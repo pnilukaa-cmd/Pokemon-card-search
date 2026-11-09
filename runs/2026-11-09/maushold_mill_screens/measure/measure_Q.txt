@@ -1,0 +1,24 @@
+wins 53/80
+  meta_dragapult_pure                       20.0%
+  meta_raging_bolt                          70.0%
+  meta_ns_zoroark                           90.0%
+  meta_mega_excadrill                       70.0%
+  meta_festival_lead                        90.0%
+  meta_slowking                             60.0%
+  krookodile_ex_relicanth_hand_disruption   50.0%
+  mega_absol_ex_hand_lock                   80.0%
+game ends: {'loss prizes': 22, 'win prizes': 10, 'win deck_out': 43, 'loss deck_out': 5}
+turns a game 21.4; Prizes the opponent took 2.08; Prizes this deck took 1.25
+
+attacks per game 7.15, cards milled by attacks 9.3 a game
+  Maushold     Gnaw Together       3.00/game  milled 2.50 each  Maushold in play 2.1  KO   0%
+  Tauros       Raging Horns        2.73/game  milled 0.01 each  Maushold in play 1.5  KO  32%
+  Comfey       Flower Shower       0.61/game  milled 2.80 each  Maushold in play 1.2  KO   0%
+  Tandemaus    Play Rough          0.60/game  milled 0.08 each  Maushold in play 0.1  KO   0%
+  Maushold     Pound               0.20/game  milled 0.00 each  Maushold in play 1.1  KO  44%
+  Comfey       Play Rough          0.01/game  milled 0.00 each  Maushold in play 0.0  KO 100%
+
+Gnaw Together by Maushold in play: n, milled each
+  1:   56  1.36
+  2:  101  2.48
+  3:   83  3.30

@@ -1,0 +1,9 @@
+N_g 110s N: 62.23% (±0.31) over 106 decks at 200 games, winning 79
+n_tau4_g 102s n_tau4: 61.54% (±0.31) over 106 decks at 200 games, winning 74
+n_eev_g 108s n_eev: 59.43% (±0.31) over 106 decks at 200 games, winning 76
+n_salv_g 106s n_salv: 61.33% (±0.31) over 106 decks at 200 games, winning 76
+n_cage_g 103s n_cage: 46.40% (±0.31) over 106 decks at 200 games, winning 45
+n_mist_g 111s n_mist: 62.93% (±0.30) over 106 decks at 200 games, winning 78
+n_lisia_g 101s n_lisia: 61.68% (±0.31) over 106 decks at 200 games, winning 75
+n_dud1_g 111s n_dud1: 64.53% (±0.30) over 106 decks at 200 games, winning 80
+DONE

@@ -1,0 +1,12 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Maushold                      75.0%   avg turn 2.85
+  Tandemaus                     96.6%   avg turn 1.46
+  Comfey                        86.0%   avg turn 1.85
+  Tauros                        84.7%   avg turn 1.87
+
+First attack landed by turn 6: 84.9% of trials (avg turn 2.64)
+Average final hand size (turn 6): 6.92
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

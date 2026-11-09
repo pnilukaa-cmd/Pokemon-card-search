@@ -1,0 +1,27 @@
+wins 51/80
+  meta_dragapult_pure                       60.0%
+  meta_raging_bolt                          70.0%
+  meta_ns_zoroark                           80.0%
+  meta_mega_excadrill                       60.0%
+  meta_festival_lead                        90.0%
+  meta_slowking                             60.0%
+  krookodile_ex_relicanth_hand_disruption   60.0%
+  mega_absol_ex_hand_lock                   30.0%
+game ends: {'win deck_out': 51, 'loss prizes': 26, 'loss deck_out': 2, 'loss no_pokemon': 1}
+turns a game 17.5; Prizes the opponent took 1.91; Prizes this deck took 0.20
+
+attacks per game 7.12, cards milled by attacks 13.9 a game
+  Maushold     Gnaw Together       4.44/game  milled 2.36 each  Maushold in play 2.0  KO   0%
+  Comfey       Flower Shower       1.15/game  milled 2.95 each  Maushold in play 0.6  KO   0%
+  Tandemaus    Play Rough          0.60/game  milled 0.00 each  Maushold in play 0.0  KO   0%
+  Dunsparce    Ram                 0.35/game  milled 0.00 each  Maushold in play 0.4  KO   0%
+  Maushold     Pound               0.30/game  milled 0.00 each  Maushold in play 1.1  KO  42%
+  Dunsparce    Trading Places      0.24/game  milled 0.00 each  Maushold in play 0.2  KO   0%
+  Comfey       Play Rough          0.04/game  milled 0.00 each  Maushold in play 0.7  KO 100%
+  Dudunsparce  Land Crush          0.01/game  milled 0.00 each  Maushold in play 0.0  KO 100%
+
+Gnaw Together by Maushold in play: n, milled each
+  1:  106  1.33
+  2:  140  2.44
+  3:  101  3.26
+  4:    8  3.38

@@ -1,0 +1,27 @@
+Pokémon: 19
+4 Maushold 30C 125
+4 Tandemaus SSP 157
+4 Dunsparce JTG 120
+3 Dudunsparce ex JTG 178
+1 Dudunsparce TEF 129
+2 Fan Rotom SCR 118
+1 Shaymin DRI 10
+
+Trainer: 29
+4 Lillie's Determination MEG 169
+2 Hilda WHT 171
+1 Lana's Aid TWM 207
+4 Buddy-Buddy Poffin MEG 167
+4 Poké Pad POR 113
+3 Night Stretcher MEG 173
+1 Ultra Ball MEG 131
+3 Backtrack Badge PBL 74
+3 Crushing Hammer POR 71
+3 Battle Cage PFL 116
+1 Neutralization Zone SFA 60
+
+Energy: 12
+4 Mist Energy TEF 161
+8 Basic {P} Energy SUM 162
+
+Total Cards: 60

@@ -725,3 +725,19 @@ density (2.5 of 3.2 hits), not stacking, and the list that wins (49% against
 the field) runs 10 Grass + Legacy Energy, 4 Lana's Aid, 4 Kofu and a 2-2
 Jellicent line, with no Boss's Orders, Poffin, Latias ex or Telepathic
 Psychic Energy.
+
+### Legendary Summit and Tauros for Maushold mill (Delta Reign, 2026-11-09)
+
+`Legendary Summit` DLR 96 (Stadium): a Colorless Pokémon Knocked Out by an
+attack gives 1 fewer Prize, both sides. In a Maushold mill deck every
+Colorless single-Prize Pokémon is then worth 0, and with `Neutralization
+Zone` (no damage to non-Rule-Box Pokémon from ex / V attacks) the opponent
+has almost no way to take Prizes while `Maushold` 30C 146's Gnaw Together
+mills. Measured in `decks/maushold_mill_legendary_summit.md`: removing
+Summit -12.65, replacing Neutralization Zone with Battle Cage -15.83.
+`Tauros` DLR 77 (Colorless Basic, 130 HP, Raging Horns 50+ for 10 per
+counter on itself) is the newest card that fits: 4 of them in the
+Dunsparce line's slots and 2 Catchers' measured +8.35 in three steps, and
+gave the deck a Prize-taking second route (10 of 53 measured wins). The
+Delta Reign heal and stall cards (Grisham, Tasty Rice Ball, Custom Vest,
+Altaria, Legendary Pyroduct) each lost 2-4 points in the same list.
