@@ -1,0 +1,8 @@
+old_chandelure_centiskorch_deck_out_g 150s old_chandelure_centiskorch_deck_out: 35.12% (±0.30) over 105 decks at 200 games, winning 26
+old_mew_alex_centiskorch_mill_g 193s old_mew_alex_centiskorch_mill: 42.21% (±0.31) over 105 decks at 200 games, winning 34
+old_study_centiskorch_bastiodon_mill_g 251s old_study_centiskorch_bastiodon_mill: 33.81% (±0.31) over 105 decks at 200 games, winning 15
+DONE
+new_chandelure_centiskorch_deck_out_g 182s new_chandelure_centiskorch_deck_out: 34.40% (±0.30) over 105 decks at 200 games, winning 26
+new_mew_alex_centiskorch_mill_g 192s new_mew_alex_centiskorch_mill: 42.49% (±0.31) over 105 decks at 200 games, winning 36
+new_study_centiskorch_bastiodon_mill_g 261s new_study_centiskorch_bastiodon_mill: 33.32% (±0.31) over 105 decks at 200 games, winning 13
+DONE

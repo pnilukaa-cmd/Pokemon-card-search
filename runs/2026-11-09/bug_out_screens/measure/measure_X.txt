@@ -1,0 +1,27 @@
+wins 35/80
+  meta_dragapult_pure                       20.0%
+  meta_raging_bolt                          30.0%
+  meta_ns_zoroark                           50.0%
+  meta_mega_excadrill                        0.0%
+  meta_festival_lead                        90.0%
+  meta_slowking                             60.0%
+  krookodile_ex_relicanth_hand_disruption   70.0%
+  mega_absol_ex_hand_lock                   30.0%
+game ends: {'loss prizes': 41, 'win prizes': 33, 'loss deck_out': 4, 'win deck_out': 2}
+
+attacks per game 4.64, Prizes from attacks 3.46 a game
+  Masquerain     Bug Out               2.62/game  avg dmg   195  KO  59%  Prizes 2.50/game ( 72%)
+  Combee         Fade Out              0.40/game  avg dmg    11  KO   0%  Prizes 0.00/game (  0%)
+  Sizzlipede     Bug Out               0.40/game  avg dmg   197  KO  50%  Prizes 0.31/game (  9%)
+  Spinarak       Bug Out               0.40/game  avg dmg   161  KO  47%  Prizes 0.31/game (  9%)
+  Surskit        Multiply              0.25/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Jellicent      Gentle Slap           0.20/game  avg dmg   100  KO  50%  Prizes 0.12/game (  4%)
+  Combee         Bug Out               0.14/game  avg dmg   273  KO  82%  Prizes 0.21/game (  6%)
+  Sizzlipede     Controlled Burn       0.10/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Frillish       Oceanic Gloom         0.07/game  avg dmg    20  KO   0%  Prizes 0.00/game (  0%)
+  Spinarak       Poison Sting          0.04/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Masquerain     Bug Out -- all damage to Dunsparce prevented  0.01/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+
+Bug Out, 285 attacks: avg Bug Out Pokémon in the bottom 7 3.16 (known 0.64); in deck 8.8 of 24.9 cards; in play 3.1, hand 2.2, discard 0.7
+  hits in the bottom 7: {1: 37, 2: 66, 3: 72, 4: 58, 5: 30, 6: 20, 7: 2}
+  attacker: {'Masquerain': 210, 'Sizzlipede': 32, 'Spinarak': 32, 'Combee': 11}

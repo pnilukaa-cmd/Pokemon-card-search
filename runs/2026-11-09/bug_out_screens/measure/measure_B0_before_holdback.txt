@@ -1,0 +1,30 @@
+wins 18/80
+  meta_dragapult_pure                        0.0%
+  meta_raging_bolt                          30.0%
+  meta_ns_zoroark                           40.0%
+  meta_mega_excadrill                       20.0%
+  meta_festival_lead                        40.0%
+  meta_slowking                             20.0%
+  krookodile_ex_relicanth_hand_disruption   10.0%
+  mega_absol_ex_hand_lock                   20.0%
+game ends: {'loss prizes': 60, 'win prizes': 13, 'win deck_out': 5, 'loss deck_out': 2}
+
+attacks per game 2.92, Prizes from attacks 1.84 a game
+  Masquerain     Bug Out               1.44/game  avg dmg   179  KO  50%  Prizes 1.14/game ( 62%)
+  Sizzlipede     Bug Out               0.36/game  avg dmg   200  KO  52%  Prizes 0.29/game ( 16%)
+  Jellicent      Gentle Slap           0.30/game  avg dmg   100  KO  50%  Prizes 0.17/game ( 10%)
+  Spinarak       Bug Out               0.20/game  avg dmg   150  KO  81%  Prizes 0.19/game ( 10%)
+  Frillish       Oceanic Gloom         0.17/game  avg dmg    20  KO   0%  Prizes 0.00/game (  0%)
+  Sizzlipede     Controlled Burn       0.09/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Spinarak       Poison Sting          0.07/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Surskit        Bug Bite              0.06/game  avg dmg     4  KO   0%  Prizes 0.00/game (  0%)
+  Surskit        Multiply              0.05/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+  Masquerain     Frightening Pattern   0.05/game  avg dmg    52  KO   0%  Prizes 0.00/game (  0%)
+  Combee         Fade Out              0.05/game  avg dmg    15  KO   0%  Prizes 0.00/game (  0%)
+  Latias ex      Eon Blade             0.04/game  avg dmg   200  KO  67%  Prizes 0.03/game (  1%)
+  Combee         Bug Out               0.03/game  avg dmg   125  KO  50%  Prizes 0.03/game (  1%)
+  Combee         Fade Out -- all damage to Dunsparce prevented  0.01/game  avg dmg     0  KO   0%  Prizes 0.00/game (  0%)
+
+Bug Out, 162 attacks: avg Bug Out Pokémon in the bottom 7 3.02 (known 0.93); in deck 8.3 of 24.1 cards; in play 4.5, hand 1.4, discard 0.6
+  hits in the bottom 7: {1: 30, 2: 38, 3: 34, 4: 29, 5: 21, 6: 9, 7: 1}
+  attacker: {'Sizzlipede': 29, 'Masquerain': 115, 'Combee': 2, 'Spinarak': 16}

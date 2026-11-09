@@ -1,0 +1,3 @@
+X_g 427s X: 49.12% (±0.14) over 105 decks at 1000 games, winning 53
+B0_g 529s B0: 30.45% (±0.13) over 105 decks at 1000 games, winning 15
+DONE

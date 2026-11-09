@@ -155,6 +155,16 @@ too (2026-11-06), with three provisional Delta Reign cards in the pool
 2026-11-09 with the same text). b2d5545 makes Lure Out (fill the
 opponent's Bench) run as an attack; no field deck has such an attack.
 
+`bug_out_masquerain_jellicent` was added to the field after this run too
+(2026-11-09). d95796e merges the official Delta Reign set and makes Bug
+Out count the bottom of its own deck (it counted Pokémon in the
+opponent's hand). Three field decks run Sizzlipede PBL 9, which has Bug
+Out; measured old engine → new at 200 games against the field:
+chandelure_centiskorch_deck_out -0.73 +/- 0.34, mew_alex_centiskorch_mill
++0.28 +/- 0.27, study_centiskorch_bastiodon_mill -0.49 +/- 0.39. Iron
+Thorns' Destructo-Press, Make Waves, the Legendary Stadiums and Talonflame
+ex's Excited Dive are in no field deck.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

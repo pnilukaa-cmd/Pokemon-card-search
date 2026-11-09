@@ -1,0 +1,4 @@
+W_g 91s W: 45.03% (±0.31) over 105 decks at 200 games, winning 44
+w_pofL_g 87s w_pofL: 45.59% (±0.31) over 105 decks at 200 games, winning 44
+w_pofE_g 85s w_pofE: 49.20% (±0.31) over 105 decks at 200 games, winning 48
+DONE

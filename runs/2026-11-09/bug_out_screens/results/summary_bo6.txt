@@ -1,0 +1,8 @@
+V_g 184s V: 44.36% (±0.31) over 105 decks at 200 games, winning 40
+v_boss0_g 180s v_boss0: 45.87% (±0.32) over 105 decks at 200 games, winning 41
+v_pof0_g 179s v_pof0: 45.63% (±0.31) over 105 decks at 200 games, winning 49
+v_jel1_g 178s v_jel1: 43.66% (±0.32) over 105 decks at 200 games, winning 35
+v_luc_g 177s v_luc: 44.09% (±0.31) over 105 decks at 200 games, winning 40
+v_hil3_g 191s v_hil3: 44.31% (±0.31) over 105 decks at 200 games, winning 42
+v_mh_g 147s v_mh: 36.80% (±0.31) over 105 decks at 200 games, winning 22
+DONE

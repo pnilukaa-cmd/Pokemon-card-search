@@ -1,0 +1,5 @@
+X_g 85s X: 49.53% (±0.31) over 105 decks at 200 games, winning 54
+x_e12_g 86s x_e12: 49.85% (±0.31) over 105 decks at 200 games, winning 55
+x_pof1_g 88s x_pof1: 47.97% (±0.31) over 105 decks at 200 games, winning 49
+x_jel3_g 95s x_jel3: 45.31% (±0.31) over 105 decks at 200 games, winning 40
+DONE

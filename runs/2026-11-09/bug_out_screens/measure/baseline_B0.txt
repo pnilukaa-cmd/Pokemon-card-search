@@ -1,0 +1,16 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Spinarak                      89.5%   avg turn 1.67
+  Jellicent                     62.0%   avg turn 3.09
+  Latias ex                     25.0%   avg turn 1.89
+  Combee                        83.1%   avg turn 1.67
+  Surskit                       81.1%   avg turn 1.66
+  Masquerain                    72.5%   avg turn 3.09
+  Frillish                      72.3%   avg turn 1.70
+  Sizzlipede                    63.7%   avg turn 1.58
+
+First attack landed by turn 6: 96.6% of trials (avg turn 2.54)
+Average final hand size (turn 6): 7.93
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

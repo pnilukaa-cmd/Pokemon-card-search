@@ -1,0 +1,4 @@
+B0_hb1_g 106s B0_hb1: 29.86% (±0.29) over 105 decks at 200 games, winning 15
+DONE
+B0_hb0_g 107s B0_hb0: 28.30% (±0.29) over 105 decks at 200 games, winning 12
+DONE

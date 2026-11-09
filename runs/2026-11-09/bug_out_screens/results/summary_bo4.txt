@@ -1,0 +1,8 @@
+T_g 98s T: 35.18% (±0.30) over 105 decks at 200 games, winning 20
+t_nolat_g 95s t_nolat: 38.27% (±0.31) over 105 decks at 200 games, winning 27
+t_nolns_g 99s t_nolns: 37.86% (±0.31) over 105 decks at 200 games, winning 24
+t_fdlr_g 100s t_fdlr: 35.02% (±0.30) over 105 decks at 200 games, winning 22
+t_jel3_g 97s t_jel3: 37.92% (±0.31) over 105 decks at 200 games, winning 25
+t_lana0_g 100s t_lana0: 31.15% (±0.30) over 105 decks at 200 games, winning 13
+t_e10_g 100s t_e10: 34.48% (±0.30) over 105 decks at 200 games, winning 18
+DONE

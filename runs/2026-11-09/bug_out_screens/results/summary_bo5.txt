@@ -1,0 +1,8 @@
+U_g 95s U: 41.48% (±0.31) over 105 decks at 200 games, winning 32
+u_lana4_g 93s u_lana4: 43.13% (±0.31) over 105 decks at 200 games, winning 33
+u_boss0_g 94s u_boss0: 43.72% (±0.31) over 105 decks at 200 games, winning 37
+u_pof0_g 93s u_pof0: 43.09% (±0.31) over 105 decks at 200 games, winning 39
+u_jel2_g 95s u_jel2: 43.83% (±0.31) over 105 decks at 200 games, winning 41
+u_ns_g 96s u_ns: 41.40% (±0.31) over 105 decks at 200 games, winning 33
+u_hil3_g 93s u_hil3: 42.58% (±0.31) over 105 decks at 200 games, winning 33
+DONE

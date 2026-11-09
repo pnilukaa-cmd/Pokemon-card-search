@@ -1,0 +1,10 @@
+B0_g 124s B0: 30.80% (±0.29) over 105 decks at 200 games, winning 15
+b_kofu4_g 105s b_kofu4: 29.33% (±0.29) over 105 decks at 200 games, winning 14
+b_nolat_g 103s b_nolat: 32.86% (±0.30) over 105 decks at 200 games, winning 18
+b_tel2_g 103s b_tel2: 32.94% (±0.30) over 105 decks at 200 games, winning 18
+b_tel0_g 99s b_tel0: 35.11% (±0.30) over 105 decks at 200 games, winning 18
+b_boss2_g 111s b_boss2: 27.91% (±0.29) over 105 decks at 200 games, winning 15
+b_hil3_g 121s b_hil3: 30.07% (±0.29) over 105 decks at 200 games, winning 14
+b_for0_g 106s b_for0: 30.88% (±0.29) over 105 decks at 200 games, winning 14
+b_pof4_g 110s b_pof4: 30.52% (±0.29) over 105 decks at 200 games, winning 18
+DONE

@@ -709,3 +709,19 @@ Pecharunt ex / Fezandipiti ex / Janine's Secret Art, near 77% against the
 field; it is weak to Grass. It was built on provisional text (from the
 Japanese set); the official English text, in the pool since 2026-11-09,
 matches it.
+
+### Bug Out (Delta Reign Masquerain, 2026-11-09)
+
+`Masquerain` DLR 3's Bug Out (one Grass: 50 for each Pokémon with the Bug
+Out attack in the bottom 7 of your deck; the Pokémon are shuffled back,
+the rest discarded) is the attacker. `Spinarak` DLR 58, `Combee` DLR 6 and
+`Sizzlipede` PBL 9 (three Colorless) are the other twelve copies, mostly
+ammo. Stackers (`deck_bottom_stack_self`): `Jellicent` DLR 28's Deep Sea
+Draw, `Kofu`, `Quaquaval`'s Up-Tempo, `Lucian`. Anti-synergy: anything
+that puts random cards on the bottom (Delibird, Metang, Grimsley's Move)
+or takes a Pokémon out of it (`Dusk Ball`). Measured in
+`decks/bug_out_masquerain_jellicent.md`: the damage is mostly the deck's
+density (2.5 of 3.2 hits), not stacking, and the list that wins (49% against
+the field) runs 10 Grass + Legacy Energy, 4 Lana's Aid, 4 Kofu and a 2-2
+Jellicent line, with no Boss's Orders, Poffin, Latias ex or Telepathic
+Psychic Energy.
