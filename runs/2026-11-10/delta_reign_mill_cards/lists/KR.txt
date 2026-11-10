@@ -1,0 +1,30 @@
+Pokémon: 22
+4 Sandile BLK 135
+3 Krokorok BLK 136
+3 Krookodile ex CRI 55
+2 Relicanth TEF 173
+3 Dunsparce TEF 128
+2 Dudunsparce TEF 129
+3 Scraggy ASC 134
+2 Mega Scrafty ex ASC 135
+
+Trainer: 24
+4 Lillie's Determination MEG 119
+1 Ultra Ball MEG 131
+1 Boss's Orders MEG 114
+4 Xerosic's Machinations SFA 64
+2 Punk Helmet PFL 121
+1 Air Balloon BLK 79
+1 Rescue Board TEF 159
+1 Night Stretcher MEG 173
+2 Poké Pad ASC 198
+1 Janine's Secret Art SFA 59
+2 Team Rocket's Petrel ASC 207
+3 Buddy-Buddy Poffin MEG 167
+1 Energy Search POR 72
+
+Energy: 14
+13 Basic Darkness Energy
+1 Enriching Energy SSP 191
+
+Total Cards: 60

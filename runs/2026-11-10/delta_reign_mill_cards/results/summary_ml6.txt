@@ -1,0 +1,11 @@
+Q_g 141s Q: 66.24% (±0.30) over 107 decks at 200 games, winning 85
+q_mant_g 139s q_mant: 62.71% (±0.30) over 107 decks at 200 games, winning 76
+q_masq_g 134s q_masq: 64.41% (±0.30) over 107 decks at 200 games, winning 80
+q_gira_g 131s q_gira: 62.54% (±0.30) over 107 decks at 200 games, winning 79
+KR_g 84s KR: 51.67% (±0.31) over 107 decks at 200 games, winning 52
+kr_ink_g 86s kr_ink: 48.91% (±0.31) over 107 decks at 200 games, winning 47
+AB_g 67s AB: 68.16% (±0.29) over 107 decks at 200 games, winning 85
+ab_ink_g 75s ab_ink: 62.85% (±0.30) over 107 decks at 200 games, winning 79
+KT_g 108s KT: 46.80% (±0.31) over 107 decks at 200 games, winning 45
+kt_sand_g 109s kt_sand: 45.80% (±0.31) over 107 decks at 200 games, winning 45
+DONE

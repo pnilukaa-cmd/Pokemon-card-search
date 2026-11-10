@@ -741,3 +741,9 @@ Dunsparce line's slots and 2 Catchers' measured +8.35 in three steps, and
 gave the deck a Prize-taking second route (10 of 53 measured wins). The
 Delta Reign heal and stall cards (Grisham, Tasty Rice Ball, Custom Vest,
 Altaria, Legendary Pyroduct) each lost 2-4 points in the same list.
+Delta Reign's direct mill and hand disruption lost wherever they fit
+(`runs/2026-11-10/delta_reign_mill_cards`): Mantine's Make Waves -3.53
+and Giratina -3.70 in that list, Inkay's Knock Off -2.77 in Krookodile ex
+and -5.31 in Mega Absol ex hand lock, Sandslash's Digging Claw -1.00 in
+the Tyrantrum mill. Delta Reign's Rotom, Sharpedo and Liepard have no hand
+disruption (Astonish, Chew Off, Knock Off are older printings).

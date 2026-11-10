@@ -98,10 +98,14 @@ ones that could fit, each tested in the list as a single change:
 Not tested, and why:
 
 - **Sandslash DLR** mills one card but costs Fighting Energy.
-- **Mantine DLR's Make Waves** and **Rotom DLR's Astonish** shuffle cards
-  *back into* the opponent's deck: the opposite of mill.
-- **Sharpedo's Chew Off** and **Liepard's Knock Off** discard from the
-  hand, not the deck, and need Darkness Energy.
+- **Mantine DLR's Make Waves** shuffles the opponent's hand *back into*
+  their deck: the opposite of mill.
+- **Inkay DLR's Knock Off** discards from the hand, not the deck, and
+  needs Darkness Energy.
+- (Corrected 2026-11-10: this list first named Rotom's Astonish and
+  Sharpedo's Chew Off and Liepard's Knock Off as Delta Reign cards. Those
+  attacks are on older printings; Delta Reign's Rotom, Sharpedo and
+  Liepard have Thunder Shock, Crunch and Follow-Up Claw.)
 - **Legendary Trench** would double heals, but it is a Stadium and would
   push Summit out.
 
