@@ -3815,7 +3815,11 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
         # alternative is a snapshot/restore of the whole player.
         pl.hand.extend([(kind, name)] * (1 + extra))
         return False
-    pl.discard.extend([name] * (1 + extra))
+    if _returns_to_hand(pl, name):
+        pl.hand.extend([(kind, name)] * (1 + extra))
+        log.append(f"  {pl.name}: {name} goes back to the hand")
+    else:
+        pl.discard.extend([name] * (1 + extra))
     if kind == "Supporter":
         pl.supporter_played = True
         pl.played_supporters_this_turn.add(name)
@@ -3827,6 +3831,26 @@ def play_trainer_from_ir(pl, opp, kind, name, log, turn=0):
 
 
 _ENDS_TURN_RE = _re.compile(r"your turn ends", _re.I)
+
+# Tate & Liza's Training: "Draw 2 cards. If you drew any cards in this way,
+# and if a Stadium that has "Legendary" in its name is in play, put this
+# Tate & Liza's Training into your hand instead of the discard pile." The
+# draw compiled and the return did not, so a Legendary Summit deck's draw
+# Supporter was spent like any other.
+_BACK_TO_HAND_RE = _re.compile(
+    r"if a stadium that has [\"“']([^\"”']+)[\"”'] in its name is in play, put this"
+    r" [^.]+? into your hand instead of the discard pile", _re.I)
+
+
+def _returns_to_hand(pl, name):
+    m = _BACK_TO_HAND_RE.search(_card_text(name) or "")
+    if not m:
+        return False
+    want = m.group(1).lower()
+    opp = getattr(pl, "_opp_ref", None)
+    return any(st and want in st.lower() for st in
+               (getattr(pl, "stadium", None), getattr(pl, "_opp_stadium", None),
+                getattr(opp, "stadium", None) if opp is not None else None))
 
 
 def _active_can_attack_now(pl, opp):

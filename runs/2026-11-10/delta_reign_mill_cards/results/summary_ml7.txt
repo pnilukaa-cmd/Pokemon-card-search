@@ -1,0 +1,10 @@
+Q_g 137s Q: 66.25% (±0.30) over 107 decks at 200 games, winning 81
+s_tl_g 136s s_tl: 60.66% (±0.31) over 107 decks at 200 games, winning 73
+s_tlb_g 137s s_tlb: 63.91% (±0.30) over 107 decks at 200 games, winning 80
+s_judge_g 139s s_judge: 59.89% (±0.31) over 107 decks at 200 games, winning 74
+s_eri_g 134s s_eri: 63.41% (±0.30) over 107 decks at 200 games, winning 77
+s_luc_g 134s s_luc: 58.61% (±0.31) over 107 decks at 200 games, winning 72
+s_emma_g 131s s_emma: 60.71% (±0.31) over 107 decks at 200 games, winning 74
+s_xer4_g 129s s_xer4: 60.63% (±0.31) over 107 decks at 200 games, winning 73
+s_emcee_g 134s s_emcee: 59.91% (±0.31) over 107 decks at 200 games, winning 76
+DONE

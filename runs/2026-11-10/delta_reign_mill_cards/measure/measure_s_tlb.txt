@@ -1,0 +1,26 @@
+wins 52/80
+  meta_dragapult_pure                       40.0%
+  meta_raging_bolt                          50.0%
+  meta_ns_zoroark                          100.0%
+  meta_mega_excadrill                       50.0%
+  meta_festival_lead                        80.0%
+  meta_slowking                             80.0%
+  krookodile_ex_relicanth_hand_disruption   70.0%
+  mega_absol_ex_hand_lock                   50.0%
+game ends: {'win deck_out': 44, 'loss prizes': 23, 'loss no_pokemon': 1, 'win prizes': 8, 'loss deck_out': 4}
+turns a game 21.1; Prizes the opponent took 2.38; Prizes this deck took 1.38
+
+attacks per game 6.71, cards milled by attacks 8.6 a game
+  Tauros       Raging Horns        2.96/game  milled 0.08 each  Maushold in play 1.8  KO  32%
+  Maushold     Gnaw Together       2.67/game  milled 2.46 each  Maushold in play 2.2  KO   0%
+  Comfey       Flower Shower       0.59/game  milled 2.85 each  Maushold in play 1.0  KO   0%
+  Maushold     Pound               0.25/game  milled 0.00 each  Maushold in play 1.2  KO  60%
+  Tandemaus    Play Rough          0.20/game  milled 0.12 each  Maushold in play 0.0  KO   0%
+  Maushold     Gnaw Together -- all damage to Dunsparce prevented  0.03/game  milled 3.00 each  Maushold in play 2.0  KO   0%
+  Maushold     Gnaw Together -- all damage to Dudunsparce prevented  0.01/game  milled 2.00 each  Maushold in play 1.0  KO   0%
+
+Gnaw Together by Maushold in play: n, milled each
+  1:   44  1.52
+  2:   81  2.10
+  3:   81  3.11
+  4:    8  4.75

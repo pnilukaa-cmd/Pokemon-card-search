@@ -7744,6 +7744,22 @@ def test_the_baseline_sim_plays_aarune():
           got == ["Lana's Aid", "Legendary Summit", "Lillie's Determination"], got)
 
 
+def test_tate_and_lizas_training_returns_with_a_legendary_stadium():
+    """Tate & Liza's Training: "Draw 2 cards. If you drew any cards in this
+    way, and if a Stadium that has "Legendary" in its name is in play, put
+    this Tate & Liza's Training into your hand instead of the discard
+    pile." Only the draw compiled, so it was spent every time."""
+    V, D, E, me, op = _mill_board()
+    for st, back in ((None, False), ("Legendary Summit", True)):
+        me.stadium = op._opp_stadium = st
+        me.supporter_played, me.played_supporters_this_turn = False, set()
+        me.hand, me.discard = [("Supporter", "Tate & Liza's Training")], []
+        V.play_trainer_from_ir(me, op, "Supporter", "Tate & Liza's Training", [], 3)
+        check(f"Tate & Liza's with Stadium {st}: back to the hand {back}",
+              (("Supporter", "Tate & Liza's Training") in me.hand) == back
+              and ("Tate & Liza's Training" in me.discard) != back, (me.hand, me.discard))
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL

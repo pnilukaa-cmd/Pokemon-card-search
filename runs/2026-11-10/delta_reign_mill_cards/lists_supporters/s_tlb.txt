@@ -1,0 +1,25 @@
+Pokémon: 14
+4 Maushold 30C 146
+4 Tandemaus SSP 157
+2 Comfey SCR 63
+4 Tauros DLR 77
+
+Trainer: 37
+4 Buddy-Buddy Poffin ASC 184
+2 Xerosic's Machinations SFA 64
+4 Poké Pad ASC 198
+4 Night Stretcher ASC 196
+4 Lillie's Determination MEG 119
+3 Backtrack Badge PBL 74
+4 Lana's Aid TWM 155
+3 Pokégear 3.0 BLK 84
+1 Pokémon Catcher POR 82
+4 Legendary Summit DLR 96
+1 Aarune DLR 89
+1 Neutralization Zone SFA 60
+2 Tate & Liza's Training DLR 102
+
+Energy: 9
+9 Basic Psychic Energy
+
+Total Cards: 60

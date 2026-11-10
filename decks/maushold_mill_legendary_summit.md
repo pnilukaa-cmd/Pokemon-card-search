@@ -119,6 +119,14 @@ Salvatore, Battle Cage, Lisia's Appeal, Mist Energy):
 | Mist Energy ×3 for 3 Psychic | +0.70, +0.75, +0.49 (three rounds, each within noise) |
 | Battle Cage for Neutralization Zone | −15.83 |
 
+## Newer Supporters (2026-11-10)
+
+None replaces what is there. Two Lillie's Determination for two of Emma,
+Tate & Liza's Training, Emcee's Hype, Judge, Lucian or more Xerosic's cost
+5.5 to 7.6. Tate & Liza's Training for Aarune and Pokégear (it returns to
+the hand while Legendary Summit is in play) cost 2.34, and Eri 2.84. Full
+table: `runs/2026-11-10/delta_reign_mill_cards/README.md`.
+
 ## What changed, measured
 
 Each change is paired against the list of its round, at 200 games a matchup.

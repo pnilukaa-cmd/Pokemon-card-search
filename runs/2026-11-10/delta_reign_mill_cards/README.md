@@ -26,3 +26,26 @@ Measured earlier (`../2026-11-09/maushold_mill_screens`): Legendary Summit
 (−12.65 to take out of a Maushold mill list) and Tauros (+3.09, +2.30,
 +2.96) are the Delta Reign cards that help; Grisham, Tasty Rice Ball,
 Custom Vest, Swablu / Altaria, Legendary Pyroduct and Eevee lost 2–4.
+
+## Supporters (tag `ml7`, `lists_supporters/`)
+
+The newest sets' Supporters that touch the opponent's hand or deck, or
+draw, swapped into the same Maushold mill list (`Q`), paired against it:
+
+| Change | Measured |
+|---|---|
+| +2 Tate & Liza's Training (DLR), −Aarune −Pokégear 3.0 | −2.34 ± 0.55 |
+| +2 Eri, −Lana's Aid −Night Stretcher | −2.84 ± 0.46 |
+| +2 Emma (CRI) for 2 Lillie's Determination | −5.53 ± 0.57 |
+| +2 Tate & Liza's Training for 2 Lillie's | −5.58 ± 0.55 |
+| Xerosic's Machinations 2 → 4 for 2 Lillie's | −5.62 ± 0.69 |
+| +2 Emcee's Hype (DLR reprint) for 2 Lillie's | −6.34 ± 0.63 |
+| +2 Judge (POR reprint) for 2 Lillie's | −6.36 ± 0.56 |
+| +2 Lucian for 2 Lillie's | −7.64 ± 0.62 |
+
+Tate & Liza's Training goes back to the hand while a "Legendary" Stadium is
+in play (Legendary Summit is one); that return was not modeled before this
+run. The pilot plays Lillie's on a hand of 4 or fewer and Tate & Liza's on
+bigger ones. `measure/measure_s_tlb.txt` (80 games) shows no change in how
+games end (52 wins, 4 own deck-outs; the list without it: 53, 5): the
+-2.34 is too small for 80 games to explain.
