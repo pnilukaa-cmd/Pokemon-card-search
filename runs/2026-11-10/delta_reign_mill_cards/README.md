@@ -49,3 +49,35 @@ run. The pilot plays Lillie's on a hand of 4 or fewer and Tate & Liza's on
 bigger ones. `measure/measure_s_tlb.txt` (80 games) shows no change in how
 games end (52 wins, 4 own deck-outs; the list without it: 53, 5): the
 -2.34 is too small for 80 games to explain.
+
+## Hand and board disruption (tag `ml8`, `lists_disruption/`)
+
+Is a lock needed? Every disruption card the Maushold mill list (`Q`) can
+pay for (Psychic Energy, Colorless costs), each swapped in for Aarune /
+Pokégear 3.0 (and a Poké Pad for 3- or 4-card packages), paired against
+it:
+
+| Change | Measured |
+|---|---|
+| +2 Furfrou POR 67 (Hand Trim: their hand down to 5; Colorless) | ±0.00 ± 0.49 |
+| +3 Crushing Hammer | −0.14 ± 0.58 |
+| +2 Hand Trimmer | −2.58 ± 0.50 |
+| +2 Furfrou and +3 Crushing Hammer together | −2.78 ± 0.72 |
+| +2 Frillish WHT 44 (Oceanic Gloom: Item lock) | −3.64 ± 0.53 |
+| +2 Team Rocket's Chingling (random discard for no Energy) | −4.84 ± 0.62 |
+| +2 Frillish and +2 Crushing Hammer | −5.65 ± 0.66 |
+| +2 Dhelmise JTG 70 (Bind Down: no retreat) | −6.92 ± 0.58 |
+| +4 Frillish | −11.27 ± 0.78 |
+| +2 Flutter Mane PRE 43 (Midnight Fluttering: no Abilities) | −14.54 ± 0.88 |
+
+The disruption Pokémon that lost are not Colorless, so Legendary Summit does
+not cover them: each is a Prize the opponent could not otherwise take.
+`measure/measure_d_flut2.txt`: with Flutter Mane the opponent took 3.19
+Prizes a game (2.08 without) and the list milled 7.3 cards (9.3). Furfrou
+(Colorless) and Crushing Hammer (an Item) cost nothing measurable alone;
+together they replace too many search cards. The deck's mill-specific gust
+(`choose_gust_target`: drag up a Pokémon that cannot attack or retreat)
+was already in play.
+
+Furfrou's Hand Trim compiled as a one-card discard; it now discards at
+random down to 5.

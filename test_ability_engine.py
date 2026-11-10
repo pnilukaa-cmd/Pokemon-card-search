@@ -7760,6 +7760,21 @@ def test_tate_and_lizas_training_returns_with_a_legendary_stadium():
               and ("Tate & Liza's Training" in me.discard) != back, (me.hand, me.discard))
 
 
+def test_hand_trim_discards_down_to_five():
+    """Furfrou's Hand Trim: "Discard random cards from your opponent's hand
+    until they have 5 cards in their hand." It compiled as the one-card
+    random discard, so it took 1 card off a hand of 9."""
+    import ability_engine as AE
+    import ability_ir as IR
+    V, D, E, me, op = _mill_board()
+    eff = IR.compile_effect("attack", "Hand Trim", "Discard random cards from your opponent's "
+                            "hand until they have 5 cards in their hand.")
+    op.hand = [("Item", "x")] * 9
+    for a in eff.actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("Hand Trim: a hand of 9 goes to 5", len(op.hand) == 5, len(op.hand))
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL

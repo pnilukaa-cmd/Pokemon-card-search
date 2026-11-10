@@ -896,6 +896,16 @@ def _r(m, text):
 # -- Xerosic's Machinations, in five decks here, and Hand Trimmer, which
 # does it to both players. Distinct from the shuffle-and-redraw hand
 # resets: nothing is drawn back.
+@rule("discard_random_opponent_hand_down_to",
+      r"discard random cards from your opponent'?s hand until they have (\d+) cards?")
+def _r(m, text):
+    """Furfrou's Hand Trim: "Discard random cards from your opponent's hand
+    until they have 5 cards in their hand." The plain random-discard rule
+    read one card off it."""
+    return [Action(Op.DISCARD_FROM_OPPONENT, None, Target.OPPONENT,
+                   {"down_to": int(m.group(1)), "random": True})]
+
+
 @rule("discard_opponent_hand_down_to",
       r"(your opponent|each player) discards? cards? from their hand"
       r" until they have (\d+) cards?")
@@ -2362,6 +2372,8 @@ def _r(m, text):
 
 @rule("discard_from_opponent", r"discard[^.]{0,40}from your opponent's hand")
 def _r(m, text):
+    if re.search(r"from your opponent'?s hand until they have", text, re.I):
+        return []                 # discard_random_opponent_hand_down_to owns it
     mm = re.search(r"discard (\d+|a|an) ", m.group(0), re.I)
     return [Action(Op.DISCARD_FROM_OPPONENT, _num(mm.group(1) if mm else "a"), Target.OPPONENT)]
 

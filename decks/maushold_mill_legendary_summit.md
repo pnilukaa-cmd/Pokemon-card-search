@@ -127,6 +127,16 @@ Tate & Liza's Training, Emcee's Hype, Judge, Lucian or more Xerosic's cost
 the hand while Legendary Summit is in play) cost 2.34, and Eri 2.84. Full
 table: `runs/2026-11-10/delta_reign_mill_cards/README.md`.
 
+## Hand and board disruption (2026-11-10)
+
+The list's lock is the Prize wall, not the opponent's hand. Item lock
+(Frillish), retreat lock (Dhelmise), ability lock (Flutter Mane) and
+free hand discard (Team Rocket's Chingling) each cost 3.6 to 14.5: none of
+them is Colorless, so each is a Prize Summit does not stop. Furfrou's Hand
+Trim (Colorless) and Crushing Hammer cost nothing measurable on their own
+(±0.00, −0.14), so either is a free add if you want disruption, but not both
+(−2.78 together). Full table: `runs/2026-11-10/delta_reign_mill_cards/README.md`.
+
 ## What changed, measured
 
 Each change is paired against the list of its round, at 200 games a matchup.

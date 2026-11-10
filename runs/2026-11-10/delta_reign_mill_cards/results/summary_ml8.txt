@@ -1,0 +1,13 @@
+Q_g 139s Q: 66.04% (±0.30) over 107 decks at 200 games, winning 81
+d_fril2_g 148s d_fril2: 62.40% (±0.30) over 107 decks at 200 games, winning 75
+d_fril4_g 151s d_fril4: 54.77% (±0.31) over 107 decks at 200 games, winning 63
+d_ham3_g 136s d_ham3: 65.89% (±0.30) over 107 decks at 200 games, winning 80
+d_furf2_g 148s d_furf2: 66.04% (±0.30) over 107 decks at 200 games, winning 81
+d_ching2_g 150s d_ching2: 61.20% (±0.31) over 107 decks at 200 games, winning 76
+d_trim2_g 131s d_trim2: 63.45% (±0.30) over 107 decks at 200 games, winning 80
+d_dhel2_g 140s d_dhel2: 59.12% (±0.31) over 107 decks at 200 games, winning 71
+d_flut2_g 169s d_flut2: 51.50% (±0.32) over 107 decks at 200 games, winning 60
+d_pkg_g 138s d_pkg: 60.39% (±0.31) over 107 decks at 200 games, winning 74
+DONE
+d_free_g 150s d_free: 63.26% (±0.30) over 107 decks at 200 games, winning 81
+DONE

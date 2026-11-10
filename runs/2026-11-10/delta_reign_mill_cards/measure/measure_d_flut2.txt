@@ -1,0 +1,29 @@
+wins 50/80
+  meta_dragapult_pure                       40.0%
+  meta_raging_bolt                          70.0%
+  meta_ns_zoroark                           70.0%
+  meta_mega_excadrill                       50.0%
+  meta_festival_lead                       100.0%
+  meta_slowking                             50.0%
+  krookodile_ex_relicanth_hand_disruption   70.0%
+  mega_absol_ex_hand_lock                   50.0%
+game ends: {'win prizes': 11, 'loss prizes': 26, 'win deck_out': 39, 'loss deck_out': 4}
+turns a game 22.4; Prizes the opponent took 3.19; Prizes this deck took 1.38
+
+attacks per game 6.36, cards milled by attacks 7.3 a game
+  Maushold     Gnaw Together       2.50/game  milled 2.13 each  Maushold in play 2.0  KO   0%
+  Tauros       Raging Horns        2.36/game  milled 0.04 each  Maushold in play 1.5  KO  41%
+  Comfey       Flower Shower       0.60/game  milled 3.00 each  Maushold in play 0.8  KO   0%
+  Tandemaus    Play Rough          0.39/game  milled 0.26 each  Maushold in play 0.0  KO   0%
+  Maushold     Pound               0.24/game  milled 0.00 each  Maushold in play 1.1  KO  47%
+  Flutter Mane Hex Hurl            0.21/game  milled 0.12 each  Maushold in play 1.8  KO  47%
+  Flutter Mane Hex Hurl -- all damage to Scraggy prevented  0.03/game  milled 0.00 each  Maushold in play 2.0  KO   0%
+  Flutter Mane Hex Hurl -- all damage to N's Zekrom prevented  0.01/game  milled 0.00 each  Maushold in play 2.0  KO   0%
+  Flutter Mane Hex Hurl -- all damage to Thwackey prevented  0.01/game  milled 0.00 each  Maushold in play 2.0  KO   0%
+  Comfey       Play Rough          0.01/game  milled 0.00 each  Maushold in play 1.0  KO   0%
+
+Gnaw Together by Maushold in play: n, milled each
+  1:   61  1.18
+  2:   90  2.22
+  3:   46  3.09
+  4:    3  4.00
