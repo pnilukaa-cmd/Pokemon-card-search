@@ -7775,6 +7775,21 @@ def test_hand_trim_discards_down_to_five():
     check("Hand Trim: a hand of 9 goes to 5", len(op.hand) == 5, len(op.hand))
 
 
+def test_the_baseline_sim_plays_ciphermaniacs_codebreaking():
+    """Ciphermaniac's Codebreaking sat in hand in the baseline (unmodeled in
+    a submitted Mega Kangaskhan ex list): 2 cards from the deck on top of
+    it, a Pokemon not yet down first and then an Energy."""
+    import simulate_baseline as SB
+    P = SB.build_deck_model(open("test_fixtures/kangaskhan_trench_wall.txt").read())[0]
+    st = SB.GameState([("Item", "Poké Pad")] * 10 + [("Pokemon", "Bouffalant")]
+                      + [("Energy", "Psychic Energy")] + [("Item", "Poké Pad")] * 5)
+    st.active = "Mega Kangaskhan ex"
+    st.hand = [("Supporter", "Ciphermaniac's Codebreaking")]
+    SB.play_supporter(st, P, [])
+    check("Ciphermaniac's: Bouffalant on top, then the Energy",
+          st.deck[-2:] == [("Energy", "Psychic Energy"), ("Pokemon", "Bouffalant")], st.deck[-3:])
+
+
 
 def _goth_board(my_hand, opp_hand, bench=()):
     import policies as POL

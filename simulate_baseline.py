@@ -1196,6 +1196,33 @@ def effect_aarune(state, POKEMON, log):
     return True
 
 
+def effect_ciphermaniac(state, POKEMON, log):
+    """Ciphermaniac's Codebreaking: search the deck for 2 cards and put them
+    on top in any order -- the next two draws, chosen now. A Pokemon not yet
+    in play or in hand first, then an Energy, then a Supporter."""
+    have = ({state.active} | {b["name"] for b in state.bench}
+            | {n for k, n in state.hand})
+    wants = [lambda c: c[0] == "Pokemon" and c[1] not in have
+             and not is_fossil(POKEMON, c[1]),
+             lambda c: c[0] == "Energy",
+             lambda c: c[0] == "Supporter" and c[1] != "Ciphermaniac's Codebreaking"]
+    picks = []
+    for want in wants:
+        if len(picks) == 2:
+            break
+        i = next((i for i, c in enumerate(state.deck) if want(c)), None)
+        if i is not None:
+            picks.append(state.deck.pop(i))
+    if not picks:
+        return False
+    random.shuffle(state.deck)
+    state.deck.extend(reversed(picks))         # the first pick is drawn first
+    state.remove_from_hand("Supporter", "Ciphermaniac's Codebreaking")
+    state.discard.append("Ciphermaniac's Codebreaking")
+    log.append(f"Play Ciphermaniac's Codebreaking -> {', '.join(n for _, n in picks)} on top")
+    return True
+
+
 def effect_judge(state, POKEMON, log):
     """Judge: each player shuffles their hand into their deck and draws 4.
 
@@ -1378,7 +1405,7 @@ def effect_carmine(state, POKEMON, log):
 SUPPORTER_PRIORITY = ["Salvatore", "Team Rocket's Proton", "Team Rocket's Ariana", "Kofu", "Dawn",
                       "Hilda", "Lillie's Determination", "Gwynn", "Brock's Scouting", "Carmine",
                       "Judge", "Lucian", "Janine's Secret Art", "Crispin", "Team Rocket's Petrel",
-                      "Lana's Aid", "Aarune"]
+                      "Lana's Aid", "Aarune", "Ciphermaniac's Codebreaking"]
 SUPPORTER_EFFECTS = {
     "Lillie's Determination": effect_lillies_determination,
     "Kofu": effect_kofu,
@@ -1397,6 +1424,7 @@ SUPPORTER_EFFECTS = {
     "Salvatore": effect_salvatore,
     "Lana's Aid": effect_lanas_aid,
     "Aarune": effect_aarune,
+    "Ciphermaniac's Codebreaking": effect_ciphermaniac,
 }
 # Real cards whose whole effect targets the opponent's side (or a
 # Prize-count condition we don't track) -- correctly left unplayed rather
@@ -1439,7 +1467,7 @@ KNOWN_ITEM_NAMES = ({"Rare Candy", "Buddy-Buddy Poffin", "Ultra Ball", "Poké Pa
 # Crushing Hammer only touches the opponent's Energy and Jumbo Ice Cream
 # only heals, and this simulator has neither an opponent nor damage.
 NO_SELF_EFFECT_ITEMS = {"Switch", "Dangerous Laser", "Dark Bell", "Special Red Card",
-                        "Crushing Hammer", "Jumbo Ice Cream",
+                        "Crushing Hammer", "Jumbo Ice Cream", "Tasty Rice Ball",
                         # opponent-only, or a switch (no retreat is modelled)
                         "Enhanced Hammer", "Tool Scrapper", "Prime Catcher",
                         "Poké Vital A",
