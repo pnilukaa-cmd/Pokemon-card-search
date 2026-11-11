@@ -1,0 +1,8 @@
+L_g 125s L: 79.21% (±0.26) over 107 decks at 200 games, winning 100
+l_e16_g 118s l_e16: 79.31% (±0.25) over 107 decks at 200 games, winning 99
+l_e18_g 117s l_e18: 79.36% (±0.25) over 107 decks at 200 games, winning 100
+l_sw_g 138s l_sw: 79.21% (±0.25) over 107 decks at 200 games, winning 100
+l_dark_g 119s l_dark: 79.74% (±0.25) over 107 decks at 200 games, winning 98
+l_bouf4_g 127s l_bouf4: 78.86% (±0.26) over 107 decks at 200 games, winning 100
+l_tr2_g 138s l_tr2: 80.29% (±0.25) over 107 decks at 200 games, winning 99
+DONE

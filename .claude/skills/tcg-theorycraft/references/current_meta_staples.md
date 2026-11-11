@@ -747,3 +747,18 @@ and Giratina -3.70 in that list, Inkay's Knock Off -2.77 in Krookodile ex
 and -5.31 in Mega Absol ex hand lock, Sandslash's Digging Claw -1.00 in
 the Tyrantrum mill. Delta Reign's Rotom, Sharpedo and Liepard have no hand
 disruption (Astonish, Chew Off, Knock Off are older printings).
+
+### Legendary Trench / Tasty Rice Ball in a Mega Kangaskhan ex wall (Delta Reign, 2026-11-11)
+
+`Legendary Trench` DLR 98 doubles every heal (both sides) and `Tasty Rice
+Ball` DLR 101 heals 30 more per copy in the discard. In a Mega Kangaskhan ex
+/ Bouffalant Curly Wall list they measured neutral, not strong
+(`decks/kangaskhan_legendary_trench_wall.md`): replacing both with Lively
+Stadium and Energy +0.04, Trench 4 -> 2 for Switch +1.07. What the
+submitted list lacked was Energy (10 -> 14: +9.18) and draw (4 Lillie's
+Determination: +5.14); its Team Rocket Petrel / Transceiver engine lost to
+Kofu and Switch (+2.77, +2.16), and `Legendary Pyroduct` (no Abilities for
+Evolution Pokémon) does nothing for an all-Basic deck (+0.35 to cut). The
+tuned list reads 84.57% against the field, level with the field's
+Snorlax / Bouffalant / Kangaskhan wall (84.30%) and 67.3% against it head
+to head.

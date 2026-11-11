@@ -1,0 +1,13 @@
+===== Baseline simulation: 1000 trials, deck size 60 =====
+
+Pokemon in play by turn 6 (% of trials, avg turn when it happened):
+  Latias ex                     61.6%   avg turn 2.03
+  Munkidori                     82.1%   avg turn 2.15
+  Mega Kangaskhan ex            81.9%   avg turn 1.79
+  Smoochum                      72.3%   avg turn 2.25
+  Bouffalant                    80.8%   avg turn 2.13
+
+First attack landed by turn 6: 96.3% of trials (avg turn 2.75)
+Average final hand size (turn 6): 8.57
+
+Note: no retreating and no opponent are modeled (same as simulate_match.py's stated simplifications) -- these numbers measure development speed, not win rate.

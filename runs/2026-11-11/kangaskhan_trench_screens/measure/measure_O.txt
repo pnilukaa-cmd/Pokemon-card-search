@@ -1,0 +1,24 @@
+wins 71/80
+  meta_dragapult_pure                       90.0%
+  meta_raging_bolt                          90.0%
+  meta_ns_zoroark                          100.0%
+  meta_mega_excadrill                       70.0%
+  meta_festival_lead                       100.0%
+  meta_slowking                             80.0%
+  krookodile_ex_relicanth_hand_disruption  100.0%
+  mega_absol_ex_hand_lock                   80.0%
+game ends: {'win prizes': 70, 'loss prizes': 8, 'loss deck_out': 1, 'win deck_out': 1}
+turns 14.9; Prizes taken by the opponent 1.51, by this deck 5.79
+Prizes given up, by the Pokemon Knocked Out: {'Smoochum': 0.47, 'Mega Kangaskhan ex': 0.45, 'Munkidori': 0.14, 'Latias ex': 0.12, 'Bouffalant': 0.1}
+
+attacks per game 6.09
+  Mega Kangaskhan ex Rapid-Fire Combo    3.46/game  avg  249  Prizes 4.40/game
+  Smoochum           Delightful Kiss     0.96/game  avg    0  Prizes 0.00/game
+  Latias ex          Eon Blade           0.68/game  avg  200  Prizes 0.72/game
+  Munkidori          Mind Bend           0.62/game  avg   60  Prizes 0.26/game
+  Bouffalant         Boundless Power     0.35/game  avg  130  Prizes 0.29/game
+  Mega Kangaskhan ex Rapid-Fire Combo -- all damage to Dunsparce prevented  0.01/game  avg    0  Prizes 0.00/game
+
+Stadium in play at this deck's attack step: {'Legendary Trench': 3.92, 'none': 1.57, 'Festival Grounds': 0.62, 'Risky Ruins': 0.33, 'Academy at Night': 0.3, 'Area Zero Underdepths': 0.2, "N's Castle": 0.2}
+Jumbo Ice Cream: 0.97/game, damage before 93, healed 72 (Trench up 56%), on {'Mega Kangaskhan ex': 56, 'Latias ex': 17, 'Munkidori': 2, 'Bouffalant': 3}
+Tasty Rice Ball: 0.88/game, damage before 105, healed 54 (Trench up 50%), on {'Mega Kangaskhan ex': 50, 'Munkidori': 3, 'Smoochum': 3, 'Latias ex': 11, 'Bouffalant': 3}

@@ -2681,6 +2681,10 @@ def test_no_card_in_any_decklist_is_silently_inert():
             if (_sir is not None and any(a.op is IR.Op.MODIFY_PRIZE for a in _sir.actions)
                     and V._re.search(r"whenever an? \w+ pok[eé]mon", text, V._re.I)):
                 return True
+            # Legendary Trench: put down by a deck that heals, which the
+            # probe's empty deck never does.
+            if _sir is not None and any(a.op is IR.Op.HEAL_MULTIPLIER for a in _sir.actions):
+                return True
             # Conditional on a Pokemon subtype in play (Tera): played when
             # the condition holds, so live -- the probe board has none.
             ir = V.trainer_effect_ir(nm)

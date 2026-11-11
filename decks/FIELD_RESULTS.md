@@ -172,6 +172,10 @@ Pokémon only and get played, Custom Vest work against Mega ex only,
 Legendary Pyroduct switch off Evolution Pokémon's Abilities only, and
 Tasty Rice Ball scale; no field deck runs any of them.
 
+`kangaskhan_legendary_trench_wall` was added to the field after this run
+too (2026-11-11). 7ee15a1 changes the setup baseline only (Ciphermaniac's
+Codebreaking, Tasty Rice Ball).
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

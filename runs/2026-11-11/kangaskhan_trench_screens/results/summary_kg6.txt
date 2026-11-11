@@ -1,0 +1,5 @@
+O_g 140s O: 84.63% (±0.22) over 107 decks at 200 games, winning 102
+o_lively_g 147s o_lively: 85.16% (±0.22) over 107 decks at 200 games, winning 102
+o_rice0_g 138s o_rice0: 84.16% (±0.23) over 107 decks at 200 games, winning 101
+o_noDLR_g 142s o_noDLR: 84.67% (±0.22) over 107 decks at 200 games, winning 100
+DONE

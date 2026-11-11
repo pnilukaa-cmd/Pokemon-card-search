@@ -1,0 +1,10 @@
+K0_g 152s K0: 65.70% (±0.31) over 107 decks at 200 games, winning 93
+k_pyro0_g 135s k_pyro0: 66.04% (±0.31) over 107 decks at 200 games, winning 91
+k_lil4_g 147s k_lil4: 70.83% (±0.29) over 107 decks at 200 games, winning 95
+k_lively_g 152s k_lively: 65.87% (±0.31) over 107 decks at 200 games, winning 91
+k_rice0_g 137s k_rice0: 66.25% (±0.30) over 107 decks at 200 games, winning 92
+k_smoo0_g 148s k_smoo0: 64.40% (±0.31) over 107 decks at 200 games, winning 90
+k_lat1_g 142s k_lat1: 63.52% (±0.31) over 107 decks at 200 games, winning 89
+k_e14_g 128s k_e14: 74.87% (±0.28) over 107 decks at 200 games, winning 98
+k_snor_g 158s k_snor: 64.15% (±0.31) over 107 decks at 200 games, winning 87
+DONE

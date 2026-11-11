@@ -1,0 +1,4 @@
+O_g 716s O: 84.57% (±0.10) over 107 decks at 1000 games, winning 102
+K0_g 721s K0: 65.54% (±0.14) over 107 decks at 1000 games, winning 94
+F_cousin_g 631s F_cousin: 84.30% (±0.10) over 107 decks at 1000 games, winning 100
+DONE

@@ -1,0 +1,3 @@
+K0_g 139s K0: 65.57% (±0.31) over 107 decks at 200 games, winning 93
+F_cousin_g 123s F_cousin: 84.13% (±0.22) over 107 decks at 200 games, winning 98
+DONE

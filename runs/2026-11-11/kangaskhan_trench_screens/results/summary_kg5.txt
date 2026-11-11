@@ -1,0 +1,7 @@
+N_g 134s N: 82.29% (±0.24) over 107 decks at 200 games, winning 100
+n_tr0_g 144s n_tr0: 84.45% (±0.22) over 107 decks at 200 games, winning 100
+n_rice0_g 135s n_rice0: 81.86% (±0.24) over 107 decks at 200 games, winning 100
+n_lively_g 141s n_lively: 82.79% (±0.24) over 107 decks at 200 games, winning 99
+n_jumbo2_g 129s n_jumbo2: 82.63% (±0.24) over 107 decks at 200 games, winning 99
+n_noDLR_g 139s n_noDLR: 83.28% (±0.23) over 107 decks at 200 games, winning 100
+DONE
