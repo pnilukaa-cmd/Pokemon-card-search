@@ -1462,7 +1462,7 @@ def _r(m, text):
     tgt = Target.YOUR_BENCHED if re.search(r"attach them to your benched pok[eé]mon", text, re.I) \
         else Target.YOUR_ANY
     # The recipient after "attach it/them to". "This Pokemon" (Okidogi ex,
-    # Zacian ex, Yanmega ex, Solgaleo, Darkrai, Raikou ex: 16 cards) and
+    # Zacian ex, Yanmega ex, Solgaleo, Darkrai, Raikou ex: 14 cards) and
     # "1 of your [Benched] Pokemon" (Smoochum, Azurill, Flareon ex, the
     # Ogerpon, Energy Coin, Misty's Vitality) all compiled to any Pokemon,
     # spread by need: Darkrai's Shadow-Clad put both Energy on the Bench.

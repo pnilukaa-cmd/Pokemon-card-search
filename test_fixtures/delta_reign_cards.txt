@@ -1,4 +1,4 @@
-Pokémon: 28
+Pokémon: 30
 1 Darkrai DLR 63
 1 Raikou ex DLR 33
 1 Azurill DLR 80
@@ -27,6 +27,8 @@ Pokémon: 28
 1 Kyogre DLR 26
 1 Sylveon ex SSP 86
 1 Heracross DLR 1
+1 Spinarak DLR 58
+1 Ariados DLR 59
 
 Trainer: 4
 1 Zinnia's Trust DLR 103
@@ -41,4 +43,4 @@ Energy: 20
 4 Basic Psychic Energy
 4 Basic Grass Energy
 
-Total Cards: 52
+Total Cards: 54

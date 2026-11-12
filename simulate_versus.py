@@ -4066,6 +4066,8 @@ _MORE_DMG_RE = _re.compile(r"(\d+) more damage for each", _re.I)
 _LESS_DMG_RE = _re.compile(r"(\d+) less damage for each", _re.I)
 _DOES_DMG_RE = _re.compile(r"does (\d+) damage for each", _re.I)
 _COUNTERS_RE = _re.compile(r"(?:place|put) (\d+) damage counters?", _re.I)
+_CHECKUP_COUNTERS_RE = _re.compile(
+    r"(?:place|put) \d+ damage counters? on that pok[eé]mon instead of 1", _re.I)
 _FLAT_DOES_RE = _re.compile(r"this attack does (\d+) damage to", _re.I)
 _COND_FLAT_BONUS_RE = _re.compile(r"this attack does (\d+) more damage", _re.I)
 # "This attack's damage isn't affected by Resistance." Nine attacks say it
@@ -5253,6 +5255,13 @@ def _attack_damage_core(pl, opp, spot, atk, record=True):
 
     # Flat damage-counter placement with no scaling clause.
     m = _COUNTERS_RE.search(text)
+    # "...is now Poisoned. During Pokemon Checkup, place 4 damage counters on
+    # that Pokemon instead of 1" (Ariados's Tormenting Poison, Mega Dragalge
+    # ex's Pernicious Poison) is the Poison's size, not damage now: both hit
+    # for the counters on the spot as well, Pernicious Poison for 160.
+    if m and _re.search(r"during pok[eé]mon checkup, $", text[:m.start()], _re.I) \
+            and _CHECKUP_COUNTERS_RE.match(text[m.start():]):
+        m = None
     if m and not base:
         # If the rider path is going to place these counters itself, this
         # function must return 0 or the Active is charged twice -- once as

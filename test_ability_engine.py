@@ -8119,7 +8119,7 @@ def _energize(spot, *types):
 
 def test_search_and_attach_goes_where_the_card_says():
     """"Search your deck for ... Energy and attach it to this Pokemon"
-    (16 cards: Darkrai, Raikou ex, Okidogi ex, Zacian ex, Yanmega ex ...)
+    (14 cards: Darkrai, Raikou ex, Okidogi ex, Zacian ex, Yanmega ex ...)
     compiled to any of your Pokemon, so the Energy went to whichever one
     the pilot ranked neediest -- Darkrai's Shadow-Clad put both of its
     Darkness on the Bench. "1 of your Benched Pokemon" (Azurill) went to
@@ -8355,6 +8355,22 @@ def test_thunder_clad_on_the_first_turn():
         else:
             check(f"going first, turn 1: {active} does not attack", not used, used)
 
+
+
+def test_checkup_poison_counters_are_not_attack_damage():
+    """Ariados's Tormenting Poison: "is now Poisoned. During Pokemon
+    Checkup, place 4 damage counters on that Pokemon instead of 1." The
+    counters are the Poison's size; the damage path also charged them as
+    40 attack damage on the spot (Mega Dragalge ex's Pernicious Poison:
+    160)."""
+    V, me, op = _dlr_board("Ariados")
+    atk = _dlr_attack(me, "Ariados", "Tormenting Poison")
+    check("Tormenting Poison does no damage when it hits",
+          V.attack_damage(me, op, me.active, atk) == 0, V.attack_damage(me, op, me.active, atk))
+    V.attack_side_effects(me, op, atk, [])
+    check("...and leaves a 4-counter Poison",
+          "poisoned" in op.active.conditions and op.active.poison_counters == 4,
+          (op.active.conditions, op.active.poison_counters))
 
 if __name__ == "__main__":
     sys.exit(main())
