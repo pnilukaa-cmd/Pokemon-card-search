@@ -8083,5 +8083,278 @@ def test_merge_set_joins_reprints_and_replaces_provisional_cards():
           and [c["name"] for c in dropped] == ["Sableye"], pool)
 
 
+
+# ---- Delta Reign card review (2026-11-12) ---------------------------------
+
+_DLR = "test_fixtures/delta_reign_cards.txt"
+_DRAGAPULT = "decks/field/meta_dragapult_pure.txt"
+
+
+def _dlr_board(active, bench=(), deck=None, hand=()):
+    """The Delta Reign fixture against Dragapult ex: my Active and Bench,
+    their Dragapult ex Active with Dreepy and Drakloak Benched."""
+    V, D, E = _real(_DLR, "d")
+    O = V.load_model(_DRAGAPULT, "o")[0]
+    me = V.Player("d", D[1], [], E)
+    op = V.Player("o", O[1], [], V.compile_effects_for(O[1], O[3]))
+    me._opp_ref, op._opp_ref = op, me
+    me.round_no = op.round_no = 5
+    me.active = V.InPlay(active, 3)
+    me.bench = [V.InPlay(b, 2) for b in bench]
+    me.deck = list(deck) if deck is not None else []
+    me.hand = list(hand)
+    op.active = V.InPlay("Dragapult ex", 2)
+    op.bench = [V.InPlay("Dreepy", 2), V.InPlay("Drakloak", 2)]
+    return V, me, op
+
+
+def _dlr_attack(me, name, atk):
+    return next(a for a in me.POKEMON[name]["attacks"] if a["name"] == atk)
+
+
+def _energize(spot, *types):
+    spot.energy = [[t] for t in types]
+    spot.energy_names = [f"{t} Energy" for t in types]
+
+
+def test_search_and_attach_goes_where_the_card_says():
+    """"Search your deck for ... Energy and attach it to this Pokemon"
+    (16 cards: Darkrai, Raikou ex, Okidogi ex, Zacian ex, Yanmega ex ...)
+    compiled to any of your Pokemon, so the Energy went to whichever one
+    the pilot ranked neediest -- Darkrai's Shadow-Clad put both of its
+    Darkness on the Bench. "1 of your Benched Pokemon" (Azurill) went to
+    the Active."""
+    import random
+    random.seed(3)
+    dark = [("Energy", "Darkness Energy")] * 4
+    for mon, atk in (("Darkrai", "Shadow-Clad"), ("Okidogi ex", "Poisonous Musculature")):
+        V, me, op = _dlr_board(mon, ("Tauros", "Eevee"), dark)
+        V.attack_side_effects(me, op, _dlr_attack(me, mon, atk), [])
+        check(f"{atk}: the Energy goes on {mon} itself",
+              len(me.active.energy) == 2 and not any(b.energy for b in me.bench),
+              [(p.name, p.energy_names) for p in me.in_play()])
+    V, me, op = _dlr_board("Azurill", ("Tauros", "Eevee"), dark)
+    V.attack_side_effects(me, op, _dlr_attack(me, "Azurill", "Bouncy-Bounce Charge"), [])
+    check("Bouncy-Bounce Charge attaches to a Benched Pokemon, not Azurill",
+          not me.active.energy and sum(len(b.energy) for b in me.bench) == 1,
+          [(p.name, p.energy_names) for p in me.in_play()])
+
+
+def test_overflowing_wishes_and_delta_gift_attach_one_each():
+    """"For each of your Benched Pokemon, search ... and attach it to that
+    Pokemon" (Mega Gardevoir ex) and "For each of your Pokemon that has a
+    Mega Rayquaza Cap attached" (Delta Gift) attached one Energy in all."""
+    import random
+    random.seed(4)
+    V, me, op = _dlr_board("Mega Gardevoir ex", ("Tauros", "Eevee", "Delibird"),
+                           [("Energy", "Psychic Energy")] * 5)
+    V.attack_side_effects(me, op, _dlr_attack(me, "Mega Gardevoir ex", "Overflowing Wishes"), [])
+    check("Overflowing Wishes: one Psychic Energy on each Benched Pokemon",
+          [len(b.energy) for b in me.bench] == [1, 1, 1] and not me.active.energy,
+          [(p.name, p.energy_names) for p in me.in_play()])
+    V, me, op = _dlr_board("Tauros", ("Eevee", "Delibird"),
+                           [("Energy", "Fire Energy")] * 4)
+    me.active.tool = me.bench[1].tool = "Mega Rayquaza Cap"
+    gift = V.tool_attacks(me, me.active)
+    check("the Cap lends Delta Gift", [a["name"] for a in gift] == ["Delta Gift"], gift)
+    V.attack_side_effects(me, op, gift[0], [])
+    check("Delta Gift: one Basic Energy on each Cap holder only",
+          [len(p.energy) for p in me.in_play()] == [1, 0, 1],
+          [(p.name, p.energy_names) for p in me.in_play()])
+
+
+def test_incarnate_solidarity_needs_all_four():
+    """"If you have Tornadus, Thundurus, Landorus, and Enamorus in play,
+    ignore all Colorless Energy in the costs of attacks". No condition was
+    read: each of the four ignored its Colorless with none of the others."""
+    V, me, op = _dlr_board("Thundurus", ("Tornadus", "Landorus"))
+    atk = _dlr_attack(me, "Thundurus", "Thunderous Edge")
+    check("three of the four: Thunderous Edge costs Lightning, Colorless, Colorless",
+          V.effective_cost(me, me.active, atk["cost"], op, atk["name"])
+          == ["Lightning", "Colorless", "Colorless"])
+    me.bench.append(V.InPlay("Enamorus", 2))
+    check("all four: Thunderous Edge costs one Lightning",
+          V.effective_cost(me, me.active, atk["cost"], op, atk["name"]) == ["Lightning"])
+
+
+def test_mega_golurk_attacks_with_ten_cards_in_hand():
+    """Restricted Activation: "can't use attacks unless you have 10 or more
+    cards in your hand". Read as a plain lock, Mega Golurk ex never attacked."""
+    import ability_engine as AE
+    V, me, op = _dlr_board("Mega Golurk ex", hand=[("Item", "x")] * 9)
+    check("9 cards in hand: no attack", not AE.query_attack_gate(me, me.active))
+    me.hand.append(("Item", "x"))
+    check("10 cards in hand: Goliath's Punch is allowed", AE.query_attack_gate(me, me.active))
+
+
+def test_buddy_boost_fire_and_lightning_to_electivire_and_magmortar():
+    """Magmortar's Buddy Boost: "a Basic Fire Energy card, a Basic Lightning
+    Energy card, or 1 of each from your hand to your Electivire and
+    Magmortar". It attached one Fire to any Pokemon."""
+    import ability_ir as IR
+    import ability_engine as AE
+    V, me, op = _dlr_board("Tauros", ("Magmortar", "Electivire"), hand=[
+        ("Energy", "Fire Energy"), ("Energy", "Fire Energy"), ("Energy", "Lightning Energy")])
+    eff = IR.compile_effect("ability", "Buddy Boost",
+                            me.POKEMON["Magmortar"]["abilities"][0]["text"])
+    for a in eff.actions:
+        AE.apply_action(a, me, op, me.bench[0], [])
+    got = sorted(n for b in me.bench for n in b.energy_names)
+    check("one Fire and one Lightning, on Magmortar or Electivire only",
+          got == ["Fire Energy", "Lightning Energy"] and not me.active.energy, got)
+    check("the second Fire stays in hand", me.hand == [("Energy", "Fire Energy")], me.hand)
+
+
+def test_zinnias_trust_moves_an_energy_to_the_new_active():
+    """Zinnia's Trust: switch, then an Energy from the Pokemon that went to
+    the Bench onto the new Active. It moved an Energy off the Active onto
+    a Benched Pokemon, then switched in whichever ranked best."""
+    import ability_ir as IR
+    import ability_engine as AE
+    V, me, op = _dlr_board("Tauros", ("Darkrai",))
+    _energize(me.active, "Darkness", "Darkness")
+    _energize(me.bench[0], "Darkness")
+    card = V._CARDS_BY_NAME["Zinnia's Trust"]
+    card = card[0] if isinstance(card, list) else card
+    eff = IR.compile_effect("trainer", "Zinnia's Trust", card["rules"][0])
+    for a in eff.actions:
+        AE.apply_action(a, me, op, None, [])
+    check("Darkrai is Active with 2 Energy, Tauros Benched with 1",
+          me.active.name == "Darkrai" and len(me.active.energy) == 2
+          and len(me.bench[0].energy) == 1,
+          [(p.name, p.energy_names) for p in me.in_play()])
+
+
+def test_energizing_present_takes_an_energy_and_bottoms_the_rest():
+    """Delibird: "Look at the top 6 cards of your deck, reveal an Energy card
+    you find there, and put it into your hand. Shuffle the other cards and
+    put them on the bottom of your deck." It took the top card, whatever
+    it was, and left the rest on top."""
+    import ability_ir as IR
+    import ability_engine as AE
+    deep = [("Pokemon", "Deep")] * 6
+    top = [("Item", "T1"), ("Energy", "Water Energy"), ("Item", "T2"),
+           ("Item", "T3"), ("Pokemon", "P"), ("Item", "T4")]
+    V, me, op = _dlr_board("Delibird", deck=deep + top)
+    eff = IR.compile_effect("ability", "Energizing Present",
+                            me.POKEMON["Delibird"]["abilities"][0]["text"])
+    for a in eff.actions:
+        AE.apply_action(a, me, op, me.active, [])
+    check("the Energy comes to hand", me.hand == [("Energy", "Water Energy")], me.hand)
+    check("the other 5 go to the bottom, the old 7th card is on top",
+          sorted(n for _k, n in me.deck[:5]) == ["P", "T1", "T2", "T3", "T4"]
+          and me.deck[-1] == ("Pokemon", "Deep") and len(me.deck) == 11,
+          me.deck)
+
+
+def test_rewarm_counts_basic_fire_and_shuffles_it_back():
+    """Heat Rotom ex's Rewarm: 30 for each Basic Fire Energy in the discard,
+    then those cards go back into the deck. Every Energy in the pile was
+    counted (a Lightning too), and nothing went back."""
+    import random
+    random.seed(5)
+    V, me, op = _dlr_board("Heat Rotom ex", deck=[("Item", "x")] * 10)
+    me.discard = ["Fire Energy"] * 3 + ["Lightning Energy", "Ultra Ball"]
+    atk = _dlr_attack(me, "Heat Rotom ex", "Rewarm")
+    check("3 Fire and 1 Lightning in the discard: 90", V.attack_damage(me, op, me.active, atk) == 90,
+          V.attack_damage(me, op, me.active, atk))
+    V.attack_side_effects(me, op, atk, [])
+    check("the 3 Fire go back into the deck",
+          me.discard == ["Lightning Energy", "Ultra Ball"] and len(me.deck) == 13, me.discard)
+
+
+def test_chaos_crawler_every_other_turn():
+    """Giratina: "If 1 of your Pokemon used Chaos Crawler during your last
+    turn, this attack can't be used." Nothing stopped it every turn."""
+    V, me, op = _dlr_board("Giratina")
+    _energize(me.active, "Psychic", "Psychic", "Psychic")
+    check("free to use", V.best_attack(me, me.active, opp=op) is not None)
+    me._last_attack = ("Chaos Crawler", 4)
+    check("used last turn: not this turn", V.best_attack(me, me.active, opp=op) is None)
+    me._last_attack = ("Chaos Crawler", 3)
+    check("used two turns ago: allowed", V.best_attack(me, me.active, opp=op) is not None)
+
+
+def test_magical_bullet_needs_a_damaged_bench_target():
+    """Meowscarada ex: "also does 120 damage to 1 of your opponent's Benched
+    Pokemon that has any damage counters on it". It hit an undamaged one."""
+    V, me, op = _dlr_board("Meowscarada ex")
+    atk = _dlr_attack(me, "Meowscarada ex", "Magical Bullet")
+    V.attack_side_effects(me, op, atk, [])
+    check("no damaged Benched Pokemon: the Bench is untouched",
+          [b.damage for b in op.bench] == [0, 0], [b.damage for b in op.bench])
+    op.bench[1].damage = 10
+    V.attack_side_effects(me, op, atk, [])
+    check("the damaged Drakloak takes the 120", [b.damage for b in op.bench] == [0, 130],
+          [b.damage for b in op.bench])
+
+
+def test_two_card_searches_find_both_cards():
+    """Colress's Tenacity ("a Stadium card and an Energy card") and Adventure
+    Lantern ("a Basic Fire Energy card and a Basic Lightning Energy card")
+    found only the first card. Adventure Lantern is an Item (TCGdex);
+    pokemontcg.io lists it as a Tool, which was attached and never used."""
+    import ability_ir as IR
+    import ability_engine as AE
+    for card, deck, want in (
+            ("Colress's Tenacity", [("Stadium", "Legendary Trench"), ("Energy", "Fire Energy"),
+                                    ("Item", "x")],
+             [("Stadium", "Legendary Trench"), ("Energy", "Fire Energy")]),
+            ("Adventure Lantern", [("Energy", "Fire Energy"), ("Energy", "Lightning Energy"),
+                                   ("Item", "x")],
+             [("Energy", "Fire Energy"), ("Energy", "Lightning Energy")])):
+        V, me, op = _dlr_board("Tauros", deck=deck * 2)
+        rec = V._CARDS_BY_NAME[card]
+        rec = rec[0] if isinstance(rec, list) else rec
+        eff = IR.compile_effect("trainer", card, rec["rules"][0])
+        for a in eff.actions:
+            AE.apply_action(a, me, op, None, [])
+        check(f"{card} finds both cards", sorted(me.hand) == sorted(want), me.hand)
+    rec = V._CARDS_BY_NAME["Adventure Lantern"]
+    rec = rec[0] if isinstance(rec, list) else rec
+    check("Adventure Lantern is an Item", rec.get("subtypes") == ["Item"], rec.get("subtypes"))
+
+
+def test_delta_reign_damage_counts():
+    """Storm Emerald counted only the Fire Energy ("for each Fire Energy and
+    each Lightning Energy"), Punishing Needles every opposing Pokemon (not
+    just those with an Ability), and Colorful Whip nothing from the hand."""
+    V, me, op = _dlr_board("Mega Rayquaza ex", ("Tauros",))
+    _energize(me.active, "Fire", "Lightning", "Psychic")
+    _energize(me.bench[0], "Fire")
+    atk = _dlr_attack(me, "Mega Rayquaza ex", "Storm Emerald")
+    check("Storm Emerald: 2 Fire + 1 Lightning on the board is 150",
+          V.attack_damage(me, op, me.active, atk) == 150, V.attack_damage(me, op, me.active, atk))
+    V, me, op = _dlr_board("Cacturne")
+    atk = _dlr_attack(me, "Cacturne", "Punishing Needles")
+    check("Punishing Needles: only Drakloak has an Ability -- 60",
+          V.attack_damage(me, op, me.active, atk) == 60, V.attack_damage(me, op, me.active, atk))
+    V, me, op = _dlr_board("Kecleon", hand=[("Pokemon", "Tauros"), ("Pokemon", "Heracross"),
+                                            ("Pokemon", "Raikou ex"), ("Pokemon", "Darkrai")])
+    atk = _dlr_attack(me, "Kecleon", "Colorful Whip")
+    check("Colorful Whip: Colorless, Grass, Lightning, Darkness in hand -- 120",
+          V.attack_damage(me, op, me.active, atk) == 120, V.attack_damage(me, op, me.active, atk))
+
+
+def test_thunder_clad_on_the_first_turn():
+    """Raikou ex: "If you go first, you can use this attack during your
+    first turn." The first-turn rule stopped it; the other attack stays
+    barred."""
+    import random
+    random.seed(6)
+    for active, want in (("Raikou ex", "Thunder-Clad"), ("Darkrai", None)):
+        V, me, op = _dlr_board(active, ("Tauros",), [("Energy", "Lightning Energy")] * 10)
+        _energize(me.active, "Lightning", "Lightning", "Lightning")
+        me.round_no = op.round_no = 1
+        log = []
+        V.take_turn(me, op, 1, True, V._CARDS_BY_NAME, log)
+        used = [ln for ln in log if " uses " in ln]
+        if want:
+            check(f"going first, turn 1: {active} uses {want} and nothing else",
+                  len(used) == 1 and want in used[0], used)
+        else:
+            check(f"going first, turn 1: {active} does not attack", not used, used)
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -295,6 +295,25 @@ def reprint_key(card):
     return tuple(sig)
 
 
+# Records pokemontcg.io has wrong, checked against TCGdex. Applied to every
+# fetch, so a re-fetch cannot quietly bring the error back.
+DATA_FIXES = {
+    # Listed as a Pokemon Tool with its effect as a rules line; TCGdex lists
+    # it as an Item. The text ("Search your deck for a Basic Fire Energy card
+    # and a Basic Lightning Energy card ... put them into your hand") only
+    # does anything when played, so as a Tool it was attached and never used.
+    "Adventure Lantern": {"subtypes": ["Item"]},
+}
+
+
+def apply_data_fixes(cards):
+    for card in cards:
+        fix = DATA_FIXES.get(card.get("name"))
+        if fix:
+            card.update(fix)
+    return cards
+
+
 def merge_set(pool, fetched, set_id):
     """Merge one set's cards into an existing pool without re-fetching the
     rest of it.
@@ -344,7 +363,7 @@ def main():
         set_id = sys.argv[sys.argv.index("--merge-set") + 1]
         with open(OUTPUT_FILE) as f:
             pool = json.load(f)
-        fetched = fill_set_codes(fetch_set(set_id))
+        fetched = apply_data_fixes(fill_set_codes(fetch_set(set_id)))
         missing = sorted({c["number"] for c in fetched if not set_code_of(c)})
         if missing:
             # Without a set code a card has no printing, and no decklist line
@@ -363,7 +382,7 @@ def main():
             json.dump(pool, f, indent=4)
         print(f"Saved {len(pool)} cards to {OUTPUT_FILE}")
         return
-    cards = fetch_all_standard_cards()
+    cards = apply_data_fixes(fetch_all_standard_cards())
 
     # Each card was already fetched by an exact regulationMark:X query, so no
     # further regulation-mark filtering is needed here (unlike the old

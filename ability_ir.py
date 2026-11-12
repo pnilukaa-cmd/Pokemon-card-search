@@ -415,6 +415,14 @@ def parse_conditions(text):
     m = re.search(r"[Ii]f you have ([A-Z][\w'’ -]+?) in play", t)
     if m:
         out.append({"kind": "named_in_play", "name": m.group(1).strip()})
+    # Incarnate Solidarity (Tornadus, Thundurus, Landorus, Enamorus): "If you
+    # have Tornadus, Thundurus, Landorus, and Enamorus in play". The single
+    # name above stops at the first comma, so no condition was read and all
+    # four ignored their Colorless costs with none of the others in play.
+    m = re.search(r"[Ii]f you have ((?:[A-Z][\w'’ -]+?, )+(?:and )?[A-Z][\w'’ -]+?) in play", t)
+    if m and not re.search(r"you can use this card only if you have", t, re.I):
+        names = [x.strip() for x in re.split(r",\s*(?:and\s+)?", m.group(1)) if x.strip()]
+        out.append({"kind": "have_in_play", "names": names})
     # Bouffalant's Curly Wall: "As long as you have at least 1 other
     # Bouffalant in play". Dropped, one Bouffalant switched it on.
     m = re.search(r"[Aa]s long as you have at least (\d+) other ([A-Z][\w'’ -]+?) in play", t)
@@ -1180,6 +1188,8 @@ def _r(m, text):
     if re.search(r"flip a coin\. if heads, search your deck for[^.]+\. if tails, "
                  r"search your deck for", text, re.I):
         return []                       # search_by_coin owns it
+    if _SEARCH_TWO_RE.search(text):
+        return []                       # search_card_and_card owns it
     kind = m.group(3).lower()
     qual = m.group(2)
     # Team Rocket's Petrel: "a Trainer card" is a KIND (any Item, Tool,
@@ -1210,6 +1220,22 @@ def _r(m, text):
     # measured -0.68 / -0.28 / -0.34 on the three Metal decks running it
     # (2026-10-29, 200 games a matchup), against 2 Basics every time.
     return [Action(Op.SEARCH_TO_HAND, 4 if many else _num(m.group(1)), Target.SELF, f)]
+
+
+_SEARCH_TWO_RE = re.compile(
+    r"search your deck for an? ([\w'’ -]*?)(pok[eé]mon|supporter|item|stadium|energy) card"
+    r" and an? ([\w'’ -]*?)(pok[eé]mon|supporter|item|stadium|energy) card,? (?:reveal them,"
+    r" and )?put them into your hand", re.I)
+
+
+@rule("search_card_and_card", _SEARCH_TWO_RE.pattern)
+def _r(m, text):
+    """Colress's Tenacity (a Stadium and an Energy) and Adventure Lantern (a
+    Basic Fire and a Basic Lightning Energy): read as one search for the
+    first card, so the second never came."""
+    return [Action(Op.SEARCH_TO_HAND, 1, Target.SELF,
+                   dict(_search_filter(m.group(i)), kind=m.group(i + 1).lower()))
+            for i in (1, 3)]
 
 
 @rule("search_by_coin",
@@ -1305,6 +1331,9 @@ def _look_selector(item):
     m = re.fullmatch(r"(trainer|supporter|item|stadium)", item, re.I)
     if m:
         return {"kind": m.group(1).capitalize()}
+    # Delibird's Energizing Present: "an Energy card", any Energy.
+    if re.fullmatch(r"energy", item, re.I):
+        return {"kind": "Energy", "type": None}
     return None
 
 
@@ -1329,6 +1358,11 @@ def _r(m, text):
                 f["take"] = int(r.group(2))
             else:
                 f["take"] = "each" if len(items) > 1 else 1
+            # "Shuffle the other cards and put them on the bottom of your deck."
+            if re.search(r"shuffle the other cards and put them on the bottom of your deck",
+                         text, re.I):
+                f["rest_to_bottom"] = True
+                f.pop("shuffle_rest")
             return [Action(Op.LOOK_AT_DECK, int(m.group(1)), Target.SELF, f)]
     return [Action(Op.LOOK_AT_DECK, int(m.group(1)), Target.SELF)]
 
@@ -1427,11 +1461,57 @@ def _r(m, text):
     # Pokemon in any way you like" -- not the Active.
     tgt = Target.YOUR_BENCHED if re.search(r"attach them to your benched pok[eé]mon", text, re.I) \
         else Target.YOUR_ANY
+    # The recipient after "attach it/them to". "This Pokemon" (Okidogi ex,
+    # Zacian ex, Yanmega ex, Solgaleo, Darkrai, Raikou ex: 16 cards) and
+    # "1 of your [Benched] Pokemon" (Smoochum, Azurill, Flareon ex, the
+    # Ogerpon, Energy Coin, Misty's Vitality) all compiled to any Pokemon,
+    # spread by need: Darkrai's Shadow-Clad put both Energy on the Bench.
+    # "For each of your Benched Pokemon, search your deck for a Basic Psychic
+    # Energy card and attach it to that Pokemon" (Mega Gardevoir ex's
+    # Overflowing Wishes) and "For each of your Pokemon that has a Mega
+    # Rayquaza Cap attached..." (Delta Gift): one each. Both attached one.
+    pe = re.search(r"for each of your (?:benched pok[eé]mon|pok[eé]mon that has an? ([\w'’ -]+?)"
+                   r" attached), search your deck for an? basic [^.]{0,20}energy card and attach"
+                   r" it to that pok[eé]mon", text, re.I)
+    if pe:
+        f["basic_only"] = True
+        if pe.group(1):
+            f["each_holding_tool"] = pe.group(1).strip()
+            return [Action(Op.ATTACH_ENERGY, 1, Target.YOUR_ANY, f)]
+        f["each_of"] = 8
+        return [Action(Op.ATTACH_ENERGY, 1, Target.YOUR_BENCHED, f)]
+    rcp = re.match(r"\s*(?:it|them) to (this pok[eé]mon|1 of your benched pok[eé]mon"
+                   r"|1 of your pok[eé]mon)\b", text[m.end():], re.I)
+    if rcp and not mm:
+        w = rcp.group(1).lower()
+        if w.startswith("this"):
+            tgt = Target.SELF
+        else:
+            f["one_recipient"] = True
+            if "benched" in w:
+                tgt = Target.YOUR_BENCHED
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), tgt, f)]
+
+
+_SWITCH_THEN_MOVE_RE = re.compile(
+    r"switch your active pok[eé]mon with 1 of your benched pok[eé]mon\. if you do, move an "
+    r"energy from the pok[eé]mon you moved to your bench to the new active pok[eé]mon", re.I)
+
+
+@rule("switch_then_move_energy", _SWITCH_THEN_MOVE_RE.pattern)
+def _r(m, text):
+    """Zinnia's Trust: switch, then one Energy from the Pokemon that went
+    to the Bench onto the new Active. It compiled as an Energy moved off
+    the Active onto any Benched Pokemon, then a switch to whichever one
+    the switch ranked best: the Energy and the new Active rarely met."""
+    return [Action(Op.SWITCH, 1, Target.YOUR_ACTIVE,
+                   {"gust": False, "then_move_energy": 1})]
 
 
 @rule("move_energy", r"move (?:a|an|(\d+)) ?(" + TYPES + r")? ?energy from ([^.]{0,40}?) to ([^.]{0,40})")
 def _r(m, text):
+    if _SWITCH_THEN_MOVE_RE.search(text):
+        return []                       # switch_then_move_energy owns it
     f = {"type": (m.group(2) or "").capitalize() or None,
          "from": parse_target(m.group(3))}
     # Elgyem's Slight Shift moves an Energy between the OPPONENT's own
@@ -2017,6 +2097,8 @@ def _r(m, text):
 @rule("switch_own", r"switch (?:this pok[eé]mon|your active pok[eé]mon) with 1 of your benched"
       r"(?: (" + TYPES + r"))?")
 def _r(m, text):
+    if _SWITCH_THEN_MOVE_RE.search(text):
+        return []                       # switch_then_move_energy owns it
     f = {"gust": False}
     if re.search(r"you may switch (?:this pok[eé]mon|your active pok[eé]mon) with", text, re.I):
         f["optional"] = True
@@ -2121,6 +2203,10 @@ def _r(m, text):
     # Shaymin: "...Benched Pokemon ex or Benched Pokemon V".
     if re.match(r"\s+ex\b(?:\s+or\s+benched\s+pok[eé]mon\s+v\b)?", text[m.end():], re.I):
         f["subtypes_any"] = ["ex", "V"]
+    # Meowscarada ex's Magical Bullet: "...Benched Pokemon that has any
+    # damage counters on it". It hit an undamaged one as readily.
+    if re.match(r"\s+that has any damage counters on it", text[m.end():], re.I):
+        f["only_damaged"] = True
     if who == "each":
         # EACH Benched Pokemon: with no count the executor read it as
         # "choose 1", so Regice's Blizzard hit one Benched Pokemon.
@@ -2288,6 +2374,14 @@ def _r(m, text):
                    {"family": m.group(2).strip()})]
 
 
+@rule("attack_gate_hand",
+      r"this pok[eé]mon can'?t use attacks unless you have (\d+) or more cards in your hand")
+def _r(m, text):
+    """Mega Golurk ex's Restricted Activation. The generic lock rule read
+    "can't use attacks" and dropped the "unless", so it could never attack."""
+    return [Action(Op.ATTACK_GATE, int(m.group(1)), Target.SELF, {"hand_at_least": True})]
+
+
 @rule("attack_gate_opponent_rule_box",
       r"if your opponent has no pok[eé]mon ex or pok[eé]mon v in play, "
       r"this pok[eé]mon can'?t attack")
@@ -2325,7 +2419,7 @@ def _r(m, text):
     # attack_gate rule above. Falling through to here as well stapled an
     # unconditional attack lock onto the same card, which would stop it
     # attacking even with the requirement met.
-    if re.search(r"can'?t attack unless", text, re.I):
+    if re.search(r"can'?t (?:attack|use attacks) unless", text, re.I):
         return []
     # "You can't use more than 1 Last-Ditch Catch Ability each turn" is a
     # once-per-turn limit on the card's own Ability, not a lock: it
@@ -2540,8 +2634,29 @@ def _r(m, text):
 @rule("attach_multi_type_energy",
       r"attach (?:up to )?(\d+|a|an) basic (" + TYPES + r") energy card[^.]{0,80}?from your (discard pile|hand|deck)")
 def _r(m, text):
+    if _BUDDY_ATTACH_RE.search(text):
+        return []                       # attach_either_or_both owns it
     return [Action(Op.ATTACH_ENERGY, _num(m.group(1)), Target.YOUR_ANY,
                    {"type": m.group(2).capitalize(), "from": m.group(3).split()[0]})]
+
+
+_BUDDY_ATTACH_RE = re.compile(
+    r"attach a basic (" + TYPES + r") energy card, a basic (" + TYPES + r") energy card, "
+    r"or 1 of each from your hand to your ([\w'’ -]+?) and ([\w'’ -]+?) in any way you like",
+    re.I)
+
+
+@rule("attach_either_or_both", _BUDDY_ATTACH_RE.pattern)
+def _r(m, text):
+    """Magmortar's Buddy Boost: a Basic Fire, a Basic Lightning, or one of
+    each, from hand, to Electivire and Magmortar only. It compiled as one
+    Fire Energy to any Pokemon."""
+    # One action: _collapse_duplicate_attachments keeps one attach per
+    # source, so a Fire attach and a Lightning attach from hand became one.
+    return [Action(Op.ATTACH_ENERGY, 2, Target.YOUR_ANY,
+                   {"type": None, "from": "hand", "basic_only": True,
+                    "one_of_each": [m.group(1).capitalize(), m.group(2).capitalize()],
+                    "recipient_names": [m.group(3).strip(), m.group(4).strip()]})]
 
 
 # ---- third pass ----------------------------------------------------------
@@ -3032,6 +3147,16 @@ def _r(m, text):
       r" use the effect of that card as the effect of this attack")
 def _r(m, text):
     return [Action(Op.COPY_TOP_SUPPORTER, 1, Target.SELF)]
+
+
+@rule("shuffle_counted_energy_back",
+      r"for each basic (" + TYPES + r") energy card in your discard pile\. then, shuffle"
+      r" those cards into your deck")
+def _r(m, text):
+    """Heat Rotom ex's Rewarm and Kyogre's Riptide: the damage was paid,
+    the Energy never went back, so the next Rewarm hit as hard again."""
+    return [Action(Op.DISCARD_TO_DECK, 60, Target.SELF,
+                   {"kind": "Energy", "energy_type": m.group(1).capitalize()})]
 
 
 @rule("prizes_if_hand_size",

@@ -1,0 +1,44 @@
+Pokémon: 28
+1 Darkrai DLR 63
+1 Raikou ex DLR 33
+1 Azurill DLR 80
+1 Okidogi ex SFA 36
+1 Tauros DLR 77
+1 Eevee DLR 78
+1 Magmar DLR 20
+1 Magmortar DLR 21
+1 Electabuzz DLR 30
+1 Electivire DLR 31
+1 Thundurus DLR 35
+1 Tornadus DLR 85
+1 Landorus DLR 54
+1 Enamorus DLR 48
+1 Golett DLR 46
+1 Mega Golurk ex DLR 47
+1 Delibird DLR 79
+1 Heat Rotom ex DLR 23
+1 Giratina DLR 45
+1 Meowscarada ex DLR 14
+1 Mega Rayquaza ex DLR 84
+1 Cacnea DLR 4
+1 Cacturne DLR 5
+1 Kecleon DLR 83
+1 Mega Gardevoir ex MEG 159
+1 Kyogre DLR 26
+1 Sylveon ex SSP 86
+1 Heracross DLR 1
+
+Trainer: 4
+1 Zinnia's Trust DLR 103
+1 Colress's Tenacity SFA 57
+1 Adventure Lantern DLR 90
+1 Mega Rayquaza Cap DLR 100
+
+Energy: 20
+4 Basic Fire Energy
+4 Basic Lightning Energy
+4 Basic Darkness Energy
+4 Basic Psychic Energy
+4 Basic Grass Energy
+
+Total Cards: 52

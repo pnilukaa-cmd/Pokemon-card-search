@@ -510,6 +510,12 @@ def query_attack_gate(pl, spot):
     for holder, eff, act in _passive_actions(pl, IR.Op.ATTACK_GATE):
         if holder is not spot:
             continue            # the gate is on its own Pokemon only
+        if (act.filter or {}).get("hand_at_least"):
+            # Mega Golurk ex: "can't use attacks unless you have 10 or more
+            # cards in your hand".
+            if len(pl.hand) < (act.amount or 0):
+                return False
+            continue
         need = (act.filter or {}).get("opponent_needs")
         if need:
             if not opponent_has_subtype(pl, need):
@@ -1754,6 +1760,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
         # find there" (Metal Maker, Waitress): the N cards come off the top
         # once, and what isn't attached goes back afterwards.
         window = None
+        once_left = list(act.filter.get("one_of_each") or [])
 
         def _take(prefer=None):
             if src == "top":
@@ -1768,17 +1775,31 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             # "Search your deck for up to 3 Basic Energy cards" lets the
             # player pick which: the type the recipient is still missing
             # (Koraidon ex's one Fire among Fighting), else the first.
+            basic_deck = act.filter.get("basic_only")
             if prefer and src == "deck":
                 card = _find_in_deck(pl, lambda k, n: k == "Energy"
                                      and (not want_type or want_type in n)
+                                     and (not basic_deck or _is_basic_energy_name(n))
                                      and (blocked is None or n != blocked)
                                      and any(t in n for t in prefer))
                 if card:
                     return card
             if src == "hand":
-                i = next((i for i, (k, n) in enumerate(pl.hand)
-                          if k == "Energy" and (not want_type or want_type in n)), None)
-                return pl.hand.pop(i) if i is not None else None
+                # Buddy Boost: "a Basic Fire, a Basic Lightning, or 1 of
+                # each" -- at most one card of each named type.
+                left = act.filter.get("one_of_each")
+                basic = act.filter.get("basic_only")
+                ok = [i for i, (k, n) in enumerate(pl.hand)
+                      if k == "Energy" and (not want_type or want_type in n)
+                      and (not basic or _is_basic_energy_name(n))
+                      and (left is None or any(t in n for t in once_left))]
+                i = next((i for i in ok if prefer and any(t in pl.hand[i][1] for t in prefer)),
+                         ok[0] if ok else None)
+                if i is None:
+                    return None
+                if left is not None:
+                    once_left.remove(next(t for t in once_left if t in pl.hand[i][1]))
+                return pl.hand.pop(i)
             if src == "discard":
                 nm = next((n for n in pl.discard
                            if n.endswith("Energy") and (not want_type or want_type in n)), None)
@@ -1788,6 +1809,7 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                 return ("Energy", nm)
             return _find_in_deck(pl, lambda k, n: k == "Energy"
                                  and (not want_type or want_type in n)
+                                 and (not basic_deck or _is_basic_energy_name(n))
                                  and (blocked is None or n != blocked))
 
         def _put(tgt, card):
@@ -1805,6 +1827,18 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             if src == "hand":
                 opponent_event(pl, opp, "attach_from_hand", tgt, log)
 
+        holder_tool = act.filter.get("each_holding_tool")
+        if holder_tool:
+            # Mega Rayquaza Cap's Delta Gift: one Basic Energy to each of
+            # your Pokemon holding a Cap.
+            got = 0
+            for tgt in [p for p in pl.in_play() if getattr(p, "tool", None) == holder_tool]:
+                card = _take(ENERGY_NEED(pl, tgt))
+                if not card:
+                    break
+                _put(tgt, card)
+                got += 1
+            return got > 0
         each = act.filter.get("each_of")
         if each:
             # Glass Trumpet: one each to up to N Benched Pokemon of a type,
@@ -1853,6 +1887,12 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             # Rosa's Encouragement: "to 1 of your Stage 2 Pokemon".
             hits = [p for p in hits if p is not None
                     and (pl.POKEMON.get(p.name) or {}).get("stage") == rs]
+            if not hits:
+                return False
+        rn = act.filter.get("recipient_names")
+        if rn:
+            # Buddy Boost: "to your Electivire and Magmortar".
+            hits = ATTACH_RANK(pl, opp, [p for p in pl.in_play() if p.name in rn])
             if not hits:
                 return False
         rt = act.filter.get("recipient_type")
@@ -2402,6 +2442,19 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             pl.active = tgt
             log.append(f"    switch into {tgt.name}")
             opponent_event(pl, opp, "active_to_bench", pl.bench[-1], log)
+            old = pl.bench[-1]
+            if f.get("then_move_energy") and old.energy:
+                # Zinnia's Trust: one Energy from the Pokemon that went to
+                # the Bench onto the new Active -- the type it still needs.
+                need = ENERGY_NEED(pl, tgt) or []
+                i = next((i for i, e in enumerate(old.energy)
+                          if any(t in e for t in need)), len(old.energy) - 1)
+                prov = old.energy[i]
+                nm = pop_energy(old, i)
+                tgt.energy.append(prov)
+                if nm:
+                    tgt.energy_names.append(nm)
+                log.append(f"    move {nm or 'Energy'} {old.name} -> {tgt.name}")
             if f.get("then_gust") and opp.bench:
                 apply_action(IR.Action(O.SWITCH, 1, IR.Target.OPP_ACTIVE, {"gust": True}),
                              pl, opp, source, log, attacker, make_inplay)
@@ -3362,6 +3415,8 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
             kind, name = card
             want = sel["kind"]
             if want == "Energy":
+                if not sel.get("type"):
+                    return kind == "Energy"
                 return (kind == "Energy" and re.fullmatch(
                     rf"(basic )?{sel['type']} energy", name, re.I) is not None)
             if want == "Pokemon":
@@ -3381,9 +3436,21 @@ def apply_action(act, pl, opp, source, log, attacker=None, make_inplay=None):
                     picks.append(c)
         else:
             picks = ranked if take == "all" else ranked[:take]
-        for c in picks:
-            pl.deck.remove(c)
-            pl.hand.append(c)
+        if act.filter.get("rest_to_bottom"):
+            # Delibird's Energizing Present: "Shuffle the other cards and
+            # put them on the bottom of your deck." The window comes off
+            # whole, so a duplicate deeper in the deck is never touched.
+            del pl.deck[-len(top):]
+            rest = list(top)
+            for c in picks:
+                rest.remove(c)
+                pl.hand.append(c)
+            random.shuffle(rest)
+            pl.deck[:0] = rest
+        else:
+            for c in picks:
+                pl.deck.remove(c)
+                pl.hand.append(c)
         if act.filter.get("shuffle_rest"):
             random.shuffle(pl.deck)
         log.append(f"    looks at top {n}, takes "

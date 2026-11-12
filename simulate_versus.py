@@ -4247,8 +4247,11 @@ def _energy_matching(clause, spots, *players):
     silently inflates any deck running a second Energy type. Azumarill ex
     read as 220 where the card says 140.
     """
-    m = _TYPED_ENERGY_RE.search(clause or "")
-    want = m.group(1).capitalize() if m else None
+    # Mega Rayquaza ex's Storm Emerald: "for each Fire Energy and each
+    # Lightning Energy attached to all of your Pokemon". Only the first type
+    # was read, so the Lightning half counted for nothing.
+    wants = [t.capitalize() for t in _TYPED_ENERGY_RE.findall(
+        _re.split(r"\battached\b", clause or "")[0])]
     n = 0
     for s in spots:
         if s is None:
@@ -4256,10 +4259,10 @@ def _energy_matching(clause, spots, *players):
         owner = next((p for p in players if p is not None
                       and (s is p.active or s in p.bench)), None)
         prov = provided(owner, s)
-        if want is None:
+        if not wants:
             n += len(prov)
         else:
-            n += sum(1 for e in prov if want in e)
+            n += sum(1 for e in prov if any(w in e for w in wants))
     return n
 
 
@@ -4297,6 +4300,16 @@ def _clause_count(clause, pl, opp, spot):
         return retreat_of(pl, spot, opp)
     if "card in your hand" in c:
         return len(pl.hand)
+    # Kecleon's Colorful Whip: "Reveal any number of Pokemon from your hand,
+    # and this attack does 30 damage for each different type of Pokemon you
+    # revealed". Revealing costs nothing, so all of them are shown.
+    if "different type of pok" in c and "revealed" in c:
+        types = set()
+        for kind, name in pl.hand:
+            if kind == "Pokemon":
+                info = pl.POKEMON.get(name) or _CARDS_BY_NAME.get(name) or {}
+                types.update(info.get("types") or [])
+        return len(types)
     if "card in your opponent's hand" in c:
         return len(opp.hand)
     # "Your opponent reveals their hand. This attack does 50 damage for
@@ -4370,10 +4383,18 @@ def _clause_count(clause, pl, opp, spot):
             c, ([opp.active] if opp.active else []) + list(opp.bench), pl, opp)
     if "energy attached to both active pok" in c:
         return _energy_matching(c, [pl.active, opp.active if opp else None], pl, opp)
-    if "energy card in your discard pile" in c:
-        return sum(1 for x in pl.discard if "energy" in str(x).lower())
-    if "energy card in your opponent's discard pile" in c:
-        return sum(1 for x in opp.discard if "energy" in str(x).lower())
+    # "for each Basic Fire Energy card in your discard pile" (Heat Rotom
+    # ex's Rewarm, Kyogre's Riptide), "Basic Energy card in your opponent's
+    # discard pile" (N's Darmanitan). The type and the "Basic" were both
+    # dropped: every Energy in the pile counted, Lightning for Rewarm too.
+    m = _re.search(r"(basic )?(?:(" + IR.TYPES.lower() + r") )?energy cards? in your"
+                   r" (opponent's )?discard pile", c)
+    if m:
+        pile = opp.discard if m.group(3) else pl.discard
+        typ = m.group(2)
+        return sum(1 for x in pile if "energy" in str(x).lower()
+                   and (not typ or typ in str(x).lower())
+                   and (not m.group(1) or AE._is_basic_energy_name(x)))
     # "for each Stage 2 Pokemon on your Bench" and friends -- a stage
     # filter on a Bench count, which the plain Bench clauses above do not
     # reach because the wording puts the filter first.
@@ -4390,6 +4411,11 @@ def _clause_count(clause, pl, opp, spot):
         if "pok\u00e9mon ex" in c or "pokemon ex" in c:
             return sum(1 for sp in spots
                        if (opp.POKEMON.get(sp.name) or {}).get("prize_value", 1) >= 2)
+        # Cacturne's Punishing Needles: "...in play that has an Ability".
+        # It counted every Pokemon they had, Abilities or not.
+        if "has an ability" in c:
+            return sum(1 for sp in spots
+                       if (opp.POKEMON.get(sp.name) or {}).get("abilities"))
         return len(spots)
     # "for each of your <A> and <B> in play" -- Beedrill ex counts both its
     # own printings, which is a name list rather than a family word.
@@ -6237,10 +6263,36 @@ def attack_value(pl, opp, spot, atk):
     return value
 
 
-def _attack_disabled(spot, atk):
-    """Torment / Memory Lock took this attack away for the turn."""
-    return bool(getattr(spot, "disabled_attack_turns", 0)
-                and getattr(spot, "disabled_attack", None) == atk.get("name"))
+_OWN_REPEAT_BLOCK_RE = _re.compile(
+    r"if 1 of your pok[eé]mon used ([\w'’ -]+?) during your last turn, this attack"
+    r" can'?t be used", _re.I)
+_FIRST_TURN_ATTACK_RE = _re.compile(
+    r"if you go first, you can use this attack during your first turn", _re.I)
+
+
+def _attack_disabled(spot, atk, pl=None):
+    """Torment / Memory Lock took this attack away for the turn.
+
+    With the player: Giratina's Chaos Crawler and Sylveon ex's Angelite
+    ("If 1 of your Pokemon used <it> during your last turn, this attack
+    can't be used"), and the first turn of the player going first, when
+    only an attack that says it may be used then is (Raikou ex's
+    Thunder-Clad)."""
+    if (getattr(spot, "disabled_attack_turns", 0)
+            and getattr(spot, "disabled_attack", None) == atk.get("name")):
+        return True
+    if pl is None:
+        return False
+    text = atk.get("text") or ""
+    if getattr(pl, "_first_turn_only", False) and not _FIRST_TURN_ATTACK_RE.search(text):
+        return True
+    m = _OWN_REPEAT_BLOCK_RE.search(text)
+    if m:
+        last = getattr(pl, "_last_attack", None)
+        prev = (getattr(pl, "round_no", 0) or 0) - 1
+        if last and last[0].lower() == m.group(1).strip().lower() and last[1] == prev:
+            return True
+    return False
 
 
 def _named_attack_pick(owner, foe, spot):
@@ -6269,7 +6321,7 @@ def best_attack(pl, spot, only_payable=True, opp=None):
                                                        atk.get("name")),
                                         provided(pl, spot)):
             continue
-        if _attack_disabled(spot, atk):
+        if _attack_disabled(spot, atk, pl):
             continue
         val = attack_value(pl, opp, spot, atk)
         if val > best_val:
@@ -7366,6 +7418,7 @@ def do_attack(pl, opp, log):
 
     pl.active.last_attack_used = atk["name"]
     pl.active.last_attack_round = getattr(pl, "round_no", None)
+    pl._last_attack = (atk["name"], getattr(pl, "round_no", None))
     # "Heal from this Pokemon the same amount of damage you did" is resolved
     # on the rider path, which is handed the attack but not its result.
     AE.DAMAGE_JUST_DEALT[0] = dmg
@@ -7818,6 +7871,7 @@ def take_turn(pl, opp, turn, going_first, cards_by_name, log):
     if pl.active is None:
         return "no_pokemon"
     pl._first_turn = first_turn
+    pl._first_turn_only = False        # set again in the attack phase
     pl._cards_by_name = cards_by_name
     # Rare Candy before the ordinary evolutions: evolving the Basic into
     # its Stage 1 first leaves nothing for the Candy to skip.
@@ -7955,8 +8009,14 @@ def run_phases(pl, opp, log, start):
             try_retreat(pl, opp, log)
         elif ph == "attack":
             # Meloetta ex's Debut Performance is the one card that may
-            # attack on the very first turn.
-            if not first_turn or AE.query_can_attack_first_turn(pl):
+            # attack on the very first turn -- and Raikou ex's Thunder-Clad,
+            # the one attack that says it may be used then.
+            ft_only = (first_turn and not AE.query_can_attack_first_turn(pl)
+                       and pl.active is not None
+                       and any(_FIRST_TURN_ATTACK_RE.search(a.get("text") or "")
+                               for a in pl.POKEMON[pl.active.name]["attacks"]))
+            pl._first_turn_only = ft_only
+            if not first_turn or AE.query_can_attack_first_turn(pl) or ft_only:
                 # Academy at Night is "once during each player's turn" --
                 # used last, when the Seek attacker is already Active,
                 # rather than stacking a card nobody attacks with.
@@ -8237,7 +8297,7 @@ def lookahead_attack(pl, opp, greedy_pick):
     for a in list(pl.POKEMON[spot.name]["attacks"]) + AE.query_extra_attacks(pl, spot):
         if a["name"] in seen or not can_pay(
                 effective_cost(pl, spot, a["cost"], opp, a.get("name")), provided(pl, spot)) \
-                or _attack_disabled(spot, a):
+                or _attack_disabled(spot, a, pl):
             continue
         seen.add(a["name"])
         cands.append(a)

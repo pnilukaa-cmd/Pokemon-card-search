@@ -226121,7 +226121,7 @@
         "name": "Adventure Lantern",
         "supertype": "Trainer",
         "subtypes": [
-            "Pok\u00e9mon Tool"
+            "Item"
         ],
         "rules": [
             "Search your deck for a Basic Fire Energy card and a Basic Lightning Energy card, reveal them, and put them into your hand. Then, shuffle your deck."
