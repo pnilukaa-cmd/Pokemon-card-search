@@ -176,6 +176,23 @@ Tasty Rice Ball scale; no field deck runs any of them.
 too (2026-11-11). 7ee15a1 changes the setup baseline only (Ciphermaniac's
 Codebreaking, Tasty Rice Ball).
 
+de65e4e and a845ec3 (the Delta Reign card review, 2026-11-12,
+`decks/delta_reign_card_review.md`) change some field decks:
+
+- **"Attach it to this Pokémon" now does:** Okidogi ex, Quilladin,
+  Exeggcute, Articuno.
+- **"1 of your [Benched] Pokémon" takes all the Energy on one Pokémon:**
+  Smoochum, Misty's Vitality.
+- **Both of its cards are now found:** Colress's Tenacity.
+- **Only Basic Energy counts:** N's Darmanitan's Back Draft.
+
+Decks affected: munkidori_ex_pecharunt_chains, chesnaught_meganium_wild_growth,
+mew_baby_box, aurorus_kangaskhan_tundra_wall, both Kangaskhan walls,
+kyurem_vanilluxe_blizzard, feraligatr_munkidori_damage_transfer,
+mew_pikachu_box, study_flygon_sandy_flapping_mill and both N's Zoroark
+decks, where those printings are the ones in the list. The table below was
+not re-run for them.
+
 | # | deck | mean | median | winning | best matchup | worst |
 |---|---|---|---|---|---|---|
 | 1 | `mega_zeraora_cinderace_thunderous_fist` | **87.2%** | 90.8% | 93/96 | tr_arbok_yveltal_snow_coating (100%) | mega_zygarde_cinderace_gaia_wave (32%) |

@@ -1,0 +1,2568 @@
+{
+ "aggron_diggersby_angry_slam": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aggron_diggersby_angry_slam__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aggron_diggersby_angry_slam__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aggron_diggersby_angry_slam__pyroduct.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/aggron_diggersby_angry_slam__ctl_switch.txt",
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/aggron_diggersby_angry_slam__ctl_switch.txt"
+  }
+ },
+ "alakazam_dudunsparce_powerful_hand": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Hilda WHT 164"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/alakazam_dudunsparce_powerful_hand__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/alakazam_dudunsparce_powerful_hand__vest.txt"
+  }
+ },
+ "alakazam_munkidori_strange_hacking": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/alakazam_munkidori_strange_hacking__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon MEG 166",
+    "1 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/alakazam_munkidori_strange_hacking__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/alakazam_munkidori_strange_hacking__giratina.txt"
+  }
+ },
+ "arbok_muk_laser_darkbell": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_laser_darkbell__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_laser_darkbell__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_laser_darkbell__pyroduct.txt",
+   "alt_cut": [
+    "2 Lillie's Determination MEG 119"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_laser_darkbell__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/arbok_muk_laser_darkbell__ctl_night.txt"
+  }
+ },
+ "arbok_muk_trolley_darkbell": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_trolley_darkbell__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_trolley_darkbell__vest.txt",
+   "alt_cut": [
+    "2 Rescue Board TEF 159"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_trolley_darkbell__pyroduct.txt",
+   "alt_cut": [
+    "2 Lillie's Determination MEG 119"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_muk_trolley_darkbell__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/arbok_muk_trolley_darkbell__ctl_night.txt",
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/arbok_muk_trolley_darkbell__ctl_air.txt"
+  }
+ },
+ "arbok_team_rockets_muk_condition_stack": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_team_rockets_muk_condition_stack__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_team_rockets_muk_condition_stack__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_team_rockets_muk_condition_stack__pyroduct.txt",
+   "alt_cut": [
+    "2 Lillie's Determination MEG 119"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arbok_team_rockets_muk_condition_stack__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/arbok_team_rockets_muk_condition_stack__ctl_night.txt"
+  }
+ },
+ "arboliva_ogerpon_oil_salvo": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arboliva_ogerpon_oil_salvo__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arboliva_ogerpon_oil_salvo__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Forest of Vitality MEG 117"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/arboliva_ogerpon_oil_salvo__pyroduct.txt",
+   "alt_cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Lillie's Determination MEG 184"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/arboliva_ogerpon_oil_salvo__ctl_forest.txt"
+  }
+ },
+ "aurorus_kangaskhan_tundra_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aurorus_kangaskhan_tundra_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aurorus_kangaskhan_tundra_wall__vest.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/aurorus_kangaskhan_tundra_wall__wishiwashi.txt"
+  },
+  "_controls": {
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/aurorus_kangaskhan_tundra_wall__ctl_lillie's.txt"
+  }
+ },
+ "bug_out_masquerain_jellicent": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/bug_out_masquerain_jellicent__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/bug_out_masquerain_jellicent__vest.txt"
+  }
+ },
+ "chandelure_centiskorch_deck_out": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chandelure_centiskorch_deck_out__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chandelure_centiskorch_deck_out__vest.txt"
+  }
+ },
+ "chandelure_maushold_dudunsparce_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chandelure_maushold_dudunsparce_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chandelure_maushold_dudunsparce_wall__vest.txt"
+  }
+ },
+ "chesnaught_meganium_wild_growth": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chesnaught_meganium_wild_growth__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/chesnaught_meganium_wild_growth__vest.txt",
+   "alt_cut": [
+    "1 Switch MEG 130",
+    "1 Lillie's Determination MEG 119"
+   ]
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/chesnaught_meganium_wild_growth__ctl_night_switch.txt"
+  }
+ },
+ "crabominable_veluza_food_prep": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Kofu SCR 138"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/crabominable_veluza_food_prep__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Brave Bangle WHT 80",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/crabominable_veluza_food_prep__vest.txt"
+  }
+ },
+ "cradily_accelgor_conditions": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/cradily_accelgor_conditions__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher ASC 196",
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/cradily_accelgor_conditions__vest.txt"
+  }
+ },
+ "cradily_amoonguss_conditions": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/cradily_amoonguss_conditions__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher ASC 196",
+    "1 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/cradily_amoonguss_conditions__vest.txt"
+  }
+ },
+ "darkness_mill_hand_lock": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Waitress ASC 215"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/darkness_mill_hand_lock__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/darkness_mill_hand_lock__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher SFA 61"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/darkness_mill_hand_lock__darkrai.txt",
+   "alt_cut": [
+    "2 Energy Search POR 72"
+   ]
+  },
+  "_controls": {
+   "darkrai": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/darkness_mill_hand_lock__ctl_night.txt"
+  }
+ },
+ "decidueye_ex_judge_sniper_lock": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Judge POR 76"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/decidueye_ex_judge_sniper_lock__aarune.txt",
+   "alt_cut": [
+    "1 Lillie's Determination MEG 119"
+   ]
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/decidueye_ex_judge_sniper_lock__vest.txt"
+  },
+  "_controls": {
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/decidueye_ex_judge_sniper_lock__ctl_judge.txt"
+  }
+ },
+ "dhelmise_veluza_hide_n_sneak": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Kofu SCR 138"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/dhelmise_veluza_hide_n_sneak__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Brave Bangle WHT 80"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/dhelmise_veluza_hide_n_sneak__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "1 Switch MEG 130",
+    "1 Kofu SCR 138"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/dhelmise_veluza_hide_n_sneak__giratina.txt"
+  }
+ },
+ "diggersby_munkidori_earthquake": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/diggersby_munkidori_earthquake__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/diggersby_munkidori_earthquake__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/diggersby_munkidori_earthquake__pyroduct.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/diggersby_munkidori_earthquake__darkrai.txt"
+  }
+ },
+ "ditto_transform_hydreigon": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Crispin SCR 133"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ditto_transform_hydreigon__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ditto_transform_hydreigon__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ditto_transform_hydreigon__darkrai.txt"
+  }
+ },
+ "ditto_tyranitar_gengar_hydreigon": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Crispin PRE 171"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ditto_tyranitar_gengar_hydreigon__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ditto_tyranitar_gengar_hydreigon__vest.txt"
+  }
+ },
+ "eerie_inferno_ninetales_burn": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Cheren ASC 258"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/eerie_inferno_ninetales_burn__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/eerie_inferno_ninetales_burn__vest.txt"
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/eerie_inferno_ninetales_burn__heat_rotom.txt"
+  }
+ },
+ "feraligatr_munkidori_damage_transfer": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/feraligatr_munkidori_damage_transfer__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/feraligatr_munkidori_damage_transfer__vest.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/feraligatr_munkidori_damage_transfer__wishiwashi.txt",
+   "alt_cut": [
+    "2 Night Stretcher SFA 61"
+   ]
+  },
+  "_controls": {
+   "wishiwashi": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/feraligatr_munkidori_damage_transfer__ctl_switch.txt"
+  }
+ },
+ "golbat_brute_bonnet_punch": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/golbat_brute_bonnet_punch__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/golbat_brute_bonnet_punch__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/golbat_brute_bonnet_punch__darkrai.txt"
+  }
+ },
+ "gothitelle_noivern_distorted_future": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gothitelle_noivern_distorted_future__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gothitelle_noivern_distorted_future__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gothitelle_noivern_distorted_future__giratina.txt"
+  }
+ },
+ "gourgeist_diggersby_horrifying_rondo": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gourgeist_diggersby_horrifying_rondo__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gourgeist_diggersby_horrifying_rondo__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gourgeist_diggersby_horrifying_rondo__pyroduct.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/gourgeist_diggersby_horrifying_rondo__giratina.txt"
+  }
+ },
+ "heracross_sinistcha_tea": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/heracross_sinistcha_tea__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon ASC 181",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/heracross_sinistcha_tea__vest.txt"
+  }
+ },
+ "hops_snorlax_stacked_buff": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hops_snorlax_stacked_buff__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Hop's Choice Band JTG 148"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hops_snorlax_stacked_buff__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hops_snorlax_stacked_buff__giratina.txt"
+  }
+ },
+ "hydrapple_hydra_breath_festival": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydrapple_hydra_breath_festival__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon MEG 166",
+    "1 Energy Retrieval CRI 108"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydrapple_hydra_breath_festival__vest.txt"
+  }
+ },
+ "hydrapple_seaking_festival_lead": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydrapple_seaking_festival_lead__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Energy Retrieval WHT 82"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydrapple_seaking_festival_lead__vest.txt"
+  }
+ },
+ "hydreigon_grafaiai_energy_denial": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydreigon_grafaiai_energy_denial__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydreigon_grafaiai_energy_denial__vest.txt"
+  }
+ },
+ "hydreigon_relicanth_hammer_denial": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydreigon_relicanth_hammer_denial__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydreigon_relicanth_hammer_denial__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/hydreigon_relicanth_hammer_denial__darkrai.txt"
+  }
+ },
+ "jellicent_ex_oceanic_curse": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/jellicent_ex_oceanic_curse__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/jellicent_ex_oceanic_curse__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/jellicent_ex_oceanic_curse__giratina.txt"
+  }
+ },
+ "kangaskhan_legendary_trench_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_legendary_trench_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_legendary_trench_wall__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Legendary Trench DLR 98"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_legendary_trench_wall__pyroduct.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_legendary_trench_wall__giratina.txt"
+  }
+ },
+ "kangaskhan_tyrantrum_flip_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_tyrantrum_flip_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon ASC 181"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kangaskhan_tyrantrum_flip_mill__vest.txt"
+  }
+ },
+ "kingdra_ex_kings_order": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kingdra_ex_kings_order__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Powerglass SFA 63"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kingdra_ex_kings_order__vest.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kingdra_ex_kings_order__wishiwashi.txt"
+  }
+ },
+ "krookodile_ex_relicanth_hand_disruption": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/krookodile_ex_relicanth_hand_disruption__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Punk Helmet PFL 121"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/krookodile_ex_relicanth_hand_disruption__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Energy Search POR 72"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/krookodile_ex_relicanth_hand_disruption__darkrai.txt"
+  }
+ },
+ "kyurem_vanilluxe_blizzard": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kyurem_vanilluxe_blizzard__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kyurem_vanilluxe_blizzard__vest.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/kyurem_vanilluxe_blizzard__wishiwashi.txt",
+   "alt_cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Lillie's Determination MEG 119"
+   ]
+  },
+  "_controls": {
+   "wishiwashi": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/kyurem_vanilluxe_blizzard__ctl_switch.txt"
+  }
+ },
+ "lurantis_heal_punish": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Drayton SSP 174"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/lurantis_heal_punish__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher SFA 61"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/lurantis_heal_punish__vest.txt"
+  }
+ },
+ "maushold_gnaw_together_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_gnaw_together_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_gnaw_together_mill__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_gnaw_together_mill__giratina.txt"
+  }
+ },
+ "maushold_mill_legendary_summit": {
+  "aarune": "already plays it",
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_mill_legendary_summit__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Legendary Summit DLR 96"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_mill_legendary_summit__pyroduct.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/maushold_mill_legendary_summit__giratina.txt"
+  }
+ },
+ "mega_absol_ex_hand_lock": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_absol_ex_hand_lock__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_absol_ex_hand_lock__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_absol_ex_hand_lock__pyroduct.txt",
+   "alt_cut": [
+    "2 Switch MEG 130"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_absol_ex_hand_lock__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/mega_absol_ex_hand_lock__ctl_night.txt"
+  }
+ },
+ "mega_chandelure_ex_retreat_tax": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_chandelure_ex_retreat_tax__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_chandelure_ex_retreat_tax__vest.txt"
+  }
+ },
+ "mega_chandelure_ex_telepathic_hilda": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_chandelure_ex_telepathic_hilda__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_chandelure_ex_telepathic_hilda__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_chandelure_ex_telepathic_hilda__giratina.txt"
+  }
+ },
+ "mega_dragonite_kangaskhan_salazzle_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_dragonite_kangaskhan_salazzle_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_dragonite_kangaskhan_salazzle_wall__vest.txt"
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_dragonite_kangaskhan_salazzle_wall__heat_rotom.txt"
+  }
+ },
+ "mega_emboar_oricorio_fire_turbo": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_fire_turbo__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_fire_turbo__vest.txt"
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "2 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_fire_turbo__heat_rotom.txt"
+  }
+ },
+ "mega_emboar_oricorio_munkidori": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_munkidori__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Pokégear 3.0 UNB 233"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_munkidori__vest.txt"
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Pokégear 3.0 UNB 233"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_emboar_oricorio_munkidori__heat_rotom.txt"
+  }
+ },
+ "mega_froslass_ex_resentful_refrain": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Wally's Compassion MEG 186"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_froslass_ex_resentful_refrain__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_froslass_ex_resentful_refrain__vest.txt"
+  }
+ },
+ "mega_gengar_ex_toxtricity_chains": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_gengar_ex_toxtricity_chains__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Pokégear 3.0 BLK 84",
+    "1 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_gengar_ex_toxtricity_chains__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "1 Pokégear 3.0 BLK 84",
+    "1 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_gengar_ex_toxtricity_chains__darkrai.txt"
+  }
+ },
+ "mega_lopunny_dusknoir_snipe_finisher": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_lopunny_dusknoir_snipe_finisher__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_lopunny_dusknoir_snipe_finisher__vest.txt"
+  }
+ },
+ "mega_malamar_ex_psychic_marionette": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_malamar_ex_psychic_marionette__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_malamar_ex_psychic_marionette__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_malamar_ex_psychic_marionette__pyroduct.txt",
+   "alt_cut": [
+    "1 Switch MEG 130",
+    "1 Lillie's Determination MEG 119"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_malamar_ex_psychic_marionette__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/mega_malamar_ex_psychic_marionette__ctl_night.txt"
+  }
+ },
+ "mega_scrafty_ex_darkness_tank": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_scrafty_ex_darkness_tank__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Punk Helmet PFL 121"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_scrafty_ex_darkness_tank__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_scrafty_ex_darkness_tank__darkrai.txt"
+  }
+ },
+ "mega_zeraora_cinderace_thunderous_fist": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zeraora_cinderace_thunderous_fist__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Switch PFL 123",
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zeraora_cinderace_thunderous_fist__vest.txt"
+  },
+  "raikou": {
+   "add": "2 Raikou ex DLR 33",
+   "cut": [
+    "1 Switch PFL 123",
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zeraora_cinderace_thunderous_fist__raikou.txt"
+  }
+ },
+ "mega_zygarde_cinderace_gaia_wave": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zygarde_cinderace_gaia_wave__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Switch PFL 123",
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zygarde_cinderace_gaia_wave__vest.txt"
+  }
+ },
+ "mega_zygarde_cinderace_turbo_flare": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zygarde_cinderace_turbo_flare__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Core Memory POR 70",
+    "1 Pokégear 3.0 UNB 233"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mega_zygarde_cinderace_turbo_flare__vest.txt",
+   "alt_cut": [
+    "2 Pokégear 3.0 UNB 233"
+   ]
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/mega_zygarde_cinderace_turbo_flare__ctl_core_pokégear.txt"
+  }
+ },
+ "meta_dragapult_blaziken": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_blaziken__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_blaziken__vest.txt",
+   "alt_cut": [
+    "2 Lillie's Determination ASC 192"
+   ]
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/meta_dragapult_blaziken__ctl_night.txt"
+  }
+ },
+ "meta_dragapult_dusknoir": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_dusknoir__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_dusknoir__vest.txt"
+  }
+ },
+ "meta_dragapult_pure": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_pure__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_dragapult_pure__vest.txt",
+   "alt_cut": [
+    "2 Lillie's Determination ASC 192"
+   ]
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/meta_dragapult_pure__ctl_night.txt"
+  }
+ },
+ "meta_festival_lead": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_festival_lead__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Brave Bangle WHT 80"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_festival_lead__vest.txt"
+  }
+ },
+ "meta_mega_excadrill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Petrel DRI 176"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_mega_excadrill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_mega_excadrill__vest.txt"
+  }
+ },
+ "meta_ns_zoroark": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination ASC 192"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_ns_zoroark__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Binding Mochi PRE 95"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_ns_zoroark__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_ns_zoroark__darkrai.txt"
+  }
+ },
+ "meta_raging_bolt": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Crispin SCR 133"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_raging_bolt__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Energy Switch MEG 115"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_raging_bolt__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Area Zero Underdepths SCR 131"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_raging_bolt__pyroduct.txt"
+  }
+ },
+ "meta_slowking": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_slowking__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Lucky Helmet TWM 158",
+    "1 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_slowking__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher ASC 196"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Academy at Night SFA 54"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/meta_slowking__pyroduct.txt",
+   "alt_cut": [
+    "2 Night Stretcher ASC 196"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/meta_slowking__ctl_academy.txt",
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/meta_slowking__ctl_lucky_night.txt"
+  }
+ },
+ "metal_metang_excadrill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Petrel DRI 226"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/metal_metang_excadrill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon MEG 166",
+    "1 Energy Recycler POR 108"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/metal_metang_excadrill__vest.txt"
+  }
+ },
+ "mew_alex_centiskorch_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Acerola's Mischief MEG 113"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_alex_centiskorch_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_alex_centiskorch_mill__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Team Rocket's Watchtower ASC 210"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_alex_centiskorch_mill__pyroduct.txt"
+  }
+ },
+ "mew_baby_box": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_baby_box__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_baby_box__vest.txt"
+  }
+ },
+ "mew_dbc_bastiodon": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_bastiodon__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_bastiodon__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_bastiodon__giratina.txt"
+  }
+ },
+ "mew_dbc_hypno": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_hypno__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_hypno__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher ASC 196"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_dbc_hypno__pyroduct.txt",
+   "alt_cut": [
+    "2 Pokégear 3.0 SVI 186"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/mew_dbc_hypno__ctl_night.txt"
+  }
+ },
+ "mew_lonestar_gourgeist_dragapult": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_lonestar_gourgeist_dragapult__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_lonestar_gourgeist_dragapult__vest.txt"
+  }
+ },
+ "mew_pikachu_box": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_pikachu_box__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon SSH 213",
+    "1 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_pikachu_box__vest.txt",
+   "alt_cut": [
+    "1 Gravity Gemstone SCR 137",
+    "1 Handheld Fan TWM 150"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Area Zero Underdepths SCR 174"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/mew_pikachu_box__pyroduct.txt"
+  }
+ },
+ "munkidori_ex_pecharunt_chains": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/munkidori_ex_pecharunt_chains__aarune.txt",
+   "alt_cut": [
+    "1 Janine's Secret Art SFA 59"
+   ]
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/munkidori_ex_pecharunt_chains__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/munkidori_ex_pecharunt_chains__pyroduct.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Pokégear 3.0 BLK 84"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/munkidori_ex_pecharunt_chains__darkrai.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/munkidori_ex_pecharunt_chains__ctl_pokégear.txt",
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/munkidori_ex_pecharunt_chains__ctl_pokégear.txt",
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/munkidori_ex_pecharunt_chains__ctl_lillie's.txt",
+   "darkrai": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/munkidori_ex_pecharunt_chains__ctl_pokégear.txt"
+  }
+ },
+ "ns_zoroark_night_joker_toolbox": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Cyrano SSP 170"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ns_zoroark_night_joker_toolbox__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ns_zoroark_night_joker_toolbox__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/ns_zoroark_night_joker_toolbox__darkrai.txt"
+  }
+ },
+ "orthworm_ex_metal_retaliation": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/orthworm_ex_metal_retaliation__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Rescue Board TEF 159"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/orthworm_ex_metal_retaliation__vest.txt"
+  }
+ },
+ "orthworm_ex_metang_archaludon": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/orthworm_ex_metang_archaludon__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/orthworm_ex_metang_archaludon__vest.txt"
+  }
+ },
+ "panic_poison_paralysis": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/panic_poison_paralysis__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/panic_poison_paralysis__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/panic_poison_paralysis__pyroduct.txt",
+   "alt_cut": [
+    "2 Switch MEG 130"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/panic_poison_paralysis__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/panic_poison_paralysis__ctl_night.txt"
+  }
+ },
+ "salazzle_ex_team_rockets_muk_condition_stack": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/salazzle_ex_team_rockets_muk_condition_stack__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Rescue Board TEF 159"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/salazzle_ex_team_rockets_muk_condition_stack__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/salazzle_ex_team_rockets_muk_condition_stack__pyroduct.txt",
+   "alt_cut": [
+    "2 Switch MEG 130"
+   ]
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/salazzle_ex_team_rockets_muk_condition_stack__ctl_night.txt"
+  }
+ },
+ "scovillain_salazzle_spicy_rage": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Cyrano SSP 170"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/scovillain_salazzle_spicy_rage__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon ASC 181"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/scovillain_salazzle_spicy_rage__vest.txt"
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/scovillain_salazzle_spicy_rage__heat_rotom.txt"
+  }
+ },
+ "snorlax_bouffalant_kangaskhan_curly_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/snorlax_bouffalant_kangaskhan_curly_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Heavy Baton TEF 151"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/snorlax_bouffalant_kangaskhan_curly_wall__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Lively Stadium SSP 180"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/snorlax_bouffalant_kangaskhan_curly_wall__pyroduct.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/snorlax_bouffalant_kangaskhan_curly_wall__giratina.txt"
+  }
+ },
+ "static_venom_drapion": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Cheren ASC 258"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/static_venom_drapion__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/static_venom_drapion__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/static_venom_drapion__pyroduct.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/static_venom_drapion__darkrai.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "_controls": {
+   "darkrai": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/static_venom_drapion__ctl_switch.txt"
+  }
+ },
+ "stevens_carbink_damage_wall": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/stevens_carbink_damage_wall__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/stevens_carbink_damage_wall__vest.txt",
+   "alt_cut": [
+    "2 Rescue Board TEF 159"
+   ]
+  },
+  "_controls": {
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/stevens_carbink_damage_wall__ctl_lillie's.txt",
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/stevens_carbink_damage_wall__ctl_air.txt"
+  }
+ },
+ "study_centiskorch_bastiodon_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_centiskorch_bastiodon_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_centiskorch_bastiodon_mill__vest.txt"
+  }
+ },
+ "study_flygon_sandy_flapping_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_flygon_sandy_flapping_mill__aarune.txt",
+   "alt_cut": [
+    "1 Hilda WHT 171"
+   ]
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_flygon_sandy_flapping_mill__vest.txt"
+  },
+  "_controls": {
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/study_flygon_sandy_flapping_mill__ctl_lillie's.txt"
+  }
+ },
+ "study_hydreigon_zweilous_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 169"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_hydreigon_zweilous_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_hydreigon_zweilous_mill__vest.txt"
+  }
+ },
+ "study_maushold_gnaw_latias": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_maushold_gnaw_latias__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Gravity Gemstone SCR 137"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_maushold_gnaw_latias__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Battle Cage PFL 85"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_maushold_gnaw_latias__pyroduct.txt"
+  }
+ },
+ "study_mega_excadrill_drill_mill": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 184"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_mega_excadrill_drill_mill__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon BLK 79",
+    "1 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/study_mega_excadrill_drill_mill__vest.txt"
+  }
+ },
+ "tauros_risky_ruins": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tauros_risky_ruins__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tauros_risky_ruins__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Risky Ruins MEG 127"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tauros_risky_ruins__pyroduct.txt"
+  }
+ },
+ "team_rocket_honchkrow_kangaskhan": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_honchkrow_kangaskhan__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_honchkrow_kangaskhan__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Team Rocket's Factory ASC 203"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_honchkrow_kangaskhan__pyroduct.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_honchkrow_kangaskhan__darkrai.txt",
+   "alt_cut": [
+    "2 Team Rocket's Ariana ASC 202"
+   ]
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_honchkrow_kangaskhan__ctl_air.txt",
+   "darkrai": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_honchkrow_kangaskhan__ctl_night.txt"
+  }
+ },
+ "team_rocket_hypno_exeggutor": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_exeggutor__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_exeggutor__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "1 Team Rocket's Factory ASC 203",
+    "1 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_exeggutor__pyroduct.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_exeggutor__giratina.txt"
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_hypno_exeggutor__ctl_air.txt",
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_hypno_exeggutor__ctl_team_night.txt"
+  }
+ },
+ "team_rocket_hypno_wobbuffet": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_wobbuffet__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_wobbuffet__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "1 Team Rocket's Factory ASC 203",
+    "1 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_wobbuffet__pyroduct.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_hypno_wobbuffet__giratina.txt"
+  }
+ },
+ "team_rocket_moltres_houndoom": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_moltres_houndoom__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_moltres_houndoom__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "1 Team Rocket's Factory ASC 203",
+    "1 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_moltres_houndoom__pyroduct.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "heat_rotom": {
+   "add": "2 Heat Rotom ex DLR 23",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_moltres_houndoom__heat_rotom.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_moltres_houndoom__ctl_team_night.txt"
+  }
+ },
+ "team_rocket_nidoking_nidoqueen": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_nidoking_nidoqueen__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_nidoking_nidoqueen__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_nidoking_nidoqueen__pyroduct.txt",
+   "alt_cut": [
+    "2 Team Rocket's Ariana ASC 202"
+   ]
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_nidoking_nidoqueen__darkrai.txt"
+  },
+  "_controls": {
+   "pyroduct": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rocket_nidoking_nidoqueen__ctl_night.txt"
+  }
+ },
+ "team_rocket_orbeetle_morpeko": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Janine's Secret Art SFA 59"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_orbeetle_morpeko__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_orbeetle_morpeko__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_orbeetle_morpeko__darkrai.txt"
+  }
+ },
+ "team_rocket_porygon_z_kangaskhan": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_porygon_z_kangaskhan__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_porygon_z_kangaskhan__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "1 Night Stretcher MEG 173",
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_porygon_z_kangaskhan__darkrai.txt"
+  }
+ },
+ "team_rocket_raticate_ampharos": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_ampharos__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Brave Bangle PBL 104"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_ampharos__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_ampharos__darkrai.txt"
+  }
+ },
+ "team_rocket_raticate_rush": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_rush__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Backtrack Badge PBL 74"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_rush__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Team Rocket's Factory ASC 203"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_raticate_rush__pyroduct.txt"
+  }
+ },
+ "team_rocket_tyranitar_sandstorm": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_tyranitar_sandstorm__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rocket_tyranitar_sandstorm__vest.txt"
+  }
+ },
+ "team_rockets_koffing_weezing_bench_swarm": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_koffing_weezing_bench_swarm__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_koffing_weezing_bench_swarm__vest.txt"
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_koffing_weezing_bench_swarm__pyroduct.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_koffing_weezing_bench_swarm__darkrai.txt"
+  }
+ },
+ "team_rockets_persian_ex_attack_theft": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Petrel ASC 207"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_persian_ex_attack_theft__aarune.txt",
+   "alt_cut": [
+    "1 Team Rocket's Ariana ASC 202"
+   ]
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_persian_ex_attack_theft__vest.txt"
+  },
+  "_controls": {
+   "aarune": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/team_rockets_persian_ex_attack_theft__ctl_team.txt"
+  }
+ },
+ "team_rockets_spidops_swarm": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Petrel ASC 207"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_spidops_swarm__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_spidops_swarm__vest.txt"
+  }
+ },
+ "team_rockets_wobbuffet_orbeetle_damage_launder": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Petrel ASC 207"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_wobbuffet_orbeetle_damage_launder__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon BLK 79"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_wobbuffet_orbeetle_damage_launder__vest.txt"
+  },
+  "giratina": {
+   "add": "2 Giratina DLR 45",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/team_rockets_wobbuffet_orbeetle_damage_launder__giratina.txt"
+  }
+ },
+ "toxic_slumber_vileplume_ex": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Dawn PFL 118"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/toxic_slumber_vileplume_ex__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/toxic_slumber_vileplume_ex__vest.txt"
+  }
+ },
+ "tr_arbok_yveltal_snow_coating": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_arbok_yveltal_snow_coating__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Air Balloon ASC 181",
+    "1 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_arbok_yveltal_snow_coating__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_arbok_yveltal_snow_coating__darkrai.txt"
+  }
+ },
+ "tr_crobat_absol_bench_snipe": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Janine's Secret Art SFA 59"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_crobat_absol_bench_snipe__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Air Balloon MEG 166"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_crobat_absol_bench_snipe__vest.txt"
+  },
+  "darkrai": {
+   "add": "2 Darkrai DLR 63",
+   "cut": [
+    "2 Night Stretcher MEG 173"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_crobat_absol_bench_snipe__darkrai.txt"
+  }
+ },
+ "tr_spidops_mewtwo_hammer": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Team Rocket's Ariana DRI 237"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_spidops_mewtwo_hammer__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "1 Brave Bangle PBL 104",
+    "1 Night Stretcher SSP 251"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/tr_spidops_mewtwo_hammer__vest.txt"
+  }
+ },
+ "trevenant_rapidash_uxie": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/trevenant_rapidash_uxie__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Handheld Fan TWM 150"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/trevenant_rapidash_uxie__vest.txt"
+  }
+ },
+ "veluza_sinistcha_ex_tea_service": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Kofu SCR 138"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/veluza_sinistcha_ex_tea_service__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Brave Bangle WHT 80"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/veluza_sinistcha_ex_tea_service__vest.txt"
+  }
+ },
+ "water_aggro": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Crispin SCR 133"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/water_aggro__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Rescue Board TEF 159"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/water_aggro__vest.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/water_aggro__wishiwashi.txt"
+  }
+ },
+ "wugtrio_paralysis_pin": {
+  "aarune": {
+   "add": "1 Aarune DLR 89",
+   "cut": [
+    "1 Lillie's Determination MEG 119"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/wugtrio_paralysis_pin__aarune.txt"
+  },
+  "vest": {
+   "add": "2 Custom Vest DLR 91",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/wugtrio_paralysis_pin__vest.txt",
+   "alt_cut": [
+    "2 Night Stretcher MEG 173"
+   ]
+  },
+  "pyroduct": {
+   "add": "2 Legendary Pyroduct DLR 94",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/wugtrio_paralysis_pin__pyroduct.txt"
+  },
+  "wishiwashi": {
+   "add": "2 Wishiwashi ex DLR 29",
+   "cut": [
+    "2 Switch MEG 130"
+   ],
+   "file": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/var/wugtrio_paralysis_pin__wishiwashi.txt"
+  },
+  "_controls": {
+   "vest": "/tmp/claude-0/-home-user-Pokemon-card-search/32313191-2e9b-5f12-921b-86b3863481b6/scratchpad/dlr2/ctl/wugtrio_paralysis_pin__ctl_switch.txt"
+  }
+ }
+}

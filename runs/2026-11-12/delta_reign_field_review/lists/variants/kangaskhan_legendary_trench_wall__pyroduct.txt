@@ -1,0 +1,26 @@
+Pokémon: 13
+2 Latias ex SSP 76
+2 Munkidori TWM 95
+4 Mega Kangaskhan ex MEG 104
+2 Smoochum SSP 75
+3 Bouffalant PR-SV 136
+
+Trainer: 33
+1 Precious Trolley SSP 185
+4 Tasty Rice Ball DLR 101
+3 Poké Pad ASC 198
+3 Night Stretcher ASC 196
+4 Jumbo Ice Cream PFL 91
+2 Crispin SCR 133
+2 Boss's Orders ASC 183
+4 Lillie's Determination MEG 119
+4 Switch MEG 130
+4 Kofu SCR 138
+2 Legendary Pyroduct DLR 94
+
+Energy: 14
+9 Basic Psychic Energy
+3 Basic Darkness Energy
+2 Mist Energy TEF 161
+
+Total Cards: 60

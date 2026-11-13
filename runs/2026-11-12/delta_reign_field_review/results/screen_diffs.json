@@ -1,0 +1,2402 @@
+[
+{
+"diff": 7.3125,
+"base": "mega_zygarde_cinderace_turbo_flare",
+"cand": "vest",
+"base_rate": 61.6875,
+"se": 1.2965298235418008,
+"n": 16
+},
+{
+"diff": 4.625,
+"base": "arbok_muk_trolley_darkbell",
+"cand": "pyroduct",
+"base_rate": 29.125,
+"se": 1.8208857734630144,
+"n": 16
+},
+{
+"diff": 4.5625,
+"base": "team_rocket_nidoking_nidoqueen",
+"cand": "pyroduct",
+"base_rate": 49.8125,
+"se": 1.6123707958572473,
+"n": 16
+},
+{
+"diff": 4.466666666666667,
+"base": "meta_dragapult_pure",
+"cand": "vest",
+"base_rate": 50.13333333333333,
+"se": 1.6672379973124831,
+"n": 15
+},
+{
+"diff": 4.4375,
+"base": "arbok_muk_trolley_darkbell",
+"cand": "vest",
+"base_rate": 29.125,
+"se": 1.290893585854388,
+"n": 16
+},
+{
+"diff": 4.375,
+"base": "arbok_team_rockets_muk_condition_stack",
+"cand": "pyroduct",
+"base_rate": 26.5,
+"se": 1.7148250639642517,
+"n": 16
+},
+{
+"diff": 4.1875,
+"base": "feraligatr_munkidori_damage_transfer",
+"cand": "wishiwashi",
+"base_rate": 23.375,
+"se": 1.5470906836166176,
+"n": 16
+},
+{
+"diff": 4.125,
+"base": "meta_dragapult_blaziken",
+"cand": "vest",
+"base_rate": 46.75,
+"se": 1.5271842281357764,
+"n": 16
+},
+{
+"diff": 3.9375,
+"base": "team_rockets_persian_ex_attack_theft",
+"cand": "aarune",
+"base_rate": 51.25,
+"se": 2.080602376716897,
+"n": 16
+},
+{
+"diff": 3.75,
+"base": "aggron_diggersby_angry_slam",
+"cand": "pyroduct",
+"base_rate": 45.6875,
+"se": 1.7066048165876013,
+"n": 16
+},
+{
+"diff": 3.4375,
+"base": "munkidori_ex_pecharunt_chains",
+"cand": "pyroduct",
+"base_rate": 64.1875,
+"se": 1.9191333764662284,
+"n": 16
+},
+{
+"diff": 3.375,
+"base": "team_rocket_hypno_exeggutor",
+"cand": "vest",
+"base_rate": 36.5625,
+"se": 1.510725543130408,
+"n": 16
+},
+{
+"diff": 3.25,
+"base": "munkidori_ex_pecharunt_chains",
+"cand": "vest",
+"base_rate": 64.1875,
+"se": 1.5041608956491324,
+"n": 16
+},
+{
+"diff": 3.1875,
+"base": "salazzle_ex_team_rockets_muk_condition_stack",
+"cand": "pyroduct",
+"base_rate": 32.3125,
+"se": 1.6078421097856592,
+"n": 16
+},
+{
+"diff": 3.0625,
+"base": "stevens_carbink_damage_wall",
+"cand": "aarune",
+"base_rate": 35.8125,
+"se": 1.7065285181717103,
+"n": 16
+},
+{
+"diff": 3.0625,
+"base": "darkness_mill_hand_lock",
+"cand": "darkrai",
+"base_rate": 27.0625,
+"se": 1.6392802028126043,
+"n": 16
+},
+{
+"diff": 3.0,
+"base": "wugtrio_paralysis_pin",
+"cand": "vest",
+"base_rate": 50.0,
+"se": 1.8663690238892559,
+"n": 16
+},
+{
+"diff": 3.0,
+"base": "munkidori_ex_pecharunt_chains",
+"cand": "aarune",
+"base_rate": 64.1875,
+"se": 1.4888474289418197,
+"n": 16
+},
+{
+"diff": 2.875,
+"base": "team_rocket_honchkrow_kangaskhan",
+"cand": "vest",
+"base_rate": 46.25,
+"se": 1.3474512978211866,
+"n": 16
+},
+{
+"diff": 2.875,
+"base": "panic_poison_paralysis",
+"cand": "pyroduct",
+"base_rate": 41.625,
+"se": 1.378026971192267,
+"n": 16
+},
+{
+"diff": 2.8125,
+"base": "team_rocket_moltres_houndoom",
+"cand": "pyroduct",
+"base_rate": 39.875,
+"se": 2.269762744576328,
+"n": 16
+},
+{
+"diff": 2.8125,
+"base": "team_rocket_honchkrow_kangaskhan",
+"cand": "darkrai",
+"base_rate": 46.25,
+"se": 1.3881004706672593,
+"n": 16
+},
+{
+"diff": 2.6875,
+"base": "mega_malamar_ex_psychic_marionette",
+"cand": "pyroduct",
+"base_rate": 71.5,
+"se": 1.2771020254205745,
+"n": 16
+},
+{
+"diff": 2.625,
+"base": "static_venom_drapion",
+"cand": "darkrai",
+"base_rate": 12.8125,
+"se": 1.2479149276559949,
+"n": 16
+},
+{
+"diff": 2.625,
+"base": "aggron_diggersby_angry_slam",
+"cand": "vest",
+"base_rate": 45.6875,
+"se": 1.6479153497676997,
+"n": 16
+},
+{
+"diff": 2.6,
+"base": "meta_slowking",
+"cand": "pyroduct",
+"base_rate": 34.666666666666664,
+"se": 2.0231987873991355,
+"n": 15
+},
+{
+"diff": 2.5625,
+"base": "mew_dbc_hypno",
+"cand": "pyroduct",
+"base_rate": 11.9375,
+"se": 1.1364005675816957,
+"n": 16
+},
+{
+"diff": 2.5625,
+"base": "chesnaught_meganium_wild_growth",
+"cand": "vest",
+"base_rate": 62.0,
+"se": 1.1545877691482214,
+"n": 16
+},
+{
+"diff": 2.5,
+"base": "team_rocket_hypno_exeggutor",
+"cand": "pyroduct",
+"base_rate": 36.5625,
+"se": 1.8819316317727024,
+"n": 16
+},
+{
+"diff": 2.5,
+"base": "aurorus_kangaskhan_tundra_wall",
+"cand": "aarune",
+"base_rate": 66.6875,
+"se": 1.6557978942693057,
+"n": 16
+},
+{
+"diff": 2.466666666666667,
+"base": "mega_absol_ex_hand_lock",
+"cand": "pyroduct",
+"base_rate": 62.666666666666664,
+"se": 1.6031714600000617,
+"n": 15
+},
+{
+"diff": 2.4375,
+"base": "stevens_carbink_damage_wall",
+"cand": "vest",
+"base_rate": 35.8125,
+"se": 1.8027034096970398,
+"n": 16
+},
+{
+"diff": 2.4375,
+"base": "kyurem_vanilluxe_blizzard",
+"cand": "wishiwashi",
+"base_rate": 33.9375,
+"se": 1.9256357175402274,
+"n": 16
+},
+{
+"diff": 2.375,
+"base": "decidueye_ex_judge_sniper_lock",
+"cand": "aarune",
+"base_rate": 39.3125,
+"se": 1.5542281042369552,
+"n": 16
+},
+{
+"diff": 2.375,
+"base": "arboliva_ogerpon_oil_salvo",
+"cand": "pyroduct",
+"base_rate": 74.625,
+"se": 2.045065198634671,
+"n": 16
+},
+{
+"diff": 2.3125,
+"base": "mew_pikachu_box",
+"cand": "vest",
+"base_rate": 17.625,
+"se": 0.9023984245701377,
+"n": 16
+},
+{
+"diff": 2.25,
+"base": "study_flygon_sandy_flapping_mill",
+"cand": "aarune",
+"base_rate": 23.6875,
+"se": 1.773649721149397,
+"n": 16
+},
+{
+"diff": 2.066666666666667,
+"base": "meta_slowking",
+"cand": "vest",
+"base_rate": 34.666666666666664,
+"se": 1.4124165939695816,
+"n": 15
+},
+{
+"diff": 2.0,
+"base": "munkidori_ex_pecharunt_chains",
+"cand": "darkrai",
+"base_rate": 64.1875,
+"se": 1.559914527573012,
+"n": 16
+},
+{
+"diff": 2.0,
+"base": "arbok_muk_laser_darkbell",
+"cand": "pyroduct",
+"base_rate": 32.6875,
+"se": 2.073644135332772,
+"n": 16
+},
+{
+"diff": 1.9375,
+"base": "wugtrio_paralysis_pin",
+"cand": "pyroduct",
+"base_rate": 50.0,
+"se": 1.1234943628400338,
+"n": 16
+},
+{
+"diff": 1.9375,
+"base": "team_rockets_persian_ex_attack_theft",
+"cand": "vest",
+"base_rate": 51.25,
+"se": 1.292506447437175,
+"n": 16
+},
+{
+"diff": 1.9333333333333333,
+"base": "meta_raging_bolt",
+"cand": "vest",
+"base_rate": 44.06666666666667,
+"se": 1.6138291249213605,
+"n": 15
+},
+{
+"diff": 1.875,
+"base": "toxic_slumber_vileplume_ex",
+"cand": "aarune",
+"base_rate": 27.6875,
+"se": 1.9036697017427506,
+"n": 16
+},
+{
+"diff": 1.875,
+"base": "mew_pikachu_box",
+"cand": "aarune",
+"base_rate": 17.625,
+"se": 1.1175680441625617,
+"n": 16
+},
+{
+"diff": 1.875,
+"base": "mega_scrafty_ex_darkness_tank",
+"cand": "darkrai",
+"base_rate": 32.75,
+"se": 1.396050978056795,
+"n": 16
+},
+{
+"diff": 1.875,
+"base": "golbat_brute_bonnet_punch",
+"cand": "darkrai",
+"base_rate": 33.625,
+"se": 1.5162316225871737,
+"n": 16
+},
+{
+"diff": 1.8125,
+"base": "team_rocket_honchkrow_kangaskhan",
+"cand": "aarune",
+"base_rate": 46.25,
+"se": 1.25571609715997,
+"n": 16
+},
+{
+"diff": 1.8125,
+"base": "gourgeist_diggersby_horrifying_rondo",
+"cand": "pyroduct",
+"base_rate": 63.375,
+"se": 1.4440070117558292,
+"n": 16
+},
+{
+"diff": 1.8125,
+"base": "arbok_muk_trolley_darkbell",
+"cand": "darkrai",
+"base_rate": 29.125,
+"se": 1.2049161450767711,
+"n": 16
+},
+{
+"diff": 1.75,
+"base": "toxic_slumber_vileplume_ex",
+"cand": "vest",
+"base_rate": 27.6875,
+"se": 1.358614490329517,
+"n": 16
+},
+{
+"diff": 1.5,
+"base": "snorlax_bouffalant_kangaskhan_curly_wall",
+"cand": "pyroduct",
+"base_rate": 73.3125,
+"se": 1.841647812874836,
+"n": 16
+},
+{
+"diff": 1.5,
+"base": "mega_malamar_ex_psychic_marionette",
+"cand": "darkrai",
+"base_rate": 71.5,
+"se": 1.1438239957848992,
+"n": 16
+},
+{
+"diff": 1.5,
+"base": "arbok_muk_laser_darkbell",
+"cand": "darkrai",
+"base_rate": 32.6875,
+"se": 1.27148207485071,
+"n": 16
+},
+{
+"diff": 1.375,
+"base": "tr_arbok_yveltal_snow_coating",
+"cand": "darkrai",
+"base_rate": 19.4375,
+"se": 1.5515449289874486,
+"n": 16
+},
+{
+"diff": 1.375,
+"base": "meta_dragapult_blaziken",
+"cand": "aarune",
+"base_rate": 46.75,
+"se": 1.6928157017230199,
+"n": 16
+},
+{
+"diff": 1.3333333333333333,
+"base": "tauros_risky_ruins",
+"cand": "vest",
+"base_rate": 56.266666666666666,
+"se": 1.6752161670510484,
+"n": 15
+},
+{
+"diff": 1.3125,
+"base": "team_rockets_wobbuffet_orbeetle_damage_launder",
+"cand": "aarune",
+"base_rate": 13.8125,
+"se": 1.337655754170955,
+"n": 16
+},
+{
+"diff": 1.3125,
+"base": "snorlax_bouffalant_kangaskhan_curly_wall",
+"cand": "vest",
+"base_rate": 73.3125,
+"se": 0.7229496870460628,
+"n": 16
+},
+{
+"diff": 1.2666666666666666,
+"base": "meta_raging_bolt",
+"cand": "pyroduct",
+"base_rate": 44.06666666666667,
+"se": 1.7388191577884293,
+"n": 15
+},
+{
+"diff": 1.25,
+"base": "trevenant_rapidash_uxie",
+"cand": "aarune",
+"base_rate": 31.25,
+"se": 1.6570556216775987,
+"n": 16
+},
+{
+"diff": 1.25,
+"base": "metal_metang_excadrill",
+"cand": "aarune",
+"base_rate": 59.625,
+"se": 1.7090445673923584,
+"n": 16
+},
+{
+"diff": 1.1875,
+"base": "veluza_sinistcha_ex_tea_service",
+"cand": "vest",
+"base_rate": 38.625,
+"se": 2.4242159385390294,
+"n": 16
+},
+{
+"diff": 1.1875,
+"base": "study_maushold_gnaw_latias",
+"cand": "aarune",
+"base_rate": 28.5625,
+"se": 1.4612173862913074,
+"n": 16
+},
+{
+"diff": 1.125,
+"base": "mega_lopunny_dusknoir_snipe_finisher",
+"cand": "vest",
+"base_rate": 47.5625,
+"se": 1.325628781622769,
+"n": 16
+},
+{
+"diff": 1.125,
+"base": "aurorus_kangaskhan_tundra_wall",
+"cand": "vest",
+"base_rate": 66.6875,
+"se": 1.5271842281357764,
+"n": 16
+},
+{
+"diff": 1.0666666666666667,
+"base": "water_aggro",
+"cand": "vest",
+"base_rate": 33.333333333333336,
+"se": 1.863091814997616,
+"n": 15
+},
+{
+"diff": 1.0666666666666667,
+"base": "krookodile_ex_relicanth_hand_disruption",
+"cand": "vest",
+"base_rate": 42.666666666666664,
+"se": 1.2890257179697004,
+"n": 15
+},
+{
+"diff": 1.0625,
+"base": "team_rockets_wobbuffet_orbeetle_damage_launder",
+"cand": "giratina",
+"base_rate": 13.8125,
+"se": 1.35851864789066,
+"n": 16
+},
+{
+"diff": 1.0625,
+"base": "team_rocket_honchkrow_kangaskhan",
+"cand": "pyroduct",
+"base_rate": 46.25,
+"se": 1.3243512562760682,
+"n": 16
+},
+{
+"diff": 1.0625,
+"base": "diggersby_munkidori_earthquake",
+"cand": "pyroduct",
+"base_rate": 48.0,
+"se": 2.0092883275760434,
+"n": 16
+},
+{
+"diff": 1.0,
+"base": "meta_raging_bolt",
+"cand": "aarune",
+"base_rate": 44.06666666666667,
+"se": 1.2946777499402993,
+"n": 15
+},
+{
+"diff": 1.0,
+"base": "hydreigon_relicanth_hammer_denial",
+"cand": "darkrai",
+"base_rate": 41.3125,
+"se": 1.0206207261596576,
+"n": 16
+},
+{
+"diff": 1.0,
+"base": "heracross_sinistcha_tea",
+"cand": "vest",
+"base_rate": 40.75,
+"se": 1.875277757204694,
+"n": 16
+},
+{
+"diff": 1.0,
+"base": "chandelure_centiskorch_deck_out",
+"cand": "aarune",
+"base_rate": 32.5,
+"se": 1.3632070031119021,
+"n": 16
+},
+{
+"diff": 0.9375,
+"base": "team_rockets_koffing_weezing_bench_swarm",
+"cand": "pyroduct",
+"base_rate": 41.1875,
+"se": 2.000976324197765,
+"n": 16
+},
+{
+"diff": 0.9375,
+"base": "team_rocket_hypno_wobbuffet",
+"cand": "pyroduct",
+"base_rate": 36.875,
+"se": 2.2313462864378537,
+"n": 16
+},
+{
+"diff": 0.9375,
+"base": "alakazam_dudunsparce_powerful_hand",
+"cand": "vest",
+"base_rate": 43.8125,
+"se": 1.292506447437175,
+"n": 16
+},
+{
+"diff": 0.875,
+"base": "team_rocket_nidoking_nidoqueen",
+"cand": "vest",
+"base_rate": 49.8125,
+"se": 1.719677779895602,
+"n": 16
+},
+{
+"diff": 0.875,
+"base": "salazzle_ex_team_rockets_muk_condition_stack",
+"cand": "vest",
+"base_rate": 32.3125,
+"se": 1.4049762750072805,
+"n": 16
+},
+{
+"diff": 0.875,
+"base": "arbok_muk_laser_darkbell",
+"cand": "vest",
+"base_rate": 32.6875,
+"se": 1.4968717379922705,
+"n": 16
+},
+{
+"diff": 0.8125,
+"base": "mew_pikachu_box",
+"cand": "pyroduct",
+"base_rate": 17.625,
+"se": 1.0092024491316562,
+"n": 16
+},
+{
+"diff": 0.8125,
+"base": "arbok_team_rockets_muk_condition_stack",
+"cand": "darkrai",
+"base_rate": 26.5,
+"se": 1.796335969874975,
+"n": 16
+},
+{
+"diff": 0.7333333333333333,
+"base": "water_aggro",
+"cand": "wishiwashi",
+"base_rate": 33.333333333333336,
+"se": 1.945609628213436,
+"n": 15
+},
+{
+"diff": 0.6875,
+"base": "team_rocket_moltres_houndoom",
+"cand": "vest",
+"base_rate": 39.875,
+"se": 1.8790927553831218,
+"n": 16
+},
+{
+"diff": 0.6875,
+"base": "maushold_gnaw_together_mill",
+"cand": "vest",
+"base_rate": 52.4375,
+"se": 1.5644987216357833,
+"n": 16
+},
+{
+"diff": 0.6875,
+"base": "lurantis_heal_punish",
+"cand": "aarune",
+"base_rate": 60.1875,
+"se": 1.6091373206369513,
+"n": 16
+},
+{
+"diff": 0.625,
+"base": "team_rocket_orbeetle_morpeko",
+"cand": "vest",
+"base_rate": 42.625,
+"se": 1.52171777935332,
+"n": 16
+},
+{
+"diff": 0.625,
+"base": "team_rocket_moltres_houndoom",
+"cand": "aarune",
+"base_rate": 39.875,
+"se": 2.150339120541998,
+"n": 16
+},
+{
+"diff": 0.625,
+"base": "maushold_gnaw_together_mill",
+"cand": "aarune",
+"base_rate": 52.4375,
+"se": 1.5702308747442206,
+"n": 16
+},
+{
+"diff": 0.5625,
+"base": "mew_alex_centiskorch_mill",
+"cand": "aarune",
+"base_rate": 38.375,
+"se": 1.604599508704067,
+"n": 16
+},
+{
+"diff": 0.5625,
+"base": "hydrapple_hydra_breath_festival",
+"cand": "aarune",
+"base_rate": 32.5625,
+"se": 1.2109526208733354,
+"n": 16
+},
+{
+"diff": 0.5625,
+"base": "chandelure_maushold_dudunsparce_wall",
+"cand": "vest",
+"base_rate": 28.4375,
+"se": 1.8188108523611428,
+"n": 16
+},
+{
+"diff": 0.5,
+"base": "arboliva_ogerpon_oil_salvo",
+"cand": "aarune",
+"base_rate": 74.625,
+"se": 2.018662923818635,
+"n": 16
+},
+{
+"diff": 0.4666666666666667,
+"base": "water_aggro",
+"cand": "aarune",
+"base_rate": 33.333333333333336,
+"se": 2.032747768923506,
+"n": 15
+},
+{
+"diff": 0.4666666666666667,
+"base": "meta_mega_excadrill",
+"cand": "aarune",
+"base_rate": 66.8,
+"se": 1.5082840034027527,
+"n": 15
+},
+{
+"diff": 0.4666666666666667,
+"base": "kangaskhan_legendary_trench_wall",
+"cand": "pyroduct",
+"base_rate": 77.26666666666667,
+"se": 1.8793784855806699,
+"n": 15
+},
+{
+"diff": 0.4375,
+"base": "tr_arbok_yveltal_snow_coating",
+"cand": "aarune",
+"base_rate": 19.4375,
+"se": 0.7690294207636013,
+"n": 16
+},
+{
+"diff": 0.4375,
+"base": "mega_malamar_ex_psychic_marionette",
+"cand": "aarune",
+"base_rate": 71.5,
+"se": 1.4287778868669545,
+"n": 16
+},
+{
+"diff": 0.4,
+"base": "mega_froslass_ex_resentful_refrain",
+"cand": "aarune",
+"base_rate": 73.6,
+"se": 1.863943592034296,
+"n": 15
+},
+{
+"diff": 0.375,
+"base": "team_rockets_koffing_weezing_bench_swarm",
+"cand": "vest",
+"base_rate": 41.1875,
+"se": 1.6352242455801997,
+"n": 16
+},
+{
+"diff": 0.375,
+"base": "team_rocket_hypno_wobbuffet",
+"cand": "vest",
+"base_rate": 36.875,
+"se": 1.378026971192267,
+"n": 16
+},
+{
+"diff": 0.375,
+"base": "study_maushold_gnaw_latias",
+"cand": "vest",
+"base_rate": 28.5625,
+"se": 1.322481883933891,
+"n": 16
+},
+{
+"diff": 0.3333333333333333,
+"base": "team_rocket_porygon_z_kangaskhan",
+"cand": "vest",
+"base_rate": 44.4,
+"se": 1.4063348739819324,
+"n": 15
+},
+{
+"diff": 0.3333333333333333,
+"base": "meta_dragapult_dusknoir",
+"cand": "vest",
+"base_rate": 41.06666666666667,
+"se": 1.5139562384902319,
+"n": 15
+},
+{
+"diff": 0.25,
+"base": "team_rockets_wobbuffet_orbeetle_damage_launder",
+"cand": "vest",
+"base_rate": 13.8125,
+"se": 1.5771810295587503,
+"n": 16
+},
+{
+"diff": 0.25,
+"base": "team_rocket_hypno_exeggutor",
+"cand": "aarune",
+"base_rate": 36.5625,
+"se": 1.1884864324004714,
+"n": 16
+},
+{
+"diff": 0.25,
+"base": "decidueye_ex_judge_sniper_lock",
+"cand": "vest",
+"base_rate": 39.3125,
+"se": 1.8874586088176875,
+"n": 16
+},
+{
+"diff": 0.125,
+"base": "mega_zeraora_cinderace_thunderous_fist",
+"cand": "vest",
+"base_rate": 79.75,
+"se": 1.3098186897429736,
+"n": 16
+},
+{
+"diff": 0.125,
+"base": "kangaskhan_tyrantrum_flip_mill",
+"cand": "aarune",
+"base_rate": 37.4375,
+"se": 1.2905909499140307,
+"n": 16
+},
+{
+"diff": 0.0625,
+"base": "panic_poison_paralysis",
+"cand": "vest",
+"base_rate": 41.625,
+"se": 1.4007996228345199,
+"n": 16
+},
+{
+"diff": 0.0625,
+"base": "mew_dbc_hypno",
+"cand": "aarune",
+"base_rate": 11.9375,
+"se": 0.6549093448714868,
+"n": 16
+},
+{
+"diff": 0.0625,
+"base": "jellicent_ex_oceanic_curse",
+"cand": "vest",
+"base_rate": 57.5625,
+"se": 1.2664542036726003,
+"n": 16
+},
+{
+"diff": 0.0625,
+"base": "hydrapple_hydra_breath_festival",
+"cand": "vest",
+"base_rate": 32.5625,
+"se": 2.0401567545983648,
+"n": 16
+},
+{
+"diff": 0.0625,
+"base": "arbok_muk_trolley_darkbell",
+"cand": "aarune",
+"base_rate": 29.125,
+"se": 1.7259508249078246,
+"n": 16
+},
+{
+"diff": 0.0,
+"base": "mega_zygarde_cinderace_gaia_wave",
+"cand": "vest",
+"base_rate": 79.66666666666667,
+"se": 1.3870146083619754,
+"n": 15
+},
+{
+"diff": 0.0,
+"base": "lurantis_heal_punish",
+"cand": "vest",
+"base_rate": 60.1875,
+"se": 1.9493588689617927,
+"n": 16
+},
+{
+"diff": 0.0,
+"base": "cradily_accelgor_conditions",
+"cand": "aarune",
+"base_rate": 42.125,
+"se": 1.6881943016134133,
+"n": 16
+},
+{
+"diff": -0.0625,
+"base": "team_rocket_hypno_wobbuffet",
+"cand": "aarune",
+"base_rate": 36.875,
+"se": 1.5718056230547932,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "team_rockets_spidops_swarm",
+"cand": "aarune",
+"base_rate": 29.8125,
+"se": 2.089407810840191,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "snorlax_bouffalant_kangaskhan_curly_wall",
+"cand": "aarune",
+"base_rate": 73.3125,
+"se": 1.502428589539838,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "maushold_mill_legendary_summit",
+"cand": "vest",
+"base_rate": 64.4375,
+"se": 1.7745304543268152,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "eerie_inferno_ninetales_burn",
+"cand": "aarune",
+"base_rate": 26.875,
+"se": 1.7389532291966145,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "darkness_mill_hand_lock",
+"cand": "aarune",
+"base_rate": 27.0625,
+"se": 1.5595806060177417,
+"n": 16
+},
+{
+"diff": -0.125,
+"base": "chesnaught_meganium_wild_growth",
+"cand": "aarune",
+"base_rate": 62.0,
+"se": 0.9826622003516773,
+"n": 16
+},
+{
+"diff": -0.1875,
+"base": "mew_dbc_bastiodon",
+"cand": "aarune",
+"base_rate": 30.375,
+"se": 1.581715181904336,
+"n": 16
+},
+{
+"diff": -0.25,
+"base": "team_rockets_koffing_weezing_bench_swarm",
+"cand": "aarune",
+"base_rate": 41.1875,
+"se": 2.001041395540499,
+"n": 16
+},
+{
+"diff": -0.25,
+"base": "orthworm_ex_metang_archaludon",
+"cand": "vest",
+"base_rate": 69.1875,
+"se": 1.4038637160826308,
+"n": 16
+},
+{
+"diff": -0.3125,
+"base": "study_maushold_gnaw_latias",
+"cand": "pyroduct",
+"base_rate": 28.5625,
+"se": 1.5538091635289923,
+"n": 16
+},
+{
+"diff": -0.3125,
+"base": "panic_poison_paralysis",
+"cand": "darkrai",
+"base_rate": 41.625,
+"se": 1.2965298235418008,
+"n": 16
+},
+{
+"diff": -0.3125,
+"base": "metal_metang_excadrill",
+"cand": "vest",
+"base_rate": 59.625,
+"se": 1.4908575552345704,
+"n": 16
+},
+{
+"diff": -0.375,
+"base": "static_venom_drapion",
+"cand": "pyroduct",
+"base_rate": 12.8125,
+"se": 0.6511208285205852,
+"n": 16
+},
+{
+"diff": -0.375,
+"base": "mew_alex_centiskorch_mill",
+"cand": "pyroduct",
+"base_rate": 38.375,
+"se": 1.8094082826530151,
+"n": 16
+},
+{
+"diff": -0.375,
+"base": "mega_emboar_oricorio_munkidori",
+"cand": "vest",
+"base_rate": 40.25,
+"se": 1.7885632036171752,
+"n": 16
+},
+{
+"diff": -0.4375,
+"base": "tr_arbok_yveltal_snow_coating",
+"cand": "vest",
+"base_rate": 19.4375,
+"se": 1.1724928926579186,
+"n": 16
+},
+{
+"diff": -0.4375,
+"base": "kingdra_ex_kings_order",
+"cand": "wishiwashi",
+"base_rate": 54.9375,
+"se": 1.7126216501804088,
+"n": 16
+},
+{
+"diff": -0.4375,
+"base": "gourgeist_diggersby_horrifying_rondo",
+"cand": "vest",
+"base_rate": 63.375,
+"se": 1.1760412053438718,
+"n": 16
+},
+{
+"diff": -0.4375,
+"base": "cradily_amoonguss_conditions",
+"cand": "vest",
+"base_rate": 37.8125,
+"se": 1.4915560945983002,
+"n": 16
+},
+{
+"diff": -0.4375,
+"base": "alakazam_munkidori_strange_hacking",
+"cand": "vest",
+"base_rate": 59.25,
+"se": 1.5544794144664638,
+"n": 16
+},
+{
+"diff": -0.4666666666666667,
+"base": "mega_absol_ex_hand_lock",
+"cand": "darkrai",
+"base_rate": 62.666666666666664,
+"se": 1.8844392033470092,
+"n": 15
+},
+{
+"diff": -0.5,
+"base": "static_venom_drapion",
+"cand": "aarune",
+"base_rate": 12.8125,
+"se": 0.8803408430829505,
+"n": 16
+},
+{
+"diff": -0.5,
+"base": "mega_zeraora_cinderace_thunderous_fist",
+"cand": "aarune",
+"base_rate": 79.75,
+"se": 1.420093893609386,
+"n": 16
+},
+{
+"diff": -0.5,
+"base": "mega_chandelure_ex_telepathic_hilda",
+"cand": "aarune",
+"base_rate": 61.9375,
+"se": 1.2649110640673518,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "study_flygon_sandy_flapping_mill",
+"cand": "vest",
+"base_rate": 23.6875,
+"se": 1.347741165802989,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "ns_zoroark_night_joker_toolbox",
+"cand": "vest",
+"base_rate": 60.5625,
+"se": 2.1054863848210146,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "mew_dbc_hypno",
+"cand": "vest",
+"base_rate": 11.9375,
+"se": 0.8849140730413697,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "darkness_mill_hand_lock",
+"cand": "vest",
+"base_rate": 27.0625,
+"se": 1.3843432558437232,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "arboliva_ogerpon_oil_salvo",
+"cand": "vest",
+"base_rate": 74.625,
+"se": 1.3600513164338077,
+"n": 16
+},
+{
+"diff": -0.5625,
+"base": "arbok_team_rockets_muk_condition_stack",
+"cand": "vest",
+"base_rate": 26.5,
+"se": 1.4519204236688272,
+"n": 16
+},
+{
+"diff": -0.6,
+"base": "meta_ns_zoroark",
+"cand": "vest",
+"base_rate": 30.133333333333333,
+"se": 1.6897449793498704,
+"n": 15
+},
+{
+"diff": -0.6875,
+"base": "mega_zeraora_cinderace_thunderous_fist",
+"cand": "raikou",
+"base_rate": 79.75,
+"se": 1.120709410745414,
+"n": 16
+},
+{
+"diff": -0.6875,
+"base": "mega_malamar_ex_psychic_marionette",
+"cand": "vest",
+"base_rate": 71.5,
+"se": 1.1892530919306734,
+"n": 16
+},
+{
+"diff": -0.6875,
+"base": "hops_snorlax_stacked_buff",
+"cand": "aarune",
+"base_rate": 29.6875,
+"se": 1.601350341638789,
+"n": 16
+},
+{
+"diff": -0.75,
+"base": "mew_dbc_bastiodon",
+"cand": "vest",
+"base_rate": 30.375,
+"se": 1.3919410907075054,
+"n": 16
+},
+{
+"diff": -0.75,
+"base": "kyurem_vanilluxe_blizzard",
+"cand": "vest",
+"base_rate": 33.9375,
+"se": 1.4818344486930155,
+"n": 16
+},
+{
+"diff": -0.8125,
+"base": "mega_scrafty_ex_darkness_tank",
+"cand": "aarune",
+"base_rate": 32.75,
+"se": 1.4324185549854715,
+"n": 16
+},
+{
+"diff": -0.8125,
+"base": "kyurem_vanilluxe_blizzard",
+"cand": "aarune",
+"base_rate": 33.9375,
+"se": 1.8216721942581584,
+"n": 16
+},
+{
+"diff": -0.8666666666666667,
+"base": "krookodile_ex_relicanth_hand_disruption",
+"cand": "darkrai",
+"base_rate": 42.666666666666664,
+"se": 1.1826792290093533,
+"n": 15
+},
+{
+"diff": -0.875,
+"base": "team_rocket_raticate_rush",
+"cand": "vest",
+"base_rate": 56.6875,
+"se": 1.2970318680227817,
+"n": 16
+},
+{
+"diff": -0.875,
+"base": "orthworm_ex_metal_retaliation",
+"cand": "aarune",
+"base_rate": 24.0,
+"se": 1.0640919446488948,
+"n": 16
+},
+{
+"diff": -0.875,
+"base": "eerie_inferno_ninetales_burn",
+"cand": "vest",
+"base_rate": 26.875,
+"se": 1.7317500781964277,
+"n": 16
+},
+{
+"diff": -0.9375,
+"base": "trevenant_rapidash_uxie",
+"cand": "vest",
+"base_rate": 31.25,
+"se": 1.4214685774461095,
+"n": 16
+},
+{
+"diff": -0.9375,
+"base": "mega_emboar_oricorio_munkidori",
+"cand": "aarune",
+"base_rate": 40.25,
+"se": 1.1085604403910507,
+"n": 16
+},
+{
+"diff": -1.0,
+"base": "tauros_risky_ruins",
+"cand": "pyroduct",
+"base_rate": 56.266666666666666,
+"se": 1.3870146083619754,
+"n": 15
+},
+{
+"diff": -1.0,
+"base": "mew_lonestar_gourgeist_dragapult",
+"cand": "aarune",
+"base_rate": 46.0,
+"se": 1.5,
+"n": 16
+},
+{
+"diff": -1.0,
+"base": "mega_scrafty_ex_darkness_tank",
+"cand": "vest",
+"base_rate": 32.75,
+"se": 1.3753787357185172,
+"n": 16
+},
+{
+"diff": -1.0,
+"base": "jellicent_ex_oceanic_curse",
+"cand": "aarune",
+"base_rate": 57.5625,
+"se": 1.8119970566569177,
+"n": 16
+},
+{
+"diff": -1.0,
+"base": "hydrapple_seaking_festival_lead",
+"cand": "vest",
+"base_rate": 60.25,
+"se": 1.6857243744653712,
+"n": 16
+},
+{
+"diff": -1.0,
+"base": "dhelmise_veluza_hide_n_sneak",
+"cand": "vest",
+"base_rate": 37.625,
+"se": 1.6046806535881213,
+"n": 16
+},
+{
+"diff": -1.0625,
+"base": "scovillain_salazzle_spicy_rage",
+"cand": "vest",
+"base_rate": 50.75,
+"se": 1.721115796026907,
+"n": 16
+},
+{
+"diff": -1.0625,
+"base": "orthworm_ex_metal_retaliation",
+"cand": "vest",
+"base_rate": 24.0,
+"se": 1.2263385543967864,
+"n": 16
+},
+{
+"diff": -1.0625,
+"base": "mew_alex_centiskorch_mill",
+"cand": "vest",
+"base_rate": 38.375,
+"se": 1.4562187049570083,
+"n": 16
+},
+{
+"diff": -1.0625,
+"base": "chandelure_maushold_dudunsparce_wall",
+"cand": "aarune",
+"base_rate": 28.4375,
+"se": 1.3430957709709312,
+"n": 16
+},
+{
+"diff": -1.0666666666666667,
+"base": "meta_dragapult_dusknoir",
+"cand": "aarune",
+"base_rate": 41.06666666666667,
+"se": 1.6517427064328052,
+"n": 15
+},
+{
+"diff": -1.125,
+"base": "study_centiskorch_bastiodon_mill",
+"cand": "aarune",
+"base_rate": 39.0,
+"se": 1.3474512978211866,
+"n": 16
+},
+{
+"diff": -1.125,
+"base": "heracross_sinistcha_tea",
+"cand": "aarune",
+"base_rate": 40.75,
+"se": 1.7556456552125395,
+"n": 16
+},
+{
+"diff": -1.125,
+"base": "arbok_team_rockets_muk_condition_stack",
+"cand": "aarune",
+"base_rate": 26.5,
+"se": 1.150633883271883,
+"n": 16
+},
+{
+"diff": -1.1875,
+"base": "team_rocket_tyranitar_sandstorm",
+"cand": "vest",
+"base_rate": 42.6875,
+"se": 1.5281218047001357,
+"n": 16
+},
+{
+"diff": -1.1875,
+"base": "mew_dbc_bastiodon",
+"cand": "giratina",
+"base_rate": 30.375,
+"se": 1.1662573686798297,
+"n": 16
+},
+{
+"diff": -1.1875,
+"base": "mew_baby_box",
+"cand": "aarune",
+"base_rate": 11.25,
+"se": 1.0924694885136763,
+"n": 16
+},
+{
+"diff": -1.1875,
+"base": "hydreigon_relicanth_hammer_denial",
+"cand": "aarune",
+"base_rate": 41.3125,
+"se": 1.3109117374306072,
+"n": 16
+},
+{
+"diff": -1.1875,
+"base": "feraligatr_munkidori_damage_transfer",
+"cand": "vest",
+"base_rate": 23.375,
+"se": 1.1662573686798297,
+"n": 16
+},
+{
+"diff": -1.25,
+"base": "ns_zoroark_night_joker_toolbox",
+"cand": "aarune",
+"base_rate": 60.5625,
+"se": 2.0544666785648613,
+"n": 16
+},
+{
+"diff": -1.25,
+"base": "mega_emboar_oricorio_fire_turbo",
+"cand": "aarune",
+"base_rate": 50.4375,
+"se": 0.9464847243000456,
+"n": 16
+},
+{
+"diff": -1.25,
+"base": "hydreigon_grafaiai_energy_denial",
+"cand": "aarune",
+"base_rate": 33.6875,
+"se": 1.0743214912988879,
+"n": 16
+},
+{
+"diff": -1.25,
+"base": "feraligatr_munkidori_damage_transfer",
+"cand": "aarune",
+"base_rate": 23.375,
+"se": 1.2466622103307161,
+"n": 16
+},
+{
+"diff": -1.2666666666666666,
+"base": "mega_absol_ex_hand_lock",
+"cand": "vest",
+"base_rate": 62.666666666666664,
+"se": 1.5101771156506514,
+"n": 15
+},
+{
+"diff": -1.3125,
+"base": "static_venom_drapion",
+"cand": "vest",
+"base_rate": 12.8125,
+"se": 0.7837875456184965,
+"n": 16
+},
+{
+"diff": -1.3125,
+"base": "mega_chandelure_ex_telepathic_hilda",
+"cand": "vest",
+"base_rate": 61.9375,
+"se": 1.961544353309402,
+"n": 16
+},
+{
+"diff": -1.3125,
+"base": "crabominable_veluza_food_prep",
+"cand": "vest",
+"base_rate": 26.25,
+"se": 1.5671597185141448,
+"n": 16
+},
+{
+"diff": -1.3333333333333333,
+"base": "meta_ns_zoroark",
+"cand": "darkrai",
+"base_rate": 30.133333333333333,
+"se": 1.1450376024878446,
+"n": 15
+},
+{
+"diff": -1.3333333333333333,
+"base": "mega_zygarde_cinderace_gaia_wave",
+"cand": "aarune",
+"base_rate": 79.66666666666667,
+"se": 1.2215005084172057,
+"n": 15
+},
+{
+"diff": -1.375,
+"base": "tr_crobat_absol_bench_snipe",
+"cand": "darkrai",
+"base_rate": 34.9375,
+"se": 2.5866242479339747,
+"n": 16
+},
+{
+"diff": -1.375,
+"base": "aurorus_kangaskhan_tundra_wall",
+"cand": "wishiwashi",
+"base_rate": 66.6875,
+"se": 1.4255846753759198,
+"n": 16
+},
+{
+"diff": -1.4375,
+"base": "team_rockets_koffing_weezing_bench_swarm",
+"cand": "darkrai",
+"base_rate": 41.1875,
+"se": 1.9599505733563793,
+"n": 16
+},
+{
+"diff": -1.4375,
+"base": "team_rocket_nidoking_nidoqueen",
+"cand": "aarune",
+"base_rate": 49.8125,
+"se": 1.7247433383936674,
+"n": 16
+},
+{
+"diff": -1.4375,
+"base": "mew_baby_box",
+"cand": "vest",
+"base_rate": 11.25,
+"se": 0.8464078508615099,
+"n": 16
+},
+{
+"diff": -1.4375,
+"base": "kangaskhan_tyrantrum_flip_mill",
+"cand": "vest",
+"base_rate": 37.4375,
+"se": 1.3353175340220267,
+"n": 16
+},
+{
+"diff": -1.4375,
+"base": "golbat_brute_bonnet_punch",
+"cand": "vest",
+"base_rate": 33.625,
+"se": 1.5192343192103932,
+"n": 16
+},
+{
+"diff": -1.5,
+"base": "salazzle_ex_team_rockets_muk_condition_stack",
+"cand": "aarune",
+"base_rate": 32.3125,
+"se": 1.2213380640374174,
+"n": 16
+},
+{
+"diff": -1.5,
+"base": "panic_poison_paralysis",
+"cand": "aarune",
+"base_rate": 41.625,
+"se": 1.6931233465600393,
+"n": 16
+},
+{
+"diff": -1.5,
+"base": "gothitelle_noivern_distorted_future",
+"cand": "vest",
+"base_rate": 29.0,
+"se": 1.9386421364793796,
+"n": 16
+},
+{
+"diff": -1.5625,
+"base": "ditto_tyranitar_gengar_hydreigon",
+"cand": "vest",
+"base_rate": 47.875,
+"se": 1.4887599705795425,
+"n": 16
+},
+{
+"diff": -1.5625,
+"base": "alakazam_dudunsparce_powerful_hand",
+"cand": "aarune",
+"base_rate": 43.8125,
+"se": 1.121638496426842,
+"n": 16
+},
+{
+"diff": -1.625,
+"base": "mega_chandelure_ex_retreat_tax",
+"cand": "aarune",
+"base_rate": 44.875,
+"se": 1.567575091236993,
+"n": 16
+},
+{
+"diff": -1.6875,
+"base": "team_rocket_raticate_ampharos",
+"cand": "vest",
+"base_rate": 48.5,
+"se": 1.9530291643154403,
+"n": 16
+},
+{
+"diff": -1.75,
+"base": "tr_crobat_absol_bench_snipe",
+"cand": "vest",
+"base_rate": 34.9375,
+"se": 1.626601774661928,
+"n": 16
+},
+{
+"diff": -1.75,
+"base": "team_rocket_orbeetle_morpeko",
+"cand": "aarune",
+"base_rate": 42.625,
+"se": 1.865252440466616,
+"n": 16
+},
+{
+"diff": -1.8125,
+"base": "mega_gengar_ex_toxtricity_chains",
+"cand": "darkrai",
+"base_rate": 62.1875,
+"se": 1.7800251636798097,
+"n": 16
+},
+{
+"diff": -1.8666666666666667,
+"base": "meta_dragapult_pure",
+"cand": "aarune",
+"base_rate": 50.13333333333333,
+"se": 2.016282922954223,
+"n": 15
+},
+{
+"diff": -1.875,
+"base": "team_rocket_raticate_rush",
+"cand": "pyroduct",
+"base_rate": 56.6875,
+"se": 2.1830311495716224,
+"n": 16
+},
+{
+"diff": -1.875,
+"base": "study_hydreigon_zweilous_mill",
+"cand": "vest",
+"base_rate": 29.75,
+"se": 1.2037268516292778,
+"n": 16
+},
+{
+"diff": -1.875,
+"base": "mega_zygarde_cinderace_turbo_flare",
+"cand": "aarune",
+"base_rate": 61.6875,
+"se": 1.5808093918411965,
+"n": 16
+},
+{
+"diff": -1.875,
+"base": "hops_snorlax_stacked_buff",
+"cand": "giratina",
+"base_rate": 29.6875,
+"se": 0.8003905296791061,
+"n": 16
+},
+{
+"diff": -1.875,
+"base": "gourgeist_diggersby_horrifying_rondo",
+"cand": "aarune",
+"base_rate": 63.375,
+"se": 1.4716062652761437,
+"n": 16
+},
+{
+"diff": -1.9333333333333333,
+"base": "meta_slowking",
+"cand": "aarune",
+"base_rate": 34.666666666666664,
+"se": 1.1232040338190123,
+"n": 15
+},
+{
+"diff": -1.9375,
+"base": "tr_spidops_mewtwo_hammer",
+"cand": "aarune",
+"base_rate": 55.75,
+"se": 1.0506694294591425,
+"n": 16
+},
+{
+"diff": -1.9375,
+"base": "team_rockets_spidops_swarm",
+"cand": "vest",
+"base_rate": 29.8125,
+"se": 1.3858473641302158,
+"n": 16
+},
+{
+"diff": -1.9375,
+"base": "team_rocket_raticate_rush",
+"cand": "aarune",
+"base_rate": 56.6875,
+"se": 1.7735763069760113,
+"n": 16
+},
+{
+"diff": -1.9375,
+"base": "hydrapple_seaking_festival_lead",
+"cand": "aarune",
+"base_rate": 60.25,
+"se": 1.4037709630372992,
+"n": 16
+},
+{
+"diff": -2.0,
+"base": "hydreigon_grafaiai_energy_denial",
+"cand": "vest",
+"base_rate": 33.6875,
+"se": 0.9574271077563381,
+"n": 16
+},
+{
+"diff": -2.0625,
+"base": "wugtrio_paralysis_pin",
+"cand": "aarune",
+"base_rate": 50.0,
+"se": 1.1953686669810282,
+"n": 16
+},
+{
+"diff": -2.0625,
+"base": "study_hydreigon_zweilous_mill",
+"cand": "aarune",
+"base_rate": 29.75,
+"se": 1.263159893547395,
+"n": 16
+},
+{
+"diff": -2.0625,
+"base": "study_centiskorch_bastiodon_mill",
+"cand": "vest",
+"base_rate": 39.0,
+"se": 1.6418200012993711,
+"n": 16
+},
+{
+"diff": -2.066666666666667,
+"base": "meta_ns_zoroark",
+"cand": "aarune",
+"base_rate": 30.133333333333333,
+"se": 1.3748304368753006,
+"n": 15
+},
+{
+"diff": -2.125,
+"base": "mega_chandelure_ex_retreat_tax",
+"cand": "vest",
+"base_rate": 44.875,
+"se": 1.86608994066917,
+"n": 16
+},
+{
+"diff": -2.125,
+"base": "alakazam_munkidori_strange_hacking",
+"cand": "aarune",
+"base_rate": 59.25,
+"se": 1.502428589539838,
+"n": 16
+},
+{
+"diff": -2.1333333333333333,
+"base": "meta_mega_excadrill",
+"cand": "vest",
+"base_rate": 66.8,
+"se": 1.2831014014290554,
+"n": 15
+},
+{
+"diff": -2.1875,
+"base": "orthworm_ex_metang_archaludon",
+"cand": "aarune",
+"base_rate": 69.1875,
+"se": 1.5524677935467777,
+"n": 16
+},
+{
+"diff": -2.25,
+"base": "study_mega_excadrill_drill_mill",
+"cand": "vest",
+"base_rate": 46.1875,
+"se": 1.4127396551853895,
+"n": 16
+},
+{
+"diff": -2.25,
+"base": "mega_chandelure_ex_telepathic_hilda",
+"cand": "giratina",
+"base_rate": 61.9375,
+"se": 1.691892431568863,
+"n": 16
+},
+{
+"diff": -2.25,
+"base": "gothitelle_noivern_distorted_future",
+"cand": "aarune",
+"base_rate": 29.0,
+"se": 1.1601005703529903,
+"n": 16
+},
+{
+"diff": -2.2666666666666666,
+"base": "team_rocket_porygon_z_kangaskhan",
+"cand": "aarune",
+"base_rate": 44.4,
+"se": 2.405285185876474,
+"n": 15
+},
+{
+"diff": -2.3125,
+"base": "arbok_muk_laser_darkbell",
+"cand": "aarune",
+"base_rate": 32.6875,
+"se": 1.3654021080497374,
+"n": 16
+},
+{
+"diff": -2.375,
+"base": "ditto_transform_hydreigon",
+"cand": "vest",
+"base_rate": 46.625,
+"se": 1.7580173491749165,
+"n": 16
+},
+{
+"diff": -2.4375,
+"base": "cradily_amoonguss_conditions",
+"cand": "aarune",
+"base_rate": 37.8125,
+"se": 1.5491092870851086,
+"n": 16
+},
+{
+"diff": -2.466666666666667,
+"base": "bug_out_masquerain_jellicent",
+"cand": "aarune",
+"base_rate": 43.93333333333333,
+"se": 1.5395319841298296,
+"n": 15
+},
+{
+"diff": -2.5,
+"base": "kingdra_ex_kings_order",
+"cand": "vest",
+"base_rate": 54.9375,
+"se": 1.18673220792786,
+"n": 16
+},
+{
+"diff": -2.5625,
+"base": "tr_spidops_mewtwo_hammer",
+"cand": "vest",
+"base_rate": 55.75,
+"se": 1.8595894484177593,
+"n": 16
+},
+{
+"diff": -2.75,
+"base": "diggersby_munkidori_earthquake",
+"cand": "darkrai",
+"base_rate": 48.0,
+"se": 1.9311050377094112,
+"n": 16
+},
+{
+"diff": -2.8,
+"base": "tauros_risky_ruins",
+"cand": "aarune",
+"base_rate": 56.266666666666666,
+"se": 1.7215718177902204,
+"n": 15
+},
+{
+"diff": -2.8125,
+"base": "team_rocket_nidoking_nidoqueen",
+"cand": "darkrai",
+"base_rate": 49.8125,
+"se": 1.6181747690942823,
+"n": 16
+},
+{
+"diff": -2.8125,
+"base": "mew_lonestar_gourgeist_dragapult",
+"cand": "vest",
+"base_rate": 46.0,
+"se": 1.391098936093332,
+"n": 16
+},
+{
+"diff": -2.8125,
+"base": "eerie_inferno_ninetales_burn",
+"cand": "heat_rotom",
+"base_rate": 26.875,
+"se": 2.0900931996763523,
+"n": 16
+},
+{
+"diff": -2.8666666666666667,
+"base": "mega_froslass_ex_resentful_refrain",
+"cand": "vest",
+"base_rate": 73.6,
+"se": 1.3232955494186138,
+"n": 15
+},
+{
+"diff": -2.8666666666666667,
+"base": "kangaskhan_legendary_trench_wall",
+"cand": "vest",
+"base_rate": 77.26666666666667,
+"se": 1.3623043036976046,
+"n": 15
+},
+{
+"diff": -2.875,
+"base": "maushold_mill_legendary_summit",
+"cand": "giratina",
+"base_rate": 64.4375,
+"se": 1.8816548567683713,
+"n": 16
+},
+{
+"diff": -2.875,
+"base": "hydreigon_relicanth_hammer_denial",
+"cand": "vest",
+"base_rate": 41.3125,
+"se": 1.0483121354507603,
+"n": 16
+},
+{
+"diff": -2.933333333333333,
+"base": "krookodile_ex_relicanth_hand_disruption",
+"cand": "aarune",
+"base_rate": 42.666666666666664,
+"se": 1.654623152798781,
+"n": 15
+},
+{
+"diff": -2.9375,
+"base": "team_rocket_tyranitar_sandstorm",
+"cand": "aarune",
+"base_rate": 42.6875,
+"se": 1.406736027120938,
+"n": 16
+},
+{
+"diff": -2.9375,
+"base": "team_rocket_raticate_ampharos",
+"cand": "darkrai",
+"base_rate": 48.5,
+"se": 1.6265217233921798,
+"n": 16
+},
+{
+"diff": -3.0625,
+"base": "ns_zoroark_night_joker_toolbox",
+"cand": "darkrai",
+"base_rate": 60.5625,
+"se": 1.5233426786730118,
+"n": 16
+},
+{
+"diff": -3.066666666666667,
+"base": "meta_festival_lead",
+"cand": "vest",
+"base_rate": 20.333333333333332,
+"se": 1.1061157550148462,
+"n": 15
+},
+{
+"diff": -3.066666666666667,
+"base": "bug_out_masquerain_jellicent",
+"cand": "vest",
+"base_rate": 43.93333333333333,
+"se": 1.9795782780001803,
+"n": 15
+},
+{
+"diff": -3.125,
+"base": "study_mega_excadrill_drill_mill",
+"cand": "aarune",
+"base_rate": 46.1875,
+"se": 1.6630168369562588,
+"n": 16
+},
+{
+"diff": -3.1333333333333333,
+"base": "mega_absol_ex_hand_lock",
+"cand": "aarune",
+"base_rate": 62.666666666666664,
+"se": 1.8564345413585706,
+"n": 15
+},
+{
+"diff": -3.3125,
+"base": "ditto_transform_hydreigon",
+"cand": "aarune",
+"base_rate": 46.625,
+"se": 2.099044921704472,
+"n": 16
+},
+{
+"diff": -3.3333333333333335,
+"base": "team_rocket_porygon_z_kangaskhan",
+"cand": "darkrai",
+"base_rate": 44.4,
+"se": 2.1748928088893784,
+"n": 15
+},
+{
+"diff": -3.375,
+"base": "team_rocket_hypno_exeggutor",
+"cand": "giratina",
+"base_rate": 36.5625,
+"se": 1.1063265039459795,
+"n": 16
+},
+{
+"diff": -3.375,
+"base": "maushold_gnaw_together_mill",
+"cand": "giratina",
+"base_rate": 52.4375,
+"se": 1.7627511641370903,
+"n": 16
+},
+{
+"diff": -3.4,
+"base": "meta_festival_lead",
+"cand": "aarune",
+"base_rate": 20.333333333333332,
+"se": 1.1783766072743587,
+"n": 15
+},
+{
+"diff": -3.4375,
+"base": "tr_crobat_absol_bench_snipe",
+"cand": "aarune",
+"base_rate": 34.9375,
+"se": 1.5082239831448556,
+"n": 16
+},
+{
+"diff": -3.4375,
+"base": "mega_gengar_ex_toxtricity_chains",
+"cand": "aarune",
+"base_rate": 62.1875,
+"se": 1.9556941436056237,
+"n": 16
+},
+{
+"diff": -3.5,
+"base": "mega_lopunny_dusknoir_snipe_finisher",
+"cand": "aarune",
+"base_rate": 47.5625,
+"se": 1.630439613519413,
+"n": 16
+},
+{
+"diff": -3.5,
+"base": "golbat_brute_bonnet_punch",
+"cand": "aarune",
+"base_rate": 33.625,
+"se": 1.8073922282301278,
+"n": 16
+},
+{
+"diff": -3.5,
+"base": "diggersby_munkidori_earthquake",
+"cand": "aarune",
+"base_rate": 48.0,
+"se": 1.7272328544042153,
+"n": 16
+},
+{
+"diff": -3.533333333333333,
+"base": "kangaskhan_legendary_trench_wall",
+"cand": "aarune",
+"base_rate": 77.26666666666667,
+"se": 1.1986765188429265,
+"n": 15
+},
+{
+"diff": -3.5625,
+"base": "ditto_transform_hydreigon",
+"cand": "darkrai",
+"base_rate": 46.625,
+"se": 1.6806961603256352,
+"n": 16
+},
+{
+"diff": -3.625,
+"base": "kingdra_ex_kings_order",
+"cand": "aarune",
+"base_rate": 54.9375,
+"se": 1.0483121354507603,
+"n": 16
+},
+{
+"diff": -3.6875,
+"base": "team_rocket_orbeetle_morpeko",
+"cand": "darkrai",
+"base_rate": 42.625,
+"se": 1.389600512137691,
+"n": 16
+},
+{
+"diff": -3.75,
+"base": "cradily_accelgor_conditions",
+"cand": "vest",
+"base_rate": 42.125,
+"se": 1.9568256607747831,
+"n": 16
+},
+{
+"diff": -3.8125,
+"base": "gothitelle_noivern_distorted_future",
+"cand": "giratina",
+"base_rate": 29.0,
+"se": 1.3045393503711058,
+"n": 16
+},
+{
+"diff": -3.875,
+"base": "team_rocket_hypno_wobbuffet",
+"cand": "giratina",
+"base_rate": 36.875,
+"se": 1.7603858478564673,
+"n": 16
+},
+{
+"diff": -3.9375,
+"base": "team_rocket_raticate_ampharos",
+"cand": "aarune",
+"base_rate": 48.5,
+"se": 1.3274937225212529,
+"n": 16
+},
+{
+"diff": -3.9375,
+"base": "scovillain_salazzle_spicy_rage",
+"cand": "aarune",
+"base_rate": 50.75,
+"se": 1.3243512562760682,
+"n": 16
+},
+{
+"diff": -4.0625,
+"base": "diggersby_munkidori_earthquake",
+"cand": "vest",
+"base_rate": 48.0,
+"se": 1.5980945685409234,
+"n": 16
+},
+{
+"diff": -4.125,
+"base": "ditto_tyranitar_gengar_hydreigon",
+"cand": "aarune",
+"base_rate": 47.875,
+"se": 1.3129959380490608,
+"n": 16
+},
+{
+"diff": -4.375,
+"base": "jellicent_ex_oceanic_curse",
+"cand": "giratina",
+"base_rate": 57.5625,
+"se": 1.593933812929508,
+"n": 16
+},
+{
+"diff": -4.375,
+"base": "hops_snorlax_stacked_buff",
+"cand": "vest",
+"base_rate": 29.6875,
+"se": 1.7556456552125395,
+"n": 16
+},
+{
+"diff": -4.4375,
+"base": "aggron_diggersby_angry_slam",
+"cand": "aarune",
+"base_rate": 45.6875,
+"se": 1.3569842482505092,
+"n": 16
+},
+{
+"diff": -4.5,
+"base": "mega_dragonite_kangaskhan_salazzle_wall",
+"cand": "aarune",
+"base_rate": 59.5625,
+"se": 1.899561352874219,
+"n": 16
+},
+{
+"diff": -4.5625,
+"base": "mega_dragonite_kangaskhan_salazzle_wall",
+"cand": "vest",
+"base_rate": 59.5625,
+"se": 2.0775962673243327,
+"n": 16
+},
+{
+"diff": -4.625,
+"base": "gourgeist_diggersby_horrifying_rondo",
+"cand": "giratina",
+"base_rate": 63.375,
+"se": 1.89489445616372,
+"n": 16
+},
+{
+"diff": -4.8125,
+"base": "veluza_sinistcha_ex_tea_service",
+"cand": "aarune",
+"base_rate": 38.625,
+"se": 1.7729888841539119,
+"n": 16
+},
+{
+"diff": -4.875,
+"base": "wugtrio_paralysis_pin",
+"cand": "wishiwashi",
+"base_rate": 50.0,
+"se": 1.5299101280794243,
+"n": 16
+},
+{
+"diff": -4.875,
+"base": "snorlax_bouffalant_kangaskhan_curly_wall",
+"cand": "giratina",
+"base_rate": 73.3125,
+"se": 1.7099585764963237,
+"n": 16
+},
+{
+"diff": -4.875,
+"base": "mega_gengar_ex_toxtricity_chains",
+"cand": "vest",
+"base_rate": 62.1875,
+"se": 1.5913175882477597,
+"n": 16
+},
+{
+"diff": -5.25,
+"base": "team_rocket_moltres_houndoom",
+"cand": "heat_rotom",
+"base_rate": 39.875,
+"se": 1.4303263030977698,
+"n": 16
+},
+{
+"diff": -5.25,
+"base": "mega_emboar_oricorio_fire_turbo",
+"cand": "heat_rotom",
+"base_rate": 50.4375,
+"se": 1.070436048222094,
+"n": 16
+},
+{
+"diff": -5.25,
+"base": "chandelure_centiskorch_deck_out",
+"cand": "vest",
+"base_rate": 32.5,
+"se": 1.9716744153130354,
+"n": 16
+},
+{
+"diff": -5.466666666666667,
+"base": "kangaskhan_legendary_trench_wall",
+"cand": "giratina",
+"base_rate": 77.26666666666667,
+"se": 1.3160788320095007,
+"n": 15
+},
+{
+"diff": -5.9375,
+"base": "alakazam_munkidori_strange_hacking",
+"cand": "giratina",
+"base_rate": 59.25,
+"se": 1.954628587907858,
+"n": 16
+},
+{
+"diff": -6.0625,
+"base": "dhelmise_veluza_hide_n_sneak",
+"cand": "aarune",
+"base_rate": 37.625,
+"se": 1.292506447437175,
+"n": 16
+},
+{
+"diff": -6.5625,
+"base": "mega_dragonite_kangaskhan_salazzle_wall",
+"cand": "heat_rotom",
+"base_rate": 59.5625,
+"se": 1.541019008102539,
+"n": 16
+},
+{
+"diff": -6.6875,
+"base": "mega_emboar_oricorio_fire_turbo",
+"cand": "vest",
+"base_rate": 50.4375,
+"se": 1.9826723338296053,
+"n": 16
+},
+{
+"diff": -6.8125,
+"base": "mega_emboar_oricorio_munkidori",
+"cand": "heat_rotom",
+"base_rate": 40.25,
+"se": 2.08809871653617,
+"n": 16
+},
+{
+"diff": -8.3125,
+"base": "scovillain_salazzle_spicy_rage",
+"cand": "heat_rotom",
+"base_rate": 50.75,
+"se": 1.3985669749187322,
+"n": 16
+},
+{
+"diff": -9.9375,
+"base": "dhelmise_veluza_hide_n_sneak",
+"cand": "giratina",
+"base_rate": 37.625,
+"se": 1.766514340917352,
+"n": 16
+},
+{
+"diff": -10.3125,
+"base": "maushold_mill_legendary_summit",
+"cand": "pyroduct",
+"base_rate": 64.4375,
+"se": 2.2522558136233104,
+"n": 16
+},
+{
+"diff": -11.375,
+"base": "crabominable_veluza_food_prep",
+"cand": "aarune",
+"base_rate": 26.25,
+"se": 2.01427199421197,
+"n": 16
+}
+]

@@ -1,0 +1,94 @@
+Pokémon: 88
+1 Heracross DLR 1
+1 Wimpod DLR 10
+1 Masquerain DLR 3
+1 Sprigatito DLR 12
+1 Growlithe DLR 18
+1 Magmortar DLR 21
+1 Electivire DLR 31
+1 Pincurchin DLR 36
+1 Mega Golisopod ex DLR 11
+1 Enamorus DLR 48
+1 Groudon DLR 53
+1 Zorua DLR 66
+1 Inkay DLR 68
+1 Eevee DLR 78
+1 Azurill DLR 80
+1 Altaria DLR 82
+1 Kecleon DLR 83
+1 Heat Rotom ex DLR 23
+1 Wishiwashi ex DLR 29
+1 Raikou ex DLR 33
+1 Mega Golurk ex DLR 47
+1 Mega Malamar ex DLR 69
+1 Talonflame ex DLR 88
+1 Floragato DLR 13
+1 Mega Rayquaza ex DLR 84
+1 Meowscarada ex DLR 14
+1 Smoliv DLR 15
+1 Dolliv DLR 16
+1 Arboliva DLR 17
+1 Arcanine DLR 19
+1 Surskit DLR 2
+1 Magmar DLR 20
+1 Torkoal DLR 22
+1 Heatmor DLR 24
+1 Mantine DLR 25
+1 Kyogre DLR 26
+1 Frillish DLR 27
+1 Jellicent DLR 28
+1 Electabuzz DLR 30
+1 Jolteon DLR 32
+1 Rotom DLR 34
+1 Thundurus DLR 35
+1 Pawmi DLR 37
+1 Pawmo DLR 38
+1 Pawmot DLR 39
+1 Cacnea DLR 4
+1 Wattrel DLR 40
+1 Kilowattrel DLR 41
+1 Miraidon DLR 42
+1 Drowzee DLR 43
+1 Hypno DLR 44
+1 Giratina DLR 45
+1 Golett DLR 46
+1 Sandshrew DLR 49
+1 Cacturne DLR 5
+1 Sandslash DLR 50
+1 Onix DLR 51
+1 Steelix DLR 52
+1 Landorus DLR 54
+1 Nidoran♀ DLR 55
+1 Nidorina DLR 56
+1 Nidoqueen DLR 57
+1 Spinarak DLR 58
+1 Ariados DLR 59
+1 Combee DLR 6
+1 Sableye DLR 60
+1 Carvanha DLR 61
+1 Sharpedo DLR 62
+1 Darkrai DLR 63
+1 Purrloin DLR 64
+1 Liepard DLR 65
+1 Zoroark ex DLR 67
+1 Vespiquen DLR 7
+1 Morpeko DLR 70
+1 Zarude DLR 71
+1 Druddigon DLR 72
+1 Jangmo-o DLR 73
+1 Hakamo-o DLR 74
+1 Kommo-o DLR 75
+1 Cyclizar DLR 76
+1 Tauros DLR 77
+1 Delibird DLR 79
+1 Shaymin DLR 8
+1 Swablu DLR 81
+1 Tornadus DLR 85
+1 Fletchling DLR 86
+1 Fletchinder DLR 87
+1 Virizion DLR 9
+
+Energy: 9
+9 Basic Fire Energy
+
+Total Cards: 97

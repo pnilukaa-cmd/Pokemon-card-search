@@ -762,3 +762,35 @@ Evolution Pokémon) does nothing for an all-Basic deck (+0.35 to cut). The
 tuned list reads 84.57% against the field, level with the field's
 Snorlax / Bouffalant / Kangaskhan wall (84.30%) and 67.3% against it head
 to head.
+
+### Delta Reign as additions to the field decks (2026-11-12)
+
+Screened in all 108 field decks (`decks/delta_reign_card_review.md`,
+`runs/2026-11-12/delta_reign_field_review`). The candidates:
+
+- Aarune and Custom Vest in every deck.
+- Legendary Pyroduct where the deck's own Evolution Pokémon have no
+  Abilities.
+- The new attacker of each Basic Energy type the deck runs.
+
+Each was checked against a Basic Energy in the same slot. Confirmed:
+
+- **`Wishiwashi ex` DLR 29** (Basic ex 260 HP, Hydro Splash 220, Oceanic
+  Gain heal 50) for 2 Switch:
+  - Feraligatr / Munkidori: +4.84 over the list, +4.62 over Energy.
+  - Kyurem / Vanilluxe: +4.26 over the list, +2.60 over Energy.
+- **`Legendary Pyroduct` DLR 94:**
+  - Munkidori ex / Pecharunt ex: +1.82 over the list, +2.50 over Energy.
+  - Team Rocket Hypno / Exeggutor: +2.64 over the list, +1.59 over Energy.
+
+Not worth it:
+
+- Aarune in a Lillie's Determination slot: −1.12 mean.
+- Custom Vest: −0.38.
+- Giratina: −3.79.
+- Heat Rotom ex: −5.83.
+- Darkrai: no better than an Energy.
+
+Several big raw gains (Darkrai in Drapion +3.74, Pyroduct in Aggron +3.53)
+were the cut, not the card.
+
